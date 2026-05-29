@@ -26,6 +26,7 @@
     <properties>
         <!-- empty for default java builds  (1 7 as of v0.5.0 )-->
         <artifactSuffix></artifactSuffix>
+        <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
 
     <dependencies>
@@ -204,6 +205,7 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
+                            <skip>${skipOpenNlpModelDownload}</skip>
                             <executable>${project.basedir}/../../tools/fetch-opennlp-models.sh</executable>
                         </configuration>
                     </execution>

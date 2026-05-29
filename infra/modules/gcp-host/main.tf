@@ -20,6 +20,12 @@ locals {
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
+  # GCS object prefixes use '/' hierarchy. Secret IDs use config_parameter_prefix with a trailing
+  # '_' (e.g. psoxy-dev-erik_GCAL_SOURCE); bucket keys are psoxy-dev-erik/GCAL/rules.yaml.
+  shared_resource_path = "${trimsuffix(trimprefix(local.config_parameter_prefix, "/"), "_")}/"
+  connector_instance_resource_path = { for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) :
+    k => "${local.shared_resource_path}${replace(upper(k), "-", "_")}/"
+  }
 
   # rules_file paths may be absolute, relative to the Terraform root module (deployment dir), or
   # relative to psoxy_base_dir (paths into the psoxy repo, eg docs/sources/...)
@@ -70,6 +76,16 @@ locals {
   }
 
   should_enable_remote_resources = var.enable_remote_resources || var.enable_gen_metadata
+
+  needs_gen_metadata_model_upload = var.enable_gen_metadata || length([
+    for k, v in var.api_connectors : k if try(v.enable_gen_metadata, false)
+  ]) > 0
+
+  gen_metadata_model_id = coalesce(
+    try(var.general_environment_variables["PSOXY_GEN_MODEL"], null),
+    "tjake/Llama-3.2-1B-Instruct-JQ4"
+  )
+  gen_metadata_archive_name = "${replace(local.gen_metadata_model_id, "/", "__")}.zip"
 
   # Appended to JAVA_TOOL_OPTIONS when enable_gen_metadata (Jlama / Vector API). See gen-metadata-augment.md.
   jlama_java_tool_options = "--add-modules=jdk.incubator.vector --enable-preview --enable-native-access=ALL-UNNAMED"
@@ -267,7 +283,7 @@ module "api_connector" {
     (each.value.enable_gen_metadata || var.enable_gen_metadata) ? coalesce(each.value.available_memory_mb, 4096) : 1024,
     (each.value.enable_gen_metadata || var.enable_gen_metadata) ? 4096 : 0
   )
-  timeout_seconds                       = coalesce(try(each.value.timeout_seconds, null), 180)
+  timeout_seconds = coalesce(try(each.value.timeout_seconds, null), 180)
 
 
   environment_variables = merge(
@@ -285,13 +301,13 @@ module "api_connector" {
     var.general_environment_variables,
     (each.value.enable_gen_metadata || var.enable_gen_metadata) ? {
       ENABLE_GEN_METADATA = "true"
-      JAVA_TOOL_OPTIONS = trimspace("${lookup(merge(try(each.value.environment_variables, {}), var.general_environment_variables), "JAVA_TOOL_OPTIONS", "")} ${local.jlama_java_tool_options}")
+      JAVA_TOOL_OPTIONS   = trimspace("${lookup(merge(try(each.value.environment_variables, {}), var.general_environment_variables), "JAVA_TOOL_OPTIONS", "")} ${local.jlama_java_tool_options}")
     } : {},
   )
 
-  remote_resource_bucket        = (local.should_enable_remote_resources || each.value.enable_gen_metadata) ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = (local.should_enable_remote_resources || each.value.enable_gen_metadata) ? "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_" : null
-  remote_resource_shared_path   = (local.should_enable_remote_resources || each.value.enable_gen_metadata) ? local.config_parameter_prefix : null
+  remote_resource_bucket        = (local.should_enable_remote_resources || try(each.value.enable_gen_metadata, false)) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (local.should_enable_remote_resources || try(each.value.enable_gen_metadata, false)) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = (local.should_enable_remote_resources || try(each.value.enable_gen_metadata, false)) ? local.shared_resource_path : null
 
   secret_bindings = merge(
     local.secrets_bound_as_env_vars[each.key],
@@ -339,31 +355,31 @@ module "webhook_collector" {
 
   source = "../../modules/gcp-webhook-collector"
 
-  project_id                        = var.gcp_project_id
-  region                            = var.gcp_region
-  environment_id_prefix             = local.environment_id_prefix
-  instance_id                       = each.key
-  service_account_email             = google_service_account.webhook_collector[each.key].email
-  artifacts_bucket_name             = module.psoxy.artifacts_bucket_name
-  deployment_bundle_object_name     = module.psoxy.deployment_bundle_object_name
-  artifact_repository_id            = module.psoxy.artifact_repository
-  path_to_repo_root                 = var.psoxy_base_dir
-  config_parameter_prefix           = local.config_parameter_prefix
-  invoker_sa_emails                 = var.worklytics_sa_emails
-  vpc_config                        = module.psoxy.vpc_config
-  gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
-  bucket_write_role_id              = module.psoxy.bucket_write_role_id
-  side_output_original              = try(local.custom_original_side_outputs[each.key], null)
-  side_output_sanitized             = try(local.sanitized_side_outputs[each.key], null)
-  todos_as_local_files              = var.todos_as_local_files
-  tf_runner_iam_principal           = module.tf_runner.iam_principal
-  enable_versioning                 = var.version_sanitized_buckets
-  bucket_access_logs_destination    = var.bucket_access_logs_destination
-  builder_sa_id                     = module.psoxy.builder_sa_id
-  key_ring_id                       = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
-  oidc_token_verifier_role_id       = module.psoxy.oidc_token_verifier_role_id
-  provision_auth_key                = each.value.provision_auth_key
-  rules_file = try(local.webhook_collector_rules_file_paths[each.key], null)
+  project_id                         = var.gcp_project_id
+  region                             = var.gcp_region
+  environment_id_prefix              = local.environment_id_prefix
+  instance_id                        = each.key
+  service_account_email              = google_service_account.webhook_collector[each.key].email
+  artifacts_bucket_name              = module.psoxy.artifacts_bucket_name
+  deployment_bundle_object_name      = module.psoxy.deployment_bundle_object_name
+  artifact_repository_id             = module.psoxy.artifact_repository
+  path_to_repo_root                  = var.psoxy_base_dir
+  config_parameter_prefix            = local.config_parameter_prefix
+  invoker_sa_emails                  = var.worklytics_sa_emails
+  vpc_config                         = module.psoxy.vpc_config
+  gcp_principals_authorized_to_test  = var.gcp_principals_authorized_to_test
+  bucket_write_role_id               = module.psoxy.bucket_write_role_id
+  side_output_original               = try(local.custom_original_side_outputs[each.key], null)
+  side_output_sanitized              = try(local.sanitized_side_outputs[each.key], null)
+  todos_as_local_files               = var.todos_as_local_files
+  tf_runner_iam_principal            = module.tf_runner.iam_principal
+  enable_versioning                  = var.version_sanitized_buckets
+  bucket_access_logs_destination     = var.bucket_access_logs_destination
+  builder_sa_id                      = module.psoxy.builder_sa_id
+  key_ring_id                        = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
+  oidc_token_verifier_role_id        = module.psoxy.oidc_token_verifier_role_id
+  provision_auth_key                 = each.value.provision_auth_key
+  rules_file                         = try(local.webhook_collector_rules_file_paths[each.key], null)
   webhook_batch_invoker_sa_email     = module.psoxy.webhook_batch_invoker_sa_email
   batch_processing_frequency_minutes = try(each.value.batch_processing_frequency_minutes, 5)
   output_path_prefix                 = each.value.output_path_prefix
@@ -381,9 +397,9 @@ module "webhook_collector" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_" : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.config_parameter_prefix : null
+  remote_resource_bucket        = local.should_enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = local.should_enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = local.should_enable_remote_resources ? local.shared_resource_path : null
 
   secret_bindings = module.psoxy.secrets
 
@@ -449,9 +465,9 @@ module "bulk_connector" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_" : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.config_parameter_prefix : null
+  remote_resource_bucket        = local.should_enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = local.should_enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = local.should_enable_remote_resources ? local.shared_resource_path : null
 
   depends_on = [
     module.psoxy # some of the set-up IAM grants done there, but not EXPLICITLY passed out as outputs and into above as inputs, are required; so make this explicit

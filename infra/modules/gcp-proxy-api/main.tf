@@ -27,6 +27,13 @@ locals {
   bucket_provisioning_required = var.enable_async_processing || length(local.side_outputs_to_provision) > 0
 
   path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(var.instance_id), "-", "_")}_"
+
+  # gcp-output-bucket allows bucket_name_prefix up to 40 chars
+  bucket_name_environment_id_prefix  = substr(var.environment_id_prefix, 0, 30)
+  bucket_name_prefix_random_suffix   = local.bucket_provisioning_required ? "-${random_string.bucket_name_random_sequence[0].result}-" : ""
+  bucket_name_instance_id_max_length = local.bucket_provisioning_required ? 40 - length(local.bucket_name_environment_id_prefix) - length(local.bucket_name_prefix_random_suffix) : 0
+  bucket_name_instance_id            = local.bucket_provisioning_required ? trim(substr(var.instance_id, 0, max(0, local.bucket_name_instance_id_max_length)), "-") : ""
+  bucket_name_prefix                 = local.bucket_provisioning_required ? "${local.bucket_name_environment_id_prefix}${local.bucket_name_instance_id}${local.bucket_name_prefix_random_suffix}" : null
 }
 
 resource "random_string" "bucket_name_random_sequence" {
@@ -58,7 +65,7 @@ module "async_output" {
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
-  bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence[0].result}-"
+  bucket_name_prefix             = local.bucket_name_prefix
   bucket_name_suffix             = "async-output"
   sanitizer_accessor_principals = concat(
     var.gcp_principals_authorized_to_test,
@@ -130,7 +137,7 @@ resource "google_pubsub_topic_iam_member" "function_publisher" {
 resource "google_service_account_iam_member" "pubsub_oidc_minter" {
   count = var.enable_async_processing ? 1 : 0
 
-  service_account_id = data.google_service_account.function.id
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.service_account_email}"
   member             = "serviceAccount:${local.pubsub_service_identity}"
   role               = "roles/iam.serviceAccountOpenIdTokenCreator"
 }
@@ -143,7 +150,7 @@ module "side_output_bucket" {
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
-  bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence[0].result}-"
+  bucket_name_prefix             = local.bucket_name_prefix
   bucket_name_suffix             = "side-output"
   sanitizer_accessor_principals  = each.value.allowed_readers
   enable_versioning              = var.enable_versioning
@@ -200,11 +207,6 @@ locals {
   }
 }
 
-data "google_service_account" "function" {
-  account_id = var.service_account_email
-}
-
-
 # to provision Cloud Function, TF must be able to act as the service account that the function will
 # run as
 # NOTE: named 'tf_runner_act_as' rather than 'act_as' to avoid replacement-cycle on upgrades where
@@ -212,7 +214,7 @@ data "google_service_account" "function" {
 resource "google_service_account_iam_member" "tf_runner_act_as" {
   member             = var.tf_runner_iam_principal
   role               = "roles/iam.serviceAccountUser"
-  service_account_id = data.google_service_account.function.id
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.service_account_email}"
 }
 
 # migration: remove old resource address from state (destroyed in GCP)
@@ -271,6 +273,8 @@ resource "google_cloudfunctions2_function" "function" {
       local.side_output_env_vars,
       var.enable_async_processing ? { ASYNC_OUTPUT_DESTINATION = "gs://${module.async_output[0].bucket_name}" } : {},
       var.remote_resource_bucket != null ? { REMOTE_RESOURCE_BUCKET = var.remote_resource_bucket } : {},
+      var.remote_resource_instance_path != null ? { INSTANCE_RESOURCE_PATH = var.remote_resource_instance_path } : {},
+      var.remote_resource_shared_path != null ? { SHARED_RESOURCE_PATH = var.remote_resource_shared_path } : {},
     )
 
     dynamic "secret_environment_variables" {

@@ -38,7 +38,7 @@ As of Feb 2025, the report includes the following fields, providing per-user usa
   1. Add `gemini-usage` to your list of `custom_bulk_connector_rules` in your `terraform.tfvars` file for your proxy configuration then `terraform apply`.
   2. Review your terraform plan/output; find the `-input` bucket name for your connector.
   3. Download the Gemini&trade; Usage report from the Google Workspace&trade; Admin Console (or ask a sufficiently privileged Google Workspace&trade; admin to do so). see `TODO 1 - gemini-usage` file that your `terraform apply` generated.
-  4. Upload the usage report to the `-input` bucket (via AWS/GCP console, using `gsutil`/`s3` CLI, etc).
+  4. Upload the usage report to the `-input` bucket (via AWS/GCP console, using `gcloud storage`/`aws s3` CLI, etc).
   5. Create the a `Bulk Import - Psoxy` connection in Worklytics&trade; with `gemini-bulk` as parser; see `TODO 3 - gemini-usage` file that your `terraform apply` generated.
   6. Repeat steps 3-4 as needed, to provide granular insights into AI adoption in your organization.  We recommend weekly uploads.
 

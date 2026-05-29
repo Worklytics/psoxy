@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>0.6.2</revision>
+        <revision>0.6.3</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.42</dependency.lombok.version>
         <dependency.dagger.version>2.40.5</dependency.dagger.version>
@@ -28,6 +28,7 @@
         <dependency.mockito-junit-jupiter.version>5.18.0</dependency.mockito-junit-jupiter.version>
         <dependency.json-path.version>2.9.0</dependency.json-path.version>
         <dependency.opennlp.version>2.3.2</dependency.opennlp.version>
+        <skipOpenNlpModelDownload>false</skipOpenNlpModelDownload>
         <!-- langchain4j-jlama has no non-beta release on Central for the 1.x ChatModel API; 0.36.x is pre-1.0 API. -->
         <dependency.langchain4j.version>1.15.0</dependency.langchain4j.version>
         <dependency.langchain4j-jlama.version>1.15.0-beta25</dependency.langchain4j-jlama.version>

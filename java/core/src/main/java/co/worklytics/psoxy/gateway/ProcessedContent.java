@@ -67,6 +67,10 @@ public class ProcessedContent implements Serializable {
      * @return the content as a string, using the specified contentCharset
      */
     public String getContentAsString() {
-        return new String(getContent(), contentCharset);
+        if (getContent() == null) {
+            return null;
+        } else {
+            return new String(getContent(), contentCharset);
+        }
     }
 }

@@ -51,4 +51,23 @@ public interface ResourceService {
             }
         }
     }
+
+    /**
+     * Normalizes a bucket object key prefix from secret/config naming ({@code psoxy-dev-erik_}) to
+     * object-key hierarchy ({@code psoxy-dev-erik/}). Strips a leading {@code /}; converts a
+     * trailing {@code _} to {@code /}.
+     */
+    static String normalizeObjectKeyPrefix(String pathPrefix) {
+        if (pathPrefix == null || pathPrefix.isEmpty()) {
+            return "";
+        }
+        String normalized = pathPrefix.trim();
+        while (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+        if (normalized.endsWith("_")) {
+            normalized = normalized.substring(0, normalized.length() - 1) + "/";
+        }
+        return normalized;
+    }
 }

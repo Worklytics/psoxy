@@ -34,6 +34,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.ParameterSchema;
 import com.avaulta.gateway.rules.transforms.EncryptIp;
 import com.avaulta.gateway.rules.transforms.HashIp;
 import com.avaulta.gateway.rules.transforms.Transform;
@@ -453,6 +454,21 @@ class RESTApiSanitizerImplTest {
                 Map.entry(endpoint, Pattern.compile(sanitizer.effectiveRegex(endpoint)));
 
         assertEquals(expected, sanitizer.getHasPathTemplateMatchingUrl(new URL(url)).test(entry));
+    }
+
+    @SneakyThrows
+    @Test
+    void hasPathTemplateMatchingUrl_blocksSchemaKeysMissingFromTemplate() {
+        Endpoint endpoint = Endpoint.builder()
+                .pathTemplate("/api/v1/users/{id}")
+                .pathParameterSchemas(Map.of("user", ParameterSchema.string()))
+                .build();
+
+        Map.Entry<Endpoint, Pattern> entry =
+                Map.entry(endpoint, Pattern.compile(sanitizer.effectiveRegex(endpoint)));
+
+        assertFalse(sanitizer.getHasPathTemplateMatchingUrl(
+                new URL("https://api.example.com/api/v1/users/1")).test(entry));
     }
 
 
