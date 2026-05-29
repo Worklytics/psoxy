@@ -27,7 +27,12 @@ run "validate_api_caller_ip_lock_passthrough" {
   command = plan
 
   assert {
-    error_message = "aws-host should pass allowed_data_access_ip_blocks to the core AWS module api-caller role policy"
-    condition     = strcontains(run.setup.module.psoxy.aws_iam_role.api-caller.assume_role_policy, "192.168.0.0/24")
+    error_message = "aws-host should normalize allowed_data_access_ip_blocks for the core AWS module api-caller role policy"
+    condition     = local.allowed_data_access_ip_blocks_for_iam == ["192.168.0.0/24"]
+  }
+
+  assert {
+    error_message = "aws-host should normalize allowed_webhook_ip_blocks for the core AWS module webhook-test-caller role policy"
+    condition     = local.allowed_webhook_ip_blocks_for_iam == ["10.0.0.0/16"]
   }
 }

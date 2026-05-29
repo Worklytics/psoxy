@@ -73,6 +73,9 @@ locals {
 
   # proxy caller role requires direct lambda access if API Gateway v2 is not used and there are API connectors
   caller_requires_direct_lambda_access = !local.use_api_gateway_v2 && length(module.api_connector) > 0
+
+  allowed_data_access_ip_blocks_for_iam = coalesce(var.allowed_data_access_ip_blocks, [])
+  allowed_webhook_ip_blocks_for_iam     = coalesce(var.allowed_webhook_ip_blocks, [])
 }
 
 module "psoxy" {
@@ -96,8 +99,8 @@ module "psoxy" {
   enable_webhook_testing             = local.enable_webhook_testing
   webhook_allow_origins              = distinct(flatten([for v in var.webhook_collectors : v.allow_origins]))
   artifacts_bucket_name              = var.artifacts_bucket_name
-  allowed_data_access_ip_blocks      = coalesce(var.allowed_data_access_ip_blocks, [])
-  allowed_webhook_ip_blocks          = coalesce(var.allowed_webhook_ip_blocks, [])
+  allowed_data_access_ip_blocks      = local.allowed_data_access_ip_blocks_for_iam
+  allowed_webhook_ip_blocks          = local.allowed_webhook_ip_blocks_for_iam
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
