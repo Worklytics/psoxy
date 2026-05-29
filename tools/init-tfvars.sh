@@ -438,10 +438,8 @@ fi
 if [ "$DEPLOYMENT_ENV" != "terraform_cloud" ]; then
   if type deployment_bundle_offer_at_init >/dev/null 2>&1; then
     deployment_bundle_offer_at_init "$TFVARS_FILE" "$PSOXY_BASE_DIR" "$HOST_PLATFORM"
-    bundle_was_set=$?
   else
     printf "${WARN}Warning:${NC} deployment bundle helper not found; skipping prebuilt bundle offer.\n\n"
-    bundle_was_set=0
   fi
 fi
 
