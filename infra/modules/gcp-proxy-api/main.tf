@@ -29,10 +29,10 @@ locals {
   path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(var.instance_id), "-", "_")}_"
 
   # gcp-output-bucket allows bucket_name_prefix up to 40 chars
-  bucket_name_environment_id_prefix = substr(var.environment_id_prefix, 0, 30)
-  bucket_name_prefix_random_suffix   = "-${random_string.bucket_name_random_sequence[0].result}-"
-  bucket_name_instance_id_max_length = 40 - length(local.bucket_name_environment_id_prefix) - length(local.bucket_name_prefix_random_suffix)
-  bucket_name_instance_id            = trim(substr(var.instance_id, 0, max(0, local.bucket_name_instance_id_max_length)), "-")
+  bucket_name_environment_id_prefix  = substr(var.environment_id_prefix, 0, 30)
+  bucket_name_prefix_random_suffix   = local.bucket_provisioning_required ? "-${random_string.bucket_name_random_sequence[0].result}-" : ""
+  bucket_name_instance_id_max_length = local.bucket_provisioning_required ? 40 - length(local.bucket_name_environment_id_prefix) - length(local.bucket_name_prefix_random_suffix) : 0
+  bucket_name_instance_id            = local.bucket_provisioning_required ? trim(substr(var.instance_id, 0, max(0, local.bucket_name_instance_id_max_length)), "-") : ""
   bucket_name_prefix                 = local.bucket_provisioning_required ? "${local.bucket_name_environment_id_prefix}${local.bucket_name_instance_id}${local.bucket_name_prefix_random_suffix}" : null
 }
 
