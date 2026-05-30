@@ -298,6 +298,9 @@ locals {
     ]
   }] : []
 
+  remote_resource_instance_prefix = var.remote_resource_instance_path != null ? trimsuffix(var.remote_resource_instance_path, "/") : null
+  remote_resource_shared_prefix   = var.remote_resource_shared_path != null ? trimsuffix(var.remote_resource_shared_path, "/") : null
+
   remote_resource_bucket_statements = var.remote_resource_bucket != null ? [{
     Sid = "ReadRemoteResourceBucket"
     Action = [
@@ -306,8 +309,12 @@ locals {
     Effect = "Allow"
     Resource = coalescelist(
       compact([
-        var.remote_resource_instance_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_instance_path}/*" : null,
-        var.remote_resource_shared_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_shared_path}/*" : null,
+        local.remote_resource_instance_prefix != null ? (
+          local.remote_resource_instance_prefix != "" ? "arn:aws:s3:::${var.remote_resource_bucket}/${local.remote_resource_instance_prefix}/*" : "arn:aws:s3:::${var.remote_resource_bucket}/*"
+        ) : null,
+        local.remote_resource_shared_prefix != null ? (
+          local.remote_resource_shared_prefix != "" ? "arn:aws:s3:::${var.remote_resource_bucket}/${local.remote_resource_shared_prefix}/*" : "arn:aws:s3:::${var.remote_resource_bucket}/*"
+        ) : null,
       ]),
       ["arn:aws:s3:::${var.remote_resource_bucket}/*"]
     )
