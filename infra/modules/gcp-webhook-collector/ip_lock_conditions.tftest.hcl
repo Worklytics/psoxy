@@ -28,12 +28,6 @@ mock_provider "google" {
     }
   }
 
-  mock_data "google_service_account" {
-    defaults = {
-      account_id = "test@example.com"
-      id         = "projects/test-project/serviceAccounts/test@example.com"
-    }
-  }
 }
 
 run "validate_cloud_run_webhook_invokers_no_ip_condition" {
