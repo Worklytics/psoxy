@@ -3,10 +3,13 @@ variables {
   environment_id_prefix         = "dev-"
   instance_id                   = "test-instance"
   service_account_email         = "test@example.com"
+  tf_runner_iam_principal       = "user:terraform@example.com"
   artifacts_bucket_name         = "test-bucket"
   deployment_bundle_object_name = "bundle.zip"
   builder_sa_id                 = "projects/test-project/serviceAccounts/builder@example.com"
   source_kind                   = "test"
+  rules_file                    = "README.md"
+  oidc_token_verifier_role_id   = "projects/test-project/roles/oidcTokenVerifier"
 
   allowed_webhook_ip_blocks = ["10.0.0.0/16"]
 }
