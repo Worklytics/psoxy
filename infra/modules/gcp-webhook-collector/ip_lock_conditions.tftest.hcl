@@ -3,7 +3,7 @@ variables {
   environment_id_prefix         = "dev-"
   instance_id                   = "test-instance"
   config_parameter_prefix       = "TEST_"
-  service_account_email         = "test@test-project.iam.gserviceaccount.com"
+  service_account_email         = "testsa@test-project.iam.gserviceaccount.com"
   tf_runner_iam_principal       = "user:terraform@example.com"
   artifacts_bucket_name         = "test-bucket"
   deployment_bundle_object_name = "bundle.zip"
@@ -42,6 +42,6 @@ run "validate_cloud_run_webhook_invokers_no_ip_condition" {
 
   assert {
     error_message = "Terraform runner must be granted act-as on the full service account resource name."
-    condition     = google_service_account_iam_member.tf_runner_act_as.service_account_id == "projects/test-project/serviceAccounts/test@test-project.iam.gserviceaccount.com"
+    condition     = google_service_account_iam_member.tf_runner_act_as.service_account_id == "projects/test-project/serviceAccounts/testsa@test-project.iam.gserviceaccount.com"
   }
 }
