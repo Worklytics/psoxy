@@ -34,4 +34,9 @@ run "validate_cloud_run_webhook_invokers_no_ip_condition" {
     error_message = "Cloud Run webhook invoker must not use IAM IP conditions (unsupported); IP lock is app-level via ALLOWED_WEBHOOK_IP_BLOCKS."
     condition     = length(google_cloud_run_service_iam_binding.invokers.condition) == 0
   }
+
+  assert {
+    error_message = "Terraform runner must be granted act-as on the full service account resource name."
+    condition     = google_service_account_iam_member.tf_runner_act_as.service_account_id == "projects/test-project/serviceAccounts/test@example.com"
+  }
 }
