@@ -100,9 +100,12 @@ resource "aws_sqs_queue" "async_api_request_queue" {
   # Standard queue for better reliability
   fifo_queue = false
 
-  message_retention_seconds = 86400 # 1 day, max; tbh, prob could be shorter
+  # 1 day, max; tbh, prob could be shorter
+  message_retention_seconds = 86400
 
-  visibility_timeout_seconds = 120 # how long after attempt begins until message is visible to another consumer for re-processing
+  # how long after attempt begins until message is visible to another consumer for re-processing
+  # this CANNOT be shorter than the lambda timeout, or AWS gives 400 on apply
+  visibility_timeout_seconds = max(var.timeout_seconds, 120)
 
   # Receive message wait time: 20 seconds (long polling)
   receive_wait_time_seconds = 20
