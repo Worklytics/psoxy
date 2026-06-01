@@ -37,7 +37,7 @@ When `enable_gen_metadata` is set on an API connector, Terraform **appends** Jla
 
 ## Infrastructure
 
-Set **`enable_gen_metadata = true`** on individual `api_connectors` entries (API connectors only):
+Set **`enable_gen_metadata = true`** on individual `api_connectors` entries (API connectors only). The `msft-copilot` entry in `worklytics-connector-specs` sets this by default when that connector is enabled; custom API connectors can set it in `custom_api_connectors`:
 
 - Sets `ENABLE_GEN_METADATA=true` on that function
 - Sets `JAVA_TOOL_OPTIONS` for Jlama on that function's JVM

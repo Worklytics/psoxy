@@ -34,6 +34,12 @@ Host modules (`aws-host` and `gcp-host`) enable remote resource loading **per co
 > - If you configure an existing bucket (e.g., by providing `artifacts_bucket_name`), the bucket must already exist.
 > - The Terraform runner (the credentials running the `terraform` command) must have sufficient IAM permissions on that bucket to apply permissions (since it will grant read access to the proxy's service account or Lambda execution role).
 
+### Connector specs and custom connectors
+
+Prebuilt connectors in `worklytics-connector-specs` may set `enable_remote_resources` or `enable_gen_metadata` per connector (e.g. `msft-copilot` enables gen metadata). Those flags flow through to `aws-host` / `gcp-host` when the connector is enabled.
+
+For ad-hoc connectors, set the flags on `custom_api_connectors` or `custom_bulk_connectors` in your root module (see `infra/examples-dev/*/variables.tf`).
+
 ### AWS (`aws-host`)
 
 ```hcl
@@ -41,11 +47,12 @@ module "psoxy" {
   source = "../../modules/aws-host"
 
   api_connectors = {
-    "msft-copilot" = {
-      source_kind            = "..."
-      source_auth_strategy   = "..."
-      target_host            = "..."
+    "my-api" = {
+      source_kind             = "..."
+      source_auth_strategy    = "..."
+      target_host             = "..."
       enable_remote_resources = true  # OpenNLP, rules.yaml in bucket, etc.
+      enable_gen_metadata     = false
     }
   }
 }
@@ -63,9 +70,9 @@ module "psoxy" {
 
   api_connectors = {
     "gcal" = {
-      source_kind            = "..."
-      source_auth_strategy   = "..."
-      target_host            = "..."
+      source_kind             = "..."
+      source_auth_strategy    = "..."
+      target_host             = "..."
       enable_remote_resources = true
     }
   }

@@ -71,7 +71,7 @@ locals {
       local.msft_api_connectors_with_auth,
       var.custom_api_connectors,
       {}
-    ) : k => merge(v, { enable_remote_resources = true })
+    ) : k => merge(v, { enable_remote_resources = try(v.enable_remote_resources, true) })
   }
 
   custom_bulk_connectors_with_defaults = {
@@ -86,7 +86,7 @@ locals {
     for k, v in merge(
       module.worklytics_connectors.enabled_bulk_connectors,
       local.custom_bulk_connectors_with_defaults,
-    ) : k => merge(v, { enable_remote_resources = true })
+    ) : k => merge(v, { enable_remote_resources = try(v.enable_remote_resources, true) })
   }
 
 
@@ -128,7 +128,7 @@ module "psoxy" {
     v,
     {
       example_payload         = try(file(v.example_payload_file), null)
-      enable_remote_resources = true
+      enable_remote_resources = try(v.enable_remote_resources, true)
     }
   ) }
   non_production_connectors       = var.non_production_connectors

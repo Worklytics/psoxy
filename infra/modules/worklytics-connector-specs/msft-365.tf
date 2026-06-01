@@ -183,6 +183,7 @@ EOT
       environment_variables : local.msft_365_environment_variables
       external_todo : null
       enable_side_output : false
+      enable_gen_metadata : true
       example_api_calls : [
         "/v1.0/users",
         "/beta/copilot/users/${local.example_msft_user_guid}/interactionHistory/getAllEnterpriseInteractions"
