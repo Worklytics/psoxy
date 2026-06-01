@@ -373,6 +373,7 @@ resource "local_file" "test_script" {
 FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
 BLUE='\e[0;34m'
 NC='\e[0m'
+FAILED=0
 
 printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"
 
@@ -382,9 +383,19 @@ for FILE in "$${FILES[@]}"; do
   # trim whitespace
   FILE=$(echo "$FILE" | xargs)
   if [ -z "$FILE" ]; then continue; fi
+
+  if [ ! -f "$FILE" ]; then
+    printf "error: file not found: %s\n" "$FILE" >&2
+    FAILED=1
+    continue
+  fi
   
   printf "Testing file: $FILE\n"
   node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$FILE" -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
+  if [ $? -ne 0 ]; then
+    FAILED=1
+    continue
+  fi
 
   if gzip -t "$FILE" 2>/dev/null; then
     printf "test file was compressed, so not testing compression as a separate case\n"
@@ -392,12 +403,23 @@ for FILE in "$${FILES[@]}"; do
     printf "testing with compressed input file ... \n"
     # extract the file name from the path
     TEST_FILE_NAME=/tmp/$(basename "$FILE").gz
-    
-    gzip -c "$FILE" > "$TEST_FILE_NAME"
+
+    if ! gzip -c "$FILE" > "$TEST_FILE_NAME"; then
+      printf "error: failed to compress file: %s\n" "$FILE" >&2
+      rm -f "$TEST_FILE_NAME"
+      FAILED=1
+      continue
+    fi
     node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$TEST_FILE_NAME" -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
-    rm "$TEST_FILE_NAME"
+    NODE_EXIT=$?
+    rm -f "$TEST_FILE_NAME"
+    if [ $NODE_EXIT -ne 0 ]; then
+      FAILED=1
+    fi
   fi
 done
+
+exit $FAILED
 EOT
 
 }

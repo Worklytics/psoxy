@@ -179,6 +179,14 @@ export default async function (options = {}) {
   const logger = getLogger(options.verbose);
   environmentCheck(logger);
 
+  if (!fs.existsSync(options.file)) {
+    throw new Error(`File not found: ${options.file}`);
+  }
+  const fileStat = fs.statSync(options.file);
+  if (!fileStat.isFile()) {
+    throw new Error(`Not a regular file: ${options.file}`);
+  }
+
   const deploymentTypeFn = options.deploy === 'AWS' ? testAWS : testGCP;
   const { original, sanitized } = await deploymentTypeFn(options, logger);
 
