@@ -718,11 +718,11 @@ EOT
     }
     slack-discovery-api = {
       source_kind : "slack"
-      availability : "deprecated",
+      availability : "ga",
       enable_by_default : false,
       worklytics_connector_id : "slack-discovery-api-psoxy",
       worklytics_connector_name : "Slack via Psoxy",
-      display_name : "(Deprecated, use Slack Analytics instead) Slack via Discovery API"
+      display_name : "Slack via Discovery API"
       target_host : "www.slack.com"
       source_auth_strategy : "oauth2_access_token"
       oauth_scopes_needed : [

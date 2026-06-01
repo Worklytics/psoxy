@@ -2,13 +2,20 @@
 
 For enabling Slack Analytics via API via the Psoxy you must first create an app on your Slack Enterprise Grid organization.
 
+#### Required scopes
+
+**User token scopes** (used by the connector):
+- `admin.analytics:read` — member analytics, channel analytics, message metadata, and message activity
+
+**Bot token scopes** (org-wide install only; not used by the connector):
+- `users:read` — required by Slack to allow org-wide app installation
+
+#### Setup steps
+
 1. Go to https://api.slack.com/apps and create an app.
    - Select "From scratch", choose a name (for example "Slack Analytics Connector") and a workspace.
 
-2. Under "Features" --> "OAuth & Permissions", add the following scope under "User Token Scopes":
-   - `admin.analytics:read`
-
-This scope grants access to `admin.analytics.getFile` (member and channel analytics), `admin.analytics.messages.metadata`, and `admin.analytics.messages.activity`. The installing user must be a Slack org owner or admin.
+2. Under "Features" --> "OAuth & Permissions", add `admin.analytics:read` under "User Token Scopes".
 
 #### Workspace install
 
@@ -30,3 +37,5 @@ Use this step if you want to install in the whole org, across multiple workspace
 4. Go to "OAuth & Permissions" and add the previous URL as "Redirect URLs"
 5. Go to "Settings > Install App", and choose "Install to Organization". A Slack admin should grant the app the permissions and the app will be installed.
 6. Copy the "User OAuth Token" (also listed under "OAuth & Permissions") and store as `${path_to_instance_parameters}ACCESS_TOKEN` in the proxy's Secret Manager. Otherwise, share the token with the AWS/GCP administrator completing the implementation.
+
+See [Slack Analytics connector documentation](https://docs.worklytics.co/psoxy/sources/slack/slack-analytics) for endpoint details and example API calls.

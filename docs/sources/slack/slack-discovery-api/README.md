@@ -2,10 +2,19 @@
 
 **Connector ID:** `slack-discovery-api`
 
-**Availability:** Deprecated — use [`slack-analytics`](../slack-analytics/README.md) instead. Slack's Admin Analytics API provides the same organizational data (members, channels, message metadata, and engagement metrics) without requiring the Discovery API's `discovery:read` scope, and returns metadata-only message data so the proxy does not need to redact message content.
+**Availability:** GA
 
-{% hint style="info" %}
-NOTE: While access to your Slack data via the Discovery API has required a sufficiently high level Slack subscription, as of May 2025 Slack is by default imposing highly restrictive rate limits on new Discovery API clients. If you did not create your Discovery API client before May 2025, you may need to contact your Slack account representative to ensure your organization can use this method to obtain a copy of your Slack data.
+{% hint style="warning" %}
+**Access requirements:** The Slack Discovery API is intended for eDiscovery, compliance, and data-retention use cases. Using it to export organizational data for analytics is **not documented or officially supported by Slack** as a use case, though some organizations do so in practice.
+
+Access depends on several factors outside Worklytics' or Psoxy's control:
+
+- **Subscription/plan:** Your organization typically needs an eligible Slack plan (for example, Enterprise Grid with Discovery API entitlements). Slack does not make Discovery API available on all plans.
+- **Slack account team approval:** The `discovery:read` scope is not self-service. You must contact your Slack account representative or account management team and ask them to enable it for your app's App ID (see Steps to Connect below). They may approve, deny, or impose conditions based on your contract and intended use.
+- **Enterprise Grid:** Discovery API access is an Enterprise Grid feature. Your org must be on Grid (or equivalent enterprise deployment) with Discovery enabled.
+- **Rate limits:** As of May 2025, Slack is by default imposing highly restrictive rate limits on new Discovery API clients. If you did not create your Discovery API client before May 2025, you may need to work with your Slack account representative to obtain viable rate limits for your use case.
+
+Due to these limitations on the availability and terms of the Discovery API, **Worklytics cannot warrant or guarantee its availability, now or going forward.**
 {% endhint %}
 
 ## Examples

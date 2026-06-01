@@ -47,7 +47,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `salesforce`               | [Salesforce](salesforce/README.md)                                          | API  | GA           |
 | `slack-analytics`          | [Slack Analytics](slack/slack-analytics/README.md)                           | API  | ALPHA        |
 | `slack-ai-analytics-bulk`  | [Slack AI Analytics Bulk](slack/slack-ai-bulk/README.md)                    | Bulk | ALPHA        |
-| `slack-discovery-api`      | [Slack via Discovery API](slack/slack-discovery-api/README.md)              | API  | DEPRECATED   |
+| `slack-discovery-api`      | [Slack via Discovery API](slack/slack-discovery-api/README.md)              | API  | GA           |
 | `survey`                   | [Survey](survey/README.md)                                                  | Bulk | GA           |
 | `windsurf`                 | [Windsurf](windsurf/README.md)                                              | API  | ALPHA        |
 | `workdata-generic`         | [Workdata Generic](workdata-generic/README.md)                              | Bulk | BETA         |

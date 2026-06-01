@@ -6,7 +6,6 @@ in each release's notes.
 Changes to be including in future/planned release notes will be added here.
 
 ## Next
-- `slack-discovery-api`: deprecated in favor of `slack-analytics`, which covers the same organizational data via Slack's Admin Analytics API (`admin.analytics.getFile`, `admin.analytics.messages.metadata`, `admin.analytics.messages.activity`).
 - `slack-analytics`: added `admin.analytics.messages.metadata` and `admin.analytics.messages.activity` endpoints; improved connector documentation.
 
 ## [0.6.3](https://github.com/Worklytics/psoxy/releases/tag/v0.6.3)
