@@ -300,11 +300,11 @@ resource "aws_ssm_parameter" "rules" {
   }
 }
 
-resource "aws_iam_policy" "testing" {
+resource "aws_iam_policy" "testing_input_write" {
   count = var.provision_iam_policy_for_testing ? 1 : 0
 
-  name_prefix = "${local.iam_policy_prefix}Testing"
-  description = "Allow to write to input bucket, read from sanitized bucket to test Lambda's behavior"
+  name_prefix = "${local.iam_policy_prefix}TestingInputWrite"
+  description = "Allow principals in caller_aws_arns to write test files to the input bucket"
   policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
@@ -317,17 +317,26 @@ resource "aws_iam_policy" "testing" {
           "${aws_s3_bucket.input.arn}",
           "${aws_s3_bucket.input.arn}/*"
         ]
-      },
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "testing_sanitized_cleanup" {
+  count = var.provision_iam_policy_for_testing ? 1 : 0
+
+  name_prefix = "${local.iam_policy_prefix}TestingSanitizedCleanup"
+  description = "Allow the proxy caller role to delete sanitized test files after verification"
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
         "Action" : [
-          "s3:GetObject",
-          "s3:ListBucket",
           "s3:DeleteObject",
           "s3:DeleteObjectVersion"
         ],
         "Effect" : "Allow",
         "Resource" : [
-          "${aws_s3_bucket.sanitized.arn}",
           "${aws_s3_bucket.sanitized.arn}/*"
         ]
       }
@@ -335,16 +344,37 @@ resource "aws_iam_policy" "testing" {
   })
 }
 
+locals {
+  caller_role_names_for_testing = var.provision_iam_policy_for_testing ? toset([
+    for arn in var.caller_aws_arns : element(split("role/", arn), 1)
+    if can(regex(":role/", arn))
+  ]) : toset([])
 
+  caller_user_names_for_testing = var.provision_iam_policy_for_testing ? toset([
+    for arn in var.caller_aws_arns : element(split("user/", arn), 1)
+    if can(regex(":user/", arn))
+  ]) : toset([])
+}
 
-resource "aws_iam_policy_attachment" "testing_policy_to_testing_role" {
+resource "aws_iam_role_policy_attachment" "testing_input_write_to_caller_roles" {
+  for_each = local.caller_role_names_for_testing
+
+  role       = each.key
+  policy_arn = aws_iam_policy.testing_input_write[0].arn
+}
+
+resource "aws_iam_user_policy_attachment" "testing_input_write_to_caller_users" {
+  for_each = local.caller_user_names_for_testing
+
+  user       = each.key
+  policy_arn = aws_iam_policy.testing_input_write[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "testing_sanitized_cleanup_to_caller_role" {
   count = var.provision_iam_policy_for_testing ? 1 : 0
 
-  name       = "${aws_iam_policy.testing[count.index].name}_to_${var.instance_id}TestingRole"
-  policy_arn = aws_iam_policy.testing[count.index].arn
-  roles = [
-    element(split("role/", var.aws_role_to_assume_when_testing), 1)
-  ]
+  role       = element(split("role/", var.aws_role_to_assume_when_testing), 1)
+  policy_arn = aws_iam_policy.testing_sanitized_cleanup[0].arn
 }
 
 locals {

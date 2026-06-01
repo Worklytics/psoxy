@@ -28,7 +28,7 @@ const { version } = require('./package.json');
     .requiredOption('-i, --input <bucketName>', 'Input bucket\'s name')
     .requiredOption('-f, --file <path/to/file>', 'Path of the file to be processed')
     .requiredOption('-o, --output <bucketName>', 'Output bucket\'s name')
-    .option('-r, --role <arn>', 'ARN of AWS role to assume; if omitted, AWS CLI must be authenticated as a principal with perms to write to input bucket and read from output bucket')
+    .option('-r, --role <arn>', 'ARN of proxy Caller role to assume when reading from the output bucket; uploads use your default AWS credentials')
     .option('--region <region>', 'AWS region of the buckets (input/output)',
       'us-east-1')
     .option('-v, --verbose', 'Verbose output', false)

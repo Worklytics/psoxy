@@ -115,9 +115,15 @@ variable "function_zip_hash" {
 }
 
 
+variable "caller_aws_arns" {
+  type        = list(string)
+  description = "ARNs of AWS principals authorized to assume the proxy caller role. When `provision_iam_policy_for_testing` is true, these principals receive S3 write access to the input bucket for bulk connector testing."
+  default     = []
+}
+
 variable "aws_role_to_assume_when_testing" {
   type        = string
-  description = "ARN of role to assume when testing instance. Leave blank to use default credentials of location from which you'll run tests (which must be for a principal with sufficient privileges, or use `provision_iam_policy_for_testing`)."
+  description = "ARN of proxy caller role to assume when reading/deleting from the sanitized bucket during bulk connector tests. Uploads use the caller's default AWS credentials (must be listed in `caller_aws_arns` when `provision_iam_policy_for_testing` is true)."
   default     = null
 
   validation {
@@ -128,7 +134,7 @@ variable "aws_role_to_assume_when_testing" {
 
 variable "provision_iam_policy_for_testing" {
   type        = bool
-  description = "Whether to provision IAM policy and attach it to `aws_role_to_assume_when_testing`."
+  description = "Whether to provision IAM policies to support bulk connector testing: grants S3 input bucket write to `caller_aws_arns`, and S3 sanitized bucket delete to `aws_role_to_assume_when_testing`."
   default     = false
 }
 

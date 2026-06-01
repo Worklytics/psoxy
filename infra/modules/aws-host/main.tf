@@ -352,6 +352,7 @@ module "bulk_connector" {
   source = "../../modules/aws-proxy-bulk"
 
   aws_account_id                   = var.aws_account_id
+  caller_aws_arns                  = var.caller_aws_arns
   provision_iam_policy_for_testing = var.provision_testing_infra
   aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
   environment_name                 = var.environment_name
