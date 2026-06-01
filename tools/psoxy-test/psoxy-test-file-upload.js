@@ -32,7 +32,7 @@ async function testAWS(options, logger) {
   const uploadClient = await aws.createS3Client(null, options.region);
   let downloadClient = uploadClient;
   if (options.role) {
-    logger.verbose(`Assuming role ${options.role} to read from output bucket`);
+    logger.verbose(`Assuming role ${options.role}`);
     downloadClient = await aws.createS3Client(options.role, options.region);
   }
 

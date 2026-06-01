@@ -6,7 +6,7 @@ in each release's notes.
 Changes to be including in future/planned release notes will be added here.
 
 ## Next
-- `aws`: bulk connector test IAM grants input bucket write to `caller_aws_arns` (not the proxy Caller role), matching production where Worklytics never uploads to `-input` buckets; the test tool uploads with default credentials and assumes the Caller role only to read/delete from the `-sanitized` bucket.
+- `aws`: bulk connector test input bucket write goes to `caller_aws_arns`, not the proxy Caller role.
 - `gcp`: fix Terraform compatibility when upgrading to v0.6.x with an older `hashicorp/google` provider lock file; require provider `>= 7.0` in modules and use `detect_md5hash` for deployment bundle change detection.
 - `aws`: add explicit `filter {}` to S3 bucket lifecycle rules for compatibility with `hashicorp/aws` provider 6.x.
 - `aws`: require `hashicorp/aws` provider `>= 6.0` in AWS host and component modules (was `>= 5.0` or unconstrained).

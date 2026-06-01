@@ -315,7 +315,7 @@ locals {
     Action = [
       "s3:GetObject",
     ]
-    Effect = "Allow"
+    Effect   = "Allow"
     Resource = length(local.remote_resource_s3_object_arns) > 0 ? local.remote_resource_s3_object_arns : ["arn:aws:s3:::${var.remote_resource_bucket}/*"]
   }] : []
 
