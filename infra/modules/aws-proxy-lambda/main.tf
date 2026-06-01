@@ -298,19 +298,25 @@ locals {
     ]
   }] : []
 
+  remote_resource_instance_prefix = var.remote_resource_instance_path != null ? trimsuffix(var.remote_resource_instance_path, "/") : ""
+  remote_resource_shared_prefix   = var.remote_resource_shared_path != null ? trimsuffix(var.remote_resource_shared_path, "/") : ""
+
+  remote_resource_s3_object_arns = distinct(compact([
+    var.remote_resource_instance_path != null ? (
+      local.remote_resource_instance_prefix != "" ? "arn:aws:s3:::${var.remote_resource_bucket}/${local.remote_resource_instance_prefix}/*" : "arn:aws:s3:::${var.remote_resource_bucket}/*"
+    ) : "",
+    var.remote_resource_shared_path != null ? (
+      local.remote_resource_shared_prefix != "" ? "arn:aws:s3:::${var.remote_resource_bucket}/${local.remote_resource_shared_prefix}/*" : "arn:aws:s3:::${var.remote_resource_bucket}/*"
+    ) : "",
+  ]))
+
   remote_resource_bucket_statements = var.remote_resource_bucket != null ? [{
     Sid = "ReadRemoteResourceBucket"
     Action = [
       "s3:GetObject",
     ]
     Effect = "Allow"
-    Resource = coalescelist(
-      compact([
-        var.remote_resource_instance_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_instance_path}/*" : null,
-        var.remote_resource_shared_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_shared_path}/*" : null,
-      ]),
-      ["arn:aws:s3:::${var.remote_resource_bucket}/*"]
-    )
+    Resource = length(local.remote_resource_s3_object_arns) > 0 ? local.remote_resource_s3_object_arns : ["arn:aws:s3:::${var.remote_resource_bucket}/*"]
   }] : []
 
   aws_kms_public_key_statements = length(var.aws_kms_public_keys) > 0 ? [{
