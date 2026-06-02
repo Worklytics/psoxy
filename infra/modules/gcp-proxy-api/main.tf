@@ -193,12 +193,11 @@ resource "google_service_account_iam_member" "tf_runner_act_as" {
   service_account_id = data.google_service_account.function.id
 }
 
-# migration: remove old resource address from state without deleting the IAM grant;
-# tf_runner_act_as manages the same membership and must remain present during upgrades.
+# migration: remove old resource address from state (destroyed in GCP)
 removed {
   from = google_service_account_iam_member.act_as
   lifecycle {
-    destroy = false
+    destroy = true
   }
 }
 
