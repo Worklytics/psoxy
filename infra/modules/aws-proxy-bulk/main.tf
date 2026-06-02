@@ -300,23 +300,24 @@ resource "aws_ssm_parameter" "rules" {
   }
 }
 
-resource "aws_iam_policy" "testing_input_write" {
+resource "aws_s3_bucket_policy" "testing_input_upload" {
   count = var.provision_iam_policy_for_testing ? 1 : 0
 
-  name_prefix = "${local.iam_policy_prefix}TestingInputWrite"
-  description = "Allow to write to input bucket for testing"
+  bucket = aws_s3_bucket.input.id
+
   policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
       {
+        "Sid" : "AllowTestUploadPrincipals",
+        "Effect" : "Allow",
+        "Principal" : {
+          "AWS" : var.test_aws_principal_arns
+        },
         "Action" : [
           "s3:PutObject"
-        ]
-        "Effect" : "Allow",
-        "Resource" : [
-          "${aws_s3_bucket.input.arn}",
-          "${aws_s3_bucket.input.arn}/*"
-        ]
+        ],
+        "Resource" : "${aws_s3_bucket.input.arn}/*"
       }
     ]
   })
@@ -342,32 +343,6 @@ resource "aws_iam_policy" "testing_sanitized_cleanup" {
       }
     ]
   })
-}
-
-locals {
-  caller_role_names_for_testing = var.provision_iam_policy_for_testing ? toset([
-    for arn in var.caller_aws_arns : element(reverse(split("/", arn)), 0)
-    if can(regex(":role/", arn))
-  ]) : toset([])
-
-  caller_user_names_for_testing = var.provision_iam_policy_for_testing ? toset([
-    for arn in var.caller_aws_arns : element(reverse(split("/", arn)), 0)
-    if can(regex(":user/", arn))
-  ]) : toset([])
-}
-
-resource "aws_iam_role_policy_attachment" "testing_input_write_to_caller_roles" {
-  for_each = local.caller_role_names_for_testing
-
-  role       = each.key
-  policy_arn = aws_iam_policy.testing_input_write[0].arn
-}
-
-resource "aws_iam_user_policy_attachment" "testing_input_write_to_caller_users" {
-  for_each = local.caller_user_names_for_testing
-
-  user       = each.key
-  policy_arn = aws_iam_policy.testing_input_write[0].arn
 }
 
 resource "aws_iam_role_policy_attachment" "testing_sanitized_cleanup_to_caller_role" {

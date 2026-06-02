@@ -18,7 +18,7 @@
 #      "Sid": "Allow Test Principals to Encrypt for Input Upload",
 #      "Effect": "Allow",
 #      "Principal": {
-#        "AWS": var.caller_aws_arns
+#        "AWS": coalesce(var.test_aws_principal_arns, [])
 #      },
 #      "Action": [
 #        "kms:Encrypt",

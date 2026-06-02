@@ -6,7 +6,7 @@ in each release's notes.
 Changes to be including in future/planned release notes will be added here.
 
 ## Next
-- `aws`: bulk connector test input bucket write goes to `caller_aws_arns`, not the proxy Caller role.
+- `aws`: add `test_aws_principal_arns` for testing (defaults to Terraform runner when `provision_testing_infra` is true); grants assume-Caller access and bulk input-bucket upload via S3 bucket policy, separate from production `caller_aws_arns`.
 - `gcp`: fix Terraform compatibility when upgrading to v0.6.x with an older `hashicorp/google` provider lock file; require provider `>= 7.0` in modules and use `detect_md5hash` for deployment bundle change detection.
 - `aws`: add explicit `filter {}` to S3 bucket lifecycle rules for compatibility with `hashicorp/aws` provider 6.x.
 - `aws`: require `hashicorp/aws` provider `>= 6.0` in AWS host and component modules (was `>= 5.0` or unconstrained).

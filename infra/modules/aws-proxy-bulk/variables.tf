@@ -115,9 +115,9 @@ variable "function_zip_hash" {
 }
 
 
-variable "caller_aws_arns" {
+variable "test_aws_principal_arns" {
   type        = list(string)
-  description = "ARNs of AWS principals authorized to assume the proxy caller role."
+  description = "AWS principal ARNs allowed to upload test files to the bulk connector input bucket. Populated by the host module when provision_iam_policy_for_testing is enabled."
   default     = []
 }
 
