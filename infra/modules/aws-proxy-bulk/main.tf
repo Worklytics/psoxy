@@ -346,7 +346,7 @@ resource "aws_iam_policy" "testing_sanitized_cleanup" {
 
 locals {
   caller_role_names_for_testing = var.provision_iam_policy_for_testing ? toset([
-    for arn in var.caller_aws_arns : element(split("role/", arn), 1)
+    for arn in var.caller_aws_arns : element(reverse(split("/", arn)), 0)
     if can(regex(":role/", arn))
   ]) : toset([])
 
