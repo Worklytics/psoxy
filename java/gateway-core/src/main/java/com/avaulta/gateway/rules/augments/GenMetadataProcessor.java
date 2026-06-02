@@ -78,7 +78,8 @@ public class GenMetadataProcessor {
                 String truncated = truncate(text);
                 return objectMapper.writeValueAsString(truncated);
             }
-            return objectMapper.writeValueAsString(input);
+            String serialized = objectMapper.writeValueAsString(input);
+            return truncateSerialized(serialized);
         } catch (Exception e) {
             log.log(Level.WARNING, "Failed to serialize genMetadata input", e);
             return null;
@@ -137,5 +138,22 @@ public class GenMetadataProcessor {
             return text;
         }
         return text.substring(0, maxInputChars);
+    }
+
+    /**
+     * Truncate JSON-serialized non-string inputs (outer quotes included in length budget).
+     */
+    private String truncateSerialized(String serialized) {
+        if (serialized.length() <= maxInputChars) {
+            return serialized;
+        }
+        if (serialized.startsWith("\"") && serialized.endsWith("\"")) {
+            int contentBudget = maxInputChars - 2;
+            if (contentBudget <= 0) {
+                return "\"\"";
+            }
+            return "\"" + serialized.substring(1, 1 + contentBudget) + "\"";
+        }
+        return serialized.substring(0, maxInputChars);
     }
 }

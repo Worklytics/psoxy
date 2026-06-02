@@ -15,9 +15,10 @@ import java.util.List;
 @UtilityClass
 class GenMetadataPromptBuilder {
 
-    private static final String SYSTEM_PROMPT =
+    static final String SYSTEM_PROMPT =
         "You are a data-processing component in a privacy proxy. "
-            + "Respond with exactly one JSON value (no markdown, no prose).";
+            + "Respond with exactly one JSON object (no markdown, no prose). "
+            + "Use only the property names defined in the JSON Schema.";
 
     static List<ChatMessage> toMessages(String taskPrompt, JsonSchemaFilter outputSchema,
                                         String inputData, ObjectMapper objectMapper) {

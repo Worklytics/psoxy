@@ -43,7 +43,9 @@ import com.avaulta.gateway.rules.augments.GenMetadataBackend;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend;
 import co.worklytics.psoxy.impl.AugmentProcessor;
+import co.worklytics.psoxy.impl.gen.GenMetadataChatModelFactory;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
+import co.worklytics.psoxy.impl.gen.GenMetadataPromptBudget;
 import co.worklytics.psoxy.impl.gen.LangChain4jGenMetadataBackend;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
@@ -398,10 +400,11 @@ public class PsoxyModule {
     static GenMetadataBackend genMetadataBackend(
             ConfigService configService,
             ObjectMapper objectMapper,
-            @Named("ForGenMetadata") ResourceService genMetadataResourceService) {
+            GenMetadataPromptBudget promptBudget,
+            GenMetadataChatModelFactory chatModelFactory) {
         GenMetadataConfig config = GenMetadataConfig.from(configService);
         if (GenMetadataConfig.BACKEND_LOCAL.equalsIgnoreCase(config.getBackend())) {
-            return new LangChain4jGenMetadataBackend(config, genMetadataResourceService, objectMapper);
+            return new LangChain4jGenMetadataBackend(config, objectMapper, promptBudget, chatModelFactory);
         }
         return new UnavailableGenMetadataBackend();
     }

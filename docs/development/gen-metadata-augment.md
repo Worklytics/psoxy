@@ -75,6 +75,17 @@ See [tjake on Hugging Face](https://huggingface.co/tjake) for other pre-quantize
 
 Classifies `body.content` into one of 11 categories (`category` only). See commented example in `docs/sources/microsoft-365/msft-copilot/msft-copilot.yaml` and `MS_COPILOT_GEN_METADATA_AUGMENT` in `PrebuiltSanitizerRules.java`.
 
+## Local integration tests
+
+Opt-in Jlama tests live in `LangChain4jGenMetadataBackendIntegrationTest` (token-budget regressions from live Copilot PoC). Run from the `java/` directory:
+
+```bash
+cd java
+mvn test -pl core -am -Pgen-metadata-integration
+```
+
+Requires a Jlama model under `~/.jlama` (downloaded on first run) or set `PSOXY_GEN_MODEL_CACHE`. Optional: `PSOXY_GEN_MODEL` to override the default HuggingFace id.
+
 ## Error handling
 
 Non-fatal: failures throw `AugmentProcessingException` (caught in `AugmentProcessor`) and surface as `X-Psoxy-Warning` headers on the response.

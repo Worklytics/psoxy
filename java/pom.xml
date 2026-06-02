@@ -116,4 +116,24 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>gen-metadata-integration</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <!-- -pl core -am still builds gateway-core; allow -Dtest filters that only match psoxy-core -->
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-plugin</artifactId>
+                            <configuration>
+                                <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

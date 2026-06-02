@@ -9,6 +9,7 @@ import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GenMetadataProcessorTest {
 
@@ -54,5 +55,13 @@ class GenMetadataProcessorTest {
             new UnavailableGenMetadataBackend(), new ObjectMapper());
         assertThrows(GenMetadataAugmentException.class,
             () -> processor.process(null, JsonSchemaFilter.builder().type("object").build(), "x"));
+    }
+
+    @Test
+    void serializeInput_truncatesNonStringValues() throws Exception {
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            new UnavailableGenMetadataBackend(), new ObjectMapper(), 20);
+        String serialized = processor.serializeInput(Map.of("text", "a".repeat(100)));
+        assertTrue(serialized.length() <= 20);
     }
 }

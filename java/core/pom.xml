@@ -279,4 +279,26 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>gen-metadata-integration</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>**/LangChain4jGenMetadataBackendIntegrationTest.java</include>
+                            </includes>
+                            <systemPropertyVariables>
+                                <psoxy.genMetadata.integration>true</psoxy.genMetadata.integration>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

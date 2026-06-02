@@ -1,8 +1,7 @@
 package co.worklytics.psoxy.impl.gen;
 
-import com.avaulta.gateway.resources.ResourceService;
-import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.augments.GenMetadataBackend;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.chat.ChatModel;
@@ -60,8 +59,9 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     }
 
     private final GenMetadataConfig config;
-    private final ResourceService resourceService;
     private final ObjectMapper objectMapper;
+    private final GenMetadataPromptBudget promptBudget;
+    private final GenMetadataChatModelFactory chatModelFactory;
     /**
      * Writable Jlama cache (extracted zips, HF downloads). Not the same as {@link ResourceService},
      * which only supplies read-only model archives from remote storage.
@@ -73,14 +73,30 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     private final ConcurrentHashMap<String, ReentrantLock> loadLocks = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ReentrantLock> inferenceLocks = new ConcurrentHashMap<>();
 
-    public LangChain4jGenMetadataBackend(GenMetadataConfig config, ResourceService resourceService,
-                                         ObjectMapper objectMapper) {
+    public LangChain4jGenMetadataBackend(GenMetadataConfig config, ObjectMapper objectMapper,
+                                         GenMetadataPromptBudget promptBudget,
+                                         GenMetadataChatModelFactory chatModelFactory) {
+        this(config, objectMapper, promptBudget, chatModelFactory, null);
+    }
+
+    /**
+     * @param modelCacheDir when non-null, used instead of a fresh temp directory (integration tests)
+     */
+    LangChain4jGenMetadataBackend(GenMetadataConfig config, ObjectMapper objectMapper,
+                                  GenMetadataPromptBudget promptBudget,
+                                  GenMetadataChatModelFactory chatModelFactory,
+                                  Path modelCacheDir) {
         this.config = config;
-        this.resourceService = resourceService;
         this.objectMapper = objectMapper;
+        this.promptBudget = promptBudget;
+        this.chatModelFactory = chatModelFactory;
         try {
-            this.modelCacheDir = Files.createTempDirectory("psoxy-jlama-cache");
-            this.modelCacheDir.toFile().deleteOnExit();
+            this.modelCacheDir = modelCacheDir != null
+                ? modelCacheDir
+                : Files.createTempDirectory("psoxy-jlama-cache");
+            if (modelCacheDir == null) {
+                this.modelCacheDir.toFile().deleteOnExit();
+            }
         } catch (Exception e) {
             throw new IllegalStateException("Failed to create genMetadata model cache directory", e);
         }
@@ -93,8 +109,15 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             return null;
         }
 
+        String fittedInput = promptBudget.fitInputData(
+            inputData,
+            taskPrompt,
+            outputSchema,
+            config.getMaxInputChars(),
+            assumedContextLength(),
+            config.getMaxTokens());
         List<ChatMessage> messages =
-            GenMetadataPromptBuilder.toMessages(taskPrompt, outputSchema, inputData, objectMapper);
+            GenMetadataPromptBuilder.toMessages(taskPrompt, outputSchema, fittedInput, objectMapper);
 
         ReentrantLock inferenceLock =
             inferenceLocks.computeIfAbsent(config.getModelId(), k -> new ReentrantLock());
@@ -125,6 +148,14 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         }
     }
 
+    /**
+     * Conservative context length for pre-inference input budgeting before the model is loaded.
+     * Llama 3.2 1B supports much larger windows; Jlama defaults to model config when generating.
+     */
+    int assumedContextLength() {
+        return 8192;
+    }
+
     ModelHandle resolveModel() {
         String modelKey = config.getModelId();
         ModelHandle existing = models.get(modelKey);
@@ -152,7 +183,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             models.put(modelKey, ModelHandle.loading());
             try {
                 ChatModel chatModel =
-                    GenMetadataChatModelFactory.buildLocal(config, modelCacheDir, resourceService);
+                    chatModelFactory.buildLocal(config, modelCacheDir);
                 ModelHandle ready = ModelHandle.ready(chatModel);
                 models.put(modelKey, ready);
                 log.info("Loaded genMetadata LangChain4j model: " + modelKey);

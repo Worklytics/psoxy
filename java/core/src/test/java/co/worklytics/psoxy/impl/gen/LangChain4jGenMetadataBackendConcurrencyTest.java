@@ -39,8 +39,9 @@ class LangChain4jGenMetadataBackendConcurrencyTest {
             .maxTokens(64)
             .build();
 
-        LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(config,
-            resourceService, new ObjectMapper());
+        LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
+            config, new ObjectMapper(), new GenMetadataPromptBudget(new ObjectMapper()),
+            new GenMetadataChatModelFactory(resourceService));
 
         int threads = 8;
         ExecutorService pool = Executors.newFixedThreadPool(threads);
