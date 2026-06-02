@@ -369,7 +369,7 @@ Check that the Psoxy works as expected, and it transforms the files of your inpu
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_files_csv} ${local.role_option_for_tests} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} --region ${data.aws_region.current.id}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_files_csv} ${local.role_option_for_tests} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} --region ${data.aws_region.current.region}
 ```
 EOT
 
@@ -378,7 +378,7 @@ EOT
 
 Review the deployed function in AWS console:
 
-- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
+- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.region}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
 
 We provide some Node.js scripts to easily validate the deployment. To be able to run the test
 commands below, you need Node.js (>=16) and npm (v >=8) installed. Ensure all dependencies are

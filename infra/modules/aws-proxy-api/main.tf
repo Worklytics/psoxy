@@ -322,7 +322,7 @@ locals {
   role_param = local.arn_for_test_calls == null ? "" : " -r \"${local.arn_for_test_calls}\""
 
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
-  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} --region \"${data.aws_region.current.id}\""
+  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} --region \"${data.aws_region.current.region}\""
 
   # Merge example_api_calls into example_api_requests for unified processing
   all_example_api_requests = concat(
@@ -345,9 +345,9 @@ locals {
   )
 
 
-  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} --region \"${data.aws_region.current.id}\" -l \"${module.psoxy_lambda.log_group}\""
+  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} --region \"${data.aws_region.current.region}\" -l \"${module.psoxy_lambda.log_group}\""
 
-  awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a ${local.role_param} -e \"${data.aws_region.current.id}\""
+  awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a ${local.role_param} -e \"${data.aws_region.current.region}\""
   awscurl_test_calls = [for path in var.example_api_calls :
     "${local.awscurl_test_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
@@ -358,7 +358,7 @@ locals {
 
 Review the deployed function in AWS console:
 
-- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
+- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.region}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
 
 We provide some Node.js scripts to simplify testing your proxy deployment. To be able run test
 commands below, you will need

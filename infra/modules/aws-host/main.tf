@@ -79,7 +79,7 @@ module "psoxy" {
   source = "../../modules/aws"
 
   aws_account_id                     = var.aws_account_id
-  region                             = data.aws_region.current.id
+  region                             = data.aws_region.current.region
   psoxy_base_dir                     = var.psoxy_base_dir
   caller_aws_arns                    = var.caller_aws_arns
   caller_gcp_service_account_ids     = var.caller_gcp_service_account_ids
@@ -281,7 +281,7 @@ module "api_connector" {
   example_api_calls                     = each.value.example_api_calls
   example_api_requests                  = try(each.value.example_api_requests, [])
   aws_account_id                        = var.aws_account_id
-  region                                = data.aws_region.current.id
+  region                                = data.aws_region.current.region
   path_to_repo_root                     = var.psoxy_base_dir
   secrets_store_implementation          = var.secrets_store_implementation
   global_parameter_arns                 = try(module.global_secrets_ssm[0].secret_arns, [])
@@ -358,7 +358,7 @@ module "bulk_connector" {
   new_relic_account_id             = var.new_relic_account_id
   instance_id                      = each.key
   source_kind                      = each.value.source_kind
-  aws_region                       = data.aws_region.current.id
+  aws_region                       = data.aws_region.current.region
   path_to_function_zip             = module.psoxy.path_to_deployment_jar
   function_zip_hash                = module.psoxy.deployment_package_hash
   function_env_kms_key_arn         = var.function_env_kms_key_arn

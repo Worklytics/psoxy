@@ -188,9 +188,9 @@ data "aws_kms_key" "keys_to_allow" {
 }
 
 locals {
-  param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:parameter${local.instance_ssm_prefix_with_slash}"
+  param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter${local.instance_ssm_prefix_with_slash}"
 
-  secret_arn_prefix = "arn:aws:secretsmanager:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:secret:${local.instance_ssm_prefix}"
+  secret_arn_prefix = "arn:aws:secretsmanager:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:secret:${local.instance_ssm_prefix}"
 
   kms_keys_to_allow_arns = distinct(concat(
     [for k in data.aws_kms_key.keys_to_allow : k.arn],
