@@ -373,7 +373,7 @@ resource "aws_iam_user_policy_attachment" "testing_input_write_to_caller_users" 
 resource "aws_iam_role_policy_attachment" "testing_sanitized_cleanup_to_caller_role" {
   count = var.provision_iam_policy_for_testing ? 1 : 0
 
-  role       = element(split("role/", var.aws_role_to_assume_when_testing), 1)
+  role       = element(reverse(split("/", var.aws_role_to_assume_when_testing)), 0)
   policy_arn = aws_iam_policy.testing_sanitized_cleanup[0].arn
 }
 
