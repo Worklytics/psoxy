@@ -16,19 +16,32 @@
 data "external" "deployment_package" {
   count = var.deployment_bundle == null ? 1 : 0
 
-  program = [
+  program = compact([
     "${path.module}/build.sh",
     var.skip_tests ? "-s" : "",
     var.force_bundle ? "-f" : "",
     var.path_to_psoxy_java,
     var.implementation,
-  ]
+  ])
 }
 
 locals {
   path_to_deployment_jar = coalesce(var.deployment_bundle, try(data.external.deployment_package[0].result.path_to_deployment_jar, "unknown"))
   filename               = coalesce(var.deployment_bundle, try(data.external.deployment_package[0].result.filename, "unknown"))
   version                = coalesce(var.deployment_bundle, try(data.external.deployment_package[0].result.version, "unknown"))
+  built_package_hash     = try(data.external.deployment_package[0].result.deployment_package_hash, null)
+}
+
+# check blocks require Terraform >= 1.5; we support >= 1.7 (see ci-terraform-modules.yaml).
+# Failed assertions surface as plan/apply warnings by default (not errors).
+check "deployment_jar_exists" {
+  assert {
+    condition = var.deployment_bundle != null || (
+      local.path_to_deployment_jar != "unknown" &&
+      fileexists(local.path_to_deployment_jar)
+    )
+    error_message = "Deployment JAR not found at ${local.path_to_deployment_jar}. Check last-build.log in your Terraform working directory."
+  }
 }
 
 
@@ -37,7 +50,7 @@ output "deployment_package_hash" {
   # run so the file doesn't exist yet
   value = coalesce(
     var.deployment_bundle_hash,
-    try(data.external.deployment_package[0].result.deployment_package_hash, null),
+    local.built_package_hash != "" ? local.built_package_hash : null,
     try(filebase64sha256(local.path_to_deployment_jar), null),
     "unknown"
   )
