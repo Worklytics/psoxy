@@ -42,7 +42,7 @@ run "empty_instance_path_grants_bucket_root" {
 
   assert {
     error_message = "empty instance path should grant bucket root objects"
-    condition = toset(one([for s in jsondecode(aws_iam_policy.required_resource_access.policy).Statement : s.Resource if s.Sid == "ReadRemoteResourceBucket"])) == toset(["arn:aws:s3:::my-artifacts/*"])
+    condition     = toset(one([for s in jsondecode(aws_iam_policy.required_resource_access.policy).Statement : s.Resource if s.Sid == "ReadRemoteResourceBucket"])) == toset(["arn:aws:s3:::my-artifacts/*"])
   }
 }
 
@@ -57,7 +57,7 @@ run "no_paths_grants_bucket_root" {
 
   assert {
     error_message = "no path prefixes should grant bucket root objects"
-    condition = toset(one([for s in jsondecode(aws_iam_policy.required_resource_access.policy).Statement : s.Resource if s.Sid == "ReadRemoteResourceBucket"])) == toset(["arn:aws:s3:::my-artifacts/*"])
+    condition     = toset(one([for s in jsondecode(aws_iam_policy.required_resource_access.policy).Statement : s.Resource if s.Sid == "ReadRemoteResourceBucket"])) == toset(["arn:aws:s3:::my-artifacts/*"])
   }
 }
 
@@ -90,6 +90,6 @@ run "duplicate_prefixes_dedupe_to_one_arn" {
 
   assert {
     error_message = "identical instance and shared prefixes should dedupe to a single ARN"
-    condition = toset(one([for s in jsondecode(aws_iam_policy.required_resource_access.policy).Statement : s.Resource if s.Sid == "ReadRemoteResourceBucket"])) == toset(["arn:aws:s3:::my-artifacts/shared/*"])
+    condition     = toset(one([for s in jsondecode(aws_iam_policy.required_resource_access.policy).Statement : s.Resource if s.Sid == "ReadRemoteResourceBucket"])) == toset(["arn:aws:s3:::my-artifacts/shared/*"])
   }
 }
