@@ -18,6 +18,12 @@ Based on the endpoints used by this connector, the following scopes are required
 - **`INSIGHTS_READ`** - Required for the `/rest/api/v1/insights` endpoint to retrieve user activity insights
 - **`PEOPLE_READ`** - Required for the `/rest/api/v1/listentities` endpoint to list users and teams
 
+### Act-As Header
+
+Glean-issued global tokens require an `X-Glean-ActAs` request header with the email of a user in your Glean workspace on every API call. See [Glean Authentication - Glean-issued Tokens](https://developers.glean.com/api-info/client/authentication/glean-issued).
+
+Worklytics sends this header using the **Admin Email** (`ADMIN_EMAIL`) connector setting. Set it to the email address of the Global Admin who created the API credential. The proxy rules allow `X-Glean-ActAs` to pass through to Glean.
+
 ## Examples
 
 - [Example Rules](glean.yaml)
@@ -49,4 +55,6 @@ of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 2. **API Token**: Follow the authentication instructions above to create a Glean-issued token with the required scopes (`INSIGHTS_READ`, `PEOPLE_READ`)
 
 3. **Deploy**: Deploy the proxy instance and configure the `ACCESS_TOKEN` secret with the token value from step 2
+
+4. **Worklytics Admin Email**: When connecting in Worklytics, set **Admin Email** (`ADMIN_EMAIL`) to the email of the Global Admin who created the API credential
 
