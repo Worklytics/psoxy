@@ -99,7 +99,7 @@ public class CloudFunctionRequest implements HttpEventRequest {
     public Optional<String> getClientIp() {
         return getHeader(HttpEventRequest.HTTP_HEADER_X_FORWARDED_FOR)
             .flatMap(value -> Splitter.on(',').trimResults().omitEmptyStrings().splitToList(value).stream()
-                .reduce((previous, current) -> current));
+                .findFirst());
     }
 
     @Override
