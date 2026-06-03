@@ -362,7 +362,7 @@ Review the deployed function in AWS console:
 
 We provide some Node.js scripts to simplify testing your proxy deployment. To be able run test
 commands below, you will need
-   - Node.js (>=16) and npm (v >=8) installed.
+   - Node.js (>=20) and npm (v >=8) installed.
    - install the tool itself (in the location from which you plan to run the test commands, if it's
      not the same location where you originally ran the Terraform apply)
 

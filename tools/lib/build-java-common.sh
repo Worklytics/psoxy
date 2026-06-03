@@ -19,17 +19,6 @@ psoxy_build_warn() {
   printf 'WARNING: %s\n' "$*" >&2
 }
 
-# Terraform passes "" for unused optional flags; filter before getopts.
-psoxy_build_filter_empty_args() {
-  filtered_args=()
-  for arg in "$@"; do
-    if [ -n "$arg" ]; then
-      filtered_args+=("$arg")
-    fi
-  done
-  set -- "${filtered_args[@]}"
-}
-
 psoxy_build_validate_implementation() {
   if [ -z "$1" ]; then
     psoxy_build_fail "IMPLEMENTATION is required (expected 'aws' or 'gcp')"

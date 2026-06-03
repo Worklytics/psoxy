@@ -16,8 +16,6 @@ source "$PSOXY_BUILD_COMMON"
 
 fail() { psoxy_build_fail "$@"; }
 
-psoxy_build_filter_empty_args "$@"
-
 while getopts ":sf" opt; do
   case $opt in
     s)
