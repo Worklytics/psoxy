@@ -13,12 +13,12 @@
 #locals {
 #  key_arn = aws_kms_key.example_key.arn # alternatively, use ar.project_aws_kms_key_arn
 #
-#  upload_testing_policy_statements = var.provision_testing_infra ? [
+#  upload_testing_policy_statements = length(module.psoxy.test_aws_principal_arns) > 0 ? [
 #    {
 #      "Sid": "Allow Test Principals to Encrypt for Input Upload",
 #      "Effect": "Allow",
 #      "Principal": {
-#        "AWS": coalesce(var.test_aws_principal_arns, [])
+#        "AWS": module.psoxy.test_aws_principal_arns
 #      },
 #      "Action": [
 #        "kms:Encrypt",
