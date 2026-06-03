@@ -13,6 +13,12 @@ terraform {
 # is provisioned, and that's implicit in the provider - so we should just infer from the provider
 data "aws_region" "current" {}
 
+data "aws_caller_identity" "current" {}
+
+data "aws_iam_session_context" "current" {
+  arn = data.aws_caller_identity.current.arn
+}
+
 module "env_id" {
   source = "../../modules/env-id"
 
@@ -29,6 +35,12 @@ locals {
 
   has_enabled_webhook_collectors = length(keys(var.webhook_collectors)) > 0
   enable_webhook_testing         = var.provision_testing_infra && local.has_enabled_webhook_collectors
+
+  terraform_principal_arn = can(regex(":assumed-role/", data.aws_caller_identity.current.arn)) ? data.aws_iam_session_context.current.issuer_arn : data.aws_caller_identity.current.arn
+
+  test_aws_principal_arns = var.provision_testing_infra ? (
+    var.test_aws_principal_arns != null ? var.test_aws_principal_arns : [local.terraform_principal_arn]
+  ) : []
 
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 
@@ -82,6 +94,7 @@ module "psoxy" {
   region                             = data.aws_region.current.id
   psoxy_base_dir                     = var.psoxy_base_dir
   caller_aws_arns                    = var.caller_aws_arns
+  test_aws_principal_arns            = local.test_aws_principal_arns
   caller_gcp_service_account_ids     = var.caller_gcp_service_account_ids
   deployment_bundle                  = var.deployment_bundle
   deployment_bundle_hash             = var.deployment_bundle_hash
@@ -352,6 +365,7 @@ module "bulk_connector" {
   source = "../../modules/aws-proxy-bulk"
 
   aws_account_id                   = var.aws_account_id
+  test_aws_principal_arns            = local.test_aws_principal_arns
   provision_iam_policy_for_testing = var.provision_testing_infra
   aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
   environment_name                 = var.environment_name

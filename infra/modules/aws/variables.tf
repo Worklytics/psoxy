@@ -78,6 +78,12 @@ variable "caller_aws_arns" {
   #  }
 }
 
+variable "test_aws_principal_arns" {
+  type        = list(string)
+  description = "AWS principal ARNs allowed to test the deployment (assume Caller role, etc.). Populated by the host module when provision_testing_infra is enabled."
+  default     = []
+}
+
 variable "psoxy_version" {
   type        = string
   description = "IGNORED; version of psoxy to deploy"

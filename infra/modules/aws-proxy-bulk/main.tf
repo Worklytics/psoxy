@@ -300,34 +300,44 @@ resource "aws_ssm_parameter" "rules" {
   }
 }
 
-resource "aws_iam_policy" "testing" {
+resource "aws_s3_bucket_policy" "testing_input_upload" {
   count = var.provision_iam_policy_for_testing ? 1 : 0
 
-  name_prefix = "${local.iam_policy_prefix}Testing"
-  description = "Allow to write to input bucket, read from sanitized bucket to test Lambda's behavior"
+  bucket = aws_s3_bucket.input.id
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Sid" : "AllowTestUploadPrincipals",
+        "Effect" : "Allow",
+        "Principal" : {
+          "AWS" : var.test_aws_principal_arns
+        },
+        "Action" : [
+          "s3:PutObject"
+        ],
+        "Resource" : "${aws_s3_bucket.input.arn}/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "testing_sanitized_cleanup" {
+  count = var.provision_iam_policy_for_testing ? 1 : 0
+
+  name_prefix = "${local.iam_policy_prefix}TestingSanitizedCleanup"
+  description = "Allow to delete from sanitized bucket for testing"
   policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
       {
         "Action" : [
-          "s3:PutObject"
-        ]
-        "Effect" : "Allow",
-        "Resource" : [
-          "${aws_s3_bucket.input.arn}",
-          "${aws_s3_bucket.input.arn}/*"
-        ]
-      },
-      {
-        "Action" : [
-          "s3:GetObject",
-          "s3:ListBucket",
           "s3:DeleteObject",
           "s3:DeleteObjectVersion"
         ],
         "Effect" : "Allow",
         "Resource" : [
-          "${aws_s3_bucket.sanitized.arn}",
           "${aws_s3_bucket.sanitized.arn}/*"
         ]
       }
@@ -335,16 +345,11 @@ resource "aws_iam_policy" "testing" {
   })
 }
 
-
-
-resource "aws_iam_policy_attachment" "testing_policy_to_testing_role" {
+resource "aws_iam_role_policy_attachment" "testing_sanitized_cleanup_to_caller_role" {
   count = var.provision_iam_policy_for_testing ? 1 : 0
 
-  name       = "${aws_iam_policy.testing[count.index].name}_to_${var.instance_id}TestingRole"
-  policy_arn = aws_iam_policy.testing[count.index].arn
-  roles = [
-    element(split("role/", var.aws_role_to_assume_when_testing), 1)
-  ]
+  role       = element(reverse(split("/", var.aws_role_to_assume_when_testing)), 0)
+  policy_arn = aws_iam_policy.testing_sanitized_cleanup[0].arn
 }
 
 locals {
