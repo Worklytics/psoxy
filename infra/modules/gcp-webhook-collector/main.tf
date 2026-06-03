@@ -32,7 +32,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_secret" {
 
   project   = var.project_id
   secret_id = each.value.secret_id
-  member    = "serviceAccount:${var.service_account_email}"
+  member    = "serviceAccount:${var.service_account.email}"
   role      = "roles/secretmanager.viewer"
 }
 
@@ -41,7 +41,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 
   project   = var.project_id
   secret_id = each.value.secret_id
-  member    = "serviceAccount:${var.service_account_email}"
+  member    = "serviceAccount:${var.service_account.email}"
   role      = "roles/secretmanager.secretAccessor" # this is ONLY accessing payload of a secret version
 }
 
@@ -108,7 +108,7 @@ resource "google_kms_crypto_key_iam_member" "allow_function_to_access_public_key
 
   crypto_key_id = google_kms_crypto_key.webhook_auth_key[0].id
   role          = var.oidc_token_verifier_role_id
-  member        = "serviceAccount:${var.service_account_email}"
+  member        = "serviceAccount:${var.service_account.email}"
 }
 
 # END AUTH KEYS
@@ -152,7 +152,7 @@ module "sanitized_webhook_output" {
   bucket_access_logs_destination = var.bucket_access_logs_destination
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
-  function_service_account_email = var.service_account_email
+  function_service_account_email = var.service_account.email
   bucket_name_prefix             = local.bucket_name_prefix
   bucket_name_suffix             = "sanitized"
   sanitizer_accessor_principals = concat(
@@ -172,7 +172,7 @@ module "side_output_bucket" {
   bucket_access_logs_destination = var.bucket_access_logs_destination
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
-  function_service_account_email = var.service_account_email
+  function_service_account_email = var.service_account.email
   bucket_name_prefix             = local.bucket_name_prefix
   bucket_name_suffix             = "side-output"
   sanitizer_accessor_principals  = each.value.allowed_readers
@@ -184,7 +184,7 @@ resource "google_storage_bucket_iam_member" "grant_sa_accessor_on_side_output_bu
   for_each = local.side_outputs_to_grant_access
 
   bucket = replace(each.value.bucket, "gs://", "")
-  member = "serviceAccount:${var.service_account_email}"
+  member = "serviceAccount:${var.service_account.email}"
   role   = var.bucket_write_role_id
 }
 
@@ -193,7 +193,7 @@ resource "google_storage_bucket_iam_member" "grant_sa_reader_on_remote_resource_
   count = var.remote_resource_bucket != null ? 1 : 0
 
   bucket = var.remote_resource_bucket
-  member = "serviceAccount:${var.service_account_email}"
+  member = "serviceAccount:${var.service_account.email}"
   role   = "roles/storage.objectViewer"
 
   dynamic "condition" {
@@ -273,7 +273,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_parameter
 
   project   = var.project_id
   secret_id = each.value.secret_id
-  member    = "serviceAccount:${var.service_account_email}"
+  member    = "serviceAccount:${var.service_account.email}"
   role      = "roles/secretmanager.viewer"
 }
 
@@ -282,13 +282,8 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_paramet
 
   project   = var.project_id
   secret_id = each.value.secret_id
-  member    = "serviceAccount:${var.service_account_email}"
+  member    = "serviceAccount:${var.service_account.email}"
   role      = "roles/secretmanager.secretAccessor" # this is ONLY accessing payload of a secret version
-}
-
-
-data "google_service_account" "function" {
-  account_id = var.service_account_email
 }
 
 
@@ -299,7 +294,7 @@ data "google_service_account" "function" {
 resource "google_service_account_iam_member" "tf_runner_act_as" {
   member             = var.tf_runner_iam_principal
   role               = "roles/iam.serviceAccountUser"
-  service_account_id = data.google_service_account.function.id
+  service_account_id = var.service_account.service_account_id
 }
 
 # migration: remove old resource address from state (destroyed in GCP)
@@ -332,7 +327,7 @@ resource "google_cloudfunctions2_function" "function" {
   }
 
   service_config {
-    service_account_email = var.service_account_email
+    service_account_email = var.service_account.email
     available_memory      = "${var.available_memory_mb}M"
     ingress_settings      = "ALLOW_ALL"
     timeout_seconds       = local.function_exec_timeout_seconds
@@ -424,7 +419,7 @@ resource "google_pubsub_topic_iam_member" "publisher" {
   project = var.project_id
   topic   = google_pubsub_topic.webhook_topic.name
   role    = "roles/pubsub.publisher"
-  member  = "serviceAccount:${var.service_account_email}"
+  member  = "serviceAccount:${var.service_account.email}"
 }
 
 # IAM binding to allow the Cloud Function to pull from the subscription
@@ -432,7 +427,7 @@ resource "google_pubsub_subscription_iam_member" "subscriber" {
   project      = var.project_id
   subscription = google_pubsub_subscription.webhook_subscription.name
   role         = "roles/pubsub.subscriber"
-  member       = "serviceAccount:${var.service_account_email}"
+  member       = "serviceAccount:${var.service_account.email}"
 }
 
 
