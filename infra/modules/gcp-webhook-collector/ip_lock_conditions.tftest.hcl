@@ -3,7 +3,10 @@ variables {
   environment_id_prefix          = "dev-"
   instance_id                    = "test-instance"
   config_parameter_prefix        = "TEST_"
-  service_account_email          = "testsa@test-project.iam.gserviceaccount.com"
+  service_account = {
+    service_account_id = "projects/test-project/serviceAccounts/testsa@test-project.iam.gserviceaccount.com"
+    email              = "testsa@test-project.iam.gserviceaccount.com"
+  }
   tf_runner_iam_principal        = "user:terraform@example.com"
   artifacts_bucket_name          = "test-bucket"
   deployment_bundle_object_name  = "bundle.zip"
