@@ -27,8 +27,8 @@ data "external" "deployment_package" {
 
 locals {
   path_to_deployment_jar = coalesce(var.deployment_bundle, try(data.external.deployment_package[0].result.path_to_deployment_jar, "unknown"))
-  filename               = coalesce(var.deployment_bundle, try(data.external.deployment_package[0].result.filename, "unknown"))
-  version                = coalesce(var.deployment_bundle, try(data.external.deployment_package[0].result.version, "unknown"))
+  filename               = var.deployment_bundle != null ? basename(var.deployment_bundle) : try(data.external.deployment_package[0].result.filename, "unknown")
+  version                = var.deployment_bundle != null ? "unknown" : try(data.external.deployment_package[0].result.version, "unknown")
   built_package_hash     = try(data.external.deployment_package[0].result.deployment_package_hash, null)
 }
 
