@@ -706,7 +706,10 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/api/admin.analytics.getFile?type=member&date=${urlencode(formatdate("YYYY-MM-DD", var.example_api_calls_sample_date))}"
+        "/api/admin.analytics.getFile?type=member&date=${urlencode(formatdate("YYYY-MM-DD", var.example_api_calls_sample_date))}",
+        "/api/admin.analytics.getFile?type=public_channel&metadata_only=true",
+        "/api/admin.analytics.messages.metadata?channel={CHANNEL_ID}&limit=100",
+        "/api/admin.analytics.messages.activity?channel={CHANNEL_ID}&limit=50",
       ]
       instructions_template = "${path.module}/docs/slack/analytics/instructions.tftpl"
       external_token_todo : templatefile("${path.module}/docs/slack/analytics/instructions.tftpl", {

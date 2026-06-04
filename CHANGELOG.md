@@ -5,20 +5,22 @@ in each release's notes.
 
 Changes to be including in future/planned release notes will be added here.
 
-## Next
+## [0.6.3](https://github.com/Worklytics/psoxy/releases/tag/v0.6.3)
 - `aws`: add `test_aws_principal_arns` for testing (defaults to Terraform runner when `provision_testing_infra` is true); grants assume-Caller access and bulk input-bucket upload via S3 bucket policy, separate from production `caller_aws_arns`.
 - `gcp`: fix Terraform compatibility when upgrading to v0.6.x with an older `hashicorp/google` provider lock file; require provider `>= 7.0` in modules and use `detect_md5hash` for deployment bundle change detection.
+- `slack-analytics`: added `admin.analytics.messages.metadata` and `admin.analytics.messages.activity` endpoints; improved connector documentation.
+
+## [0.6.2](https://github.com/Worklytics/psoxy/releases/tag/v0.6.2)
+- `chatgpt-enterprise`: update rules to align to new api, support async
+
+## [0.6.1](https://github.com/Worklytics/psoxy/releases/tag/v0.6.1)
 - `aws`: add explicit `filter {}` to S3 bucket lifecycle rules for compatibility with `hashicorp/aws` provider 6.x.
 - `aws`: require `hashicorp/aws` provider `>= 6.0` in AWS host and component modules (was `>= 5.0` or unconstrained).
 - `gcp`: custom rules previously stored as secrets will now be configured as environment variables on the Cloud Run function, as gen 2 supports sufficiently large environment variables to accommodate this.
 - `gcp`: grant `proxy-builder-sa` the additional Cloud Build IAM roles required for Gen2 function builds (read access to `gcf-v2-sources-*` staging buckets, Cloud Logging, Artifact Registry).
 - `textDigest` rule now accepts an optional list of `keywords` to tally the occurrence of specific keywords in the text.
-- `chatgpt-enterprise`: added `write` and `email` keyword tracking to prompt/title texts via `textDigest`.
 - performance: optimized `redactExceptPhrases` rule to use non-reluctant matchers.
 - support fetching redirect locations in async mode for APIs that use 3xx responses to indicate async processing (e.g., Slack Analytics).
-
-
-## [0.6.1](https://github.com/Worklytics/psoxy/releases/tag/v0.6.1)
 - **beta** Remote Resources: added infrastructure support for loading rules, NLP models, and LLM
   weights from a remote cloud storage bucket (S3/GCS). Gated behind `enable_remote_resources`
   variable on `aws-host`/`gcp-host` modules, which defaults to `false`. **Existing users upgrading
