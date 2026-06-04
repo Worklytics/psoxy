@@ -12,9 +12,7 @@ import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.hc.core5.http.ContentType;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -24,7 +22,6 @@ import java.net.URI;
 import java.util.logging.Level;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
