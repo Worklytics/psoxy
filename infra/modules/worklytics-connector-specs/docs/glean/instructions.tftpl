@@ -25,3 +25,6 @@ Then proceed with token creation:
    - `ENTITIES` — for listing users and teams
 
 5. Copy the generated token immediately — it is shown only once; then paste it as the `${path_to_instance_parameters}ACCESS_TOKEN` parameter value in your proxy's host platform.
+     
+6. When connecting this source in Worklytics, set **Admin Email** (`ADMIN_EMAIL`) to the email address of the Global Admin who created the API credential in step 1. Glean requires this value on every API request as the `X-Glean-ActAs` header when using a Glean-issued global token. Worklytics sends it automatically; the proxy forwards it to Glean.
+
