@@ -8,12 +8,13 @@ Our Claude data connector uses the [Compliance API](https://platform.claude.com/
 
 ## Data Collected
 
-| Endpoint | Description |
-|---|---|
-| Activities | Audit log of actions taken by users in Claude (chat created, file uploaded, etc.) |
-| Chats | Chat conversations, including metadata about the user and project |
-| Chat Messages | Individual messages within a chat (message text is hashed) |
-| Organization Users | User accounts in the organization |
+| Endpoint | Description | Required Scope |
+|---|---|---|
+| `GET /v1/compliance/activities` | Audit log of actions taken by users in Claude (chat created, file uploaded, etc.) | `read:compliance_activities` |
+| `GET /v1/compliance/apps/chats` | Chat conversations, including metadata about the user and project | `read:compliance_user_data` |
+| `GET /v1/compliance/apps/chats/{chatId}/messages` | Individual messages within a chat (message text is hashed) | `read:compliance_user_data` |
+| `GET /v1/compliance/organizations` | Organizations metadata | `read:compliance_org_data` |
+| `GET /v1/compliance/organizations/{organizationUuid}/users` | User accounts in the organization | `read:compliance_user_data` |
 
 ## Steps to Connect
 

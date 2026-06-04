@@ -4,7 +4,17 @@
 
 **Availability:** Beta
 
-Examples data:
+## Data Collected
+
+All endpoints require an **Admin API key** (`sk-ant-admin01-...`). Admin API keys have no scopes — they grant full access to all Admin API endpoints. Only organization members with the `admin` role can create them.
+
+| Endpoint | Docs | Description |
+|---|---|---|
+| `GET /v1/organizations/users` | [Admin API – Organization Members](https://platform.claude.com/docs/en/manage-claude/admin-api#organization-members) | Organization members and their roles |
+| `GET /v1/organizations/usage_report/claude_code` | [Claude Code Analytics API](https://platform.claude.com/docs/en/manage-claude/claude-code-analytics-api) | Per-user Claude Code usage metrics (sessions, tokens, commits, PRs, lines of code) |
+
+## Examples
+
 - [Example Rules](claude-code.yaml)
 - Example Data:
   - [list-users.json](example-api-responses/original/list-users.json) | [sanitized/example_data.json](example-api-responses/sanitized/list-users.json)

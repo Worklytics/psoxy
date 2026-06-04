@@ -1,4 +1,6 @@
 See [Claude documentation](https://platform.claude.com/docs/en/manage-claude/admin-api) for the latest. The following is required to connect to Claude's Admin API.
 
-1. An organization member with the [`admin` role](https://platform.claude.com/docs/en/manage-claude/admin-api#organization-roles-and-permissions) must create an **Admin API key** in [Claude Console > Settings > Admin keys](https://platform.claude.com/settings/admin-keys). Only admins can create Admin API keys.
+**Required role:** [`admin`](https://platform.claude.com/docs/en/manage-claude/admin-api#organization-roles-and-permissions) — this is the minimum (and only) role that can create Admin API keys. The Admin API has no per-endpoint scoping; lower roles (`developer`, `billing`, etc.) cannot access it programmatically.
+
+1. Sign in to [Claude Console > Settings > Admin keys](https://platform.claude.com/settings/admin-keys) as an `admin` and create an **Admin API key**.
 2. Copy the key (starts with `sk-ant-admin01-`) into the proxy, as `${path_to_instance_parameters}ADMIN_API_KEY` parameter value in your proxy's host platform.
