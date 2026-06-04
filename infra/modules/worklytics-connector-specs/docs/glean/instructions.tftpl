@@ -1,6 +1,6 @@
-See Glean's documentation for the latest: https://developers.glean.com/api-info/client/authentication/glean-issued
+See [Glean-issued token authentication](https://developers.glean.com/api-info/client/authentication/glean-issued) for the latest.
 
-A **Global Admin** in your Glean workspace must create a Glean-issued token with the required scopes.
+This connector requires a **Glean-issued Global Token**. A global token can impersonate any user via the `X-Glean-ActAs` header, which is how this connector retrieves per-user data. Only **Super Admins** can create global tokens. Token scopes cannot be changed after creation.
 
 **IMPORTANT: Before proceeding, you must set the `glean_instance_subdomain` variable in your Terraform configuration.**
 
@@ -14,15 +14,14 @@ glean_instance_subdomain = "acme"  # replace with your actual instance subdomain
 
 Then proceed with token creation:
 
-1. Log in to your Glean workspace as a Global Admin
+1. Log in to your Glean workspace as a **Super Admin**
 
-2. Navigate to Setup → API Credentials → Create API Credential
+2. Navigate to **Workspace Settings → Setup → API Credentials**
 
-3. Select "Glean-issued token" as the authentication method
+3. Click **Add New Token** and select **Global Token** as the token type
 
-4. Configure the required scopes:
-   - `INSIGHTS_READ` - for retrieving user activity insights
-   - `PEOPLE_READ` - for listing users and teams
+4. Configure the following scopes:
+   - `INSIGHTS` — for retrieving per-user activity insights
+   - `ENTITIES` — for listing users and teams
 
-5. Copy the generated token immediately - you won't see it again; then paste it as the `${path_to_instance_parameters}ACCESS_TOKEN` parameter value in your proxy's host platform.
-
+5. Copy the generated token immediately — it is shown only once; then paste it as the `${path_to_instance_parameters}ACCESS_TOKEN` parameter value in your proxy's host platform.
