@@ -100,6 +100,7 @@ public class ClaudeAuthStrategy implements SourceAuthStrategy {
     }
 
     private String resolveNormalizedAdminApiKey() {
+        // single volatile read; use local on fast path to avoid a second volatile read in return
         String cached = normalizedAdminApiKey;
         if (cached != null) {
             return cached;
