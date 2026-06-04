@@ -4,7 +4,7 @@
 
 **Availability:** Beta
 
-Our Claude data connector uses the [Compliance API](https://platform.claude.com/docs/en/claude-api/compliance) to import data about Users (accounts), Chats (work events), and Activities (audit logs) to Worklytics. This API is intended for compliance, security, and data privacy use.
+Our Claude data connector uses the [Compliance API](https://platform.claude.com/docs/en/manage-claude/compliance-api-access) to import data about Users (accounts), Chats (work events), and Activities (audit logs) to Worklytics. This API is intended for compliance, security, and data privacy use.
 
 ## Data Collected
 
@@ -17,11 +17,14 @@ Our Claude data connector uses the [Compliance API](https://platform.claude.com/
 
 ## Steps to Connect
 
-See [Anthropic's documentation](https://platform.claude.com/docs/en/build-with-claude/administration-api) for the latest, but as of early 2026 the following is required:
+See [Anthropic's documentation](https://platform.claude.com/docs/en/manage-claude/compliance-api-access) for the latest, but as of early 2026 the following is required:
 
-1. An admin user from the organization must generate an API key with `admin` permission in the [Anthropic Console](https://console.anthropic.com/).
+1. The **primary owner** of the parent organization must create a **Compliance Access Key** in [claude.ai > Organization settings > Data and privacy](https://claude.ai/admin-settings/data-privacy-controls) with the following scopes:
+   - `read:compliance_activities`
+   - `read:compliance_user_data`
+   - `read:compliance_org_data`
 
-2. Copy the API key into the proxy as the `PSOXY_CLAUDE_ACCESS_TOKEN` parameter value in your proxy's host platform.
+2. Copy the key (starts with `sk-ant-api01-`) into the proxy as the `PSOXY_CLAUDE_ACCESS_TOKEN` parameter value in your proxy's host platform.
 
 ## Examples
 
