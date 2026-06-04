@@ -336,7 +336,11 @@ module "webhook_collector" {
   region                             = var.gcp_region
   environment_id_prefix              = local.environment_id_prefix
   instance_id                        = each.key
-  service_account_email              = google_service_account.webhook_collector[each.key].email
+  service_account = {
+    # .id is the provider's fully-qualified name (projects/.../serviceAccounts/...); same value google_service_account_iam_member.service_account_id expects
+    service_account_id = google_service_account.webhook_collector[each.key].id
+    email              = google_service_account.webhook_collector[each.key].email
+  }
   artifacts_bucket_name              = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name      = module.psoxy.deployment_bundle_object_name
   artifact_repository_id             = module.psoxy.artifact_repository

@@ -78,7 +78,7 @@ module "cognito_identity" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-cognito-identity-cli?ref=rc-v0.6.3"
 
 
-  aws_region       = data.aws_region.current.id
+  aws_region       = data.aws_region.current.region
   aws_role         = var.aws_assume_role_arn
   identity_pool_id = module.cognito_identity_pool[0].pool_id
   login_ids = {

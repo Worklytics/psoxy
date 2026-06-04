@@ -8,7 +8,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].email"
-        includeReversible: true
+          - "$.data[*].userId"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -17,6 +17,8 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/AccountUsageData"
+        pagination:
+          $ref: "#/definitions/DailyUsagePagination"
         period:
           $ref: "#/definitions/DataPeriod"
   - pathTemplate: "/teams/filtered-usage-events"
@@ -85,6 +87,9 @@ definitions:
         type: "integer"
       date:
         type: "integer"
+      day:
+        type: "string"
+        format: "date"
       email:
         type: "string"
       isActive:
@@ -110,6 +115,23 @@ definitions:
       totalTabsShown:
         type: "integer"
       usageBasedReqs:
+        type: "integer"
+      userId:
+        type: "integer"
+  DailyUsagePagination:
+    type: "object"
+    properties:
+      hasNextPage:
+        type: "boolean"
+      hasPreviousPage:
+        type: "boolean"
+      page:
+        type: "integer"
+      pageSize:
+        type: "integer"
+      totalPages:
+        type: "integer"
+      totalUsers:
         type: "integer"
   DataPeriod:
     type: "object"

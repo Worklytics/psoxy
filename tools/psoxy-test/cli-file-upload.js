@@ -69,7 +69,7 @@ const { version } = require('./package.json');
     result = await psoxyTestFileUpload(options);
   } catch (error) {
     logger.error(error.message);
-    process.exitCode = 1;
+    process.exit(1);
   }
   return result;
 })();

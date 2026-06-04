@@ -5,11 +5,10 @@ in each release's notes.
 
 Changes to be including in future/planned release notes will be added here.
 
-## Next
-- `slack-analytics`: added `admin.analytics.messages.metadata` and `admin.analytics.messages.activity` endpoints; improved connector documentation.
-
 ## [0.6.3](https://github.com/Worklytics/psoxy/releases/tag/v0.6.3)
+- `aws`: add `test_aws_principal_arns` for testing (defaults to Terraform runner when `provision_testing_infra` is true); grants assume-Caller access and bulk input-bucket upload via S3 bucket policy, separate from production `caller_aws_arns`.
 - `gcp`: fix Terraform compatibility when upgrading to v0.6.x with an older `hashicorp/google` provider lock file; require provider `>= 7.0` in modules and use `detect_md5hash` for deployment bundle change detection.
+- `slack-analytics`: added `admin.analytics.messages.metadata` and `admin.analytics.messages.activity` endpoints; improved connector documentation.
 
 ## [0.6.2](https://github.com/Worklytics/psoxy/releases/tag/v0.6.2)
 - `chatgpt-enterprise`: update rules to align to new api, support async
