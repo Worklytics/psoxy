@@ -100,9 +100,12 @@ resource "aws_sqs_queue" "async_api_request_queue" {
   # Standard queue for better reliability
   fifo_queue = false
 
-  message_retention_seconds = 86400 # 1 day, max; tbh, prob could be shorter
+  # 1 day, max; tbh, prob could be shorter
+  message_retention_seconds = 86400
 
-  visibility_timeout_seconds = 120 # how long after attempt begins until message is visible to another consumer for re-processing
+  # how long after attempt begins until message is visible to another consumer for re-processing
+  # this CANNOT be shorter than the lambda timeout, or AWS gives 400 on apply
+  visibility_timeout_seconds = max(var.timeout_seconds, 120)
 
   # Receive message wait time: 20 seconds (long polling)
   receive_wait_time_seconds = 20
@@ -319,7 +322,7 @@ locals {
   role_param = local.arn_for_test_calls == null ? "" : " -r \"${local.arn_for_test_calls}\""
 
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
-  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} --region \"${data.aws_region.current.id}\""
+  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} --region \"${data.aws_region.current.region}\""
 
   # Merge example_api_calls into example_api_requests for unified processing
   all_example_api_requests = concat(
@@ -342,9 +345,9 @@ locals {
   )
 
 
-  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} --region \"${data.aws_region.current.id}\" -l \"${module.psoxy_lambda.log_group}\""
+  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} --region \"${data.aws_region.current.region}\" -l \"${module.psoxy_lambda.log_group}\""
 
-  awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a ${local.role_param} -e \"${data.aws_region.current.id}\""
+  awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a ${local.role_param} -e \"${data.aws_region.current.region}\""
   awscurl_test_calls = [for path in var.example_api_calls :
     "${local.awscurl_test_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
@@ -355,11 +358,11 @@ locals {
 
 Review the deployed function in AWS console:
 
-- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
+- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.region}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
 
 We provide some Node.js scripts to simplify testing your proxy deployment. To be able run test
 commands below, you will need
-   - Node.js (>=16) and npm (v >=8) installed.
+   - Node.js (>=20) and npm (v >=8) installed.
    - install the tool itself (in the location from which you plan to run the test commands, if it's
      not the same location where you originally ran the Terraform apply)
 
