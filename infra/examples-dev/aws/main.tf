@@ -133,6 +133,7 @@ module "psoxy" {
   force_bundle                         = var.force_bundle
   caller_gcp_service_account_ids       = var.caller_gcp_service_account_ids
   caller_aws_arns                      = var.caller_aws_arns
+  test_aws_principal_arns              = var.test_aws_principal_arns
   non_production_connectors            = var.non_production_connectors
   custom_api_connector_rules           = var.custom_api_connector_rules
   lookup_table_builders                = var.lookup_table_builders

@@ -115,6 +115,12 @@ variable "function_zip_hash" {
 }
 
 
+variable "test_aws_principal_arns" {
+  type        = list(string)
+  description = "AWS principal ARNs allowed to upload test files to the bulk connector input bucket. Populated by the host module when provision_iam_policy_for_testing is enabled."
+  default     = []
+}
+
 variable "aws_role_to_assume_when_testing" {
   type        = string
   description = "ARN of role to assume when testing instance. Leave blank to use default credentials of location from which you'll run tests (which must be for a principal with sufficient privileges, or use `provision_iam_policy_for_testing`)."
@@ -128,7 +134,7 @@ variable "aws_role_to_assume_when_testing" {
 
 variable "provision_iam_policy_for_testing" {
   type        = bool
-  description = "Whether to provision IAM policy and attach it to `aws_role_to_assume_when_testing`."
+  description = "Whether to provision IAM policies for bulk connector testing."
   default     = false
 }
 
