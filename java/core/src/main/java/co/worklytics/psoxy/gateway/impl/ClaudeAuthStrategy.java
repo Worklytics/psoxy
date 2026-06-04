@@ -3,9 +3,6 @@ package co.worklytics.psoxy.gateway.impl;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.http.ByteArrayContent;
-import com.google.api.client.http.HttpContent;
 import com.google.auth.Credentials;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -13,10 +10,9 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
@@ -41,6 +37,11 @@ public class ClaudeAuthStrategy implements SourceAuthStrategy {
     @NonNull
     SecretStore secretStore;
 
+    /**
+     * Lazily resolved normalized admin API key; thread-safe for concurrent requests.
+     */
+    private volatile String normalizedAdminApiKey;
+
     @Getter
     private final String configIdentifier = "claude_admin_api_key";
 
@@ -61,11 +62,7 @@ public class ClaudeAuthStrategy implements SourceAuthStrategy {
 
             @Override
             public Map<String, List<String>> getRequestMetadata() throws IOException {
-                String rawAdminApiKey = secretStore.getConfigPropertyAsOptional(ConfigProperty.ADMIN_API_KEY).orElseThrow(
-                    () -> new IllegalStateException("ADMIN_API_KEY not configured"));
-                String adminApiKey = normalizeAdminApiKey(rawAdminApiKey);
-
-                return ImmutableMap.of("x-api-key", Collections.singletonList(adminApiKey));
+                return ImmutableMap.of("x-api-key", Collections.singletonList(resolveNormalizedAdminApiKey()));
             }
 
             @Override
@@ -102,9 +99,24 @@ public class ClaudeAuthStrategy implements SourceAuthStrategy {
         return Arrays.stream(ConfigProperty.values()).collect(Collectors.toSet());
     }
 
+    private String resolveNormalizedAdminApiKey() {
+        String cached = normalizedAdminApiKey;
+        if (cached != null) {
+            return cached;
+        }
+        synchronized (this) {
+            if (normalizedAdminApiKey == null) {
+                String raw = secretStore.getConfigPropertyAsOptional(ConfigProperty.ADMIN_API_KEY).orElseThrow(
+                    () -> new IllegalStateException("ADMIN_API_KEY not configured"));
+                normalizedAdminApiKey = normalizeAdminApiKey(raw);
+            }
+            return normalizedAdminApiKey;
+        }
+    }
+
     @VisibleForTesting
     static String normalizeAdminApiKey(String raw) {
-        String normalized = stripLeadingAndTrailingWhitespaceAndControlChars(raw);
+        String normalized = StringUtils.trimToEmpty(raw);
         if (normalized.isEmpty()) {
             throw new IllegalStateException("ADMIN_API_KEY not configured");
         }
@@ -113,21 +125,5 @@ public class ClaudeAuthStrategy implements SourceAuthStrategy {
                 "ADMIN_API_KEY contained leading/trailing whitespace or control characters; these were stripped before use");
         }
         return normalized;
-    }
-
-    private static boolean isWhitespaceOrControl(char c) {
-        return Character.isWhitespace(c) || Character.isISOControl(c);
-    }
-
-    private static String stripLeadingAndTrailingWhitespaceAndControlChars(String value) {
-        int start = 0;
-        int end = value.length();
-        while (start < end && isWhitespaceOrControl(value.charAt(start))) {
-            start++;
-        }
-        while (end > start && isWhitespaceOrControl(value.charAt(end - 1))) {
-            end--;
-        }
-        return value.substring(start, end);
     }
 }
