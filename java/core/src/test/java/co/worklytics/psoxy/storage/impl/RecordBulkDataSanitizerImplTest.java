@@ -328,6 +328,25 @@ class RecordBulkDataSanitizerImplTest {
     }
 
     @Test
+    void testAutoFormat_NdjsonWithUnreliableContentTypeUsesFileExtension() {
+        this.setUpWithRules("---\n" +
+            "format: \"AUTO\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n");
+
+        final String objectPath = "export-20231128/items.ndjson";
+        storageHandler.handle(BulkDataTestUtils.request(objectPath)
+                .withContentType("application/x-www-form-urlencoded"),
+            BulkDataTestUtils.transform(rules),
+            BulkDataTestUtils.inputStreamSupplier("bulk/example.ndjson"),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        assertEquals(new String(TestUtils.getData("bulk/example-sanitized.ndjson"), StandardCharsets.UTF_8), output);
+    }
+
+    @Test
     void testAutoFormat_JsonArrayWithoutContentTypeUsesFileExtension() {
         this.setUpWithRules("---\n" +
             "format: \"AUTO\"\n" +
