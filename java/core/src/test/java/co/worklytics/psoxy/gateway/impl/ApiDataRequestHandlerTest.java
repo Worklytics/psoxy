@@ -698,6 +698,21 @@ class ApiDataRequestHandlerTest {
             .normalizeHeader(org.apache.http.HttpHeaders.CONTENT_TYPE)));
     }
 
+    static class RecordingApiSanitizedDataOutput implements ApiSanitizedDataOutput {
+
+        int writes;
+        ProcessedContent content;
+        ApiDataRequestHandler.ProcessingContext processingContext;
+
+        @Override
+        public void writeSanitized(ProcessedContent content,
+            ApiDataRequestHandler.ProcessingContext processingContext) {
+            this.writes++;
+            this.content = content;
+            this.processingContext = processingContext;
+        }
+    }
+
     private void setup(String source, String host) {
         ApiDataRequestHandlerTest.Container container =
             DaggerApiDataRequestHandlerTest_Container.create();
@@ -956,7 +971,7 @@ class ApiDataRequestHandlerTest {
         when(sanitizer.getAllowedRequestHeaders(anyString(), any())).thenReturn(Optional.empty());
         spy.sanitizer = sanitizer;
 
-        ApiSanitizedDataOutput asyncOutput = mock(ApiSanitizedDataOutput.class);
+        RecordingApiSanitizedDataOutput asyncOutput = new RecordingApiSanitizedDataOutput();
         spy.asyncSanitizedDataOutput = () -> asyncOutput;
         ApiDataRequestHandler.ProcessingContext processingContext =
             ApiDataRequestHandler.ProcessingContext.builder()
@@ -971,11 +986,9 @@ class ApiDataRequestHandlerTest {
         assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertNull(response.getBody());
 
-        ArgumentCaptor<ProcessedContent> asyncContentCaptor =
-            ArgumentCaptor.forClass(ProcessedContent.class);
-        verify(asyncOutput).writeSanitized(asyncContentCaptor.capture(), same(processingContext));
-
-        ProcessedContent asyncContent = asyncContentCaptor.getValue();
+        assertEquals(1, asyncOutput.writes);
+        assertSame(processingContext, asyncOutput.processingContext);
+        ProcessedContent asyncContent = asyncOutput.content;
         assertEquals(errorContent, asyncContent.getContentAsString());
         assertEquals(ErrorCauses.API_ERROR.name(), asyncContent.getMetadata()
             .get(ProcessedDataMetadataFields.ERROR.getMetadataKey()));
@@ -1017,7 +1030,7 @@ class ApiDataRequestHandlerTest {
         when(sanitizer.getAllowedRequestHeaders(anyString(), any())).thenReturn(Optional.empty());
         spy.sanitizer = sanitizer;
 
-        ApiSanitizedDataOutput asyncOutput = mock(ApiSanitizedDataOutput.class);
+        RecordingApiSanitizedDataOutput asyncOutput = new RecordingApiSanitizedDataOutput();
         spy.asyncSanitizedDataOutput = () -> asyncOutput;
         ApiDataRequestHandler.ProcessingContext processingContext =
             ApiDataRequestHandler.ProcessingContext.builder()
@@ -1031,11 +1044,9 @@ class ApiDataRequestHandlerTest {
 
         assertEquals(HttpStatus.SC_BAD_GATEWAY, response.getStatusCode());
 
-        ArgumentCaptor<ProcessedContent> asyncContentCaptor =
-            ArgumentCaptor.forClass(ProcessedContent.class);
-        verify(asyncOutput).writeSanitized(asyncContentCaptor.capture(), same(processingContext));
-
-        ProcessedContent asyncContent = asyncContentCaptor.getValue();
+        assertEquals(1, asyncOutput.writes);
+        assertSame(processingContext, asyncOutput.processingContext);
+        ProcessedContent asyncContent = asyncOutput.content;
         assertTrue(asyncContent.getContentAsString().contains("Async redirect Location is not HTTPS"));
         assertEquals(ErrorCauses.API_ERROR.name(), asyncContent.getMetadata()
             .get(ProcessedDataMetadataFields.ERROR.getMetadataKey()));
