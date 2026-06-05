@@ -167,7 +167,7 @@ public class StorageHandler {
                     sourceContentType, sourceObjectPath, inferredContentType));
                 return inferredContentType;
             }
-            return null;
+            return sourceContentType;
         }
 
         if (StringUtils.isBlank(sourceContentType)) {
