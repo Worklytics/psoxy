@@ -33,7 +33,7 @@ class CloudFunctionRequestTest {
     }
 
     @Test
-    void getClientIp_usesLastForwardedForHop() {
+    void getClientIp_usesFirstForwardedForHop() {
         HttpRequest nativeRequest = mock(HttpRequest.class);
 
         when(nativeRequest.getHeaders()).thenReturn(Map.of(
@@ -42,7 +42,7 @@ class CloudFunctionRequestTest {
 
         CloudFunctionRequest request = CloudFunctionRequest.of(nativeRequest);
 
-        assertEquals("198.51.100.7", request.getClientIp().get());
+        assertEquals("203.0.113.10", request.getClientIp().get());
     }
 
 }
