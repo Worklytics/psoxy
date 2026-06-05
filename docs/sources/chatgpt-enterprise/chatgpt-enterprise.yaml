@@ -40,8 +40,8 @@ endpoints:
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$.data[*].files[*].name"
-          - "$.data[*].files[*].downloadUrl"
+          - "$.data[*]..files[*].name"
+          - "$.data[*]..files[*].download_url"
       - !<textDigest>
         keywords:
           - "write"
