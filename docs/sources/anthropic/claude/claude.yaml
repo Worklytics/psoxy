@@ -77,7 +77,11 @@ endpoints:
         next_page:
           type: "string"
   - pathTemplate: "/v1/compliance/apps/chats/{chatId}/messages"
-    allowedQueryParams: []
+    allowedQueryParams:
+      - "after_id"
+      - "before_id"
+      - "limit"
+      - "order"
     transforms:
       - !<pseudonymize>
         jsonPaths:
