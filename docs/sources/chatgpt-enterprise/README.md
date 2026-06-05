@@ -17,6 +17,8 @@ Do not select the owner's personal organization.
 
 **Note on Message Authorship:** The specific encoding of `bot` vs `user` messages in the compliance API is currently undocumented by OpenAI. Psoxy rule datasets assume a best-guess encoding approach (where an `author.role` dictates `"user"` or `"assistant"`) for conditional filtering algorithms.
 
+**Note on legacy `conversations` endpoints:** OpenAI has deprecated the synchronous `/conversations` and `/conversations/{conversationId}/messages` compliance API paths in favor of the `/logs` API (see [Example Rules](chatgpt-enterprise.yaml)). Those legacy paths are scheduled to be closed around **June 6, 2026**. Psoxy rules intentionally still allow them so existing deployments can migrate on their own schedule; new integrations should use the `/logs` endpoints only.
+
 ## Instructions to Connect
 
 1. Add `chatgpt-enterprise` to `enabled_connectors` in `terraform.tfvars`, then run `terraform apply`.
