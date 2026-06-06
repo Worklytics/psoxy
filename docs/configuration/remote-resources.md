@@ -51,7 +51,7 @@ module "psoxy" {
 
 This will:
 - Set `REMOTE_RESOURCE_BUCKET` on every Lambda function to the artifacts bucket name
-- Grant `s3:GetObject` permission on the configured path prefixes in the bucket to each Lambda's execution role
+- Grant `s3:GetObject` and prefix-scoped `s3:ListBucket` permission on the configured path prefixes in the bucket to each Lambda's execution role
 
 ### GCP (`gcp-host`)
 
@@ -83,10 +83,10 @@ This will:
 The Terraform modules automatically grant minimal read permissions following the Principle of
 Least Privilege. Access is limited to the configured resource path prefixes within the bucket:
 
-- **AWS**: `s3:GetObject` only for objects under `{INSTANCE_RESOURCE_PATH}/` and `{SHARED_RESOURCE_PATH}/`
+- **AWS**: `s3:GetObject` for objects under `{INSTANCE_RESOURCE_PATH}/` and `{SHARED_RESOURCE_PATH}/`, plus prefix-scoped `s3:ListBucket` so missing resources can be distinguished from access-denied errors
 - **GCP**: object read access only for objects under `{INSTANCE_RESOURCE_PATH}/` and `{SHARED_RESOURCE_PATH}/`, enforced with IAM Conditions
 
-No write, delete, or list permissions are granted. When an object is missing or inaccessible, S3 may return 403 (citing `s3:ListBucket`) rather than 404 if the caller lacks bucket list permission; psoxy treats that as unavailable (non-fatal) and continues its resource lookup chain (e.g. falling back to prebuilt rules).
+No write or delete permissions are granted. When an object is missing, psoxy treats it as unavailable (non-fatal) and continues its resource lookup chain (e.g. falling back to prebuilt rules). Access-denied errors are fatal, preventing misconfigured remote rules from silently falling back to prebuilt defaults.
 
 Remote resource paths use `/` as a hierarchy separator within the bucket (e.g. `psoxy-dev-erik/GCAL/rules.yaml` for shared prefix `psoxy-dev-erik/` and connector `gcal`). They are distinct from secret / parameter prefixes, which use a trailing `_` to separate names (e.g. `psoxy-dev-erik_GCAL_SOURCE`). When `INSTANCE_RESOURCE_PATH` / `SHARED_RESOURCE_PATH` are not set, psoxy falls back to the config paths and normalizes trailing `_` to `/` and strips any leading `/`.
 

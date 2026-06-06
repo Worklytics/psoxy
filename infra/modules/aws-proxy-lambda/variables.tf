@@ -258,7 +258,7 @@ variable "lambda_role_iam_statements" {
 
 variable "remote_resource_bucket" {
   type        = string
-  description = "**beta** Name of the S3 bucket from which to load remote resources (rules, NLP models, etc.). If set, the REMOTE_RESOURCE_BUCKET env var is populated and the lambda receives s3:GetObject permission on the bucket."
+  description = "**beta** Name of the S3 bucket from which to load remote resources (rules, NLP models, etc.). If set, the REMOTE_RESOURCE_BUCKET env var is populated and the lambda receives s3:GetObject and prefix-scoped s3:ListBucket permission on the bucket."
   default     = null
 }
 

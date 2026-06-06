@@ -106,7 +106,7 @@ class S3ResourceServiceTest {
     }
 
     @Test
-    void getResource_accessDenied_treatedAsUnavailable() {
+    void getResource_accessDenied_rethrows() {
         S3Exception exception = (S3Exception) S3Exception.builder()
             .statusCode(403)
             .message("Access Denied")
@@ -115,9 +115,8 @@ class S3ResourceServiceTest {
             .thenThrow(exception);
 
         S3ResourceService service = new S3ResourceService(client, "my-bucket", "my-prefix");
-        Optional<InputStream> resultOpt = service.getResource("my-key");
 
-        assertTrue(resultOpt.isEmpty());
+        assertThrows(S3Exception.class, () -> service.getResource("my-key"));
     }
 
     @Test
