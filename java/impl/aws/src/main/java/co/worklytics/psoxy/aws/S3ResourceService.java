@@ -17,9 +17,9 @@ import lombok.extern.java.Log;
 /**
  * ResourceService backed by AWS S3.
  *
- * <p>Fetches resources via {@code GetObject} only (never {@code ListBucket}). When the object is
- * absent or the caller lacks access, S3 may respond with 403 instead of 404; that response is
- * treated as unavailable (non-fatal) rather than propagated as an error.</p>
+ * <p>Fetches resources via {@code GetObject}. Missing resources are treated as unavailable, but
+ * access-denied responses are fatal so callers do not silently fall back to weaker defaults when
+ * remote resource IAM is misconfigured.</p>
  */
 @Log
 @RequiredArgsConstructor
@@ -51,9 +51,13 @@ public class S3ResourceService implements ResourceService {
             log.log(Level.FINE, "S3 resource not found: s3://{0}/{1}", new Object[]{bucketName, key});
             return Optional.empty();
         } catch (S3Exception e) {
-            if (e.statusCode() == 404 || isAccessDenied(e)) {
-                log.log(Level.FINE, "S3 resource not found or not accessible: s3://{0}/{1}", new Object[]{bucketName, key});
+            if (e.statusCode() == 404) {
+                log.log(Level.FINE, "S3 resource not found: s3://{0}/{1}", new Object[]{bucketName, key});
                 return Optional.empty();
+            }
+            if (isAccessDenied(e)) {
+                log.log(Level.WARNING, "Access denied fetching S3 resource: s3://" + bucketName + "/" + key, e);
+                throw e;
             }
             log.log(Level.WARNING, "Error fetching S3 resource: s3://" + bucketName + "/" + key, e);
             throw e;
@@ -61,9 +65,8 @@ public class S3ResourceService implements ResourceService {
     }
 
     /**
-     * {@code true} when S3 denied access to the object. Callers may treat this as unavailable
-     * rather than fatal — e.g. S3 often returns 403 (citing {@code s3:ListBucket}) instead of 404
-     * when the object is absent and the caller lacks bucket list permission.
+     * {@code true} when S3 denied access to the object. Terraform grants prefix-scoped
+     * {@code s3:ListBucket} for remote-resource paths so absent objects can be reported as 404.
      */
     static boolean isAccessDenied(S3Exception e) {
         return e.statusCode() == 403;

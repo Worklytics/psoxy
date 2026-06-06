@@ -298,20 +298,51 @@ locals {
     ]
   }] : []
 
-  remote_resource_bucket_statements = var.remote_resource_bucket != null ? [{
-    Sid = "ReadRemoteResourceBucket"
-    Action = [
-      "s3:GetObject",
+  remote_resource_paths = var.remote_resource_bucket == null ? [] : compact([
+    var.remote_resource_instance_path != null ? trimsuffix(var.remote_resource_instance_path, "/") : null,
+    var.remote_resource_shared_path != null ? trimsuffix(var.remote_resource_shared_path, "/") : null,
+  ])
+
+  remote_resource_object_arns = var.remote_resource_bucket == null ? [] : coalescelist(
+    [for path in local.remote_resource_paths : "arn:aws:s3:::${var.remote_resource_bucket}/${path}/*"],
+    ["arn:aws:s3:::${var.remote_resource_bucket}/*"]
+  )
+
+  remote_resource_prefixes = var.remote_resource_bucket == null ? [] : (
+    length(local.remote_resource_paths) > 0 ? flatten([
+      for path in local.remote_resource_paths : [
+        trimsuffix(path, "/"),
+        "${trimsuffix(path, "/")}/*"
+      ]
+    ]) : ["*"]
+  )
+
+  remote_resource_bucket_statements = flatten([
+    for bucket in compact([var.remote_resource_bucket]) : [
+      {
+        Sid = "ReadRemoteResourceObjects"
+        Action = [
+          "s3:GetObject",
+        ]
+        Effect   = "Allow"
+        Resource = local.remote_resource_object_arns
+      },
+      merge({
+        Sid = "ListRemoteResourceBucketPrefixes"
+        Action = [
+          "s3:ListBucket",
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:s3:::${bucket}"
+        }, local.remote_resource_prefixes == ["*"] ? {} : {
+        Condition = {
+          StringLike = {
+            "s3:prefix" = local.remote_resource_prefixes
+          }
+        }
+      })
     ]
-    Effect = "Allow"
-    Resource = coalescelist(
-      compact([
-        var.remote_resource_instance_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_instance_path}/*" : null,
-        var.remote_resource_shared_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_shared_path}/*" : null,
-      ]),
-      ["arn:aws:s3:::${var.remote_resource_bucket}/*"]
-    )
-  }] : []
+  ])
 
   aws_kms_public_key_statements = length(var.aws_kms_public_keys) > 0 ? [{
     Sid = "AllowAWSKMSPublicKeyUse"

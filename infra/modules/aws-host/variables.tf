@@ -467,6 +467,6 @@ variable "artifacts_bucket_name" {
 
 variable "enable_remote_resources" {
   type        = bool
-  description = "**beta** Whether to enable remote resource loading from the artifacts S3 bucket (rules, NLP models, etc.). When true, sets REMOTE_RESOURCE_BUCKET env var and grants s3:GetObject to each Lambda. Default will change to `true` in next major version."
+  description = "**beta** Whether to enable remote resource loading from the artifacts S3 bucket (rules, NLP models, etc.). When true, sets REMOTE_RESOURCE_BUCKET env var and grants s3:GetObject plus prefix-scoped s3:ListBucket to each Lambda. Default will change to `true` in next major version."
   default     = false # will change to true in 0.7.x
 }
