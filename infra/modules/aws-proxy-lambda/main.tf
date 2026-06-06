@@ -317,30 +317,32 @@ locals {
     ]) : ["*"]
   )
 
-  remote_resource_bucket_statements = var.remote_resource_bucket != null ? [
-    {
-      Sid = "ReadRemoteResourceObjects"
-      Action = [
-        "s3:GetObject",
-      ]
-      Effect   = "Allow"
-      Resource = local.remote_resource_object_arns
-    },
-    merge({
-      Sid = "ListRemoteResourceBucketPrefixes"
-      Action = [
-        "s3:ListBucket",
-      ]
-      Effect   = "Allow"
-      Resource = "arn:aws:s3:::${var.remote_resource_bucket}"
-      }, local.remote_resource_prefixes == ["*"] ? {} : {
-      Condition = {
-        StringLike = {
-          "s3:prefix" = local.remote_resource_prefixes
+  remote_resource_bucket_statements = flatten([
+    for bucket in compact([var.remote_resource_bucket]) : [
+      {
+        Sid = "ReadRemoteResourceObjects"
+        Action = [
+          "s3:GetObject",
+        ]
+        Effect   = "Allow"
+        Resource = local.remote_resource_object_arns
+      },
+      merge({
+        Sid = "ListRemoteResourceBucketPrefixes"
+        Action = [
+          "s3:ListBucket",
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:s3:::${bucket}"
+        }, local.remote_resource_prefixes == ["*"] ? {} : {
+        Condition = {
+          StringLike = {
+            "s3:prefix" = local.remote_resource_prefixes
+          }
         }
-      }
-    })
-  ] : []
+      })
+    ]
+  ])
 
   aws_kms_public_key_statements = length(var.aws_kms_public_keys) > 0 ? [{
     Sid = "AllowAWSKMSPublicKeyUse"
