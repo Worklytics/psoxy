@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,6 +68,9 @@ import lombok.extern.java.Log;
 //  (augments) and schema filtering. Consider renaming or factoring into a pipeline abstraction.
 @Log
 public class RESTApiSanitizerImpl implements RESTApiSanitizer {
+
+    private static final String DEFAULT_REQUEST_BODY_CONTENT_TYPE =
+            ContentType.APPLICATION_JSON.getMimeType();
 
     @Getter
     final RESTRules rules;
@@ -170,19 +174,19 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 // empty request body, and none required, so we allow it
                 return true;
             } else {
-                // default content-type to application/json (tbh, is this right?? it's just our
-                // historical default)
-                String parsedContentType =
-                        Optional.ofNullable(contentType).orElse(ContentType.APPLICATION_JSON.toString());
+                String parsedContentType = normalizedContentType(contentType);
 
-                JsonSchema schema = endpoint.getRequestBody().getContent().get(parsedContentType);
+                JsonSchema schema = endpoint.getRequestBody().getContent()
+                        .getOrDefault(Optional.ofNullable(contentType).orElse(parsedContentType),
+                                endpoint.getRequestBody().getContent().get(parsedContentType));
                 if (schema == null) {
                     // no schema defined for request body, so we allow it
                     return true;
                 } else {
-                    if (parsedContentType.equals(ContentType.APPLICATION_JSON.toString())) {
+                    if (parsedContentType.equals(ContentType.APPLICATION_JSON.getMimeType())) {
                         return jsonSchemaValidationUtils.validateJsonBySchema(requestBody, schema);
-                    } else if (parsedContentType.equals(ContentType.APPLICATION_FORM_URLENCODED.toString())) {
+                    } else if (parsedContentType.equals(
+                            ContentType.APPLICATION_FORM_URLENCODED.getMimeType())) {
                         return jsonSchemaValidationUtils.validateFormUrlEncodedBySchema(requestBody,
                                 schema);
                     } else {
@@ -192,6 +196,17 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 }
             }
         }
+    }
+
+    private String normalizedContentType(@Nullable String contentType) {
+        String contentTypeToParse = StringUtils.trimToEmpty(contentType);
+        if (StringUtils.isEmpty(contentTypeToParse)) {
+            return DEFAULT_REQUEST_BODY_CONTENT_TYPE;
+        }
+
+        return StringUtils.substringBefore(contentTypeToParse, ";")
+                .trim()
+                .toLowerCase(Locale.ROOT);
     }
 
     @Override

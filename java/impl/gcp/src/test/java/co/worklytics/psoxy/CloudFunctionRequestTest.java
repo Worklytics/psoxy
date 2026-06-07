@@ -33,7 +33,7 @@ class CloudFunctionRequestTest {
     }
 
     @Test
-    void getClientIp_usesLastForwardedForHop() {
+    void getClientIp_usesFirstForwardedForHop() {
         HttpRequest nativeRequest = mock(HttpRequest.class);
 
         when(nativeRequest.getHeaders()).thenReturn(Map.of(
@@ -42,7 +42,20 @@ class CloudFunctionRequestTest {
 
         CloudFunctionRequest request = CloudFunctionRequest.of(nativeRequest);
 
-        assertEquals("198.51.100.7", request.getClientIp().get());
+        assertEquals("203.0.113.10", request.getClientIp().get());
+    }
+
+    @Test
+    void getClientIp_emptyWhenFirstForwardedForHopBlank() {
+        HttpRequest nativeRequest = mock(HttpRequest.class);
+
+        when(nativeRequest.getHeaders()).thenReturn(Map.of(
+            "X-Forwarded-For", Lists.newArrayList(", 198.51.100.7")
+        ));
+
+        CloudFunctionRequest request = CloudFunctionRequest.of(nativeRequest);
+
+        assertTrue(request.getClientIp().isEmpty());
     }
 
 }
