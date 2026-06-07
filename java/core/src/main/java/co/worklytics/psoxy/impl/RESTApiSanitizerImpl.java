@@ -162,7 +162,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         if (endpoint.getRequestBody() == null) {
             return true;
         } else {
-            if (endpoint.getRequestBody().getRequired() && StringUtils.isEmpty(requestBody)) {
+            if (Boolean.TRUE.equals(endpoint.getRequestBody().getRequired())
+                    && StringUtils.isEmpty(requestBody)) {
                 log.warning(String.format("Request body required for %s %s, but none provided",
                         httpMethod, url));
                 return false;
