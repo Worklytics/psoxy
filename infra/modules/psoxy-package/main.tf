@@ -26,10 +26,10 @@ data "external" "deployment_package" {
 }
 
 locals {
-  path_to_deployment_jar = coalesce(var.deployment_bundle, try(data.external.deployment_package[0].result.path_to_deployment_jar, "unknown"))
-  filename               = var.deployment_bundle != null ? basename(var.deployment_bundle) : try(data.external.deployment_package[0].result.filename, "unknown")
-  version                = var.deployment_bundle != null ? try(regex("^psoxy-(?:aws|gcp)-(.+)\\.jar$", basename(var.deployment_bundle))[0], "unknown") : try(data.external.deployment_package[0].result.version, "unknown")
-  built_package_hash     = try(data.external.deployment_package[0].result.deployment_package_hash, null)
+  path_to_deployment_jar   = coalesce(var.deployment_bundle, try(data.external.deployment_package[0].result.path_to_deployment_jar, "unknown"))
+  filename                 = var.deployment_bundle != null ? basename(var.deployment_bundle) : try(data.external.deployment_package[0].result.filename, "unknown")
+  version                  = var.deployment_bundle != null ? try(regex("^psoxy-(?:aws|gcp)-(.+)\\.jar$", basename(var.deployment_bundle))[0], "unknown") : try(data.external.deployment_package[0].result.version, "unknown")
+  built_package_hash       = try(data.external.deployment_package[0].result.deployment_package_hash, null)
   deployment_jar_is_remote = can(regex("^(s3|gs)://", local.path_to_deployment_jar))
 }
 

@@ -353,8 +353,6 @@ resource "aws_iam_role_policy_attachment" "testing_sanitized_cleanup_to_caller_r
 }
 
 locals {
-  role_option_for_tests = var.aws_role_to_assume_when_testing == null ? "" : "-r ${var.aws_role_to_assume_when_testing}"
-
   # id that is unique for connector, within the environment (eg, files with this token in name, but otherwise equivalent, will not conflict)
   local_file_id = trimprefix(var.instance_id, var.environment_name)
 
@@ -368,13 +366,25 @@ locals {
 
   example_files_csv = join(",", [for f in local.all_example_files : "${var.psoxy_base_dir}${f}"])
 
+  cli_file_upload_role_args = compact([
+    var.aws_upload_role_to_assume_when_testing != null ? "--upload-role-to-assume ${var.aws_upload_role_to_assume_when_testing}" : null,
+    var.aws_role_to_assume_when_testing != null ? "-r ${var.aws_role_to_assume_when_testing}" : null,
+  ])
+  cli_file_upload_role_args_todo  = join("\n", [for arg in local.cli_file_upload_role_args : "  ${arg} \\"])
+  cli_file_upload_role_args_shell = join("\n", [for arg in local.cli_file_upload_role_args : "    ${arg} \\"])
+
   todo_brief = <<EOT
 ## Test ${var.instance_id}
 Check that the Psoxy works as expected, and it transforms the files of your input bucket following
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_files_csv} ${local.role_option_for_tests} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} --region ${data.aws_region.current.region}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js \\
+  -f ${local.example_files_csv} \\
+  -d AWS \\
+  -i ${aws_s3_bucket.input.bucket} \\
+  -o ${aws_s3_bucket.sanitized.bucket} \\
+${local.cli_file_upload_role_args_todo != "" ? "${local.cli_file_upload_role_args_todo}\n" : ""}  --region ${data.aws_region.current.region}
 ```
 EOT
 
@@ -446,7 +456,12 @@ for FILE in "$${FILES[@]}"; do
   fi
   
   printf "Testing file: $FILE\n"
-  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$FILE" -d "AWS" -i "${aws_s3_bucket.input.bucket}" -o "${aws_s3_bucket.sanitized.bucket}" ${local.role_option_for_tests} --region "${var.aws_region}"
+  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js \
+    -f "$FILE" \
+    -d "AWS" \
+    -i "${aws_s3_bucket.input.bucket}" \
+    -o "${aws_s3_bucket.sanitized.bucket}" \
+${local.cli_file_upload_role_args_shell != "" ? "${local.cli_file_upload_role_args_shell}\n" : ""}    --region "${var.aws_region}"
   if [ $? -ne 0 ]; then
     FAILED=1
   fi

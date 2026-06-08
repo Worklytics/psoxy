@@ -29,10 +29,15 @@ async function testAWS(options, logger) {
   const parsedPath = path.parse(options.file);
   const filenameWithTimestamp = addFilenameSuffix(parsedPath.base, TIMESTAMP);
 
-  const uploadClient = await aws.createS3Client(null, options.region);
+  let uploadClient = await aws.createS3Client(null, options.region);
+  if (options.uploadRoleToAssume) {
+    logger.verbose(`Assuming role ${options.uploadRoleToAssume} for upload`);
+    uploadClient = await aws.createS3Client(options.uploadRoleToAssume, options.region);
+  }
+
   let downloadClient = uploadClient;
   if (options.role) {
-    logger.verbose(`Assuming role ${options.role}`);
+    logger.verbose(`Assuming role ${options.role} for download`);
     downloadClient = await aws.createS3Client(options.role, options.region);
   }
 
@@ -173,7 +178,8 @@ async function testGCP(options, logger) {
  * @param {string} options.input
  * @param {string} options.output
  * @param {string} options.region - AWS: buckets region
- * @param {string} options.role - AWS: role to assume (ARN format; optional)
+ * @param {string} options.role - AWS: role to assume for download/delete (ARN format; optional)
+ * @param {string} options.uploadRoleToAssume - AWS: role to assume for upload (ARN format; optional)
  * @param {boolean} options.saveSanitizedFile - Whether to save sanitized file or not
  * @param {boolean} options.keepSanitizedFile - Whether to delete sanitized file or not (from
  *  output bucket, after test completion)
