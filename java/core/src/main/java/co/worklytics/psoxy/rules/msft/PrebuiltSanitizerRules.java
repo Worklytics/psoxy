@@ -720,6 +720,46 @@ public class PrebuiltSanitizerRules {
         .jsonPath("$..body.content")
         .build();
 
+    /**
+     * BETA genMetadata PoC — prompt classification into fixed categories. Not enabled on the
+     * default endpoint until deployment provides a Jlama model archive, {@code enable_remote_resources},
+     * and {@code memory_size_mb >= 4096}. See {@code docs/development/gen-metadata-augment.md}.
+     */
+    static final Augment.GenMetadata MS_COPILOT_GEN_METADATA_AUGMENT = Augment.GenMetadata.builder()
+        .jsonPath("$..body.content")
+        .prompt("""
+            Classify the user's LLM prompt (input text) into exactly one category.
+            Use one of these category names verbatim:
+            Email Drafting, General Content Drafting, Email Editing and Refinement,
+            General Content Editing and Refinement, Summarization and Synthesis,
+            Research and Ideation, Analysis and Data Work, Code Generation and Development,
+            Workflow and Task Management, Uncategorized, Excluded.
+            Use "Uncategorized" when the prompt is substantive but does not clearly fit a specific category.
+            Use "Excluded" for social niceties (greetings, thanks, pleasantries only) or prompts
+            that are too short or non-substantive to classify.
+            """)
+        .outputSchema(com.avaulta.gateway.rules.JsonSchemaFilter.builder()
+            .type("object")
+            .required(List.of("category"))
+            .properties(java.util.Map.of(
+                "category", com.avaulta.gateway.rules.JsonSchemaFilter.builder()
+                    .type("string")
+                    .enumValues(List.of(
+                        "Email Drafting",
+                        "General Content Drafting",
+                        "Email Editing and Refinement",
+                        "General Content Editing and Refinement",
+                        "Summarization and Synthesis",
+                        "Research and Ideation",
+                        "Analysis and Data Work",
+                        "Code Generation and Development",
+                        "Workflow and Task Management",
+                        "Uncategorized",
+                        "Excluded"))
+                    .build()))
+            .build())
+        .build();
+
     static final Transform.Redact MS_COPILOT_CONTENT_REDACT = Transform.Redact.builder()
         .jsonPath("$..body.content")
         .jsonPath("$..attachments[*].content")

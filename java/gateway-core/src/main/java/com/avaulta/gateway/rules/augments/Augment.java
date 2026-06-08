@@ -29,6 +29,7 @@ import java.util.TreeMap;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Augment.TextDigest.class, name = "textDigest"),
     @JsonSubTypes.Type(value = Augment.SentenceMetadata.class, name = "sentenceMetadata"),
+    @JsonSubTypes.Type(value = Augment.GenMetadata.class, name = "genMetadata"),
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
@@ -234,6 +235,41 @@ public abstract class Augment {
                     .forEach(word -> result.add(word.toLowerCase()));
             }
             return Set.copyOf(result);
+        }
+    }
+
+    /**
+     * BETA: Generates structured metadata via LangChain4j (Jlama local; Bedrock/Vertex planned).
+     * Requires {@link #outputSchema} and {@link #prompt}; model/backend selection is deployment config.
+     */
+    @SuperBuilder(toBuilder = true)
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    public static class GenMetadata extends Augment {
+
+        /**
+         * Task instruction passed to the generative backend.
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String prompt;
+
+        @JsonIgnore
+        @Override
+        public String getFunctionName() {
+            return "genMetadata";
+        }
+
+        @Override
+        public Object compute(Object input) {
+            // Computed at runtime by AugmentProcessor via injected GenMetadataProcessor.
+            return null;
+        }
+
+        @Override
+        protected boolean canEqual(Object other) {
+            return other instanceof GenMetadata;
         }
     }
 }

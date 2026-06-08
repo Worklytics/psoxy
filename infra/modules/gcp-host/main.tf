@@ -74,6 +74,24 @@ locals {
       try(local.api_connector_rules_raw[k], null) != null ? local.api_connector_rules_raw[k] : null
     )
   }
+
+  needs_opennlp_model_upload = length([
+    for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) : k
+    if try(v.enable_remote_resources, false)
+  ]) > 0
+
+  needs_gen_metadata_model_upload = length([
+    for k, v in var.api_connectors : k if try(v.enable_gen_metadata, false)
+  ]) > 0
+
+  gen_metadata_model_id = coalesce(
+    try(var.general_environment_variables["PSOXY_GEN_MODEL"], null),
+    "tjake/Llama-3.2-1B-Instruct-JQ4"
+  )
+  gen_metadata_archive_name = "${replace(local.gen_metadata_model_id, "/", "__")}.zip"
+
+  # Appended to JAVA_TOOL_OPTIONS when enable_gen_metadata (Jlama / Vector API). See gen-metadata-augment.md.
+  jlama_java_tool_options = "--add-modules=jdk.incubator.vector --enable-preview --enable-native-access=ALL-UNNAMED"
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -264,7 +282,11 @@ module "api_connector" {
   allowed_data_access_ip_blocks         = var.allowed_data_access_ip_blocks
   instance_concurrency                  = var.api_connector_instance_concurrency
   max_instance_count                    = var.max_instances_per_api_connector
-  timeout_seconds                       = coalesce(try(each.value.timeout_seconds, null), 180)
+  available_memory_mb = max(
+    try(each.value.enable_gen_metadata, false) ? coalesce(each.value.available_memory_mb, 4096) : 1024,
+    try(each.value.enable_gen_metadata, false) ? 4096 : 0
+  )
+  timeout_seconds = coalesce(try(each.value.timeout_seconds, null), 180)
 
 
   environment_variables = merge(
@@ -280,11 +302,15 @@ module "api_connector" {
     },
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      ENABLE_GEN_METADATA = "true"
+      JAVA_TOOL_OPTIONS   = trimspace("${lookup(merge(try(each.value.environment_variables, {}), var.general_environment_variables), "JAVA_TOOL_OPTIONS", "")} ${local.jlama_java_tool_options}")
+    } : {},
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
+  remote_resource_bucket        = (try(each.value.enable_remote_resources, false) || try(each.value.enable_gen_metadata, false)) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (try(each.value.enable_remote_resources, false) || try(each.value.enable_gen_metadata, false)) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = (try(each.value.enable_remote_resources, false) || try(each.value.enable_gen_metadata, false)) ? local.shared_resource_path : null
 
   secret_bindings = merge(
     local.secrets_bound_as_env_vars[each.key],
@@ -378,9 +404,9 @@ module "webhook_collector" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
+  remote_resource_bucket        = try(each.value.enable_remote_resources, false) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = try(each.value.enable_remote_resources, false) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = try(each.value.enable_remote_resources, false) ? local.shared_resource_path : null
 
   secret_bindings = module.psoxy.secrets
 
@@ -446,9 +472,9 @@ module "bulk_connector" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
+  remote_resource_bucket        = try(each.value.enable_remote_resources, false) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = try(each.value.enable_remote_resources, false) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = try(each.value.enable_remote_resources, false) ? local.shared_resource_path : null
 
   depends_on = [
     module.psoxy # some of the set-up IAM grants done there, but not EXPLICITLY passed out as outputs and into above as inputs, are required; so make this explicit

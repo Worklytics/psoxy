@@ -40,14 +40,16 @@ Inspired by OData's `@`-annotation pattern (where metadata about a property `Foo
 +{sourceProperty}:{augmentFunction}
 ```
 
-When `innerJsonPath` is set and matches nested JSON inside a string field, each inner match is
-augmented in place within the parsed embedded JSON (mirroring the legacy `textDigest` transform
-with `isJsonEscaped`), then the modified structure is re-serialized as a string:
+When `innerJsonPath` is set and matches nested JSON inside a string field, all inner matches are
+grouped under a single augment property, keyed by normalized inner path suffix:
 
 ```jsonc
 {
   "content": "{ ... escaped AdaptiveCard JSON ... }",
-  "+content:textDigest": "{\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"TextBlock\",\"text\":\"{\\\"length\\\":2572,\\\"word_count\\\":154}\",\"wrap\":true},...]}"
+  "+content:textDigest": {
+    "body[0].text": { "length": 2572, "word_count": 154 },
+    "body[1].text": { "length": 980,  "word_count": 154 }
+  }
 }
 ```
 
@@ -58,8 +60,8 @@ with `isJsonEscaped`), then the modified structure is re-serialized as a string:
 | `:` | Separator. |
 | `{augmentFunction}` | The name of the augment function (e.g. `textDigest`). |
 
-For embedded JSON, inner matched fields (e.g. `text`) are replaced with serialized augment output
-and the whole embedded JSON is re-serialized as a string value.
+Inner map keys use `{innerPathSuffix}` — the normalized concrete path within parsed inner JSON
+(e.g. `body[0].text`).
 
 **Example.** For a response containing `body.content`, the augment property produced by the `textDigest` function would be:
 
@@ -193,7 +195,7 @@ public abstract class Augment {
 
 ### `outputSchema` — Output Validation
 
-Each augment rule carries an optional `outputSchema` property of type `JsonSchemaFilter`. This schema is applied as a **predicate** (not a filter) to the value produced by the augment's `compute()` method:
+Each augment rule may carry an `outputSchema` property of type `JsonSchemaFilter`. This schema is applied as a **predicate** (not a filter) to the value produced by the augment's `compute()` method. **`genMetadata` requires `outputSchema`.** Validation is implemented in `AugmentProcessor` (v0.6.x BETA); failures emit `X-Psoxy-Warning: augment-output-schema-mismatch`.
 
 | Outcome | Action |
 |---|---|

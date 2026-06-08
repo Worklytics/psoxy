@@ -85,6 +85,24 @@ locals {
 
   # proxy caller role requires direct lambda access if API Gateway v2 is not used and there are API connectors
   caller_requires_direct_lambda_access = !local.use_api_gateway_v2 && length(module.api_connector) > 0
+
+  needs_opennlp_model_upload = length([
+    for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) : k
+    if try(v.enable_remote_resources, false)
+  ]) > 0
+
+  needs_gen_metadata_model_upload = length([
+    for k, v in var.api_connectors : k if try(v.enable_gen_metadata, false)
+  ]) > 0
+
+  gen_metadata_model_id = coalesce(
+    try(var.general_environment_variables["PSOXY_GEN_MODEL"], null),
+    "tjake/Llama-3.2-1B-Instruct-JQ4"
+  )
+  gen_metadata_archive_name = "${replace(local.gen_metadata_model_id, "/", "__")}.zip"
+
+  # Appended to JAVA_TOOL_OPTIONS when enable_gen_metadata (Jlama / Vector API). See gen-metadata-augment.md.
+  jlama_java_tool_options = "--add-modules=jdk.incubator.vector --enable-preview --enable-native-access=ALL-UNNAMED"
 }
 
 module "psoxy" {
@@ -313,7 +331,10 @@ module "api_connector" {
   side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
   enable_async_processing               = each.value.enable_async_processing
-  memory_size_mb                        = each.value.enable_async_processing ? 1024 : 512 # default is 512; double it for async case, to give additional margin
+  memory_size_mb = max(
+    try(each.value.enable_gen_metadata, false) ? coalesce(each.value.memory_size_mb, 4096) : (each.value.enable_async_processing ? 1024 : 512),
+    try(each.value.enable_gen_metadata, false) ? 4096 : 0
+  )
 
   todos_as_local_files          = var.todos_as_local_files
   todo_step                     = var.todo_step
@@ -331,11 +352,15 @@ module "api_connector" {
     },
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      ENABLE_GEN_METADATA = "true"
+      JAVA_TOOL_OPTIONS   = trimspace("${lookup(merge(try(each.value.environment_variables, {}), var.general_environment_variables), "JAVA_TOOL_OPTIONS", "")} ${local.jlama_java_tool_options}")
+    } : {},
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
+  remote_resource_bucket        = (try(each.value.enable_remote_resources, false) || try(each.value.enable_gen_metadata, false)) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (try(each.value.enable_remote_resources, false) || try(each.value.enable_gen_metadata, false)) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = (try(each.value.enable_remote_resources, false) || try(each.value.enable_gen_metadata, false)) ? local.shared_resource_path : null
 }
 
 
@@ -421,9 +446,9 @@ module "bulk_connector" {
     var.general_environment_variables
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
+  remote_resource_bucket        = try(each.value.enable_remote_resources, false) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = try(each.value.enable_remote_resources, false) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = try(each.value.enable_remote_resources, false) ? local.shared_resource_path : null
 }
 
 
@@ -474,9 +499,9 @@ module "webhook_collectors" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
+  remote_resource_bucket        = try(each.value.enable_remote_resources, false) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = try(each.value.enable_remote_resources, false) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = try(each.value.enable_remote_resources, false) ? local.shared_resource_path : null
 }
 
 # Policy to allow test caller to invoke webhook collector urls and sign webhook requests

@@ -197,6 +197,9 @@ variable "api_connectors" {
     oauth_scopes_needed     = optional(list(string), [])
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
+    enable_remote_resources = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
+    memory_size_mb          = optional(number)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -288,13 +291,14 @@ variable "bulk_connectors" {
         transforms = optional(list(map(string)), [])
       })))
     }))
-    rules_file            = optional(string)
-    rules_raw             = optional(string, null)
-    example_file          = optional(string)
-    example_files         = optional(list(string), [])
-    instructions_template = optional(string)
-    memory_size_mb        = optional(number)
-    settings_to_provide   = optional(map(string), {})
+    rules_file              = optional(string)
+    rules_raw               = optional(string, null)
+    example_file            = optional(string)
+    example_files           = optional(list(string), [])
+    instructions_template   = optional(string)
+    memory_size_mb          = optional(number)
+    settings_to_provide     = optional(map(string), {})
+    enable_remote_resources = optional(bool, false)
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -372,12 +376,13 @@ variable "webhook_collectors" {
       rotation_days = optional(number, null)       # null means no rotation; if > 0, will rotate every N days
       key_spec      = optional(string, "RSA_2048") # RSA_2048, RSA_3072, or RSA_4096; defaults to RSA_2048, which should be sufficient this use-case
     }), null)
-    auth_public_keys    = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
-    allow_origins       = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
-    output_path_prefix  = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket
-    keep_warm_instances = optional(number, null)        # if set, keeps N Lambda instances warm to eliminate cold starts; adds cost (~$11/month per instance) but improves reliability
-    example_identity    = optional(string, null)        # example identity to use in test payloads
-    example_payload     = optional(string, null)        # example payload content to use in test scripts
+    auth_public_keys        = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
+    allow_origins           = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
+    output_path_prefix      = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket
+    keep_warm_instances     = optional(number, null)        # if set, keeps N Lambda instances warm to eliminate cold starts; adds cost (~$11/month per instance) but improves reliability
+    example_identity        = optional(string, null)        # example identity to use in test payloads
+    example_payload         = optional(string, null)        # example payload content to use in test scripts
+    enable_remote_resources = optional(bool, false)
   }))
   default = {}
 
@@ -472,8 +477,3 @@ variable "artifacts_bucket_name" {
 }
 
 
-variable "enable_remote_resources" {
-  type        = bool
-  description = "**beta** Whether to enable remote resource loading from the artifacts S3 bucket (rules, NLP models, etc.). When true, sets REMOTE_RESOURCE_BUCKET env var and grants s3:GetObject to each Lambda. Default will change to `true` in next major version."
-  default     = false # will change to true in 0.7.x
-}

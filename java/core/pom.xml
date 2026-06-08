@@ -169,6 +169,24 @@
             <version>10.5</version>
         </dependency>
 
+        <!-- BETA genMetadata: LangChain4j + Jlama (embedded local LLM, pure Java). -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>${dependency.langchain4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-jlama</artifactId>
+            <version>${dependency.langchain4j-jlama.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tjake</groupId>
+            <artifactId>jlama-native</artifactId>
+            <version>0.8.4</version>
+            <classifier>${os.detected.classifier}</classifier>
+        </dependency>
+
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
@@ -207,6 +225,13 @@
 
 
     <build>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.7.1</version>
+            </extension>
+        </extensions>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -215,7 +240,7 @@
                 <configuration>
                     <!-- forces loading of Mockito agent during test execution; this avoids some warnings seen in console during test execution, but unlcear that it fixes anything -->
                     <!-- specfically, warning was "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3 WARNING: A Java agent has been loaded dynamically (/Users/erik/.m2/repository/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar) WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information WARNING: Dynamic loading of agents will be disallowed by default in a future release" -->
-                    <argLine>-javaagent:"${settings.localRepository}/org/mockito/mockito-core/${dependency.mockito-junit-jupiter.version}/mockito-core-${dependency.mockito-junit-jupiter.version}.jar"</argLine> <!-- enable inline mocking -->
+                    <argLine>-javaagent:"${settings.localRepository}/org/mockito/mockito-core/${dependency.mockito-junit-jupiter.version}/mockito-core-${dependency.mockito-junit-jupiter.version}.jar" --add-modules=jdk.incubator.vector --enable-preview --enable-native-access=ALL-UNNAMED</argLine> <!-- enable inline mocking -->
                     <!-- rerun failing tests twice more -->
                     <rerunFailingTestsCount>2</rerunFailingTestsCount>
                     <systemProperties>
@@ -253,5 +278,27 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>gen-metadata-integration</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>**/LangChain4jGenMetadataBackendIntegrationTest.java</include>
+                            </includes>
+                            <systemPropertyVariables>
+                                <psoxy.genMetadata.integration>true</psoxy.genMetadata.integration>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

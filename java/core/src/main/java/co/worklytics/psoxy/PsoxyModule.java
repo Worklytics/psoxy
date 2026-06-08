@@ -38,7 +38,15 @@ import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import com.avaulta.gateway.resources.ResourceService;
+import com.avaulta.gateway.rules.augments.GenMetadataBackend;
+import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
+import com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend;
 import co.worklytics.psoxy.impl.AugmentProcessor;
+import co.worklytics.psoxy.impl.gen.GenMetadataChatModelFactory;
+import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
+import co.worklytics.psoxy.impl.gen.GenMetadataPromptBudget;
+import co.worklytics.psoxy.impl.gen.LangChain4jGenMetadataBackend;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
@@ -381,5 +389,32 @@ public class PsoxyModule {
     @Provides
     Base64.Encoder provideBase64Encoder() {
         return Base64.getEncoder();
+    }
+
+    /**
+     * Wires genMetadata backend. Model weights are resolved via {@code @Named("ForGenMetadata")}
+     * {@link ResourceService} from {@code ResourceServiceBindingsModule}.
+     */
+    @Provides
+    @Singleton
+    static GenMetadataBackend genMetadataBackend(
+            ConfigService configService,
+            ObjectMapper objectMapper,
+            GenMetadataPromptBudget promptBudget,
+            GenMetadataChatModelFactory chatModelFactory) {
+        GenMetadataConfig config = GenMetadataConfig.from(configService);
+        if (GenMetadataConfig.BACKEND_LOCAL.equalsIgnoreCase(config.getBackend())) {
+            return new LangChain4jGenMetadataBackend(config, objectMapper, promptBudget, chatModelFactory);
+        }
+        return new UnavailableGenMetadataBackend();
+    }
+
+    @Provides
+    @Singleton
+    static GenMetadataProcessor genMetadataProcessor(GenMetadataBackend genMetadataBackend,
+                                                     ObjectMapper objectMapper,
+                                                     ConfigService configService) {
+        GenMetadataConfig config = GenMetadataConfig.from(configService);
+        return new GenMetadataProcessor(genMetadataBackend, objectMapper, config.getMaxInputChars());
     }
 }

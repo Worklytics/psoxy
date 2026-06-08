@@ -31,3 +31,6 @@
 
 # OpenNLP models (downloaded by tools/fetch-opennlp-models.sh)
 /java/gateway-core/src/main/resources/opennlp/
+
+# genMetadata model cache/archives (tools/fetch-gen-metadata-model.sh)
+.build/

@@ -3,6 +3,11 @@ package co.worklytics.psoxy;
 public enum Warning {
 
     COMPRESSION_NOT_REQUESTED,
+
+    AUGMENT_OUTPUT_SCHEMA_MISMATCH,
+    AUGMENT_GEN_INFERENCE_FAILED,
+    AUGMENT_GEN_UNAVAILABLE,
+    AUGMENT_CONFLICT_SKIPPED,
     ;
 
     public String asHttpHeaderCode() {

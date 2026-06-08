@@ -254,6 +254,9 @@ variable "custom_api_connectors" {
     oauth_scopes_needed     = optional(list(string), [])
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
+    enable_remote_resources = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
+    available_memory_mb     = optional(number)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -279,10 +282,12 @@ variable "custom_api_connectors" {
   description = "map of custom API connectors to provision"
   default = {
     # "custom-api" = {
-    #   source_kind          = "my-custom-api"
-    #   source_auth_strategy = "bearer"
-    #   target_host          = "api.example.com"
-    #   example_api_calls    = ["/v1/users"]
+    #   source_kind             = "my-custom-api"
+    #   source_auth_strategy    = "bearer"
+    #   target_host             = "api.example.com"
+    #   enable_remote_resources = true
+    #   enable_gen_metadata     = false
+    #   example_api_calls       = ["/v1/users"]
     #   secured_variables = [
     #     { name = "API_KEY" }
     #   ]
@@ -307,11 +312,12 @@ variable "webhook_collectors" {
       rotation_days = optional(number, null)                         # null means no rotation; if > 0, will rotate every N days
       key_spec      = optional(string, "RSA_SIGN_PKCS1_2048_SHA256") # see https://cloud.google.com/kms/docs/reference/rest/v1/CryptoKeyVersionAlgorithm
     }), null)
-    auth_public_keys     = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
-    allow_origins        = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
-    output_path_prefix   = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket (e.g., 'events_', 'webhooks/')
-    example_payload_file = optional(string, null)        # path to example payload file to use for testing; if provided, will be used in the test script
-    example_identity     = optional(string, null)        # example identity to use for testing; if provided, will be used to test the collector
+    auth_public_keys        = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
+    allow_origins           = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
+    output_path_prefix      = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket (e.g., 'events_', 'webhooks/')
+    example_payload_file    = optional(string, null)        # path to example payload file to use for testing; if provided, will be used in the test script
+    example_identity        = optional(string, null)        # example identity to use for testing; if provided, will be used to test the collector
+    enable_remote_resources = optional(bool, false)
   }))
 
   default = {}
@@ -340,12 +346,13 @@ variable "custom_bulk_connectors" {
         transforms = optional(list(map(string)), [])
       })))
     }))
-    available_memory_mb = optional(number)
-    timeout_seconds     = optional(number)
-    rules_file          = optional(string)
-    settings_to_provide = optional(map(string), {})
-    example_file        = optional(string)
-    example_files       = optional(list(string), [])
+    available_memory_mb     = optional(number)
+    timeout_seconds         = optional(number)
+    enable_remote_resources = optional(bool, false)
+    rules_file              = optional(string)
+    settings_to_provide     = optional(map(string), {})
+    example_file            = optional(string)
+    example_files           = optional(list(string), [])
   }))
   description = "specs of custom bulk connectors to create"
 

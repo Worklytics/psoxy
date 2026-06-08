@@ -28,13 +28,17 @@ mounted locally.
 
 ## Terraform Configuration
 
-By default, the host modules in this repository (`aws-host` and `gcp-host`) will configure the
-`REMOTE_RESOURCE_BUCKET` for you if you set the `enable_remote_resources` variable to `true`. This
-automatically wires the **artifacts bucket** (used for deployment bundles) as the remote resource bucket.
+Host modules (`aws-host` and `gcp-host`) enable remote resource loading **per connector** via `enable_remote_resources` on each `api_connectors`, `bulk_connectors`, or `webhook_collectors` entry. This wires the **artifacts bucket** (used for deployment bundles) as the remote resource bucket for only those instances.
 
 > [!IMPORTANT]
 > - If you configure an existing bucket (e.g., by providing `artifacts_bucket_name`), the bucket must already exist.
 > - The Terraform runner (the credentials running the `terraform` command) must have sufficient IAM permissions on that bucket to apply permissions (since it will grant read access to the proxy's service account or Lambda execution role).
+
+### Connector specs and custom connectors
+
+Prebuilt connectors in `worklytics-connector-specs` may set `enable_remote_resources` or `enable_gen_metadata` per connector (e.g. `msft-copilot` enables gen metadata). Those flags flow through to `aws-host` / `gcp-host` when the connector is enabled.
+
+For ad-hoc connectors, set the flags on `custom_api_connectors` or `custom_bulk_connectors` in your root module (see `infra/examples-dev/*/variables.tf`).
 
 ### AWS (`aws-host`)
 
@@ -42,16 +46,21 @@ automatically wires the **artifacts bucket** (used for deployment bundles) as th
 module "psoxy" {
   source = "../../modules/aws-host"
 
-  # ... existing configuration ...
-
-  # Enable remote resource loading from the artifacts S3 bucket
-  enable_remote_resources = true
+  api_connectors = {
+    "my-api" = {
+      source_kind             = "..."
+      source_auth_strategy    = "..."
+      target_host             = "..."
+      enable_remote_resources = true  # OpenNLP, rules.yaml in bucket, etc.
+      enable_gen_metadata     = false
+    }
+  }
 }
 ```
 
-This will:
-- Set `REMOTE_RESOURCE_BUCKET` on every Lambda function to the artifacts bucket name
-- Grant `s3:GetObject` permission on the configured path prefixes in the bucket to each Lambda's execution role
+This will, for that connector only:
+- Set `REMOTE_RESOURCE_BUCKET` on the Lambda to the artifacts bucket name
+- Grant `s3:GetObject` permission on the configured path prefixes in the bucket to that Lambda's execution role
 
 ### GCP (`gcp-host`)
 
@@ -59,22 +68,28 @@ This will:
 module "psoxy" {
   source = "../../modules/gcp-host"
 
-  # ... existing configuration ...
-
-  # Enable remote resource loading from the artifacts GCS bucket
-  enable_remote_resources = true
+  api_connectors = {
+    "gcal" = {
+      source_kind             = "..."
+      source_auth_strategy    = "..."
+      target_host             = "..."
+      enable_remote_resources = true
+    }
+  }
 }
 ```
 
-This will:
-- Set `REMOTE_RESOURCE_BUCKET` on every Cloud Function to the artifacts bucket name
-- Grant `roles/storage.objectViewer` on the bucket, scoped to the configured path prefixes using IAM conditions, to each function's service account
+This will, for that connector only:
+- Set `REMOTE_RESOURCE_BUCKET` on the Cloud Function to the artifacts bucket name
+- Grant `roles/storage.objectViewer` on the bucket, scoped to the configured path prefixes using IAM conditions, to that function's service account
+
+Remote resource paths use `/` as a hierarchy separator within the bucket (e.g. `psoxy-dev-erik/GCAL/rules.yaml` for shared prefix `psoxy-dev-erik/` and connector `gcal`). They are distinct from secret / parameter prefixes, which use a trailing `_` to separate names (e.g. `psoxy-dev-erik_GCAL_SOURCE`). When `INSTANCE_RESOURCE_PATH` / `SHARED_RESOURCE_PATH` are not set, psoxy falls back to the config paths and normalizes trailing `_` to `/` and strips any leading `/`.
 
 ## Environment Variables
 
 | Variable                  | Description                                                                                        | Required |
 |---------------------------|----------------------------------------------------------------------------------------------------|----------|
-| `REMOTE_RESOURCE_BUCKET`  | Name of the S3/GCS bucket containing remote resources.                                             | No       |
+| `REMOTE_RESOURCE_BUCKET`  | Name of the S3/GCS bucket from which to load remote resources.                                     | Yes      |
 | `INSTANCE_RESOURCE_PATH`  | Path prefix for instance-specific resources within the bucket. Defaults to `PATH_TO_INSTANCE_CONFIG`. | No       |
 | `SHARED_RESOURCE_PATH`    | Path prefix for shared resources (NLP models, etc.) within the bucket. Defaults to `PATH_TO_SHARED_CONFIG`. | No       |
 
@@ -83,12 +98,12 @@ This will:
 The Terraform modules automatically grant minimal read permissions following the Principle of
 Least Privilege. Access is limited to the configured resource path prefixes within the bucket:
 
-- **AWS**: `s3:GetObject` only for objects under `{INSTANCE_RESOURCE_PATH}/` and `{SHARED_RESOURCE_PATH}/`
-- **GCP**: object read access only for objects under `{INSTANCE_RESOURCE_PATH}/` and `{SHARED_RESOURCE_PATH}/`, enforced with IAM Conditions
+- **AWS**: `s3:GetObject` only for objects under `{INSTANCE_RESOURCE_PATH}/` and
+  `{SHARED_RESOURCE_PATH}/`
+- **GCP**: object read access only for objects under `{INSTANCE_RESOURCE_PATH}/` and
+  `{SHARED_RESOURCE_PATH}/`, enforced with IAM Conditions
 
-No write, delete, or list permissions are granted. When an object is missing or inaccessible, S3 may return 403 (citing `s3:ListBucket`) rather than 404 if the caller lacks bucket list permission; psoxy treats that as unavailable (non-fatal) and continues its resource lookup chain (e.g. falling back to prebuilt rules).
-
-Remote resource paths use `/` as a hierarchy separator within the bucket (e.g. `psoxy-dev-erik/GCAL/rules.yaml` for shared prefix `psoxy-dev-erik/` and connector `gcal`). They are distinct from secret / parameter prefixes, which use a trailing `_` to separate names (e.g. `psoxy-dev-erik_GCAL_SOURCE`). When `INSTANCE_RESOURCE_PATH` / `SHARED_RESOURCE_PATH` are not set, psoxy falls back to the config paths and normalizes trailing `_` to `/` and strips any leading `/`.
+No write, delete, or list permissions are granted.
 
 ## Use Cases
 
@@ -98,8 +113,7 @@ if no `RULES` config property (env var, parameter store entry, etc.) is found.
 
 ### NLP Models (alpha)
 OpenNLP model files (`en-sent.bin`, `en-pos-maxent.bin`, `en-chunker.bin`) are **not** bundled in
-deployment JARs. If your connector rules use `sentenceMetadata` augments, you must upload these
-models to the remote resources bucket yourself (requires `enable_remote_resources = true`).
+deployment JARs. If your connector rules use `sentenceMetadata` augments, set `enable_remote_resources = true` on that API connector and upload these models to the remote resources bucket.
 
 Place them under `{SHARED_RESOURCE_PATH}/opennlp/` (e.g.
 `{SHARED_RESOURCE_PATH}/opennlp/en-sent.bin`). `{SHARED_RESOURCE_PATH}` defaults to
@@ -130,9 +144,32 @@ aws s3 cp en-sent.bin s3://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/openn
 gsutil cp en-sent.bin gs://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/opennlp/en-sent.bin
 ```
 
-### LLM Weights (future)
-Smaller language models that fit in memory can be placed in the shared resource path for
-on-the-fly inference within the proxy.
+### LLM model archives (genMetadata BETA)
+Upload a **zip** of a Jlama SafeTensors model directory (must include `config.json`) for the **genMetadata** augment to `{SHARED_RESOURCE_PATH}/llm/` in the bucket. The archive name is derived from `PSOXY_GEN_MODEL` (default `tjake/Llama-3.2-1B-Instruct-JQ4`): slashes become `__`, with a `.zip` suffix — e.g. `llm/tjake__Llama-3.2-1B-Instruct-JQ4.zip`. Set per-connector `enable_gen_metadata = true` on `api_connectors` (which also enables remote resource loading for that connector). See [gen-metadata-augment.md](../development/gen-metadata-augment.md) for HuggingFace ids, cloud backends, and ops detail (cloud inference does not use `llm/` archives).
+
+**Helper script** (download from HuggingFace, zip, upload):
+
+```bash
+# AWS — PREFIX is your SHARED_RESOURCE_PATH within the bucket (trailing slash optional)
+./tools/fetch-gen-metadata-model.sh s3://REMOTE_RESOURCE_BUCKET/PREFIX/
+
+# GCP — optional MODEL_ID overrides PSOXY_GEN_MODEL / default
+./tools/fetch-gen-metadata-model.sh gs://REMOTE_RESOURCE_BUCKET/PREFIX/ tjake/Llama-3.2-1B-Instruct-JQ4
+
+# Use an existing local SafeTensors directory instead of downloading
+./tools/fetch-gen-metadata-model.sh --from-dir /path/to/model-dir s3://REMOTE_RESOURCE_BUCKET/PREFIX/
+```
+
+**Manual upload:**
+
+```bash
+cd /path/to/model-dir && zip -r ../tjake__Llama-3.2-1B-Instruct-JQ4.zip .
+aws s3 cp ../tjake__Llama-3.2-1B-Instruct-JQ4.zip \
+  s3://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/llm/tjake__Llama-3.2-1B-Instruct-JQ4.zip
+
+gsutil cp ../tjake__Llama-3.2-1B-Instruct-JQ4.zip \
+  gs://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/llm/tjake__Llama-3.2-1B-Instruct-JQ4.zip
+```
 
 ## Uploading Resources
 

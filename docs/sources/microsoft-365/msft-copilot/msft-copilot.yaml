@@ -11,6 +11,38 @@ endpoints:
       - !<textDigest>
         jsonPaths:
           - "$..body.content"
+      # BETA genMetadata PoC — enable when PSOXY_GEN_* env and 4096MB memory are configured:
+      # - !<genMetadata>
+      #   jsonPaths:
+      #     - "$..body.content"
+      #   prompt: >
+      #     Classify the user's LLM prompt (input text) into exactly one category.
+      #     Use one of these category names verbatim:
+      #     Email Drafting, General Content Drafting, Email Editing and Refinement,
+      #     General Content Editing and Refinement, Summarization and Synthesis,
+      #     Research and Ideation, Analysis and Data Work, Code Generation and Development,
+      #     Workflow and Task Management, Uncategorized, Excluded.
+      #     Use "Uncategorized" when the prompt is substantive but does not clearly fit a specific category.
+      #     Use "Excluded" for social niceties (greetings, thanks, pleasantries only) or prompts
+      #     that are too short or non-substantive to classify.
+      #   outputSchema:
+      #     type: object
+      #     properties:
+      #       category:
+      #         type: string
+      #         enum:
+      #           - Email Drafting
+      #           - General Content Drafting
+      #           - Email Editing and Refinement
+      #           - General Content Editing and Refinement
+      #           - Summarization and Synthesis
+      #           - Research and Ideation
+      #           - Analysis and Data Work
+      #           - Code Generation and Development
+      #           - Workflow and Task Management
+      #           - Uncategorized
+      #           - Excluded
+      #     required: [category]
     transforms:
       - !<pseudonymize>
         jsonPaths:
