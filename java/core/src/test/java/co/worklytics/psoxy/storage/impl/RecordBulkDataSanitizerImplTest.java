@@ -523,7 +523,62 @@ class RecordBulkDataSanitizerImplTest {
 
             String expected2 = encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("2" + "salt")).build());
             assertEquals(expected2, sanitized.get("bar"));
+
         }
+    }
+    void pseudonymize_blankStringValue() {
+        this.setUpWithRules("---\n" +
+            "format: \"NDJSON\"\n" +
+            "transforms:\n" +
+            "- pseudonymize: \"email\"\n");
+
+        String input = "{\"email\":\"\",\"other\":\"value\"}\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/file.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+        assertEquals("{\"email\":\"\",\"other\":\"value\"}\n", output);
+    }
+
+    @Test
+    void pseudonymize_nullJsonPathMatch() {
+        this.setUpWithRules("---\n" +
+            "format: \"NDJSON\"\n" +
+            "transforms:\n" +
+            "- pseudonymize: \"$.profile.email\"\n");
+
+        String input = "{\"profile\":{\"email\":null},\"other\":\"value\"}\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/file.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+        assertEquals("{\"profile\":{\"email\":null},\"other\":\"value\"}\n", output);
+    }
+
+    @Test
+    void pseudonymize_arrayWithBlankAndValidValues() {
+        this.setUpWithRules("---\n" +
+            "format: \"NDJSON\"\n" +
+            "transforms:\n" +
+            "- pseudonymize: \"$.members[*].email\"\n");
+
+        String input = "{\"members\":[{\"email\":\"alice@example.com\"},{\"email\":\"\"},{\"email\":null}]}\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/file.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+        assertTrue(output.contains("\"email\":\"\""));
+        assertTrue(output.contains("\"email\":null"));
+        assertTrue(output.contains("t~"));
     }
 
     @Test
