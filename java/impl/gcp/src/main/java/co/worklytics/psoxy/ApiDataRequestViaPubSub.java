@@ -50,12 +50,6 @@ public class ApiDataRequestViaPubSub implements AsyncApiDataRequestHandler {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 publisher.shutdown();
-                if (!publisher.awaitTermination(30, java.util.concurrent.TimeUnit.SECONDS)) {
-                    publisher.shutdownNow();
-                }
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                publisher.shutdownNow();
             } catch (Exception e) {
                 log.log(Level.WARNING, "Failed to shutdown PubSub publisher for topic: " + topicName, e);
             }
