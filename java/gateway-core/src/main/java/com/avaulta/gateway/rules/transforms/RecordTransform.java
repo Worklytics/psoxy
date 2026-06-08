@@ -30,7 +30,9 @@ import java.util.List;
 )
 @JsonSubTypes({
     @JsonSubTypes.Type(value = RecordTransform.Redact.class),
-    @JsonSubTypes.Type(value = RecordTransform.Pseudonymize.class)
+    @JsonSubTypes.Type(value = RecordTransform.Pseudonymize.class),
+    @JsonSubTypes.Type(value = RecordTransform.Tokenize.class),
+    @JsonSubTypes.Type(value = RecordTransform.TextDigest.class),
 })
 public interface RecordTransform {
 
@@ -80,6 +82,48 @@ public interface RecordTransform {
         @JsonIgnore
         public List<String> getPaths() {
             return pseudonymize;
+        }
+    }
+
+
+    @JsonTypeName("tokenize")
+    @NoArgsConstructor
+    @SuperBuilder(toBuilder = true)
+    @Data
+    class Tokenize implements RecordTransform {
+
+        @Singular("tokenize")
+        @JsonFormat(with = {
+            JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
+            JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED
+        })
+        List<String> tokenize;
+
+        @Override
+        @JsonIgnore
+        public List<String> getPaths() {
+            return tokenize;
+        }
+    }
+
+
+    @JsonTypeName("textDigest")
+    @NoArgsConstructor
+    @SuperBuilder(toBuilder = true)
+    @Data
+    class TextDigest implements RecordTransform {
+
+        @Singular("textDigest")
+        @JsonFormat(with = {
+            JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
+            JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED
+        })
+        List<String> textDigest;
+
+        @Override
+        @JsonIgnore
+        public List<String> getPaths() {
+            return textDigest;
         }
     }
 }

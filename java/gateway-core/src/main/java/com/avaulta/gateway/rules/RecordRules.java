@@ -2,6 +2,7 @@ package com.avaulta.gateway.rules;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import com.avaulta.gateway.rules.transforms.RecordTransform;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -55,6 +56,17 @@ public class RecordRules implements BulkDataRules {
      */
     @Singular
     List<RecordTransform> transforms;
+
+    /**
+     * Optional JSON schema allow-list applied to each record after transforms.
+     * Properties not declared in the schema (including unknown future event payload fields) are
+     * removed from the output. See {@link JsonSchemaFilter}.
+     */
+    JsonSchemaFilter outputSchemaFilter;
+
+    public Optional<JsonSchemaFilter> getOutputSchemaFilterOptional() {
+        return Optional.ofNullable(outputSchemaFilter);
+    }
 
     /**
      * No-args constructor.
