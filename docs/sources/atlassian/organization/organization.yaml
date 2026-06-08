@@ -333,6 +333,8 @@ definitions:
     properties:
       action:
         type: "string"
+      actionCategory:
+        type: "string"
       actor:
         $ref: "#/definitions/Actor"
       container:
