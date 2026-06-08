@@ -300,34 +300,44 @@ resource "aws_ssm_parameter" "rules" {
   }
 }
 
-resource "aws_iam_policy" "testing" {
+resource "aws_s3_bucket_policy" "testing_input_upload" {
   count = var.provision_iam_policy_for_testing ? 1 : 0
 
-  name_prefix = "${local.iam_policy_prefix}Testing"
-  description = "Allow to write to input bucket, read from sanitized bucket to test Lambda's behavior"
+  bucket = aws_s3_bucket.input.id
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Sid" : "AllowTestUploadPrincipals",
+        "Effect" : "Allow",
+        "Principal" : {
+          "AWS" : var.test_aws_principal_arns
+        },
+        "Action" : [
+          "s3:PutObject"
+        ],
+        "Resource" : "${aws_s3_bucket.input.arn}/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "testing_sanitized_cleanup" {
+  count = var.provision_iam_policy_for_testing ? 1 : 0
+
+  name_prefix = "${local.iam_policy_prefix}TestingSanitizedCleanup"
+  description = "Allow to delete from sanitized bucket for testing"
   policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
       {
         "Action" : [
-          "s3:PutObject"
-        ]
-        "Effect" : "Allow",
-        "Resource" : [
-          "${aws_s3_bucket.input.arn}",
-          "${aws_s3_bucket.input.arn}/*"
-        ]
-      },
-      {
-        "Action" : [
-          "s3:GetObject",
-          "s3:ListBucket",
           "s3:DeleteObject",
           "s3:DeleteObjectVersion"
         ],
         "Effect" : "Allow",
         "Resource" : [
-          "${aws_s3_bucket.sanitized.arn}",
           "${aws_s3_bucket.sanitized.arn}/*"
         ]
       }
@@ -335,16 +345,11 @@ resource "aws_iam_policy" "testing" {
   })
 }
 
-
-
-resource "aws_iam_policy_attachment" "testing_policy_to_testing_role" {
+resource "aws_iam_role_policy_attachment" "testing_sanitized_cleanup_to_caller_role" {
   count = var.provision_iam_policy_for_testing ? 1 : 0
 
-  name       = "${aws_iam_policy.testing[count.index].name}_to_${var.instance_id}TestingRole"
-  policy_arn = aws_iam_policy.testing[count.index].arn
-  roles = [
-    element(split("role/", var.aws_role_to_assume_when_testing), 1)
-  ]
+  role       = element(reverse(split("/", var.aws_role_to_assume_when_testing)), 0)
+  policy_arn = aws_iam_policy.testing_sanitized_cleanup[0].arn
 }
 
 locals {
@@ -369,7 +374,7 @@ Check that the Psoxy works as expected, and it transforms the files of your inpu
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_files_csv} ${local.role_option_for_tests} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} --region ${data.aws_region.current.id}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_files_csv} ${local.role_option_for_tests} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} --region ${data.aws_region.current.region}
 ```
 EOT
 
@@ -378,10 +383,10 @@ EOT
 
 Review the deployed function in AWS console:
 
-- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
+- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.region}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
 
 We provide some Node.js scripts to easily validate the deployment. To be able to run the test
-commands below, you need Node.js (>=16) and npm (v >=8) installed. Ensure all dependencies are
+commands below, you need Node.js (>=20) and npm (v >=8) installed. Ensure all dependencies are
 installed by running:
 
 ```shell
@@ -423,6 +428,7 @@ locals {
 FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
 BLUE='\e[0;34m'
 NC='\e[0m'
+FAILED=0
 
 printf "Quick test of $${BLUE}${var.instance_id}$${NC} ...\n"
 
@@ -432,10 +438,21 @@ for FILE in "$${FILES[@]}"; do
   # trim whitespace
   FILE=$(echo "$FILE" | xargs)
   if [ -z "$FILE" ]; then continue; fi
+
+  if [ ! -f "$FILE" ]; then
+    printf "error: file not found: %s\n" "$FILE" >&2
+    FAILED=1
+    continue
+  fi
   
   printf "Testing file: $FILE\n"
   node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$FILE" -d "AWS" -i "${aws_s3_bucket.input.bucket}" -o "${aws_s3_bucket.sanitized.bucket}" ${local.role_option_for_tests} --region "${var.aws_region}"
+  if [ $? -ne 0 ]; then
+    FAILED=1
+  fi
 done
+
+exit $FAILED
 EOT
 }
 

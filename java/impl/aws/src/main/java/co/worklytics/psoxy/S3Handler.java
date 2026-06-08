@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,15 +36,6 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
     @Inject
     S3Client s3Client;
-
-
-    List<String> EXPECTED_CONTENT_TYPES = Arrays.asList(
-        "text/csv; charset=utf-8",
-        "text/csv; charset=ascii",
-        "text/csv; charset=us-ascii"
-        //"text/csv; charset=iso-8859-1" // standardized latin-1, don't expect this
-    );
-
 
 
     @SneakyThrows
@@ -91,15 +81,6 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             return null;
         }
 
-        // check content type here
-        if (sourceMetadata.contentType() != null
-                && !EXPECTED_CONTENT_TYPES.contains(sourceMetadata.contentType().toLowerCase())) {
-            // our code presumes a CSV, which is utf-8 encoded atm (or something like ascii, which is a subset of utf-8)
-            log.warning(String.format("S3 file content type for %s/%s is %s (content encoding: %s); this is not known to be compatible with UTF-8-encoded CSVs, so may not work as expected",
-                importBucket, sourceKey, sourceMetadata.contentType(), sourceMetadata.contentEncoding()));
-        }
-
-
         StorageEventRequest request =
             storageHandler.buildRequest(importBucket, sourceKey, transform, sourceMetadata.contentEncoding(), sourceMetadata.contentType());
 
@@ -133,8 +114,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
                 .contentLength(tmpFile.length())
                 .metadata(destinationUserMetadata);
 
-            // set headers iff they're non-null on source object
-            Optional.ofNullable(sourceMetadata.contentType())
+            Optional.ofNullable(request.getContentType())
                 .ifPresent(putBuilder::contentType);
 
             if (request.getCompressOutput()) {
