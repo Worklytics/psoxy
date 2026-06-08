@@ -303,6 +303,8 @@ definitions:
     properties:
       client_type:
         type: "string"
+      role:
+        type: "string"
       type:
         type: "string"
   BaseFile:
