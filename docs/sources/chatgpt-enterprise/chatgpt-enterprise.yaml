@@ -191,8 +191,7 @@ endpoints:
           - "linkedin"
       - !<textDigest>
         jsonPaths:
-          - "$[?(@.message.author.type != 'user')].message.content.value"
-          - "$[?(@.message.author.role != 'user')].message.content.value"
+          - "$[?(@.message.author.type != 'user' && @.message.author.role != 'user')].message.content.value"
     responseSchema:
       type: "object"
       properties:
