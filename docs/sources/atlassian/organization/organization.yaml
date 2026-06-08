@@ -16,9 +16,9 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[*].actor.id"
-          - "$.data[*].actor.onBehalfOf.id"
-          - "$.data[*].actor.onBehalfOf.email"
+          - "$.data[*].attributes.actor.id"
+          - "$.data[*].attributes.actor.onBehalfOf.id"
+          - "$.data[*].attributes.actor.onBehalfOf.email"
         encoding: "URL_SAFE_TOKEN"
       - !<redactExceptPhrases>
         jsonPaths:
@@ -148,9 +148,9 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[*].actor.id"
-          - "$.data[*].actor.onBehalfOf.id"
-          - "$.data[*].actor.onBehalfOf.email"
+          - "$.data[*].attributes.actor.id"
+          - "$.data[*].attributes.actor.onBehalfOf.id"
+          - "$.data[*].attributes.actor.onBehalfOf.email"
         encoding: "URL_SAFE_TOKEN"
       - !<redactExceptPhrases>
         jsonPaths:
@@ -333,28 +333,27 @@ definitions:
     properties:
       action:
         type: "string"
-      actionCategory:
-        type: "string"
-      product:
-        type: "string"
-  AuditEvent:
-    type: "object"
-    properties:
       actor:
         $ref: "#/definitions/Actor"
-      attributes:
-        $ref: "#/definitions/Attributes"
       container:
         $ref: "#/definitions/Container"
       context:
         $ref: "#/definitions/Context"
+      processedAt:
+        type: "string"
+        format: "date-time"
+      time:
+        type: "string"
+        format: "date-time"
+  AuditEvent:
+    type: "object"
+    properties:
+      attributes:
+        $ref: "#/definitions/Attributes"
       id:
         type: "string"
       message:
         $ref: "#/definitions/Message"
-      time:
-        type: "string"
-        format: "date-time"
       type:
         type: "string"
   Container:
