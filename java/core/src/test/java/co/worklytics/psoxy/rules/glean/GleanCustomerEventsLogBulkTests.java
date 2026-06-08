@@ -147,6 +147,38 @@ public class GleanCustomerEventsLogBulkTests {
 
     @SneakyThrows
     @Test
+    public void productionShapedEventsSanitized() {
+        setUp("sources/glean/glean-customer-events-log-bulk/glean-customer-events-log-bulk.yaml");
+
+        storageHandler.handle(BulkDataTestUtils.request("sample.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            BulkDataTestUtils.inputStreamSupplier(
+                "sources/glean/glean-customer-events-log-bulk/example-bulk/original/sample.ndjson"),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        assertTrue(output.contains("\"Type\":\"LLM_CALL\""));
+        assertTrue(output.contains("\"Type\":\"ACTION\""));
+        assertTrue(output.contains("\"Type\":\"MCP_USAGE\""));
+        assertTrue(output.contains("\"Type\":\"AUTOCOMPLETE\""));
+        assertTrue(output.contains("\"Type\":\"SEARCH\""));
+        assertTrue(output.contains("\"Type\":\"GLEAN_BOT_ACTIVITY\""));
+        assertTrue(output.contains("\"Type\":\"CLIENT_EVENT\""));
+        assertTrue(output.contains("\"ActionId\":\"Glean Search\""));
+        assertTrue(output.contains("\"ToolName\":\"search\""));
+        assertTrue(output.contains("\"INIT_EPOCH_MS\":\"1724338092104\""));
+        assertTrue(output.contains("\"UiElement\":\"chat-assistant-export-button\""));
+        assertTrue(output.contains("\"DepartmentId\":0"));
+        assertFalse(output.contains("user-llm@example.com"));
+        assertFalse(output.contains("user-action@example.com"));
+        assertFalse(output.contains("vacation carryover rules"));
+        assertFalse(output.contains("acme api"));
+        assertFalse(output.contains("Orbit Ops"));
+        assertFalse(output.contains("Rivet Analytics"));
+    }
+
+    @SneakyThrows
+    @Test
     public void dropsUnknownPayloadFields() {
         setUp("sources/glean/glean-customer-events-log-bulk/glean-customer-events-log-bulk.yaml");
 

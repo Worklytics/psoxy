@@ -90,6 +90,7 @@ outputSchemaFilter:
         DepartmentId:
           anyOf:
             - type: "integer"
+            - type: "number"
             - type: "string"
     GleanCustomerEventSearch:
       type: "object"
@@ -368,13 +369,13 @@ outputSchemaFilter:
           type: "string"
         SessionTrackingToken:
           type: "string"
-        Modality:
-          type: "string"
-        UIElement:
-          type: "string"
         HostDomain:
           type: "string"
         DocUrl:
+          type: "string"
+        Modality:
+          type: "string"
+        UiElement:
           type: "string"
     GleanCustomerEventSearchFeedback:
       type: "object"
@@ -529,17 +530,14 @@ outputSchemaFilter:
         ChannelId:
           type: "string"
         EventMetadata:
-          type: "array"
-          items:
-            type: "object"
+          $ref: "#/definitions/GleanCustomerEventGleanBotEventMetadata"
         EventTrackingToken:
           type: "string"
         EventType:
           type: "string"
         LatenciesMillisMap:
-          type: "array"
-          items:
-            type: "object"
+          type: "object"
+          properties: {}
         ResponseEvents:
           type: "array"
           items:
@@ -555,6 +553,17 @@ outputSchemaFilter:
         WorkspaceId:
           type: "string"
         AgentId:
+          type: "string"
+        TeamId:
+          type: "string"
+    GleanCustomerEventGleanBotEventMetadata:
+      type: "object"
+      properties:
+        INIT_EPOCH_MS:
+          type: "string"
+        PROACTIVE_MENTIONS_ROOT_TS:
+          type: "string"
+        PROACTIVE_MENTIONS_THREAD_TS:
           type: "string"
     GleanCustomerEventProductSnapshot:
       type: "object"
@@ -673,10 +682,66 @@ outputSchemaFilter:
           type: "string"
     GleanCustomerEventAction:
       type: "object"
-      properties: {}
+      properties:
+        ActionId:
+          type: "string"
+        ActionInstanceId:
+          type: "string"
+        ActionName:
+          type: "string"
+        ActionRunId:
+          type: "string"
+        ApplicationId:
+          type: "string"
+        Caller:
+          type: "string"
+        EndTimeMs:
+          type: "integer"
+        EndpointRequestId:
+          type: "string"
+        ErrorStr:
+          type: "string"
+        ErrorType:
+          type: "string"
+        ExecutionMode:
+          type: "string"
+        ExecutionStatus:
+          type: "string"
+        SearchTrackingTokens:
+          type: "array"
+          items:
+            type: "string"
+        SessionTrackingToken:
+          type: "string"
+        StartTimeMs:
+          type: "integer"
+        WebSearchProvider:
+          type: "string"
+        WorkflowId:
+          type: "string"
     GleanCustomerEventMcpUsage:
       type: "object"
-      properties: {}
+      properties:
+        Application:
+          type: "string"
+        AuthMethod:
+          type: "string"
+        DurationMs:
+          type: "integer"
+        EventType:
+          type: "string"
+        McpProtocol:
+          type: "string"
+        McpType:
+          type: "string"
+        Server:
+          type: "string"
+        Status:
+          type: "string"
+        ToolName:
+          type: "string"
+        ToolType:
+          type: "string"
     GleanCustomerEventVoiceChat:
       type: "object"
       properties: {}
