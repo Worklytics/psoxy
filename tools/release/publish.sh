@@ -102,11 +102,8 @@ else
 fi
 
 printf "Updating release notes for ${SUCCESS}$RELEASE${NC} ...\n"
-# Fetch release notes
-release_notes=$(gh release view $RELEASE --json body -q '.body')
-
-# Remove GitHub username mentions
-modified_notes=$(echo -e "$release_notes" | sed -r 's/by @[a-zA-Z0-9_-]+ in//g')
+FORMAT_NOTES_SH="$(dirname "$0")/lib/format-release-notes.sh"
+modified_notes=$(gh release view $RELEASE --json body -q '.body' | "$FORMAT_NOTES_SH")
 
 # Update release notes
 gh release edit $RELEASE -n "$modified_notes"

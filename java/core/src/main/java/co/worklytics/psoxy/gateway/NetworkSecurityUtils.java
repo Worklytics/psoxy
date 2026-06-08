@@ -108,6 +108,10 @@ public class NetworkSecurityUtils {
             return false;
         }
 
+        /**
+         * Extract a single client IP from a raw value that may be a comma-separated
+         * {@code X-Forwarded-For} chain (first hop = original client).
+         */
         private static String normalizeClientIp(String raw) {
             if (raw == null || raw.isBlank()) {
                 return null;

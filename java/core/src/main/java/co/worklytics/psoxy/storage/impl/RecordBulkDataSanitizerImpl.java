@@ -82,19 +82,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         RecordRules.Format format = rules.getFormat();
 
         if (format == RecordRules.Format.AUTO) {
-            String contentType = request.getContentType();
-            if (StringUtils.isBlank(contentType)) {
-                log.warning("Content-Type is missing; defaulting to NDJSON for AUTO format.");
-                format = RecordRules.Format.NDJSON;
-            } else if (StringUtils.containsIgnoreCase(contentType, "application/json")) {
-                format = RecordRules.Format.JSON_ARRAY;
-            } else if (StringUtils.containsIgnoreCase(contentType, "text/csv")) {
-                format = RecordRules.Format.CSV;
-            } else if (StringUtils.containsIgnoreCase(contentType, "parquet") || StringUtils.containsIgnoreCase(contentType, "application/vnd.apache.parquet")) {
-                 format = RecordRules.Format.PARQUET;
-            } else {
-                format = RecordRules.Format.NDJSON;
-            }
+            format = resolveAutoFormat(request);
         }
 
         RecordRules.Format outputFormat = bulkModeConfig.getOutputFormat()
@@ -147,6 +135,65 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             default:
                 return new NdjsonRecordWriter(writer, jsonConfiguration);
         }
+    }
+
+    private RecordRules.Format resolveAutoFormat(StorageEventRequest request) {
+        RecordRules.Format contentTypeFormat = formatFromContentType(request.getContentType());
+        if (contentTypeFormat != null) {
+            return contentTypeFormat;
+        }
+
+        RecordRules.Format sourcePathFormat = formatFromSourceObjectPath(request.getSourceObjectPath());
+        if (sourcePathFormat != null) {
+            return sourcePathFormat;
+        }
+
+        if (StringUtils.containsIgnoreCase(request.getContentType(), "application/json")) {
+            return RecordRules.Format.JSON_ARRAY;
+        }
+
+        if (StringUtils.isBlank(request.getContentType())) {
+            log.warning("Content-Type is missing and file extension is not recognized; defaulting to NDJSON for AUTO format.");
+        }
+        return RecordRules.Format.NDJSON;
+    }
+
+    private RecordRules.Format formatFromContentType(String contentType) {
+        if (StringUtils.isBlank(contentType)) {
+            return null;
+        }
+
+        if (StringUtils.containsIgnoreCase(contentType, "parquet") ||
+            StringUtils.containsIgnoreCase(contentType, "application/vnd.apache.parquet")) {
+            return RecordRules.Format.PARQUET;
+        } else if (StringUtils.containsIgnoreCase(contentType, "text/csv") ||
+            StringUtils.containsIgnoreCase(contentType, "application/csv")) {
+            return RecordRules.Format.CSV;
+        } else if (StringUtils.containsIgnoreCase(contentType, "ndjson") ||
+            StringUtils.containsIgnoreCase(contentType, "jsonl")) {
+            return RecordRules.Format.NDJSON;
+        }
+
+        return null;
+    }
+
+    private RecordRules.Format formatFromSourceObjectPath(String sourceObjectPath) {
+        String path = StringUtils.lowerCase(StringUtils.defaultString(sourceObjectPath));
+        if (path.endsWith(".gz")) {
+            path = path.substring(0, path.length() - ".gz".length());
+        }
+
+        if (path.endsWith(".parquet")) {
+            return RecordRules.Format.PARQUET;
+        } else if (path.endsWith(".csv")) {
+            return RecordRules.Format.CSV;
+        } else if (path.endsWith(".json")) {
+            return RecordRules.Format.JSON_ARRAY;
+        } else if (path.endsWith(".ndjson") || path.endsWith(".jsonl")) {
+            return RecordRules.Format.NDJSON;
+        }
+
+        return null;
     }
 
 

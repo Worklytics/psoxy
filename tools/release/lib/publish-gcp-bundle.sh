@@ -327,7 +327,7 @@ main() {
         exit 1
     fi
 
-    GCLOUD_VERSION=$(gcloud version --format='value(Google Cloud SDK)' 2>/dev/null | head -1)
+    GCLOUD_VERSION=$(gcloud version 2>/dev/null | awk '/^Google Cloud SDK /{print $0; exit}')
     if [ -z "$GCLOUD_VERSION" ]; then
         echo -e "${ERR}Error: gcloud is installed but not working properly${NC}"
         exit 1
