@@ -49,8 +49,6 @@ public class ClaudeTests extends JavaRulesTestBaseCase {
 
             // Organizations endpoint
             InvocationExample.of("https://api.anthropic.com/v1/compliance/organizations", "organizations-response.json"),
-            InvocationExample.of("https://api.anthropic.com/v1/compliance/organizations?page=1&limit=20", "organizations-response.json"),
-            InvocationExample.of("https://api.anthropic.com/v1/compliance/organizations?page=2&limit=50", "organizations-response.json"),
 
             // Organization Users endpoint
             InvocationExample.of("https://api.anthropic.com/v1/compliance/organizations/org_uuid_123/users", "organization-users-response.json"),

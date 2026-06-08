@@ -124,9 +124,7 @@ endpoints:
         user:
           $ref: "#/definitions/User"
   - pathTemplate: "/v1/compliance/organizations"
-    allowedQueryParams:
-      - "page"
-      - "limit"
+    allowedQueryParams: []
     responseSchema:
       type: "object"
       properties:
