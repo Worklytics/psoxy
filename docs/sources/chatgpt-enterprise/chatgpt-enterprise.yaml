@@ -61,7 +61,9 @@ endpoints:
         jsonPaths:
           - "$.conversation.title"
           - "$[?(@.message.author.type == 'user')].message.content.value"
+          - "$[?(@.message.author.role == 'user')].message.content.value"
           - "$[?(@.message.author.type == 'user')].message.annotations[*].quote_text"
+          - "$[?(@.message.author.role == 'user')].message.annotations[*].quote_text"
         keywords:
           - "generate image"
           - "create image"
@@ -190,6 +192,7 @@ endpoints:
       - !<textDigest>
         jsonPaths:
           - "$[?(@.message.author.type != 'user')].message.content.value"
+          - "$[?(@.message.author.role != 'user')].message.content.value"
     responseSchema:
       type: "object"
       properties:

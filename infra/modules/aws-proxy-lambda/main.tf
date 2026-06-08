@@ -306,8 +306,8 @@ locals {
     Effect = "Allow"
     Resource = coalescelist(
       compact([
-        var.remote_resource_instance_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_instance_path}/*" : null,
-        var.remote_resource_shared_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_shared_path}/*" : null,
+        var.remote_resource_instance_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${trimsuffix(var.remote_resource_instance_path, "/")}/*" : null,
+        var.remote_resource_shared_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${trimsuffix(var.remote_resource_shared_path, "/")}/*" : null,
       ]),
       ["arn:aws:s3:::${var.remote_resource_bucket}/*"]
     )

@@ -15,7 +15,7 @@ Owners can generate an API key in the [OpenAI API Platform Portal](https://platf
 Note that the correct Organization must be selected when creating a key, corresponding to the  administered workspace.
 Do not select the owner's personal organization.
 
-**Note on Message Authorship:** The specific encoding of `bot` vs `user` messages in the compliance API is currently undocumented by OpenAI. Psoxy rule datasets assume a best-guess encoding approach (where an `author.role` dictates `"user"` or `"assistant"`) for conditional filtering algorithms.
+**Note on Message Authorship:** The specific encoding of `bot` vs `user` messages in the compliance API is currently undocumented by OpenAI. Psoxy rule datasets support the observed `author.type` field and the earlier best-guess `author.role` field for conditional filtering algorithms.
 
 ## Examples
 
