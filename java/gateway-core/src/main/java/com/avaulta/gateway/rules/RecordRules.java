@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import com.avaulta.gateway.rules.transforms.RecordTransform;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -62,8 +64,10 @@ public class RecordRules implements BulkDataRules {
      * Properties not declared in the schema (including unknown future event payload fields) are
      * removed from the output. See {@link JsonSchemaFilter}.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     JsonSchemaFilter outputSchemaFilter;
 
+    @JsonIgnore
     public Optional<JsonSchemaFilter> getOutputSchemaFilterOptional() {
         return Optional.ofNullable(outputSchemaFilter);
     }
