@@ -526,6 +526,7 @@ class RecordBulkDataSanitizerImplTest {
 
         }
     }
+    @Test
     void pseudonymize_blankStringValue() {
         this.setUpWithRules("---\n" +
             "format: \"NDJSON\"\n" +
