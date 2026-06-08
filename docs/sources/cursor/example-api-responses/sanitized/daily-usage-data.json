@@ -1,8 +1,6 @@
 {
   "data":[
     {
-      "userId":"t~r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE",
-      "day":"2024-03-18",
       "date":1710720000000,
       "isActive":true,
       "totalLinesAdded":1543,
@@ -26,11 +24,9 @@
       "applyMostUsedExtension":".tsx",
       "tabMostUsedExtension":".ts",
       "clientVersion":"0.25.1",
-      "email":"t~bSkdfjBTY24htUdeLzDD8hBKsXGprapgKEXQFW5AFPU@company.com"
+      "email":"p~bSkdfjBTY24htUdeLzDD8hBKsXGprapgKEXQFW5AFPUvx2QMsn4QCzKGs4Euwt5zcxqip1jmR4KhlQEjTooWpQ@company.com"
     },
     {
-      "userId":"t~0b5Lal9Cxr1m8WWPwMlTBpVZxmt0D_nUvJzOX9A_4CM",
-      "day":"2024-03-19",
       "date":1710806400000,
       "isActive":true,
       "totalLinesAdded":2104,
@@ -54,19 +50,11 @@
       "applyMostUsedExtension":".py",
       "tabMostUsedExtension":".py",
       "clientVersion":"0.25.1",
-      "email":"t~AAWFsREszx4Vds9FAI9oFcKI9Bj3th2sLKm2QqRmU3w@company.com"
+      "email":"p~bSkdfjBTY24htUdeLzDD8hBKsXGprapgKEXQFW5AFPUvx2QMsn4QCzKGs4Euwt5zcxqip1jmR4KhlQEjTooWpQ@company.com"
     }
   ],
   "period":{
     "startDate":1710720000000,
     "endDate":1710892800000
-  },
-  "pagination":{
-    "page":1,
-    "pageSize":1000,
-    "totalUsers":2,
-    "totalPages":1,
-    "hasNextPage":false,
-    "hasPreviousPage":false
   }
 }

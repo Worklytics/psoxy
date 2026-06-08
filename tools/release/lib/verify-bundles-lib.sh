@@ -40,6 +40,7 @@ verify_bundles_version_from_tag() {
   fi
   printf '%s' "${BASH_REMATCH[1]}"
 }
+}
 
 verify_bundles_artifact_names() {
   local version="$1"

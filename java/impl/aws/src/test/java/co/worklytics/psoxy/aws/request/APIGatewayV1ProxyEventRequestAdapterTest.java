@@ -66,17 +66,6 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
         assertEquals("/v2/report/meetings/NUXghb123TCj0bP6nPVe%252Fsg253D253D/participants", requestAdapter.getPath());
     }
 
-    @Test
-    public void getClientIp_usesFirstForwardedForHopWhenSourceIpAbsent() {
-        APIGatewayProxyRequestEvent apiGatewayEvent = new APIGatewayProxyRequestEvent()
-            .withHeaders(Map.of("x-forwarded-for", "203.0.113.10, 198.51.100.7"));
-
-        APIGatewayV1ProxyEventRequestAdapter requestAdapter =
-            APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
-
-        assertEquals("203.0.113.10", requestAdapter.getClientIp().get());
-    }
-
     @SneakyThrows
     @Test
     public void getClientIp_prefersSourceIpOverForwardedHeader() {

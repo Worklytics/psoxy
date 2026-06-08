@@ -22,8 +22,7 @@ jobs:
           - { name: 'psoxy-constants', test: false }
           # Modules that have tests
           - { name: 'worklytics-connector-specs', test: true }
-          - { name: 'gcp-host', test: true }
-          - { name: 'aws-proxy-lambda', test: true } 
+          - { name: 'gcp-host', test: true } 
     steps:
       - name: Check out code
         uses: actions/checkout@v4

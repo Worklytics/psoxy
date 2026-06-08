@@ -152,13 +152,6 @@ variable "provision_testing_infra" {
   default     = false
 }
 
-variable "test_aws_principal_arns" {
-  type        = list(string)
-  description = "AWS principal ARNs allowed to test the deployment (invoke APIs, upload bulk test files, etc.). When null and `provision_testing_infra` is true, defaults to the IAM principal running Terraform."
-  default     = null
-  nullable    = true
-}
-
 variable "install_test_tool" {
   type        = bool
   description = "whether to install the test tool (can be 'false' if Terraform not running from a machine where you intend to run tests of your Psoxy deployment)"

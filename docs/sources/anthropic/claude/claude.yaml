@@ -77,11 +77,7 @@ endpoints:
         next_page:
           type: "string"
   - pathTemplate: "/v1/compliance/apps/chats/{chatId}/messages"
-    allowedQueryParams:
-      - "after_id"
-      - "before_id"
-      - "limit"
-      - "order"
+    allowedQueryParams: []
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -94,37 +90,11 @@ endpoints:
         jsonPaths:
           - "$.chat_messages[*].content[*].text"
     responseSchema:
-      type: "object"
-      properties:
-        chat_messages:
-          type: "array"
-          items:
-            $ref: "#/definitions/Message"
-        created_at:
-          type: "string"
-          format: "date-time"
-        deleted_at:
-          type: "string"
-          format: "date-time"
-        id:
-          type: "string"
-        model:
-          type: "string"
-        organization_id:
-          type: "string"
-        organization_uuid:
-          type: "string"
-        project_id:
-          type: "string"
-        sourceId:
-          type: "string"
-        updated_at:
-          type: "string"
-          format: "date-time"
-        user:
-          $ref: "#/definitions/User"
+      $ref: "#/definitions/Chat"
   - pathTemplate: "/v1/compliance/organizations"
-    allowedQueryParams: []
+    allowedQueryParams:
+      - "page"
+      - "limit"
     responseSchema:
       type: "object"
       properties:
@@ -149,12 +119,7 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[*]['email_address','email']"
-        encoding: "URL_SAFE_TOKEN"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.data[*].id"
-        includeReversible: true
+          - "$.data[*]['email_address','email','id']"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"

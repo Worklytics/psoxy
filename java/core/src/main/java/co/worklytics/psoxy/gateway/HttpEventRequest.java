@@ -37,10 +37,7 @@ public interface HttpEventRequest {
     }
 
     /**
-     * @return IP of the client making the request, if known.
-     * When derived from {@link #HTTP_HEADER_X_FORWARDED_FOR}, that header is a comma-separated
-     * chain ordered left-to-right: the first address is the original client, with each subsequent
-     * address added by a proxy on the path.
+     * @return IP of the client making the request, if known
      */
     Optional<String> getClientIp();
 

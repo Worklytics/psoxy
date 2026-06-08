@@ -99,15 +99,11 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
 
     @Override
     public Optional<String> getClientIp() {
-        // Prefer API Gateway's sourceIp (immediate TCP peer). X-Forwarded-For fallback uses the
-        // first hop only: the header is a comma-separated chain with original client left-most.
         return Optional.ofNullable(event.getRequestContext())
             .map(context -> context.getIdentity())
             .map(APIGatewayProxyRequestEvent.RequestIdentity::getSourceIp)
             .filter(StringUtils::isNotBlank)
-            .or(() -> getHeader(HTTP_HEADER_X_FORWARDED_FOR)
-                .flatMap(value -> Splitter.on(',').trimResults().omitEmptyStrings().splitToList(value).stream()
-                    .findFirst()));
+            .or(() -> getHeader(HTTP_HEADER_X_FORWARDED_FOR));
     }
 
     @Override

@@ -29,17 +29,10 @@ async function testAWS(options, logger) {
   const parsedPath = path.parse(options.file);
   const filenameWithTimestamp = addFilenameSuffix(parsedPath.base, TIMESTAMP);
 
-  let uploadClient = await aws.createS3Client(null, options.region);
-  if (options.uploadRoleToAssume) {
-    logger.verbose(`Assuming role ${options.uploadRoleToAssume} for upload`);
-    uploadClient = await aws.createS3Client(options.uploadRoleToAssume, options.region);
-  }
-
-  let downloadClient = uploadClient;
   if (options.role) {
-    logger.verbose(`Assuming role ${options.role} for download`);
-    downloadClient = await aws.createS3Client(options.role, options.region);
+    logger.verbose(`Assuming role ${options.role}`);
   }
+  const client = await aws.createS3Client(options.role, options.region);
 
   const parsedBucketInputOption = parseBucketOption(options.input);
   // not destructuring to avoid variable name collision with path module
@@ -49,8 +42,9 @@ async function testAWS(options, logger) {
   logger.info(`Uploading "${inputPath + parsedPath.base}" as "${inputKey}" to input bucket: ${inputBucket}`);
 
   const uploadResult = await aws.upload(inputBucket, inputKey, options.file, {
+      role: options.role,
       region: options.region,
-    }, uploadClient);
+    }, client);
 
   if (uploadResult['$metadata'].httpStatusCode !== httpCodes.HTTP_STATUS_OK) {
     throw new Error('Unable to upload file', { cause: uploadResult });
@@ -70,7 +64,7 @@ async function testAWS(options, logger) {
   const file = await aws.download(outputBucket, outputKey, destination, {
       role: options.role,
       region: options.region,
-    }, downloadClient, logger);
+    }, client, logger);
   logger.success('File downloaded');
 
   if (file?.metadata) {
@@ -85,10 +79,7 @@ async function testAWS(options, logger) {
       // the default "null" version of the object, but:
       // > If there isn't a null version, Amazon S3 does not remove any objects
       //   but will still respond that the command was successful.
-      await aws.deleteObject(outputBucket, outputKey, {
-        role: options.role,
-        region: options.region,
-      }, downloadClient);
+      await aws.deleteObject(outputBucket, outputKey, options, client);
     } catch (error) {
       logger.error(`Error deleting sanitized file: ${error.message}`, {
         additional: error,
@@ -178,8 +169,7 @@ async function testGCP(options, logger) {
  * @param {string} options.input
  * @param {string} options.output
  * @param {string} options.region - AWS: buckets region
- * @param {string} options.role - AWS: role to assume for download/delete (ARN format; optional)
- * @param {string} options.uploadRoleToAssume - AWS: role to assume for upload (ARN format; optional)
+ * @param {string} options.role - AWS: role to assume (ARN format; optional)
  * @param {boolean} options.saveSanitizedFile - Whether to save sanitized file or not
  * @param {boolean} options.keepSanitizedFile - Whether to delete sanitized file or not (from
  *  output bucket, after test completion)
@@ -188,14 +178,6 @@ async function testGCP(options, logger) {
 export default async function (options = {}) {
   const logger = getLogger(options.verbose);
   environmentCheck(logger);
-
-  if (!fs.existsSync(options.file)) {
-    throw new Error(`File not found: ${options.file}`);
-  }
-  const fileStat = fs.statSync(options.file);
-  if (!fileStat.isFile()) {
-    throw new Error(`Not a regular file: ${options.file}`);
-  }
 
   const deploymentTypeFn = options.deploy === 'AWS' ? testAWS : testGCP;
   const { original, sanitized } = await deploymentTypeFn(options, logger);

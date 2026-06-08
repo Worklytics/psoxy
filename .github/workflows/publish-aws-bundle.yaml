@@ -125,8 +125,8 @@ jobs:
           
           IDENTIFIER="<!-- aws-artifacts-info -->"
           
-          BLOCK_FILE=$(mktemp)
-          cat > "$BLOCK_FILE" <<EOF
+          # Construct the block to append
+          BLOCK=$(cat <<EOF
           
           $IDENTIFIER
           ## AWS Deployment Bundles
@@ -134,10 +134,49 @@ jobs:
           $AWS_BLOCK
           $IDENTIFIER
           EOF
+          )
+          
+          # Retry loop to handle potential concurrent edits with GCP workflow
+          release_updated=false
+          for i in {1..5}; do
+            echo "Fetching latest release body..."
+            current_body=$(gh release view "$TAG_NAME" --json body -q '.body')
+            
+            # Check if AWS info already exists
+            if [[ "$current_body" == *"$IDENTIFIER"* ]]; then
+              echo "Release already contains AWS artifact references. Replacing block..."
+              new_body=$(IDENTIFIER="$IDENTIFIER" python3 -c '
+import sys, os
+identifier = os.environ["IDENTIFIER"]
+body = sys.stdin.read()
+parts = body.split(identifier)
+if len(parts) >= 3:
+    sys.stdout.write(parts[0] + parts[2])
+else:
+    sys.stdout.write(body)
+' <<< "$current_body")
+            else
+              new_body="$current_body"
+            fi
+            
+            # Append new block
+            new_body=$(printf "%s\n%s" "$new_body" "$BLOCK")
+            
+            echo "Updating release body on GitHub..."
+            if gh release edit "$TAG_NAME" --notes "$new_body"; then
+              echo "✅ Successfully updated release body!"
+              release_updated=true
+              break
+            fi
+            
+            sleep_time=$((RANDOM % 5 + 2))
+            echo "Failed to update release, retrying in $sleep_time seconds..."
+            sleep $sleep_time
+          done
 
-          chmod +x ./tools/release/lib/amend-github-release-notes.sh
-          ./tools/release/lib/amend-github-release-notes.sh "$TAG_NAME" "$IDENTIFIER" "$BLOCK_FILE"
-          rm -f "$BLOCK_FILE"
+          if [ "$release_updated" != true ]; then
+            echo "::warning::Failed to update GitHub release notes with AWS artifact references after 5 attempts. The bundle was published successfully; update the release notes manually if needed."
+          fi
 
       - name: Summary
         if: success()

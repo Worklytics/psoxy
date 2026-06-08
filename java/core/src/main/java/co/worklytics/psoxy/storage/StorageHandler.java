@@ -15,11 +15,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
@@ -70,34 +68,6 @@ public class StorageHandler {
     public static final String CONTENT_ENCODING_GZIP = "gzip";
     public static final String EXTENSION_GZIP = ".gz";
 
-    private static final String CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded";
-    private static final String CONTENT_TYPE_CSV = "text/csv";
-    private static final String CONTENT_TYPE_APPLICATION_CSV = "application/csv";
-    private static final String CONTENT_TYPE_JSON = "application/json";
-    private static final String CONTENT_TYPE_NDJSON = "application/x-ndjson";
-    private static final String CONTENT_TYPE_NDJSON_ALT = "application/ndjson";
-    private static final String CONTENT_TYPE_PARQUET = "application/vnd.apache.parquet";
-    private static final String CONTENT_TYPE_CSV_UTF8 = CONTENT_TYPE_CSV + "; charset=utf-8";
-
-    /**
-     * Well-defined Content-Types that cloud consoles often attach to bulk uploads, but that do not
-     * reflect the file format (e.g. AWS S3 console may use {@code application/x-www-form-urlencoded}
-     * for arbitrary objects). When the object path implies a bulk format, extension-inferred types
-     * are preferred over these values.
-     */
-    private static final Set<String> KNOWN_GENERIC_CONTENT_TYPES = Set.of(
-        CONTENT_TYPE_FORM_URLENCODED
-    );
-
-    private static final Set<String> SUPPORTED_BULK_CONTENT_TYPE_BASES = Set.of(
-        CONTENT_TYPE_CSV,
-        CONTENT_TYPE_APPLICATION_CSV,
-        CONTENT_TYPE_JSON,
-        CONTENT_TYPE_NDJSON,
-        CONTENT_TYPE_NDJSON_ALT,
-        CONTENT_TYPE_PARQUET
-    );
-
     // gzip magic number bytes (RFC 1952)
     private static final int GZIP_MAGIC_BYTE_1 = 0x1f;
     private static final int GZIP_MAGIC_BYTE_2 = 0x8b;
@@ -143,79 +113,6 @@ public class StorageHandler {
             && !Objects.equals(contentEncoding, CONTENT_ENCODING_GZIP)) {
             log.warning("Input filename ends with .gz, but 'Content-Encoding' metadata is not 'gzip'; is this correct? Decompression is based on object's 'Content-Encoding'");
         }
-    }
-
-    /**
-     * Resolves the Content-Type for bulk processing and for writing sanitized objects.
-     *
-     * <ol>
-     *   <li>Use object metadata when it is a supported bulk type (including parameters such as
-     *       {@code charset}).</li>
-     *   <li>When metadata is absent, or is a {@link #KNOWN_GENERIC_CONTENT_TYPES known generic}
-     *       upload type, prefer a type inferred from the file extension when recognized.</li>
-     *   <li>Otherwise use the metadata value when present.</li>
-     * </ol>
-     */
-    @Nullable
-    String effectiveContentType(@NonNull String sourceObjectPath, @Nullable String sourceContentType) {
-        String inferredContentType = inferContentTypeFromObjectPath(sourceObjectPath).orElse(null);
-
-        if (isKnownGenericContentType(sourceContentType)) {
-            if (inferredContentType != null) {
-                log.info(String.format(
-                    "Replacing generic Content-Type '%s' on %s with '%s' inferred from file extension",
-                    sourceContentType, sourceObjectPath, inferredContentType));
-                return inferredContentType;
-            }
-            return sourceContentType;
-        }
-
-        if (StringUtils.isBlank(sourceContentType)) {
-            return inferredContentType;
-        }
-
-        if (matchesSupportedBulkContentType(sourceContentType)) {
-            return sourceContentType;
-        }
-
-        return sourceContentType;
-    }
-
-    private boolean isKnownGenericContentType(@Nullable String contentType) {
-        String base = baseContentType(contentType);
-        return base != null && KNOWN_GENERIC_CONTENT_TYPES.contains(base);
-    }
-
-    private boolean matchesSupportedBulkContentType(@Nullable String contentType) {
-        String base = baseContentType(contentType);
-        return base != null && SUPPORTED_BULK_CONTENT_TYPE_BASES.contains(base);
-    }
-
-    @Nullable
-    private String baseContentType(@Nullable String contentType) {
-        if (StringUtils.isBlank(contentType)) {
-            return null;
-        }
-        return StringUtils.trimToNull(contentType.split(";", 2)[0].toLowerCase(Locale.ROOT));
-    }
-
-    private Optional<String> inferContentTypeFromObjectPath(@NonNull String sourceObjectPath) {
-        String path = StringUtils.lowerCase(sourceObjectPath);
-        if (path.endsWith(EXTENSION_GZIP)) {
-            path = path.substring(0, path.length() - EXTENSION_GZIP.length());
-        }
-
-        String inferredContentType = null;
-        if (path.endsWith(".ndjson") || path.endsWith(".jsonl")) {
-            inferredContentType = CONTENT_TYPE_NDJSON;
-        } else if (path.endsWith(".csv")) {
-            inferredContentType = CONTENT_TYPE_CSV_UTF8;
-        } else if (path.endsWith(".json")) {
-            inferredContentType = CONTENT_TYPE_JSON;
-        } else if (path.endsWith(".parquet")) {
-            inferredContentType = CONTENT_TYPE_PARQUET;
-        }
-        return Optional.ofNullable(inferredContentType);
     }
 
     @RequiredArgsConstructor
@@ -322,7 +219,7 @@ public class StorageHandler {
             .destinationObjectPath(transform.getPathWithinBucket() + sourceObjectPathWithinBase)
             .decompressInput(isSourceCompressed)
             .compressOutput(compressOutput)
-            .contentType(effectiveContentType(sourceObjectPath, sourceContentType))
+            .contentType(sourceContentType)
             .build();
 
         warnIfEncodingDoesNotMatchFilename(request, sourceContentEncoding);

@@ -18,10 +18,6 @@ locals {
     "cloudscheduler.googleapis.com", # triggering batches
     "pubsub.googleapis.com",         # webhooks batched via pubsub
   ]
-
-  # Artifact Registry repository IDs must be unique within a project/location; prefix with
-  # environment_id_prefix so multiple psoxy instances can share a GCP project.
-  functions_repo_id = length(var.environment_id_prefix) > 0 ? "${var.environment_id_prefix}functions" : "psoxy-functions"
 }
 
 
@@ -56,7 +52,7 @@ resource "google_project_service" "gcp_infra_api" {
 resource "google_artifact_registry_repository" "psoxy-functions-repo" {
   location      = var.bucket_location
   project       = var.project_id
-  repository_id = local.functions_repo_id
+  repository_id = "psoxy-functions"
   description   = "Docker repository used on the cloud functions"
   format        = "DOCKER"
 
@@ -67,13 +63,6 @@ resource "google_artifact_registry_repository" "psoxy-functions-repo" {
     most_recent_versions {
       keep_count = 3
     }
-  }
-
-  lifecycle {
-    # TODO: remove in 0.7.x; retain for upgrades from pre-0.7.x deployments that used hardcoded "psoxy-functions"
-    ignore_changes = [
-      repository_id,
-    ]
   }
 
   depends_on = [

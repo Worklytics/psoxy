@@ -134,15 +134,11 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
     @Override
     public Optional<String> getClientIp() {
-        // Prefer API Gateway's sourceIp (immediate TCP peer). X-Forwarded-For fallback uses the
-        // first hop only: the header is a comma-separated chain with original client left-most.
-        return Optional.ofNullable(event.getRequestContext())
-            .map(context -> context.getHttp())
-            .map(http -> http.getSourceIp())
-            .filter(StringUtils::isNotBlank)
-            .or(() -> getHeader(HTTP_HEADER_X_FORWARDED_FOR)
-                .flatMap(value -> Splitter.on(',').trimResults().omitEmptyStrings().splitToList(value).stream()
-                    .findFirst()));
+       return Optional.ofNullable(event.getRequestContext())
+           .map(context -> context.getHttp())
+           .map(http -> http.getSourceIp())
+           .filter(StringUtils::isNotBlank)
+           .or(() -> Optional.ofNullable(this.getCaseInsensitiveHeaders().get(HTTP_HEADER_X_FORWARDED_FOR.toLowerCase())));
     }
 
     @Override

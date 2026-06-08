@@ -40,19 +40,6 @@ class APIGatewayV2HTTPEventRequestAdapterTest {
         assertTrue(requestAdapter.isHttps().get());
     }
 
-    @Test
-    public void getClientIp_usesFirstForwardedForHopWhenSourceIpAbsent() {
-        APIGatewayV2HTTPEvent apiGatewayV2HTTPEvent = new APIGatewayV2HTTPEvent();
-        apiGatewayV2HTTPEvent.setHeaders(Map.of(
-            "x-forwarded-for", "203.0.113.10, 198.51.100.7"
-        ));
-
-        APIGatewayV2HTTPEventRequestAdapter requestAdapter =
-            new APIGatewayV2HTTPEventRequestAdapter(apiGatewayV2HTTPEvent);
-
-        assertEquals("203.0.113.10", requestAdapter.getClientIp().get());
-    }
-
     @SneakyThrows
     @Test
     public void getClientIp_prefersAwsSourceIpOverForwardedHeader() {

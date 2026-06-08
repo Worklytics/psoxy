@@ -1,29 +1,27 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
-import co.worklytics.psoxy.gateway.HttpEventRequest;
-import co.worklytics.psoxy.gateway.HttpEventRequestDto;
-import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.cloud.pubsub.v1.Publisher;
-import com.google.protobuf.ByteString;
-import com.google.pubsub.v1.PubsubMessage;
-import com.google.pubsub.v1.TopicName;
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedInject;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.extern.java.Log;
-
-import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.cloud.pubsub.v1.Publisher;
+import com.google.protobuf.ByteString;
+import com.google.pubsub.v1.PubsubMessage;
+import com.google.pubsub.v1.TopicName;
+import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.HttpEventRequestDto;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.extern.java.Log;
 
 @Log
 public class ApiDataRequestViaPubSub implements AsyncApiDataRequestHandler {
@@ -35,25 +33,14 @@ public class ApiDataRequestViaPubSub implements AsyncApiDataRequestHandler {
      */
     final String topicName;
 
-    final Publisher publisher;
-
     @Inject
     ObjectMapper objectMapper;
     @Inject
     EnvVarsConfigService envVarsConfigService;
 
-    @SneakyThrows
     @AssistedInject
     public ApiDataRequestViaPubSub(@Assisted @NonNull String topicName) {
         this.topicName = topicName;
-        this.publisher = Publisher.newBuilder(TopicName.parse(topicName)).build();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                publisher.shutdown();
-            } catch (Exception e) {
-                log.log(Level.WARNING, "Failed to shutdown PubSub publisher for topic: " + topicName, e);
-            }
-        }, "pubsub-publisher-shutdown-hook"));
     }
 
     @AllArgsConstructor
@@ -69,6 +56,8 @@ public class ApiDataRequestViaPubSub implements AsyncApiDataRequestHandler {
     @Override
     public void handle(HttpEventRequest requestToProxy, ApiDataRequestHandler.ProcessingContext processingContext) {
         try {
+            Publisher publisher = Publisher.newBuilder(TopicName.parse(topicName)).build();
+
             HttpEventRequestDto requestDto = HttpEventRequestDto.copyOf(requestToProxy);
 
             // strip Authorization header; maybe more??

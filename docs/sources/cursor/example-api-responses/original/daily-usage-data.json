@@ -1,8 +1,6 @@
 {
     "data": [
         {
-            "userId": 12345,
-            "day": "2024-03-18",
             "date": 1710720000000,
             "isActive": true,
             "totalLinesAdded": 1543,
@@ -29,8 +27,6 @@
             "email": "developer@company.com"
         },
         {
-            "userId": 67890,
-            "day": "2024-03-19",
             "date": 1710806400000,
             "isActive": true,
             "totalLinesAdded": 2104,
@@ -54,19 +50,11 @@
             "applyMostUsedExtension": ".py",
             "tabMostUsedExtension": ".py",
             "clientVersion": "0.25.1",
-            "email": "developer2@company.com"
+            "email": "developer@company.com"
         }
     ],
     "period": {
         "startDate": 1710720000000,
         "endDate": 1710892800000
-    },
-    "pagination": {
-        "page": 1,
-        "pageSize": 1000,
-        "totalUsers": 2,
-        "totalPages": 1,
-        "hasNextPage": false,
-        "hasPreviousPage": false
     }
 }

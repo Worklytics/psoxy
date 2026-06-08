@@ -40,25 +40,6 @@ locals {
   per_setting_instructions_manual      = [for ux_name, value_to_provide in var.settings_to_provide : "    - Copy and paste `${value_to_provide}` as the value for \"${ux_name}\"." if value_to_provide != null]
   per_setting_instructions_manual_text = length(var.settings_to_provide) > 0 ? "\n${join("\n", tolist(local.per_setting_instructions_manual))}" : ""
 
-  # Hints for settings listed in the summary (async API connectors expose endpoint + bucket).
-  setting_hints = {
-    "Psoxy Base URL"            = "proxy/function endpoint URL"
-    "Bucket Name"               = "bucket for sanitized async API responses"
-    "AWS Psoxy Role ARN"        = "IAM role Worklytics assumes to call the proxy and read the bucket"
-    "AWS Psoxy Region"          = "AWS region of the proxy deployment"
-    "Workspace Id"              = "ChatGPT Enterprise workspace id"
-    "Parser"                    = "bulk import parser id"
-    "Atlassian Organization Id" = "Atlassian organization id"
-    "GitHub Organization"       = "GitHub organization"
-  }
-
-  connection_settings_summary_lines = [
-    for ux_name, value_to_provide in var.settings_to_provide :
-    "- **${ux_name}** (${lookup(local.setting_hints, ux_name, "connector setting")}): `${value_to_provide}`"
-    if try(value_to_provide != null && value_to_provide != "", false)
-  ]
-  connection_settings_summary = length(local.connection_settings_summary_lines) > 0 ? join("\n", local.connection_settings_summary_lines) : null
-
   deep_link_base = "${local.worklytics_add_connection_url}${var.connector_id}/settings?PROXY_DEPLOYMENT_KIND=${var.host_platform_id}&${local.query_param_string}"
 
   manual_instructions = <<EOT
@@ -85,17 +66,8 @@ Alternatively, you may follow the manual instructions below:
 ${local.manual_instructions}
 EOT
 
-  connection_settings_summary_block = local.connection_settings_summary != null ? format(<<-EOT
-
-
-Use these values in the Worklytics connector settings (verify each field is filled correctly before connecting):
-
-%s
-EOT
-  , local.connection_settings_summary) : ""
-
   todo_content = <<EOT
-Complete the following steps in Worklytics AFTER you have deployed the Psoxy instance for your connection:${local.connection_settings_summary_block}
+Complete the following steps in Worklytics AFTER you have deployed the Psoxy instance for your connection:
 
 ${var.connector_id == "" ? local.manual_instructions : local.deep_link_instructions}
 

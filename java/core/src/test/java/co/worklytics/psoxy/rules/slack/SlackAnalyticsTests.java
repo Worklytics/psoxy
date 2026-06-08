@@ -36,10 +36,6 @@ public class SlackAnalyticsTests extends JavaRulesTestBaseCase {
     @SneakyThrows
     @ValueSource(strings = {
         "https://slack.com/api/admin.analytics.getFile",
-        "https://slack.com/api/admin.analytics.messages.metadata",
-        "https://slack.com/api/admin.analytics.messages.metadata?channel=C123ABC456&limit=100&cursor=abc",
-        "https://slack.com/api/admin.analytics.messages.activity",
-        "https://slack.com/api/admin.analytics.messages.activity?channel=C123ABC456&oldest_ts=123&latest_ts=456&limit=50",
     })
     @ParameterizedTest
     void allowedEndpointRegex_allowed(String url) {
@@ -49,9 +45,7 @@ public class SlackAnalyticsTests extends JavaRulesTestBaseCase {
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
-            InvocationExample.of("https://slack.com/api/admin.analytics.getFile?type=member&date=2024-04-07", "member_sample.json"),
-            InvocationExample.of("https://slack.com/api/admin.analytics.messages.metadata?channel=C123ABC456&limit=100", "messages-metadata.json"),
-            InvocationExample.of("https://slack.com/api/admin.analytics.messages.activity?channel=C123ABC456&limit=50", "messages-activity.json")
+            InvocationExample.of("https://slack.com/api/admin.analytics.getFile?type=member&date=2024-04-07", "member_sample.json")
         );
     }
 }
