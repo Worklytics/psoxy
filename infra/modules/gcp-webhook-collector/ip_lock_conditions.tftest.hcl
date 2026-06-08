@@ -1,8 +1,8 @@
 variables {
-  project_id                     = "test-project"
-  environment_id_prefix          = "dev-"
-  instance_id                    = "test-instance"
-  config_parameter_prefix        = "TEST_"
+  project_id              = "test-project"
+  environment_id_prefix   = "dev-"
+  instance_id             = "test-instance"
+  config_parameter_prefix = "TEST_"
   service_account = {
     service_account_id = "projects/test-project/serviceAccounts/testsa@test-project.iam.gserviceaccount.com"
     email              = "testsa@test-project.iam.gserviceaccount.com"
