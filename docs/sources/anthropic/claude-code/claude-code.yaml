@@ -7,6 +7,7 @@ endpoints:
       - "limit"
     allowedRequestHeaders:
       - "anthropic-version"
+      - "content-type"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -38,6 +39,7 @@ endpoints:
       - "limit"
     allowedRequestHeaders:
       - "anthropic-version"
+      - "content-type"
     transforms:
       - !<pseudonymize>
         jsonPaths:
