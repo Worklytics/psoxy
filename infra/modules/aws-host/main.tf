@@ -36,7 +36,8 @@ locals {
   has_enabled_webhook_collectors = length(keys(var.webhook_collectors)) > 0
   enable_webhook_testing         = var.provision_testing_infra && local.has_enabled_webhook_collectors
 
-  terraform_principal_arn = can(regex(":assumed-role/", data.aws_caller_identity.current.arn)) ? data.aws_iam_session_context.current.issuer_arn : data.aws_caller_identity.current.arn
+  terraform_principal_arn   = can(regex(":assumed-role/", data.aws_caller_identity.current.arn)) ? data.aws_iam_session_context.current.issuer_arn : data.aws_caller_identity.current.arn
+  terraform_upload_role_arn = can(regex("^arn:aws:iam::\\d{12}:role/", local.terraform_principal_arn)) ? local.terraform_principal_arn : null
 
   test_aws_principal_arns = var.provision_testing_infra ? (
     var.test_aws_principal_arns != null ? var.test_aws_principal_arns : [local.terraform_principal_arn]
@@ -364,21 +365,22 @@ module "bulk_connector" {
 
   source = "../../modules/aws-proxy-bulk"
 
-  aws_account_id                   = var.aws_account_id
-  test_aws_principal_arns            = local.test_aws_principal_arns
-  provision_iam_policy_for_testing = var.provision_testing_infra
-  aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
-  environment_name                 = var.environment_name
-  new_relic_account_id             = var.new_relic_account_id
-  instance_id                      = each.key
-  source_kind                      = each.value.source_kind
-  aws_region                       = data.aws_region.current.region
-  path_to_function_zip             = module.psoxy.path_to_deployment_jar
-  function_zip_hash                = module.psoxy.deployment_package_hash
-  function_env_kms_key_arn         = var.function_env_kms_key_arn
-  logs_kms_key_arn                 = var.logs_kms_key_arn
-  log_retention_days               = var.log_retention_days
-  psoxy_base_dir                   = var.psoxy_base_dir
+  aws_account_id                         = var.aws_account_id
+  test_aws_principal_arns                = local.test_aws_principal_arns
+  provision_iam_policy_for_testing       = var.provision_testing_infra
+  aws_role_to_assume_when_testing        = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
+  aws_upload_role_to_assume_when_testing = var.provision_testing_infra ? local.terraform_upload_role_arn : null
+  environment_name                       = var.environment_name
+  new_relic_account_id                   = var.new_relic_account_id
+  instance_id                            = each.key
+  source_kind                            = each.value.source_kind
+  aws_region                             = data.aws_region.current.region
+  path_to_function_zip                   = module.psoxy.path_to_deployment_jar
+  function_zip_hash                      = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn               = var.function_env_kms_key_arn
+  logs_kms_key_arn                       = var.logs_kms_key_arn
+  log_retention_days                     = var.log_retention_days
+  psoxy_base_dir                         = var.psoxy_base_dir
   rules = (
     try(var.custom_bulk_connector_rules[each.key], null) != null ? var.custom_bulk_connector_rules[each.key] :
     each.value.rules

@@ -332,10 +332,10 @@ module "webhook_collector" {
 
   source = "../../modules/gcp-webhook-collector"
 
-  project_id                         = var.gcp_project_id
-  region                             = var.gcp_region
-  environment_id_prefix              = local.environment_id_prefix
-  instance_id                        = each.key
+  project_id            = var.gcp_project_id
+  region                = var.gcp_region
+  environment_id_prefix = local.environment_id_prefix
+  instance_id           = each.key
   service_account = {
     # .id is the provider's fully-qualified name (projects/.../serviceAccounts/...); same value google_service_account_iam_member.service_account_id expects
     service_account_id = google_service_account.webhook_collector[each.key].id

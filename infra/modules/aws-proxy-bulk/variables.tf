@@ -123,12 +123,23 @@ variable "test_aws_principal_arns" {
 
 variable "aws_role_to_assume_when_testing" {
   type        = string
-  description = "ARN of role to assume when testing instance. Leave blank to use default credentials of location from which you'll run tests (which must be for a principal with sufficient privileges, or use `provision_iam_policy_for_testing`)."
+  description = "ARN of role to assume when downloading from the sanitized bucket during tests. Leave blank to use default credentials of location from which you'll run tests (which must be for a principal with sufficient privileges, or use `provision_iam_policy_for_testing`)."
   default     = null
 
   validation {
     condition     = var.aws_role_to_assume_when_testing == null || can(regex("^arn:aws:iam::\\d{12}:role/.*$", var.aws_role_to_assume_when_testing))
     error_message = "if provided, aws_role_to_assume_when_testing must be a valid ARN of an IAM Role"
+  }
+}
+
+variable "aws_upload_role_to_assume_when_testing" {
+  type        = string
+  description = "ARN of role to assume when uploading test files to the input bucket. Typically the IAM role used when running Terraform, if Terraform runs via role assumption."
+  default     = null
+
+  validation {
+    condition     = var.aws_upload_role_to_assume_when_testing == null || can(regex("^arn:aws:iam::\\d{12}:role/.*$", var.aws_upload_role_to_assume_when_testing))
+    error_message = "if provided, aws_upload_role_to_assume_when_testing must be a valid ARN of an IAM Role"
   }
 }
 
