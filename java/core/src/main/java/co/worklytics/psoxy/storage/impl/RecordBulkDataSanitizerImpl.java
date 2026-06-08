@@ -246,8 +246,14 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             return (currentValue, configuration) -> {
                 if (currentValue == null) {
                     return null;
+                } else if (currentValue instanceof String && StringUtils.isBlank((String) currentValue)) {
+                    return currentValue;
                 } else if (currentValue instanceof String || currentValue instanceof Long || currentValue instanceof Integer) {
                     PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(currentValue);
+
+                    if (pseudonymizedIdentity == null) {
+                        return null;
+                    }
 
                     if (pseudonymizer.getOptions().getPseudonymImplementation() != PseudonymImplementation.DEFAULT) {
                         throw new IllegalArgumentException("Only DEFAULT (v0.4) pseudonymization is supported");
