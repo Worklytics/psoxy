@@ -33,7 +33,7 @@ class CloudFunctionRequestTest {
     }
 
     @Test
-    void getClientIp_usesFirstForwardedForHop() {
+    void getClientIp_usesGcpAppendedClientHop() {
         HttpRequest nativeRequest = mock(HttpRequest.class);
 
         when(nativeRequest.getHeaders()).thenReturn(Map.of(
@@ -43,6 +43,19 @@ class CloudFunctionRequestTest {
         CloudFunctionRequest request = CloudFunctionRequest.of(nativeRequest);
 
         assertEquals("203.0.113.10", request.getClientIp().get());
+    }
+
+    @Test
+    void getClientIp_ignoresSpoofedForwardedForPrefix() {
+        HttpRequest nativeRequest = mock(HttpRequest.class);
+
+        when(nativeRequest.getHeaders()).thenReturn(Map.of(
+            "X-Forwarded-For", Lists.newArrayList("10.0.0.5, 198.51.100.7, 203.0.113.10")
+        ));
+
+        CloudFunctionRequest request = CloudFunctionRequest.of(nativeRequest);
+
+        assertEquals("198.51.100.7", request.getClientIp().get());
     }
 
 }
