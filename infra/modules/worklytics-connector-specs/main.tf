@@ -126,6 +126,12 @@ EOT
       reserved_concurrent_executions : null
       enable_async_processing : true
       enable_side_output : false
+      environment_variables : {
+        # ChatGPT Enterprise's API issues redirects that must be intercepted manually by the proxy
+        # in async mode; disable automatic redirect following so the 3xx Location URL is fetched
+        # by the async redirect-handling block rather than transparently by the HTTP client.
+        FOLLOW_REDIRECTS : "FALSE"
+      }
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
