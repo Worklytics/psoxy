@@ -333,7 +333,8 @@ locals {
   # admin user for everything such that it's not required
   role_param = var.test_caller_role_arn == null ? "" : " -r \"${var.test_caller_role_arn}\""
 
-  command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
+  command_npm_install       = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
+  command_install_test_tool = "${var.path_to_repo_root}tools/install-test-tool.sh ${var.path_to_repo_root}tools"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} --region \"${data.aws_region.current.region}\""
   command_test_logs   = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} --region \"${data.aws_region.current.region}\" -l \"${module.gate_instance.log_group}\""
 
@@ -388,9 +389,10 @@ EOT
 
 locals {
   test_script = templatefile("${path.module}/test_script.tftpl", {
-    collector_endpoint_url = local.proxy_endpoint_url,
-    function_name          = module.gate_instance.function_name,
-    command_cli_call       = local.command_cli_call,
+    collector_endpoint_url    = local.proxy_endpoint_url,
+    function_name             = module.gate_instance.function_name,
+    command_install_test_tool = local.command_install_test_tool,
+    command_cli_call          = local.command_cli_call,
     signing_key_arn        = local.keys_to_provision > 0 ? element(local.auth_key_arns_sorted, length(local.auth_key_arns_sorted) - 1) : null,
     example_payload        = coalesce(var.example_payload, "{\"test\": \"data\"}")
     example_identity       = var.example_identity

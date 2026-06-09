@@ -370,7 +370,8 @@ resource "google_cloud_run_service_iam_binding" "invokers" {
 locals {
   proxy_endpoint_url  = google_cloudfunctions2_function.function.service_config[0].uri
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
-  command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
+  command_npm_install       = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
+  command_install_test_tool = "${var.path_to_repo_root}tools/install-test-tool.sh ${var.path_to_repo_root}tools"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js"
 
   # Merge example_api_calls into example_api_requests for unified processing
@@ -451,6 +452,7 @@ resource "local_file" "test_script" {
     proxy_endpoint_url        = local.proxy_endpoint_url,
     function_name             = var.instance_id,
     impersonation_param       = local.impersonation_param,
+    command_install_test_tool = local.command_install_test_tool,
     command_cli_call          = local.command_cli_call,
     example_api_get_requests  = [for r in local.all_example_api_requests : r if r.method == "GET"],
     example_api_post_requests = [for r in local.all_example_api_requests : r if r.method == "POST" && r.body != null], # body being null will blow up the templating

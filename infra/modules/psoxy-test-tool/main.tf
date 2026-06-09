@@ -19,14 +19,15 @@ resource "null_resource" "install_test_tool" {
     path_to_psoxy_java = var.path_to_tools
     version            = var.psoxy_version
 
-    # trigger if package.json has changed, suggesting dependencies have
+    # trigger if package.json or package-lock.json has changed, suggesting dependencies have
     sha_package = filesha1("${local.test_tool_directory}/package.json")
+    sha_lock    = fileexists("${local.test_tool_directory}/package-lock.json") ? filesha1("${local.test_tool_directory}/package-lock.json") : ""
   }
 }
 
 # expose whether test tool installed back, in case want to condition test commands on it
 output "test_tool_installed" {
-  value = fileexists("${local.test_tool_directory}/node_modules/.package-lock.json")
+  value = fileexists("${local.test_tool_directory}/node_modules/chalk/package.json")
 
   depends_on = [
     null_resource.install_test_tool

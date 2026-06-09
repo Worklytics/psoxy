@@ -51,6 +51,7 @@
     "fast-xml-parser": "^5.7.0",
     "uuid": "^11.1.1",
     "glob": "^13.0.3",
+    "node-domexception": "^2.0.2",
     "fetch-blob": "git+https://github.com/node-fetch/fetch-blob.git#d6f1029ae59bde4768adcbf79dbce9eab15bbb1f"
   }
 }

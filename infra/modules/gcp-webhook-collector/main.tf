@@ -460,7 +460,8 @@ resource "google_cloud_scheduler_job" "trigger_batch_processing" {
 
 locals {
   proxy_endpoint_url  = google_cloudfunctions2_function.function.service_config[0].uri
-  command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
+  command_npm_install       = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
+  command_install_test_tool = "${var.path_to_repo_root}tools/install-test-tool.sh ${var.path_to_repo_root}tools"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js"
   signing_key_id      = var.provision_auth_key == null ? null : google_kms_crypto_key.webhook_auth_key[0].id
   command_test_logs   = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions2_function.function.project}\" -f \"${google_cloudfunctions2_function.function.name}\""
@@ -528,9 +529,10 @@ resource "local_file" "test_script" {
   filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "755"
   content = templatefile("${path.module}/test_script.tftpl", {
-    collector_endpoint_url = local.proxy_endpoint_url,
-    function_name          = var.instance_id,
-    command_cli_call       = local.command_cli_call,
+    collector_endpoint_url    = local.proxy_endpoint_url,
+    function_name             = var.instance_id,
+    command_install_test_tool = local.command_install_test_tool,
+    command_cli_call          = local.command_cli_call,
     signing_key_id         = local.signing_key_id,
     example_payload        = coalesce(var.example_payload, "{\"test\": \"data\"}")
     example_identity       = var.example_identity

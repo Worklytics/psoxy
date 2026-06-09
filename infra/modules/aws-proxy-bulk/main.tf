@@ -270,7 +270,8 @@ resource "aws_iam_policy" "sanitized_bucket_read" {
 
 locals {
   accessor_role_names = concat([var.api_caller_role_name], var.sanitized_accessor_role_names)
-  command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
+  command_npm_install        = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
+  command_install_test_tool  = "${var.psoxy_base_dir}tools/install-test-tool.sh ${var.psoxy_base_dir}tools"
   example_file        = var.example_file == null ? "/path/to/example.csv" : "${var.psoxy_base_dir}${var.example_file}"
 
   # Merge example_files list with singular example_file (if provided)
@@ -435,6 +436,8 @@ resource "local_file" "todo_test" {
 locals {
   test_script = <<EOT
 #!/bin/bash
+${local.command_install_test_tool}
+
 FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
 BLUE='\e[0;34m'
 NC='\e[0m'

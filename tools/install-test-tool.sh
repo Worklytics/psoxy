@@ -1,6 +1,8 @@
 #!/bin/bash
 # Install test tool, if npm available
 
+set -euo pipefail
+
 PATH_TO_TOOLS=${1:-$(pwd)/tools}
 
 COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
@@ -11,16 +13,33 @@ else
 fi
 
 TEST_TOOL_ROOT="${PATH_TO_TOOLS}/psoxy-test"
+INSTALL_MARKER="${TEST_TOOL_ROOT}/node_modules/chalk/package.json"
 
-if [ ! -d ${TEST_TOOL_ROOT} ]; then
-  printf "${ERR}No test tool source found at ${TEST_TOOL_ROOT}. Failed to install test tool.${NC}\n"
-  exit
+# already installed
+if [ -f "${INSTALL_MARKER}" ]; then
+  exit 0
 fi
 
-if npm -v &> /dev/null ; then
-  printf "Installing ${INFO}psoxy-test${NC} tool ...\n"
-  npm --no-audit --no-fund --prefix "${TEST_TOOL_ROOT}" install
-  printf "Test tool ${SUCCESS}successfully${NC} installed at ${SUCCESS}${TEST_TOOL_ROOT}${NC}\n"
+if [ ! -d "${TEST_TOOL_ROOT}" ]; then
+  printf "${ERR}No test tool source found at ${TEST_TOOL_ROOT}. Failed to install test tool.${NC}\n" >&2
+  exit 1
+fi
+
+if ! command -v npm &> /dev/null; then
+  printf "${ERR}NPM / Node.JS not available; could not install test tool. We recommend installing Node.js ( https://nodejs.org/ LTS version preferred), then re-running this init script.${NC}\n" >&2
+  exit 1
+fi
+
+printf "Installing ${INFO}psoxy-test${NC} tool ...\n"
+if [ -f "${TEST_TOOL_ROOT}/package-lock.json" ]; then
+  npm --no-audit --no-fund --prefix "${TEST_TOOL_ROOT}" ci
 else
-  printf "${ERR}NPM / Node.JS not available; could not install test tool. We recommend installing Node.js ( https://nodejs.org/ LTS version preferred), then re-running this init script.${NC}\n"
+  npm --no-audit --no-fund --prefix "${TEST_TOOL_ROOT}" install
 fi
+
+if [ ! -f "${INSTALL_MARKER}" ]; then
+  printf "${ERR}Failed to install test tool dependencies at ${TEST_TOOL_ROOT}.${NC}\n" >&2
+  exit 1
+fi
+
+printf "Test tool ${SUCCESS}successfully${NC} installed at ${SUCCESS}${TEST_TOOL_ROOT}${NC}\n"

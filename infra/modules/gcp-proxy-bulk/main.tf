@@ -13,7 +13,8 @@ locals {
   default_sa_name     = trim(substr(local.raw_default_sa_name, 0, local.SA_NAME_MAX_LENGTH), "-")
   sa_name             = length(local.default_sa_name) < local.SA_NAME_MIN_LENGTH ? "psoxy-${local.default_sa_name}" : local.default_sa_name
   function_name       = "${var.environment_id_prefix}${local.instance_id}"
-  command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
+  command_npm_install       = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
+  command_install_test_tool = "${var.psoxy_base_dir}tools/install-test-tool.sh ${var.psoxy_base_dir}tools"
 
   path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(local.instance_id), "-", "_")}_"
 }
@@ -370,6 +371,8 @@ resource "local_file" "test_script" {
   file_permission = "755"
   content         = <<EOT
 #!/bin/bash
+${local.command_install_test_tool}
+
 FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
 BLUE='\e[0;34m'
 NC='\e[0m'
