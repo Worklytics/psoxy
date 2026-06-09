@@ -613,3 +613,8 @@ output "bulk_connector" {
   description = "INTERNAL USE ONLY - For testing purposes."
   value       = module.bulk_connector
 }
+
+output "api_connector" {
+  description = "INTERNAL USE ONLY - For testing purposes."
+  value       = module.api_connector
+}
