@@ -7,7 +7,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ParameterSchemaUtilsTest {
 
@@ -135,10 +136,10 @@ class ParameterSchemaUtilsTest {
             .required(true)
             .build();
 
-        assertTrue(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo", "bar"))));
+        assertTrue(parameterSchemaUtils.validateAll(Map.of("foo", schema), Collections.singletonList(Pair.of("foo", "bar"))));
 
-        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo", null))));
-        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo2", "bar"))));
+        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Collections.singletonList(Pair.of("foo", null))));
+        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Collections.singletonList(Pair.of("foo2", "bar"))));
         assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Collections.emptyList()));
     }
 }
