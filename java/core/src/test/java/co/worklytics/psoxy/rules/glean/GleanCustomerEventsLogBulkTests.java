@@ -142,7 +142,7 @@ public class GleanCustomerEventsLogBulkTests {
         assertTrue(output.contains("\"InputTokens\":31144"));
         assertTrue(output.contains("\"WorkflowRunId\":\"541f42b9f9d346adf65405406b2ef5143a\""));
         assertFalse(output.contains("alice@acme.com"));
-        assertFalse(output.contains("Widget  QA"));
+        assertTrue(output.contains("Widget  QA"));
     }
 
     @SneakyThrows
@@ -173,8 +173,8 @@ public class GleanCustomerEventsLogBulkTests {
         assertFalse(output.contains("user-action@example.com"));
         assertFalse(output.contains("vacation carryover rules"));
         assertFalse(output.contains("acme api"));
-        assertFalse(output.contains("Orbit Ops"));
-        assertFalse(output.contains("Rivet Analytics"));
+        assertTrue(output.contains("Orbit Ops"));
+        assertTrue(output.contains("Rivet Analytics"));
     }
 
     @SneakyThrows

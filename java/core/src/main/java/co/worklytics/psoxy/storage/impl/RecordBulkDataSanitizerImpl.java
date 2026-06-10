@@ -286,6 +286,11 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             return sanitizerUtils.getTransformImpl(pseudonymizer, Transform.TextDigest.builder()
                 .jsonPaths(transform.getPaths())
                 .build());
+        } else if (transform instanceof RecordTransform.TextDigestKeywords textDigestKeywords) {
+            return sanitizerUtils.getTransformImpl(pseudonymizer, Transform.TextDigest.builder()
+                .jsonPaths(transform.getPaths())
+                .keywords(textDigestKeywords.getKeywords())
+                .build());
         } else {
             throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
         }

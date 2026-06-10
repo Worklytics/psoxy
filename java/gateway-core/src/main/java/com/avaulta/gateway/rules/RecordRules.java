@@ -4,8 +4,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import com.avaulta.gateway.rules.transforms.RecordTransform;
+import com.avaulta.gateway.rules.transforms.RecordTransformDeserializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -57,6 +59,7 @@ public class RecordRules implements BulkDataRules {
      *
      */
     @Singular
+    @JsonDeserialize(contentUsing = RecordTransformDeserializer.class)
     List<RecordTransform> transforms;
 
     /**
