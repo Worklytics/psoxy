@@ -121,6 +121,12 @@ variable "test_aws_principal_arns" {
   default     = []
 }
 
+variable "provision_iam_policy_for_testing" {
+  type        = bool
+  description = "Whether to provision access for bulk connector testing (S3 bucket policies on input/sanitized buckets when enabled by the host module)."
+  default     = false
+}
+
 variable "aws_role_to_assume_when_testing" {
   type        = string
   description = "ARN of role to assume when downloading from the sanitized bucket during tests. Leave blank to use default credentials of location from which you'll run tests (which must be for a principal with sufficient privileges, or use `provision_iam_policy_for_testing`)."
@@ -143,27 +149,25 @@ variable "aws_upload_role_to_assume_when_testing" {
   }
 }
 
-variable "provision_iam_policy_for_testing" {
-  type        = bool
-  description = "Whether to provision IAM policies for bulk connector testing."
-  default     = false
-}
-
+# TODO: remove in next major version; output-bucket read access is provisioned by aws-host (0.6.4+).
 variable "api_caller_role_arn" {
   type        = string
-  description = "DEPRECATED; arn of role which can be assumed to call API"
+  description = "DEPRECATED (ignored since 0.6.4); arn of role which can be assumed to call API"
   default     = null
 }
 
+# TODO: remove in next major version; output-bucket read access is provisioned by aws-host (0.6.4+).
 variable "api_caller_role_name" {
   type        = string
-  description = "DEPRECATED; name of role which can be assumed to call API"
+  description = "DEPRECATED (ignored since 0.6.4); name of role which can be assumed to call API"
   default     = null
 }
 
+# TODO: remove in next major version; output-bucket read access is provisioned by aws-host (0.6.4+).
 variable "sanitized_accessor_role_names" {
   type        = list(string)
-  description = "list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
+  description = "DEPRECATED (ignored since 0.6.4); list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
+  default     = []
 }
 
 variable "psoxy_base_dir" {

@@ -31,7 +31,6 @@ module "env_id" {
 
 locals {
   bucket_name_prefix = "${module.env_id.id}-${replace(var.instance_id, "_", "-")}"
-  iam_policy_prefix  = "${module.env_id.id}-${replace(var.instance_id, " ", "_")}"
 }
 
 
@@ -236,40 +235,7 @@ resource "aws_iam_role_policy_attachment" "write_policy_for_sanitized_bucket" {
   policy_arn = aws_iam_policy.sanitized_bucket_write_policy.arn
 }
 
-# proxy caller (data consumer) needs to read (both get and list objects) from the output bucket
-resource "aws_iam_policy" "sanitized_bucket_read" {
-  name        = "${module.env_id.id}_BucketRead_${aws_s3_bucket.sanitized.id}"
-  description = "Allow to read content from bucket: ${aws_s3_bucket.sanitized.id}"
-
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Action" : [
-            "s3:GetObject",
-            "s3:ListBucket"
-          ],
-          "Effect" : "Allow",
-          "Resource" : [
-            "${aws_s3_bucket.sanitized.arn}",
-            "${aws_s3_bucket.sanitized.arn}/*"
-          ]
-        }
-      ]
-  })
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
-}
-
-
-
 locals {
-  accessor_role_names = concat([var.api_caller_role_name], var.sanitized_accessor_role_names)
   command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
   example_file        = var.example_file == null ? "/path/to/example.csv" : "${var.psoxy_base_dir}${var.example_file}"
 
@@ -280,11 +246,61 @@ locals {
   )
 }
 
-resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
-  for_each = toset([for r in local.accessor_role_names : r if r != null])
+resource "aws_s3_bucket_policy" "testing_input" {
+  count = var.provision_iam_policy_for_testing ? 1 : 0
 
-  role       = each.key
-  policy_arn = aws_iam_policy.sanitized_bucket_read.arn
+  bucket = aws_s3_bucket.input.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowTestPrincipalInputAccess"
+        Effect = "Allow"
+        Principal = {
+          AWS = var.test_aws_principal_arns
+        }
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket",
+        ]
+        Resource = [
+          aws_s3_bucket.input.arn,
+          "${aws_s3_bucket.input.arn}/*",
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_policy" "testing_sanitized" {
+  count = var.provision_iam_policy_for_testing ? 1 : 0
+
+  bucket = aws_s3_bucket.sanitized.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowTestPrincipalSanitizedAccess"
+        Effect = "Allow"
+        Principal = {
+          AWS = var.test_aws_principal_arns
+        }
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:DeleteObject",
+          "s3:DeleteObjectVersion",
+        ]
+        Resource = [
+          aws_s3_bucket.sanitized.arn,
+          "${aws_s3_bucket.sanitized.arn}/*",
+        ]
+      }
+    ]
+  })
 }
 
 resource "aws_ssm_parameter" "rules" {
@@ -298,58 +314,6 @@ resource "aws_ssm_parameter" "rules" {
       tags
     ]
   }
-}
-
-resource "aws_s3_bucket_policy" "testing_input_upload" {
-  count = var.provision_iam_policy_for_testing ? 1 : 0
-
-  bucket = aws_s3_bucket.input.id
-
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Sid" : "AllowTestUploadPrincipals",
-        "Effect" : "Allow",
-        "Principal" : {
-          "AWS" : var.test_aws_principal_arns
-        },
-        "Action" : [
-          "s3:PutObject"
-        ],
-        "Resource" : "${aws_s3_bucket.input.arn}/*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_policy" "testing_sanitized_cleanup" {
-  count = var.provision_iam_policy_for_testing ? 1 : 0
-
-  name_prefix = "${local.iam_policy_prefix}TestingSanitizedCleanup"
-  description = "Allow to delete from sanitized bucket for testing"
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Action" : [
-          "s3:DeleteObject",
-          "s3:DeleteObjectVersion"
-        ],
-        "Effect" : "Allow",
-        "Resource" : [
-          "${aws_s3_bucket.sanitized.arn}/*"
-        ]
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "testing_sanitized_cleanup_to_caller_role" {
-  count = var.provision_iam_policy_for_testing ? 1 : 0
-
-  role       = element(reverse(split("/", var.aws_role_to_assume_when_testing)), 0)
-  policy_arn = aws_iam_policy.testing_sanitized_cleanup[0].arn
 }
 
 locals {

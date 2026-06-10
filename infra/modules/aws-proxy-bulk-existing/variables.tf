@@ -90,9 +90,11 @@ variable "function_zip_hash" {
   description = "hash of base64-encoded zipped lambda bundle"
 }
 
+# TODO: remove in next major version; output-bucket read access must be provisioned by the caller (eg, aws-host since 0.6.4+).
 variable "sanitized_accessor_role_names" {
   type        = list(string)
-  description = "list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
+  description = "DEPRECATED (ignored since 0.6.4); list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
+  default     = []
 }
 
 variable "psoxy_base_dir" {

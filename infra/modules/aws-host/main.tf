@@ -114,79 +114,6 @@ module "psoxy" {
   allowed_webhook_ip_blocks          = var.allowed_webhook_ip_blocks
 }
 
-resource "aws_iam_policy" "execution_lambda_to_caller" {
-  count = local.caller_requires_direct_lambda_access ? 1 : 0
-
-  name        = "${module.env_id.id}ExecuteLambdas" # TODO: change this name in next major version
-  description = "Allow caller to invoke the lambda via function url"
-
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        # allow caller to invoke the lambda via function url
-        {
-          "Action" : [
-            # for new AWS accounts as of Oct 2025, both of these are required
-            # see https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html
-            "lambda:InvokeFunctionUrl",
-            "lambda:InvokeFunction"
-          ],
-          "Effect" : "Allow",
-          "Resource" : [for k, v in module.api_connector : v.function_arn]
-        }
-      ],
-  })
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
-  count = local.caller_requires_direct_lambda_access ? 1 : 0
-
-  role       = module.psoxy.api_caller_role_name
-  policy_arn = aws_iam_policy.execution_lambda_to_caller[0].arn
-}
-
-# access to async output buckets
-# this is independent of whether API connectors are otherwise invoked via API Gateway v2 or function urls
-locals {
-  api_connectors_with_async = {
-    for k, v in var.api_connectors : k => v
-    if try(v.enable_async_processing, false)
-  }
-}
-
-resource "aws_iam_policy" "async_output_access" {
-  count = length(local.api_connectors_with_async) > 0 ? 1 : 0
-
-  name        = "${module.env_id.id}AsyncOutputAccess"
-  description = "Allow caller to read from async output buckets (sanitized output)"
-
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [for k, v in module.api_connector : {
-        "Action" : ["s3:GetObject", "s3:ListBucket"],
-        "Effect" : "Allow",
-        "Resource" : ["arn:aws:s3:::${v.async_output_bucket_id}", "arn:aws:s3:::${v.async_output_bucket_id}/*"]
-      } if contains(keys(local.api_connectors_with_async), k)]
-    }
-  )
-}
-
-resource "aws_iam_role_policy_attachment" "async_output_access_to_caller" {
-  count = length(local.api_connectors_with_async) > 0 ? 1 : 0
-
-  role       = module.psoxy.api_caller_role_name
-  policy_arn = aws_iam_policy.async_output_access[0].arn
-}
-
-
 # secrets shared across all instances
 locals {
   path_to_shared_secrets = var.secrets_store_implementation == "aws_secrets_manager" ? var.aws_secrets_manager_path : var.aws_ssm_param_root_path
@@ -368,6 +295,7 @@ module "bulk_connector" {
   aws_account_id                         = var.aws_account_id
   test_aws_principal_arns                = local.test_aws_principal_arns
   provision_iam_policy_for_testing       = var.provision_testing_infra
+  sanitized_accessor_role_names        = [module.psoxy.api_caller_role_name]
   aws_role_to_assume_when_testing        = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
   aws_upload_role_to_assume_when_testing = var.provision_testing_infra ? local.terraform_upload_role_arn : null
   environment_name                       = var.environment_name
@@ -395,7 +323,6 @@ module "bulk_connector" {
   path_to_instance_ssm_parameters      = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   path_to_shared_ssm_parameters        = local.path_to_shared_secrets
   ssm_kms_key_ids                      = local.ssm_key_ids
-  sanitized_accessor_role_names        = [module.psoxy.api_caller_role_name]
   memory_size_mb                       = coalesce(try(var.custom_bulk_connector_arguments[each.key].memory_size_mb, null), each.value.memory_size_mb, 1024)
   sanitized_expiration_days            = var.bulk_sanitized_expiration_days
   input_expiration_days                = var.bulk_input_expiration_days

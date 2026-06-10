@@ -85,10 +85,11 @@ async function testAWS(options, logger) {
       // the default "null" version of the object, but:
       // > If there isn't a null version, Amazon S3 does not remove any objects
       //   but will still respond that the command was successful.
+      const deleteClient = options.uploadRoleToAssume ? uploadClient : downloadClient;
       await aws.deleteObject(outputBucket, outputKey, {
-        role: options.role,
+        role: options.uploadRoleToAssume ?? options.role,
         region: options.region,
-      }, downloadClient);
+      }, deleteClient);
     } catch (error) {
       logger.error(`Error deleting sanitized file: ${error.message}`, {
         additional: error,
