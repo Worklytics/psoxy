@@ -115,22 +115,13 @@ variable "support_webhook_collectors" {
 
 variable "vpc_config" {
   type = object({
-    network              = string           # Local name of the VPC network resource on which to provision the VPC connector (required if `serverless_connector` is not provided)
-    subnet               = string           # Local name of the VPC subnet resource on which to provision the VPC connector (required if `serverless_connector` is not provided). NOTE: Subnet MUST have /28 netmask (required by Google Cloud for VPC connectors)
-    serverless_connector = optional(string) # Format: projects/{project}/locations/{location}/connectors/{connector}
+    network              = optional(string) # Local name of the VPC network resource on which to provision the VPC connector (required if `serverless_connector` is not provided)
+    subnet               = optional(string) # Local name of the VPC subnet resource on which to provision the VPC connector (required if `serverless_connector` is not provided). NOTE: Subnet MUST have /28 netmask (required by Google Cloud for VPC connectors)
+    serverless_connector = optional(string) # TODO 0.7.x: remove; deprecated. Format: projects/{project}/locations/{location}/connectors/{connector}
   })
 
   description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
   default     = null
-  # serverless_connector: allow null; if provided, must match the full resource name
-  validation {
-    condition = (
-      var.vpc_config == null
-      || try(var.vpc_config.serverless_connector, null) == null
-      || can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", try(var.vpc_config.serverless_connector, "")))
-    )
-    error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
-  }
 
   validation {
     condition = (

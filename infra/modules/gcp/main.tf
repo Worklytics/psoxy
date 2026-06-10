@@ -468,28 +468,22 @@ resource "google_service_account_iam_member" "allow_scheduler_impersonation" {
 }
 
 
-# BEGIN Serverless VPC Access connector (conditional)
+# BEGIN VPC (conditional)
 locals {
   MAX_SERVERLESS_CONNECTOR_NAME_LENGTH = 25
 
-  vpc_defined = var.vpc_config != null
+  vpc_defined    = var.vpc_config != null
+  use_direct_vpc = local.vpc_defined && try(var.vpc_config.serverless_connector, null) == null && try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null
 
-  provision_serverless_connector = local.vpc_defined && try(var.vpc_config.serverless_connector, null) == null
+  # TODO 0.7.x: remove serverless connector provisioning once deprecated path is dropped
+  provision_serverless_connector = local.vpc_defined && try(var.vpc_config.serverless_connector, null) == null && !local.use_direct_vpc
   legal_connector_prefix         = substr(var.environment_id_prefix, 0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH)
   legal_connector_suffix         = substr("connector", 0, max(0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH - length(var.environment_id_prefix)))
 
-  # check if shared VPC
   vpc_connector_network_project = coalesce(
     try(regex("^projects/([^/]+)", var.vpc_config.network)[0], null),
   var.project_id)
-  shared = var.project_id != local.vpc_connector_network_project
 
-  # if shared, expect network, expect everything set-up
-
-  # network argument to vpc_access_connector resource; must be provided if subnet isn't
-  vpc_connector_network = try(local.shared || !local.vpc_defined ? null : var.vpc_config.network, null)
-
-  # extract region from subnetwork (if shared)
   vpc_connector_region = coalesce(
     try(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0], null),
   var.gcp_region)
@@ -510,24 +504,24 @@ resource "google_vpc_access_connector" "connector" {
     name       = local.vpc_connector_subnetwork_name
     project_id = local.vpc_connector_network_project
   }
-
 }
 
 locals {
-  vpc_config = try(
-    {
+  vpc_config = (
+    local.use_direct_vpc ? {
+      network = var.vpc_config.network
+      subnet  = var.vpc_config.subnet
+    } :
+    local.provision_serverless_connector ? {
       serverless_connector = google_vpc_access_connector.connector[0].id
-    },
-    {
+    } :
+    try(var.vpc_config.serverless_connector, null) != null ? {
       serverless_connector = var.vpc_config.serverless_connector
-    },
+    } :
     null
   )
 }
 # END VPC (conditional)
-
-
-
 
 
 locals {
