@@ -595,7 +595,7 @@ outputSchemaFilter:
         Department:
           type: "string"
         DepartmentId:
-          type: "string"
+          type: "integer"
         JobFunction:
           type: "string"
         EmployeeType:
