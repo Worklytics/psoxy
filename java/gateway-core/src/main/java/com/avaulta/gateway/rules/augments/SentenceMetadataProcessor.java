@@ -11,6 +11,7 @@ import com.avaulta.gateway.rules.augments.SentenceMetadataResult.Verb;
 import opennlp.tools.chunker.ChunkerME;
 import opennlp.tools.chunker.ChunkerModel;
 import opennlp.tools.postag.POSModel;
+import opennlp.tools.postag.POSTagFormat;
 import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
@@ -289,7 +290,7 @@ public class SentenceMetadataProcessor {
                  InputStream posModelStream = loadModel("en-pos-maxent.bin");
                  InputStream chunkerModelStream = loadModel("en-chunker.bin")) {
                 SentenceDetectorME detector = new SentenceDetectorME(new SentenceModel(sentenceModelStream));
-                POSTaggerME tagger = new POSTaggerME(new POSModel(posModelStream));
+                POSTaggerME tagger = new POSTaggerME(new POSModel(posModelStream), POSTagFormat.PENN);
                 ChunkerME chunkerModel = new ChunkerME(new ChunkerModel(chunkerModelStream));
                 sentenceDetector = detector;
                 posTagger = tagger;
