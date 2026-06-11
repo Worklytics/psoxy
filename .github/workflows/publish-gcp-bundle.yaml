@@ -15,12 +15,8 @@ name: Publish GCP Bundle
 #   - Consider adding branch protection rules to restrict who can push tags and create rc-* branches
 
 on:
+  workflow_call:
   workflow_dispatch:
-  push:
-    tags:
-      - 'v*'
-    branches:
-      - 'rc-*'
 
 env:
   IMPLEMENTATION: gcp
@@ -128,24 +124,12 @@ jobs:
             exit 1
           fi
           
-          # Convert gs:// URI to HTTP URL
-          HTTP_URL=$(echo "$ARTIFACT_URI" | sed 's|^gs://|https://storage.googleapis.com/|')
-          
           IDENTIFIER="<!-- gcp-artifacts-info -->"
           
           BLOCK_FILE=$(mktemp)
-          cat > "$BLOCK_FILE" <<EOF
-          
-          $IDENTIFIER
-          ## GCP Deployment Bundle
-          * **GCS URI:** \`$ARTIFACT_URI\`
-          * **HTTP URL:** [$HTTP_URL]($HTTP_URL)
-          * **SHA256 Hash:** \`$ARTIFACT_SHA256\`
-          $IDENTIFIER
-          EOF
+          bash ./tools/release/lib/deployment-bundle-release-notes-block.sh gcp "$TAG_NAME" "$ARTIFACT_SHA256" "$ARTIFACT_URI" > "$BLOCK_FILE"
 
-          chmod +x ./tools/release/lib/amend-github-release-notes.sh
-          ./tools/release/lib/amend-github-release-notes.sh "$TAG_NAME" "$IDENTIFIER" "$BLOCK_FILE"
+          bash ./tools/release/lib/amend-github-release-notes.sh "$TAG_NAME" "$IDENTIFIER" "$BLOCK_FILE"
           rm -f "$BLOCK_FILE"
 
       - name: Summary
