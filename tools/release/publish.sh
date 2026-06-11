@@ -101,27 +101,11 @@ RELEASE_GH_RUNS=()
 MVN_WORKFLOW="publish-release-artifacts.yaml"
 BUNDLES_WORKFLOW="publish-bundles.yaml"
 
-printf "\n${INFO}Pushing ${RELEASE} triggers GitHub Actions for Maven packages and release bundles.${NC}\n"
-printf "${INFO}These run in CI (not locally). Waiting a few seconds for workflow runs to register ...${NC}\n"
+printf "\n${INFO}Tag push also triggers GitHub Actions for Maven packages and release bundles.${NC}\n"
+printf "${INFO}Checking workflow status via gh ...${NC}\n"
 sleep 3
-
-auto_track_tag_workflow_run() {
-  local workflow_file="$1"
-  local label="$2"
-  local line run_id status url
-
-  line="$(gh_workflow_runs_find_latest "$workflow_file" "$RELEASE")"
-  [ -z "$line" ] && return 0
-  IFS='|' read -r run_id status _ url _ <<< "$line"
-  [ -z "$run_id" ] || [ "$run_id" = "null" ] && return 0
-
-  printf "${SUCCESS}✓${NC} Found ${label} GitHub Actions run ${SUCCESS}${run_id}${NC} (${status})\n"
-  printf "  ${INFO}${url}${NC}\n"
-  gh_workflow_runs_track "$workflow_file" "$run_id" "$url" "$label"
-}
-
-auto_track_tag_workflow_run "$MVN_WORKFLOW" "Maven packages (GitHub Packages)"
-auto_track_tag_workflow_run "$BUNDLES_WORKFLOW" "Release bundles (AWS + GCP)"
+gh_workflow_runs_report_status "$MVN_WORKFLOW" "$RELEASE" "Maven packages (GitHub Packages)"
+gh_workflow_runs_report_status "$BUNDLES_WORKFLOW" "$RELEASE" "Release bundles (AWS + GCP)"
 printf "\n"
 
 if gh release view $RELEASE >/dev/null 2>&1
@@ -159,46 +143,71 @@ fi
 printf "Opening release ${INFO}${RELEASE}${NC} in browser; review / update notes and then publish as latest ...\n"
 gh release view $RELEASE --web
 
-# prompt user to publish mvn artifacts via GitHub Actions
-printf "Publish Maven artifacts to GitHub Packages via GitHub Actions (${MVN_WORKFLOW})?\n"
+# Maven artifacts — report GH status again in case it changed, then offer local publish
+printf "Publish Maven artifacts to GitHub Packages locally?\n"
+gh_workflow_runs_report_status "$MVN_WORKFLOW" "$RELEASE" "Maven packages (GitHub Packages)"
 read -p "(Y/n) " -n 1 -r
 REPLY=${REPLY:-Y}
 echo    # Move to a new line
 case "$REPLY" in
   [yY][eE][sS]|[yY])
-    if gh_workflow_runs_trigger_and_track "$MVN_WORKFLOW" "$RELEASE" "Maven packages (GitHub Packages)"; then
-      :
+    LOG_FILE="/tmp/release_${RELEASE}_mvn-artifacts.log"
+    set +e
+    ./tools/release/publish-mvn-artifacts.sh "${PATH_TO_REPO}" &> "${LOG_FILE}"
+    EXIT_CODE=$?
+    set -e
+    if [ $EXIT_CODE -ne 0 ]; then
+      printf "${ERR}Failed to publish Maven artifacts locally.${NC}\n"
+      printf "Review logs: ${INFO}cat ${LOG_FILE}${NC}\n"
+      printf "Or use GitHub Actions: ${INFO}gh workflow run ${MVN_WORKFLOW} --ref ${RELEASE}${NC}\n"
+      exit $EXIT_CODE
     else
-      printf "${WARN}Could not confirm Maven workflow run. Trigger manually:${NC}\n"
-      printf "    ${INFO}gh workflow run ${MVN_WORKFLOW} --ref ${RELEASE}${NC}\n"
+      printf "${SUCCESS}✓${NC} Maven artifacts published locally\n"
+      printf "See logs: ${INFO}cat ${LOG_FILE}${NC}\n"
     fi
   ;;
   *)
-    printf "Skipped triggering Maven packages workflow\n"
-    printf "Tag push may already have started it. To trigger manually:\n"
-    printf "    ${INFO}gh workflow run ${MVN_WORKFLOW} --ref ${RELEASE}${NC}\n"
+    printf "Skipped local Maven publish\n"
+    printf "GitHub Actions equivalent: ${INFO}gh workflow run ${MVN_WORKFLOW} --ref ${RELEASE}${NC}\n"
     ;;
 esac
 
-# publish bundles via GitHub Actions
-printf "Publish release bundles (AWS + GCP) via GitHub Actions (${BUNDLES_WORKFLOW})?\n"
+# Bundles — report GH status, then offer local AWS + GCP publish
+printf "Publish release bundles locally (AWS + GCP)?\n"
+gh_workflow_runs_report_status "$BUNDLES_WORKFLOW" "$RELEASE" "Release bundles (AWS + GCP)"
 read -p "(Y/n) " -n 1 -r
 REPLY=${REPLY:-Y}
 echo    # Move to a new line
 case "$REPLY" in
   [yY][eE][sS]|[yY])
-    if line="$(./tools/release/publish-rc-bundles-via-gh.sh ${RELEASE})"; then
-      IFS='|' read -r wf run_id url _triggered <<< "$line"
-      gh_workflow_runs_track "$wf" "$run_id" "$url" "Release bundles (AWS + GCP)"
+    BUNDLE_LOG="/tmp/release_${RELEASE}_bundles.log"
+    : > "${BUNDLE_LOG}"
+    set +e
+    (
+      cd "${PATH_TO_REPO}"
+      ./tools/release/lib/publish-aws-bundle.sh
+      AWS_EXIT=$?
+      ./tools/release/lib/publish-gcp-bundle.sh
+      GCP_EXIT=$?
+      exit $((AWS_EXIT || GCP_EXIT))
+    ) >> "${BUNDLE_LOG}" 2>&1
+    EXIT_CODE=$?
+    set -e
+    if [ $EXIT_CODE -ne 0 ]; then
+      printf "${ERR}Failed to publish bundles locally.${NC}\n"
+      printf "Review logs: ${INFO}cat ${BUNDLE_LOG}${NC}\n"
+      printf "Or use GitHub Actions: ${INFO}gh workflow run ${BUNDLES_WORKFLOW} --ref ${RELEASE}${NC}\n"
+      exit $EXIT_CODE
     else
-      printf "${WARN}Could not confirm bundle workflow run. Trigger manually:${NC}\n"
-      printf "    ${INFO}gh workflow run ${BUNDLES_WORKFLOW} --ref ${RELEASE}${NC}\n"
+      printf "${SUCCESS}✓${NC} AWS and GCP bundles published locally\n"
+      printf "See logs: ${INFO}cat ${BUNDLE_LOG}${NC}\n"
     fi
   ;;
   *)
-    printf "Skipped triggering release bundles workflow\n"
-    printf "Tag push may already have started it. To trigger manually:\n"
-    printf "    ${INFO}gh workflow run ${BUNDLES_WORKFLOW} --ref ${RELEASE}${NC}\n"
+    printf "Skipped local bundle publish\n"
+    printf "GitHub Actions equivalent: ${INFO}gh workflow run ${BUNDLES_WORKFLOW} --ref ${RELEASE}${NC}\n"
+    printf "Or trigger individually: ${INFO}gh workflow run publish-aws-bundle.yaml --ref ${RELEASE}${NC}\n"
+    printf "                       ${INFO}gh workflow run publish-gcp-bundle.yaml --ref ${RELEASE}${NC}\n"
     ;;
 esac
 

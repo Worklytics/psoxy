@@ -29,6 +29,42 @@ gh_workflow_runs_find_latest() {
     2>/dev/null || true
 }
 
+# Print human-readable status for the latest workflow run on a ref (stderr).
+# Tracks the run in RELEASE_GH_RUNS when found. Returns 0 always (informational).
+gh_workflow_runs_report_status() {
+  local workflow_file="$1"
+  local ref="$2"
+  local label="$3"
+  local line run_id status conclusion url
+
+  if ! gh_workflow_runs_require_gh 2>/dev/null; then
+    printf "${WARN}${label}:${NC} skipped GitHub Actions status check (gh not available)\n" >&2
+    return 0
+  fi
+
+  line="$(gh_workflow_runs_find_latest "$workflow_file" "$ref")"
+  if [ -z "$line" ] || [ -z "${line%%|*}" ] || [ "${line%%|*}" = "null" ]; then
+    printf "${INFO}${label}:${NC} no GitHub Actions run found yet for ${ref} (${CODE}${workflow_file}${NC})\n" >&2
+    printf "  ${INFO}Tag push may still be registering; check with: gh run list --workflow=${workflow_file}${NC}\n" >&2
+    return 0
+  fi
+
+  IFS='|' read -r run_id status conclusion url _ <<< "$line"
+
+  if [ "$status" = "completed" ] && [ -n "$conclusion" ]; then
+    if [ "$conclusion" = "success" ]; then
+      printf "${SUCCESS}✓${NC} ${label}: GitHub Actions run ${SUCCESS}${run_id}${NC} completed successfully\n" >&2
+    else
+      printf "${ERR}✗${NC} ${label}: GitHub Actions run ${run_id} completed with ${conclusion}\n" >&2
+    fi
+  else
+    printf "${INFO}…${NC} ${label}: GitHub Actions run ${SUCCESS}${run_id}${NC} is ${status}\n" >&2
+  fi
+  printf "  ${INFO}${url}${NC}\n" >&2
+  gh_workflow_runs_track "$workflow_file" "$run_id" "$url" "$label"
+  return 0
+}
+
 # Wait briefly for a workflow run to appear after a trigger (tag push or workflow_dispatch).
 gh_workflow_runs_wait_for_run() {
   local workflow_file="$1"
