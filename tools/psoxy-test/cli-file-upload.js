@@ -28,8 +28,9 @@ const { version } = require('./package.json');
     .requiredOption('-i, --input <bucketName>', 'Input bucket\'s name')
     .requiredOption('-f, --file <path/to/file>', 'Path of the file to be processed')
     .requiredOption('-o, --output <bucketName>', 'Output bucket\'s name')
-    .option('-r, --role <arn>', 'ARN of AWS role to assume when downloading from the output bucket (and deleting test artifacts); if omitted, default AWS credentials are used')
-    .option('--upload-role-to-assume <arn>', 'ARN of AWS role to assume when uploading to the input bucket; if omitted, default AWS credentials are used')
+    .option('-r, --role <arn>', 'ARN of AWS role to assume when downloading from the output bucket (and deleting the sanitized file, if --write-role-to-assume is not set); if omitted, default AWS credentials are used')
+    .option('--write-role-to-assume <arn>', 'ARN of AWS role to assume for S3 writes during the test (input upload and sanitized output delete); if omitted, default AWS credentials are used')
+    .option('--upload-role-to-assume <arn>', 'DEPRECATED: use --write-role-to-assume')
     .option('--region <region>', 'AWS region of the buckets (input/output)',
       'us-east-1')
     .option('-v, --verbose', 'Verbose output', false)
@@ -48,7 +49,7 @@ const { version } = require('./package.json');
           -i my-input-bucket \\
           -o my-output-bucket \\
           -f /path/to/file \\
-          --upload-role-to-assume arn:aws:iam::id:uploadRole \\
+          --write-role-to-assume arn:aws:iam::id:writeRole \\
           -r arn:aws:iam::id:downloadRole \\
           --region us-east-1
       GCP example call:

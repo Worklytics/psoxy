@@ -28,14 +28,15 @@ const SANITIZED_FILE_SUFFIX = 'sanitized';
 async function testAWS(options, logger) {
   const parsedPath = path.parse(options.file);
   const filenameWithTimestamp = addFilenameSuffix(parsedPath.base, TIMESTAMP);
+  const writeRoleToAssume = options.writeRoleToAssume ?? options.uploadRoleToAssume;
 
-  let uploadClient = await aws.createS3Client(null, options.region);
-  if (options.uploadRoleToAssume) {
-    logger.verbose(`Assuming role ${options.uploadRoleToAssume} for upload`);
-    uploadClient = await aws.createS3Client(options.uploadRoleToAssume, options.region);
+  let writeClient = await aws.createS3Client(null, options.region);
+  if (writeRoleToAssume) {
+    logger.verbose(`Assuming role ${writeRoleToAssume} for S3 writes (upload and sanitized delete)`);
+    writeClient = await aws.createS3Client(writeRoleToAssume, options.region);
   }
 
-  let downloadClient = uploadClient;
+  let downloadClient = writeClient;
   if (options.role) {
     logger.verbose(`Assuming role ${options.role} for download`);
     downloadClient = await aws.createS3Client(options.role, options.region);
@@ -50,7 +51,7 @@ async function testAWS(options, logger) {
 
   const uploadResult = await aws.upload(inputBucket, inputKey, options.file, {
       region: options.region,
-    }, uploadClient);
+    }, writeClient);
 
   if (uploadResult['$metadata'].httpStatusCode !== httpCodes.HTTP_STATUS_OK) {
     throw new Error('Unable to upload file', { cause: uploadResult });
@@ -85,9 +86,9 @@ async function testAWS(options, logger) {
       // the default "null" version of the object, but:
       // > If there isn't a null version, Amazon S3 does not remove any objects
       //   but will still respond that the command was successful.
-      // Deletion uses the upload role when configured (it has s3:DeleteObject on the sanitized
+      // Deletion uses the write role when configured (it has s3:DeleteObject on the sanitized
       // bucket via testing bucket policy); otherwise fall back to the download/access role client.
-      const deleteClient = options.uploadRoleToAssume ? uploadClient : downloadClient;
+      const deleteClient = writeRoleToAssume ? writeClient : downloadClient;
       await aws.deleteObject(outputBucket, outputKey, {
         region: options.region,
       }, deleteClient);
@@ -180,8 +181,9 @@ async function testGCP(options, logger) {
  * @param {string} options.input
  * @param {string} options.output
  * @param {string} options.region - AWS: buckets region
- * @param {string} options.role - AWS: role to assume for download (ARN format; optional)
- * @param {string} options.uploadRoleToAssume - AWS: role to assume for upload and test artifact cleanup (ARN format; optional)
+ * @param {string} options.role - AWS: role to assume for download (and sanitized output delete, if no write role; ARN format; optional)
+ * @param {string} options.writeRoleToAssume - AWS: role to assume for S3 writes during the test (input upload and sanitized output delete; ARN format; optional)
+ * @param {string} options.uploadRoleToAssume - DEPRECATED: use writeRoleToAssume
  * @param {boolean} options.saveSanitizedFile - Whether to save sanitized file or not
  * @param {boolean} options.keepSanitizedFile - Whether to delete sanitized file or not (from
  *  output bucket, after test completion)

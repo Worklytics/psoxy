@@ -1,4 +1,4 @@
-# IAM policies consolidated at host level in 0.6.4; prior per-connector policies are replaced.
+# IAM policies consolidated at host level in 0.6.5; prior per-connector policies are replaced.
 
 removed {
   from = aws_iam_policy.execution_lambda_to_caller

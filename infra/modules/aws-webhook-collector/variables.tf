@@ -49,7 +49,8 @@ variable "function_env_kms_key_arn" {
 variable "sanitized_accessor_role_names" {
   type        = list(string)
   description = "DEPRECATED (ignored since 0.6.4); list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
-  default     = []
+  default     = null
+  nullable    = true
 }
 
 variable "output_path_prefix" {
