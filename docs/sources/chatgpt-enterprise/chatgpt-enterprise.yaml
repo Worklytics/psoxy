@@ -431,8 +431,8 @@ endpoints:
       - !<textDigest>
         jsonPaths:
           - "$.conversation.title"
-          - "$[?(@.message.author.type == 'user' || @.message.author.role == 'user')].message.content.value"
-          - "$[?(@.message.author.type == 'user' || @.message.author.role == 'user')].message.annotations[*].quote_text"
+          - "$[?(@.message.author.type == 'user')].message.content.value"
+          - "$[?(@.message.author.type == 'user')].message.annotations[*].quote_text"
         keywords:
           - "generate image"
           - "create image"
@@ -560,7 +560,7 @@ endpoints:
           - "linkedin"
       - !<textDigest>
         jsonPaths:
-          - "$[?(@.message.author.type != 'user' && @.message.author.role != 'user')].message.content.value"
+          - "$[?(@.message.author.type != 'user')].message.content.value"
     responseSchema:
       type: "object"
       properties:
@@ -671,8 +671,6 @@ definitions:
     type: "object"
     properties:
       client_type:
-        type: "string"
-      role:
         type: "string"
       type:
         type: "string"

@@ -37,13 +37,11 @@ class SentenceMetadataProcessorTest {
             DEFAULT_CONSTRAINT);
 
         assertEquals("interrogative", analysis.sentence().getType());
-        assertNotNull(analysis.sentence().getSignals());
         assertTrue(analysis.sentence().getSignals().isQuestion());
         assertTrue(analysis.sentence().getSignals().isConstraint());
-        assertNotNull(analysis.sentence().getNouns());
         assertEquals(1, analysis.sentence().getNouns().size());
-        assertEquals("email", analysis.sentence().getNouns().getFirst().getNoun());
-        assertEquals("MEDIUM", analysis.sentence().getNouns().getFirst().getCategory());
+        assertEquals("email", analysis.sentence().getNouns().get(0).getNoun());
+        assertEquals("MEDIUM", analysis.sentence().getNouns().get(0).getCategory());
         assertTrue(analysis.nounCategories().contains("MEDIUM"));
     }
 
@@ -62,26 +60,21 @@ class SentenceMetadataProcessorTest {
             text, taxonomy, DEFAULT_HEDGE, DEFAULT_CONSTRAINT);
 
         assertNotNull(result);
-        assertNotNull(result.getSentences());
         assertEquals(2, result.getSentences().size());
 
         SentenceMetadataResult.Sentence s2 = result.getSentences().get(1);
         assertEquals("interrogative", s2.getType());
-        assertNotNull(s2.getSignals());
         assertTrue(s2.getSignals().isQuestion());
         assertTrue(s2.getSignals().isConstraint());
 
-        assertNotNull(s2.getNouns());
         boolean foundMedium = s2.getNouns().stream()
             .anyMatch(n -> "MEDIUM".equals(n.getCategory()) && "email".equals(n.getNoun()));
         assertTrue(foundMedium);
 
         SentenceMetadataResult.DocSummary docSummary = result.getDocSummary();
-        assertNotNull(docSummary);
         assertEquals(2, docSummary.getSentenceCount());
         assertTrue(docSummary.isAnyQuestion());
         assertTrue(docSummary.isAnyConstraint());
-        assertNotNull(docSummary.getNounCategories());
         assertTrue(docSummary.getNounCategories().contains("MEDIUM"));
     }
 
@@ -107,7 +100,6 @@ class SentenceMetadataProcessorTest {
         SentenceMetadataResult result = processor.process(
             "", Map.of(), DEFAULT_HEDGE, DEFAULT_CONSTRAINT);
         assertNotNull(result);
-        assertNotNull(result.getDocSummary());
         assertEquals(0, result.getDocSummary().getSentenceCount());
     }
 

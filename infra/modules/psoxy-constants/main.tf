@@ -638,7 +638,6 @@ locals {
       display_name    = "Compute Network Admin",
       description_url = "https://cloud.google.com/iam/docs/roles-permissions/compute#compute.networkAdmin"
     },
-    # TODO 0.7.x: possibly remove if no longer needed once serverless connector path is dropped
     "roles/vpcaccess.admin" = {
       display_name    = "VPC Access Admin",
       description_url = "https://cloud.google.com/iam/docs/roles-permissions/vpcaccess#vpcaccess.admin"

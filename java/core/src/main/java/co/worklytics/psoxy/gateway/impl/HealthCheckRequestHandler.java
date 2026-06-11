@@ -22,7 +22,6 @@ import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -60,8 +59,6 @@ public class HealthCheckRequestHandler {
     HashUtils hashUtils;
     @Inject
     ProxyConstants proxyConstants;
-    @Inject
-    NetworkSecurityUtils networkSecurityUtils;
 
     volatile String piiSaltHash;
     private final Object $piiSaltHashLock = new Object[0];
@@ -127,15 +124,6 @@ public class HealthCheckRequestHandler {
                 .missingConfigProperties(missing)
                 .callerIp(request.getClientIp().orElse("unknown"));
 
-        if (!apiModeConfig.getAllowedDataAccessIpBlocks().isEmpty()) {
-            boolean clientIpAllowed = networkSecurityUtils.isDataAccessIpAllowed(
-                    request.getClientIp().orElse(null));
-            healthCheckResult.clientIpAuthorized(clientIpAllowed);
-            if (!clientIpAllowed) {
-                healthCheckResult.warningMessage(
-                        "Client IP is not authorized to access this proxy instance.");
-            }
-        }
 
         try {
             config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYMIZE_APP_IDS)

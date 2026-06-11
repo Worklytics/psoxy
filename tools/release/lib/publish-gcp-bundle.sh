@@ -183,7 +183,7 @@ clean_maven_artifacts() {
 clean_maven_artifacts
 
 # Construct JAR filename
-./tools/build.sh -qd "$IMPLEMENTATION" "$JAVA_SOURCE_ROOT"
+./tools/build.sh -d "$IMPLEMENTATION" "$JAVA_SOURCE_ROOT"
 DEPLOYMENT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
 
 JAR_PATH="java/impl/gcp/target/deployment/${DEPLOYMENT_ARTIFACT}"

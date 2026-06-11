@@ -1,11 +1,9 @@
 package com.avaulta.gateway.rules.transforms;
 
 import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -26,6 +24,14 @@ import java.util.List;
  *
  *
  */
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.DEDUCTION,
+    defaultImpl = RecordTransform.class
+)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = RecordTransform.Redact.class),
+    @JsonSubTypes.Type(value = RecordTransform.Pseudonymize.class)
+})
 public interface RecordTransform {
 
 
@@ -74,77 +80,6 @@ public interface RecordTransform {
         @JsonIgnore
         public List<String> getPaths() {
             return pseudonymize;
-        }
-    }
-
-
-    @JsonTypeName("tokenize")
-    @NoArgsConstructor
-    @SuperBuilder(toBuilder = true)
-    @Data
-    class Tokenize implements RecordTransform {
-
-        @Singular("tokenize")
-        @JsonFormat(with = {
-            JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
-            JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED
-        })
-        List<String> tokenize;
-
-        @Override
-        @JsonIgnore
-        public List<String> getPaths() {
-            return tokenize;
-        }
-    }
-
-
-    @JsonTypeName("textDigest")
-    @NoArgsConstructor
-    @SuperBuilder(toBuilder = true)
-    @Data
-    class TextDigest implements RecordTransform {
-
-        @Singular("textDigest")
-        @JsonFormat(with = {
-            JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
-            JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED
-        })
-        List<String> textDigest;
-
-        @Override
-        @JsonIgnore
-        public List<String> getPaths() {
-            return textDigest;
-        }
-    }
-
-
-    @JsonTypeName("textDigestKeywords")
-    @NoArgsConstructor
-    @SuperBuilder(toBuilder = true)
-    @Data
-    class TextDigestKeywords implements RecordTransform {
-
-        @Singular("jsonPath")
-        @JsonFormat(with = {
-            JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
-            JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED
-        })
-        List<String> jsonPaths;
-
-        /**
-         * BETA - behavior subject to change or removal.
-         */
-        @JsonPropertyDescription("BETA - behavior subject to change or removal")
-        @JsonInclude(JsonInclude.Include.NON_EMPTY)
-        @Builder.Default
-        List<String> keywords = new ArrayList<>();
-
-        @Override
-        @JsonIgnore
-        public List<String> getPaths() {
-            return jsonPaths;
         }
     }
 }

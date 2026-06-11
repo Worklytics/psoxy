@@ -87,8 +87,6 @@ jobs:
       - name: Publish AWS Bundle
         id: publish
         run: |
-          set -o pipefail
-
           # Determine if RC build; assume it is UNLESS ref is tag starting with v (e.g., v0.5.15)
           RC_OPTION="--rc"
           REF_NAME="${{ github.ref_name }}"
@@ -99,15 +97,11 @@ jobs:
           ./tools/release/lib/publish-aws-bundle.sh --non-interactive $RC_OPTION | tee publish-output.log
           
           # Extract artifact URIs and SHA256 from output and save to file for summary step
-          grep "^ARTIFACT_URI_" publish-output.log > artifact-uris.txt
-          grep "^ARTIFACT_SHA256=" publish-output.log > artifact-sha.txt
-          if [ ! -s artifact-uris.txt ]; then
-            echo "::error::No artifact URIs found in publish output"
-            exit 1
-          fi
+          grep "^ARTIFACT_URI_" publish-output.log > artifact-uris.txt || true
+          grep "^ARTIFACT_SHA256=" publish-output.log > artifact-sha.txt || true
 
       - name: Amend GitHub Release with Artifact References
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') && hashFiles('artifact-uris.txt') != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

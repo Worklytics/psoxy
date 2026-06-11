@@ -67,25 +67,10 @@
             <version>${dependency.commons-net.version}</version>
         </dependency>
 
-        <!-- Source: https://mvnrepository.com/artifact/io.airlift/aircompressor -->
-        <!-- Fixes vulnerability CVE-2025-67721, indirect dependency of blue.strategic.parquet:parquet-floor -->
-        <!-- once fixed, remove this exclusion -->
-        <dependency>
-            <groupId>io.airlift</groupId>
-            <artifactId>aircompressor</artifactId>
-            <version>2.0.3</version>
-            <scope>compile</scope>
-        </dependency>
         <dependency>
             <groupId>blue.strategic.parquet</groupId>
             <artifactId>parquet-floor</artifactId>
-            <version>2.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.airlift</groupId>
-                    <artifactId>aircompressor</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>1.64</version>
         </dependency>
 
 

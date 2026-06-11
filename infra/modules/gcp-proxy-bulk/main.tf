@@ -234,9 +234,8 @@ resource "google_cloudfunctions2_function" "function" {
     timeout_seconds       = var.timeout_seconds
     ingress_settings      = "ALLOW_INTERNAL_ONLY"
 
-  # bulk connectors do not dial out to SaaS APIs; only honor legacy serverless connector path
-    vpc_connector                 = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) != null ? var.vpc_config.serverless_connector : null
-    vpc_connector_egress_settings = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) != null ? "ALL_TRAFFIC" : null
+    vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
+    vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
 
     environment_variables = merge(tomap({
       INPUT_BUCKET  = google_storage_bucket.input_bucket.name,
