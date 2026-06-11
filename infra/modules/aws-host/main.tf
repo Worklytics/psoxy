@@ -292,22 +292,22 @@ module "bulk_connector" {
 
   source = "../../modules/aws-proxy-bulk"
 
-  aws_account_id                         = var.aws_account_id
-  test_aws_principal_arns                = local.test_aws_principal_arns
-  provision_iam_policy_for_testing       = var.provision_testing_infra
-  aws_principal_arn_when_testing         = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
-  aws_write_role_to_assume_when_testing  = var.provision_testing_infra ? local.terraform_upload_role_arn : null
-  environment_name                       = var.environment_name
-  new_relic_account_id                   = var.new_relic_account_id
-  instance_id                            = each.key
-  source_kind                            = each.value.source_kind
-  aws_region                             = data.aws_region.current.region
-  path_to_function_zip                   = module.psoxy.path_to_deployment_jar
-  function_zip_hash                      = module.psoxy.deployment_package_hash
-  function_env_kms_key_arn               = var.function_env_kms_key_arn
-  logs_kms_key_arn                       = var.logs_kms_key_arn
-  log_retention_days                     = var.log_retention_days
-  psoxy_base_dir                         = var.psoxy_base_dir
+  aws_account_id                        = var.aws_account_id
+  test_aws_principal_arns               = local.test_aws_principal_arns
+  provision_iam_policy_for_testing      = var.provision_testing_infra
+  aws_principal_arn_when_testing        = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
+  aws_write_role_to_assume_when_testing = var.provision_testing_infra ? local.terraform_upload_role_arn : null
+  environment_name                      = var.environment_name
+  new_relic_account_id                  = var.new_relic_account_id
+  instance_id                           = each.key
+  source_kind                           = each.value.source_kind
+  aws_region                            = data.aws_region.current.region
+  path_to_function_zip                  = module.psoxy.path_to_deployment_jar
+  function_zip_hash                     = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn              = var.function_env_kms_key_arn
+  logs_kms_key_arn                      = var.logs_kms_key_arn
+  log_retention_days                    = var.log_retention_days
+  psoxy_base_dir                        = var.psoxy_base_dir
   rules = (
     try(var.custom_bulk_connector_rules[each.key], null) != null ? var.custom_bulk_connector_rules[each.key] :
     each.value.rules
@@ -488,6 +488,16 @@ resource "aws_ssm_parameter" "additional_transforms" {
 
 # Host-level IAM policies (consolidated per principal/role, rather than per connector instance).
 locals {
+  # Plan-time signal for whether caller output-bucket read is configured. Do not use bucket names
+  # from module outputs here — those may be unknown until apply (eg, bucket_prefix).
+  caller_has_configured_output_buckets = (
+    length(var.bulk_connectors) > 0 ||
+    length(var.webhook_collectors) > 0 ||
+    length(var.lookup_table_builders) > 0 ||
+    length([for k, v in var.api_connectors : k if try(v.enable_async_processing, false)]) > 0 ||
+    length([for k, v in local.sanitized_side_outputs : k if v != null]) > 0
+  )
+
   caller_readable_s3_bucket_ids = distinct(compact(concat(
     [for k, v in module.bulk_connector : v.sanitized_bucket],
     [for k, v in module.webhook_collectors : v.output_sanitized_bucket_id],
@@ -527,7 +537,7 @@ locals {
     }
   ]...)
 
-  provision_psoxy_caller_access_policy = local.caller_requires_direct_lambda_access || length(local.caller_readable_s3_bucket_ids) > 0
+  provision_psoxy_caller_access_policy = local.caller_requires_direct_lambda_access || local.caller_has_configured_output_buckets
 }
 
 data "aws_iam_policy_document" "lookup_bucket_read" {
@@ -564,7 +574,7 @@ data "aws_iam_policy_document" "psoxy_caller_access" {
   }
 
   dynamic "statement" {
-    for_each = length(local.caller_readable_s3_bucket_ids) > 0 ? [1] : []
+    for_each = local.caller_has_configured_output_buckets ? [1] : []
     content {
       sid    = "ReadOutputBuckets"
       effect = "Allow"
