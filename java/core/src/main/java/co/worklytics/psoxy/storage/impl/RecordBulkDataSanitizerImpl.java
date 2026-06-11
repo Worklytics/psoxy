@@ -17,8 +17,12 @@ import org.apache.commons.lang3.tuple.Triple;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.transforms.RecordTransform;
+import com.avaulta.gateway.rules.transforms.Transform;
+import co.worklytics.psoxy.impl.SanitizerUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.Configuration;
@@ -54,6 +58,12 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
     BulkModeConfig bulkModeConfig;
+
+    @Inject
+    JsonSchemaFilterUtils jsonSchemaFilterUtils;
+
+    @Inject
+    SanitizerUtils sanitizerUtils;
 
     RecordRules rules;
 
@@ -198,7 +208,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
 
     /**
-     * Apply the compiled transforms to the document
+     * Apply transforms, then optional output schema filter.
      *
      * @param document JSON "document object"
      * @param compiledTransforms ordered list of compiled transforms
@@ -234,7 +244,11 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             }
         }
 
-        return document;
+        return rules.getOutputSchemaFilterOptional()
+            .map(schema -> (Map<String, Object>) jsonSchemaFilterUtils
+                .filterObjectBySchema(document, schema)
+                .getLeft())
+            .orElse(document);
     }
 
     private MapFunction getMapFunction(RecordTransform transform,
@@ -264,6 +278,19 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                     throw new IllegalArgumentException("Pseudonymize transform only supports string/integer values");
                 }
             };
+        } else if (transform instanceof RecordTransform.Tokenize) {
+            return sanitizerUtils.getTransformImpl(pseudonymizer, Transform.Tokenize.builder()
+                .jsonPaths(transform.getPaths())
+                .build());
+        } else if (transform instanceof RecordTransform.TextDigest) {
+            return sanitizerUtils.getTransformImpl(pseudonymizer, Transform.TextDigest.builder()
+                .jsonPaths(transform.getPaths())
+                .build());
+        } else if (transform instanceof RecordTransform.TextDigestKeywords textDigestKeywords) {
+            return sanitizerUtils.getTransformImpl(pseudonymizer, Transform.TextDigest.builder()
+                .jsonPaths(transform.getPaths())
+                .keywords(textDigestKeywords.getKeywords())
+                .build());
         } else {
             throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
         }

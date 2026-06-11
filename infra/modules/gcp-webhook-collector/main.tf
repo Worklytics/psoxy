@@ -58,6 +58,8 @@ locals {
 
   path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(var.instance_id), "-", "_")}_"
 
+  vpc_use_connector = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) != null # TODO 0.7.x: remove
+  vpc_use_direct    = var.vpc_config != null && !local.vpc_use_connector && try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null
 }
 
 # BEGIN AUTH KEYS
@@ -335,8 +337,18 @@ resource "google_cloudfunctions2_function" "function" {
     max_instance_request_concurrency = var.instance_concurrency
     available_cpu                    = var.instance_concurrency > 1 ? "1" : null
 
-    vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
-    vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
+    vpc_connector                 = local.vpc_use_connector ? var.vpc_config.serverless_connector : null
+    vpc_connector_egress_settings = local.vpc_use_connector ? "ALL_TRAFFIC" : null
+
+    direct_vpc_egress = local.vpc_use_direct ? "VPC_EGRESS_ALL_TRAFFIC" : null
+
+    dynamic "direct_vpc_network_interface" {
+      for_each = local.vpc_use_direct ? [var.vpc_config] : []
+      content {
+        network    = direct_vpc_network_interface.value.network
+        subnetwork = direct_vpc_network_interface.value.subnet
+      }
+    }
 
     max_instance_count = local.max_instance_count
 

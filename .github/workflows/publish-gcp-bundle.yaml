@@ -91,6 +91,8 @@ jobs:
       - name: Publish GCP Bundle
         id: publish
         run: |
+          set -o pipefail
+
           # Determine if RC build; assume it is UNLESS ref is tag starting with v (e.g., v0.5.15)
           RC_OPTION="--rc"
           REF_NAME="${{ github.ref_name }}"
@@ -103,15 +105,17 @@ jobs:
           # Extract artifact URI and SHA256 from output
           ARTIFACT_URI=$(grep "^ARTIFACT_URI=" publish-output.log | cut -d'=' -f2- || echo "")
           ARTIFACT_SHA256=$(grep "^ARTIFACT_SHA256=" publish-output.log | cut -d'=' -f2- || echo "")
-          if [ -n "$ARTIFACT_URI" ]; then
-            echo "artifact_uri=$ARTIFACT_URI" >> $GITHUB_OUTPUT
+          if [ -z "$ARTIFACT_URI" ]; then
+            echo "::error::No artifact URI found in publish output"
+            exit 1
           fi
+          echo "artifact_uri=$ARTIFACT_URI" >> $GITHUB_OUTPUT
           if [ -n "$ARTIFACT_SHA256" ]; then
             echo "artifact_sha256=$ARTIFACT_SHA256" >> $GITHUB_OUTPUT
           fi
 
       - name: Amend GitHub Release with Artifact References
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') && steps.publish.outputs.artifact_uri != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

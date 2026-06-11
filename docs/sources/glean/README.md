@@ -29,6 +29,12 @@ Glean-issued global tokens require an `X-Glean-ActAs` request header with the em
 
 Worklytics sends this header using the **Admin Email** (`ADMIN_EMAIL`) connector setting. Set it to the email address of the Global Admin who created the API credential. The proxy rules allow `X-Glean-ActAs` to pass through to Glean.
 
+## Bulk Connector
+
+For Glean Customer Event logs delivered to object storage (GCS/S3), see the bulk connector:
+
+- [Glean Customer Event Logs (Bulk)](glean-customer-events-log-bulk/README.md)
+
 ## Examples
 
 - [Example Rules](glean.yaml)

@@ -93,6 +93,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.java.Log;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
@@ -376,13 +377,15 @@ public class ApiDataRequestHandler {
             populateHeadersFromSource(requestToSourceApi, requestToProxy, requestUrls.getTarget());
 
             // setup request
+            boolean followRedirects = config.getConfigPropertyAsOptional(ProxyConfigProperty.FOLLOW_REDIRECTS)
+                    .map(Boolean::parseBoolean)
+                    .orElse(true);
+
             requestToSourceApi
                     .setThrowExceptionOnExecuteError(false)
                     .setConnectTimeout(apiModeConfig.getSourceApiConnectTimeoutMs())
                     .setReadTimeout(apiModeConfig.getSourceApiReadTimeoutMs())
-                    // disable automatic redirect following in async mode so that our redirect
-                    // handling block can intercept 3xx responses and fetch from Location manually
-                    .setFollowRedirects(!processingContext.getAsync());
+                    .setFollowRedirects(followRedirects);
 
         } catch (SocketTimeoutException e) {
             return buildConnectTimeoutErrorResponse(builder, e);

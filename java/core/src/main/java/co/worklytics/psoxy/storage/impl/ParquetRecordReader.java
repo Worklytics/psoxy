@@ -1,5 +1,10 @@
 package co.worklytics.psoxy.storage.impl;
 
+import blue.strategic.parquet.Hydrator;
+import blue.strategic.parquet.ParquetReader;
+import lombok.extern.java.Log;
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,10 +13,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
-import blue.strategic.parquet.Hydrator;
-import blue.strategic.parquet.ParquetReader;
-import lombok.extern.java.Log;
 
 @Log
 public class ParquetRecordReader implements RecordReader {
@@ -29,15 +30,15 @@ public class ParquetRecordReader implements RecordReader {
             FileUtils.copyInputStreamToFile(in, tempFile);
 
             // Open stream of content as Maps using custom Hydrator
-            this.stream = ParquetReader.streamContent(tempFile, (descriptors) -> new Hydrator<Map<String, Object>, Map<String, Object>>() {
+            Hydrator<Map<String, Object>, Map<String, Object>, String[]> hydrator = new Hydrator<Map<String, Object>, Map<String, Object>, String[]>() {
                 @Override
                 public Map<String, Object> start() {
                     return new LinkedHashMap<>();
                 }
 
                 @Override
-                public Map<String, Object> add(Map<String, Object> map, String key, Object value) {
-                    map.put(key, value);
+                public Map<String, Object> add(Map<String, Object> map, String[] heading, Object o) {
+                    map.put(heading[0], o);
                     return map;
                 }
 
@@ -45,7 +46,9 @@ public class ParquetRecordReader implements RecordReader {
                 public Map<String, Object> finish(Map<String, Object> map) {
                     return map;
                 }
-            });
+            };
+
+            this.stream = ParquetReader.streamContent(tempFile, hydrator);
             this.iterator = stream.iterator();
         } catch (Exception e) {
             if (this.tempFile.exists()) {

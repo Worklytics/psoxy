@@ -93,6 +93,7 @@ resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
 module "sanitized_output_bucket" {
   source = "../aws-proxy-output-bucket"
 
+  environment_name                     = var.environment_name
   instance_id                          = var.instance_id
   iam_role_for_lambda_name             = module.psoxy_lambda.iam_role_for_lambda_name
   sanitized_accessor_role_names        = var.sanitized_accessor_role_names
