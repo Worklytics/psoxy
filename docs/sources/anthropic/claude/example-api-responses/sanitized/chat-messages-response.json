@@ -1,23 +1,25 @@
 {
   "id":"claude_chat_abc123",
+  "name":"{\"length\":31,\"word_count\":3}",
   "created_at":"2025-06-07T08:09:10Z",
   "updated_at":"2025-06-07T08:09:11Z",
-  "deleted_at":null,
   "organization_id":"org_abc123",
   "organization_uuid":"abcdef0123-4567-89ab-cdef-0123456789ab",
   "project_id":"claude_proj_xyz789",
+  "model":"claude-opus-4-7",
   "user":{
     "id":"t~hzNx42jBr-4nE9px0Ear3NuRyZW9y0_o7pegL6tNN-Y",
     "email_address":"t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com"
   },
   "chat_messages":[
     {
+      "id":"claude_chat_msg_abc123",
       "role":"user",
       "created_at":"2025-06-07T08:09:10Z",
       "content":[
         {
           "type":"text",
-          "text":"{\"length\":65,\"word_count\":11}"
+          "text":"{\"keywords\":{\"draft\":1},\"length\":65,\"word_count\":11}"
         }
       ],
       "files":[
@@ -28,14 +30,26 @@
       ]
     },
     {
+      "id":"claude_chat_msg_def456",
       "role":"assistant",
       "created_at":"2025-06-07T08:09:11Z",
       "content":[
         {
           "type":"text",
-          "text":"{\"length\":73,\"word_count\":12}"
+          "text":"{\"keywords\":{\"draft\":1},\"length\":73,\"word_count\":12}"
+        }
+      ],
+      "artifacts":[
+        {
+          "id":"claude_artifact_abc123",
+          "version_id":"claude_artifact_version_xyz789",
+          "title":"{\"keywords\":{\"draft\":1},\"length\":28,\"word_count\":3}",
+          "artifact_type":"text/markdown"
         }
       ]
     }
-  ]
+  ],
+  "has_more":false,
+  "first_id":"eyJtc2dfdXVpZCI6ICIwZjcwYjA2Ni0uLi4ifQ==",
+  "last_id":"eyJtc2dfdXVpZCI6ICJhNGUwYjE3Mi0uLi4ifQ=="
 }
