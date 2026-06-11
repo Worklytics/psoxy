@@ -1411,6 +1411,16 @@ EOT
       }
       example_file = "docs/sources/slack/slack-ai-bulk/slack-ai-analytics-sample.csv"
     }
+    "glean-customer-events-log-bulk" = {
+      source_kind               = "glean"
+      availability              = "beta"
+      enable_by_default         = false
+      worklytics_connector_id   = "glean-customer-events-log-bulk-psoxy"
+      worklytics_connector_name = "Glean Customer Event Logs - Bulk via Psoxy"
+      rules_file                = "docs/sources/glean/glean-customer-events-log-bulk/glean-customer-events-log-bulk.yaml"
+      example_file              = "docs/sources/glean/glean-customer-events-log-bulk/example-bulk/original/sample.ndjson"
+      instructions_template     = "${path.module}/docs/glean/customer-events-log-bulk-instructions.tftpl"
+    }
   }
 
   oauth_long_access_connectors_backwards = { for k, v in local.oauth_long_access_connectors :
