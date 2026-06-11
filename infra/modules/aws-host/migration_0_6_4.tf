@@ -55,3 +55,20 @@ removed {
     destroy = true
   }
 }
+
+# Replaced by per-lookup-table lookup_bucket_read policies (scoped to each lookup bucket).
+removed {
+  from = aws_iam_policy.output_bucket_read
+
+  lifecycle {
+    destroy = true
+  }
+}
+
+removed {
+  from = aws_iam_role_policy_attachment.output_bucket_read
+
+  lifecycle {
+    destroy = true
+  }
+}

@@ -246,6 +246,13 @@ locals {
   )
 }
 
+check "test_aws_principal_arns_when_testing_enabled" {
+  assert {
+    condition     = !var.provision_iam_policy_for_testing || length(var.test_aws_principal_arns) > 0
+    error_message = "test_aws_principal_arns must not be empty when provision_iam_policy_for_testing is true (S3 bucket policy principals cannot be empty)."
+  }
+}
+
 resource "aws_s3_bucket_policy" "testing_input" {
   count = var.provision_iam_policy_for_testing ? 1 : 0
 

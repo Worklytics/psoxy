@@ -85,9 +85,10 @@ async function testAWS(options, logger) {
       // the default "null" version of the object, but:
       // > If there isn't a null version, Amazon S3 does not remove any objects
       //   but will still respond that the command was successful.
+      // Deletion uses the upload role when configured (it has s3:DeleteObject on the sanitized
+      // bucket via testing bucket policy); otherwise fall back to the download/access role client.
       const deleteClient = options.uploadRoleToAssume ? uploadClient : downloadClient;
       await aws.deleteObject(outputBucket, outputKey, {
-        role: options.uploadRoleToAssume ?? options.role,
         region: options.region,
       }, deleteClient);
     } catch (error) {
@@ -179,8 +180,8 @@ async function testGCP(options, logger) {
  * @param {string} options.input
  * @param {string} options.output
  * @param {string} options.region - AWS: buckets region
- * @param {string} options.role - AWS: role to assume for download/delete (ARN format; optional)
- * @param {string} options.uploadRoleToAssume - AWS: role to assume for upload (ARN format; optional)
+ * @param {string} options.role - AWS: role to assume for download (ARN format; optional)
+ * @param {string} options.uploadRoleToAssume - AWS: role to assume for upload and test artifact cleanup (ARN format; optional)
  * @param {boolean} options.saveSanitizedFile - Whether to save sanitized file or not
  * @param {boolean} options.keepSanitizedFile - Whether to delete sanitized file or not (from
  *  output bucket, after test completion)

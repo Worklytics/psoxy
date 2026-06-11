@@ -17,29 +17,47 @@ locals {
     ]
   ])
 
-  lookup_accessor_role_names = distinct(flatten([
-    for k, v in var.lookup_table_builders : v.sanitized_accessor_role_names
-  ]))
+  # Lookup-table accessor roles (other than the Psoxy caller) need read access only to their
+  # lookup bucket(s), not to all output buckets.
+  lookup_tables_with_non_caller_accessor_roles = {
+    for lookup_id, config in var.lookup_table_builders :
+    lookup_id => [
+      for role_name in config.sanitized_accessor_role_names :
+      role_name if role_name != module.psoxy.api_caller_role_name
+    ]
+    if length([
+      for role_name in config.sanitized_accessor_role_names :
+      role_name if role_name != module.psoxy.api_caller_role_name
+    ]) > 0
+  }
 
-  non_caller_lookup_accessor_role_names = [
-    for role_name in local.lookup_accessor_role_names : role_name
-    if role_name != module.psoxy.api_caller_role_name
-  ]
+  lookup_bucket_read_attachments = merge([
+    for lookup_id, role_names in local.lookup_tables_with_non_caller_accessor_roles : {
+      for role_name in toset(role_names) :
+      "${lookup_id}-${role_name}" => {
+        lookup_id = lookup_id
+        role_name = role_name
+      }
+    }
+  ]...)
 
   provision_psoxy_caller_access_policy = local.caller_requires_direct_lambda_access || length(local.caller_readable_s3_bucket_ids) > 0
 }
 
-data "aws_iam_policy_document" "output_bucket_read" {
-  count = length(local.caller_readable_s3_bucket_ids) > 0 ? 1 : 0
+data "aws_iam_policy_document" "lookup_bucket_read" {
+  for_each = local.lookup_tables_with_non_caller_accessor_roles
 
   statement {
-    sid    = "ReadOutputBuckets"
+    sid    = "ReadLookupBucket"
     effect = "Allow"
     actions = [
       "s3:GetObject",
       "s3:ListBucket",
     ]
-    resources = local.caller_output_bucket_read_resources
+    resources = [
+      "arn:aws:s3:::${module.lookup_output[each.key].output_bucket}",
+      "arn:aws:s3:::${module.lookup_output[each.key].output_bucket}/*",
+    ]
   }
 }
 
@@ -95,13 +113,13 @@ resource "aws_iam_role_policy_attachment" "psoxy_caller_access" {
   policy_arn = aws_iam_policy.psoxy_caller_access[0].arn
 }
 
-resource "aws_iam_policy" "output_bucket_read" {
-  count = length(local.caller_readable_s3_bucket_ids) > 0 ? 1 : 0
+resource "aws_iam_policy" "lookup_bucket_read" {
+  for_each = local.lookup_tables_with_non_caller_accessor_roles
 
-  name        = "${module.env_id.id}OutputBucketRead"
-  description = "Allow read access to Psoxy output buckets"
+  name        = "${module.env_id.id}LookupBucketRead_${replace(each.key, "-", "_")}"
+  description = "Allow read access to lookup table bucket: ${module.lookup_output[each.key].output_bucket}"
 
-  policy = data.aws_iam_policy_document.output_bucket_read[0].json
+  policy = data.aws_iam_policy_document.lookup_bucket_read[each.key].json
 
   lifecycle {
     ignore_changes = [
@@ -110,9 +128,9 @@ resource "aws_iam_policy" "output_bucket_read" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "output_bucket_read" {
-  for_each = length(local.caller_readable_s3_bucket_ids) > 0 ? toset(local.non_caller_lookup_accessor_role_names) : toset([])
+resource "aws_iam_role_policy_attachment" "lookup_bucket_read" {
+  for_each = local.lookup_bucket_read_attachments
 
-  role       = each.key
-  policy_arn = aws_iam_policy.output_bucket_read[0].arn
+  role       = each.value.role_name
+  policy_arn = aws_iam_policy.lookup_bucket_read[each.value.lookup_id].arn
 }
