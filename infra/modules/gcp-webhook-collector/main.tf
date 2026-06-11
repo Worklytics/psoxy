@@ -58,8 +58,8 @@ locals {
 
   path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(var.instance_id), "-", "_")}_"
 
-  vpc_use_direct    = var.vpc_config != null && try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null
   vpc_use_connector = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) != null # TODO 0.7.x: remove
+  vpc_use_direct    = var.vpc_config != null && !local.vpc_use_connector && try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null
 }
 
 # BEGIN AUTH KEYS

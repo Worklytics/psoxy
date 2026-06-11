@@ -32,7 +32,7 @@ See [Google's Direct VPC IAM guidance](https://cloud.google.com/functions/docs/r
 
 NOTE: VPC networking resources (subnets, Cloud NAT, static IPs) are billable; using them will increase hosting costs.
 
-Direct VPC egress requires Terraform Google provider **>= 7.21** (the `serverless_connector` path works with earlier provider versions).
+Direct VPC egress requires Terraform Google provider **>= 7.21** (the `serverless_connector` path works with earlier provider versions). Pin that version in your root module's `required_providers`, and run `terraform init -upgrade` if your lockfile still resolves an older provider.
 
 ## Min Network Example
 

@@ -44,7 +44,6 @@ resource "google_project_service" "gcp_infra_api" {
     ],
     var.support_bulk_mode ? local.services_required_for_bulk_mode : [],
     var.support_webhook_collectors ? local.services_required_for_webhook_collectors : [],
-    local.provision_serverless_connector ? ["vpcaccess.googleapis.com"] : []
   ))
 
   service                    = each.key
@@ -470,50 +469,13 @@ resource "google_service_account_iam_member" "allow_scheduler_impersonation" {
 
 # BEGIN VPC (conditional)
 locals {
-  MAX_SERVERLESS_CONNECTOR_NAME_LENGTH = 25
-
   vpc_defined    = var.vpc_config != null
   use_direct_vpc = local.vpc_defined && try(var.vpc_config.serverless_connector, null) == null && try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null
 
-  # TODO 0.7.x: remove serverless connector provisioning once deprecated path is dropped
-  provision_serverless_connector = local.vpc_defined && try(var.vpc_config.serverless_connector, null) == null && !local.use_direct_vpc
-  legal_connector_prefix         = substr(var.environment_id_prefix, 0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH)
-  legal_connector_suffix         = substr("connector", 0, max(0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH - length(var.environment_id_prefix)))
-
-  vpc_connector_network_project = coalesce(
-    try(regex("^projects/([^/]+)", var.vpc_config.network)[0], null),
-  var.project_id)
-
-  vpc_connector_region = coalesce(
-    try(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0], null),
-  var.gcp_region)
-
-  vpc_connector_subnetwork_name = !local.provision_serverless_connector ? null : coalesce(
-    try(regex(".*/([^/]+)$", var.vpc_config.subnet)[0], null),
-  try(local.vpc_defined ? var.vpc_config.subnet : null, null))
-}
-
-resource "google_vpc_access_connector" "connector" {
-  count = local.provision_serverless_connector ? 1 : 0
-
-  project = var.project_id
-  region  = local.vpc_connector_region
-  name    = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
-
-  subnet {
-    name       = local.vpc_connector_subnetwork_name
-    project_id = local.vpc_connector_network_project
-  }
-}
-
-locals {
   vpc_config = (
     local.use_direct_vpc ? {
       network = var.vpc_config.network
       subnet  = var.vpc_config.subnet
-    } :
-    local.provision_serverless_connector ? {
-      serverless_connector = google_vpc_access_connector.connector[0].id
     } :
     try(var.vpc_config.serverless_connector, null) != null ? {
       serverless_connector = var.vpc_config.serverless_connector
