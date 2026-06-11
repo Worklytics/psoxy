@@ -1,10 +1,10 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.5",
-  "serialNumber" : "urn:uuid:a7ef1d04-c1fc-3ddd-8057-bb43f6a20150",
+  "serialNumber" : "urn:uuid:c80abd31-36cf-3c3b-84f7-8761e6013006",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2026-06-04T18:14:57Z",
+    "timestamp" : "2026-06-11T15:17:27Z",
     "lifecycles" : [
       {
         "phase" : "build"
@@ -59,9 +59,9 @@
     "component" : {
       "group" : "co.worklytics.psoxy",
       "name" : "psoxy-aws",
-      "version" : "0.6.3",
+      "version" : "0.6.4",
       "licenses" : [ ],
-      "purl" : "pkg:maven/co.worklytics.psoxy/psoxy-aws@0.6.3?type=jar",
+      "purl" : "pkg:maven/co.worklytics.psoxy/psoxy-aws@0.6.4?type=jar",
       "externalReferences" : [
         {
           "type" : "distribution-intake",
@@ -69,7 +69,7 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/co.worklytics.psoxy/psoxy-aws@0.6.3?type=jar"
+      "bom-ref" : "pkg:maven/co.worklytics.psoxy/psoxy-aws@0.6.4?type=jar"
     },
     "properties" : [
       {
@@ -86,40 +86,40 @@
     {
       "group" : "co.worklytics.psoxy",
       "name" : "psoxy-core",
-      "version" : "0.6.3",
+      "version" : "0.6.4",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "f2345da857342e691cc021d373a94f62"
+          "content" : "ab4d443d9e7bfbd458fd7a3697b4d7be"
         },
         {
           "alg" : "SHA-1",
-          "content" : "ba4e8c3a79a16ad0731051fce9338106e5fd674d"
+          "content" : "6faaef2a86fa2248b0df22d6cd4e0dcb4e344abc"
         },
         {
           "alg" : "SHA-256",
-          "content" : "124b90b6f742e414367eddb943483fae2de08188c88d2a09299337c995b7b302"
+          "content" : "a7818d08ad0203088e1e4e67045e7b704fe29f716d7658603f98903200d861bc"
         },
         {
           "alg" : "SHA-512",
-          "content" : "d13466d8c2400e87fef643240a868a8111ef907d3de8dd51eebf5340c39330d8bdb162ecfeab76b765e17f2dc06189139bb850ac0a2add811ee5219f8b2ce32f"
+          "content" : "db1c3193e1d1d203ee8daf3de140e6780529391ecd787f73c24bec07cc1abb2853faca07c2118d14938bb190770a3208c2ad21244cda59c8e9e317f4db6db391"
         },
         {
           "alg" : "SHA-384",
-          "content" : "2080246f3587aa739270e60f63812a1a7ea311684f8334cb40bc04a887fdf213d4dc62b4a80fc5d0dc511fba0905af6a"
+          "content" : "cf47ea720d3c81a8835f063c6dac5d673b5ec7297a8f4f3ad537509e5fca72bbc5e88dcb0831f39aad4e12cae3e7340e"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "823509e9644cd73ecc0eaad42867453705f3c67e7cb5b076e9ac9e6abe9367c01024f563160e00e6dbaa4538507b6257"
+          "content" : "42cffadd3e58bb9b2c37723b80715ed79901d1aebbd5e7549abf47e857d5fc64cb9067fe21492a737f1e9b25a79ed50b"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "c6d509a61f71ccf1582eccaa5679b74d7ed965aca79ddc33e9cd989093f9e7cb"
+          "content" : "860c374e7af86aa14ba0a28bdfe9f1c207af1d01e97a5782edf0dc25aa087f31"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "1cf64626d40fb1a6aded8168a74d8cfca0183ac49e366ba8e072a06db46a7d64b3be735e95b743e14bff2d45edc880d08cbd3860b4229d35b508e900e22d4dff"
+          "content" : "c39d9a66bc6c77ee41aa279b9cd09a08dc2d3e16d03ce5b96622c178c48de9f7840e46e988fd866dc939242638e1d205675178a48308fa6e40bb217fc977156b"
         }
       ],
       "licenses" : [
@@ -130,47 +130,47 @@
           }
         }
       ],
-      "purl" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.3?type=jar",
+      "purl" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.4?type=jar",
       "type" : "library",
-      "bom-ref" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.3?type=jar"
+      "bom-ref" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.4?type=jar"
     },
     {
       "group" : "com.avaulta.gateway",
       "name" : "gateway-core",
-      "version" : "0.6.3",
+      "version" : "0.6.4",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "8c6d135e50140cf667aff4ddb1c35c85"
+          "content" : "3acb9016df9cddc0d23db4cc63459a68"
         },
         {
           "alg" : "SHA-1",
-          "content" : "1faff5d172036ccb48f74ccaa0970ab73fb02b04"
+          "content" : "10e08ccb4d04141e668e8cc948d1f58f5c013566"
         },
         {
           "alg" : "SHA-256",
-          "content" : "97a548a256dbd522f253874355e4808bf08bae90b19f5cfb054b177f987bca6e"
+          "content" : "8adb04953fb7d2a47de6989d9fc7743b9577cc1b05893500679743a5a1d4037e"
         },
         {
           "alg" : "SHA-512",
-          "content" : "ae69df739d0451b7a5bfa7a3f3d66090786d52e918cdc7847c159f73f156ba2dbb6b4805aeecb5467861805f81fca9d56a79dff415e650d238bed4d8bc272d7b"
+          "content" : "d512bda9af16243a9a691ba0276df6220c5f69a660d5f57a12b3585a0c765b1419a9498aa75d49f9b61ace93aa838f7d8e9b49b92de0b972a2a8e64c4aee9b8f"
         },
         {
           "alg" : "SHA-384",
-          "content" : "06c4c264cf7f9abed43ff3f61b1bdb4768bc2f3551c6bf78798da3e4043dfdacc3e82793ad2ef8b7c65e1ab048ac4bd5"
+          "content" : "bc8b62f8cf232bde284549f68bcb80cbb214b06225cabf0e6a0d6f46f1ff366c97c1e7e634594e91585346fadc3444c2"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "0fc075c58355426c7dcfa43d254f5264f16e55d1b3ab791cdabd61e00d8d79873600dcf2be70f215f89316577a1012be"
+          "content" : "1874b8d3290526695aa628b1b63ca9001475a9cf33e60d4c1011bb29d526a83591d3b68117682373322889441f8f9779"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "a21ec120cf051d359b6d33adb3d7571dd4d4a4db20b8de2e5885c242b3be573a"
+          "content" : "2635fdfcfadb25f5d7f9140dafc368e2a065267d9950fe0866318e6b4d2eefe2"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "0c0358a510b7f6a8a5cc900d9f939b3ad2913e359c84ba97f082bac9e8f6dcf6efc46ce38f532509d1fd4d5fc1883ed85b31bdf3f0c2008dde90fa11af55bf5a"
+          "content" : "80bff4cb49625da8878b71ddcbc9f13915d78cd3938ce0c3bea688907c725dff79f70fd2029b910e353cdd1d1797547dbf69156db8fed47054a8350ad4aa8018"
         }
       ],
       "licenses" : [
@@ -181,9 +181,9 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.avaulta.gateway/gateway-core@0.6.3?type=jar",
+      "purl" : "pkg:maven/com.avaulta.gateway/gateway-core@0.6.4?type=jar",
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.avaulta.gateway/gateway-core@0.6.3?type=jar"
+      "bom-ref" : "pkg:maven/com.avaulta.gateway/gateway-core@0.6.4?type=jar"
     },
     {
       "publisher" : "The Apache Software Foundation",
@@ -650,41 +650,41 @@
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.opennlp",
       "name" : "opennlp-tools",
-      "version" : "2.3.2",
+      "version" : "2.5.9",
       "description" : "The Apache Software Foundation provides support for the Apache community of open-source software projects. The Apache projects are characterized by a collaborative, consensus based development process, an open and pragmatic software license, and a desire to create high quality software that leads the way in its field. We consider ourselves not simply a group of projects sharing a server, but rather a community of developers and users.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "ec43ef9faacc1405b67a2d2b138d67d2"
+          "content" : "3516d10a4ed36678cdb01258d216dc5a"
         },
         {
           "alg" : "SHA-1",
-          "content" : "d739edba1e729691ed5ab80e1ccf330555a02ea7"
+          "content" : "3a9c5279e4ad1950a92ab5aa85fa88e970d82927"
         },
         {
           "alg" : "SHA-256",
-          "content" : "c27ebe06a841e3a7e9bdfa3a7353bf0d074bb1b20237087ccbce9605c8e09e32"
+          "content" : "bc2d28082607b211fdf3185c1496ea8e130fa1fe1bead85622d38487920017e2"
         },
         {
           "alg" : "SHA-512",
-          "content" : "6670c5869553fa074f9750f44a01b1dfbfe3664e7ab05a5d957ca9456cecae4ed11239ea2bd1ff92fc200a337cedad935f8552e8cec350bf28f17cd4a96683e3"
+          "content" : "d5771d89584083389e6646ce4772c7913b521e8c1d8346777c436423c8590be91f90ed9a61e2525b86afbf9f3bb5055eebb9630e59a38bd144d865cf6123badf"
         },
         {
           "alg" : "SHA-384",
-          "content" : "199b1c1f9d67a2d2b1929d29b4b61f56fbd5641d0030eb7513e5cf5946ff7b36e586fd5d77d94e9a47d8af850bff8b97"
+          "content" : "4d7b58cbe15aad3d36f58cc4fa9ccca6b6657845b012af166f869d72f5bd58fd3152f89303b2a9c3ce6bbb6f8c6fdb97"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "6440dab3363c22844a89a68359ba86526f9fb823c51d6986b2824a75ab4e901347dc0cb88ca27f787f11b296b2594549"
+          "content" : "9d39779d986738dc38974d46c95870ea8787567be23ffe9e759c510226175275d6f52eb21de9ffe47184273061da8f71"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "c4660aad0ba9194073aead66638215cbb0bef20c9e1025615621bdd4d0c8dcff"
+          "content" : "5c34d310c2d211b0d3a70f94e234fa9392507a7bd86cbd1343347ec5120c8b74"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "8c74a1d55012ef894959348082ddfe1c75b630d2ea87da717ee064cf85930fc57d7c9106cfb1508b3262a6f55f6bb7c2fe02968af94eb119abade627f9100fb9"
+          "content" : "fd19b227af8dfda4d3e45ebd83a239968eb1953c5c4b3e42761cacc76c6574ded89662ae9c85402aeb7593b6cc156f732975e51752ae7a9daa02c086b8177434"
         }
       ],
       "licenses" : [
@@ -700,7 +700,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.opennlp/opennlp-tools@2.3.2?type=jar",
+      "purl" : "pkg:maven/org.apache.opennlp/opennlp-tools@2.5.9?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -716,7 +716,7 @@
         },
         {
           "type" : "mailing-list",
-          "url" : "http://mail-archives.apache.org/mod_mbox/opennlp-users/"
+          "url" : "https://mail-archives.apache.org/mod_mbox/opennlp-users/"
         },
         {
           "type" : "vcs",
@@ -724,7 +724,7 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.opennlp/opennlp-tools@2.3.2?type=jar"
+      "bom-ref" : "pkg:maven/org.apache.opennlp/opennlp-tools@2.5.9?type=jar"
     },
     {
       "publisher" : "The Apache Software Foundation",
@@ -979,43 +979,114 @@
       "bom-ref" : "pkg:maven/commons-net/commons-net@3.11.1?type=jar"
     },
     {
+      "group" : "io.airlift",
+      "name" : "aircompressor",
+      "version" : "2.0.3",
+      "description" : "Compression algorithms",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "6bc89228727ab2a3ed7df7cecef85158"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "d7032ede4ff2c124d4913807ebd6868af66f1721"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "b86bb66f610079e0bf790d62e2ff68853eb0dc4748a6d68ae28bce92b68094aa"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "726f9c919b8bc517b247954b93701e10dd68fa2d62bef6a5aad4a6dc9e1137bae97755d4dbd0bf799513e1a7fcaae733ede7ade42b6d9bdca6f93784297539c0"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "398a184408d407798bbce8ecf72c064de31797017e5cf197a785467aae13f2f1b3746aec096cdf6b8c401a3500a02833"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "570b3fe83097e77cad881f608aecc984f4d6c4937654b6cc0f72070767cb259202fdce69bd84344dcd960d8a271f0c81"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "2e27dc2de17cfb514cd49d9fea569aa965defa2c1a784c662a7c890a556183c9"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "f43d2d8da54e3c47125661fda170802426f621a8d5d937a9126db5e6e4ca779a549b206da9c9276febf47ee3bc497d77f64a14bb812088c6cff2ffdb9e156041"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0",
+            "text" : {
+              "encoding" : "base64",
+              "contentType" : "plain/text",
+              "content" : "QXBhY2hlIExpY2Vuc2UKVmVyc2lvbiAyLjAsIEphbnVhcnkgMjAwNApodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvCgpURVJNUyBBTkQgQ09ORElUSU9OUyBGT1IgVVNFLCBSRVBST0RVQ1RJT04sIEFORCBESVNUUklCVVRJT04KCjEuIERlZmluaXRpb25zLgoKIkxpY2Vuc2UiIHNoYWxsIG1lYW4gdGhlIHRlcm1zIGFuZCBjb25kaXRpb25zIGZvciB1c2UsIHJlcHJvZHVjdGlvbiwgYW5kIGRpc3RyaWJ1dGlvbiBhcyBkZWZpbmVkIGJ5IFNlY3Rpb25zIDEgdGhyb3VnaCA5IG9mIHRoaXMgZG9jdW1lbnQuCgoiTGljZW5zb3IiIHNoYWxsIG1lYW4gdGhlIGNvcHlyaWdodCBvd25lciBvciBlbnRpdHkgYXV0aG9yaXplZCBieSB0aGUgY29weXJpZ2h0IG93bmVyIHRoYXQgaXMgZ3JhbnRpbmcgdGhlIExpY2Vuc2UuCgoiTGVnYWwgRW50aXR5IiBzaGFsbCBtZWFuIHRoZSB1bmlvbiBvZiB0aGUgYWN0aW5nIGVudGl0eSBhbmQgYWxsIG90aGVyIGVudGl0aWVzIHRoYXQgY29udHJvbCwgYXJlIGNvbnRyb2xsZWQgYnksIG9yIGFyZSB1bmRlciBjb21tb24gY29udHJvbCB3aXRoIHRoYXQgZW50aXR5LiBGb3IgdGhlIHB1cnBvc2VzIG9mIHRoaXMgZGVmaW5pdGlvbiwgImNvbnRyb2wiIG1lYW5zIChpKSB0aGUgcG93ZXIsIGRpcmVjdCBvciBpbmRpcmVjdCwgdG8gY2F1c2UgdGhlIGRpcmVjdGlvbiBvciBtYW5hZ2VtZW50IG9mIHN1Y2ggZW50aXR5LCB3aGV0aGVyIGJ5IGNvbnRyYWN0IG9yIG90aGVyd2lzZSwgb3IgKGlpKSBvd25lcnNoaXAgb2YgZmlmdHkgcGVyY2VudCAoNTAlKSBvciBtb3JlIG9mIHRoZSBvdXRzdGFuZGluZyBzaGFyZXMsIG9yIChpaWkpIGJlbmVmaWNpYWwgb3duZXJzaGlwIG9mIHN1Y2ggZW50aXR5LgoKIllvdSIgKG9yICJZb3VyIikgc2hhbGwgbWVhbiBhbiBpbmRpdmlkdWFsIG9yIExlZ2FsIEVudGl0eSBleGVyY2lzaW5nIHBlcm1pc3Npb25zIGdyYW50ZWQgYnkgdGhpcyBMaWNlbnNlLgoKIlNvdXJjZSIgZm9ybSBzaGFsbCBtZWFuIHRoZSBwcmVmZXJyZWQgZm9ybSBmb3IgbWFraW5nIG1vZGlmaWNhdGlvbnMsIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gc29mdHdhcmUgc291cmNlIGNvZGUsIGRvY3VtZW50YXRpb24gc291cmNlLCBhbmQgY29uZmlndXJhdGlvbiBmaWxlcy4KCiJPYmplY3QiIGZvcm0gc2hhbGwgbWVhbiBhbnkgZm9ybSByZXN1bHRpbmcgZnJvbSBtZWNoYW5pY2FsIHRyYW5zZm9ybWF0aW9uIG9yIHRyYW5zbGF0aW9uIG9mIGEgU291cmNlIGZvcm0sIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gY29tcGlsZWQgb2JqZWN0IGNvZGUsIGdlbmVyYXRlZCBkb2N1bWVudGF0aW9uLCBhbmQgY29udmVyc2lvbnMgdG8gb3RoZXIgbWVkaWEgdHlwZXMuCgoiV29yayIgc2hhbGwgbWVhbiB0aGUgd29yayBvZiBhdXRob3JzaGlwLCB3aGV0aGVyIGluIFNvdXJjZSBvciBPYmplY3QgZm9ybSwgbWFkZSBhdmFpbGFibGUgdW5kZXIgdGhlIExpY2Vuc2UsIGFzIGluZGljYXRlZCBieSBhIGNvcHlyaWdodCBub3RpY2UgdGhhdCBpcyBpbmNsdWRlZCBpbiBvciBhdHRhY2hlZCB0byB0aGUgd29yayAoYW4gZXhhbXBsZSBpcyBwcm92aWRlZCBpbiB0aGUgQXBwZW5kaXggYmVsb3cpLgoKIkRlcml2YXRpdmUgV29ya3MiIHNoYWxsIG1lYW4gYW55IHdvcmssIHdoZXRoZXIgaW4gU291cmNlIG9yIE9iamVjdCBmb3JtLCB0aGF0IGlzIGJhc2VkIG9uIChvciBkZXJpdmVkIGZyb20pIHRoZSBXb3JrIGFuZCBmb3Igd2hpY2ggdGhlIGVkaXRvcmlhbCByZXZpc2lvbnMsIGFubm90YXRpb25zLCBlbGFib3JhdGlvbnMsIG9yIG90aGVyIG1vZGlmaWNhdGlvbnMgcmVwcmVzZW50LCBhcyBhIHdob2xlLCBhbiBvcmlnaW5hbCB3b3JrIG9mIGF1dGhvcnNoaXAuIEZvciB0aGUgcHVycG9zZXMgb2YgdGhpcyBMaWNlbnNlLCBEZXJpdmF0aXZlIFdvcmtzIHNoYWxsIG5vdCBpbmNsdWRlIHdvcmtzIHRoYXQgcmVtYWluIHNlcGFyYWJsZSBmcm9tLCBvciBtZXJlbHkgbGluayAob3IgYmluZCBieSBuYW1lKSB0byB0aGUgaW50ZXJmYWNlcyBvZiwgdGhlIFdvcmsgYW5kIERlcml2YXRpdmUgV29ya3MgdGhlcmVvZi4KCiJDb250cmlidXRpb24iIHNoYWxsIG1lYW4gYW55IHdvcmsgb2YgYXV0aG9yc2hpcCwgaW5jbHVkaW5nIHRoZSBvcmlnaW5hbCB2ZXJzaW9uIG9mIHRoZSBXb3JrIGFuZCBhbnkgbW9kaWZpY2F0aW9ucyBvciBhZGRpdGlvbnMgdG8gdGhhdCBXb3JrIG9yIERlcml2YXRpdmUgV29ya3MgdGhlcmVvZiwgdGhhdCBpcyBpbnRlbnRpb25hbGx5IHN1Ym1pdHRlZCB0byBMaWNlbnNvciBmb3IgaW5jbHVzaW9uIGluIHRoZSBXb3JrIGJ5IHRoZSBjb3B5cmlnaHQgb3duZXIgb3IgYnkgYW4gaW5kaXZpZHVhbCBvciBMZWdhbCBFbnRpdHkgYXV0aG9yaXplZCB0byBzdWJtaXQgb24gYmVoYWxmIG9mIHRoZSBjb3B5cmlnaHQgb3duZXIuIEZvciB0aGUgcHVycG9zZXMgb2YgdGhpcyBkZWZpbml0aW9uLCAic3VibWl0dGVkIiBtZWFucyBhbnkgZm9ybSBvZiBlbGVjdHJvbmljLCB2ZXJiYWwsIG9yIHdyaXR0ZW4gY29tbXVuaWNhdGlvbiBzZW50IHRvIHRoZSBMaWNlbnNvciBvciBpdHMgcmVwcmVzZW50YXRpdmVzLCBpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVkIHRvIGNvbW11bmljYXRpb24gb24gZWxlY3Ryb25pYyBtYWlsaW5nIGxpc3RzLCBzb3VyY2UgY29kZSBjb250cm9sIHN5c3RlbXMsIGFuZCBpc3N1ZSB0cmFja2luZyBzeXN0ZW1zIHRoYXQgYXJlIG1hbmFnZWQgYnksIG9yIG9uIGJlaGFsZiBvZiwgdGhlIExpY2Vuc29yIGZvciB0aGUgcHVycG9zZSBvZiBkaXNjdXNzaW5nIGFuZCBpbXByb3ZpbmcgdGhlIFdvcmssIGJ1dCBleGNsdWRpbmcgY29tbXVuaWNhdGlvbiB0aGF0IGlzIGNvbnNwaWN1b3VzbHkgbWFya2VkIG9yIG90aGVyd2lzZSBkZXNpZ25hdGVkIGluIHdyaXRpbmcgYnkgdGhlIGNvcHlyaWdodCBvd25lciBhcyAiTm90IGEgQ29udHJpYnV0aW9uLiIKCiJDb250cmlidXRvciIgc2hhbGwgbWVhbiBMaWNlbnNvciBhbmQgYW55IGluZGl2aWR1YWwgb3IgTGVnYWwgRW50aXR5IG9uIGJlaGFsZiBvZiB3aG9tIGEgQ29udHJpYnV0aW9uIGhhcyBiZWVuIHJlY2VpdmVkIGJ5IExpY2Vuc29yIGFuZCBzdWJzZXF1ZW50bHkgaW5jb3Jwb3JhdGVkIHdpdGhpbiB0aGUgV29yay4KCjIuIEdyYW50IG9mIENvcHlyaWdodCBMaWNlbnNlLiBTdWJqZWN0IHRvIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZiB0aGlzIExpY2Vuc2UsIGVhY2ggQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBwZXJwZXR1YWwsIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8tY2hhcmdlLCByb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlIGNvcHlyaWdodCBsaWNlbnNlIHRvIHJlcHJvZHVjZSwgcHJlcGFyZSBEZXJpdmF0aXZlIFdvcmtzIG9mLCBwdWJsaWNseSBkaXNwbGF5LCBwdWJsaWNseSBwZXJmb3JtLCBzdWJsaWNlbnNlLCBhbmQgZGlzdHJpYnV0ZSB0aGUgV29yayBhbmQgc3VjaCBEZXJpdmF0aXZlIFdvcmtzIGluIFNvdXJjZSBvciBPYmplY3QgZm9ybS4KCjMuIEdyYW50IG9mIFBhdGVudCBMaWNlbnNlLiBTdWJqZWN0IHRvIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZiB0aGlzIExpY2Vuc2UsIGVhY2ggQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBwZXJwZXR1YWwsIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8tY2hhcmdlLCByb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlIChleGNlcHQgYXMgc3RhdGVkIGluIHRoaXMgc2VjdGlvbikgcGF0ZW50IGxpY2Vuc2UgdG8gbWFrZSwgaGF2ZSBtYWRlLCB1c2UsIG9mZmVyIHRvIHNlbGwsIHNlbGwsIGltcG9ydCwgYW5kIG90aGVyd2lzZSB0cmFuc2ZlciB0aGUgV29yaywgd2hlcmUgc3VjaCBsaWNlbnNlIGFwcGxpZXMgb25seSB0byB0aG9zZSBwYXRlbnQgY2xhaW1zIGxpY2Vuc2FibGUgYnkgc3VjaCBDb250cmlidXRvciB0aGF0IGFyZSBuZWNlc3NhcmlseSBpbmZyaW5nZWQgYnkgdGhlaXIgQ29udHJpYnV0aW9uKHMpIGFsb25lIG9yIGJ5IGNvbWJpbmF0aW9uIG9mIHRoZWlyIENvbnRyaWJ1dGlvbihzKSB3aXRoIHRoZSBXb3JrIHRvIHdoaWNoIHN1Y2ggQ29udHJpYnV0aW9uKHMpIHdhcyBzdWJtaXR0ZWQuIElmIFlvdSBpbnN0aXR1dGUgcGF0ZW50IGxpdGlnYXRpb24gYWdhaW5zdCBhbnkgZW50aXR5IChpbmNsdWRpbmcgYSBjcm9zcy1jbGFpbSBvciBjb3VudGVyY2xhaW0gaW4gYSBsYXdzdWl0KSBhbGxlZ2luZyB0aGF0IHRoZSBXb3JrIG9yIGEgQ29udHJpYnV0aW9uIGluY29ycG9yYXRlZCB3aXRoaW4gdGhlIFdvcmsgY29uc3RpdHV0ZXMgZGlyZWN0IG9yIGNvbnRyaWJ1dG9yeSBwYXRlbnQgaW5mcmluZ2VtZW50LCB0aGVuIGFueSBwYXRlbnQgbGljZW5zZXMgZ3JhbnRlZCB0byBZb3UgdW5kZXIgdGhpcyBMaWNlbnNlIGZvciB0aGF0IFdvcmsgc2hhbGwgdGVybWluYXRlIGFzIG9mIHRoZSBkYXRlIHN1Y2ggbGl0aWdhdGlvbiBpcyBmaWxlZC4KCjQuIFJlZGlzdHJpYnV0aW9uLiBZb3UgbWF5IHJlcHJvZHVjZSBhbmQgZGlzdHJpYnV0ZSBjb3BpZXMgb2YgdGhlIFdvcmsgb3IgRGVyaXZhdGl2ZSBXb3JrcyB0aGVyZW9mIGluIGFueSBtZWRpdW0sIHdpdGggb3Igd2l0aG91dCBtb2RpZmljYXRpb25zLCBhbmQgaW4gU291cmNlIG9yIE9iamVjdCBmb3JtLCBwcm92aWRlZCB0aGF0IFlvdSBtZWV0IHRoZSBmb2xsb3dpbmcgY29uZGl0aW9uczoKCiAgICAgKGEpIFlvdSBtdXN0IGdpdmUgYW55IG90aGVyIHJlY2lwaWVudHMgb2YgdGhlIFdvcmsgb3IgRGVyaXZhdGl2ZSBXb3JrcyBhIGNvcHkgb2YgdGhpcyBMaWNlbnNlOyBhbmQKCiAgICAgKGIpIFlvdSBtdXN0IGNhdXNlIGFueSBtb2RpZmllZCBmaWxlcyB0byBjYXJyeSBwcm9taW5lbnQgbm90aWNlcyBzdGF0aW5nIHRoYXQgWW91IGNoYW5nZWQgdGhlIGZpbGVzOyBhbmQKCiAgICAgKGMpIFlvdSBtdXN0IHJldGFpbiwgaW4gdGhlIFNvdXJjZSBmb3JtIG9mIGFueSBEZXJpdmF0aXZlIFdvcmtzIHRoYXQgWW91IGRpc3RyaWJ1dGUsIGFsbCBjb3B5cmlnaHQsIHBhdGVudCwgdHJhZGVtYXJrLCBhbmQgYXR0cmlidXRpb24gbm90aWNlcyBmcm9tIHRoZSBTb3VyY2UgZm9ybSBvZiB0aGUgV29yaywgZXhjbHVkaW5nIHRob3NlIG5vdGljZXMgdGhhdCBkbyBub3QgcGVydGFpbiB0byBhbnkgcGFydCBvZiB0aGUgRGVyaXZhdGl2ZSBXb3JrczsgYW5kCgogICAgIChkKSBJZiB0aGUgV29yayBpbmNsdWRlcyBhICJOT1RJQ0UiIHRleHQgZmlsZSBhcyBwYXJ0IG9mIGl0cyBkaXN0cmlidXRpb24sIHRoZW4gYW55IERlcml2YXRpdmUgV29ya3MgdGhhdCBZb3UgZGlzdHJpYnV0ZSBtdXN0IGluY2x1ZGUgYSByZWFkYWJsZSBjb3B5IG9mIHRoZSBhdHRyaWJ1dGlvbiBub3RpY2VzIGNvbnRhaW5lZCB3aXRoaW4gc3VjaCBOT1RJQ0UgZmlsZSwgZXhjbHVkaW5nIHRob3NlIG5vdGljZXMgdGhhdCBkbyBub3QgcGVydGFpbiB0byBhbnkgcGFydCBvZiB0aGUgRGVyaXZhdGl2ZSBXb3JrcywgaW4gYXQgbGVhc3Qgb25lIG9mIHRoZSBmb2xsb3dpbmcgcGxhY2VzOiB3aXRoaW4gYSBOT1RJQ0UgdGV4dCBmaWxlIGRpc3RyaWJ1dGVkIGFzIHBhcnQgb2YgdGhlIERlcml2YXRpdmUgV29ya3M7IHdpdGhpbiB0aGUgU291cmNlIGZvcm0gb3IgZG9jdW1lbnRhdGlvbiwgaWYgcHJvdmlkZWQgYWxvbmcgd2l0aCB0aGUgRGVyaXZhdGl2ZSBXb3Jrczsgb3IsIHdpdGhpbiBhIGRpc3BsYXkgZ2VuZXJhdGVkIGJ5IHRoZSBEZXJpdmF0aXZlIFdvcmtzLCBpZiBhbmQgd2hlcmV2ZXIgc3VjaCB0aGlyZC1wYXJ0eSBub3RpY2VzIG5vcm1hbGx5IGFwcGVhci4gVGhlIGNvbnRlbnRzIG9mIHRoZSBOT1RJQ0UgZmlsZSBhcmUgZm9yIGluZm9ybWF0aW9uYWwgcHVycG9zZXMgb25seSBhbmQgZG8gbm90IG1vZGlmeSB0aGUgTGljZW5zZS4gWW91IG1heSBhZGQgWW91ciBvd24gYXR0cmlidXRpb24gbm90aWNlcyB3aXRoaW4gRGVyaXZhdGl2ZSBXb3JrcyB0aGF0IFlvdSBkaXN0cmlidXRlLCBhbG9uZ3NpZGUgb3IgYXMgYW4gYWRkZW5kdW0gdG8gdGhlIE5PVElDRSB0ZXh0IGZyb20gdGhlIFdvcmssIHByb3ZpZGVkIHRoYXQgc3VjaCBhZGRpdGlvbmFsIGF0dHJpYnV0aW9uIG5vdGljZXMgY2Fubm90IGJlIGNvbnN0cnVlZCBhcyBtb2RpZnlpbmcgdGhlIExpY2Vuc2UuCgogICAgIFlvdSBtYXkgYWRkIFlvdXIgb3duIGNvcHlyaWdodCBzdGF0ZW1lbnQgdG8gWW91ciBtb2RpZmljYXRpb25zIGFuZCBtYXkgcHJvdmlkZSBhZGRpdGlvbmFsIG9yIGRpZmZlcmVudCBsaWNlbnNlIHRlcm1zIGFuZCBjb25kaXRpb25zIGZvciB1c2UsIHJlcHJvZHVjdGlvbiwgb3IgZGlzdHJpYnV0aW9uIG9mIFlvdXIgbW9kaWZpY2F0aW9ucywgb3IgZm9yIGFueSBzdWNoIERlcml2YXRpdmUgV29ya3MgYXMgYSB3aG9sZSwgcHJvdmlkZWQgWW91ciB1c2UsIHJlcHJvZHVjdGlvbiwgYW5kIGRpc3RyaWJ1dGlvbiBvZiB0aGUgV29yayBvdGhlcndpc2UgY29tcGxpZXMgd2l0aCB0aGUgY29uZGl0aW9ucyBzdGF0ZWQgaW4gdGhpcyBMaWNlbnNlLgoKNS4gU3VibWlzc2lvbiBvZiBDb250cmlidXRpb25zLiBVbmxlc3MgWW91IGV4cGxpY2l0bHkgc3RhdGUgb3RoZXJ3aXNlLCBhbnkgQ29udHJpYnV0aW9uIGludGVudGlvbmFsbHkgc3VibWl0dGVkIGZvciBpbmNsdXNpb24gaW4gdGhlIFdvcmsgYnkgWW91IHRvIHRoZSBMaWNlbnNvciBzaGFsbCBiZSB1bmRlciB0aGUgdGVybXMgYW5kIGNvbmRpdGlvbnMgb2YgdGhpcyBMaWNlbnNlLCB3aXRob3V0IGFueSBhZGRpdGlvbmFsIHRlcm1zIG9yIGNvbmRpdGlvbnMuIE5vdHdpdGhzdGFuZGluZyB0aGUgYWJvdmUsIG5vdGhpbmcgaGVyZWluIHNoYWxsIHN1cGVyc2VkZSBvciBtb2RpZnkgdGhlIHRlcm1zIG9mIGFueSBzZXBhcmF0ZSBsaWNlbnNlIGFncmVlbWVudCB5b3UgbWF5IGhhdmUgZXhlY3V0ZWQgd2l0aCBMaWNlbnNvciByZWdhcmRpbmcgc3VjaCBDb250cmlidXRpb25zLgoKNi4gVHJhZGVtYXJrcy4gVGhpcyBMaWNlbnNlIGRvZXMgbm90IGdyYW50IHBlcm1pc3Npb24gdG8gdXNlIHRoZSB0cmFkZSBuYW1lcywgdHJhZGVtYXJrcywgc2VydmljZSBtYXJrcywgb3IgcHJvZHVjdCBuYW1lcyBvZiB0aGUgTGljZW5zb3IsIGV4Y2VwdCBhcyByZXF1aXJlZCBmb3IgcmVhc29uYWJsZSBhbmQgY3VzdG9tYXJ5IHVzZSBpbiBkZXNjcmliaW5nIHRoZSBvcmlnaW4gb2YgdGhlIFdvcmsgYW5kIHJlcHJvZHVjaW5nIHRoZSBjb250ZW50IG9mIHRoZSBOT1RJQ0UgZmlsZS4KCjcuIERpc2NsYWltZXIgb2YgV2FycmFudHkuIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgTGljZW5zb3IgcHJvdmlkZXMgdGhlIFdvcmsgKGFuZCBlYWNoIENvbnRyaWJ1dG9yIHByb3ZpZGVzIGl0cyBDb250cmlidXRpb25zKSBvbiBhbiAiQVMgSVMiIEJBU0lTLCBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZCwgaW5jbHVkaW5nLCB3aXRob3V0IGxpbWl0YXRpb24sIGFueSB3YXJyYW50aWVzIG9yIGNvbmRpdGlvbnMgb2YgVElUTEUsIE5PTi1JTkZSSU5HRU1FTlQsIE1FUkNIQU5UQUJJTElUWSwgb3IgRklUTkVTUyBGT1IgQSBQQVJUSUNVTEFSIFBVUlBPU0UuIFlvdSBhcmUgc29sZWx5IHJlc3BvbnNpYmxlIGZvciBkZXRlcm1pbmluZyB0aGUgYXBwcm9wcmlhdGVuZXNzIG9mIHVzaW5nIG9yIHJlZGlzdHJpYnV0aW5nIHRoZSBXb3JrIGFuZCBhc3N1bWUgYW55IHJpc2tzIGFzc29jaWF0ZWQgd2l0aCBZb3VyIGV4ZXJjaXNlIG9mIHBlcm1pc3Npb25zIHVuZGVyIHRoaXMgTGljZW5zZS4KCjguIExpbWl0YXRpb24gb2YgTGlhYmlsaXR5LiBJbiBubyBldmVudCBhbmQgdW5kZXIgbm8gbGVnYWwgdGhlb3J5LCB3aGV0aGVyIGluIHRvcnQgKGluY2x1ZGluZyBuZWdsaWdlbmNlKSwgY29udHJhY3QsIG9yIG90aGVyd2lzZSwgdW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IChzdWNoIGFzIGRlbGliZXJhdGUgYW5kIGdyb3NzbHkgbmVnbGlnZW50IGFjdHMpIG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzaGFsbCBhbnkgQ29udHJpYnV0b3IgYmUgbGlhYmxlIHRvIFlvdSBmb3IgZGFtYWdlcywgaW5jbHVkaW5nIGFueSBkaXJlY3QsIGluZGlyZWN0LCBzcGVjaWFsLCBpbmNpZGVudGFsLCBvciBjb25zZXF1ZW50aWFsIGRhbWFnZXMgb2YgYW55IGNoYXJhY3RlciBhcmlzaW5nIGFzIGEgcmVzdWx0IG9mIHRoaXMgTGljZW5zZSBvciBvdXQgb2YgdGhlIHVzZSBvciBpbmFiaWxpdHkgdG8gdXNlIHRoZSBXb3JrIChpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVkIHRvIGRhbWFnZXMgZm9yIGxvc3Mgb2YgZ29vZHdpbGwsIHdvcmsgc3RvcHBhZ2UsIGNvbXB1dGVyIGZhaWx1cmUgb3IgbWFsZnVuY3Rpb24sIG9yIGFueSBhbmQgYWxsIG90aGVyIGNvbW1lcmNpYWwgZGFtYWdlcyBvciBsb3NzZXMpLCBldmVuIGlmIHN1Y2ggQ29udHJpYnV0b3IgaGFzIGJlZW4gYWR2aXNlZCBvZiB0aGUgcG9zc2liaWxpdHkgb2Ygc3VjaCBkYW1hZ2VzLgoKOS4gQWNjZXB0aW5nIFdhcnJhbnR5IG9yIEFkZGl0aW9uYWwgTGlhYmlsaXR5LiBXaGlsZSByZWRpc3RyaWJ1dGluZyB0aGUgV29yayBvciBEZXJpdmF0aXZlIFdvcmtzIHRoZXJlb2YsIFlvdSBtYXkgY2hvb3NlIHRvIG9mZmVyLCBhbmQgY2hhcmdlIGEgZmVlIGZvciwgYWNjZXB0YW5jZSBvZiBzdXBwb3J0LCB3YXJyYW50eSwgaW5kZW1uaXR5LCBvciBvdGhlciBsaWFiaWxpdHkgb2JsaWdhdGlvbnMgYW5kL29yIHJpZ2h0cyBjb25zaXN0ZW50IHdpdGggdGhpcyBMaWNlbnNlLiBIb3dldmVyLCBpbiBhY2NlcHRpbmcgc3VjaCBvYmxpZ2F0aW9ucywgWW91IG1heSBhY3Qgb25seSBvbiBZb3VyIG93biBiZWhhbGYgYW5kIG9uIFlvdXIgc29sZSByZXNwb25zaWJpbGl0eSwgbm90IG9uIGJlaGFsZiBvZiBhbnkgb3RoZXIgQ29udHJpYnV0b3IsIGFuZCBvbmx5IGlmIFlvdSBhZ3JlZSB0byBpbmRlbW5pZnksIGRlZmVuZCwgYW5kIGhvbGQgZWFjaCBDb250cmlidXRvciBoYXJtbGVzcyBmb3IgYW55IGxpYWJpbGl0eSBpbmN1cnJlZCBieSwgb3IgY2xhaW1zIGFzc2VydGVkIGFnYWluc3QsIHN1Y2ggQ29udHJpYnV0b3IgYnkgcmVhc29uIG9mIHlvdXIgYWNjZXB0aW5nIGFueSBzdWNoIHdhcnJhbnR5IG9yIGFkZGl0aW9uYWwgbGlhYmlsaXR5LgoKRU5EIE9GIFRFUk1TIEFORCBDT05ESVRJT05TCgpBUFBFTkRJWDogSG93IHRvIGFwcGx5IHRoZSBBcGFjaGUgTGljZW5zZSB0byB5b3VyIHdvcmsuCgpUbyBhcHBseSB0aGUgQXBhY2hlIExpY2Vuc2UgdG8geW91ciB3b3JrLCBhdHRhY2ggdGhlIGZvbGxvd2luZyBib2lsZXJwbGF0ZSBub3RpY2UsIHdpdGggdGhlIGZpZWxkcyBlbmNsb3NlZCBieSBicmFja2V0cyAiW10iIHJlcGxhY2VkIHdpdGggeW91ciBvd24gaWRlbnRpZnlpbmcgaW5mb3JtYXRpb24uIChEb24ndCBpbmNsdWRlIHRoZSBicmFja2V0cyEpICBUaGUgdGV4dCBzaG91bGQgYmUgZW5jbG9zZWQgaW4gdGhlIGFwcHJvcHJpYXRlIGNvbW1lbnQgc3ludGF4IGZvciB0aGUgZmlsZSBmb3JtYXQuIFdlIGFsc28gcmVjb21tZW5kIHRoYXQgYSBmaWxlIG9yIGNsYXNzIG5hbWUgYW5kIGRlc2NyaXB0aW9uIG9mIHB1cnBvc2UgYmUgaW5jbHVkZWQgb24gdGhlIHNhbWUgInByaW50ZWQgcGFnZSIgYXMgdGhlIGNvcHlyaWdodCBub3RpY2UgZm9yIGVhc2llciBpZGVudGlmaWNhdGlvbiB3aXRoaW4gdGhpcmQtcGFydHkgYXJjaGl2ZXMuCgpDb3B5cmlnaHQgW3l5eXldIFtuYW1lIG9mIGNvcHlyaWdodCBvd25lcl0KCkxpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSAiTGljZW5zZSIpOwp5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCllvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdAoKaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCgpVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlCmRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCldJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLgpTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kCmxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgo="
+            },
+            "url" : "https://www.apache.org/licenses/LICENSE-2.0"
+          }
+        }
+      ],
+      "purl" : "pkg:maven/io.airlift/aircompressor@2.0.3?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://github.com/airlift/aircompressor"
+        },
+        {
+          "type" : "distribution-intake",
+          "url" : "https://repo.maven.apache.org/maven2/"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/airlift/aircompressor/tree/release-2.x"
+        }
+      ],
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.airlift/aircompressor@2.0.3?type=jar"
+    },
+    {
       "group" : "blue.strategic.parquet",
       "name" : "parquet-floor",
-      "version" : "1.64",
+      "version" : "2.1",
       "description" : "A lightweight Java library that facilitates reading and writing Apache Parquet files without Hadoop dependencies.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "4169a01362e261796909019c31995a19"
+          "content" : "d4bb2c0386e6542920da9f81767868fd"
         },
         {
           "alg" : "SHA-1",
-          "content" : "32809bc186bf27792ffbb24b4a6b89c1b6d89dc2"
+          "content" : "0169386ba7a373f44a76bc316939261ea6bc27f0"
         },
         {
           "alg" : "SHA-256",
-          "content" : "870187f4d669c5ee0e4541653ce789320a7bb113ca3e2ef976f276de24ab18fd"
+          "content" : "99eacb2c9d37bb41a0f5e51a51b2decb14b3908d56319bbb063b94531f610bca"
         },
         {
           "alg" : "SHA-512",
-          "content" : "6bc7325e6731741d80d4690b2fd6f8f6e40b3d258aa152c59c802ee610a0231e93d3639dfa3d9260d79207b66c8c9baf8d73206b3b1bfb0620f1b6cf625b266f"
+          "content" : "a7ef7b5a5312d4421b7f1957e9ceeb4bb110d8f2df4fd0cfd0a05f869a56deaaaf821dc50aff3b88794e117a51b63a2e09ee44d7d11df136c72be6e3e8a6bdf3"
         },
         {
           "alg" : "SHA-384",
-          "content" : "598461481a11b3e57aa6f8928df09ec16f9234e5014ad662f5b9924e0ffdf8c3ccb98cad2e134b549981c6c67becce83"
+          "content" : "544cbe07e9de2b1ef3859f9059f54f28e6f46ba04731e994ae164ce7305e86ef551c77a9a491a0ac8fb18a62a30f6913"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "e4b08c3115413f654aa65847b7d37521c777caa515628f3aef8fb95d17de0da661eb70144dee7b785966248c4752e5ce"
+          "content" : "a3c0701c263dcd9fcf7cb95788b67a9ebe07ccc440bd61278f4ea10003721e47843b40e9a16a0d4826c9b38831f2533b"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "68dcab7d00836885c0873963a38a36a035e837243699cb05361074c1c5b4d730"
+          "content" : "8a00de9e3081044fdb14168876337fbdf24cbe6dd30465acc7ef6c4f68542120"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "0531e65a83a171c0d6128f5e6fe97cf7323addcab3df33f2b052a62e96593556ac0fa25f827750cd429a5bf37092002479bde8f813788303a1ee00fc4a139a62"
+          "content" : "b199a390a772cc0af0eb06fea1e8522d3cbb7821bb4028124be9e4b5df1845f5f1e4a78232011cc1c90bea91c46d0e2fcb19043bdbcf23ddc62a17b91c1a939b"
         }
       ],
       "licenses" : [
@@ -1030,7 +1101,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/blue.strategic.parquet/parquet-floor@1.64?type=jar",
+      "purl" : "pkg:maven/blue.strategic.parquet/parquet-floor@2.1?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -1042,47 +1113,47 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/blue.strategic.parquet/parquet-floor@1.64?type=jar"
+      "bom-ref" : "pkg:maven/blue.strategic.parquet/parquet-floor@2.1?type=jar"
     },
     {
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.parquet",
       "name" : "parquet-column",
-      "version" : "1.17.0",
+      "version" : "1.17.1",
       "description" : "Parquet is a columnar storage format that supports nested data. This provides the java implementation.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "de0b4768d6050fed4a8484ccf831971e"
+          "content" : "f6588ef4b39ae1da4dee608dbd0d7555"
         },
         {
           "alg" : "SHA-1",
-          "content" : "c776925bc0d1466b4f5eaf7ba375c3ba6d9eaa2e"
+          "content" : "dd42ee94f0f09083818517121bd82bf744a352a3"
         },
         {
           "alg" : "SHA-256",
-          "content" : "2fcd38628897c3b547b92d0abf7200ec84e9eb3fb9e8450b196142e4d5229044"
+          "content" : "25c4be0714581a5b33f6862ec972da30b9dd864ecb5b86698b288d0eb0d5b089"
         },
         {
           "alg" : "SHA-512",
-          "content" : "049e5d233fddc6a04b9512d5e90ce116719d549773bd44300d087ab7d9eb3c24f5d73f1ee3557592bdd3cda0309c0895f174b82234b4a89d07df52938905c131"
+          "content" : "1918006a35d6737adde196bf0140670f01c93e807f2ad83dcd10ccf3280e8dc41e3ab6f6a9fc5ff9d0f8f0df0646d01f5edb17d2beb3b8ad34dd6005f4b82206"
         },
         {
           "alg" : "SHA-384",
-          "content" : "4f8706ae17563dff9bcccf9637bbbac74da1cc8b9180d761c2eb311272def250ac713b4e73ff6164d84ddd06fc07715a"
+          "content" : "8db806c00a1c53bbc5bb55f3929f6e57cdecd98bb9b4ab2d0cbeb446fd6a256df8cbd15d92ffe31e9a4bdc7b22b9d921"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "032be9e7cee8ab222907db0fa86478afb853f426c3b41a4e3afacbf6f9100283a937ce3da3e41c0a7b4ce77b8aa362a5"
+          "content" : "0bef068871c56f06137b710321d16c119b2b88d284519da83a0d306b8f51298c67cf971a2f6e39be4eae81d5a503867b"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "609c2314f3babe95580080275044b7f024d0235216f61cd2fe859b2de9ec4ad9"
+          "content" : "7311e807bb2c6373987dd0e6713e327456b1cb343e5d0e684882d824eb406fb7"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "18a862e043241ae47f5bc9c9c050f7dcbf57409699dce51e8af25e4d5fe5a815cc219cd4a1b31ac965934aa4472f2fe39643717d76a5fcc9de09680f596feaf3"
+          "content" : "1ebd57a9af1686b22a13256815a799b1c85529691a246fbb551b0d77fb2f8eb94f238db29dce3d69c4d97932241783d8a9f1906d60cecf376b87e642be6abcbe"
         }
       ],
       "licenses" : [
@@ -1097,7 +1168,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.parquet/parquet-column@1.17.0?type=jar",
+      "purl" : "pkg:maven/org.apache.parquet/parquet-column@1.17.1?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -1121,47 +1192,47 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.parquet/parquet-column@1.17.0?type=jar"
+      "bom-ref" : "pkg:maven/org.apache.parquet/parquet-column@1.17.1?type=jar"
     },
     {
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.parquet",
       "name" : "parquet-common",
-      "version" : "1.17.0",
+      "version" : "1.17.1",
       "description" : "Parquet is a columnar storage format that supports nested data. This provides the java implementation.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "a4788b3dc17efbab5f32c52d93604e3a"
+          "content" : "31c178d2ee03e8a23fc2d795ecc2ea4b"
         },
         {
           "alg" : "SHA-1",
-          "content" : "832fbdbe4bb4ba066e8f0f5d896c7c57da13ecff"
+          "content" : "076b002b8384b54f210b5f0f2df7c0288d39f255"
         },
         {
           "alg" : "SHA-256",
-          "content" : "697ef2603a427eb997837cec5d7a1290322425e63678f37257d8f2e8619f2c4e"
+          "content" : "844c5779c5071a95cbc410d711eff408589cbecd6e7063d75a88dd47dbc582f1"
         },
         {
           "alg" : "SHA-512",
-          "content" : "6ab618db185a66f5db0374c7d837f1d3eebce46c0c47274e31640e20e7e757685532510e72a68c549c87e8ab01e54b777835daae77031f4ddeb63c4f3f2bc54d"
+          "content" : "94c4fb7f160f5aa114b2d86e0ff6031be08709266fd20143c19890a9bad259c976fe7b58d149a8b1c2b5a13bcf6dbcb364f50a7f703f184462178cb2778d87e0"
         },
         {
           "alg" : "SHA-384",
-          "content" : "441367c393216229164a2ccca4ba817a46acfa8248ae6debe5dd2bf4fe0fd861aa3e7c389de997960130e8da37a0664f"
+          "content" : "fe62c7a43c56ea03a4eb3665a040c0c009d8eae234b5a4146745087430449011d75c10adaaf20cfe133bc74f98086ed2"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "463d46819ced3edc5aca4869f45c729e28d696043850fac41bb0fe3107dc60bb8083814112c4553b3f1a8e668d10b878"
+          "content" : "bbd0bf25696a15a0fb8b8fbb2e3e853b99acc32772a88f603423dc4d30e204d8f7a1a43f7db7274b03fbe0785e3c5ff7"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "404a849ff9ccf9bd437fa85215ea841212be1cd0776e378518d9ec655e93e004"
+          "content" : "97623950f7c851381dc31016c9224ba2e463dc19379c1b9f9da2391264d2c7f2"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "9db78e589469be765a8e63e20f2bd2e7ea58aedbf8cd4ff0a76ce0fd1ebf1fa57257c3bf518b4893c11ceb227b5a1b1de5eec3d646f2609a57a87497d2767e18"
+          "content" : "4771e6fee394e254935e14041a419368876a9a24256724ae916b67ce0ee9784d7a0b14b06192f42e1c6f4dc227712e5a35ea5fcbbe01fc0d0f0878a7fef9100e"
         }
       ],
       "licenses" : [
@@ -1176,7 +1247,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.parquet/parquet-common@1.17.0?type=jar",
+      "purl" : "pkg:maven/org.apache.parquet/parquet-common@1.17.1?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -1200,47 +1271,47 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.parquet/parquet-common@1.17.0?type=jar"
+      "bom-ref" : "pkg:maven/org.apache.parquet/parquet-common@1.17.1?type=jar"
     },
     {
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.parquet",
       "name" : "parquet-encoding",
-      "version" : "1.17.0",
+      "version" : "1.17.1",
       "description" : "Parquet is a columnar storage format that supports nested data. This provides the java implementation.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "4e24da84356b31337dc4f0881797552b"
+          "content" : "3c45adf65f3c8cdf66dc4a6b723051d7"
         },
         {
           "alg" : "SHA-1",
-          "content" : "a73ef96585b6b654b3f25dd12bcd5812284e753a"
+          "content" : "cb58ffccc09f3db99f8a991a57f02aada86ead31"
         },
         {
           "alg" : "SHA-256",
-          "content" : "affb09b7f468b6437afe78cdb229ed5631bbca5a578fb9cac22ead2187b9339a"
+          "content" : "afc8ca7c319c3ff21eb58f900dae067e36ef472f7c74d578ccf7a656f13f0908"
         },
         {
           "alg" : "SHA-512",
-          "content" : "7e11a8e24255136bb0f84f861f28426c220a500c2a1f7216876e2e06c982b2349d18825a846a30fca27335fe94850ab16c3e32a174a5ff4e50ae87ee98ac9930"
+          "content" : "86f1b7e7aa9003b2ce4ff81e6826088439dc521202bd1fa05bbcb6c637ebf12e05876e8c4cc2204ad0db2b63cc27fb5b08b8edf4d5dbfaa5c539e3e212821f4d"
         },
         {
           "alg" : "SHA-384",
-          "content" : "aabede3be120680c4d2c2c915d47bafe6a11aad9f33b9274baae3cb346f641ecf315b0e1211e2a7fc8a9c8701901f0a6"
+          "content" : "78f7a75153db943861cd2b2bae5e1fb2ac4bf3035d46d4b1622925e20972ab00defb87a4f67a574dbc18c2ff7bce1041"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "120389075668ea0c186a9915ad3ff134c8dbde2d82d147194351fd41fab5642ecdd78050c9a7cbbdb807fcd322460f6b"
+          "content" : "72aba3882888213426799c4cfa4c60aada72add9312b35c7dac8ebd0782565912822b5f4f046f8fb1368f87f9be611e2"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "a4ba5780242dc0d3ea0ae518e6bab7ade77669bd4cabb6f164fd81120abb1806"
+          "content" : "ef99aac53c25db73d0e37b5660fd1d28d18370a86b37bbd20321128434b14035"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "1d30ced021ac63746e4e580b0c29d3518e09ca10761c4eb8bb730ef286fe842bc5c2b2eb83f022011cc4e0d3f3fbb1e7dca61f84dc9160351ed0faa7f9119566"
+          "content" : "f6577c068b293959620ff2f24578e9c7d2f15dbfd7ddb201f5894ae8294cb7c8609771ed4f4a4ddf1aff912bf7dcba7c85220bfbd9ae3321b519c34d812ad0ca"
         }
       ],
       "licenses" : [
@@ -1255,7 +1326,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.parquet/parquet-encoding@1.17.0?type=jar",
+      "purl" : "pkg:maven/org.apache.parquet/parquet-encoding@1.17.1?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -1279,7 +1350,7 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.parquet/parquet-encoding@1.17.0?type=jar"
+      "bom-ref" : "pkg:maven/org.apache.parquet/parquet-encoding@1.17.1?type=jar"
     },
     {
       "group" : "org.locationtech.jts",
@@ -1365,41 +1436,41 @@
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.parquet",
       "name" : "parquet-hadoop",
-      "version" : "1.17.0",
+      "version" : "1.17.1",
       "description" : "Parquet is a columnar storage format that supports nested data. This provides the java implementation.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "b46695e8d065958bbbb7bfeb663ce33a"
+          "content" : "089115b4548f96b08b2ccf637b97950f"
         },
         {
           "alg" : "SHA-1",
-          "content" : "8a4967433a30998f834405b57aa034e21980c723"
+          "content" : "9ab4edf3f3226abc34cab103f86a11768f816de8"
         },
         {
           "alg" : "SHA-256",
-          "content" : "c47b0a875951fa191fadf8c5d13742e8938bdda9779b2d8fec5c5345ac9e0184"
+          "content" : "2aeb5e21fb12ddc51fc8c69050906446d9c261c28b0446abf2e40d80cfc8e0a0"
         },
         {
           "alg" : "SHA-512",
-          "content" : "8668e87c07e1a9ca0ea5fdee21e3fa32eef02fe3ea6e18e2483678ce8ba57a8c8c4cb0b162879b0f344c0e7c8562e8b057f1effeae554c9afddd6f4d1fb14843"
+          "content" : "4c160a99b4be460e166805c49a41609b1f41936e6d50c37c164757c23ec65e09b80f7a7d2ff258ed3facf1c6fbb12059a87c88e21107583563d708a6bb0fafa4"
         },
         {
           "alg" : "SHA-384",
-          "content" : "b97e74dae7ab948d93f99a765d356d75b789fcd3f00eadcf883bb489e1060c8652ab1008bc0b817e0d1ef0eedd08e4c6"
+          "content" : "b9567a748b63aba6dd951633b426dc0b62e76cc5bfb00e0d47a4b89f21efaa175b98cf5eb0018995e8e9634ecf65ab22"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "3cf33d7db8a368cbf577c8798216fca17310e8b33dc34bb99fdde9f6802300d886f0a968a406a9a22c1d7a6891bddcce"
+          "content" : "8b72b8f7560d63447ba87bcbfef63b04d12758386f39d755182d9704b3f868b1c16e119231734c3f3b994ee9312b9660"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "ffffc11c60dedff7ca922f2df037a26609fc812bd7506adcfef6a5e15a185bb2"
+          "content" : "2662b62b4153aa55c6094c9c3fa9fcb6d5c240f2c9464db7b9a07936a1000861"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "dbf17007e3cb12dd1716465a93fe8653b3dd7d795f5ba5c726134ffda7c65fb258ab73d20204902e90b06164811010f2be907d8dacb4604c08f73f95ce301a47"
+          "content" : "d7f65e128acba469040c600651f709f8f178f7930b1c406ea2e183f445dd826160f76305779befadb405c0ebaed048ad0067d340dc5bb66ad69abacc0ad4b597"
         }
       ],
       "licenses" : [
@@ -1414,7 +1485,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.parquet/parquet-hadoop@1.17.0?type=jar",
+      "purl" : "pkg:maven/org.apache.parquet/parquet-hadoop@1.17.1?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -1438,47 +1509,47 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.parquet/parquet-hadoop@1.17.0?type=jar"
+      "bom-ref" : "pkg:maven/org.apache.parquet/parquet-hadoop@1.17.1?type=jar"
     },
     {
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.parquet",
       "name" : "parquet-format-structures",
-      "version" : "1.17.0",
+      "version" : "1.17.1",
       "description" : "Parquet-mr related java classes to use the parquet-format thrift structures.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "8bc75f1810154685369167c0aad03ca1"
+          "content" : "ad576c4879a769b90956da07ea231d34"
         },
         {
           "alg" : "SHA-1",
-          "content" : "fcb37419c5b7f1075b648d80b5c480c02a69057e"
+          "content" : "a557161be5009aebefc0f3a5aeaddba91cdcaf8c"
         },
         {
           "alg" : "SHA-256",
-          "content" : "9b251f36df0bf61c80e23f07f76e3564d1b6566dea98210cc92a80e3075c0116"
+          "content" : "8e12f3d99de417fec077d858fe6f84daa79fdbfdc0753075843801118853a29b"
         },
         {
           "alg" : "SHA-512",
-          "content" : "bc6a99d14f187d8488bee205285d537c6e21c5e9c8fe516b74828eb978d2f4fd3562580b7b7aedb5ca43d89999ab6fd53b11a1d27059f8ae3bcfb0d65b535be5"
+          "content" : "f4ae91cb8829f3084c05096a032257613a95b534c9b1aa55967e5fe383bd4b1bda0ac3081bccb56922e145b50e9147e393e1d719db76f55d3286e3012ef41195"
         },
         {
           "alg" : "SHA-384",
-          "content" : "54b3bab9bd150402c1ecc0193f46a54d2cf4874a33d8e32f5d687157cdc6143c51261011867a6c2a3b3642646f17aa8e"
+          "content" : "df87bd502fe1cbeaa06c3fdb0d8c8f1c21ce431a5d0d252015a5e4096d6cf1e56ba672868514884e042f51675c10af77"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "9a1132177b803f762cd43ce37fa2ef3ec9907ad7211e4028f1db3bf33e3f11f60c8f2e8e48670f50c6b8f6779c39901b"
+          "content" : "eb2c68e8e6fd1b0575e70b32359aae611083e4f318d2f5051f9086e79ba3df4b05f588ab5967c8906a15a34ae6053e35"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "021ff4e48b11fe4042846da49e277aeac91397c62ba9f992b792d0afa7c84cd9"
+          "content" : "c94cd72bf361d05dee693c8e2d3d9499619e398a99456e9a6a74720dd6b17789"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "33c41fc9b6b152f60d8dea09135021a57a4ca703f67a6ef3e014379e566634deb0e7e4f4e11d1ea6b9dbf178ac1cde234e8bfb3e1647e52ebe7c1b1d1e1ce00b"
+          "content" : "c05c24afb46be0dbdd336ac91c16c6af6d92ac9854c930aebb864c091b4727fc7278486831749be257f23dc9f85bcb0af74d3237d202e317e7ad59a57b22c90c"
         }
       ],
       "licenses" : [
@@ -1493,7 +1564,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.parquet/parquet-format-structures@1.17.0?type=jar",
+      "purl" : "pkg:maven/org.apache.parquet/parquet-format-structures@1.17.1?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -1517,7 +1588,7 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.parquet/parquet-format-structures@1.17.0?type=jar"
+      "bom-ref" : "pkg:maven/org.apache.parquet/parquet-format-structures@1.17.1?type=jar"
     },
     {
       "publisher" : "GlassFish Community",
@@ -1595,41 +1666,41 @@
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.parquet",
       "name" : "parquet-jackson",
-      "version" : "1.17.0",
+      "version" : "1.17.1",
       "description" : "Parquet is a columnar storage format that supports nested data. This provides the java implementation.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "fde1b8e055f1d4dbb582b2d7f30796a3"
+          "content" : "9435c5a6758f70e31f0ebbdff20b2ab4"
         },
         {
           "alg" : "SHA-1",
-          "content" : "4575b219744e3dd5a037ab489b8de7b2a5bcc040"
+          "content" : "6218d5e4cd9cbdf5fed9abea23bb695f49012fad"
         },
         {
           "alg" : "SHA-256",
-          "content" : "7a4fe149acf7b2381e5c4d0677c075e11e4289ff944fb99be70c9f7d337027fe"
+          "content" : "bc1879dd3b81200d8925e8e61ccee59a48867f6f567039b8b86f4fb36041ac5e"
         },
         {
           "alg" : "SHA-512",
-          "content" : "5d6c387cafcf4708d02d13bf69a290dbd93011529d1f12de338e0944aa5976e718bb4eeae5648b2ea602242a7b153cde9d6afc8e7ce8b618803e328e855e8225"
+          "content" : "7dd65830b95e822978bf2cef40dac935631d6d977bff43de74a1c798eb5896f3ccf7c9061c78e90794b0f17675067b776a6c013ac1f76b792b1691f7cd860a66"
         },
         {
           "alg" : "SHA-384",
-          "content" : "a17dc924959ceaaa012e0f9b3e1d207f28489088738eed6301c55cc7c89244b0d70878dcb3ecdbf62a72e6bdf63d54fd"
+          "content" : "4816739b011a20553c5c41acdc2ca72bb3fdcc1f69c2fa883bce8c84200a11a604bcb393058122f9a014f63e4c9544c4"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "e0c3200ddd59f363cfb5f2c620491709cf1442782f97042073feb9605c06deecc4d9c8a7f1ac9c9dd550d616ae861f33"
+          "content" : "0e354de0bc7d78fa2dc1a968532b792f37859d92b947d0ec938e015e9fa83ade74de4939ee528b948f15a0dd1bf835c1"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "8488d8863581a24533682473f81d43dc3593763c6d60208c58818dc66f34c3b6"
+          "content" : "b5cad189f59fb80143daed42adf8c995f6a25475af2d8be208e50c3ab54066bd"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "61a6803f944783a9f1ea3ac8b720314da3d6a085f39e1c4115b84e6b6408a070037afe664f412f20660ae968bfa097508b78fb37e98156822a2f9dbddfb3cce8"
+          "content" : "7cd77f752bb2ed2df4a712da74bf8f879a5cfa3eb194d9455b68ed9b521923130196de71b14032875ee5e2d1b6156e0a42c0fb69aed63f09664114e1ef5f3bce"
         }
       ],
       "licenses" : [
@@ -1644,7 +1715,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.parquet/parquet-jackson@1.17.0?type=jar",
+      "purl" : "pkg:maven/org.apache.parquet/parquet-jackson@1.17.1?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -1668,7 +1739,7 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.parquet/parquet-jackson@1.17.0?type=jar"
+      "bom-ref" : "pkg:maven/org.apache.parquet/parquet-jackson@1.17.1?type=jar"
     },
     {
       "publisher" : "xerial.org",
@@ -1737,77 +1808,6 @@
       ],
       "type" : "library",
       "bom-ref" : "pkg:maven/org.xerial.snappy/snappy-java@1.1.10.7?type=jar"
-    },
-    {
-      "group" : "io.airlift",
-      "name" : "aircompressor",
-      "version" : "2.0.2",
-      "description" : "Compression algorithms",
-      "scope" : "required",
-      "hashes" : [
-        {
-          "alg" : "MD5",
-          "content" : "86ebd034828b5af24292c985370c360a"
-        },
-        {
-          "alg" : "SHA-1",
-          "content" : "527952aa21839e8664618e1fe73c5648173607ac"
-        },
-        {
-          "alg" : "SHA-256",
-          "content" : "0c2a96bf86d5fb24ff7f20c92483c61391cb10d440a4bd278c77365a2b165698"
-        },
-        {
-          "alg" : "SHA-512",
-          "content" : "db5379867ff66f5570f48f42093f9172df23ef75f124fae4ec2dec74ee977ad081139f9dc0a663aae261439cb435a5c545edb7122d1bac40223401fe93fb431d"
-        },
-        {
-          "alg" : "SHA-384",
-          "content" : "117c41b463396e88a025f4bf3f1904dbe2f111dcb86e8e99b3960705bd92b205982df031b68d046bc65c3cab2d503fed"
-        },
-        {
-          "alg" : "SHA3-384",
-          "content" : "0558592618b70715c5308f6d3e5d2ba64126a9d521f2ed6f7dc1183dc0039ce88f3298a4462d3c3cfe3bf34f517db7c5"
-        },
-        {
-          "alg" : "SHA3-256",
-          "content" : "ab3d5a6f88eb30b9c32e90c7bb829774a5efe201fae82a5ebbf66f2c32267276"
-        },
-        {
-          "alg" : "SHA3-512",
-          "content" : "764f153c20a2ae0a3ddc90ca6a5b660709854171fe96cc2b5ab423de3da447b85b4329bab5054df41705becb2cb5da006585bdb64cc780a86f220bcce87621c8"
-        }
-      ],
-      "licenses" : [
-        {
-          "license" : {
-            "id" : "Apache-2.0",
-            "text" : {
-              "encoding" : "base64",
-              "contentType" : "plain/text",
-              "content" : "QXBhY2hlIExpY2Vuc2UKVmVyc2lvbiAyLjAsIEphbnVhcnkgMjAwNApodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvCgpURVJNUyBBTkQgQ09ORElUSU9OUyBGT1IgVVNFLCBSRVBST0RVQ1RJT04sIEFORCBESVNUUklCVVRJT04KCjEuIERlZmluaXRpb25zLgoKIkxpY2Vuc2UiIHNoYWxsIG1lYW4gdGhlIHRlcm1zIGFuZCBjb25kaXRpb25zIGZvciB1c2UsIHJlcHJvZHVjdGlvbiwgYW5kIGRpc3RyaWJ1dGlvbiBhcyBkZWZpbmVkIGJ5IFNlY3Rpb25zIDEgdGhyb3VnaCA5IG9mIHRoaXMgZG9jdW1lbnQuCgoiTGljZW5zb3IiIHNoYWxsIG1lYW4gdGhlIGNvcHlyaWdodCBvd25lciBvciBlbnRpdHkgYXV0aG9yaXplZCBieSB0aGUgY29weXJpZ2h0IG93bmVyIHRoYXQgaXMgZ3JhbnRpbmcgdGhlIExpY2Vuc2UuCgoiTGVnYWwgRW50aXR5IiBzaGFsbCBtZWFuIHRoZSB1bmlvbiBvZiB0aGUgYWN0aW5nIGVudGl0eSBhbmQgYWxsIG90aGVyIGVudGl0aWVzIHRoYXQgY29udHJvbCwgYXJlIGNvbnRyb2xsZWQgYnksIG9yIGFyZSB1bmRlciBjb21tb24gY29udHJvbCB3aXRoIHRoYXQgZW50aXR5LiBGb3IgdGhlIHB1cnBvc2VzIG9mIHRoaXMgZGVmaW5pdGlvbiwgImNvbnRyb2wiIG1lYW5zIChpKSB0aGUgcG93ZXIsIGRpcmVjdCBvciBpbmRpcmVjdCwgdG8gY2F1c2UgdGhlIGRpcmVjdGlvbiBvciBtYW5hZ2VtZW50IG9mIHN1Y2ggZW50aXR5LCB3aGV0aGVyIGJ5IGNvbnRyYWN0IG9yIG90aGVyd2lzZSwgb3IgKGlpKSBvd25lcnNoaXAgb2YgZmlmdHkgcGVyY2VudCAoNTAlKSBvciBtb3JlIG9mIHRoZSBvdXRzdGFuZGluZyBzaGFyZXMsIG9yIChpaWkpIGJlbmVmaWNpYWwgb3duZXJzaGlwIG9mIHN1Y2ggZW50aXR5LgoKIllvdSIgKG9yICJZb3VyIikgc2hhbGwgbWVhbiBhbiBpbmRpdmlkdWFsIG9yIExlZ2FsIEVudGl0eSBleGVyY2lzaW5nIHBlcm1pc3Npb25zIGdyYW50ZWQgYnkgdGhpcyBMaWNlbnNlLgoKIlNvdXJjZSIgZm9ybSBzaGFsbCBtZWFuIHRoZSBwcmVmZXJyZWQgZm9ybSBmb3IgbWFraW5nIG1vZGlmaWNhdGlvbnMsIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gc29mdHdhcmUgc291cmNlIGNvZGUsIGRvY3VtZW50YXRpb24gc291cmNlLCBhbmQgY29uZmlndXJhdGlvbiBmaWxlcy4KCiJPYmplY3QiIGZvcm0gc2hhbGwgbWVhbiBhbnkgZm9ybSByZXN1bHRpbmcgZnJvbSBtZWNoYW5pY2FsIHRyYW5zZm9ybWF0aW9uIG9yIHRyYW5zbGF0aW9uIG9mIGEgU291cmNlIGZvcm0sIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gY29tcGlsZWQgb2JqZWN0IGNvZGUsIGdlbmVyYXRlZCBkb2N1bWVudGF0aW9uLCBhbmQgY29udmVyc2lvbnMgdG8gb3RoZXIgbWVkaWEgdHlwZXMuCgoiV29yayIgc2hhbGwgbWVhbiB0aGUgd29yayBvZiBhdXRob3JzaGlwLCB3aGV0aGVyIGluIFNvdXJjZSBvciBPYmplY3QgZm9ybSwgbWFkZSBhdmFpbGFibGUgdW5kZXIgdGhlIExpY2Vuc2UsIGFzIGluZGljYXRlZCBieSBhIGNvcHlyaWdodCBub3RpY2UgdGhhdCBpcyBpbmNsdWRlZCBpbiBvciBhdHRhY2hlZCB0byB0aGUgd29yayAoYW4gZXhhbXBsZSBpcyBwcm92aWRlZCBpbiB0aGUgQXBwZW5kaXggYmVsb3cpLgoKIkRlcml2YXRpdmUgV29ya3MiIHNoYWxsIG1lYW4gYW55IHdvcmssIHdoZXRoZXIgaW4gU291cmNlIG9yIE9iamVjdCBmb3JtLCB0aGF0IGlzIGJhc2VkIG9uIChvciBkZXJpdmVkIGZyb20pIHRoZSBXb3JrIGFuZCBmb3Igd2hpY2ggdGhlIGVkaXRvcmlhbCByZXZpc2lvbnMsIGFubm90YXRpb25zLCBlbGFib3JhdGlvbnMsIG9yIG90aGVyIG1vZGlmaWNhdGlvbnMgcmVwcmVzZW50LCBhcyBhIHdob2xlLCBhbiBvcmlnaW5hbCB3b3JrIG9mIGF1dGhvcnNoaXAuIEZvciB0aGUgcHVycG9zZXMgb2YgdGhpcyBMaWNlbnNlLCBEZXJpdmF0aXZlIFdvcmtzIHNoYWxsIG5vdCBpbmNsdWRlIHdvcmtzIHRoYXQgcmVtYWluIHNlcGFyYWJsZSBmcm9tLCBvciBtZXJlbHkgbGluayAob3IgYmluZCBieSBuYW1lKSB0byB0aGUgaW50ZXJmYWNlcyBvZiwgdGhlIFdvcmsgYW5kIERlcml2YXRpdmUgV29ya3MgdGhlcmVvZi4KCiJDb250cmlidXRpb24iIHNoYWxsIG1lYW4gYW55IHdvcmsgb2YgYXV0aG9yc2hpcCwgaW5jbHVkaW5nIHRoZSBvcmlnaW5hbCB2ZXJzaW9uIG9mIHRoZSBXb3JrIGFuZCBhbnkgbW9kaWZpY2F0aW9ucyBvciBhZGRpdGlvbnMgdG8gdGhhdCBXb3JrIG9yIERlcml2YXRpdmUgV29ya3MgdGhlcmVvZiwgdGhhdCBpcyBpbnRlbnRpb25hbGx5IHN1Ym1pdHRlZCB0byBMaWNlbnNvciBmb3IgaW5jbHVzaW9uIGluIHRoZSBXb3JrIGJ5IHRoZSBjb3B5cmlnaHQgb3duZXIgb3IgYnkgYW4gaW5kaXZpZHVhbCBvciBMZWdhbCBFbnRpdHkgYXV0aG9yaXplZCB0byBzdWJtaXQgb24gYmVoYWxmIG9mIHRoZSBjb3B5cmlnaHQgb3duZXIuIEZvciB0aGUgcHVycG9zZXMgb2YgdGhpcyBkZWZpbml0aW9uLCAic3VibWl0dGVkIiBtZWFucyBhbnkgZm9ybSBvZiBlbGVjdHJvbmljLCB2ZXJiYWwsIG9yIHdyaXR0ZW4gY29tbXVuaWNhdGlvbiBzZW50IHRvIHRoZSBMaWNlbnNvciBvciBpdHMgcmVwcmVzZW50YXRpdmVzLCBpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVkIHRvIGNvbW11bmljYXRpb24gb24gZWxlY3Ryb25pYyBtYWlsaW5nIGxpc3RzLCBzb3VyY2UgY29kZSBjb250cm9sIHN5c3RlbXMsIGFuZCBpc3N1ZSB0cmFja2luZyBzeXN0ZW1zIHRoYXQgYXJlIG1hbmFnZWQgYnksIG9yIG9uIGJlaGFsZiBvZiwgdGhlIExpY2Vuc29yIGZvciB0aGUgcHVycG9zZSBvZiBkaXNjdXNzaW5nIGFuZCBpbXByb3ZpbmcgdGhlIFdvcmssIGJ1dCBleGNsdWRpbmcgY29tbXVuaWNhdGlvbiB0aGF0IGlzIGNvbnNwaWN1b3VzbHkgbWFya2VkIG9yIG90aGVyd2lzZSBkZXNpZ25hdGVkIGluIHdyaXRpbmcgYnkgdGhlIGNvcHlyaWdodCBvd25lciBhcyAiTm90IGEgQ29udHJpYnV0aW9uLiIKCiJDb250cmlidXRvciIgc2hhbGwgbWVhbiBMaWNlbnNvciBhbmQgYW55IGluZGl2aWR1YWwgb3IgTGVnYWwgRW50aXR5IG9uIGJlaGFsZiBvZiB3aG9tIGEgQ29udHJpYnV0aW9uIGhhcyBiZWVuIHJlY2VpdmVkIGJ5IExpY2Vuc29yIGFuZCBzdWJzZXF1ZW50bHkgaW5jb3Jwb3JhdGVkIHdpdGhpbiB0aGUgV29yay4KCjIuIEdyYW50IG9mIENvcHlyaWdodCBMaWNlbnNlLiBTdWJqZWN0IHRvIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZiB0aGlzIExpY2Vuc2UsIGVhY2ggQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBwZXJwZXR1YWwsIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8tY2hhcmdlLCByb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlIGNvcHlyaWdodCBsaWNlbnNlIHRvIHJlcHJvZHVjZSwgcHJlcGFyZSBEZXJpdmF0aXZlIFdvcmtzIG9mLCBwdWJsaWNseSBkaXNwbGF5LCBwdWJsaWNseSBwZXJmb3JtLCBzdWJsaWNlbnNlLCBhbmQgZGlzdHJpYnV0ZSB0aGUgV29yayBhbmQgc3VjaCBEZXJpdmF0aXZlIFdvcmtzIGluIFNvdXJjZSBvciBPYmplY3QgZm9ybS4KCjMuIEdyYW50IG9mIFBhdGVudCBMaWNlbnNlLiBTdWJqZWN0IHRvIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZiB0aGlzIExpY2Vuc2UsIGVhY2ggQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBwZXJwZXR1YWwsIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8tY2hhcmdlLCByb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlIChleGNlcHQgYXMgc3RhdGVkIGluIHRoaXMgc2VjdGlvbikgcGF0ZW50IGxpY2Vuc2UgdG8gbWFrZSwgaGF2ZSBtYWRlLCB1c2UsIG9mZmVyIHRvIHNlbGwsIHNlbGwsIGltcG9ydCwgYW5kIG90aGVyd2lzZSB0cmFuc2ZlciB0aGUgV29yaywgd2hlcmUgc3VjaCBsaWNlbnNlIGFwcGxpZXMgb25seSB0byB0aG9zZSBwYXRlbnQgY2xhaW1zIGxpY2Vuc2FibGUgYnkgc3VjaCBDb250cmlidXRvciB0aGF0IGFyZSBuZWNlc3NhcmlseSBpbmZyaW5nZWQgYnkgdGhlaXIgQ29udHJpYnV0aW9uKHMpIGFsb25lIG9yIGJ5IGNvbWJpbmF0aW9uIG9mIHRoZWlyIENvbnRyaWJ1dGlvbihzKSB3aXRoIHRoZSBXb3JrIHRvIHdoaWNoIHN1Y2ggQ29udHJpYnV0aW9uKHMpIHdhcyBzdWJtaXR0ZWQuIElmIFlvdSBpbnN0aXR1dGUgcGF0ZW50IGxpdGlnYXRpb24gYWdhaW5zdCBhbnkgZW50aXR5IChpbmNsdWRpbmcgYSBjcm9zcy1jbGFpbSBvciBjb3VudGVyY2xhaW0gaW4gYSBsYXdzdWl0KSBhbGxlZ2luZyB0aGF0IHRoZSBXb3JrIG9yIGEgQ29udHJpYnV0aW9uIGluY29ycG9yYXRlZCB3aXRoaW4gdGhlIFdvcmsgY29uc3RpdHV0ZXMgZGlyZWN0IG9yIGNvbnRyaWJ1dG9yeSBwYXRlbnQgaW5mcmluZ2VtZW50LCB0aGVuIGFueSBwYXRlbnQgbGljZW5zZXMgZ3JhbnRlZCB0byBZb3UgdW5kZXIgdGhpcyBMaWNlbnNlIGZvciB0aGF0IFdvcmsgc2hhbGwgdGVybWluYXRlIGFzIG9mIHRoZSBkYXRlIHN1Y2ggbGl0aWdhdGlvbiBpcyBmaWxlZC4KCjQuIFJlZGlzdHJpYnV0aW9uLiBZb3UgbWF5IHJlcHJvZHVjZSBhbmQgZGlzdHJpYnV0ZSBjb3BpZXMgb2YgdGhlIFdvcmsgb3IgRGVyaXZhdGl2ZSBXb3JrcyB0aGVyZW9mIGluIGFueSBtZWRpdW0sIHdpdGggb3Igd2l0aG91dCBtb2RpZmljYXRpb25zLCBhbmQgaW4gU291cmNlIG9yIE9iamVjdCBmb3JtLCBwcm92aWRlZCB0aGF0IFlvdSBtZWV0IHRoZSBmb2xsb3dpbmcgY29uZGl0aW9uczoKCiAgICAgKGEpIFlvdSBtdXN0IGdpdmUgYW55IG90aGVyIHJlY2lwaWVudHMgb2YgdGhlIFdvcmsgb3IgRGVyaXZhdGl2ZSBXb3JrcyBhIGNvcHkgb2YgdGhpcyBMaWNlbnNlOyBhbmQKCiAgICAgKGIpIFlvdSBtdXN0IGNhdXNlIGFueSBtb2RpZmllZCBmaWxlcyB0byBjYXJyeSBwcm9taW5lbnQgbm90aWNlcyBzdGF0aW5nIHRoYXQgWW91IGNoYW5nZWQgdGhlIGZpbGVzOyBhbmQKCiAgICAgKGMpIFlvdSBtdXN0IHJldGFpbiwgaW4gdGhlIFNvdXJjZSBmb3JtIG9mIGFueSBEZXJpdmF0aXZlIFdvcmtzIHRoYXQgWW91IGRpc3RyaWJ1dGUsIGFsbCBjb3B5cmlnaHQsIHBhdGVudCwgdHJhZGVtYXJrLCBhbmQgYXR0cmlidXRpb24gbm90aWNlcyBmcm9tIHRoZSBTb3VyY2UgZm9ybSBvZiB0aGUgV29yaywgZXhjbHVkaW5nIHRob3NlIG5vdGljZXMgdGhhdCBkbyBub3QgcGVydGFpbiB0byBhbnkgcGFydCBvZiB0aGUgRGVyaXZhdGl2ZSBXb3JrczsgYW5kCgogICAgIChkKSBJZiB0aGUgV29yayBpbmNsdWRlcyBhICJOT1RJQ0UiIHRleHQgZmlsZSBhcyBwYXJ0IG9mIGl0cyBkaXN0cmlidXRpb24sIHRoZW4gYW55IERlcml2YXRpdmUgV29ya3MgdGhhdCBZb3UgZGlzdHJpYnV0ZSBtdXN0IGluY2x1ZGUgYSByZWFkYWJsZSBjb3B5IG9mIHRoZSBhdHRyaWJ1dGlvbiBub3RpY2VzIGNvbnRhaW5lZCB3aXRoaW4gc3VjaCBOT1RJQ0UgZmlsZSwgZXhjbHVkaW5nIHRob3NlIG5vdGljZXMgdGhhdCBkbyBub3QgcGVydGFpbiB0byBhbnkgcGFydCBvZiB0aGUgRGVyaXZhdGl2ZSBXb3JrcywgaW4gYXQgbGVhc3Qgb25lIG9mIHRoZSBmb2xsb3dpbmcgcGxhY2VzOiB3aXRoaW4gYSBOT1RJQ0UgdGV4dCBmaWxlIGRpc3RyaWJ1dGVkIGFzIHBhcnQgb2YgdGhlIERlcml2YXRpdmUgV29ya3M7IHdpdGhpbiB0aGUgU291cmNlIGZvcm0gb3IgZG9jdW1lbnRhdGlvbiwgaWYgcHJvdmlkZWQgYWxvbmcgd2l0aCB0aGUgRGVyaXZhdGl2ZSBXb3Jrczsgb3IsIHdpdGhpbiBhIGRpc3BsYXkgZ2VuZXJhdGVkIGJ5IHRoZSBEZXJpdmF0aXZlIFdvcmtzLCBpZiBhbmQgd2hlcmV2ZXIgc3VjaCB0aGlyZC1wYXJ0eSBub3RpY2VzIG5vcm1hbGx5IGFwcGVhci4gVGhlIGNvbnRlbnRzIG9mIHRoZSBOT1RJQ0UgZmlsZSBhcmUgZm9yIGluZm9ybWF0aW9uYWwgcHVycG9zZXMgb25seSBhbmQgZG8gbm90IG1vZGlmeSB0aGUgTGljZW5zZS4gWW91IG1heSBhZGQgWW91ciBvd24gYXR0cmlidXRpb24gbm90aWNlcyB3aXRoaW4gRGVyaXZhdGl2ZSBXb3JrcyB0aGF0IFlvdSBkaXN0cmlidXRlLCBhbG9uZ3NpZGUgb3IgYXMgYW4gYWRkZW5kdW0gdG8gdGhlIE5PVElDRSB0ZXh0IGZyb20gdGhlIFdvcmssIHByb3ZpZGVkIHRoYXQgc3VjaCBhZGRpdGlvbmFsIGF0dHJpYnV0aW9uIG5vdGljZXMgY2Fubm90IGJlIGNvbnN0cnVlZCBhcyBtb2RpZnlpbmcgdGhlIExpY2Vuc2UuCgogICAgIFlvdSBtYXkgYWRkIFlvdXIgb3duIGNvcHlyaWdodCBzdGF0ZW1lbnQgdG8gWW91ciBtb2RpZmljYXRpb25zIGFuZCBtYXkgcHJvdmlkZSBhZGRpdGlvbmFsIG9yIGRpZmZlcmVudCBsaWNlbnNlIHRlcm1zIGFuZCBjb25kaXRpb25zIGZvciB1c2UsIHJlcHJvZHVjdGlvbiwgb3IgZGlzdHJpYnV0aW9uIG9mIFlvdXIgbW9kaWZpY2F0aW9ucywgb3IgZm9yIGFueSBzdWNoIERlcml2YXRpdmUgV29ya3MgYXMgYSB3aG9sZSwgcHJvdmlkZWQgWW91ciB1c2UsIHJlcHJvZHVjdGlvbiwgYW5kIGRpc3RyaWJ1dGlvbiBvZiB0aGUgV29yayBvdGhlcndpc2UgY29tcGxpZXMgd2l0aCB0aGUgY29uZGl0aW9ucyBzdGF0ZWQgaW4gdGhpcyBMaWNlbnNlLgoKNS4gU3VibWlzc2lvbiBvZiBDb250cmlidXRpb25zLiBVbmxlc3MgWW91IGV4cGxpY2l0bHkgc3RhdGUgb3RoZXJ3aXNlLCBhbnkgQ29udHJpYnV0aW9uIGludGVudGlvbmFsbHkgc3VibWl0dGVkIGZvciBpbmNsdXNpb24gaW4gdGhlIFdvcmsgYnkgWW91IHRvIHRoZSBMaWNlbnNvciBzaGFsbCBiZSB1bmRlciB0aGUgdGVybXMgYW5kIGNvbmRpdGlvbnMgb2YgdGhpcyBMaWNlbnNlLCB3aXRob3V0IGFueSBhZGRpdGlvbmFsIHRlcm1zIG9yIGNvbmRpdGlvbnMuIE5vdHdpdGhzdGFuZGluZyB0aGUgYWJvdmUsIG5vdGhpbmcgaGVyZWluIHNoYWxsIHN1cGVyc2VkZSBvciBtb2RpZnkgdGhlIHRlcm1zIG9mIGFueSBzZXBhcmF0ZSBsaWNlbnNlIGFncmVlbWVudCB5b3UgbWF5IGhhdmUgZXhlY3V0ZWQgd2l0aCBMaWNlbnNvciByZWdhcmRpbmcgc3VjaCBDb250cmlidXRpb25zLgoKNi4gVHJhZGVtYXJrcy4gVGhpcyBMaWNlbnNlIGRvZXMgbm90IGdyYW50IHBlcm1pc3Npb24gdG8gdXNlIHRoZSB0cmFkZSBuYW1lcywgdHJhZGVtYXJrcywgc2VydmljZSBtYXJrcywgb3IgcHJvZHVjdCBuYW1lcyBvZiB0aGUgTGljZW5zb3IsIGV4Y2VwdCBhcyByZXF1aXJlZCBmb3IgcmVhc29uYWJsZSBhbmQgY3VzdG9tYXJ5IHVzZSBpbiBkZXNjcmliaW5nIHRoZSBvcmlnaW4gb2YgdGhlIFdvcmsgYW5kIHJlcHJvZHVjaW5nIHRoZSBjb250ZW50IG9mIHRoZSBOT1RJQ0UgZmlsZS4KCjcuIERpc2NsYWltZXIgb2YgV2FycmFudHkuIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgTGljZW5zb3IgcHJvdmlkZXMgdGhlIFdvcmsgKGFuZCBlYWNoIENvbnRyaWJ1dG9yIHByb3ZpZGVzIGl0cyBDb250cmlidXRpb25zKSBvbiBhbiAiQVMgSVMiIEJBU0lTLCBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZCwgaW5jbHVkaW5nLCB3aXRob3V0IGxpbWl0YXRpb24sIGFueSB3YXJyYW50aWVzIG9yIGNvbmRpdGlvbnMgb2YgVElUTEUsIE5PTi1JTkZSSU5HRU1FTlQsIE1FUkNIQU5UQUJJTElUWSwgb3IgRklUTkVTUyBGT1IgQSBQQVJUSUNVTEFSIFBVUlBPU0UuIFlvdSBhcmUgc29sZWx5IHJlc3BvbnNpYmxlIGZvciBkZXRlcm1pbmluZyB0aGUgYXBwcm9wcmlhdGVuZXNzIG9mIHVzaW5nIG9yIHJlZGlzdHJpYnV0aW5nIHRoZSBXb3JrIGFuZCBhc3N1bWUgYW55IHJpc2tzIGFzc29jaWF0ZWQgd2l0aCBZb3VyIGV4ZXJjaXNlIG9mIHBlcm1pc3Npb25zIHVuZGVyIHRoaXMgTGljZW5zZS4KCjguIExpbWl0YXRpb24gb2YgTGlhYmlsaXR5LiBJbiBubyBldmVudCBhbmQgdW5kZXIgbm8gbGVnYWwgdGhlb3J5LCB3aGV0aGVyIGluIHRvcnQgKGluY2x1ZGluZyBuZWdsaWdlbmNlKSwgY29udHJhY3QsIG9yIG90aGVyd2lzZSwgdW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IChzdWNoIGFzIGRlbGliZXJhdGUgYW5kIGdyb3NzbHkgbmVnbGlnZW50IGFjdHMpIG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzaGFsbCBhbnkgQ29udHJpYnV0b3IgYmUgbGlhYmxlIHRvIFlvdSBmb3IgZGFtYWdlcywgaW5jbHVkaW5nIGFueSBkaXJlY3QsIGluZGlyZWN0LCBzcGVjaWFsLCBpbmNpZGVudGFsLCBvciBjb25zZXF1ZW50aWFsIGRhbWFnZXMgb2YgYW55IGNoYXJhY3RlciBhcmlzaW5nIGFzIGEgcmVzdWx0IG9mIHRoaXMgTGljZW5zZSBvciBvdXQgb2YgdGhlIHVzZSBvciBpbmFiaWxpdHkgdG8gdXNlIHRoZSBXb3JrIChpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVkIHRvIGRhbWFnZXMgZm9yIGxvc3Mgb2YgZ29vZHdpbGwsIHdvcmsgc3RvcHBhZ2UsIGNvbXB1dGVyIGZhaWx1cmUgb3IgbWFsZnVuY3Rpb24sIG9yIGFueSBhbmQgYWxsIG90aGVyIGNvbW1lcmNpYWwgZGFtYWdlcyBvciBsb3NzZXMpLCBldmVuIGlmIHN1Y2ggQ29udHJpYnV0b3IgaGFzIGJlZW4gYWR2aXNlZCBvZiB0aGUgcG9zc2liaWxpdHkgb2Ygc3VjaCBkYW1hZ2VzLgoKOS4gQWNjZXB0aW5nIFdhcnJhbnR5IG9yIEFkZGl0aW9uYWwgTGlhYmlsaXR5LiBXaGlsZSByZWRpc3RyaWJ1dGluZyB0aGUgV29yayBvciBEZXJpdmF0aXZlIFdvcmtzIHRoZXJlb2YsIFlvdSBtYXkgY2hvb3NlIHRvIG9mZmVyLCBhbmQgY2hhcmdlIGEgZmVlIGZvciwgYWNjZXB0YW5jZSBvZiBzdXBwb3J0LCB3YXJyYW50eSwgaW5kZW1uaXR5LCBvciBvdGhlciBsaWFiaWxpdHkgb2JsaWdhdGlvbnMgYW5kL29yIHJpZ2h0cyBjb25zaXN0ZW50IHdpdGggdGhpcyBMaWNlbnNlLiBIb3dldmVyLCBpbiBhY2NlcHRpbmcgc3VjaCBvYmxpZ2F0aW9ucywgWW91IG1heSBhY3Qgb25seSBvbiBZb3VyIG93biBiZWhhbGYgYW5kIG9uIFlvdXIgc29sZSByZXNwb25zaWJpbGl0eSwgbm90IG9uIGJlaGFsZiBvZiBhbnkgb3RoZXIgQ29udHJpYnV0b3IsIGFuZCBvbmx5IGlmIFlvdSBhZ3JlZSB0byBpbmRlbW5pZnksIGRlZmVuZCwgYW5kIGhvbGQgZWFjaCBDb250cmlidXRvciBoYXJtbGVzcyBmb3IgYW55IGxpYWJpbGl0eSBpbmN1cnJlZCBieSwgb3IgY2xhaW1zIGFzc2VydGVkIGFnYWluc3QsIHN1Y2ggQ29udHJpYnV0b3IgYnkgcmVhc29uIG9mIHlvdXIgYWNjZXB0aW5nIGFueSBzdWNoIHdhcnJhbnR5IG9yIGFkZGl0aW9uYWwgbGlhYmlsaXR5LgoKRU5EIE9GIFRFUk1TIEFORCBDT05ESVRJT05TCgpBUFBFTkRJWDogSG93IHRvIGFwcGx5IHRoZSBBcGFjaGUgTGljZW5zZSB0byB5b3VyIHdvcmsuCgpUbyBhcHBseSB0aGUgQXBhY2hlIExpY2Vuc2UgdG8geW91ciB3b3JrLCBhdHRhY2ggdGhlIGZvbGxvd2luZyBib2lsZXJwbGF0ZSBub3RpY2UsIHdpdGggdGhlIGZpZWxkcyBlbmNsb3NlZCBieSBicmFja2V0cyAiW10iIHJlcGxhY2VkIHdpdGggeW91ciBvd24gaWRlbnRpZnlpbmcgaW5mb3JtYXRpb24uIChEb24ndCBpbmNsdWRlIHRoZSBicmFja2V0cyEpICBUaGUgdGV4dCBzaG91bGQgYmUgZW5jbG9zZWQgaW4gdGhlIGFwcHJvcHJpYXRlIGNvbW1lbnQgc3ludGF4IGZvciB0aGUgZmlsZSBmb3JtYXQuIFdlIGFsc28gcmVjb21tZW5kIHRoYXQgYSBmaWxlIG9yIGNsYXNzIG5hbWUgYW5kIGRlc2NyaXB0aW9uIG9mIHB1cnBvc2UgYmUgaW5jbHVkZWQgb24gdGhlIHNhbWUgInByaW50ZWQgcGFnZSIgYXMgdGhlIGNvcHlyaWdodCBub3RpY2UgZm9yIGVhc2llciBpZGVudGlmaWNhdGlvbiB3aXRoaW4gdGhpcmQtcGFydHkgYXJjaGl2ZXMuCgpDb3B5cmlnaHQgW3l5eXldIFtuYW1lIG9mIGNvcHlyaWdodCBvd25lcl0KCkxpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSAiTGljZW5zZSIpOwp5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCllvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdAoKaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCgpVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlCmRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCldJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLgpTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kCmxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgo="
-            },
-            "url" : "https://www.apache.org/licenses/LICENSE-2.0"
-          }
-        }
-      ],
-      "purl" : "pkg:maven/io.airlift/aircompressor@2.0.2?type=jar",
-      "externalReferences" : [
-        {
-          "type" : "website",
-          "url" : "https://github.com/airlift/aircompressor"
-        },
-        {
-          "type" : "distribution-intake",
-          "url" : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-        },
-        {
-          "type" : "vcs",
-          "url" : "https://github.com/airlift/aircompressor/tree/master"
-        }
-      ],
-      "type" : "library",
-      "bom-ref" : "pkg:maven/io.airlift/aircompressor@2.0.2?type=jar"
     },
     {
       "publisher" : "com.github.luben",
@@ -10157,9 +10157,9 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/co.worklytics.psoxy/psoxy-aws@0.6.3?type=jar",
+      "ref" : "pkg:maven/co.worklytics.psoxy/psoxy-aws@0.6.4?type=jar",
       "dependsOn" : [
-        "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.3?type=jar",
+        "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.4?type=jar",
         "pkg:maven/org.projectlombok/lombok@1.18.42?type=jar",
         "pkg:maven/com.google.dagger/dagger-compiler@2.40.5?type=jar",
         "pkg:maven/com.google.dagger/dagger@2.40.5?type=jar",
@@ -10179,14 +10179,15 @@
       ]
     },
     {
-      "ref" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.3?type=jar",
+      "ref" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.4?type=jar",
       "dependsOn" : [
-        "pkg:maven/com.avaulta.gateway/gateway-core@0.6.3?type=jar",
+        "pkg:maven/com.avaulta.gateway/gateway-core@0.6.4?type=jar",
         "pkg:maven/org.apache.commons/commons-lang3@3.19.0?type=jar",
         "pkg:maven/org.apache.commons/commons-csv@1.14.1?type=jar",
         "pkg:maven/commons-io/commons-io@2.18.0?type=jar",
         "pkg:maven/commons-net/commons-net@3.11.1?type=jar",
-        "pkg:maven/blue.strategic.parquet/parquet-floor@1.64?type=jar",
+        "pkg:maven/io.airlift/aircompressor@2.0.3?type=jar",
+        "pkg:maven/blue.strategic.parquet/parquet-floor@2.1?type=jar",
         "pkg:maven/com.google.guava/guava@33.4.7-jre?type=jar",
         "pkg:maven/javax.inject/javax.inject@1?type=jar",
         "pkg:maven/com.google.dagger/dagger@2.40.5?type=jar",
@@ -10205,7 +10206,7 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.avaulta.gateway/gateway-core@0.6.3?type=jar",
+      "ref" : "pkg:maven/com.avaulta.gateway/gateway-core@0.6.4?type=jar",
       "dependsOn" : [
         "pkg:maven/org.apache.commons/commons-lang3@3.19.0?type=jar",
         "pkg:maven/org.apache.commons/commons-csv@1.14.1?type=jar",
@@ -10218,7 +10219,7 @@
         "pkg:maven/com.networknt/json-schema-validator@1.5.8?type=jar",
         "pkg:maven/com.google.guava/guava@33.4.7-jre?type=jar",
         "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.4.3?type=jar",
-        "pkg:maven/org.apache.opennlp/opennlp-tools@2.3.2?type=jar"
+        "pkg:maven/org.apache.opennlp/opennlp-tools@2.5.9?type=jar"
       ]
     },
     {
@@ -10340,7 +10341,7 @@
       ]
     },
     {
-      "ref" : "pkg:maven/org.apache.opennlp/opennlp-tools@2.3.2?type=jar",
+      "ref" : "pkg:maven/org.apache.opennlp/opennlp-tools@2.5.9?type=jar",
       "dependsOn" : [
         "pkg:maven/org.slf4j/slf4j-api@2.0.11?type=jar"
       ]
@@ -10350,30 +10351,34 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/blue.strategic.parquet/parquet-floor@1.64?type=jar",
+      "ref" : "pkg:maven/io.airlift/aircompressor@2.0.3?type=jar",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/blue.strategic.parquet/parquet-floor@2.1?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.apache.parquet/parquet-column@1.17.0?type=jar",
-        "pkg:maven/org.apache.parquet/parquet-hadoop@1.17.0?type=jar"
+        "pkg:maven/org.apache.parquet/parquet-column@1.17.1?type=jar",
+        "pkg:maven/org.apache.parquet/parquet-hadoop@1.17.1?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/org.apache.parquet/parquet-column@1.17.0?type=jar",
+      "ref" : "pkg:maven/org.apache.parquet/parquet-column@1.17.1?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.apache.parquet/parquet-common@1.17.0?type=jar",
-        "pkg:maven/org.apache.parquet/parquet-encoding@1.17.0?type=jar",
+        "pkg:maven/org.apache.parquet/parquet-common@1.17.1?type=jar",
+        "pkg:maven/org.apache.parquet/parquet-encoding@1.17.1?type=jar",
         "pkg:maven/org.slf4j/slf4j-api@2.0.11?type=jar",
         "pkg:maven/org.locationtech.jts/jts-core@1.20.0?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/org.apache.parquet/parquet-common@1.17.0?type=jar",
+      "ref" : "pkg:maven/org.apache.parquet/parquet-common@1.17.1?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.apache.parquet/parquet-format-structures@1.17.0?type=jar",
+        "pkg:maven/org.apache.parquet/parquet-format-structures@1.17.1?type=jar",
         "pkg:maven/org.slf4j/slf4j-api@2.0.11?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/org.apache.parquet/parquet-format-structures@1.17.0?type=jar",
+      "ref" : "pkg:maven/org.apache.parquet/parquet-format-structures@1.17.1?type=jar",
       "dependsOn" : [
         "pkg:maven/javax.annotation/javax.annotation-api@1.3.2?type=jar"
       ]
@@ -10383,9 +10388,9 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/org.apache.parquet/parquet-encoding@1.17.0?type=jar",
+      "ref" : "pkg:maven/org.apache.parquet/parquet-encoding@1.17.1?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.apache.parquet/parquet-common@1.17.0?type=jar",
+        "pkg:maven/org.apache.parquet/parquet-common@1.17.1?type=jar",
         "pkg:maven/org.slf4j/slf4j-api@2.0.11?type=jar"
       ]
     },
@@ -10394,28 +10399,23 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/org.apache.parquet/parquet-hadoop@1.17.0?type=jar",
+      "ref" : "pkg:maven/org.apache.parquet/parquet-hadoop@1.17.1?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.apache.parquet/parquet-column@1.17.0?type=jar",
-        "pkg:maven/org.apache.parquet/parquet-format-structures@1.17.0?type=jar",
-        "pkg:maven/org.apache.parquet/parquet-common@1.17.0?type=jar",
-        "pkg:maven/org.apache.parquet/parquet-jackson@1.17.0?type=jar",
+        "pkg:maven/org.apache.parquet/parquet-column@1.17.1?type=jar",
+        "pkg:maven/org.apache.parquet/parquet-format-structures@1.17.1?type=jar",
+        "pkg:maven/org.apache.parquet/parquet-common@1.17.1?type=jar",
+        "pkg:maven/org.apache.parquet/parquet-jackson@1.17.1?type=jar",
         "pkg:maven/org.xerial.snappy/snappy-java@1.1.10.7?type=jar",
-        "pkg:maven/io.airlift/aircompressor@2.0.2?type=jar",
         "pkg:maven/com.github.luben/zstd-jni@1.5.7-3?type=jar",
         "pkg:maven/org.slf4j/slf4j-api@2.0.11?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/org.apache.parquet/parquet-jackson@1.17.0?type=jar",
+      "ref" : "pkg:maven/org.apache.parquet/parquet-jackson@1.17.1?type=jar",
       "dependsOn" : [ ]
     },
     {
       "ref" : "pkg:maven/org.xerial.snappy/snappy-java@1.1.10.7?type=jar",
-      "dependsOn" : [ ]
-    },
-    {
-      "ref" : "pkg:maven/io.airlift/aircompressor@2.0.2?type=jar",
       "dependsOn" : [ ]
     },
     {

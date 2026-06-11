@@ -152,21 +152,21 @@ variable "gcp_region" {
 
 variable "vpc_config" {
   type = object({
-    network              = string           # Local name of the VPC network resource on which to provision the VPC connector (required if `serverless_connector` is not provided)
-    subnet               = string           # Local name of the VPC subnet resource on which to provision the VPC connector (required if `serverless_connector` is not provided). NOTE: Subnet MUST have /28 netmask (required by Google Cloud for VPC connectors)
-    serverless_connector = optional(string) # Format: projects/{project}/locations/{location}/connectors/{connector}
+    network              = optional(string) # VPC network name or self-link (required for Direct VPC egress if `serverless_connector` is not provided)
+    subnet               = optional(string) # Regional subnet name or self-link; must be in the same region as Cloud Functions
+    serverless_connector = optional(string) # TODO 0.7.x: remove; deprecated. Format: projects/{project}/locations/{location}/connectors/{connector}
   })
 
   description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
   default     = null
-  # serverless_connector: allow null; if provided, must match the full resource name
+
   validation {
     condition = (
       var.vpc_config == null
       || try(var.vpc_config.serverless_connector, null) == null
-      || can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", try(var.vpc_config.serverless_connector, "")))
+      || (try(var.vpc_config.network, null) == null && try(var.vpc_config.subnet, null) == null)
     )
-    error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
+    error_message = "vpc_config cannot set serverless_connector together with network/subnet."
   }
 
   validation {

@@ -83,6 +83,32 @@ public class RecordRulesTest {
 
     @SneakyThrows
     @Test
+    public void textDigestWithKeywords() {
+        final String YAML = "---\n" +
+            "format: \"NDJSON\"\n" +
+            "transforms:\n" +
+            "- textDigestKeywords:\n" +
+            "    keywords:\n" +
+            "    - \"write\"\n" +
+            "    jsonPaths:\n" +
+            "    - \"$.query\"\n" +
+            "- textDigest: \"$.title\"\n";
+
+        RecordRules rules = yamlMapper.readValue(YAML, RecordRules.class);
+        assertEquals(2, rules.getTransforms().size());
+
+        RecordTransform.TextDigestKeywords withKeywords =
+            (RecordTransform.TextDigestKeywords) rules.getTransforms().get(0);
+        assertEquals(1, withKeywords.getKeywords().size());
+        assertEquals("write", withKeywords.getKeywords().get(0));
+        assertEquals("$.query", withKeywords.getJsonPaths().get(0));
+
+        RecordTransform.TextDigest titlesOnly = (RecordTransform.TextDigest) rules.getTransforms().get(1);
+        assertEquals("$.title", titlesOnly.getTextDigest().get(0));
+    }
+
+    @SneakyThrows
+    @Test
     public void toYaml() {
 
         final String EXPECTED = "---\n" +

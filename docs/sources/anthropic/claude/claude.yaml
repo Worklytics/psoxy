@@ -15,12 +15,140 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[*].actor['email_address','user_id','unauthenticated_email_address',\
-      \ 'api_key_id']"
+          - "$.data[*].actor['email_address','user_id','unauthenticated_email_address','api_key_id','admin_api_key_id','service_account_id']"
+          - "$.data[*].invitee_email"
         encoding: "URL_SAFE_TOKEN"
       - !<hashIp>
         jsonPaths:
           - "$..ip_address"
+      - !<textDigest>
+        jsonPaths:
+          - "$.data[*].title"
+        keywords:
+          - "generate image"
+          - "create image"
+          - "draw image"
+          - "make image"
+          - "design image"
+          - "picture of"
+          - "illustration of"
+          - "visual of"
+          - "render"
+          - "generate graphic"
+          - "create graphic"
+          - "dall-e"
+          - "dalle"
+          - "draw"
+          - "python"
+          - "javascript"
+          - "typescript"
+          - "java"
+          - "sql"
+          - "code"
+          - "function"
+          - "debug"
+          - "api"
+          - "html"
+          - "react"
+          - "bash"
+          - "css"
+          - "docker"
+          - "ruby"
+          - "golang"
+          - "kotlin"
+          - "php"
+          - "node"
+          - "angular"
+          - "vue"
+          - "swift"
+          - "npm"
+          - "github"
+          - "git"
+          - "implement"
+          - "bug"
+          - "deploy"
+          - "script"
+          - "class"
+          - "method"
+          - "array"
+          - "exception"
+          - "refactor"
+          - "compile"
+          - "callback"
+          - "const"
+          - "async"
+          - "await"
+          - "pull request"
+          - "code review"
+          - "unit test"
+          - "stack trace"
+          - "error"
+          - "what is"
+          - "what are"
+          - "how does"
+          - "explain"
+          - "difference between"
+          - "compared"
+          - "how do"
+          - "how to"
+          - "explain how"
+          - "explain why"
+          - "explain what"
+          - "why does"
+          - "why is"
+          - "best practices"
+          - "compared to"
+          - "brainstorm"
+          - "alternatives"
+          - "versus"
+          - "tradeoffs"
+          - "outline"
+          - "nda"
+          - "write"
+          - "draft"
+          - "compose"
+          - "email"
+          - "rewrite"
+          - "proofread"
+          - "blog"
+          - "article"
+          - "e-mail"
+          - "mail"
+          - "redline"
+          - "review"
+          - "summarise"
+          - "summary"
+          - "translate to"
+          - "report"
+          - "proposal"
+          - "presentation"
+          - "slides"
+          - "brief"
+          - "newsletter"
+          - "contract"
+          - "financials"
+          - "accounting"
+          - "payroll"
+          - "breakeven"
+          - "cashflow"
+          - "nps"
+          - "data analysis"
+          - "analyze"
+          - "pivot"
+          - "chart"
+          - "tableau"
+          - "summarize"
+          - "pivot table"
+          - "bar chart"
+          - "line chart"
+          - "pie chart"
+          - "vlookup"
+          - "snowflake"
+          - "memo"
+          - "deck"
+          - "craft"
+          - "design"
+          - "linkedin"
     responseSchema:
       type: "object"
       properties:
@@ -59,6 +187,134 @@ endpoints:
         jsonPaths:
           - "$.data[*].user['email_address','id']"
         encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$.data[*].name"
+        keywords:
+          - "generate image"
+          - "create image"
+          - "draw image"
+          - "make image"
+          - "design image"
+          - "picture of"
+          - "illustration of"
+          - "visual of"
+          - "render"
+          - "generate graphic"
+          - "create graphic"
+          - "dall-e"
+          - "dalle"
+          - "draw"
+          - "python"
+          - "javascript"
+          - "typescript"
+          - "java"
+          - "sql"
+          - "code"
+          - "function"
+          - "debug"
+          - "api"
+          - "html"
+          - "react"
+          - "bash"
+          - "css"
+          - "docker"
+          - "ruby"
+          - "golang"
+          - "kotlin"
+          - "php"
+          - "node"
+          - "angular"
+          - "vue"
+          - "swift"
+          - "npm"
+          - "github"
+          - "git"
+          - "implement"
+          - "bug"
+          - "deploy"
+          - "script"
+          - "class"
+          - "method"
+          - "array"
+          - "exception"
+          - "refactor"
+          - "compile"
+          - "callback"
+          - "const"
+          - "async"
+          - "await"
+          - "pull request"
+          - "code review"
+          - "unit test"
+          - "stack trace"
+          - "error"
+          - "what is"
+          - "what are"
+          - "how does"
+          - "explain"
+          - "difference between"
+          - "compared"
+          - "how do"
+          - "how to"
+          - "explain how"
+          - "explain why"
+          - "explain what"
+          - "why does"
+          - "why is"
+          - "best practices"
+          - "compared to"
+          - "brainstorm"
+          - "alternatives"
+          - "versus"
+          - "tradeoffs"
+          - "outline"
+          - "nda"
+          - "write"
+          - "draft"
+          - "compose"
+          - "email"
+          - "rewrite"
+          - "proofread"
+          - "blog"
+          - "article"
+          - "e-mail"
+          - "mail"
+          - "redline"
+          - "review"
+          - "summarise"
+          - "summary"
+          - "translate to"
+          - "report"
+          - "proposal"
+          - "presentation"
+          - "slides"
+          - "brief"
+          - "newsletter"
+          - "contract"
+          - "financials"
+          - "accounting"
+          - "payroll"
+          - "breakeven"
+          - "cashflow"
+          - "nps"
+          - "data analysis"
+          - "analyze"
+          - "pivot"
+          - "chart"
+          - "tableau"
+          - "summarize"
+          - "pivot table"
+          - "bar chart"
+          - "line chart"
+          - "pie chart"
+          - "vlookup"
+          - "snowflake"
+          - "memo"
+          - "deck"
+          - "craft"
+          - "design"
+          - "linkedin"
     responseSchema:
       type: "object"
       properties:
@@ -82,6 +338,16 @@ endpoints:
       - "before_id"
       - "limit"
       - "order"
+      - "created_at.gt"
+      - "created_at.gte"
+      - "created_at.lt"
+      - "created_at.lte"
+      - "updated_at.gt"
+      - "updated_at.gte"
+      - "updated_at.lt"
+      - "updated_at.lte"
+      - "tool_result_max_chars"
+      - "tool_use_input_max_chars"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -92,7 +358,136 @@ endpoints:
           - "$..ip_address"
       - !<textDigest>
         jsonPaths:
+          - "$.name"
           - "$.chat_messages[*].content[*].text"
+          - "$.chat_messages[*].content[*].input"
+          - "$.chat_messages[*].content[*].content[*].text"
+          - "$.chat_messages[*].artifacts[*].title"
+        keywords:
+          - "generate image"
+          - "create image"
+          - "draw image"
+          - "make image"
+          - "design image"
+          - "picture of"
+          - "illustration of"
+          - "visual of"
+          - "render"
+          - "generate graphic"
+          - "create graphic"
+          - "dall-e"
+          - "dalle"
+          - "draw"
+          - "python"
+          - "javascript"
+          - "typescript"
+          - "java"
+          - "sql"
+          - "code"
+          - "function"
+          - "debug"
+          - "api"
+          - "html"
+          - "react"
+          - "bash"
+          - "css"
+          - "docker"
+          - "ruby"
+          - "golang"
+          - "kotlin"
+          - "php"
+          - "node"
+          - "angular"
+          - "vue"
+          - "swift"
+          - "npm"
+          - "github"
+          - "git"
+          - "implement"
+          - "bug"
+          - "deploy"
+          - "script"
+          - "class"
+          - "method"
+          - "array"
+          - "exception"
+          - "refactor"
+          - "compile"
+          - "callback"
+          - "const"
+          - "async"
+          - "await"
+          - "pull request"
+          - "code review"
+          - "unit test"
+          - "stack trace"
+          - "error"
+          - "what is"
+          - "what are"
+          - "how does"
+          - "explain"
+          - "difference between"
+          - "compared"
+          - "how do"
+          - "how to"
+          - "explain how"
+          - "explain why"
+          - "explain what"
+          - "why does"
+          - "why is"
+          - "best practices"
+          - "compared to"
+          - "brainstorm"
+          - "alternatives"
+          - "versus"
+          - "tradeoffs"
+          - "outline"
+          - "nda"
+          - "write"
+          - "draft"
+          - "compose"
+          - "email"
+          - "rewrite"
+          - "proofread"
+          - "blog"
+          - "article"
+          - "e-mail"
+          - "mail"
+          - "redline"
+          - "review"
+          - "summarise"
+          - "summary"
+          - "translate to"
+          - "report"
+          - "proposal"
+          - "presentation"
+          - "slides"
+          - "brief"
+          - "newsletter"
+          - "contract"
+          - "financials"
+          - "accounting"
+          - "payroll"
+          - "breakeven"
+          - "cashflow"
+          - "nps"
+          - "data analysis"
+          - "analyze"
+          - "pivot"
+          - "chart"
+          - "tableau"
+          - "summarize"
+          - "pivot table"
+          - "bar chart"
+          - "line chart"
+          - "pie chart"
+          - "vlookup"
+          - "snowflake"
+          - "memo"
+          - "deck"
+          - "craft"
+          - "design"
+          - "linkedin"
     responseSchema:
       type: "object"
       properties:
@@ -106,9 +501,17 @@ endpoints:
         deleted_at:
           type: "string"
           format: "date-time"
+        first_id:
+          type: "string"
+        has_more:
+          type: "boolean"
         id:
           type: "string"
+        last_id:
+          type: "string"
         model:
+          type: "string"
+        name:
           type: "string"
         organization_id:
           type: "string"
@@ -177,24 +580,67 @@ definitions:
   Activity:
     type: "object"
     properties:
+      action:
+        type: "string"
       actor:
         $ref: "#/definitions/Actor"
       api_key_id:
         type: "string"
+      artifact_type:
+        type: "string"
+      cadence:
+        type: "string"
+      cc_email_count:
+        type: "integer"
+      claude_artifact_id:
+        type: "string"
+      claude_artifact_version_id:
+        type: "string"
       claude_chat_id:
+        type: "string"
+      claude_chat_snapshot_id:
         type: "string"
       claude_file_id:
         type: "string"
       claude_project_id:
         type: "string"
+      claude_published_artifact_id:
+        type: "string"
+      config_id:
+        type: "string"
       created_at:
         type: "string"
         format: "date-time"
+      decision:
+        type: "string"
+      enabled:
+        type: "boolean"
+      environment_id:
+        type: "string"
+      from_date:
+        type: "string"
+        format: "date-time"
+      group_id:
+        type: "string"
       id:
+        type: "string"
+      invitee_email:
+        type: "string"
+      mcp_server_id:
+        type: "string"
+      model:
         type: "string"
       organization_id:
         type: "string"
       organization_uuid:
+        type: "string"
+      per_review_limit_usd:
+        type: "string"
+      primary_email_set:
+        type: "boolean"
+      repo_name:
+        type: "string"
+      repo_owner:
         type: "string"
       request_body:
         type: "string"
@@ -202,8 +648,29 @@ definitions:
         type: "string"
       request_method:
         type: "string"
+      request_type:
+        type: "string"
+      resolved_count:
+        type: "integer"
+      scan_id:
+        type: "string"
+      scan_project_id:
+        type: "string"
+      scans_cancelled:
+        type: "integer"
+      status:
+        type: "string"
       status_code:
         type: "integer"
+      title:
+        type: "string"
+      to_date:
+        type: "string"
+        format: "date-time"
+      to_email_count:
+        type: "integer"
+      trigger_mode:
+        type: "string"
       type:
         type: "string"
       url:
@@ -211,11 +678,11 @@ definitions:
   Actor:
     type: "object"
     properties:
-      api_key_id:
-        type: "string"
       email_address:
         type: "string"
       ip_address:
+        type: "string"
+      service_account_id:
         type: "string"
       type:
         type: "string"
@@ -232,6 +699,10 @@ definitions:
         type: "string"
       id:
         type: "string"
+      title:
+        type: "string"
+      version_id:
+        type: "string"
   Chat:
     type: "object"
     properties:
@@ -245,9 +716,17 @@ definitions:
       deleted_at:
         type: "string"
         format: "date-time"
+      first_id:
+        type: "string"
+      has_more:
+        type: "boolean"
       id:
         type: "string"
+      last_id:
+        type: "string"
       model:
+        type: "string"
+      name:
         type: "string"
       organization_id:
         type: "string"
@@ -265,8 +744,28 @@ definitions:
   ContentBlock:
     type: "object"
     properties:
+      content:
+        type: "array"
+        items:
+          $ref: "#/definitions/ContentBlock"
+      id:
+        type: "string"
+      input:
+        type: "string"
+      integration_name:
+        type: "string"
+      is_error:
+        type: "boolean"
+      mcp_server_url:
+        type: "string"
+      name:
+        type: "string"
       text:
         type: "string"
+      tool_use_id:
+        type: "string"
+      truncated:
+        type: "boolean"
       type:
         type: "string"
   ErrorResponse:

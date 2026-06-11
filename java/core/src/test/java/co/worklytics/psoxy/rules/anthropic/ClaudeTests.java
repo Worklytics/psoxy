@@ -46,6 +46,17 @@ public class ClaudeTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?limit=50", "chat-messages-response.json"),
             InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?after_id=msg_123&limit=100", "chat-messages-response.json"),
             InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?before_id=msg_456&order=asc", "chat-messages-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?order=desc&limit=25", "chat-messages-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?created_at.gte=2024-01-01T00:00:00Z", "chat-messages-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?created_at.gt=2024-01-01T00:00:00Z&created_at.lt=2024-12-31T00:00:00Z", "chat-messages-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?created_at.gte=2024-01-01T00:00:00Z&created_at.lte=2024-12-31T00:00:00Z&limit=100", "chat-messages-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?updated_at.gte=2024-06-01T00:00:00Z", "chat-messages-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?updated_at.gt=2024-06-01T00:00:00Z&updated_at.lt=2024-06-30T00:00:00Z", "chat-messages-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?updated_at.gte=2024-06-01T00:00:00Z&updated_at.lte=2024-06-30T00:00:00Z", "chat-messages-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?tool_result_max_chars=1000", "chat-messages-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?tool_use_input_max_chars=500", "chat-messages-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?tool_result_max_chars=1000&tool_use_input_max_chars=500&limit=50", "chat-messages-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages?after_id=msg_789&created_at.gte=2024-01-01T00:00:00Z&limit=50&order=asc", "chat-messages-response.json"),
 
             // Organizations endpoint
             InvocationExample.of("https://api.anthropic.com/v1/compliance/organizations", "organizations-response.json"),

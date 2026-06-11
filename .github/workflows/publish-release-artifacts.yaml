@@ -64,6 +64,14 @@ jobs:
           # This script builds the modules and generates SBOMs
           ./tools/release/generate-sbom.sh
 
+      - name: Build deployment JARs for release assets
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          # generate-sbom.sh runs mvn clean verify, which removes shaded deployment JARs.
+          # Rebuild distribution artifacts for GitHub release upload.
+          ./tools/build.sh -qd aws java/
+          ./tools/build.sh -qd gcp java/
+
       - name: Locate Artifacts
         id: locate-artifacts
         if: startsWith(github.ref, 'refs/tags/v')
@@ -71,6 +79,15 @@ jobs:
           # Find the generated JARs - verifying path assumptions from build scripts
           AWS_JAR=$(find java/impl/aws/target/deployment -name "psoxy-aws-*.jar" | head -n 1)
           GCP_JAR=$(find java/impl/gcp/target/deployment -name "psoxy-gcp-*.jar" | head -n 1)
+
+          if [ -z "$AWS_JAR" ] || [ ! -f "$AWS_JAR" ]; then
+            echo "::error::AWS deployment JAR not found under java/impl/aws/target/deployment"
+            exit 1
+          fi
+          if [ -z "$GCP_JAR" ] || [ ! -f "$GCP_JAR" ]; then
+            echo "::error::GCP deployment JAR not found under java/impl/gcp/target/deployment"
+            exit 1
+          fi
 
           echo "aws_jar=$AWS_JAR" >> $GITHUB_OUTPUT
           echo "gcp_jar=$GCP_JAR" >> $GITHUB_OUTPUT
