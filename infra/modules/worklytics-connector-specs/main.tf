@@ -175,6 +175,45 @@ EOT
       })
       instructions_template = "${path.module}/docs/claude/instructions.tftpl"
     }
+    claude-analytics = {
+      source_kind : "claude-analytics"
+      availability : "beta",
+      enable_by_default : false
+      worklytics_connector_id : "claude-analytics-psoxy"
+      display_name : "Claude Analytics",
+      worklytics_connector_name : "Claude Analytics via Psoxy"
+      target_host : "api.anthropic.com"
+      source_auth_strategy : "claude_admin_api_key"
+      secured_variables : [
+        {
+          name : "ADMIN_API_KEY"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ]
+      example_api_requests : [
+        {
+          method : "GET"
+          path : "/v1/organizations/analytics/users?date=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/analytics/apps/chat/projects?date=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/analytics/user_usage_report?starting_at=${formatdate("YYYY-MM-DD", local.example_api_calls_sample_interval_start)}&ending_at=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/analytics/user_cost_report?starting_at=${formatdate("YYYY-MM-DD", local.example_api_calls_sample_interval_start)}&ending_at=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}"
+        }
+      ],
+      external_token_todo : templatefile("${path.module}/docs/claude/claude_analytics_instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_CLAUDE_ANALYTICS_"
+      })
+    }
     claude-code = {
       source_kind : "claude-code"
       availability : "beta",

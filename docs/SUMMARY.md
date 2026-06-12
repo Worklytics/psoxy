@@ -57,6 +57,7 @@
 * [Data Sources](sources/README.md)
   * [Anthropic](sources/anthropic/README.md)
     * [Claude](sources/anthropic/claude/README.md)
+    * [Claude Analytics](sources/anthropic/claude-analytics/README.md)
     * [Claude Code](sources/anthropic/claude-code/README.md)
   * [Asana](sources/asana/README.md)
   * [Atlassian](sources/atlassian/README.md)
