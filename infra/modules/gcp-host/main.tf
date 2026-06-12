@@ -545,11 +545,35 @@ resource "google_secret_manager_secret_iam_member" "additional_transforms" {
 # END LOOKUP TABLES
 
 locals {
+  api_connector_test_examples = { for k, connector in var.api_connectors : k => merge(
+    {
+      api_requests = concat(
+        [for path in try(connector.example_api_calls, []) : {
+          method       = "GET"
+          path         = path
+          content_type = null
+          body         = null
+          headers      = {}
+        }],
+        [for req in try(connector.example_api_requests, []) : {
+          method       = try(req.method, "GET")
+          path         = req.path
+          content_type = try(req.content_type, null)
+          body         = try(req.body, null)
+          headers      = try(req.headers, {})
+        }]
+      )
+    },
+    try(connector.enable_async_processing, false) ? { supports_async = true } : {},
+    try(connector.example_api_calls_user_to_impersonate, null) != null ? { user_to_impersonate = connector.example_api_calls_user_to_impersonate } : {}
+  ) }
+
   api_instances = { for instance in module.api_connector :
     instance.instance_id => merge(
       {
-        endpoint_url : instance.cloud_function_url,
-        sanitized_bucket : try(instance.async_output_bucket_name, null),
+        endpoint_url     = instance.cloud_function_url,
+        sanitized_bucket   = try(instance.async_output_bucket_name, null),
+        test_examples      = local.api_connector_test_examples[instance.instance_id],
       },
       instance,
       var.api_connectors[instance.instance_id]
