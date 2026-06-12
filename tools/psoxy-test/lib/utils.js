@@ -95,6 +95,13 @@ function getCommonHTTPHeaders(options = {}) {
     headers['Content-Type'] = 'application/json';
   }
 
+  for (const h of (options.header || [])) {
+    const sep = h.indexOf(':');
+    if (sep > 0) {
+      headers[h.slice(0, sep).trim()] = h.slice(sep + 1).trim();
+    }
+  }
+
   return headers;
 }
 

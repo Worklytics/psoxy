@@ -5,6 +5,9 @@ endpoints:
       - "starting_at"
       - "page"
       - "limit"
+    allowedRequestHeaders:
+      - "anthropic-version"
+      - "content-type"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -34,6 +37,9 @@ endpoints:
     allowedQueryParams:
       - "after_id"
       - "limit"
+    allowedRequestHeaders:
+      - "anthropic-version"
+      - "content-type"
     transforms:
       - !<pseudonymize>
         jsonPaths:

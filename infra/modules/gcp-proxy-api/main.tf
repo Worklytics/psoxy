@@ -28,6 +28,9 @@ locals {
 
   path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(var.instance_id), "-", "_")}_"
 
+  vpc_use_connector = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) != null # TODO 0.7.x: remove
+  vpc_use_direct    = var.vpc_config != null && !local.vpc_use_connector && try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null
+
   # gcp-output-bucket allows bucket_name_prefix up to 40 chars
   bucket_name_environment_id_prefix  = substr(var.environment_id_prefix, 0, 30)
   bucket_name_prefix_random_suffix   = local.bucket_provisioning_required ? "-${random_string.bucket_name_random_sequence[0].result}-" : ""
@@ -257,8 +260,18 @@ resource "google_cloudfunctions2_function" "function" {
     available_cpu                    = var.instance_concurrency > 1 ? "1" : null
     max_instance_count               = var.max_instance_count
 
-    vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
-    vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
+    vpc_connector                 = local.vpc_use_connector ? var.vpc_config.serverless_connector : null
+    vpc_connector_egress_settings = local.vpc_use_connector ? "ALL_TRAFFIC" : null
+
+    direct_vpc_egress = local.vpc_use_direct ? "VPC_EGRESS_ALL_TRAFFIC" : null
+
+    dynamic "direct_vpc_network_interface" {
+      for_each = local.vpc_use_direct ? [var.vpc_config] : []
+      content {
+        network    = direct_vpc_network_interface.value.network
+        subnetwork = direct_vpc_network_interface.value.subnet
+      }
+    }
 
     environment_variables = merge(
       # { LOG_EXECUTION_ID = "true" }, # NOTE that the google provider > 5.x seems to magically add this here, seemingly bc that's the defalt behavior of the version gcloud cli / API its using
@@ -400,7 +413,7 @@ Review the deployed Cloud function in GCP console:
 [Function in GCP Console](https://console.cloud.google.com/functions/details/${google_cloudfunctions2_function.function.location}/${google_cloudfunctions2_function.function.name}?project=${google_cloudfunctions2_function.function.project})
 
 We provide some Node.js scripts to easily validate the deployment. To be able
-to run the test commands below, you need Node.js (>=16) and npm (v >=8)
+to run the test commands below, you need Node.js (>=20) and npm (v >=8)
 installed. Then, ensure all dependencies are installed by running:
 
 ```shell

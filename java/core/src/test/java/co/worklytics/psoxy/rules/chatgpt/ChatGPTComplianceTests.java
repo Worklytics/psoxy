@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules.chatgpt;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
 import lombok.Getter;
+import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
@@ -22,6 +23,9 @@ public class ChatGPTComplianceTests extends JavaRulesTestBaseCase {
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
+            InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/conversations", "conversations.json"),
+            InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/conversations/some_id/messages", "conversation-messages.json"),
+            InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/conversations?after=blabla&limit=100", "conversations.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs", "logs.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs?event_type=something&after=after&limit=limit&before=before", "logs.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs/some_id", "sample_log_message.json"),
@@ -31,5 +35,17 @@ public class ChatGPTComplianceTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/users", "users.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/users?after=blabla&limit=100", "users.json")
         );
+    }
+
+    @Test
+    void sanitizesRoleBasedUserMessageAuthorshipInLogs() {
+        String original = asJson("sample_log_message.json")
+            .replace("\"type\": \"user\",\n      \"client_type\": \"unknown\"", "\"role\": \"user\",\n      \"client_type\": \"unknown\"");
+
+        String sanitized = sanitize("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs/some_id", original);
+
+        assertRedacted(sanitized,
+            "Can you summarize the Q2 financial results for the EMEA region?",
+            "Q2 financial results");
     }
 }

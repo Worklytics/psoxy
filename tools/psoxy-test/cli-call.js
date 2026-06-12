@@ -42,6 +42,7 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     .option('--request-no-response', "Request 'No response body' back from proxy (tests side-output case)", false)
     .option('--async', 'Process request asynchronously (adds X-Psoxy-Process-Async header)', false)
     .option('-b, --body <body>', 'Body to send in request (it expects a JSON string)')
+    .option('-H, --header <header>', 'Extra request header in "Name: Value" format (repeatable)', (val, prev) => prev.concat([val]), [])
     .option('--verify-collection <bucket>', 'Verify that the posted data appears in the specified bucket (GCS/S3)')
     .option('--scheduler-job <name>', 'GCP: Cloud Scheduler job name to trigger batch processing')
     .option('--concurrency <n>', 'Fire N concurrent copies of the request (max 5) to test instance concurrency', parseInt)

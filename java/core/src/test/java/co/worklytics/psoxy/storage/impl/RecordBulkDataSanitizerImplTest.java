@@ -326,6 +326,48 @@ class RecordBulkDataSanitizerImplTest {
         assertEquals(']', output.charAt(output.length() - 1));
         assertTrue(output.contains("\"foo\":null"));
     }
+
+    @Test
+    void testAutoFormat_NdjsonWithUnreliableContentTypeUsesFileExtension() {
+        this.setUpWithRules("---\n" +
+            "format: \"AUTO\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n");
+
+        final String objectPath = "export-20231128/items.ndjson";
+        storageHandler.handle(BulkDataTestUtils.request(objectPath)
+                .withContentType("application/x-www-form-urlencoded"),
+            BulkDataTestUtils.transform(rules),
+            BulkDataTestUtils.inputStreamSupplier("bulk/example.ndjson"),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        assertEquals(new String(TestUtils.getData("bulk/example-sanitized.ndjson"), StandardCharsets.UTF_8), output);
+    }
+
+    @Test
+    void testAutoFormat_JsonArrayWithoutContentTypeUsesFileExtension() {
+        this.setUpWithRules("---\n" +
+            "format: \"AUTO\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n");
+
+        String input = "[{\"foo\":1,\"bar\":2,\"other\":\"three\"}]";
+
+        storageHandler.handle(BulkDataTestUtils.request("export-20231128/file.json"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+
+        assertEquals('[', output.charAt(0));
+        assertEquals(']', output.charAt(output.length() - 1));
+        assertTrue(output.contains("\"foo\":null"));
+    }
+
     @Test
     void parquet() throws IOException {
         this.setUpWithRules("---\n" +
@@ -446,6 +488,98 @@ class RecordBulkDataSanitizerImplTest {
             // "secret" should be null (redacted)
             assertNull(r1.get("secret"));
         }
+    }
+
+    @Test
+    void testAutoFormat_ParquetWithoutContentTypeUsesFileExtension() throws IOException {
+        this.setUpWithRules("---\n" +
+            "format: \"AUTO\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n");
+
+        Map<String, Object> record = new LinkedHashMap<>();
+        record.put("foo", "1");
+        record.put("bar", "2");
+        record.put("other", "three");
+
+        ByteArrayOutputStream sourceOut = new ByteArrayOutputStream();
+        try (ParquetRecordWriter writer = new ParquetRecordWriter(sourceOut)) {
+            writer.beginRecordSet();
+            writer.writeRecord(record);
+            writer.endRecordSet();
+        }
+
+        storageHandler.handle(BulkDataTestUtils.request("export-20231128/file.parquet"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(sourceOut.toByteArray()),
+            outputStreamSupplier);
+
+        try (ParquetRecordReader reader = new ParquetRecordReader(new ByteArrayInputStream(outputStream.toByteArray()))) {
+            Map<String, Object> sanitized = reader.readRecord();
+            assertNotNull(sanitized);
+            assertNull(sanitized.get("foo"));
+            assertEquals("three", sanitized.get("other"));
+
+            String expected2 = encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("2" + "salt")).build());
+            assertEquals(expected2, sanitized.get("bar"));
+
+        }
+    }
+    @Test
+    void pseudonymize_blankStringValue() {
+        this.setUpWithRules("---\n" +
+            "format: \"NDJSON\"\n" +
+            "transforms:\n" +
+            "- pseudonymize: \"email\"\n");
+
+        String input = "{\"email\":\"\",\"other\":\"value\"}\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/file.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+        assertEquals("{\"email\":\"\",\"other\":\"value\"}\n", output);
+    }
+
+    @Test
+    void pseudonymize_nullJsonPathMatch() {
+        this.setUpWithRules("---\n" +
+            "format: \"NDJSON\"\n" +
+            "transforms:\n" +
+            "- pseudonymize: \"$.profile.email\"\n");
+
+        String input = "{\"profile\":{\"email\":null},\"other\":\"value\"}\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/file.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+        assertEquals("{\"profile\":{\"email\":null},\"other\":\"value\"}\n", output);
+    }
+
+    @Test
+    void pseudonymize_arrayWithBlankAndValidValues() {
+        this.setUpWithRules("---\n" +
+            "format: \"NDJSON\"\n" +
+            "transforms:\n" +
+            "- pseudonymize: \"$.members[*].email\"\n");
+
+        String input = "{\"members\":[{\"email\":\"alice@example.com\"},{\"email\":\"\"},{\"email\":null}]}\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/file.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+        assertTrue(output.contains("\"email\":\"\""));
+        assertTrue(output.contains("\"email\":null"));
+        assertTrue(output.contains("t~"));
     }
 
     @Test

@@ -13,6 +13,12 @@ terraform {
 # is provisioned, and that's implicit in the provider - so we should just infer from the provider
 data "aws_region" "current" {}
 
+data "aws_caller_identity" "current" {}
+
+data "aws_iam_session_context" "current" {
+  arn = data.aws_caller_identity.current.arn
+}
+
 module "env_id" {
   source = "../../modules/env-id"
 
@@ -29,6 +35,13 @@ locals {
 
   has_enabled_webhook_collectors = length(keys(var.webhook_collectors)) > 0
   enable_webhook_testing         = var.provision_testing_infra && local.has_enabled_webhook_collectors
+
+  terraform_principal_arn   = can(regex(":assumed-role/", data.aws_caller_identity.current.arn)) ? data.aws_iam_session_context.current.issuer_arn : data.aws_caller_identity.current.arn
+  terraform_upload_role_arn = can(regex("^arn:aws:iam::\\d{12}:role/", local.terraform_principal_arn)) ? local.terraform_principal_arn : null
+
+  test_aws_principal_arns = var.provision_testing_infra ? (
+    var.test_aws_principal_arns != null ? var.test_aws_principal_arns : [local.terraform_principal_arn]
+  ) : []
 
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 
@@ -79,9 +92,10 @@ module "psoxy" {
   source = "../../modules/aws"
 
   aws_account_id                     = var.aws_account_id
-  region                             = data.aws_region.current.id
+  region                             = data.aws_region.current.region
   psoxy_base_dir                     = var.psoxy_base_dir
   caller_aws_arns                    = var.caller_aws_arns
+  test_aws_principal_arns            = local.test_aws_principal_arns
   caller_gcp_service_account_ids     = var.caller_gcp_service_account_ids
   deployment_bundle                  = var.deployment_bundle
   deployment_bundle_hash             = var.deployment_bundle_hash
@@ -99,76 +113,6 @@ module "psoxy" {
   allowed_data_access_ip_blocks      = var.allowed_data_access_ip_blocks
   allowed_webhook_ip_blocks          = var.allowed_webhook_ip_blocks
 }
-
-resource "aws_iam_policy" "execution_lambda_to_caller" {
-  count = local.caller_requires_direct_lambda_access ? 1 : 0
-
-  name        = "${module.env_id.id}ExecuteLambdas" # TODO: change this name in next major version
-  description = "Allow caller to invoke the lambda via function url"
-
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        # allow caller to invoke the lambda via function url
-        {
-          "Action" : [
-            # for new AWS accounts as of Oct 2025, both of these are required
-            # see https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html
-            "lambda:InvokeFunctionUrl",
-            "lambda:InvokeFunction"
-          ],
-          "Effect" : "Allow",
-          "Resource" : [for k, v in module.api_connector : v.function_arn]
-        }
-      ],
-  })
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
-  count = local.caller_requires_direct_lambda_access ? 1 : 0
-
-  role       = module.psoxy.api_caller_role_name
-  policy_arn = aws_iam_policy.execution_lambda_to_caller[0].arn
-}
-
-# access to async output buckets
-# this is independent of whether API connectors are otherwise invoked via API Gateway v2 or function urls
-locals {
-  async_output_buckets = [for k, v in module.api_connector : v.async_output_bucket_id if v.async_output_bucket_id != null]
-}
-
-resource "aws_iam_policy" "async_output_access" {
-  count = length(local.async_output_buckets) > 0 ? 1 : 0
-
-  name        = "${module.env_id.id}AsyncOutputAccess"
-  description = "Allow caller to read from async output buckets (sanitized output)"
-
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [for k, v in module.api_connector : {
-        "Action" : ["s3:GetObject", "s3:ListBucket"],
-        "Effect" : "Allow",
-        "Resource" : ["arn:aws:s3:::${v.async_output_bucket_id}", "arn:aws:s3:::${v.async_output_bucket_id}/*"]
-      } if v.async_output_bucket_id != null]
-    }
-  )
-}
-
-resource "aws_iam_role_policy_attachment" "async_output_access_to_caller" {
-  count = length(local.async_output_buckets) > 0 ? 1 : 0
-
-  role       = module.psoxy.api_caller_role_name
-  policy_arn = aws_iam_policy.async_output_access[0].arn
-}
-
 
 # secrets shared across all instances
 locals {
@@ -278,7 +222,7 @@ module "api_connector" {
   example_api_calls                     = each.value.example_api_calls
   example_api_requests                  = try(each.value.example_api_requests, [])
   aws_account_id                        = var.aws_account_id
-  region                                = data.aws_region.current.id
+  region                                = data.aws_region.current.region
   path_to_repo_root                     = var.psoxy_base_dir
   secrets_store_implementation          = var.secrets_store_implementation
   global_parameter_arns                 = try(module.global_secrets_ssm[0].secret_arns, [])
@@ -348,20 +292,22 @@ module "bulk_connector" {
 
   source = "../../modules/aws-proxy-bulk"
 
-  aws_account_id                   = var.aws_account_id
-  provision_iam_policy_for_testing = var.provision_testing_infra
-  aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
-  environment_name                 = var.environment_name
-  new_relic_account_id             = var.new_relic_account_id
-  instance_id                      = each.key
-  source_kind                      = each.value.source_kind
-  aws_region                       = data.aws_region.current.id
-  path_to_function_zip             = module.psoxy.path_to_deployment_jar
-  function_zip_hash                = module.psoxy.deployment_package_hash
-  function_env_kms_key_arn         = var.function_env_kms_key_arn
-  logs_kms_key_arn                 = var.logs_kms_key_arn
-  log_retention_days               = var.log_retention_days
-  psoxy_base_dir                   = var.psoxy_base_dir
+  aws_account_id                        = var.aws_account_id
+  test_aws_principal_arns               = local.test_aws_principal_arns
+  provision_iam_policy_for_testing      = var.provision_testing_infra
+  aws_principal_arn_when_testing        = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
+  aws_write_role_to_assume_when_testing = var.provision_testing_infra ? local.terraform_upload_role_arn : null
+  environment_name                      = var.environment_name
+  new_relic_account_id                  = var.new_relic_account_id
+  instance_id                           = each.key
+  source_kind                           = each.value.source_kind
+  aws_region                            = data.aws_region.current.region
+  path_to_function_zip                  = module.psoxy.path_to_deployment_jar
+  function_zip_hash                     = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn              = var.function_env_kms_key_arn
+  logs_kms_key_arn                      = var.logs_kms_key_arn
+  log_retention_days                    = var.log_retention_days
+  psoxy_base_dir                        = var.psoxy_base_dir
   rules = (
     try(var.custom_bulk_connector_rules[each.key], null) != null ? var.custom_bulk_connector_rules[each.key] :
     each.value.rules
@@ -376,7 +322,6 @@ module "bulk_connector" {
   path_to_instance_ssm_parameters      = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   path_to_shared_ssm_parameters        = local.path_to_shared_secrets
   ssm_kms_key_ids                      = local.ssm_key_ids
-  sanitized_accessor_role_names        = [module.psoxy.api_caller_role_name]
   memory_size_mb                       = coalesce(try(var.custom_bulk_connector_arguments[each.key].memory_size_mb, null), each.value.memory_size_mb, 1024)
   sanitized_expiration_days            = var.bulk_sanitized_expiration_days
   input_expiration_days                = var.bulk_input_expiration_days
@@ -423,7 +368,6 @@ module "webhook_collectors" {
   function_env_kms_key_arn             = var.function_env_kms_key_arn
   logs_kms_key_arn                     = var.logs_kms_key_arn
   log_retention_days                   = var.log_retention_days
-  sanitized_accessor_role_names        = [module.psoxy.api_caller_role_name]
   aws_account_id                       = var.aws_account_id
   path_to_repo_root                    = var.psoxy_base_dir
   secrets_store_implementation         = var.secrets_store_implementation
@@ -541,6 +485,151 @@ resource "aws_ssm_parameter" "additional_transforms" {
 }
 
 # END lookup tables
+
+# Host-level IAM policies (consolidated per principal/role, rather than per connector instance).
+locals {
+  # Plan-time signal for whether caller output-bucket read is configured. Do not use bucket names
+  # from module outputs here — those may be unknown until apply (eg, bucket_prefix).
+  caller_has_configured_output_buckets = (
+    length(var.bulk_connectors) > 0 ||
+    length(var.webhook_collectors) > 0 ||
+    length(var.lookup_table_builders) > 0 ||
+    length([for k, v in var.api_connectors : k if try(v.enable_async_processing, false)]) > 0 ||
+    length([for k, v in local.sanitized_side_outputs : k if v != null]) > 0
+  )
+
+  caller_readable_s3_bucket_ids = distinct(compact(concat(
+    [for k, v in module.bulk_connector : v.sanitized_bucket],
+    [for k, v in module.webhook_collectors : v.output_sanitized_bucket_id],
+    [for k, v in module.api_connector : v.async_output_bucket_id if try(v.async_output_bucket_id, null) != null],
+    [for k, v in module.api_connector : v.side_output_sanitized_bucket_id if try(v.side_output_sanitized_bucket_id, null) != null],
+    [for k, v in module.lookup_output : v.output_bucket],
+  )))
+
+  caller_output_bucket_read_resources = flatten([
+    for bucket_id in local.caller_readable_s3_bucket_ids : [
+      "arn:aws:s3:::${bucket_id}",
+      "arn:aws:s3:::${bucket_id}/*",
+    ]
+  ])
+
+  # Lookup-table accessor roles (other than the Psoxy caller) need read access only to their
+  # lookup bucket(s), not to all output buckets.
+  lookup_tables_with_non_caller_accessor_roles = {
+    for lookup_id, config in var.lookup_table_builders :
+    lookup_id => [
+      for role_name in config.sanitized_accessor_role_names :
+      role_name if role_name != module.psoxy.api_caller_role_name
+    ]
+    if length([
+      for role_name in config.sanitized_accessor_role_names :
+      role_name if role_name != module.psoxy.api_caller_role_name
+    ]) > 0
+  }
+
+  lookup_bucket_read_attachments = merge([
+    for lookup_id, role_names in local.lookup_tables_with_non_caller_accessor_roles : {
+      for role_name in toset(role_names) :
+      "${lookup_id}-${role_name}" => {
+        lookup_id = lookup_id
+        role_name = role_name
+      }
+    }
+  ]...)
+
+  provision_psoxy_caller_access_policy = local.caller_requires_direct_lambda_access || local.caller_has_configured_output_buckets
+}
+
+data "aws_iam_policy_document" "lookup_bucket_read" {
+  for_each = local.lookup_tables_with_non_caller_accessor_roles
+
+  statement {
+    sid    = "ReadLookupBucket"
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket",
+    ]
+    resources = [
+      "arn:aws:s3:::${module.lookup_output[each.key].output_bucket}",
+      "arn:aws:s3:::${module.lookup_output[each.key].output_bucket}/*",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "psoxy_caller_access" {
+  count = local.provision_psoxy_caller_access_policy ? 1 : 0
+
+  dynamic "statement" {
+    for_each = local.caller_requires_direct_lambda_access ? [1] : []
+    content {
+      sid    = "InvokeApiConnectors"
+      effect = "Allow"
+      actions = [
+        "lambda:InvokeFunctionUrl",
+        "lambda:InvokeFunction",
+      ]
+      resources = [for k, v in module.api_connector : v.function_arn]
+    }
+  }
+
+  dynamic "statement" {
+    for_each = local.caller_has_configured_output_buckets ? [1] : []
+    content {
+      sid    = "ReadOutputBuckets"
+      effect = "Allow"
+      actions = [
+        "s3:GetObject",
+        "s3:ListBucket",
+      ]
+      resources = local.caller_output_bucket_read_resources
+    }
+  }
+}
+
+resource "aws_iam_policy" "psoxy_caller_access" {
+  count = local.provision_psoxy_caller_access_policy ? 1 : 0
+
+  name        = "${module.env_id.id}CallerAccess"
+  description = "Allow Psoxy caller to invoke API connectors and read sanitized output buckets"
+
+  policy = data.aws_iam_policy_document.psoxy_caller_access[0].json
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "psoxy_caller_access" {
+  count = local.provision_psoxy_caller_access_policy ? 1 : 0
+
+  role       = module.psoxy.api_caller_role_name
+  policy_arn = aws_iam_policy.psoxy_caller_access[0].arn
+}
+
+resource "aws_iam_policy" "lookup_bucket_read" {
+  for_each = local.lookup_tables_with_non_caller_accessor_roles
+
+  name        = "${module.env_id.id}LookupBucketRead_${replace(each.key, "-", "_")}"
+  description = "Allow read access to lookup table bucket: ${module.lookup_output[each.key].output_bucket}"
+
+  policy = data.aws_iam_policy_document.lookup_bucket_read[each.key].json
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "lookup_bucket_read" {
+  for_each = local.lookup_bucket_read_attachments
+
+  role       = each.value.role_name
+  policy_arn = aws_iam_policy.lookup_bucket_read[each.value.lookup_id].arn
+}
 
 locals {
   api_instances = { for k, instance in module.api_connector :

@@ -126,6 +126,12 @@ EOT
       reserved_concurrent_executions : null
       enable_async_processing : true
       enable_side_output : false
+      environment_variables : {
+        # ChatGPT Enterprise's API issues redirects that must be intercepted manually by the proxy
+        # in async mode; disable automatic redirect following so the 3xx Location URL is fetched
+        # by the async redirect-handling block rather than transparently by the HTTP client.
+        FOLLOW_REDIRECTS : "FALSE"
+      }
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
@@ -706,7 +712,10 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/api/admin.analytics.getFile?type=member&date=${urlencode(formatdate("YYYY-MM-DD", var.example_api_calls_sample_date))}"
+        "/api/admin.analytics.getFile?type=member&date=${urlencode(formatdate("YYYY-MM-DD", var.example_api_calls_sample_date))}",
+        "/api/admin.analytics.getFile?type=public_channel&metadata_only=true",
+        "/api/admin.analytics.messages.metadata?channel={CHANNEL_ID}&limit=100",
+        "/api/admin.analytics.messages.activity?channel={CHANNEL_ID}&limit=50",
       ]
       instructions_template = "${path.module}/docs/slack/analytics/instructions.tftpl"
       external_token_todo : templatefile("${path.module}/docs/slack/analytics/instructions.tftpl", {
@@ -1401,6 +1410,16 @@ EOT
         ]
       }
       example_file = "docs/sources/slack/slack-ai-bulk/slack-ai-analytics-sample.csv"
+    }
+    "glean-customer-events-log-bulk" = {
+      source_kind               = "glean"
+      availability              = "beta"
+      enable_by_default         = false
+      worklytics_connector_id   = "glean-customer-events-log-bulk-psoxy"
+      worklytics_connector_name = "Glean Customer Event Logs - Bulk via Psoxy"
+      rules_file                = "docs/sources/glean/glean-customer-events-log-bulk/glean-customer-events-log-bulk.yaml"
+      example_file              = "docs/sources/glean/glean-customer-events-log-bulk/example-bulk/original/sample.ndjson"
+      instructions_template     = "${path.module}/docs/glean/customer-events-log-bulk-instructions.tftpl"
     }
   }
 

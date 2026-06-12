@@ -426,4 +426,55 @@ class StorageHandlerTest {
 
         return Base64.getEncoder().encodeToString(compress(content.getBytes(StandardCharsets.UTF_8)));
     }
+
+    @Test
+    void buildRequest_replacesGenericContentTypeWithInferred() {
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.INPUT_BASE_PATH)))
+            .thenReturn(Optional.empty());
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
+            .thenReturn(Optional.empty());
+
+        StorageEventRequest request = handler.buildRequest(
+            "bucket-in",
+            "items.ndjson",
+            handler.buildDefaultTransform(),
+            null,
+            "application/x-www-form-urlencoded");
+
+        assertEquals("application/x-ndjson", request.getContentType());
+    }
+
+    @Test
+    void effectiveContentType_replacesGenericWithInferred() {
+        assertEquals(
+            "application/x-ndjson",
+            handler.effectiveContentType("items.ndjson", "application/x-www-form-urlencoded"));
+        assertEquals(
+            "text/csv; charset=utf-8",
+            handler.effectiveContentType("data.csv", "application/x-www-form-urlencoded"));
+        assertEquals(
+            "application/json",
+            handler.effectiveContentType("export/file.json", "application/x-www-form-urlencoded"));
+    }
+
+    @Test
+    void effectiveContentType_preservesSupportedSourceType() {
+        assertEquals(
+            "text/csv; charset=us-ascii",
+            handler.effectiveContentType("data.csv", "text/csv; charset=us-ascii"));
+    }
+
+    @Test
+    void effectiveContentType_preservesNonGenericNonSupportedSourceType() {
+        assertEquals(
+            "application/custom",
+            handler.effectiveContentType("items.ndjson", "application/custom"));
+    }
+
+    @Test
+    void effectiveContentType_infersWhenAbsent() {
+        assertEquals(
+            "application/x-ndjson",
+            handler.effectiveContentType("items.ndjson", null));
+    }
 }

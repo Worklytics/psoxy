@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>0.6.2</revision>
+        <revision>0.6.5</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.42</dependency.lombok.version>
         <dependency.dagger.version>2.40.5</dependency.dagger.version>
@@ -27,7 +27,7 @@
         <dependency.junit-jupiter.version>5.11.4</dependency.junit-jupiter.version>
         <dependency.mockito-junit-jupiter.version>5.18.0</dependency.mockito-junit-jupiter.version>
         <dependency.json-path.version>2.9.0</dependency.json-path.version>
-        <dependency.opennlp.version>2.3.2</dependency.opennlp.version>
+        <dependency.opennlp.version>2.5.9</dependency.opennlp.version>
         <skipOpenNlpModelDownload>false</skipOpenNlpModelDownload>
         <dependency.bouncycastle.version>1.82</dependency.bouncycastle.version>
         <plugin.surefire.version>3.5.3</plugin.surefire.version>

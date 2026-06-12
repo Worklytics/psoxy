@@ -183,7 +183,7 @@ clean_maven_artifacts() {
 clean_maven_artifacts
 
 # Construct JAR filename
-./tools/build.sh -d "$IMPLEMENTATION" "$JAVA_SOURCE_ROOT"
+./tools/build.sh -qd "$IMPLEMENTATION" "$JAVA_SOURCE_ROOT"
 DEPLOYMENT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
 
 JAR_PATH="java/impl/gcp/target/deployment/${DEPLOYMENT_ARTIFACT}"
@@ -327,7 +327,7 @@ main() {
         exit 1
     fi
 
-    GCLOUD_VERSION=$(gcloud version --format='value(Google Cloud SDK)' 2>/dev/null | head -1)
+    GCLOUD_VERSION=$(gcloud version 2>/dev/null | awk '/^Google Cloud SDK /{print $0; exit}')
     if [ -z "$GCLOUD_VERSION" ]; then
         echo -e "${ERR}Error: gcloud is installed but not working properly${NC}"
         exit 1

@@ -31,7 +31,6 @@ module "env_id" {
 
 locals {
   bucket_name_prefix = "${module.env_id.id}-${replace(var.instance_id, "_", "-")}"
-  iam_policy_prefix  = "${module.env_id.id}-${replace(var.instance_id, " ", "_")}"
 }
 
 
@@ -236,40 +235,7 @@ resource "aws_iam_role_policy_attachment" "write_policy_for_sanitized_bucket" {
   policy_arn = aws_iam_policy.sanitized_bucket_write_policy.arn
 }
 
-# proxy caller (data consumer) needs to read (both get and list objects) from the output bucket
-resource "aws_iam_policy" "sanitized_bucket_read" {
-  name        = "${module.env_id.id}_BucketRead_${aws_s3_bucket.sanitized.id}"
-  description = "Allow to read content from bucket: ${aws_s3_bucket.sanitized.id}"
-
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Action" : [
-            "s3:GetObject",
-            "s3:ListBucket"
-          ],
-          "Effect" : "Allow",
-          "Resource" : [
-            "${aws_s3_bucket.sanitized.arn}",
-            "${aws_s3_bucket.sanitized.arn}/*"
-          ]
-        }
-      ]
-  })
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
-}
-
-
-
 locals {
-  accessor_role_names = concat([var.api_caller_role_name], var.sanitized_accessor_role_names)
   command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
   example_file        = var.example_file == null ? "/path/to/example.csv" : "${var.psoxy_base_dir}${var.example_file}"
 
@@ -280,11 +246,68 @@ locals {
   )
 }
 
-resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
-  for_each = toset([for r in local.accessor_role_names : r if r != null])
+check "test_aws_principal_arns_when_testing_enabled" {
+  assert {
+    condition     = !var.provision_iam_policy_for_testing || length(var.test_aws_principal_arns) > 0
+    error_message = "test_aws_principal_arns must not be empty when provision_iam_policy_for_testing is true (S3 bucket policy principals cannot be empty)."
+  }
+}
 
-  role       = each.key
-  policy_arn = aws_iam_policy.sanitized_bucket_read.arn
+resource "aws_s3_bucket_policy" "testing_input" {
+  count = var.provision_iam_policy_for_testing ? 1 : 0
+
+  bucket = aws_s3_bucket.input.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowTestPrincipalInputAccess"
+        Effect = "Allow"
+        Principal = {
+          AWS = var.test_aws_principal_arns
+        }
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket",
+        ]
+        Resource = [
+          aws_s3_bucket.input.arn,
+          "${aws_s3_bucket.input.arn}/*",
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_policy" "testing_sanitized" {
+  count = var.provision_iam_policy_for_testing ? 1 : 0
+
+  bucket = aws_s3_bucket.sanitized.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowTestPrincipalSanitizedAccess"
+        Effect = "Allow"
+        Principal = {
+          AWS = var.test_aws_principal_arns
+        }
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:DeleteObject",
+          "s3:DeleteObjectVersion",
+        ]
+        Resource = [
+          aws_s3_bucket.sanitized.arn,
+          "${aws_s3_bucket.sanitized.arn}/*",
+        ]
+      }
+    ]
+  })
 }
 
 resource "aws_ssm_parameter" "rules" {
@@ -300,56 +323,7 @@ resource "aws_ssm_parameter" "rules" {
   }
 }
 
-resource "aws_iam_policy" "testing" {
-  count = var.provision_iam_policy_for_testing ? 1 : 0
-
-  name_prefix = "${local.iam_policy_prefix}Testing"
-  description = "Allow to write to input bucket, read from sanitized bucket to test Lambda's behavior"
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Action" : [
-          "s3:PutObject"
-        ]
-        "Effect" : "Allow",
-        "Resource" : [
-          "${aws_s3_bucket.input.arn}",
-          "${aws_s3_bucket.input.arn}/*"
-        ]
-      },
-      {
-        "Action" : [
-          "s3:GetObject",
-          "s3:ListBucket",
-          "s3:DeleteObject",
-          "s3:DeleteObjectVersion"
-        ],
-        "Effect" : "Allow",
-        "Resource" : [
-          "${aws_s3_bucket.sanitized.arn}",
-          "${aws_s3_bucket.sanitized.arn}/*"
-        ]
-      }
-    ]
-  })
-}
-
-
-
-resource "aws_iam_policy_attachment" "testing_policy_to_testing_role" {
-  count = var.provision_iam_policy_for_testing ? 1 : 0
-
-  name       = "${aws_iam_policy.testing[count.index].name}_to_${var.instance_id}TestingRole"
-  policy_arn = aws_iam_policy.testing[count.index].arn
-  roles = [
-    element(split("role/", var.aws_role_to_assume_when_testing), 1)
-  ]
-}
-
 locals {
-  role_option_for_tests = var.aws_role_to_assume_when_testing == null ? "" : "-r ${var.aws_role_to_assume_when_testing}"
-
   # id that is unique for connector, within the environment (eg, files with this token in name, but otherwise equivalent, will not conflict)
   local_file_id = trimprefix(var.instance_id, var.environment_name)
 
@@ -363,13 +337,29 @@ locals {
 
   example_files_csv = join(",", [for f in local.all_example_files : "${var.psoxy_base_dir}${f}"])
 
+  aws_principal_arn_when_testing = coalesce(var.aws_principal_arn_when_testing, var.aws_role_to_assume_when_testing)
+  aws_write_role_to_assume_when_testing = coalesce(var.aws_write_role_to_assume_when_testing, var.aws_upload_role_to_assume_when_testing)
+
+  cli_file_upload_role_args = compact([
+    local.aws_write_role_to_assume_when_testing != null ? "--write-role-to-assume ${local.aws_write_role_to_assume_when_testing}" : null,
+    # test tool assumes roles via STS; user principals use default credentials instead
+    local.aws_principal_arn_when_testing != null && can(regex(":role/", local.aws_principal_arn_when_testing)) ? "-r ${local.aws_principal_arn_when_testing}" : null,
+  ])
+  cli_file_upload_role_args_todo  = join("\n", [for arg in local.cli_file_upload_role_args : "  ${arg} \\"])
+  cli_file_upload_role_args_shell = join("\n", [for arg in local.cli_file_upload_role_args : "    ${arg} \\"])
+
   todo_brief = <<EOT
 ## Test ${var.instance_id}
 Check that the Psoxy works as expected, and it transforms the files of your input bucket following
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_files_csv} ${local.role_option_for_tests} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} --region ${data.aws_region.current.id}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js \\
+  -f ${local.example_files_csv} \\
+  -d AWS \\
+  -i ${aws_s3_bucket.input.bucket} \\
+  -o ${aws_s3_bucket.sanitized.bucket} \\
+${local.cli_file_upload_role_args_todo != "" ? "${local.cli_file_upload_role_args_todo}\n" : ""}  --region ${data.aws_region.current.region}
 ```
 EOT
 
@@ -378,10 +368,10 @@ EOT
 
 Review the deployed function in AWS console:
 
-- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
+- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.region}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
 
 We provide some Node.js scripts to easily validate the deployment. To be able to run the test
-commands below, you need Node.js (>=16) and npm (v >=8) installed. Ensure all dependencies are
+commands below, you need Node.js (>=20) and npm (v >=8) installed. Ensure all dependencies are
 installed by running:
 
 ```shell
@@ -423,6 +413,7 @@ locals {
 FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
 BLUE='\e[0;34m'
 NC='\e[0m'
+FAILED=0
 
 printf "Quick test of $${BLUE}${var.instance_id}$${NC} ...\n"
 
@@ -432,10 +423,26 @@ for FILE in "$${FILES[@]}"; do
   # trim whitespace
   FILE=$(echo "$FILE" | xargs)
   if [ -z "$FILE" ]; then continue; fi
+
+  if [ ! -f "$FILE" ]; then
+    printf "error: file not found: %s\n" "$FILE" >&2
+    FAILED=1
+    continue
+  fi
   
   printf "Testing file: $FILE\n"
-  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$FILE" -d "AWS" -i "${aws_s3_bucket.input.bucket}" -o "${aws_s3_bucket.sanitized.bucket}" ${local.role_option_for_tests} --region "${var.aws_region}"
+  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js \
+    -f "$FILE" \
+    -d "AWS" \
+    -i "${aws_s3_bucket.input.bucket}" \
+    -o "${aws_s3_bucket.sanitized.bucket}" \
+${local.cli_file_upload_role_args_shell != "" ? "${local.cli_file_upload_role_args_shell}\n" : ""}    --region "${var.aws_region}"
+  if [ $? -ne 0 ]; then
+    FAILED=1
+  fi
 done
+
+exit $FAILED
 EOT
 }
 

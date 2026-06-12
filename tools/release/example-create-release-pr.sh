@@ -131,13 +131,13 @@ if [ "$CURRENT_BRANCH" != "main" ]; then
   exit 1
 fi
 
-BRANCH_STATUS=$(git status --porcelain)
-if [ -n "$BRANCH_STATUS" ]; then
-  printf "${ERR}Current status of 'main' branch is not clean. Please commit or stash your changes and try again.${NC}\n"
+# Block only on tracked changes; untracked local files (e.g. az-auth) should not stop a release PR.
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  printf "${ERR}Current status of 'main' branch has uncommitted tracked changes. Please commit or stash them and try again.${NC}\n"
 
   git status
 
-  printf "Do you want to ${INFO}git reset --hard${NC}?"
+  printf "Do you want to ${INFO}git reset --hard${NC} to discard tracked changes?"
   read -p "(y/N) " -n 1 -r
   REPLY=${REPLY:-N}
   echo    # Move to a new line
@@ -150,7 +150,24 @@ if [ -n "$BRANCH_STATUS" ]; then
       exit 1
       ;;
   esac
-  exit 1
+fi
+
+UNTRACKED_FILES=$(git ls-files -o --exclude-standard)
+if [ -n "$UNTRACKED_FILES" ]; then
+  printf "${WARN}Warning: untracked file(s) present in the example repo (will not block this script):${NC}\n"
+  echo "$UNTRACKED_FILES" | sed 's/^/  /'
+  printf "Remove them with ${INFO}git clean -fd${NC}?"
+  read -p "(y/N) " -n 1 -r
+  REPLY=${REPLY:-N}
+  echo    # Move to a new line
+  case "$REPLY" in
+    [yY][eE][sS]|[yY])
+      git clean -fd
+      ;;
+    *)
+      printf "Leaving untracked files in place.\n"
+      ;;
+  esac
 fi
 
 # ensure `main` up-to-date with origin

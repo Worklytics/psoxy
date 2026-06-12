@@ -21,7 +21,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.6.2"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.6.5"
 
   enabled_connectors                       = var.enabled_connectors
   connector_settings                       = var.connector_settings
@@ -121,7 +121,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.6.2"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=rc-v0.6.5"
 
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
@@ -133,6 +133,7 @@ module "psoxy" {
   force_bundle                         = var.force_bundle
   caller_gcp_service_account_ids       = var.caller_gcp_service_account_ids
   caller_aws_arns                      = var.caller_aws_arns
+  test_aws_principal_arns              = var.test_aws_principal_arns
   non_production_connectors            = var.non_production_connectors
   custom_api_connector_rules           = var.custom_api_connector_rules
   lookup_table_builders                = var.lookup_table_builders
@@ -199,7 +200,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=v0.6.2"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=rc-v0.6.5"
 
   proxy_instance_id    = each.key
   worklytics_host      = var.worklytics_host

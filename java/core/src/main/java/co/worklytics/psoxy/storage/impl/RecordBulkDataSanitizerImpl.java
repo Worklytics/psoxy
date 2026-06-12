@@ -17,8 +17,12 @@ import org.apache.commons.lang3.tuple.Triple;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.transforms.RecordTransform;
+import com.avaulta.gateway.rules.transforms.Transform;
+import co.worklytics.psoxy.impl.SanitizerUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.Configuration;
@@ -55,6 +59,12 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
     @Inject
     BulkModeConfig bulkModeConfig;
 
+    @Inject
+    JsonSchemaFilterUtils jsonSchemaFilterUtils;
+
+    @Inject
+    SanitizerUtils sanitizerUtils;
+
     RecordRules rules;
 
     @AssistedInject
@@ -82,19 +92,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         RecordRules.Format format = rules.getFormat();
 
         if (format == RecordRules.Format.AUTO) {
-            String contentType = request.getContentType();
-            if (StringUtils.isBlank(contentType)) {
-                log.warning("Content-Type is missing; defaulting to NDJSON for AUTO format.");
-                format = RecordRules.Format.NDJSON;
-            } else if (StringUtils.containsIgnoreCase(contentType, "application/json")) {
-                format = RecordRules.Format.JSON_ARRAY;
-            } else if (StringUtils.containsIgnoreCase(contentType, "text/csv")) {
-                format = RecordRules.Format.CSV;
-            } else if (StringUtils.containsIgnoreCase(contentType, "parquet") || StringUtils.containsIgnoreCase(contentType, "application/vnd.apache.parquet")) {
-                 format = RecordRules.Format.PARQUET;
-            } else {
-                format = RecordRules.Format.NDJSON;
-            }
+            format = resolveAutoFormat(request);
         }
 
         RecordRules.Format outputFormat = bulkModeConfig.getOutputFormat()
@@ -149,9 +147,68 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         }
     }
 
+    private RecordRules.Format resolveAutoFormat(StorageEventRequest request) {
+        RecordRules.Format contentTypeFormat = formatFromContentType(request.getContentType());
+        if (contentTypeFormat != null) {
+            return contentTypeFormat;
+        }
+
+        RecordRules.Format sourcePathFormat = formatFromSourceObjectPath(request.getSourceObjectPath());
+        if (sourcePathFormat != null) {
+            return sourcePathFormat;
+        }
+
+        if (StringUtils.containsIgnoreCase(request.getContentType(), "application/json")) {
+            return RecordRules.Format.JSON_ARRAY;
+        }
+
+        if (StringUtils.isBlank(request.getContentType())) {
+            log.warning("Content-Type is missing and file extension is not recognized; defaulting to NDJSON for AUTO format.");
+        }
+        return RecordRules.Format.NDJSON;
+    }
+
+    private RecordRules.Format formatFromContentType(String contentType) {
+        if (StringUtils.isBlank(contentType)) {
+            return null;
+        }
+
+        if (StringUtils.containsIgnoreCase(contentType, "parquet") ||
+            StringUtils.containsIgnoreCase(contentType, "application/vnd.apache.parquet")) {
+            return RecordRules.Format.PARQUET;
+        } else if (StringUtils.containsIgnoreCase(contentType, "text/csv") ||
+            StringUtils.containsIgnoreCase(contentType, "application/csv")) {
+            return RecordRules.Format.CSV;
+        } else if (StringUtils.containsIgnoreCase(contentType, "ndjson") ||
+            StringUtils.containsIgnoreCase(contentType, "jsonl")) {
+            return RecordRules.Format.NDJSON;
+        }
+
+        return null;
+    }
+
+    private RecordRules.Format formatFromSourceObjectPath(String sourceObjectPath) {
+        String path = StringUtils.lowerCase(StringUtils.defaultString(sourceObjectPath));
+        if (path.endsWith(".gz")) {
+            path = path.substring(0, path.length() - ".gz".length());
+        }
+
+        if (path.endsWith(".parquet")) {
+            return RecordRules.Format.PARQUET;
+        } else if (path.endsWith(".csv")) {
+            return RecordRules.Format.CSV;
+        } else if (path.endsWith(".json")) {
+            return RecordRules.Format.JSON_ARRAY;
+        } else if (path.endsWith(".ndjson") || path.endsWith(".jsonl")) {
+            return RecordRules.Format.NDJSON;
+        }
+
+        return null;
+    }
+
 
     /**
-     * Apply the compiled transforms to the document
+     * Apply transforms, then optional output schema filter.
      *
      * @param document JSON "document object"
      * @param compiledTransforms ordered list of compiled transforms
@@ -187,7 +244,11 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             }
         }
 
-        return document;
+        return rules.getOutputSchemaFilterOptional()
+            .map(schema -> (Map<String, Object>) jsonSchemaFilterUtils
+                .filterObjectBySchema(document, schema)
+                .getLeft())
+            .orElse(document);
     }
 
     private MapFunction getMapFunction(RecordTransform transform,
@@ -199,8 +260,14 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             return (currentValue, configuration) -> {
                 if (currentValue == null) {
                     return null;
+                } else if (currentValue instanceof String && StringUtils.isBlank((String) currentValue)) {
+                    return currentValue;
                 } else if (currentValue instanceof String || currentValue instanceof Long || currentValue instanceof Integer) {
                     PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(currentValue);
+
+                    if (pseudonymizedIdentity == null) {
+                        return null;
+                    }
 
                     if (pseudonymizer.getOptions().getPseudonymImplementation() != PseudonymImplementation.DEFAULT) {
                         throw new IllegalArgumentException("Only DEFAULT (v0.4) pseudonymization is supported");
@@ -211,6 +278,19 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                     throw new IllegalArgumentException("Pseudonymize transform only supports string/integer values");
                 }
             };
+        } else if (transform instanceof RecordTransform.Tokenize) {
+            return sanitizerUtils.getTransformImpl(pseudonymizer, Transform.Tokenize.builder()
+                .jsonPaths(transform.getPaths())
+                .build());
+        } else if (transform instanceof RecordTransform.TextDigest) {
+            return sanitizerUtils.getTransformImpl(pseudonymizer, Transform.TextDigest.builder()
+                .jsonPaths(transform.getPaths())
+                .build());
+        } else if (transform instanceof RecordTransform.TextDigestKeywords textDigestKeywords) {
+            return sanitizerUtils.getTransformImpl(pseudonymizer, Transform.TextDigest.builder()
+                .jsonPaths(transform.getPaths())
+                .keywords(textDigestKeywords.getKeywords())
+                .build());
         } else {
             throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
         }

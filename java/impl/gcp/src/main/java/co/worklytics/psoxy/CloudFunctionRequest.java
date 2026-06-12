@@ -2,6 +2,7 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import com.google.cloud.functions.HttpRequest;
+import com.google.common.base.Splitter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -96,15 +97,17 @@ public class CloudFunctionRequest implements HttpEventRequest {
 
     @Override
     public Optional<String> getClientIp() {
+        // Cloud Run / load balancers set X-Forwarded-For as a comma-separated chain; the left-most
+        // address is the original client, with each proxy appending on the right (de-facto standard).
         return getHeader(HttpEventRequest.HTTP_HEADER_X_FORWARDED_FOR)
-            .map(value -> value.split(",", 2)[0].trim())
-            .filter(value -> !value.isEmpty());
+            .flatMap(value -> Splitter.on(',').trimResults().omitEmptyStrings().splitToList(value).stream()
+                .findFirst());
     }
 
     @Override
     public Optional<Boolean> isHttps() {
-        return Optional.ofNullable(request.getHeaders().get(HttpEventRequest.HTTP_HEADER_X_FORWARDED_PROTO))
-            .map(values -> values.get(0).equals("https"));
+        return getHeader(HttpEventRequest.HTTP_HEADER_X_FORWARDED_PROTO)
+            .map(proto -> proto.equalsIgnoreCase("https"));
     }
 
     @Override
