@@ -1,10 +1,10 @@
-# Claude Analytics
+# Claude Enterprise Analytics
 
-**Connector ID:** `claude-analytics`
+**Connector ID:** `claude-enterprise-analytics`
 
 **Availability:** Beta
 
-Our Claude Analytics data connector uses the [Enterprise Analytics API](https://support.claude.com/en/articles/13703965-claude-enterprise-analytics-api-reference-guide) (Enterprise plan only) to import per-user usage metrics across all Claude surfaces — chat, Claude Code, Office add-ins, and Cowork — into Worklytics.
+Our Claude Enterprise Analytics data connector uses the [Enterprise Analytics API](https://support.claude.com/en/articles/13703965-claude-enterprise-analytics-api-reference-guide) (Enterprise plan only) to import per-user usage metrics across all Claude surfaces — chat, Claude Code, Office add-ins, and Cowork — into Worklytics.
 
 ## Data Collected
 
@@ -30,13 +30,13 @@ See the [Claude Enterprise Analytics API Reference](https://support.claude.com/e
 
 1. The **Primary Owner** of the Enterprise organization must sign in to [claude.ai/analytics/api-keys](https://claude.ai/analytics/api-keys).
 2. Create a new API key with the **`read:analytics`** scope. You can create multiple keys per organization; rate limits apply at the organization level, not the key level.
-3. Copy the key into the proxy as the `PSOXY_CLAUDE_ANALYTICS_ADMIN_API_KEY` parameter value in your proxy's host platform.
+3. Copy the key into the proxy as the `PSOXY_CLAUDE_ENTERPRISE_ANALYTICS_ADMIN_API_KEY` parameter value in your proxy's host platform.
 
 > **Note:** The Analytics API key is separate from the Admin API key used by other Claude connectors. It requires the **Primary Owner** role (not just `admin`) and is created at a different URL.
 
 ## Examples
 
-- [Example Rules](claude-analytics.yaml)
+- [Example Rules](claude-enterprise-analytics.yaml)
 - Example Data:
   - [users.json](example-api-responses/original/users.json) | [sanitized](example-api-responses/sanitized/users.json)
   - [apps_chat_projects.json](example-api-responses/original/apps_chat_projects.json) | [sanitized](example-api-responses/sanitized/apps_chat_projects.json)

@@ -175,13 +175,13 @@ EOT
       })
       instructions_template = "${path.module}/docs/claude/instructions.tftpl"
     }
-    claude-analytics = {
-      source_kind : "claude-analytics"
+    claude-enterprise-analytics = {
+      source_kind : "claude-enterprise-analytics"
       availability : "beta",
       enable_by_default : false
-      worklytics_connector_id : "claude-analytics-psoxy"
-      display_name : "Claude Analytics",
-      worklytics_connector_name : "Claude Analytics via Psoxy"
+      worklytics_connector_id : "claude-enterprise-analytics-psoxy"
+      display_name : "Claude Enterprise Analytics",
+      worklytics_connector_name : "Claude Enterprise Analytics via Psoxy"
       target_host : "api.anthropic.com"
       source_auth_strategy : "claude_admin_api_key"
       secured_variables : [
@@ -210,8 +210,8 @@ EOT
           path : "/v1/organizations/analytics/user_cost_report?starting_at=${formatdate("YYYY-MM-DD", local.example_api_calls_sample_interval_start)}&ending_at=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}"
         }
       ],
-      external_token_todo : templatefile("${path.module}/docs/claude/claude_analytics_instructions.tftpl", {
-        path_to_instance_parameters = "PSOXY_CLAUDE_ANALYTICS_"
+      external_token_todo : templatefile("${path.module}/docs/claude/claude_enterprise_analytics_instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_CLAUDE_ENTERPRISE_ANALYTICS_"
       })
     }
     claude-code = {

@@ -14,7 +14,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `badge`                    | [Badge](badge/README.md)                                                    | Bulk | GA           |
 | `chatgpt-enterprise`       | [ChatGPT Enterprise](chatgpt-enterprise/README.md)                          | API  | ALPHA        |
 | `claude`                   | [Claude](anthropic/claude/README.md)                                        | API  | BETA         |
-| `claude-analytics`         | [Claude Analytics](anthropic/claude-analytics/README.md)                    | API  | BETA         |
+| `claude-enterprise-analytics` | [Claude Enterprise Analytics](anthropic/claude-enterprise-analytics/README.md) | API  | BETA         |
 | `claude-code`              | [Claude Code](anthropic/claude-code/README.md)                              | API  | BETA         |
 | `confluence-cloud`         | [Confluence Cloud](atlassian/confluence/README.md)                          | API  | BETA         |
 | `cursor`                   | [Cursor](cursor/README.md)                                                  | API  | BETA         |

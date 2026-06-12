@@ -1,127 +1,127 @@
 ---
 endpoints:
-- pathTemplate: "/v1/organizations/analytics/apps/chat/projects"
-  allowedQueryParams:
-  - "date"
-  - "page"
-  - "limit"
-  allowedRequestHeaders:
-  - "anthropic-version"
-  - "content-type"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$.data[*].created_by['id','email_address']"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      data:
-        type: "array"
-        items:
-          $ref: "#/definitions/ChatProjectUsage"
-      next_page:
-        type: "string"
-- pathTemplate: "/v1/organizations/analytics/user_cost_report"
-  allowedQueryParams:
-  - "starting_at"
-  - "ending_at"
-  - "page"
-  - "limit"
-  - "products[]"
-  - "models[]"
-  - "user_ids[]"
-  - "context_windows[]"
-  - "inference_geos[]"
-  - "speeds[]"
-  - "group_by[]"
-  - "order"
-  - "order_by"
-  allowedRequestHeaders:
-  - "anthropic-version"
-  - "content-type"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$.data[*].actor['user_id','email']"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      data:
-        type: "array"
-        items:
-          $ref: "#/definitions/UserCostEntry"
-      data_refreshed_at:
-        type: "string"
-        format: "date-time"
-      has_more:
-        type: "boolean"
-      next_page:
-        type: "string"
-      organization_id:
-        type: "string"
-- pathTemplate: "/v1/organizations/analytics/user_usage_report"
-  allowedQueryParams:
-  - "starting_at"
-  - "ending_at"
-  - "page"
-  - "limit"
-  - "products[]"
-  - "models[]"
-  - "user_ids[]"
-  - "context_windows[]"
-  - "inference_geos[]"
-  - "speeds[]"
-  - "group_by[]"
-  - "order"
-  - "order_by"
-  allowedRequestHeaders:
-  - "anthropic-version"
-  - "content-type"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$.data[*].actor['user_id','email']"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      data:
-        type: "array"
-        items:
-          $ref: "#/definitions/UserUsageEntry"
-      data_refreshed_at:
-        type: "string"
-        format: "date-time"
-      has_more:
-        type: "boolean"
-      next_page:
-        type: "string"
-      organization_id:
-        type: "string"
-- pathTemplate: "/v1/organizations/analytics/users"
-  allowedQueryParams:
-  - "date"
-  - "page"
-  - "limit"
-  allowedRequestHeaders:
-  - "anthropic-version"
-  - "content-type"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$.data[*].user['id','email_address']"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      data:
-        type: "array"
-        items:
-          $ref: "#/definitions/UserActivity"
-      next_page:
-        type: "string"
+  - pathTemplate: "/v1/organizations/analytics/apps/chat/projects"
+    allowedQueryParams:
+      - "date"
+      - "page"
+      - "limit"
+    allowedRequestHeaders:
+      - "anthropic-version"
+      - "content-type"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].created_by['id','email_address']"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/ChatProjectUsage"
+        next_page:
+          type: "string"
+  - pathTemplate: "/v1/organizations/analytics/user_cost_report"
+    allowedQueryParams:
+      - "starting_at"
+      - "ending_at"
+      - "page"
+      - "limit"
+      - "products[]"
+      - "models[]"
+      - "user_ids[]"
+      - "context_windows[]"
+      - "inference_geos[]"
+      - "speeds[]"
+      - "group_by[]"
+      - "order"
+      - "order_by"
+    allowedRequestHeaders:
+      - "anthropic-version"
+      - "content-type"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].actor['user_id','email']"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/UserCostEntry"
+        data_refreshed_at:
+          type: "string"
+          format: "date-time"
+        has_more:
+          type: "boolean"
+        next_page:
+          type: "string"
+        organization_id:
+          type: "string"
+  - pathTemplate: "/v1/organizations/analytics/user_usage_report"
+    allowedQueryParams:
+      - "starting_at"
+      - "ending_at"
+      - "page"
+      - "limit"
+      - "products[]"
+      - "models[]"
+      - "user_ids[]"
+      - "context_windows[]"
+      - "inference_geos[]"
+      - "speeds[]"
+      - "group_by[]"
+      - "order"
+      - "order_by"
+    allowedRequestHeaders:
+      - "anthropic-version"
+      - "content-type"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].actor['user_id','email']"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/UserUsageEntry"
+        data_refreshed_at:
+          type: "string"
+          format: "date-time"
+        has_more:
+          type: "boolean"
+        next_page:
+          type: "string"
+        organization_id:
+          type: "string"
+  - pathTemplate: "/v1/organizations/analytics/users"
+    allowedQueryParams:
+      - "date"
+      - "page"
+      - "limit"
+    allowedRequestHeaders:
+      - "anthropic-version"
+      - "content-type"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].user['id','email_address']"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/UserActivity"
+        next_page:
+          type: "string"
 definitions:
   AnalyticsActor:
     type: "object"

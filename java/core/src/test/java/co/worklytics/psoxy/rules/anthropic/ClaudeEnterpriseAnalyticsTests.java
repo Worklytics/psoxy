@@ -7,13 +7,13 @@ import lombok.Getter;
 import java.util.stream.Stream;
 
 @Getter
-public class ClaudeAnalyticsTests extends JavaRulesTestBaseCase {
+public class ClaudeEnterpriseAnalyticsTests extends JavaRulesTestBaseCase {
 
-    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.CLAUDE_ANALYTICS;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.CLAUDE_ENTERPRISE_ANALYTICS;
 
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .defaultScopeId("claude")
-        .sourceKind("claude-analytics")
+        .sourceKind("claude-enterprise-analytics")
         .exampleApiResponsesDirectoryPath("example-api-responses/original/")
         .exampleSanitizedApiResponsesPath("example-api-responses/sanitized/")
         .sourceFamily("anthropic")
