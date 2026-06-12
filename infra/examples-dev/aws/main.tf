@@ -228,25 +228,8 @@ output "api_connector_instances" {
   value = { for k, v in module.psoxy.api_connector_instances : k => {
     endpoint_url     = v.endpoint_url
     sanitized_bucket = v.sanitized_bucket
-    test_examples = merge({
-      api_requests = concat(
-        [for path in try(v.example_api_calls, []) : "GET ${path}"],
-        [for req in try(v.example_api_requests, []) : merge(
-          {
-            request = "${try(req.method, "GET")} ${req.path}"
-          },
-          try(req.method, "GET") == "POST" || try(req.method, "GET") == "PUT" ? merge(
-            try(req.content_type, null) != null ? { content_type = req.content_type } : {},
-            try(req.body, null) != null ? { body = req.body } : {}
-          ) : {},
-          length(try(req.headers, {})) > 0 ? { headers = req.headers } : {}
-        )]
-      )
-      },
-      try(v.enable_async_processing, false) ? { supports_async = true } : {},
-      try(v.example_api_calls_user_to_impersonate, null) != null ? { user_to_impersonate = try(v.example_api_calls_user_to_impersonate, null) } : {}
-    ) }
-  }
+    test_examples    = v.test_examples
+  } }
 }
 
 output "bulk_connector_instances" {

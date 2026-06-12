@@ -632,10 +632,34 @@ resource "aws_iam_role_policy_attachment" "lookup_bucket_read" {
 }
 
 locals {
+  api_connector_test_examples = { for k, connector in var.api_connectors : k => merge(
+    {
+      api_requests = concat(
+        [for path in try(connector.example_api_calls, []) : {
+          method       = "GET"
+          path         = path
+          content_type = null
+          body         = null
+          headers      = {}
+        }],
+        [for req in try(connector.example_api_requests, []) : {
+          method       = try(req.method, "GET")
+          path         = req.path
+          content_type = try(req.content_type, null)
+          body         = try(req.body, null)
+          headers      = try(req.headers, {})
+        }]
+      )
+    },
+    try(connector.enable_async_processing, false) ? { supports_async = true } : {},
+    try(connector.example_api_calls_user_to_impersonate, null) != null ? { user_to_impersonate = connector.example_api_calls_user_to_impersonate } : {}
+  ) }
+
   api_instances = { for k, instance in module.api_connector :
     k => merge(
       {
-        sanitized_bucket : try(instance.async_output_bucket_id, null),
+        sanitized_bucket = try(instance.async_output_bucket_id, null),
+        test_examples    = local.api_connector_test_examples[k],
       },
       instance,
       var.api_connectors[k]

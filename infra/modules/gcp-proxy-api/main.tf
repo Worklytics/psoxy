@@ -403,7 +403,15 @@ locals {
     "${request.method} ${request.path}" => join("", [for name, value in try(request.headers, {}) : " -H \"${name}: ${value}\""])
   }
 
-  default_get_request_header_flags = length(local.example_api_get_requests) > 0 ? local.example_request_header_flags["${local.example_api_get_requests[0].method} ${local.example_api_get_requests[0].path}"] : ""
+  example_api_get_requests_for_script = [for r in local.example_api_get_requests : merge(r, {
+    header_flags = trimspace(lookup(local.example_request_header_flags, "${r.method} ${r.path}", ""))
+  })]
+
+  example_api_post_requests_for_script = [for r in local.all_example_api_requests : merge(r, {
+    header_flags = trimspace(lookup(local.example_request_header_flags, "${r.method} ${r.path}", ""))
+  }) if r.method == "POST" && r.body != null]
+
+  default_header_flags = length(local.example_api_get_requests_for_script) > 0 ? local.example_api_get_requests_for_script[0].header_flags : ""
 
   # Generate test calls from all example requests
   command_test_calls = [for request in local.all_example_api_requests :
@@ -469,14 +477,14 @@ resource "local_file" "test_script" {
   filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "755"
   content = templatefile("${path.module}/test_script.tftpl", {
-    proxy_endpoint_url               = local.proxy_endpoint_url,
-    function_name                    = var.instance_id,
-    impersonation_param              = local.impersonation_param,
-    command_cli_call                 = local.command_cli_call,
-    default_get_request_header_flags = local.default_get_request_header_flags,
-    example_api_get_requests         = local.example_api_get_requests,
-    example_api_post_requests        = [for r in local.all_example_api_requests : r if r.method == "POST" && r.body != null], # body being null will blow up the templating
-    enable_async_processing          = var.enable_async_processing
+    proxy_endpoint_url        = local.proxy_endpoint_url,
+    function_name             = var.instance_id,
+    impersonation_param       = local.impersonation_param,
+    command_cli_call          = local.command_cli_call,
+    default_header_flags      = local.default_header_flags,
+    example_api_get_requests  = local.example_api_get_requests_for_script,
+    example_api_post_requests = local.example_api_post_requests_for_script,
+    enable_async_processing   = var.enable_async_processing
   })
 }
 
