@@ -1,0 +1,36 @@
+{
+  "organization_id": "org_xyz",
+  "data": [
+    {
+      "actor": { "type": "user_actor", "user_id": "user_abc123", "email": "alice@example.com", "deleted": false },
+      "product": null,
+      "model": null,
+      "context_window": null,
+      "inference_geo": null,
+      "speed": null,
+      "currency": "USD",
+      "amount": "245.50",
+      "list_amount": "290.00",
+      "cost_type": null,
+      "token_type": null,
+      "requests": 47
+    },
+    {
+      "actor": { "type": "user_actor", "user_id": "user_def456", "email": "bob@example.com", "deleted": false },
+      "product": null,
+      "model": null,
+      "context_window": null,
+      "inference_geo": null,
+      "speed": null,
+      "currency": "USD",
+      "amount": "82.30",
+      "list_amount": "97.50",
+      "cost_type": null,
+      "token_type": null,
+      "requests": 12
+    }
+  ],
+  "has_more": false,
+  "next_page": null,
+  "data_refreshed_at": "2026-06-08T06:00:00Z"
+}

@@ -1,0 +1,58 @@
+{
+  "organization_id": "org_xyz",
+  "data": [
+    {
+      "actor": {
+        "type": "user_actor",
+        "user_id": "t~Wd2U4lmivWESn4fNgZWtjnW3j4TXciQNif50hO_QMVM",
+        "email": "t~knxWE5tapsutcz6pLWSC3wfb5t34lCrXNZsKnhwyVXk@example.com",
+        "deleted": false
+      },
+      "product": null,
+      "model": null,
+      "context_window": null,
+      "inference_geo": null,
+      "speed": null,
+      "uncached_input_tokens": 12500,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 3000,
+        "ephemeral_1h_input_tokens": 1500
+      },
+      "cache_read_input_tokens": 8000,
+      "output_tokens": 4200,
+      "total_tokens": 29200,
+      "server_tool_use": {
+        "web_search_requests": 3
+      },
+      "requests": 47
+    },
+    {
+      "actor": {
+        "type": "user_actor",
+        "user_id": "t~rUNP43joGY2IUQzpGJcOH7nY9pzIOXRLPOKi_PdHieA",
+        "email": "t~PFsxS8oxlBJ9dZkL1zNMvRIajvbO3VzZpbdT-ty6Gm0@example.com",
+        "deleted": false
+      },
+      "product": null,
+      "model": null,
+      "context_window": null,
+      "inference_geo": null,
+      "speed": null,
+      "uncached_input_tokens": 4200,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 500,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "cache_read_input_tokens": 2100,
+      "output_tokens": 1800,
+      "total_tokens": 8600,
+      "server_tool_use": {
+        "web_search_requests": 0
+      },
+      "requests": 12
+    }
+  ],
+  "has_more": true,
+  "next_page": "cursor_token_ghi",
+  "data_refreshed_at": "2026-06-08T06:00:00Z"
+}

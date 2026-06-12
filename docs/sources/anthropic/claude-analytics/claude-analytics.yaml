@@ -1,0 +1,361 @@
+---
+endpoints:
+- pathTemplate: "/v1/organizations/analytics/apps/chat/projects"
+  allowedQueryParams:
+  - "date"
+  - "page"
+  - "limit"
+  allowedRequestHeaders:
+  - "anthropic-version"
+  - "content-type"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.data[*].created_by['id','email_address']"
+    encoding: "URL_SAFE_TOKEN"
+  responseSchema:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/ChatProjectUsage"
+      next_page:
+        type: "string"
+- pathTemplate: "/v1/organizations/analytics/user_cost_report"
+  allowedQueryParams:
+  - "starting_at"
+  - "ending_at"
+  - "page"
+  - "limit"
+  - "products[]"
+  - "models[]"
+  - "user_ids[]"
+  - "context_windows[]"
+  - "inference_geos[]"
+  - "speeds[]"
+  - "group_by[]"
+  - "order"
+  - "order_by"
+  allowedRequestHeaders:
+  - "anthropic-version"
+  - "content-type"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.data[*].actor['user_id','email']"
+    encoding: "URL_SAFE_TOKEN"
+  responseSchema:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/UserCostEntry"
+      data_refreshed_at:
+        type: "string"
+        format: "date-time"
+      has_more:
+        type: "boolean"
+      next_page:
+        type: "string"
+      organization_id:
+        type: "string"
+- pathTemplate: "/v1/organizations/analytics/user_usage_report"
+  allowedQueryParams:
+  - "starting_at"
+  - "ending_at"
+  - "page"
+  - "limit"
+  - "products[]"
+  - "models[]"
+  - "user_ids[]"
+  - "context_windows[]"
+  - "inference_geos[]"
+  - "speeds[]"
+  - "group_by[]"
+  - "order"
+  - "order_by"
+  allowedRequestHeaders:
+  - "anthropic-version"
+  - "content-type"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.data[*].actor['user_id','email']"
+    encoding: "URL_SAFE_TOKEN"
+  responseSchema:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/UserUsageEntry"
+      data_refreshed_at:
+        type: "string"
+        format: "date-time"
+      has_more:
+        type: "boolean"
+      next_page:
+        type: "string"
+      organization_id:
+        type: "string"
+- pathTemplate: "/v1/organizations/analytics/users"
+  allowedQueryParams:
+  - "date"
+  - "page"
+  - "limit"
+  allowedRequestHeaders:
+  - "anthropic-version"
+  - "content-type"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.data[*].user['id','email_address']"
+    encoding: "URL_SAFE_TOKEN"
+  responseSchema:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/UserActivity"
+      next_page:
+        type: "string"
+definitions:
+  AnalyticsActor:
+    type: "object"
+    properties:
+      deleted:
+        type: "boolean"
+      email:
+        type: "string"
+      type:
+        type: "string"
+      user_id:
+        type: "string"
+  AnalyticsUser:
+    type: "object"
+    properties:
+      email_address:
+        type: "string"
+      id:
+        type: "string"
+  CacheCreation:
+    type: "object"
+    properties:
+      ephemeral_1h_input_tokens:
+        type: "integer"
+      ephemeral_5m_input_tokens:
+        type: "integer"
+  ChatMetrics:
+    type: "object"
+    properties:
+      connectors_used_count:
+        type: "integer"
+      distinct_artifacts_created_count:
+        type: "integer"
+      distinct_conversation_count:
+        type: "integer"
+      distinct_files_uploaded_count:
+        type: "integer"
+      distinct_projects_created_count:
+        type: "integer"
+      distinct_projects_used_count:
+        type: "integer"
+      distinct_shared_artifacts_viewed_count:
+        type: "integer"
+      distinct_skills_used_count:
+        type: "integer"
+      message_count:
+        type: "integer"
+      shared_conversations_viewed_count:
+        type: "integer"
+      thinking_message_count:
+        type: "integer"
+  ChatProjectUsage:
+    type: "object"
+    properties:
+      created_at:
+        type: "string"
+        format: "date-time"
+      created_by:
+        $ref: "#/definitions/AnalyticsUser"
+      distinct_conversation_count:
+        type: "integer"
+      distinct_user_count:
+        type: "integer"
+      message_count:
+        type: "integer"
+      project_id:
+        type: "string"
+      project_name:
+        type: "string"
+  ClaudeCodeMetrics:
+    type: "object"
+    properties:
+      core_metrics:
+        $ref: "#/definitions/CoreMetrics"
+      tool_actions:
+        $ref: "#/definitions/ToolActions"
+  CoreMetrics:
+    type: "object"
+    properties:
+      commit_count:
+        type: "integer"
+      distinct_session_count:
+        type: "integer"
+      lines_of_code:
+        $ref: "#/definitions/LinesOfCode"
+      pull_request_count:
+        type: "integer"
+  CoworkMetrics:
+    type: "object"
+    properties:
+      action_count:
+        type: "integer"
+      connectors_used_count:
+        type: "integer"
+      dispatch_turn_count:
+        type: "integer"
+      distinct_connectors_used_count:
+        type: "integer"
+      distinct_session_count:
+        type: "integer"
+      distinct_skills_used_count:
+        type: "integer"
+      message_count:
+        type: "integer"
+      skills_used_count:
+        type: "integer"
+  LinesOfCode:
+    type: "object"
+    properties:
+      added_count:
+        type: "integer"
+      removed_count:
+        type: "integer"
+  OfficeAppMetrics:
+    type: "object"
+    properties:
+      connectors_used_count:
+        type: "integer"
+      distinct_connectors_used_count:
+        type: "integer"
+      distinct_session_count:
+        type: "integer"
+      distinct_skills_used_count:
+        type: "integer"
+      message_count:
+        type: "integer"
+      skills_used_count:
+        type: "integer"
+  OfficeMetrics:
+    type: "object"
+    properties:
+      excel:
+        $ref: "#/definitions/OfficeAppMetrics"
+      outlook:
+        $ref: "#/definitions/OfficeAppMetrics"
+      powerpoint:
+        $ref: "#/definitions/OfficeAppMetrics"
+      word:
+        $ref: "#/definitions/OfficeAppMetrics"
+  ServerToolUse:
+    type: "object"
+    properties:
+      web_search_requests:
+        type: "integer"
+  ToolAction:
+    type: "object"
+    properties:
+      accepted:
+        type: "integer"
+      rejected:
+        type: "integer"
+  ToolActions:
+    type: "object"
+    properties:
+      edit_tool:
+        $ref: "#/definitions/ToolAction"
+      multi_edit_tool:
+        $ref: "#/definitions/ToolAction"
+      notebook_edit_tool:
+        $ref: "#/definitions/ToolAction"
+      write_tool:
+        $ref: "#/definitions/ToolAction"
+  UserActivity:
+    type: "object"
+    properties:
+      chat_metrics:
+        $ref: "#/definitions/ChatMetrics"
+      claude_code_metrics:
+        $ref: "#/definitions/ClaudeCodeMetrics"
+      cowork_metrics:
+        $ref: "#/definitions/CoworkMetrics"
+      date:
+        type: "string"
+        format: "date"
+      office_metrics:
+        $ref: "#/definitions/OfficeMetrics"
+      user:
+        $ref: "#/definitions/AnalyticsUser"
+      web_search_count:
+        type: "integer"
+  UserCostEntry:
+    type: "object"
+    properties:
+      actor:
+        $ref: "#/definitions/AnalyticsActor"
+      amount:
+        type: "string"
+      context_window:
+        type: "integer"
+      cost_type:
+        type: "string"
+      currency:
+        type: "string"
+      inference_geo:
+        type: "string"
+      list_amount:
+        type: "string"
+      model:
+        type: "string"
+      product:
+        type: "string"
+      requests:
+        type: "integer"
+      speed:
+        type: "string"
+      token_type:
+        type: "string"
+  UserUsageEntry:
+    type: "object"
+    properties:
+      actor:
+        $ref: "#/definitions/AnalyticsActor"
+      cache_creation:
+        $ref: "#/definitions/CacheCreation"
+      cache_read_input_tokens:
+        type: "integer"
+      context_window:
+        type: "integer"
+      inference_geo:
+        type: "string"
+      model:
+        type: "string"
+      output_tokens:
+        type: "integer"
+      product:
+        type: "string"
+      requests:
+        type: "integer"
+      server_tool_use:
+        $ref: "#/definitions/ServerToolUse"
+      speed:
+        type: "string"
+      total_tokens:
+        type: "integer"
+      uncached_input_tokens:
+        type: "integer"
+
