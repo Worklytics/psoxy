@@ -29,7 +29,7 @@ locals {
 
   # rules_file paths may be absolute, relative to the Terraform root module (deployment dir), or
   # relative to psoxy_base_dir (paths into the psoxy repo, eg docs/sources/...)
-  api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
+  api_connector_rules_files = merge({ for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null }, var.custom_api_connector_rules)
 
   _rules_file_references = distinct(concat(
     values(local.api_connector_rules_files),
@@ -612,4 +612,9 @@ output "secrets_to_provision" {
 output "bulk_connector" {
   description = "INTERNAL USE ONLY - For testing purposes."
   value       = module.bulk_connector
+}
+
+output "api_connector" {
+  description = "INTERNAL USE ONLY - For testing purposes."
+  value       = module.api_connector
 }

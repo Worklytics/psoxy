@@ -70,9 +70,9 @@ class NetworkSecurityUtilsTest {
     }
 
     @Test
-    void testIsAllowed_XForwardedForUsesFirstIp() {
+    void testIsAllowed_RejectsRawXForwardedForChain() {
         NetworkSecurityUtils utils = dataAccessUtils(Arrays.asList("10.0.0.5"));
-        assertTrue(utils.isDataAccessIpAllowed("10.0.0.5, 192.168.1.1"));
+        assertFalse(utils.isDataAccessIpAllowed("10.0.0.5, 192.168.1.1"));
     }
 
     @Test
