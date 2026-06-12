@@ -150,8 +150,9 @@ variable "example_api_requests" {
     path         = string
     content_type = optional(string, "application/json")
     body         = optional(string, null)
+    headers      = optional(map(string), {})
   }))
-  description = "example API requests with method, content_type and body parameters that can be called via proxy"
+  description = "example API requests with method, content_type, body, and headers parameters that can be called via proxy"
   default     = []
 }
 

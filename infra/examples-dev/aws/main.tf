@@ -238,7 +238,8 @@ output "api_connector_instances" {
           try(req.method, "GET") == "POST" || try(req.method, "GET") == "PUT" ? merge(
             try(req.content_type, null) != null ? { content_type = req.content_type } : {},
             try(req.body, null) != null ? { body = req.body } : {}
-          ) : {}
+          ) : {},
+          length(try(req.headers, {})) > 0 ? { headers = req.headers } : {}
         )]
       )
       },

@@ -13,11 +13,11 @@ export NODE_OPTIONS="$${NODE_OPTIONS:+$NODE_OPTIONS }--no-deprecation"
 ${command_cli_call} -u "${proxy_endpoint_url}/" --health-check
 HEALTHCHECK_RC=$?
 
-${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b "$BODY"
+${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b "$BODY"${default_get_request_header_flags}
 SYNC_CALL_RC=$?
 
 %{ if enable_async_processing ~}
-${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b "$BODY" --async
+${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b "$BODY"${default_get_request_header_flags} --async
 ASYNC_CALL_RC=$?
 %{ else ~}
 ASYNC_CALL_RC=0

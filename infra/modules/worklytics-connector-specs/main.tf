@@ -39,6 +39,10 @@ locals {
   # 3 days before the sample date, for interesting API calls (without repeating computation a dozen times)
   example_api_calls_sample_interval_start = timeadd(var.example_api_calls_sample_date, "-72h")
 
+  anthropic_api_headers = {
+    "anthropic-version" = "2023-06-01"
+  }
+
   chat_gpt_enterprise_example_workspace_id = coalesce(var.chat_gpt_enterprise_example_workspace_id, try(var.connector_settings["chat_gpt_enterprise_example_workspace_id"], null), "YOUR_WORKSPACEID")
   confluence_example_cloud_id              = coalesce(var.confluence_example_cloud_id, try(var.connector_settings["confluence_example_cloud_id"], null), "YOUR_confluence_example_cloud_id")
   confluence_example_group_id              = coalesce(var.confluence_example_group_id, try(var.connector_settings["confluence_example_group_id"], null), "YOUR_confluence_example_group_id")
@@ -164,10 +168,12 @@ EOT
         {
           method : "GET"
           path : "/v1/compliance/organizations"
+          headers : local.anthropic_api_headers
         },
         {
           method : "GET"
           path : "/v1/compliance/activities"
+          headers : local.anthropic_api_headers
         }
       ],
       external_token_todo : templatefile("${path.module}/docs/claude/claude_instructions.tftpl", {
@@ -196,10 +202,12 @@ EOT
         {
           method : "GET"
           path : "/v1/organizations/users"
+          headers : local.anthropic_api_headers
         },
         {
           method : "GET"
           path : "/v1/organizations/usage_report/claude_code"
+          headers : local.anthropic_api_headers
         }
       ],
       external_token_todo : templatefile("${path.module}/docs/claude/claude_code_instructions.tftpl", {

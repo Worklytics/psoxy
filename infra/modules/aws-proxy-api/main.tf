@@ -335,9 +335,17 @@ locals {
     var.example_api_requests
   )
 
+  example_api_get_requests = [for r in local.all_example_api_requests : r if r.method == "GET"]
+
+  example_request_header_flags = { for request in local.all_example_api_requests :
+    "${request.method} ${request.path}" => join("", [for name, value in try(request.headers, {}) : " -H \"${name}: ${value}\""])
+  }
+
+  default_get_request_header_flags = length(local.example_api_get_requests) > 0 ? local.example_request_header_flags["${local.example_api_get_requests[0].method} ${local.example_api_get_requests[0].path}"] : ""
+
   # Generate test calls from all example requests
   sync_test_calls = [for request in local.all_example_api_requests :
-    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${request.path}\" -m ${request.method}${request.body != null ? " -b \"${request.body}\"" : ""}${local.impersonation_param}"
+    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${request.path}\" -m ${request.method}${request.body != null ? " -b \"${request.body}\"" : ""}${local.example_request_header_flags["${request.method} ${request.path}"]}${local.impersonation_param}"
   ]
 
   command_test_calls = concat(local.sync_test_calls,
@@ -425,13 +433,14 @@ resource "local_file" "todo" {
 
 locals {
   test_script = templatefile("${path.module}/test_script.tftpl", {
-    proxy_endpoint_url        = local.proxy_endpoint_url,
-    function_name             = module.psoxy_lambda.function_name,
-    impersonation_param       = local.impersonation_param,
-    command_cli_call          = local.command_cli_call,
-    example_api_get_requests  = [for r in local.all_example_api_requests : r if r.method == "GET"],
-    example_api_post_requests = [for r in local.all_example_api_requests : r if r.method == "POST" && r.body != null], # body being null will blow up the templating
-    enable_async_processing   = var.enable_async_processing,
+    proxy_endpoint_url               = local.proxy_endpoint_url,
+    function_name                    = module.psoxy_lambda.function_name,
+    impersonation_param              = local.impersonation_param,
+    command_cli_call                 = local.command_cli_call,
+    default_get_request_header_flags = local.default_get_request_header_flags,
+    example_api_get_requests         = local.example_api_get_requests,
+    example_api_post_requests        = [for r in local.all_example_api_requests : r if r.method == "POST" && r.body != null], # body being null will blow up the templating
+    enable_async_processing          = var.enable_async_processing,
   })
 }
 
