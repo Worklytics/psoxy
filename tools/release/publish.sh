@@ -93,6 +93,21 @@ fi
 printf "Pushing tag ${SUCCESS}$RELEASE${NC} to origin ...\n"
 git push origin $RELEASE
 
+GH_RUNS_LIB="$(dirname "$0")/lib/gh-workflow-runs.sh"
+# shellcheck source=lib/gh-workflow-runs.sh
+source "$GH_RUNS_LIB"
+RELEASE_GH_RUNS=()
+
+MVN_WORKFLOW="publish-release-artifacts.yaml"
+BUNDLES_WORKFLOW="publish-bundles.yaml"
+
+printf "\n${INFO}Tag push also triggers GitHub Actions for Maven packages and release bundles.${NC}\n"
+printf "${INFO}Checking workflow status via gh ...${NC}\n"
+sleep 3
+gh_workflow_runs_report_status "$MVN_WORKFLOW" "$RELEASE" "Maven packages (GitHub Packages)"
+gh_workflow_runs_report_status "$BUNDLES_WORKFLOW" "$RELEASE" "Release bundles (AWS + GCP)"
+printf "\n"
+
 if gh release view $RELEASE >/dev/null 2>&1
 then
   printf "Release ${SUCCESS}$RELEASE${NC} already exists.\n"
@@ -128,48 +143,71 @@ fi
 printf "Opening release ${INFO}${RELEASE}${NC} in browser; review / update notes and then publish as latest ...\n"
 gh release view $RELEASE --web
 
-# prompt user to publish mvn artifacts
-printf "Publish Maven artifacts to GitHub Packages?\n"
+# Maven artifacts — report GH status again in case it changed, then offer local publish
+printf "Publish Maven artifacts to GitHub Packages locally?\n"
+gh_workflow_runs_report_status "$MVN_WORKFLOW" "$RELEASE" "Maven packages (GitHub Packages)"
 read -p "(Y/n) " -n 1 -r
 REPLY=${REPLY:-Y}
 echo    # Move to a new line
 case "$REPLY" in
   [yY][eE][sS]|[yY])
     LOG_FILE="/tmp/release_${RELEASE}_mvn-artifacts.log"
-    set +e  # Temporarily disable exit on error to check exit code
-    ./tools/release/publish-mvn-artifacts.sh ${PATH_TO_REPO} &> "${LOG_FILE}"
+    set +e
+    ./tools/release/publish-mvn-artifacts.sh "${PATH_TO_REPO}" &> "${LOG_FILE}"
     EXIT_CODE=$?
-    set -e  # Re-enable exit on error
+    set -e
     if [ $EXIT_CODE -ne 0 ]; then
-      printf "${ERR}Failed to publish Maven artifacts to GitHub Packages.${NC}\n"
-      printf "Please review the error logs: ${INFO}cat ${LOG_FILE}${NC}\n"
+      printf "${ERR}Failed to publish Maven artifacts locally.${NC}\n"
+      printf "Review logs: ${INFO}cat ${LOG_FILE}${NC}\n"
+      printf "Or use GitHub Actions: ${INFO}gh workflow run ${MVN_WORKFLOW} --ref ${RELEASE}${NC}\n"
       exit $EXIT_CODE
     else
-      printf "${SUCCESS}✓${NC} Maven artifacts published to GitHub Packages\n"
+      printf "${SUCCESS}✓${NC} Maven artifacts published locally\n"
       printf "See logs: ${INFO}cat ${LOG_FILE}${NC}\n"
     fi
   ;;
   *)
-    printf "Skipped publishing Maven artifacts to GitHub Packages\n"
-    printf "To do so manually, run:\n"
-    printf "    ${INFO}./tools/release/publish-mvn-artifacts.sh ${PATH_TO_REPO}${NC}\n"
-    printf "    or run the GitHub Actions workflow manually: ${INFO}gh workflow run publish-release-artifacts.yaml --ref ${RELEASE}${NC}\n"
+    printf "Skipped local Maven publish\n"
+    printf "GitHub Actions equivalent: ${INFO}gh workflow run ${MVN_WORKFLOW} --ref ${RELEASE}${NC}\n"
     ;;
 esac
 
-# publish bundles
-printf "Publish bundles (via GitHub Actions)?\n"
+# Bundles — report GH status, then offer local AWS + GCP publish
+printf "Publish release bundles locally (AWS + GCP)?\n"
+gh_workflow_runs_report_status "$BUNDLES_WORKFLOW" "$RELEASE" "Release bundles (AWS + GCP)"
 read -p "(Y/n) " -n 1 -r
 REPLY=${REPLY:-Y}
 echo    # Move to a new line
 case "$REPLY" in
   [yY][eE][sS]|[yY])
-    ./tools/release/publish-rc-bundles-via-gh.sh ${RELEASE}
+    BUNDLE_LOG="/tmp/release_${RELEASE}_bundles.log"
+    : > "${BUNDLE_LOG}"
+    set +e
+    (
+      cd "${PATH_TO_REPO}"
+      ./tools/release/lib/publish-aws-bundle.sh
+      AWS_EXIT=$?
+      ./tools/release/lib/publish-gcp-bundle.sh
+      GCP_EXIT=$?
+      exit $((AWS_EXIT || GCP_EXIT))
+    ) >> "${BUNDLE_LOG}" 2>&1
+    EXIT_CODE=$?
+    set -e
+    if [ $EXIT_CODE -ne 0 ]; then
+      printf "${ERR}Failed to publish bundles locally.${NC}\n"
+      printf "Review logs: ${INFO}cat ${BUNDLE_LOG}${NC}\n"
+      printf "Or use GitHub Actions: ${INFO}gh workflow run ${BUNDLES_WORKFLOW} --ref ${RELEASE}${NC}\n"
+      exit $EXIT_CODE
+    else
+      printf "${SUCCESS}✓${NC} AWS and GCP bundles published locally\n"
+      printf "See logs: ${INFO}cat ${BUNDLE_LOG}${NC}\n"
+    fi
   ;;
   *)
-    printf "Skipped publishing bundles (via GitHub Actions)\n"
-    printf "To do so manually, run:\n"
-    printf "    ${INFO}./tools/release/publish-rc-bundles-via-gh.sh ${RELEASE}${NC}\n"
+    printf "Skipped local bundle publish\n"
+    printf "GitHub Actions equivalent: ${INFO}gh workflow run ${BUNDLES_WORKFLOW} --ref ${RELEASE}${NC}\n"
+    printf "Or trigger individually: ${INFO}gh workflow run publish-aws-bundle.yaml --ref ${RELEASE}${NC}\n"
+    printf "                       ${INFO}gh workflow run publish-gcp-bundle.yaml --ref ${RELEASE}${NC}\n"
     ;;
 esac
 
@@ -204,14 +242,29 @@ REPLY=${REPLY:-Y}
 echo    # Move to a new line
 case "$REPLY" in
   [yY][eE][sS]|[yY])
-    ./tools/release/prep.sh ${RELEASE} rc-NEXT
+    printf "Next release version number (e.g. ${INFO}0.6.5${NC}): "
+    read -r NEXT_VERSION_NUMBER
+    NEXT_VERSION_NUMBER="${NEXT_VERSION_NUMBER#v}"
+    if [[ ! "$NEXT_VERSION_NUMBER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+      printf "${ERR}Invalid version '${NEXT_VERSION_NUMBER}'. Expected format X.Y.Z (e.g. 0.6.5). Skipping rc prep.${NC}\n"
+    else
+      NEXT_RC="rc-v${NEXT_VERSION_NUMBER}"
+      ./tools/release/prep.sh ${RELEASE} "${NEXT_RC}"
+    fi
   ;;
   *)
     printf "Skipped prepping next rc\n"
     printf "To do so manually, run:\n"
-    printf "    ${INFO}./tools/release/prep.sh ${RELEASE} rc-NEXT${NC}\n"
+    printf "    ${INFO}./tools/release/prep.sh ${RELEASE} rc-v<next-version>${NC}\n"
     ;;
 esac
+
+# Watch GitHub Actions release workflows (last step)
+if [ "${#RELEASE_GH_RUNS[@]}" -gt 0 ]; then
+  WATCH_RUNS_SH="$(dirname "$0")/lib/watch-gh-runs.sh"
+  chmod +x "$WATCH_RUNS_SH" 2>/dev/null || true
+  "$WATCH_RUNS_SH" "$RELEASE" "${RELEASE_GH_RUNS[@]}"
+fi
 
 printf "Next steps: \n"
 printf "  1. update example templates to point to it:\n"
