@@ -114,10 +114,11 @@ public class NetworkSecurityUtils {
             }
             List<String> parts = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(raw);
             if (parts.size() != 1) {
+                log.warning("Client IP could not be parsed (expected single IP, got comma-separated chain): " + raw);
                 return null;
             }
             String clientIp = parts.get(0);
-            if (clientIp.indexOf(':') >= 0 && clientIp.chars().filter(ch -> ch == ':').count() == 1) {
+            if (clientIp.contains(":") && clientIp.chars().filter(ch -> ch == ':').count() == 1) {
                 String beforePort = clientIp.substring(0, clientIp.indexOf(':'));
                 if (InetAddresses.isInetAddress(beforePort)) {
                     return beforePort;
