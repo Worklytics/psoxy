@@ -142,12 +142,11 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     /**
      * Whether the proxy should follow HTTP redirects (3xx responses) when calling source APIs.
      *
-     * OPTIONAL; defaults to {@code true} (redirects are followed), matching the default behavior
-     * of the underlying HTTP client.
+     * OPTIONAL. When unset, redirects are followed in synchronous processing and disabled in
+     * async processing so the proxy can intercept 3xx responses and fetch from the Location URL
+     * manually (required for connectors such as ChatGPT Enterprise).
      *
-     * Set to {@code FALSE} for connectors whose APIs issue redirects that must not be
-     * automatically followed — e.g. ChatGPT Enterprise, which uses async processing and relies
-     * on the proxy intercepting 3xx responses to fetch data from the Location URL manually.
+     * Set explicitly to override that default for a connector instance.
      *
      * Accepted values: {@code true} / {@code false} (case-insensitive).
      */
