@@ -33,6 +33,19 @@ class CloudFunctionRequestTest {
     }
 
     @Test
+    void isHttps_usesCaseInsensitiveForwardedProtoHeader() {
+        HttpRequest nativeRequest = mock(HttpRequest.class);
+
+        when(nativeRequest.getHeaders()).thenReturn(Map.of(
+            "x-forwarded-proto", Lists.newArrayList("https")
+        ));
+
+        CloudFunctionRequest request = CloudFunctionRequest.of(nativeRequest);
+
+        assertTrue(request.isHttps().get());
+    }
+
+    @Test
     void getClientIp_usesFirstForwardedForHop() {
         HttpRequest nativeRequest = mock(HttpRequest.class);
 
@@ -43,6 +56,19 @@ class CloudFunctionRequestTest {
         CloudFunctionRequest request = CloudFunctionRequest.of(nativeRequest);
 
         assertEquals("203.0.113.10", request.getClientIp().get());
+    }
+
+    @Test
+    void getClientIp_ignoresSpoofedForwardedForPrefix() {
+        HttpRequest nativeRequest = mock(HttpRequest.class);
+
+        when(nativeRequest.getHeaders()).thenReturn(Map.of(
+            "X-Forwarded-For", Lists.newArrayList("10.0.0.5, 198.51.100.7, 203.0.113.10")
+        ));
+
+        CloudFunctionRequest request = CloudFunctionRequest.of(nativeRequest);
+
+        assertEquals("198.51.100.7", request.getClientIp().get());
     }
 
 }

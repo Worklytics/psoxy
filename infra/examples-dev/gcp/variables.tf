@@ -260,6 +260,7 @@ variable "custom_api_connectors" {
       path         = string
       content_type = optional(string, "application/json")
       body         = optional(string, null)
+      headers      = optional(map(string), {})
     })), [])
     example_api_calls_user_to_impersonate = optional(string)
     secured_variables = optional(list(object({

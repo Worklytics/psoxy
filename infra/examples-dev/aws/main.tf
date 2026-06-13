@@ -21,7 +21,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.6.4"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.6.5"
 
   enabled_connectors                       = var.enabled_connectors
   connector_settings                       = var.connector_settings
@@ -121,7 +121,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.6.4"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=rc-v0.6.5"
 
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
@@ -200,7 +200,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=v0.6.4"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=rc-v0.6.5"
 
   proxy_instance_id    = each.key
   worklytics_host      = var.worklytics_host
@@ -228,24 +228,8 @@ output "api_connector_instances" {
   value = { for k, v in module.psoxy.api_connector_instances : k => {
     endpoint_url     = v.endpoint_url
     sanitized_bucket = v.sanitized_bucket
-    test_examples = merge({
-      api_requests = concat(
-        [for path in try(v.example_api_calls, []) : "GET ${path}"],
-        [for req in try(v.example_api_requests, []) : merge(
-          {
-            request = "${try(req.method, "GET")} ${req.path}"
-          },
-          try(req.method, "GET") == "POST" || try(req.method, "GET") == "PUT" ? merge(
-            try(req.content_type, null) != null ? { content_type = req.content_type } : {},
-            try(req.body, null) != null ? { body = req.body } : {}
-          ) : {}
-        )]
-      )
-      },
-      try(v.enable_async_processing, false) ? { supports_async = true } : {},
-      try(v.example_api_calls_user_to_impersonate, null) != null ? { user_to_impersonate = try(v.example_api_calls_user_to_impersonate, null) } : {}
-    ) }
-  }
+    test_examples    = v.test_examples
+  } }
 }
 
 output "bulk_connector_instances" {

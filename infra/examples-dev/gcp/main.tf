@@ -30,7 +30,7 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.6.4"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.6.5"
 
   base_dir                                 = var.psoxy_base_dir
   enabled_connectors                       = var.enabled_connectors
@@ -104,7 +104,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.6.4"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=rc-v0.6.5"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
@@ -168,7 +168,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=v0.6.4"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=rc-v0.6.5"
 
   host_platform_id     = local.host_platform_id
   proxy_instance_id    = each.key
@@ -205,24 +205,8 @@ output "api_connector_instances" {
     }, v.sanitized_bucket != null ? {
     sanitized_bucket = v.sanitized_bucket
     } : {}, {
-    test_examples = merge({
-      api_requests = concat(
-        [for path in try(v.example_api_calls, []) : "GET ${path}"],
-        [for req in try(v.example_api_requests, []) : merge(
-          {
-            request = "${try(req.method, "GET")} ${req.path}"
-          },
-          try(req.method, "GET") == "POST" || try(req.method, "GET") == "PUT" ? merge(
-            try(req.content_type, null) != null ? { content_type = req.content_type } : {},
-            try(req.body, null) != null ? { body = req.body } : {}
-          ) : {}
-        )]
-      )
-      },
-      try(v.enable_async_processing, false) ? { supports_async = true } : {},
-      try(v.example_api_calls_user_to_impersonate, null) != null ? { user_to_impersonate = try(v.example_api_calls_user_to_impersonate, null) } : {}
-    ) }
-  ) }
+    test_examples = v.test_examples
+  }) }
 }
 
 output "bulk_connector_instances" {
