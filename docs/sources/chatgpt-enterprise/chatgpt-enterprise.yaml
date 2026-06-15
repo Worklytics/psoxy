@@ -43,6 +43,9 @@ endpoints:
           - "$.data[*]..files[*].name"
           - "$.data[*]..files[*].download_url"
       - !<textDigest>
+        jsonPaths:
+          - "$.data[*]..title"
+          - "$.data[*]..messages.data[?(@.author.role == 'user')]..content.value"
         keywords:
           - "write"
           - "draft"
@@ -196,9 +199,6 @@ endpoints:
           - "delegate"
           - "SOP"
           - "runbook"
-        jsonPaths:
-          - "$.data[*]..title"
-          - "$.data[*]..messages.data[?(@.author.role == 'user')]..content.value"
       - !<textDigest>
         jsonPaths:
           - "$.data[*]..messages.data[?(@.author.role != 'user')]..content.value"
@@ -211,6 +211,9 @@ endpoints:
             $ref: "#/definitions/Conversation"
         has_more:
           type: "boolean"
+        last_end_time:
+          type: "string"
+          format: "date-time"
         last_id:
           type: "string"
         object:
@@ -225,164 +228,8 @@ endpoints:
           - "$.data[*].user_email"
         encoding: "URL_SAFE_TOKEN"
       - !<textDigest>
-        keywords:
-          - "write"
-          - "draft"
-          - "compose"
-          - "create"
-          - "generate"
-          - "craft"
-          - "prepare"
-          - "edit"
-          - "revise"
-          - "rewrite"
-          - "reword"
-          - "rephrase"
-          - "paraphrase"
-          - "improve"
-          - "refine"
-          - "polish"
-          - "fix"
-          - "correct"
-          - "update"
-          - "modify"
-          - "analyze"
-          - "calculate"
-          - "compute"
-          - "summarize"
-          - "condense"
-          - "extract"
-          - "explain"
-          - "describe"
-          - "compare"
-          - "brainstorm"
-          - "suggest"
-          - "explore"
-          - "automate"
-          - "organize"
-          - "prioritize"
-          - "email"
-          - "e-mail"
-          - "reply"
-          - "respond"
-          - "response"
-          - "follow up"
-          - "cold outreach"
-          - "subject line"
-          - "recipient"
-          - "cc"
-          - "bcc"
-          - "dear"
-          - "hi"
-          - "hello"
-          - "regards"
-          - "sincerely"
-          - "inbox"
-          - "send"
-          - "forward"
-          - "message"
-          - "slack"
-          - "chat"
-          - "memo"
-          - "letter"
-          - "report"
-          - "proposal"
-          - "blog post"
-          - "article"
-          - "presentation"
-          - "slides"
-          - "job posting"
-          - "social media post"
-          - "newsletter"
-          - "announcement"
-          - "documentation"
-          - "resume"
-          - "copy"
-          - "script"
-          - "speech"
-          - "agenda"
-          - "pitch"
-          - "proofread"
-          - "concise"
-          - "formal"
-          - "casual"
-          - "professional"
-          - "friendly"
-          - "tone"
-          - "grammar"
-          - "spelling"
-          - "translate"
-          - "restructure"
-          - "summary"
-          - "key points"
-          - "key takeaways"
-          - "highlights"
-          - "TLDR"
-          - "recap"
-          - "overview"
-          - "boil down"
-          - "digest"
-          - "distill"
-          - "what is"
-          - "how to"
-          - "ideas"
-          - "options"
-          - "alternatives"
-          - "approaches"
-          - "best practices"
-          - "pros and cons"
-          - "analysis"
-          - "formula"
-          - "spreadsheet"
-          - "pivot"
-          - "chart"
-          - "graph"
-          - "trend"
-          - "pattern"
-          - "correlation"
-          - "statistics"
-          - "metrics"
-          - "KPI"
-          - "forecast"
-          - "dataset"
-          - "data cleaning"
-          - "code"
-          - "function"
-          - "program"
-          - "debug"
-          - "error"
-          - "bug"
-          - "compile"
-          - "runtime"
-          - "refactor"
-          - "optimize"
-          - "test"
-          - "deploy"
-          - "algorithm"
-          - "API"
-          - "SQL"
-          - "Python"
-          - "JavaScript"
-          - "Codex"
-          - "Terminal"
-          - "Git"
-          - "workflow"
-          - "process"
-          - "checklist"
-          - "task list"
-          - "action items"
-          - "schedule"
-          - "timeline"
-          - "milestones"
-          - "project plan"
-          - "delegate"
-          - "SOP"
-          - "runbook"
         jsonPaths:
-          - "$.data[?(@.author.role == 'user')]..content.value"
-      - !<textDigest>
-        jsonPaths:
-          - "$.data[?(@.author.role != 'user')]..content.value"
+          - "$.data[*].content.value"
     responseSchema:
       type: "object"
       properties:
@@ -392,6 +239,9 @@ endpoints:
             $ref: "#/definitions/Message"
         has_more:
           type: "boolean"
+        last_end_time:
+          type: "string"
+          format: "date-time"
         last_id:
           type: "string"
         object:
@@ -427,12 +277,15 @@ endpoints:
           - "$..email"
           - "$..user_id"
           - "$..user_email"
+          - "$.event_details.created_by_user_id"
+          - "$.event_details.plugin_creator_account_user_id"
         encoding: "URL_SAFE_TOKEN"
       - !<textDigest>
         jsonPaths:
           - "$.conversation.title"
-          - "$[?(@.message.author.type == 'user' || @.message.author.role == 'user')].message.content.value"
-          - "$[?(@.message.author.type == 'user' || @.message.author.role == 'user')].message.annotations[*].quote_text"
+          - "$[?(@.actor.type =~ /account_user/i)].message.content.value"
+          - "$[?(@.actor.type =~ /account_user/i)].message.annotations[*].quote_text"
+          - "$.event_details.prompt_text"
         keywords:
           - "generate image"
           - "create image"
@@ -558,17 +411,20 @@ endpoints:
           - "craft"
           - "design"
           - "linkedin"
-      - !<textDigest>
-        jsonPaths:
-          - "$[?(@.message.author.type != 'user' && @.message.author.role != 'user')].message.content.value"
     responseSchema:
       type: "object"
       properties:
         actor:
           $ref: "#/definitions/Actor"
+        client_id:
+          type: "string"
         conversation:
-          $ref: "#/definitions/LogConversation"
+          $ref: "#/definitions/ConversationRef"
+        event_details:
+          $ref: "#/definitions/CodexEventDetails"
         event_id:
+          type: "string"
+        event_type:
           type: "string"
         message:
           $ref: "#/definitions/LogMessage"
@@ -578,6 +434,8 @@ endpoints:
           type: "string"
           format: "date-time"
         type:
+          type: "string"
+        workspace_id:
           type: "string"
   - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/projects"
     allowedQueryParams:
@@ -672,8 +530,6 @@ definitions:
     properties:
       client_type:
         type: "string"
-      role:
-        type: "string"
       type:
         type: "string"
   BaseFile:
@@ -684,6 +540,57 @@ definitions:
       id:
         type: "string"
       object:
+        type: "string"
+  CodexEventDetails:
+    type: "object"
+    properties:
+      access_token_id:
+        type: "string"
+      access_token_name:
+        type: "string"
+      call_id:
+        type: "string"
+      created_by_user_id:
+        type: "string"
+      detail_type:
+        type: "string"
+      environment_id:
+        type: "string"
+      expires_at:
+        type: "string"
+      model:
+        type: "string"
+      plugin_creator_account_user_id:
+        type: "string"
+      plugin_display_name:
+        type: "string"
+      plugin_id:
+        type: "string"
+      plugin_name:
+        type: "string"
+      plugin_release_id:
+        type: "string"
+      plugin_scope:
+        type: "string"
+      plugin_version:
+        type: "string"
+      prompt_text:
+        type: "string"
+      reasoning_effort:
+        type: "string"
+      service_tier:
+        type: "string"
+      session_id:
+        type: "string"
+      status:
+        type: "string"
+      token_usage:
+        $ref: "#/definitions/TokenUsage"
+      tool_name:
+        type: "string"
+      tool_type:
+        type: "string"
+      turn_id:
         type: "string"
   Content:
     type: "object"
@@ -713,7 +620,7 @@ definitions:
         type: "string"
       workspace_id:
         type: "string"
-  LogConversation:
+  ConversationRef:
     type: "object"
     properties:
       created_at:
@@ -726,6 +633,41 @@ definitions:
       is_temporary_chat:
         type: "boolean"
       title:
+        type: "string"
+  ExportAutomation:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      is_enabled:
+        type: "boolean"
+      prompt:
+        type: "string"
+      schedule:
+        type: "string"
+  LogFile:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+  LogMessage:
+    type: "object"
+    properties:
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/Annotation"
+      author:
+        $ref: "#/definitions/Author"
+      content:
+        $ref: "#/definitions/Content"
+      files:
+        type: "array"
+        items:
+          $ref: "#/definitions/BaseFile"
+      id:
+        type: "string"
+      parent_id:
         type: "string"
   Message:
     type: "object"
@@ -780,41 +722,6 @@ definitions:
       last_id:
         type: "string"
       object:
-        type: "string"
-  ExportAutomation:
-    type: "object"
-    properties:
-      id:
-        type: "string"
-      is_enabled:
-        type: "boolean"
-      prompt:
-        type: "string"
-      schedule:
-        type: "string"
-  LogFile:
-    type: "object"
-    properties:
-      id:
-        type: "string"
-  LogMessage:
-    type: "object"
-    properties:
-      annotations:
-        type: "array"
-        items:
-          $ref: "#/definitions/Annotation"
-      author:
-        $ref: "#/definitions/Author"
-      content:
-        $ref: "#/definitions/Content"
-      files:
-        type: "array"
-        items:
-          $ref: "#/definitions/BaseFile"
-      id:
-        type: "string"
-      parent_id:
         type: "string"
   Permissions:
     type: "object"
@@ -915,6 +822,17 @@ definitions:
           $ref: "#/definitions/Recipient"
       visibility:
         type: "string"
+  TokenUsage:
+    type: "object"
+    properties:
+      cached_input_tokens:
+        type: "integer"
+      input_tokens:
+        type: "integer"
+      output_tokens:
+        type: "integer"
+      reasoning_output_tokens:
+        type: "integer"
   WorkspaceUser:
     type: "object"
     properties:
