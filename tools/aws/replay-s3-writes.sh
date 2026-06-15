@@ -2,7 +2,7 @@
 
 # Script to replay writes on S3 objects created since a specific timestamp
 # (useful to re-trigger bulk processing of those objects via proxy)
-# Usage: ./replay-s3-writes.sh <bucket_name> [timestamp]
+# Usage: ./replay-s3-writes.sh [--role ROLE_ARN] [--prefix PREFIX] <bucket_name> [timestamp]
 # Timestamp format: YYYY-MM-DDTHH:MM:SSZ (ISO 8601)
 # If timestamp is not provided, defaults to one week ago
 
@@ -16,13 +16,84 @@ else
     ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
 fi
 
+# Resolve a Python 3 interpreter (python3 preferred, then python)
+resolve_python() {
+    if command -v python3 &> /dev/null; then
+        echo python3
+        return 0
+    fi
+    if command -v python &> /dev/null && python -c 'import sys; sys.exit(0 if sys.version_info >= (3, 0) else 1)' 2>/dev/null; then
+        echo python
+        return 0
+    fi
+    return 1
+}
+
+# Normalize metadata from head-object (empty/null query results become "{}")
+normalize_existing_metadata() {
+    local metadata="$1"
+    if [ -z "$metadata" ] || [ "$metadata" = "null" ]; then
+        echo "{}"
+    else
+        echo "$metadata"
+    fi
+}
+
+# Merge existing object metadata with psoxy-last-replay; output compact JSON for --metadata
+merge_replay_metadata() {
+    local existing="$1"
+    local ts="$2"
+
+    existing=$(normalize_existing_metadata "$existing")
+
+    if command -v jq &> /dev/null; then
+        local merged
+        merged=$(echo "$existing" | jq -c --arg ts "$ts" '
+            (if type == "object" then . else {} end) + {"psoxy-last-replay": $ts}
+        ')
+        if [ -z "$merged" ]; then
+            echo "Error: failed to build metadata JSON (jq returned empty output)" >&2
+            return 1
+        fi
+        echo "$merged"
+        return 0
+    fi
+
+    local python_cmd
+    if python_cmd=$(resolve_python); then
+        "$python_cmd" -c '
+import json, sys
+raw = sys.argv[1]
+ts = sys.argv[2]
+try:
+    metadata = json.loads(raw) if raw else {}
+except json.JSONDecodeError:
+    metadata = {}
+if not isinstance(metadata, dict):
+    metadata = {}
+metadata["psoxy-last-replay"] = ts
+print(json.dumps(metadata, separators=(",", ":")))
+' "$existing" "$ts"
+        return 0
+    fi
+
+    if [ "$existing" = "{}" ]; then
+        echo "{\"psoxy-last-replay\":\"$ts\"}"
+        return 0
+    fi
+
+    echo "Error: jq or python is required" >&2
+    return 1
+}
+
 # Function to display usage information
 usage() {
-    echo "Usage: $0 [--role ROLE_ARN] <bucket_name> [timestamp]"
+    echo "Usage: $0 [--role ROLE_ARN] [--prefix PREFIX] <bucket_name> [timestamp]"
     echo "   OR: $0 [--role ROLE_ARN] <object_path>"
     echo ""
     echo "Options:"
-    echo "  --role ROLE_ARN  : IAM role ARN to assume before accessing S3"
+    echo "  --role ROLE_ARN    : IAM role ARN to assume before accessing S3"
+    echo "  --prefix PREFIX    : S3 key prefix to limit listing (bucket mode only)"
     echo ""
     echo "Arguments:"
     echo "  bucket_name  : S3 bucket name (with or without s3:// prefix)"
@@ -34,12 +105,13 @@ usage() {
     echo "  $0 my-bucket                                    # Replay writes on objects from last week"
     echo "  $0 s3://my-bucket                               # Replay writes on objects from last week (s3:// prefix accepted)"
     echo "  $0 my-bucket 2024-01-01T00:00:00Z              # Replay writes on objects since specific date"
+    echo "  $0 --prefix raw/source_bucket=my-bucket my-bucket  # Replay writes under a prefix"
     echo "  $0 s3://my-bucket/path/to/object.json          # Replay write on a single object"
     echo "  $0 my-bucket/path/to/object.json               # Replay write on a single object (s3:// added automatically)"
     echo "  $0 --role arn:aws:iam::123456789012:role/MyRole my-bucket  # Assume role before accessing bucket"
     echo ""
     echo "This script will:"
-    echo "  • If bucket_name provided: List all objects in the bucket created after the specified timestamp and replay writes"
+    echo "  • If bucket_name provided: List objects in the bucket (optionally under --prefix) modified after the timestamp and replay writes"
     echo "  • If object_path provided: Replay write on just that single object using 'aws s3api copy-object'"
     echo ""
     echo "Note: This script adds/updates 'psoxy-last-replay' metadata field to trigger S3 events."
@@ -47,18 +119,51 @@ usage() {
     exit 1
 }
 
-# Parse --role option if provided
+# Parse options
 ROLE_ARN=""
-if [ $# -ge 1 ] && [ "$1" = "--role" ]; then
-    if [ $# -lt 2 ]; then
-        echo "Error: --role option requires a role ARN"
-        usage
+PREFIX=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --role)
+            if [ $# -lt 2 ]; then
+                echo "Error: --role option requires a role ARN"
+                usage
+            fi
+            ROLE_ARN="$2"
+            shift 2
+            ;;
+        --prefix)
+            if [ $# -lt 2 ]; then
+                echo "Error: --prefix option requires a prefix value"
+                usage
+            fi
+            PREFIX="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            echo "Error: Unknown option: $1"
+            usage
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+# Strip s3:// from prefix if provided
+if [[ "$PREFIX" == s3://* ]]; then
+    PREFIX="${PREFIX#s3://}"
+    # If prefix included bucket name, strip it when bucket mode supplies bucket separately
+    if [[ "$PREFIX" == */* ]]; then
+        PREFIX="${PREFIX#*/}"
     fi
-    ROLE_ARN="$2"
-    shift 2
 fi
 
-# Check if correct number of arguments provided (after shifting --role if present)
+# Check if correct number of arguments provided (after shifting options)
 if [ $# -lt 1 ] || [ $# -gt 2 ]; then
     echo "Error: Invalid number of arguments"
     usage
@@ -73,6 +178,10 @@ if [[ "$FIRST_ARG" == s3://*/* ]] || ([[ "$FIRST_ARG" != s3://* ]] && [[ "$FIRST
     # Single object mode
     if [ $# -ne 1 ]; then
         echo "Error: When providing an object path, no additional arguments are allowed"
+        usage
+    fi
+    if [ -n "$PREFIX" ]; then
+        echo "Error: --prefix is only supported in bucket mode, not when replaying a single object path"
         usage
     fi
     # Parse bucket and key from path
@@ -93,7 +202,7 @@ else
         BUCKET_NAME="$FIRST_ARG"
     fi
     SINGLE_OBJECT_MODE=false
-    
+
     # Set timestamp - default to one week ago if not provided
     if [ $# -eq 2 ]; then
         TIMESTAMP="$2"
@@ -108,7 +217,7 @@ else
         fi
         echo -e "No timestamp provided, defaulting to one week ago: ${INFO}$TIMESTAMP${NC}"
     fi
-    
+
     # Validate bucket name (basic check)
     if [[ -z "$BUCKET_NAME" ]]; then
         echo "Error: Bucket name cannot be empty"
@@ -138,22 +247,22 @@ fi
 # Assume role if provided
 if [ -n "$ROLE_ARN" ]; then
     echo -e "Assuming role: ${INFO}$ROLE_ARN${NC}"
-    
+
     # Generate a session name
     SESSION_NAME="replay-s3-writes-$(date +%s)"
-    
+
     # Assume the role and capture credentials
     ASSUME_ROLE_OUTPUT=$(aws sts assume-role \
         --role-arn "$ROLE_ARN" \
         --role-session-name "$SESSION_NAME" \
         --output json 2>&1)
-    
+
     if [ $? -ne 0 ]; then
         echo -e "${ERR}Error: Failed to assume role${NC}"
         echo "$ASSUME_ROLE_OUTPUT"
         exit 1
     fi
-    
+
     # Extract credentials and export as environment variables
     if command -v jq &> /dev/null; then
         # Use jq for reliable JSON parsing if available
@@ -166,12 +275,12 @@ if [ -n "$ROLE_ARN" ]; then
         export AWS_SECRET_ACCESS_KEY=$(echo "$ASSUME_ROLE_OUTPUT" | grep -o '"SecretAccessKey": "[^"]*' | cut -d'"' -f4)
         export AWS_SESSION_TOKEN=$(echo "$ASSUME_ROLE_OUTPUT" | grep -o '"SessionToken": "[^"]*' | cut -d'"' -f4)
     fi
-    
+
     if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$AWS_SESSION_TOKEN" ]; then
         echo -e "${ERR}Error: Failed to extract credentials from assume-role response${NC}"
         exit 1
     fi
-    
+
     echo -e "${SUCCESS}✓ Successfully assumed role${NC}"
     echo ""
 fi
@@ -190,57 +299,65 @@ echo -e "NOTE: This script adds/updates a 'psoxy-last-replay' metadata field on 
 echo "      Existing metadata, tags, and content are preserved."
 echo ""
 
+replay_object_write() {
+    local bucket="$1"
+    local object_key="$2"
+    local error_output="$3"
+
+    local timestamp_rfc3339
+    timestamp_rfc3339=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    local existing_metadata
+    existing_metadata=$(aws s3api head-object --bucket "$bucket" --key "$object_key" --query 'Metadata' --output json 2>"$error_output")
+    if [ $? -ne 0 ]; then
+        return 2
+    fi
+
+    local merged_metadata merge_error
+    merge_error=$(mktemp)
+    if ! merged_metadata=$(merge_replay_metadata "$existing_metadata" "$timestamp_rfc3339" 2>"$merge_error"); then
+        echo "Error: failed to merge metadata for s3://$bucket/$object_key" >&2
+        cat "$merge_error" >&2
+        rm -f "$merge_error"
+        return 3
+    fi
+    rm -f "$merge_error"
+
+    if [ -z "$merged_metadata" ]; then
+        echo "Error: merged metadata is empty for s3://$bucket/$object_key" >&2
+        return 3
+    fi
+
+    aws s3api copy-object \
+        --bucket "$bucket" \
+        --copy-source "$bucket/$object_key" \
+        --key "$object_key" \
+        --metadata "$merged_metadata" \
+        --metadata-directive REPLACE \
+        --tagging-directive COPY \
+        > /dev/null 2>"$error_output"
+}
+
 # Handle single object mode
 if [[ "$SINGLE_OBJECT_MODE" == true ]]; then
     echo -e "Single object mode: Replaying write on ${INFO}s3://$BUCKET_NAME/$OBJECT_KEY${NC}"
     echo ""
-    
-    # Perform the write replay operation on the single object by copying to itself
-    # AWS requires changing something when copying to self, so we add a metadata field
-    TIMESTAMP_RFC3339=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
     ERROR_OUTPUT=$(mktemp)
     trap 'rm -f "$ERROR_OUTPUT"' EXIT
-    
-    # Get existing metadata
-    EXISTING_METADATA=$(aws s3api head-object --bucket "$BUCKET_NAME" --key "$OBJECT_KEY" --query 'Metadata' --output json 2>"$ERROR_OUTPUT")
-    if [ $? -ne 0 ]; then
-        echo -e "${ERR}✗ Failed to get object metadata${NC}"
-        cat "$ERROR_OUTPUT"
-        exit 1
-    fi
-    
-    # Merge existing metadata with new field
-    if command -v jq &> /dev/null; then
-        MERGED_METADATA=$(echo "$EXISTING_METADATA" | jq --arg ts "$TIMESTAMP_RFC3339" '. + {"psoxy-last-replay": $ts}')
-    else
-        # Fallback: if no existing metadata, just use the new field
-        if [ "$EXISTING_METADATA" = "{}" ] || [ "$EXISTING_METADATA" = "null" ]; then
-            MERGED_METADATA="{\"psoxy-last-replay\":\"$TIMESTAMP_RFC3339\"}"
-        else
-            # Simple merge without jq - append to existing
-            MERGED_METADATA=$(echo "$EXISTING_METADATA" | sed 's/}$//' | sed 's/$/,"psoxy-last-replay":"'"$TIMESTAMP_RFC3339"'"}/')
-        fi
-    fi
-    
-    if aws s3api copy-object \
-        --bucket "$BUCKET_NAME" \
-        --copy-source "$BUCKET_NAME/$OBJECT_KEY" \
-        --key "$OBJECT_KEY" \
-        --metadata "$MERGED_METADATA" \
-        --metadata-directive REPLACE \
-        --tagging-directive COPY \
-        > /dev/null 2>"$ERROR_OUTPUT"; then
+
+    if replay_object_write "$BUCKET_NAME" "$OBJECT_KEY" "$ERROR_OUTPUT"; then
         echo -e "${SUCCESS}✓ Successfully replayed write on s3://$BUCKET_NAME/$OBJECT_KEY${NC}"
         exit 0
-    else
-        echo -e "${ERR}✗ Failed to replay write on s3://$BUCKET_NAME/$OBJECT_KEY${NC}"
-        ERROR_MSG=$(cat "$ERROR_OUTPUT")
-        if echo "$ERROR_MSG" | grep -q -i "AccessDenied\|Forbidden\|403"; then
-            echo -e "${ERR}Permission Error: Access denied. Please verify you have the required permissions.${NC}"
-        fi
-        echo "$ERROR_MSG"
-        exit 1
     fi
+
+    echo -e "${ERR}✗ Failed to replay write on s3://$BUCKET_NAME/$OBJECT_KEY${NC}"
+    ERROR_MSG=$(cat "$ERROR_OUTPUT")
+    if echo "$ERROR_MSG" | grep -q -i "AccessDenied\|Forbidden\|403"; then
+        echo -e "${ERR}Permission Error: Access denied. Please verify you have the required permissions.${NC}"
+    fi
+    echo "$ERROR_MSG"
+    exit 1
 fi
 
 # Create temporary file to store object list
@@ -248,7 +365,10 @@ TEMP_FILE=$(mktemp)
 trap 'rm -f "$TEMP_FILE"' EXIT
 
 # List objects created after the timestamp and store in temp file
-echo -e "Enumerating objects created after ${INFO}$TIMESTAMP${NC}..."
+echo -e "Enumerating objects modified after ${INFO}$TIMESTAMP${NC}..."
+if [ -n "$PREFIX" ]; then
+    echo -e "Filtering to prefix: ${INFO}$PREFIX${NC}"
+fi
 
 # Convert our timestamp to epoch for comparison
 TIMESTAMP_EPOCH=""
@@ -261,48 +381,92 @@ else
 fi
 
 # Filter objects by creation time
-echo "Getting list of objects in bucket and filtering by creation time..."
+echo "Getting list of objects in bucket and filtering by modification time..."
 FILTERED_FILE=$(mktemp)
 ERROR_FILE=$(mktemp)
 trap 'rm -f "$TEMP_FILE" "$FILTERED_FILE" "$ERROR_FILE"' EXIT
 
-# Use AWS CLI to list objects with their LastModified timestamp
-# Note: S3 doesn't expose creation time, so we use LastModified as a proxy
-LIST_OUTPUT=$(aws s3api list-objects-v2 --bucket "$BUCKET_NAME" --query 'Contents[].[Key,LastModified]' --output text 2>"$ERROR_FILE")
-LIST_EXIT_CODE=$?
+append_objects_modified_after() {
+    local key="$1"
+    local last_modified="$2"
 
-if [ $LIST_EXIT_CODE -ne 0 ]; then
-    echo -e "${ERR}Error: Failed to list objects in bucket${NC}"
-    ERROR_MSG=$(cat "$ERROR_FILE")
-    if echo "$ERROR_MSG" | grep -q -i "AccessDenied\|Forbidden\|403"; then
-        echo -e "${ERR}Permission Error: Access denied. Please verify you have s3:ListBucket permission on the bucket.${NC}"
-    elif echo "$ERROR_MSG" | grep -q -i "NoSuchBucket"; then
-        echo -e "${ERR}Error: Bucket does not exist or you don't have permission to access it.${NC}"
-    fi
-    echo "$ERROR_MSG"
-    exit 1
-fi
-
-echo "$LIST_OUTPUT" | while read -r key last_modified; do
-    # Skip if empty
     if [ -z "$key" ]; then
-        continue
+        return 0
     fi
-    
-    # Convert last_modified to epoch
+
+    local modified_epoch=""
     # AWS returns timestamps in format: 2024-01-01T12:34:56.000Z or 2024-01-01T12:34:56+00:00
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS - handle both formats
         modified_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${last_modified:0:19}" +%s 2>/dev/null || \
                         date -j -f "%Y-%m-%dT%H:%M:%SZ" "$last_modified" +%s 2>/dev/null)
     else
-        # Linux
         modified_epoch=$(date -d "$last_modified" +%s 2>/dev/null)
     fi
-    
-    # If modified time is after our timestamp, include this object
+
     if [ -n "$modified_epoch" ] && [ "$modified_epoch" -gt "$TIMESTAMP_EPOCH" ]; then
         echo "$key" >> "$FILTERED_FILE"
+    fi
+}
+
+CONTINUATION_TOKEN=""
+while true; do
+    LIST_ARGS=(s3api list-objects-v2 --bucket "$BUCKET_NAME" --output json)
+    if [ -n "$PREFIX" ]; then
+        LIST_ARGS+=(--prefix "$PREFIX")
+    fi
+    if [ -n "$CONTINUATION_TOKEN" ]; then
+        LIST_ARGS+=(--starting-token "$CONTINUATION_TOKEN")
+    fi
+
+    PAGE_JSON=$(aws "${LIST_ARGS[@]}" 2>"$ERROR_FILE")
+    LIST_EXIT_CODE=$?
+
+    if [ $LIST_EXIT_CODE -ne 0 ]; then
+        echo -e "${ERR}Error: Failed to list objects in bucket${NC}"
+        ERROR_MSG=$(cat "$ERROR_FILE")
+        if echo "$ERROR_MSG" | grep -q -i "AccessDenied\|Forbidden\|403"; then
+            echo -e "${ERR}Permission Error: Access denied. Please verify you have s3:ListBucket permission on the bucket.${NC}"
+        elif echo "$ERROR_MSG" | grep -q -i "NoSuchBucket"; then
+            echo -e "${ERR}Error: Bucket does not exist or you don't have permission to access it.${NC}"
+        fi
+        echo "$ERROR_MSG"
+        exit 1
+    fi
+
+    if command -v jq &> /dev/null; then
+        while IFS=$'\t' read -r key last_modified; do
+            append_objects_modified_after "$key" "$last_modified"
+        done < <(echo "$PAGE_JSON" | jq -r '.Contents[]? | [.Key, .LastModified] | @tsv')
+        CONTINUATION_TOKEN=$(echo "$PAGE_JSON" | jq -r '.NextContinuationToken // empty')
+    elif python_cmd=$(resolve_python); then
+        while IFS=$'\t' read -r key last_modified; do
+            append_objects_modified_after "$key" "$last_modified"
+        done < <("$python_cmd" -c 'import json,sys
+page=json.load(sys.stdin)
+for item in page.get("Contents") or []:
+    print("{}\t{}".format(item["Key"], item["LastModified"]))' <<< "$PAGE_JSON")
+        CONTINUATION_TOKEN=$("$python_cmd" -c 'import json,sys; print(json.load(sys.stdin).get("NextContinuationToken") or "")' <<< "$PAGE_JSON")
+    else
+        TEXT_ARGS=(s3api list-objects-v2 --bucket "$BUCKET_NAME" --query 'Contents[].[Key,LastModified]' --output text)
+        TOKEN_ARGS=(s3api list-objects-v2 --bucket "$BUCKET_NAME" --query 'NextContinuationToken' --output text)
+        if [ -n "$PREFIX" ]; then
+            TEXT_ARGS+=(--prefix "$PREFIX")
+            TOKEN_ARGS+=(--prefix "$PREFIX")
+        fi
+        if [ -n "$CONTINUATION_TOKEN" ]; then
+            TEXT_ARGS+=(--starting-token "$CONTINUATION_TOKEN")
+            TOKEN_ARGS+=(--starting-token "$CONTINUATION_TOKEN")
+        fi
+
+        LIST_OUTPUT=$(aws "${TEXT_ARGS[@]}" 2>"$ERROR_FILE")
+        while read -r key last_modified; do
+            append_objects_modified_after "$key" "$last_modified"
+        done <<< "$LIST_OUTPUT"
+        CONTINUATION_TOKEN=$(aws "${TOKEN_ARGS[@]}" 2>"$ERROR_FILE")
+    fi
+
+    if [ -z "$CONTINUATION_TOKEN" ] || [ "$CONTINUATION_TOKEN" = "None" ]; then
+        break
     fi
 done
 
@@ -328,65 +492,33 @@ FAILED_COUNT=0
 while IFS= read -r object_key; do
     CURRENT=$((CURRENT + 1))
     echo -e "[$CURRENT/$TOTAL_OBJECTS] Replaying write of object: ${INFO}s3://$BUCKET_NAME/$object_key${NC}"
-    
-    # Perform the write replay operation by copying object to itself
-    # AWS requires changing something when copying to self, so we add a metadata field
-    TIMESTAMP_RFC3339=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
     ERROR_OUTPUT=$(mktemp)
-    
-    # Get existing metadata
-    EXISTING_METADATA=$(aws s3api head-object --bucket "$BUCKET_NAME" --key "$object_key" --query 'Metadata' --output json 2>"$ERROR_OUTPUT")
-    if [ $? -ne 0 ]; then
-        FAILED_COUNT=$((FAILED_COUNT + 1))
-        echo -e "  ${ERR}✗ Failed to get object metadata${NC}"
-        if [ "$FAILED_COUNT" -le 3 ]; then
-            cat "$ERROR_OUTPUT"
-        fi
-        rm -f "$ERROR_OUTPUT"
-        continue
-    fi
-    
-    # Merge existing metadata with new field
-    if command -v jq &> /dev/null; then
-        MERGED_METADATA=$(echo "$EXISTING_METADATA" | jq --arg ts "$TIMESTAMP_RFC3339" '. + {"psoxy-last-replay": $ts}')
-    else
-        # Fallback: if no existing metadata, just use the new field
-        if [ "$EXISTING_METADATA" = "{}" ] || [ "$EXISTING_METADATA" = "null" ]; then
-            MERGED_METADATA="{\"psoxy-last-replay\":\"$TIMESTAMP_RFC3339\"}"
-        else
-            # Simple merge without jq - append to existing
-            MERGED_METADATA=$(echo "$EXISTING_METADATA" | sed 's/}$//' | sed 's/$/,"psoxy-last-replay":"'"$TIMESTAMP_RFC3339"'"}/')
-        fi
-    fi
-    
-    if aws s3api copy-object \
-        --bucket "$BUCKET_NAME" \
-        --copy-source "$BUCKET_NAME/$object_key" \
-        --key "$object_key" \
-        --metadata "$MERGED_METADATA" \
-        --metadata-directive REPLACE \
-        --tagging-directive COPY \
-        > /dev/null 2>"$ERROR_OUTPUT"; then
+    REPLAY_EXIT=0
+    replay_object_write "$BUCKET_NAME" "$object_key" "$ERROR_OUTPUT" || REPLAY_EXIT=$?
+
+    if [ "$REPLAY_EXIT" -eq 0 ]; then
         SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
         echo -e "  ${SUCCESS}✓ Success${NC}"
     else
         FAILED_COUNT=$((FAILED_COUNT + 1))
         ERROR_MSG=$(cat "$ERROR_OUTPUT")
-        if echo "$ERROR_MSG" | grep -q -i "AccessDenied\|Forbidden\|403"; then
+        if [ "$REPLAY_EXIT" -eq 2 ] && echo "$ERROR_MSG" | grep -q -i "AccessDenied\|Forbidden\|403"; then
             echo -e "  ${ERR}✗ Failed - Permission Error${NC}"
+        elif [ "$REPLAY_EXIT" -eq 3 ]; then
+            echo -e "  ${ERR}✗ Failed - Metadata merge error${NC}"
         else
             echo -e "  ${ERR}✗ Failed${NC}"
         fi
-        # Only show detailed error for first few failures to avoid spam
         if [ "$FAILED_COUNT" -le 3 ]; then
             echo "    Error: $ERROR_MSG"
         fi
     fi
     rm -f "$ERROR_OUTPUT"
-    
+
     # Add small delay to avoid overwhelming the API
     sleep 0.1
-    
+
 done < "$TEMP_FILE"
 
 echo ""
@@ -402,4 +534,3 @@ if [ "$FAILED_COUNT" -gt 0 ]; then
     echo "  • Verifying your IAM user/role has the required S3 permissions"
     exit 1
 fi
-

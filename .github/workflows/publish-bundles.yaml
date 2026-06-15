@@ -1,0 +1,70 @@
+name: Publish Release Bundles
+
+# Orchestrates AWS + GCP bundle publication and verification.
+# Individual platform workflows remain available via workflow_dispatch.
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - 'rc-*'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  aws:
+    name: AWS Bundle
+    uses: ./.github/workflows/publish-aws-bundle.yaml
+    secrets: inherit
+
+  gcp:
+    name: GCP Bundle
+    uses: ./.github/workflows/publish-gcp-bundle.yaml
+    secrets: inherit
+
+  verify:
+    name: Verify Bundles
+    needs: [aws, gcp]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # verify-bundles.sh reads S3 object metadata across regions; this job needs its own
+      # OIDC session (separate from the publish-aws-bundle reusable workflow).
+      # aws-region is only the CLI default; each s3api call passes an explicit --region.
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Verify published bundles
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REF_NAME="${{ github.ref_name }}"
+          RC_FLAG=""
+          if [[ "$REF_NAME" =~ ^rc- ]]; then
+            RC_FLAG="--rc"
+          fi
+
+          if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            ./tools/release/verify-bundles.sh "$REF_NAME" $RC_FLAG
+          else
+            VERSION="${REF_NAME#rc-}"
+            ./tools/release/verify-bundles.sh "$VERSION" $RC_FLAG
+          fi
