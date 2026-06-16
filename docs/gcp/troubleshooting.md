@@ -88,6 +88,49 @@ terraform {
 
 You will likely see MANY changes. These are caused by the provider version difference and should be benign. The vast majority are label changes; we utilize the `default_labels` functionality in google provider `5.x` to label all the infra created by this configuration;
 
+## Error 400: `vpc-access-egress` annotation cannot be set without connector or network-interfaces
+
+If you remove Direct VPC egress or a Serverless VPC Access connector from your configuration (for example, by commenting out `vpc_config` in `terraform.tfvars`), `terraform apply` may fail with:
+
+```
+Error 400: Could not update Cloud Run service ... spec.template.metadata.annotations: The run.googleapis.com/vpc-access-egress annotation cannot be set without also setting the run.googleapis.com/vpc-access-connector annotation or the run.googleapis.com/network-interfaces annotation.
+```
+
+This is a GCP limitation: Cloud Functions gen2 cannot drop VPC egress settings through an in-place service update. Terraform attempts to remove `direct_vpc_network_interface` from the function, but the underlying Cloud Run service still has a stale egress annotation until the function is recreated.
+
+**Fix:** destroy the affected Cloud Function resources in Terraform, then apply to recreate them without VPC networking.
+
+1. Ensure `vpc_config` is removed or set to `null` in your configuration.
+2. Find the resource addresses:
+
+```bash
+terraform state list | grep google_cloudfunctions2_function
+```
+
+3. Destroy each affected function. Examples using the standard `module "psoxy"` layout from our GCP examples:
+
+```bash
+terraform destroy -target='module.psoxy.module.api_connector["gcal"].google_cloudfunctions2_function.function'
+terraform destroy -target='module.psoxy.module.api_connector["msft-teams"].google_cloudfunctions2_function.function'
+terraform destroy -target='module.psoxy.module.webhook_collector["llm-portal"].google_cloudfunctions2_function.function'
+```
+
+Repeat for every connector that had VPC egress enabled. Adjust the module path if your root module is not named `psoxy`, and use the connector map keys from your `terraform.tfvars`.
+
+4. Recreate:
+
+```bash
+terraform apply
+```
+
+Alternatively, a single apply can replace a function without a separate destroy step:
+
+```bash
+terraform apply -replace='module.psoxy.module.api_connector["gcal"].google_cloudfunctions2_function.function'
+```
+
+See [VPC configuration](./vpc.md#removing-vpc-egress) for background on Direct VPC egress and removal.
+
 ## Bulk processing failures
 
 If you need to re-trigger bulk processing of objects that have already been written to GCS (e.g., for webhook collectors), you can use the `replay-gcs-writes.sh` script.

@@ -337,7 +337,7 @@ locals {
 
   example_files_csv = join(",", [for f in local.all_example_files : "${var.psoxy_base_dir}${f}"])
 
-  aws_principal_arn_when_testing = coalesce(var.aws_principal_arn_when_testing, var.aws_role_to_assume_when_testing)
+  aws_principal_arn_when_testing        = coalesce(var.aws_principal_arn_when_testing, var.aws_role_to_assume_when_testing)
   aws_write_role_to_assume_when_testing = coalesce(var.aws_write_role_to_assume_when_testing, var.aws_upload_role_to_assume_when_testing)
 
   cli_file_upload_role_args = compact([
