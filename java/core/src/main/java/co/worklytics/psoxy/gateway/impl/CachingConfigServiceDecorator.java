@@ -15,8 +15,10 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.TransientConfigException;
 import co.worklytics.psoxy.gateway.WritableConfigService;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
@@ -68,21 +70,27 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
 
                             @Override
                             public ListenableFuture<String> reload(@NonNull ConfigProperty key, @NonNull String oldValue) {
-                                String newValue = delegate.getConfigPropertyAsOptional(key).orElse(NEGATIVE_VALUE);
-                                // If the store returns empty but we previously had a valid value,
-                                // treat it as a transient backend failure and retain the old value.
-                                // Crucially, we return immediateFuture(oldValue) rather than a failed
-                                // future: a failed future leaves the write-time unchanged so Guava
-                                // would re-attempt the reload on every subsequent cache.get() call,
-                                // hammering SSM for the entire outage window. Returning the old value
-                                // marks the entry as freshly written, so the next retry waits a full TTL.
-                                if (NEGATIVE_VALUE.equals(newValue) && !NEGATIVE_VALUE.equals(oldValue)) {
+                                try {
+                                    String newValue = delegate.getConfigPropertyAsOptional(key).orElse(NEGATIVE_VALUE);
+                                    // Fallback heuristic for backends that still swallow exceptions
+                                    // (e.g. GCP SecretManagerConfigService): if the value was valid
+                                    // before but now comes back empty, assume transient and retain.
+                                    if (NEGATIVE_VALUE.equals(newValue) && !NEGATIVE_VALUE.equals(oldValue)) {
+                                        log.log(Level.WARNING,
+                                            "Backend returned empty for config property {0} which was previously set; assuming transient failure and retaining cached value",
+                                            key.name());
+                                        return Futures.immediateFuture(oldValue);
+                                    }
+                                    return Futures.immediateFuture(newValue);
+                                } catch (TransientConfigException e) {
+                                    // Backend explicitly signalled a transient failure.
+                                    // Returning the old value resets the write-time so Guava waits a
+                                    // full TTL before retrying, rather than retrying on every request.
                                     log.log(Level.WARNING,
                                         "Transient failure reloading config property {0}; retaining cached value until next refresh cycle",
                                         key.name());
                                     return Futures.immediateFuture(oldValue);
                                 }
-                                return Futures.immediateFuture(newValue);
                             }
                         });
                 }
@@ -123,8 +131,23 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
                 } else {
                     return Optional.of(value);
                 }
+            } catch (UncheckedExecutionException e) {
+                // Guava wraps RuntimeExceptions from load() in UncheckedExecutionException.
+                // TransientConfigException is a RuntimeException, so it lands here.
+                Throwable cause = e.getCause();
+                if (cause instanceof TransientConfigException) {
+                    // load() threw a TransientConfigException — the cache stored nothing, so the
+                    // next request will retry the backend immediately. Return empty so that
+                    // optional-property callers degrade gracefully; required-property callers will
+                    // reach getConfigPropertyOrError() which throws NoSuchElementException.
+                    log.log(Level.WARNING,
+                        "Transient backend failure for config property {0}; value not cached, next request will retry",
+                        property.name());
+                    return Optional.empty();
+                }
+                throw (cause instanceof RuntimeException) ? (RuntimeException) cause : e;
             } catch (ExecutionException e) {
-                //unwrap if possible, re-throw
+                // Guava wraps checked exceptions from load() in ExecutionException.
                 if (e.getCause() == null) {
                     throw e;
                 } else {

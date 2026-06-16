@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Ticker;
+import co.worklytics.psoxy.gateway.TransientConfigException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -109,6 +110,63 @@ class CachingConfigServiceDecoratorTest {
     }
 
     @Test
+    void retainsStaleValueOnExplicitTransientException() {
+        FakeTicker ticker = new FakeTicker();
+        ThrowingConfigService delegate = new ThrowingConfigService("valid_token");
+
+        CachingConfigServiceDecorator cache =
+            new CachingConfigServiceDecorator(delegate, Duration.ofMinutes(1), ticker);
+
+        // initial load succeeds
+        assertEquals(Optional.of("valid_token"),
+            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(1, delegate.getReads());
+
+        // backend starts throwing TransientConfigException
+        delegate.setThrowTransient(true);
+        ticker.advance(2, TimeUnit.MINUTES);
+
+        // reload catches TransientConfigException; old value retained, no error to caller
+        assertEquals(Optional.of("valid_token"),
+            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(2, delegate.getReads());
+
+        // backend recovers
+        delegate.setThrowTransient(false);
+        ticker.advance(2, TimeUnit.MINUTES);
+
+        assertEquals(Optional.of("valid_token"),
+            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(3, delegate.getReads());
+    }
+
+    @Test
+    void transientExceptionOnColdStartDoesNotCacheNegativeValue() {
+        FakeTicker ticker = new FakeTicker();
+        ThrowingConfigService delegate = new ThrowingConfigService("valid_token");
+        delegate.setThrowTransient(true);
+
+        CachingConfigServiceDecorator cache =
+            new CachingConfigServiceDecorator(delegate, Duration.ofMinutes(1), ticker);
+
+        // cold start with transient error: returns empty but does NOT cache NEGATIVE_VALUE
+        assertEquals(Optional.empty(),
+            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(1, delegate.getReads());
+
+        // next request retries immediately (nothing cached) — still failing
+        assertEquals(Optional.empty(),
+            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(2, delegate.getReads()); // retried, not served from cache
+
+        // backend recovers (no TTL advance needed — nothing was cached)
+        delegate.setThrowTransient(false);
+        assertEquals(Optional.of("valid_token"),
+            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(3, delegate.getReads());
+    }
+
+    @Test
     void getConfigProperty_noCache() {
         assertTrue(config.getConfigPropertyAsOptional(TestConfigProperties.NO_CACHE).isEmpty());
         assertEquals(1, localHashMapConfigService.getReads());
@@ -137,6 +195,42 @@ class CachingConfigServiceDecoratorTest {
 
         void advance(long amount, TimeUnit unit) {
             nanos += unit.toNanos(amount);
+        }
+    }
+
+    static class ThrowingConfigService implements WritableConfigService {
+        private String value;
+        private boolean throwTransient = false;
+
+        @Getter
+        private int reads = 0;
+
+        ThrowingConfigService(String value) {
+            this.value = value;
+        }
+
+        void setThrowTransient(boolean throwTransient) {
+            this.throwTransient = throwTransient;
+        }
+
+        @Override
+        public void putConfigProperty(ConfigProperty property, String newValue) {
+            this.value = newValue;
+        }
+
+        @Override
+        public String getConfigPropertyOrError(ConfigProperty property) {
+            return getConfigPropertyAsOptional(property)
+                .orElseThrow(() -> new NoSuchElementException("no value for " + property));
+        }
+
+        @Override
+        public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
+            reads++;
+            if (throwTransient) {
+                throw new TransientConfigException("simulated transient failure");
+            }
+            return Optional.ofNullable(value);
         }
     }
 
