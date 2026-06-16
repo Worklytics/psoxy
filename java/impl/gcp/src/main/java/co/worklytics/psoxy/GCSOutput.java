@@ -16,7 +16,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.util.Map;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 @Log
 public class GCSOutput implements Output {
@@ -46,11 +48,15 @@ public class GCSOutput implements Output {
 
         try {
             Storage storageClient = storageProvider.get();
+            Map<String, String> metadata = content.getMetadata().entrySet().stream()
+                .filter(entry -> entry.getValue() != null)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
             try (WriteChannel writeChannel = storageClient.writer(
                 BlobInfo.newBuilder(bucket, pathPrefix + key)
                     .setContentType(content.getContentType())
                     .setContentEncoding(content.getContentEncoding())
-                    //.setMetadata(outputUtils.buildMetadata(request))
+                    .setMetadata(metadata)
                     .build())) {
                 writeChannel.write(java.nio.ByteBuffer.wrap(content.getContent(), 0, content.getContent().length));
             }
