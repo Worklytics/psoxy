@@ -405,6 +405,14 @@ public class ApiDataRequestHandler {
             log.log(Level.WARNING,
                     "Confirm oauth scopes set in config.yaml match those granted in data source");
             return builder.build();
+        } catch (co.worklytics.psoxy.gateway.TransientConfigException e) {
+            // Config store was temporarily unreachable (e.g. credential rotation, AWS hiccup).
+            // The proxy already retried internally; this is not a misconfiguration.
+            builder.statusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
+            builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                    ErrorCauses.CONFIGURATION_FAILURE.name());
+            log.log(Level.WARNING, "Transient config store failure after retries: " + e.getMessage(), e);
+            return builder.build();
         } catch (java.util.NoSuchElementException e) {
             // missing config, such as ACCESS_TOKEN
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);

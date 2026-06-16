@@ -146,24 +146,26 @@ class CachingConfigServiceDecoratorTest {
         ThrowingConfigService delegate = new ThrowingConfigService("valid_token");
         delegate.setThrowTransient(true);
 
+        // 0ms delay so the retry loop is fast in tests
         CachingConfigServiceDecorator cache =
-            new CachingConfigServiceDecorator(delegate, Duration.ofMinutes(1), ticker);
+            new CachingConfigServiceDecorator(delegate, Duration.ofMinutes(1), ticker, 0L);
 
-        // cold start with transient error: returns empty but does NOT cache NEGATIVE_VALUE
-        assertEquals(Optional.empty(),
-            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
-        assertEquals(1, delegate.getReads());
+        // cold start with transient error: retries MAX_TRANSIENT_RETRIES times then throws —
+        // nothing is cached as NEGATIVE_VALUE, so the next request will retry immediately
+        assertThrows(TransientConfigException.class,
+            () -> cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(CachingConfigServiceDecorator.MAX_TRANSIENT_RETRIES, delegate.getReads());
 
-        // next request retries immediately (nothing cached) — still failing
-        assertEquals(Optional.empty(),
-            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
-        assertEquals(2, delegate.getReads()); // retried, not served from cache
+        // second request: still failing, retries again from scratch (nothing was cached)
+        assertThrows(TransientConfigException.class,
+            () -> cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(CachingConfigServiceDecorator.MAX_TRANSIENT_RETRIES * 2, delegate.getReads());
 
-        // backend recovers (no TTL advance needed — nothing was cached)
+        // backend recovers — no TTL advance needed since nothing was ever cached
         delegate.setThrowTransient(false);
         assertEquals(Optional.of("valid_token"),
             cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
-        assertEquals(3, delegate.getReads());
+        assertEquals(CachingConfigServiceDecorator.MAX_TRANSIENT_RETRIES * 2 + 1, delegate.getReads());
     }
 
     @Test

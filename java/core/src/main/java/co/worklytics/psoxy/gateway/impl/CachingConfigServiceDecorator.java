@@ -30,19 +30,29 @@ import java.util.logging.Level;
 @Log
 public class CachingConfigServiceDecorator implements WritableConfigService, SecretStore {
 
+    static final int MAX_TRANSIENT_RETRIES = 3;
+    static final long DEFAULT_TRANSIENT_RETRY_DELAY_MS = 500L;
+
     final ConfigService delegate;
     final Duration defaultTtl;
     final Ticker ticker;
+    final long transientRetryDelayMs;
 
     public CachingConfigServiceDecorator(ConfigService delegate, Duration defaultTtl) {
-        this(delegate, defaultTtl, Ticker.systemTicker());
+        this(delegate, defaultTtl, Ticker.systemTicker(), DEFAULT_TRANSIENT_RETRY_DELAY_MS);
     }
 
     @VisibleForTesting
     CachingConfigServiceDecorator(ConfigService delegate, Duration defaultTtl, Ticker ticker) {
+        this(delegate, defaultTtl, ticker, DEFAULT_TRANSIENT_RETRY_DELAY_MS);
+    }
+
+    @VisibleForTesting
+    CachingConfigServiceDecorator(ConfigService delegate, Duration defaultTtl, Ticker ticker, long transientRetryDelayMs) {
         this.delegate = delegate;
         this.defaultTtl = defaultTtl;
         this.ticker = ticker;
+        this.transientRetryDelayMs = transientRetryDelayMs;
     }
 
     private volatile LoadingCache<ConfigProperty, String> cache;
@@ -65,7 +75,27 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
                         .build(new CacheLoader<ConfigProperty, String>() {  //req for java8-backwards compatibility
                             @Override
                             public String load(@NonNull ConfigProperty key) {
-                                return delegate.getConfigPropertyAsOptional(key).orElse(NEGATIVE_VALUE);
+                                TransientConfigException lastException = null;
+                                for (int attempt = 0; attempt < MAX_TRANSIENT_RETRIES; attempt++) {
+                                    if (attempt > 0) {
+                                        try {
+                                            if (transientRetryDelayMs > 0) Thread.sleep(transientRetryDelayMs);
+                                        } catch (InterruptedException ie) {
+                                            Thread.currentThread().interrupt();
+                                            throw new TransientConfigException("Config load for " + key.name() + " interrupted during retry", ie);
+                                        }
+                                        log.log(Level.WARNING, "Retrying config property {0}, attempt {1}/{2}",
+                                            new Object[]{key.name(), attempt + 1, MAX_TRANSIENT_RETRIES});
+                                    }
+                                    try {
+                                        return delegate.getConfigPropertyAsOptional(key).orElse(NEGATIVE_VALUE);
+                                    } catch (TransientConfigException e) {
+                                        lastException = e;
+                                        log.log(Level.WARNING, "Transient failure on attempt {0}/{1} for config property {2}",
+                                            new Object[]{attempt + 1, MAX_TRANSIENT_RETRIES, key.name()});
+                                    }
+                                }
+                                throw Objects.requireNonNull(lastException);
                             }
 
                             @Override
@@ -136,14 +166,13 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
                 // TransientConfigException is a RuntimeException, so it lands here.
                 Throwable cause = e.getCause();
                 if (cause instanceof TransientConfigException) {
-                    // load() threw a TransientConfigException — the cache stored nothing, so the
-                    // next request will retry the backend immediately. Return empty so that
-                    // optional-property callers degrade gracefully; required-property callers will
-                    // reach getConfigPropertyOrError() which throws NoSuchElementException.
+                    // load() retried MAX_TRANSIENT_RETRIES times and still failed. Nothing was
+                    // cached, so the next request will retry immediately. Re-throw so callers can
+                    // distinguish a transient store outage from a genuinely missing property.
                     log.log(Level.WARNING,
-                        "Transient backend failure for config property {0}; value not cached, next request will retry",
+                        "Transient backend failure for config property {0}; all retries exhausted",
                         property.name());
-                    return Optional.empty();
+                    throw (TransientConfigException) cause;
                 }
                 throw (cause instanceof RuntimeException) ? (RuntimeException) cause : e;
             } catch (ExecutionException e) {
