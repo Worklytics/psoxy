@@ -9,21 +9,39 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Ticker;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.WritableConfigService;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.java.Log;
+import org.jspecify.annotations.NonNull;
+
+import java.util.logging.Level;
 
 
-@RequiredArgsConstructor
+@Log
 public class CachingConfigServiceDecorator implements WritableConfigService, SecretStore {
 
     final ConfigService delegate;
     final Duration defaultTtl;
+    final Ticker ticker;
+
+    public CachingConfigServiceDecorator(ConfigService delegate, Duration defaultTtl) {
+        this(delegate, defaultTtl, Ticker.systemTicker());
+    }
+
+    @VisibleForTesting
+    CachingConfigServiceDecorator(ConfigService delegate, Duration defaultTtl, Ticker ticker) {
+        this.delegate = delegate;
+        this.defaultTtl = defaultTtl;
+        this.ticker = ticker;
+    }
 
     private volatile LoadingCache<ConfigProperty, String> cache;
 
@@ -39,12 +57,32 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
                 if (this.cache == null) {
                     this.cache = CacheBuilder.newBuilder()
                         .maximumSize(100)
-                        .expireAfterWrite(defaultTtl.getSeconds(), TimeUnit.SECONDS)
+                        .ticker(ticker)
+                        .refreshAfterWrite(defaultTtl.getSeconds(), TimeUnit.SECONDS)
                         .recordStats()
                         .build(new CacheLoader<ConfigProperty, String>() {  //req for java8-backwards compatibility
                             @Override
-                            public String load(ConfigProperty key) {
+                            public String load(@NonNull ConfigProperty key) {
                                 return delegate.getConfigPropertyAsOptional(key).orElse(NEGATIVE_VALUE);
+                            }
+
+                            @Override
+                            public ListenableFuture<String> reload(@NonNull ConfigProperty key, @NonNull String oldValue) {
+                                String newValue = delegate.getConfigPropertyAsOptional(key).orElse(NEGATIVE_VALUE);
+                                // If the store returns empty but we previously had a valid value,
+                                // treat it as a transient backend failure and retain the old value.
+                                // Crucially, we return immediateFuture(oldValue) rather than a failed
+                                // future: a failed future leaves the write-time unchanged so Guava
+                                // would re-attempt the reload on every subsequent cache.get() call,
+                                // hammering SSM for the entire outage window. Returning the old value
+                                // marks the entry as freshly written, so the next retry waits a full TTL.
+                                if (NEGATIVE_VALUE.equals(newValue) && !NEGATIVE_VALUE.equals(oldValue)) {
+                                    log.log(Level.WARNING,
+                                        "Transient failure reloading config property {0}; retaining cached value until next refresh cycle",
+                                        key.name());
+                                    return Futures.immediateFuture(oldValue);
+                                }
+                                return Futures.immediateFuture(newValue);
                             }
                         });
                 }
