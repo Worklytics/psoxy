@@ -1,0 +1,32 @@
+{
+  "event_id":"evt_20260520_abc123def456",
+  "type":"CODEX_LOG",
+  "principal":{
+    "id":"t~TDhE_IAxxWoLdspQg3HZYlI9IEx8ylVhXguQIRJb7vc",
+    "type":"CHATGPT_WORKSPACE"
+  },
+  "actor":{
+    "type":"ACCOUNT_USER",
+    "user_id":"t~QNybpbKvUYf4HL8gqEZfPRwjlz4FbGlr4mKOaduViYc",
+    "user_email":"t~knxWE5tapsutcz6pLWSC3wfb5t34lCrXNZsKnhwyVXk@example.com"
+  },
+  "event_type":"PROMPT_SENT",
+  "client_id":"CODEX_CLI",
+  "workspace_id":"be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details":{
+    "detail_type":"PROMPT_SENT",
+    "session_id":"session-abc123",
+    "prompt_text":"{\"keywords\":{\"review\":1,\"summarize\":1},\"length\":72,\"word_count\":13}",
+    "status":"completed",
+    "model":"gpt-5.1-codex-max",
+    "service_tier":"default",
+    "reasoning_effort":"medium",
+    "token_usage":{
+      "input_tokens":45,
+      "output_tokens":38,
+      "cached_input_tokens":12,
+      "reasoning_output_tokens":0
+    },
+    "environment_id":null
+  }
+}
