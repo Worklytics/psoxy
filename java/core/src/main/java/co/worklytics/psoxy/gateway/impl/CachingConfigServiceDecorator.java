@@ -20,9 +20,9 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.TransientConfigException;
 import co.worklytics.psoxy.gateway.WritableConfigService;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.jspecify.annotations.NonNull;
 
 import java.util.logging.Level;
 
