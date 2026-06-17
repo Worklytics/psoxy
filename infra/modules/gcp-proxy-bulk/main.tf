@@ -252,7 +252,8 @@ resource "google_cloudfunctions2_function" "function" {
 
       content {
         key        = secret_environment_variable.key
-        project_id = var.gcp_project.number
+        # project_id string (not number) avoids apply-time drift: number comes from data.google_project
+        project_id = var.gcp_project.project_id
         secret     = secret_environment_variable.value.secret_id
         version    = secret_environment_variable.value.version_number
       }
