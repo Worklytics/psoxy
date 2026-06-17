@@ -17,6 +17,7 @@ public class GenMetadataProcessor {
     private static final Logger log = Logger.getLogger(GenMetadataProcessor.class.getName());
 
     private static final int DEFAULT_MAX_INPUT_CHARS = 4096;
+    private static final int MAX_LOG_OUTPUT_CHARS = 2000;
 
     private final GenMetadataBackend backend;
     private final ObjectMapper objectMapper;
@@ -51,11 +52,19 @@ public class GenMetadataProcessor {
         }
         try {
             Object raw = backend.generate(taskPrompt, outputSchema, inputJson);
+            if (raw instanceof String rawText) {
+                log.info("genMetadata raw backend response: " + truncateForLog(rawText));
+            } else if (raw != null) {
+                log.info("genMetadata backend returned non-string type: "
+                    + raw.getClass().getSimpleName());
+            }
             Map<?, ?> parsed = parseModelJson(raw);
             if (parsed == null) {
                 throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.INFERENCE_FAILED,
                     "genMetadata backend returned unparseable output");
             }
+            log.info("genMetadata parsed output keys: " + parsed.keySet()
+                + "; value=" + truncateForLog(serializeForLog(parsed)));
             return parsed;
         } catch (GenMetadataAugmentException e) {
             throw e;
@@ -108,6 +117,24 @@ public class GenMetadataProcessor {
             }
         }
         return null;
+    }
+
+    private String serializeForLog(Map<?, ?> parsed) {
+        try {
+            return objectMapper.writeValueAsString(parsed);
+        } catch (Exception e) {
+            return String.valueOf(parsed);
+        }
+    }
+
+    private static String truncateForLog(String value) {
+        if (value == null) {
+            return "null";
+        }
+        if (value.length() <= MAX_LOG_OUTPUT_CHARS) {
+            return value;
+        }
+        return value.substring(0, MAX_LOG_OUTPUT_CHARS) + "... (" + value.length() + " chars total)";
     }
 
     static String extractJsonObject(String response) {

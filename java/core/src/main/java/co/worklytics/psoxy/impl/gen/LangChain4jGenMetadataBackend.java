@@ -134,7 +134,11 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             if (response == null || response.aiMessage() == null) {
                 return null;
             }
-            return response.aiMessage().text();
+            String text = response.aiMessage().text();
+            if (text != null && !text.isBlank()) {
+                log.info("genMetadata raw model response: " + truncateForLog(text));
+            }
+            return text;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return null;
@@ -199,6 +203,18 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         } finally {
             loadLock.unlock();
         }
+    }
+
+    private static final int MAX_LOG_OUTPUT_CHARS = 2000;
+
+    private static String truncateForLog(String value) {
+        if (value == null) {
+            return "null";
+        }
+        if (value.length() <= MAX_LOG_OUTPUT_CHARS) {
+            return value;
+        }
+        return value.substring(0, MAX_LOG_OUTPUT_CHARS) + "... (" + value.length() + " chars total)";
     }
 
     private ModelHandle waitForLoad(String modelKey) {

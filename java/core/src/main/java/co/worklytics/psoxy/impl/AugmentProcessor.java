@@ -12,6 +12,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.PathNotFoundException;
 import co.worklytics.psoxy.Warning;
+import lombok.NonNull;
 import lombok.extern.java.Log;
 
 import javax.inject.Inject;
@@ -215,7 +216,7 @@ public class AugmentProcessor {
             return;
         }
 
-        if (!validateOutputSchema(augment, augmentValue)) {
+        if (!validateOutputSchema(augment, augmentValue, augmentPropertyName)) {
             throw new AugmentProcessingException(Warning.AUGMENT_OUTPUT_SCHEMA_MISMATCH,
                 "Augment '" + augment.getFunctionName()
                     + "' output failed schema validation for property '" + augmentPropertyName
@@ -250,16 +251,23 @@ public class AugmentProcessor {
             : new AugmentProcessingException(warning, e.getMessage());
     }
 
-    private boolean validateOutputSchema(Augment augment, Object augmentValue) {
+    private boolean validateOutputSchema(@NonNull Augment augment, @NonNull Object augmentValue,
+                                         @NonNull String augmentPropertyName) {
         JsonSchemaFilter outputSchema = augment.getOutputSchema();
         if (outputSchema == null) {
             return true;
         }
         try {
             String json = objectMapper.writeValueAsString(augmentValue);
-            return jsonSchemaValidationUtils.validateJsonBySchema(json, outputSchema);
+            boolean valid = jsonSchemaValidationUtils.validateJsonBySchema(json, outputSchema);
+            if (!valid) {
+                log.warning("Augment '" + augment.getFunctionName()
+                    + "' output for '" + augmentPropertyName + "' failed schema validation");
+            }
+            return valid;
         } catch (Exception e) {
-            log.log(Level.WARNING, "Failed to validate augment output schema", e);
+            log.log(Level.WARNING, "Failed to validate augment output schema for '"
+                + augmentPropertyName + "'", e);
             return false;
         }
     }
@@ -298,7 +306,8 @@ public class AugmentProcessor {
                 if (augmentValue == null) {
                     continue;
                 }
-                if (!validateOutputSchema(augment, augmentValue)) {
+                if (!validateOutputSchema(augment, augmentValue,
+                    buildAugmentPropertyName(leafFieldName, augment.getFunctionName()))) {
                     log.warning("Augment '" + augment.getFunctionName()
                         + "' output failed schema validation at inner path '" + innerConcretePath
                         + "'; skipping.");
