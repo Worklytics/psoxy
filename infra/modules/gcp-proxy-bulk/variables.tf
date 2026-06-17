@@ -3,6 +3,11 @@ variable "project_id" {
   description = "id of GCP project that will host psoxy instance"
 }
 
+variable "gcp_project_number" {
+  type        = string
+  description = "numeric GCP project number (used for secret environment variables; pass from parent to avoid a data.google_project lookup per bulk connector instance)"
+}
+
 variable "tf_runner_iam_principal" {
   description = "The IAM principal (e.g., 'user:alice@example.com' or 'serviceAccount:terraform@project.iam.gserviceaccount.com') that Terraform is running as, used for granting necessary permissions to provision Cloud Functions."
   type        = string

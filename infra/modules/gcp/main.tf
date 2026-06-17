@@ -526,6 +526,11 @@ resource "google_project_iam_member" "data_sanitization_tester_grant" {
 
 
 
+output "gcp_project_number" {
+  value       = data.google_project.project.number
+  description = "Numeric GCP project number. Exposed so child modules (eg bulk connectors) can reference it without their own data.google_project lookup."
+}
+
 output "artifacts_bucket_name" {
   value = local.artifact_bucket_name
 }

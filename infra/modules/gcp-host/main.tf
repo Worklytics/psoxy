@@ -398,6 +398,7 @@ module "bulk_connector" {
   source = "../../modules/gcp-proxy-bulk"
 
   project_id                        = var.gcp_project_id
+  gcp_project_number                = module.psoxy.gcp_project_number
   region                            = var.gcp_region
   environment_id_prefix             = local.environment_id_prefix
   instance_id                       = each.key

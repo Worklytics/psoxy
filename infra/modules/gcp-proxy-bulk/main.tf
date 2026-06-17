@@ -18,10 +18,6 @@ locals {
   path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(local.instance_id), "-", "_")}_"
 }
 
-data "google_project" "project" {
-  project_id = var.project_id
-}
-
 resource "random_string" "bucket_id_part" {
   length  = 8
   special = false
@@ -256,7 +252,7 @@ resource "google_cloudfunctions2_function" "function" {
 
       content {
         key        = secret_environment_variable.key
-        project_id = data.google_project.project.number
+        project_id = var.gcp_project_number
         secret     = secret_environment_variable.value.secret_id
         version    = secret_environment_variable.value.version_number
       }
