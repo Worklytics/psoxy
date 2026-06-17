@@ -413,8 +413,10 @@ public class PsoxyModule {
     @Singleton
     static GenMetadataProcessor genMetadataProcessor(GenMetadataBackend genMetadataBackend,
                                                      ObjectMapper objectMapper,
-                                                     ConfigService configService) {
+                                                     ConfigService configService,
+                                                     JsonSchemaValidationUtils jsonSchemaValidationUtils) {
         GenMetadataConfig config = GenMetadataConfig.from(configService);
-        return new GenMetadataProcessor(genMetadataBackend, objectMapper, config.getMaxInputChars());
+        return new GenMetadataProcessor(genMetadataBackend, objectMapper, config.getMaxInputChars(),
+            config.getMaxAttempts(), jsonSchemaValidationUtils);
     }
 }

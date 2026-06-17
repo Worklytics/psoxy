@@ -17,7 +17,14 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
@@ -73,6 +80,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     private final ConcurrentHashMap<String, ModelHandle> models = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ReentrantLock> loadLocks = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ReentrantLock> inferenceLocks = new ConcurrentHashMap<>();
+    private final ExecutorService chatExecutor = Executors.newCachedThreadPool(chatThreadFactory());
 
     public LangChain4jGenMetadataBackend(GenMetadataConfig config, ObjectMapper objectMapper,
                                          GenMetadataPromptBudget promptBudget,
@@ -136,9 +144,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
                 + " modelId=" + config.getModelId());
             ChatResponse response;
             try {
-                response = handle.chatModel.chat(ChatRequest.builder()
-                    .messages(messages)
-                    .build());
+                response = chatWithTimeout(handle.chatModel, messages);
             } finally {
                 long inferenceMs = TimeUnit.NANOSECONDS.toMillis(
                     System.nanoTime() - inferenceStartedNanos);
@@ -217,6 +223,34 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         } finally {
             loadLock.unlock();
         }
+    }
+
+    ChatResponse chatWithTimeout(ChatModel chatModel, List<ChatMessage> messages) throws Exception {
+        ChatRequest request = ChatRequest.builder().messages(messages).build();
+        Future<ChatResponse> future = chatExecutor.submit(() -> chatModel.chat(request));
+        try {
+            return future.get(config.getTimeoutSeconds(), TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            future.cancel(true);
+            log.warning("genMetadata LLM inference timed out after " + config.getTimeoutSeconds()
+                + "s modelId=" + config.getModelId());
+            return null;
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof Exception ex) {
+                throw ex;
+            }
+            throw e;
+        }
+    }
+
+    private static ThreadFactory chatThreadFactory() {
+        AtomicInteger threadNumber = new AtomicInteger(1);
+        return runnable -> {
+            Thread thread = new Thread(runnable, "genMetadata-chat-" + threadNumber.getAndIncrement());
+            thread.setDaemon(true);
+            return thread;
+        };
     }
 
     private static final int MAX_LOG_OUTPUT_CHARS = 2000;

@@ -15,6 +15,8 @@ import java.util.Optional;
 @Builder
 public class GenMetadataConfig {
 
+    public static final int DEFAULT_MAX_ATTEMPTS = 2;
+
     public static final String BACKEND_LOCAL = "local";
     public static final String BACKEND_BEDROCK = "bedrock";
     public static final String BACKEND_VERTEX = "vertex";
@@ -30,6 +32,9 @@ public class GenMetadataConfig {
     int timeoutSeconds;
     int maxInputChars;
     int maxTokens;
+    /** Total inference attempts per augment (including the first try). */
+    @Builder.Default
+    int maxAttempts = DEFAULT_MAX_ATTEMPTS;
 
     public static GenMetadataConfig from(ConfigService configService) {
         String backend = configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_GEN_BACKEND)
@@ -50,12 +55,16 @@ public class GenMetadataConfig {
         int maxTokens = configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_GEN_MAX_TOKENS)
             .flatMap(GenMetadataConfig::parsePositiveInt)
             .orElse(256);
+        int maxAttempts = configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_GEN_META_RETRIES)
+            .flatMap(GenMetadataConfig::parsePositiveInt)
+            .orElse(2);
         return GenMetadataConfig.builder()
             .backend(backend)
             .modelId(model)
             .timeoutSeconds(timeout)
             .maxInputChars(maxInput)
             .maxTokens(maxTokens)
+            .maxAttempts(maxAttempts)
             .build();
     }
 

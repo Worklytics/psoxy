@@ -28,9 +28,10 @@ Read via `ConfigService` / `ProxyConfigProperty`:
 |----------|---------|---------|
 | `PSOXY_GEN_BACKEND` | `local` | `local` (Jlama), `bedrock` and `vertex` (future) |
 | `PSOXY_GEN_MODEL` | `tjake/Llama-3.2-1B-Instruct-JQ4` | Jlama HuggingFace id (`owner/name`) or logical id for a cached local archive |
-| `PSOXY_GEN_TIMEOUT_SECONDS` | `15` | Per-inference and model-load timeout |
+| `PSOXY_GEN_TIMEOUT_SECONDS` | `15` | Max seconds per genMetadata `chat()` call (and model-load wait) |
 | `PSOXY_GEN_MAX_INPUT_CHARS` | `4096` | Truncate source text before prompting |
 | `PSOXY_GEN_MAX_TOKENS` | `256` | Max tokens to generate per inference |
+| `PSOXY_GEN_META_RETRIES` | `2` | Total inference attempts per augment when output is unparseable or fails `outputSchema` (minimum 1; `2` = one retry) |
 | `ENABLE_GEN_METADATA` | unset | Set to `true` when that connector has Terraform `enable_gen_metadata = true` |
 
 When `enable_gen_metadata` is set on an API connector, Terraform **appends** Jlama JVM flags to any existing `JAVA_TOOL_OPTIONS` from `general_environment_variables` or that connector's `environment_variables` (`--add-modules=jdk.incubator.vector --enable-preview --enable-native-access=ALL-UNNAMED`).

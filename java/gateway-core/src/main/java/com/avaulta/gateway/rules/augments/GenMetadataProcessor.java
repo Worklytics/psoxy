@@ -1,6 +1,7 @@
 package com.avaulta.gateway.rules.augments;
 
 import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,16 +20,28 @@ public class GenMetadataProcessor {
     private static final Logger log = Logger.getLogger(GenMetadataProcessor.class.getName());
 
     private static final int DEFAULT_MAX_INPUT_CHARS = 4096;
+    private static final int DEFAULT_MAX_ATTEMPTS = 2;
     private static final int MAX_LOG_OUTPUT_CHARS = 2000;
 
     private final GenMetadataBackend backend;
     private final ObjectMapper objectMapper;
+    private final JsonSchemaValidationUtils jsonSchemaValidationUtils;
     private final int maxInputChars;
+    private final int maxAttempts;
 
-    public GenMetadataProcessor(GenMetadataBackend backend, ObjectMapper objectMapper, int maxInputChars) {
+    public GenMetadataProcessor(GenMetadataBackend backend, ObjectMapper objectMapper, int maxInputChars,
+                                int maxAttempts, JsonSchemaValidationUtils jsonSchemaValidationUtils) {
         this.backend = backend != null ? backend : new UnavailableGenMetadataBackend();
         this.objectMapper = objectMapper != null ? objectMapper : new ObjectMapper();
+        this.jsonSchemaValidationUtils = jsonSchemaValidationUtils != null
+            ? jsonSchemaValidationUtils
+            : new JsonSchemaValidationUtils(this.objectMapper);
         this.maxInputChars = maxInputChars > 0 ? maxInputChars : DEFAULT_MAX_INPUT_CHARS;
+        this.maxAttempts = maxAttempts > 0 ? maxAttempts : DEFAULT_MAX_ATTEMPTS;
+    }
+
+    public GenMetadataProcessor(GenMetadataBackend backend, ObjectMapper objectMapper, int maxInputChars) {
+        this(backend, objectMapper, maxInputChars, DEFAULT_MAX_ATTEMPTS, null);
     }
 
     public GenMetadataProcessor(GenMetadataBackend backend, ObjectMapper objectMapper) {
@@ -53,36 +66,61 @@ public class GenMetadataProcessor {
                 "genMetadata input empty or not serializable");
         }
         try {
-            Instant startedAt = Instant.now();
-            long startedNanos = System.nanoTime();
-            log.info("genMetadata augment inference call started at " + startedAt);
-            Object raw;
-            try {
-                raw = backend.generate(taskPrompt, outputSchema, inputJson);
-            } finally {
-                long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedNanos);
-                log.info("genMetadata augment inference call completed in " + elapsedMs + "ms");
+            for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+                if (attempt > 1) {
+                    log.info("genMetadata inference retry attempt " + attempt + " of " + maxAttempts);
+                }
+                Map<?, ?> parsed = inferOnce(taskPrompt, outputSchema, inputJson);
+                if (parsed != null && validatesOutputSchema(parsed, outputSchema)) {
+                    return parsed;
+                }
             }
-            if (raw instanceof String rawText) {
-                log.info("genMetadata raw backend response: " + truncateForLog(rawText));
-            } else if (raw != null) {
-                log.info("genMetadata backend returned non-string type: "
-                    + raw.getClass().getSimpleName());
-            }
-            Map<?, ?> parsed = parseModelJson(raw);
-            if (parsed == null) {
-                throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.INFERENCE_FAILED,
-                    "genMetadata backend returned unparseable output");
-            }
-            log.info("genMetadata parsed output keys: " + parsed.keySet()
-                + "; value=" + truncateForLog(serializeForLog(parsed)));
-            return parsed;
+            throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.INFERENCE_FAILED,
+                "genMetadata output failed schema validation after " + maxAttempts + " attempt(s)");
         } catch (GenMetadataAugmentException e) {
             throw e;
         } catch (Exception e) {
             log.log(Level.WARNING, "genMetadata inference failed", e);
             throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.INFERENCE_FAILED,
                 "genMetadata inference failed", e);
+        }
+    }
+
+    private Map<?, ?> inferOnce(String taskPrompt, JsonSchemaFilter outputSchema, String inputJson)
+            throws Exception {
+        Instant startedAt = Instant.now();
+        long startedNanos = System.nanoTime();
+        log.info("genMetadata augment inference call started at " + startedAt);
+        Object raw;
+        try {
+            raw = backend.generate(taskPrompt, outputSchema, inputJson);
+        } finally {
+            long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedNanos);
+            log.info("genMetadata augment inference call completed in " + elapsedMs + "ms");
+        }
+        if (raw instanceof String rawText) {
+            log.info("genMetadata raw backend response: " + truncateForLog(rawText));
+        } else if (raw != null) {
+            log.info("genMetadata backend returned non-string type: "
+                + raw.getClass().getSimpleName());
+        }
+        Map<?, ?> parsed = parseModelJson(raw);
+        if (parsed == null) {
+            log.warning("genMetadata backend returned unparseable output");
+            return null;
+        }
+        log.info("genMetadata parsed output keys: " + parsed.keySet()
+            + "; value=" + truncateForLog(serializeForLog(parsed)));
+        return parsed;
+    }
+
+    private boolean validatesOutputSchema(Map<?, ?> parsed, JsonSchemaFilter outputSchema) {
+        try {
+            String json = objectMapper.writeValueAsString(parsed);
+            return jsonSchemaValidationUtils.validateJsonBySchema(json, outputSchema);
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Failed to validate genMetadata output schema", e);
+            return false;
         }
     }
 
