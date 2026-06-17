@@ -14,12 +14,8 @@ name: Publish AWS Bundle
 #   - Consider adding branch protection rules to restrict who can push tags and create rc-* branches
 
 on:
+  workflow_call:
   workflow_dispatch:
-  push:
-    tags:
-      - 'v*'
-    branches:
-      - 'rc-*'
 
 env:
   IMPLEMENTATION: aws
@@ -113,37 +109,14 @@ jobs:
         run: |
           TAG_NAME="${{ github.ref_name }}"
           
-          # Construct AWS markdown block
-          AWS_BLOCK=""
-          while IFS='=' read -r key url; do
-            region=$(echo "$key" | sed 's/^ARTIFACT_URI_//')
-            filename="${url##*/}"
-            bucket="${BUCKET_PREFIX}-${region}"
-            s3_uri="s3://${bucket}/${filename}"
-            
-            AWS_BLOCK="${AWS_BLOCK}* **${region}:**"$'\n'
-            AWS_BLOCK="${AWS_BLOCK}  * **S3 URI:** \`${s3_uri}\`"$'\n'
-            AWS_BLOCK="${AWS_BLOCK}  * **HTTP URL:** [$url]($url)"$'\n'
-          done < artifact-uris.txt
-          
-          # Read SHA256 hash
-          AWS_SHA256=$(cut -d'=' -f2 < artifact-sha.txt || echo "")
+          bash ./tools/release/lib/deployment-bundle-release-notes-block.sh aws "$TAG_NAME" "$(cut -d'=' -f2 < artifact-sha.txt || echo "")" artifact-uris.txt > aws-release-block.md
           
           IDENTIFIER="<!-- aws-artifacts-info -->"
-          
           BLOCK_FILE=$(mktemp)
-          cat > "$BLOCK_FILE" <<EOF
-          
-          $IDENTIFIER
-          ## AWS Deployment Bundles
-          * **SHA256 Hash:** \`$AWS_SHA256\`
-          $AWS_BLOCK
-          $IDENTIFIER
-          EOF
+          cp aws-release-block.md "$BLOCK_FILE"
 
-          chmod +x ./tools/release/lib/amend-github-release-notes.sh
-          ./tools/release/lib/amend-github-release-notes.sh "$TAG_NAME" "$IDENTIFIER" "$BLOCK_FILE"
-          rm -f "$BLOCK_FILE"
+          bash ./tools/release/lib/amend-github-release-notes.sh "$TAG_NAME" "$IDENTIFIER" "$BLOCK_FILE"
+          rm -f "$BLOCK_FILE" aws-release-block.md
 
       - name: Summary
         if: success()

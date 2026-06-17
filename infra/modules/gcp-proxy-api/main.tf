@@ -397,9 +397,25 @@ locals {
     var.example_api_requests
   )
 
+  example_api_get_requests = [for r in local.all_example_api_requests : r if r.method == "GET"]
+
+  example_request_header_flags = { for request in local.all_example_api_requests :
+    "${request.method} ${request.path}" => join("", [for name, value in try(request.headers, {}) : " -H \"${name}: ${value}\""])
+  }
+
+  example_api_get_requests_for_script = [for r in local.example_api_get_requests : merge(r, {
+    header_flags = trimspace(lookup(local.example_request_header_flags, "${r.method} ${r.path}", ""))
+  })]
+
+  example_api_post_requests_for_script = [for r in local.all_example_api_requests : merge(r, {
+    header_flags = trimspace(lookup(local.example_request_header_flags, "${r.method} ${r.path}", ""))
+  }) if r.method == "POST" && r.body != null]
+
+  default_header_flags = length(local.example_api_get_requests_for_script) > 0 ? local.example_api_get_requests_for_script[0].header_flags : ""
+
   # Generate test calls from all example requests
   command_test_calls = [for request in local.all_example_api_requests :
-    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${request.path}\" -m ${request.method}${request.body != null ? " -b \"${request.body}\"" : ""}${local.impersonation_param}"
+    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${request.path}\" -m ${request.method}${request.body != null ? " -b \"${request.body}\"" : ""}${local.example_request_header_flags["${request.method} ${request.path}"]}${local.impersonation_param}"
   ]
   command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions2_function.function.project}\" -f \"${google_cloudfunctions2_function.function.name}\""
 }
@@ -465,8 +481,9 @@ resource "local_file" "test_script" {
     function_name             = var.instance_id,
     impersonation_param       = local.impersonation_param,
     command_cli_call          = local.command_cli_call,
-    example_api_get_requests  = [for r in local.all_example_api_requests : r if r.method == "GET"],
-    example_api_post_requests = [for r in local.all_example_api_requests : r if r.method == "POST" && r.body != null], # body being null will blow up the templating
+    default_header_flags      = local.default_header_flags,
+    example_api_get_requests  = local.example_api_get_requests_for_script,
+    example_api_post_requests = local.example_api_post_requests_for_script,
     enable_async_processing   = var.enable_async_processing
   })
 }

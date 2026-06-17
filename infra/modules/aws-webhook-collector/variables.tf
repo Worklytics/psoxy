@@ -45,9 +45,12 @@ variable "function_env_kms_key_arn" {
   default     = null
 }
 
+# TODO: remove in next major version; output-bucket read access is provisioned by aws-host (0.6.4+).
 variable "sanitized_accessor_role_names" {
   type        = list(string)
-  description = "list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
+  description = "DEPRECATED (ignored since 0.6.4); list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
+  default     = null
+  nullable    = true
 }
 
 variable "output_path_prefix" {

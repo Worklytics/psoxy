@@ -106,6 +106,24 @@ verify_bundles_platform_label() {
   esac
 }
 
+verify_bundles_print_compile_remediation() {
+  local label="${1:-bundle}"
+  echo ""
+  echo -e "${WARN}The published ${label} appears to contain Eclipse stub classes from a failed compile.${NC}"
+  echo -e "${INFO}To fix locally, rebuild and republish:${NC}"
+  echo -e "  ${CODE}./tools/build.sh -qd aws java/${NC}"
+  echo -e "  ${CODE}./tools/build.sh -qd gcp java/${NC}"
+  echo -e "  ${CODE}cd java && mvn clean test${NC}"
+  echo ""
+  echo -e "${INFO}To rebuild via GitHub Actions and republish:${NC}"
+  echo -e "  ${CODE}gh workflow run publish-bundles.yaml --ref <release-tag-or-rc-branch>${NC}"
+  echo -e "  ${CODE}gh workflow run publish-aws-bundle.yaml --ref <release-tag-or-rc-branch>${NC}"
+  echo -e "  ${CODE}gh workflow run publish-gcp-bundle.yaml --ref <release-tag-or-rc-branch>${NC}"
+  echo ""
+  echo -e "${INFO}To catch compile issues before publishing, run bundle CI:${NC}"
+  echo -e "  ${CODE}gh workflow run ci-bundles.yaml --ref <branch>${NC}"
+}
+
 verify_bundles_scan_jar_for_compilation_errors() {
   local jar_path="$1"
   local label="$2"
@@ -131,6 +149,7 @@ verify_bundles_scan_jar_for_compilation_errors() {
     if [ "${#bad_classes[@]}" -gt 10 ]; then
       echo -e "  ${WARN}... and $((${#bad_classes[@]} - 10)) more${NC}"
     fi
+    verify_bundles_print_compile_remediation "$label"
     return 1
   fi
 

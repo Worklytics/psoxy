@@ -173,6 +173,9 @@ This script copies S3 objects to themselves (adding a `psoxy-last-replay` metada
 # Re-trigger processing for objects modified since a specific date
 ./tools/aws/replay-s3-writes.sh my-bucket-name 2024-01-01T00:00:00Z
 
+# Re-trigger processing for objects under a prefix
+./tools/aws/replay-s3-writes.sh --prefix raw/source_bucket=my-bucket my-bucket-name
+
 # Re-trigger processing for a single object
 ./tools/aws/replay-s3-writes.sh s3://my-bucket-name/path/to/object.json
 

@@ -5,6 +5,12 @@ in each release's notes.
 
 Changes to be including in future/planned release notes will be added here.
 
+## [0.6.5]
+- added `claude-enterprise-analytics` connector in **beta**; imports per-user daily activity, token usage, and cost data from the [Claude Enterprise Analytics API](https://support.claude.com/en/articles/13703965-claude-enterprise-analytics-api-reference-guide); see [docs/sources/anthropic/claude-enterprise-analytics/README.md](docs/sources/anthropic/claude-enterprise-analytics/README.md)
+
+## [0.6.4]
+- `aws`: consolidate IAM policies at the `aws-host` level to reduce per-connector policy/attachment churn (important for customers with low per-role IAM policy limits). PsoxyCaller now receives a single `CallerAccess` policy (lambda invoke, when applicable, plus read access to all provisioned output buckets: bulk sanitized, async, side-output, webhook, and lookup). Non-caller lookup-table accessor roles receive per-lookup `LookupBucketRead` policies scoped to their lookup bucket only. Bulk connector testing uses S3 bucket policies on each input/sanitized bucket granting the Terraform test principal upload/read/delete as needed, avoiding additional IAM policy attachments on the test role. **Upgrading customers should expect Terraform to destroy and recreate several IAM policies and attachments**; effective access should be unchanged, but we encourage reviewing the plan.
+
 ## [0.6.3](https://github.com/Worklytics/psoxy/releases/tag/v0.6.3)
 - `aws`: add `test_aws_principal_arns` for testing (defaults to Terraform runner when `provision_testing_infra` is true); grants assume-Caller access and bulk input-bucket upload via S3 bucket policy, separate from production `caller_aws_arns`.
 - `gcp`: fix Terraform compatibility when upgrading to v0.6.x with an older `hashicorp/google` provider lock file; require provider `>= 7.0` in modules and use `detect_md5hash` for deployment bundle change detection.

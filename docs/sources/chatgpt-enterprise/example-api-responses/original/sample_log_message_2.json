@@ -1,0 +1,32 @@
+{
+  "event_id": "evt_20260520_abc123def456",
+  "type": "CODEX_LOG",
+  "principal": {
+    "id": "workspace_abc123",
+    "type": "CHATGPT_WORKSPACE"
+  },
+  "actor": {
+    "type": "ACCOUNT_USER",
+    "user_id": "user-abc123def456",
+    "user_email": "alice@example.com"
+  },
+  "event_type": "PROMPT_SENT",
+  "client_id": "CODEX_CLI",
+  "workspace_id": "be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details": {
+    "detail_type": "PROMPT_SENT",
+    "session_id": "session-abc123",
+    "prompt_text": "Hey, review this PR and summarize the changes made in the latest commit.",
+    "status": "completed",
+    "model": "gpt-5.1-codex-max",
+    "service_tier": "default",
+    "reasoning_effort": "medium",
+    "token_usage": {
+      "input_tokens": 45,
+      "output_tokens": 38,
+      "cached_input_tokens": 12,
+      "reasoning_output_tokens": 0
+    },
+    "environment_id": null
+  }
+}

@@ -4,6 +4,7 @@ METHOD=$${1:-"GET"}
 API_PATH=$${2:-${try(example_api_get_requests[0].path, "")}}
 CONTENT_TYPE=$${3:-""}
 BODY=$${4:-""}
+HEADER_FLAGS=$${5:-'${replace(default_header_flags, "'", "'\\''")}'}
 
 echo "Quick test of ${function_name} ..."
 
@@ -13,11 +14,11 @@ export NODE_OPTIONS="$${NODE_OPTIONS:+$NODE_OPTIONS }--no-deprecation"
 ${command_cli_call} -u "${proxy_endpoint_url}/" --health-check
 HEALTHCHECK_RC=$?
 
-${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b "$BODY"
+${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b "$BODY" $HEADER_FLAGS
 SYNC_CALL_RC=$?
 
 %{ if enable_async_processing ~}
-${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b "$BODY" --async
+${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b "$BODY" $HEADER_FLAGS --async
 ASYNC_CALL_RC=$?
 %{ else ~}
 ASYNC_CALL_RC=0
@@ -26,10 +27,10 @@ ASYNC_CALL_RC=0
 echo "Invoke this script with any of the following as arguments to test other endpoints:"
 
 %{ for example_api_get_request in example_api_get_requests ~}
-    printf "\t%s\n" "${example_api_get_request.method} '${example_api_get_request.path}'"
+    printf "\t%s\n" "${example_api_get_request.method} '${example_api_get_request.path}' '' '' '${replace(example_api_get_request.header_flags, "'", "'\\''")}'"
 %{ endfor ~}
 %{ for example_api_post_request in example_api_post_requests ~}
-    printf "\t%s\n" "${example_api_post_request.method} '${example_api_post_request.path}' ${example_api_post_request.content_type} '${replace(example_api_post_request.body, "\"", "\\\"")}'"
+    printf "\t%s\n" "${example_api_post_request.method} '${example_api_post_request.path}' ${example_api_post_request.content_type} '${replace(example_api_post_request.body, "\"", "\\\"")}' '${replace(example_api_post_request.header_flags, "'", "'\\''")}'"
 %{ endfor ~}
 
 exit $(( HEALTHCHECK_RC + SYNC_CALL_RC + ASYNC_CALL_RC ))
