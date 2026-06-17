@@ -29,7 +29,7 @@ locals {
 
   # rules_file paths may be absolute, relative to the Terraform root module (deployment dir), or
   # relative to psoxy_base_dir (paths into the psoxy repo, eg docs/sources/...)
-  api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
+  api_connector_rules_files = merge({ for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null }, var.custom_api_connector_rules)
 
   _rules_file_references = distinct(concat(
     values(local.api_connector_rules_files),
@@ -545,11 +545,35 @@ resource "google_secret_manager_secret_iam_member" "additional_transforms" {
 # END LOOKUP TABLES
 
 locals {
+  api_connector_test_examples = { for k, connector in var.api_connectors : k => merge(
+    {
+      api_requests = concat(
+        [for path in try(connector.example_api_calls, []) : {
+          method       = "GET"
+          path         = path
+          content_type = null
+          body         = null
+          headers      = {}
+        }],
+        [for req in try(connector.example_api_requests, []) : {
+          method       = try(req.method, "GET")
+          path         = req.path
+          content_type = try(req.content_type, null)
+          body         = try(req.body, null)
+          headers      = try(req.headers, {})
+        }]
+      )
+    },
+    try(connector.enable_async_processing, false) ? { supports_async = true } : {},
+    try(connector.example_api_calls_user_to_impersonate, null) != null ? { user_to_impersonate = connector.example_api_calls_user_to_impersonate } : {}
+  ) }
+
   api_instances = { for instance in module.api_connector :
     instance.instance_id => merge(
       {
-        endpoint_url : instance.cloud_function_url,
-        sanitized_bucket : try(instance.async_output_bucket_name, null),
+        endpoint_url     = instance.cloud_function_url,
+        sanitized_bucket   = try(instance.async_output_bucket_name, null),
+        test_examples      = local.api_connector_test_examples[instance.instance_id],
       },
       instance,
       var.api_connectors[instance.instance_id]
@@ -612,4 +636,9 @@ output "secrets_to_provision" {
 output "bulk_connector" {
   description = "INTERNAL USE ONLY - For testing purposes."
   value       = module.bulk_connector
+}
+
+output "api_connector" {
+  description = "INTERNAL USE ONLY - For testing purposes."
+  value       = module.api_connector
 }
