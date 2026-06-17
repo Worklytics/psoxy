@@ -18,6 +18,10 @@ locals {
     "cloudscheduler.googleapis.com", # triggering batches
     "pubsub.googleapis.com",         # webhooks batched via pubsub
   ]
+
+  # Artifact Registry repository IDs must be unique within a project/location; prefix with
+  # environment_id_prefix so multiple psoxy instances can share a GCP project.
+  functions_repo_id = length(var.environment_id_prefix) > 0 ? "${var.environment_id_prefix}functions" : "psoxy-functions"
 }
 
 
@@ -40,7 +44,6 @@ resource "google_project_service" "gcp_infra_api" {
     ],
     var.support_bulk_mode ? local.services_required_for_bulk_mode : [],
     var.support_webhook_collectors ? local.services_required_for_webhook_collectors : [],
-    local.provision_serverless_connector ? ["vpcaccess.googleapis.com"] : []
   ))
 
   service                    = each.key
@@ -52,7 +55,7 @@ resource "google_project_service" "gcp_infra_api" {
 resource "google_artifact_registry_repository" "psoxy-functions-repo" {
   location      = var.bucket_location
   project       = var.project_id
-  repository_id = "psoxy-functions"
+  repository_id = local.functions_repo_id
   description   = "Docker repository used on the cloud functions"
   format        = "DOCKER"
 
@@ -63,6 +66,13 @@ resource "google_artifact_registry_repository" "psoxy-functions-repo" {
     most_recent_versions {
       keep_count = 3
     }
+  }
+
+  lifecycle {
+    # TODO: remove in 0.7.x; retain for upgrades from pre-0.7.x deployments that used hardcoded "psoxy-functions"
+    ignore_changes = [
+      repository_id,
+    ]
   }
 
   depends_on = [
@@ -457,66 +467,23 @@ resource "google_service_account_iam_member" "allow_scheduler_impersonation" {
 }
 
 
-# BEGIN Serverless VPC Access connector (conditional)
+# BEGIN VPC (conditional)
 locals {
-  MAX_SERVERLESS_CONNECTOR_NAME_LENGTH = 25
+  vpc_defined    = var.vpc_config != null
+  use_direct_vpc = local.vpc_defined && try(var.vpc_config.serverless_connector, null) == null && try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null
 
-  vpc_defined = var.vpc_config != null
-
-  provision_serverless_connector = local.vpc_defined && try(var.vpc_config.serverless_connector, null) == null
-  legal_connector_prefix         = substr(var.environment_id_prefix, 0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH)
-  legal_connector_suffix         = substr("connector", 0, max(0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH - length(var.environment_id_prefix)))
-
-  # check if shared VPC
-  vpc_connector_network_project = coalesce(
-    try(regex("^projects/([^/]+)", var.vpc_config.network)[0], null),
-  var.project_id)
-  shared = var.project_id != local.vpc_connector_network_project
-
-  # if shared, expect network, expect everything set-up
-
-  # network argument to vpc_access_connector resource; must be provided if subnet isn't
-  vpc_connector_network = try(local.shared || !local.vpc_defined ? null : var.vpc_config.network, null)
-
-  # extract region from subnetwork (if shared)
-  vpc_connector_region = coalesce(
-    try(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0], null),
-  var.gcp_region)
-
-  vpc_connector_subnetwork_name = !local.provision_serverless_connector ? null : coalesce(
-    try(regex(".*/([^/]+)$", var.vpc_config.subnet)[0], null),
-  try(local.vpc_defined ? var.vpc_config.subnet : null, null))
-}
-
-resource "google_vpc_access_connector" "connector" {
-  count = local.provision_serverless_connector ? 1 : 0
-
-  project = var.project_id
-  region  = local.vpc_connector_region
-  name    = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
-
-  subnet {
-    name       = local.vpc_connector_subnetwork_name
-    project_id = local.vpc_connector_network_project
-  }
-
-}
-
-locals {
-  vpc_config = try(
-    {
-      serverless_connector = google_vpc_access_connector.connector[0].id
-    },
-    {
+  vpc_config = (
+    local.use_direct_vpc ? {
+      network = var.vpc_config.network
+      subnet  = var.vpc_config.subnet
+    } :
+    try(var.vpc_config.serverless_connector, null) != null ? {
       serverless_connector = var.vpc_config.serverless_connector
-    },
+    } :
     null
   )
 }
 # END VPC (conditional)
-
-
-
 
 
 locals {

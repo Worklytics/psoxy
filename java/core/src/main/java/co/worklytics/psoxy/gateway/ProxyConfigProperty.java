@@ -159,6 +159,20 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      * is sized for local generative augments.
      */
     ENABLE_GEN_METADATA,
+
+    /**
+     * Whether the proxy should follow HTTP redirects (3xx responses) when calling source APIs.
+     *
+     * OPTIONAL; defaults to {@code true} (redirects are followed), matching the default behavior
+     * of the underlying HTTP client.
+     *
+     * Set to {@code FALSE} for connectors whose APIs issue redirects that must not be
+     * automatically followed — e.g. ChatGPT Enterprise, which uses async processing and relies
+     * on the proxy intercepting 3xx responses to fetch data from the Location URL manually.
+     *
+     * Accepted values: {@code true} / {@code false} (case-insensitive).
+     */
+    FOLLOW_REDIRECTS,
     ;
 
 

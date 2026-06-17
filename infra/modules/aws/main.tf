@@ -13,8 +13,10 @@ terraform {
 locals {
   api_function_name_prefix = coalesce(var.api_function_name_prefix, "${lower(var.deployment_id)}-")
 
+  caller_and_test_aws_arns = distinct(concat(var.caller_aws_arns, var.test_aws_principal_arns))
+
   aws_caller_statements = [
-    for arn in var.caller_aws_arns :
+    for arn in local.caller_and_test_aws_arns :
     merge({
       Action : "sts:AssumeRole"
       Effect : "Allow"
@@ -51,7 +53,7 @@ locals {
   ]
 
   webhook_aws_caller_statements = [
-    for arn in var.caller_aws_arns :
+    for arn in local.caller_and_test_aws_arns :
     merge({
       Action : "sts:AssumeRole"
       Effect : "Allow"

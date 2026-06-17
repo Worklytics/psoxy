@@ -115,38 +115,78 @@ variable "function_zip_hash" {
 }
 
 
-variable "aws_role_to_assume_when_testing" {
-  type        = string
-  description = "ARN of role to assume when testing instance. Leave blank to use default credentials of location from which you'll run tests (which must be for a principal with sufficient privileges, or use `provision_iam_policy_for_testing`)."
-  default     = null
-
-  validation {
-    condition     = var.aws_role_to_assume_when_testing == null || can(regex("^arn:aws:iam::\\d{12}:role/.*$", var.aws_role_to_assume_when_testing))
-    error_message = "if provided, aws_role_to_assume_when_testing must be a valid ARN of an IAM Role"
-  }
+variable "test_aws_principal_arns" {
+  type        = list(string)
+  description = "AWS principal ARNs allowed to upload test files to the bulk connector input bucket. Populated by the host module when provision_iam_policy_for_testing is enabled."
+  default     = []
 }
 
 variable "provision_iam_policy_for_testing" {
   type        = bool
-  description = "Whether to provision IAM policy and attach it to `aws_role_to_assume_when_testing`."
+  description = "Whether to provision access for bulk connector testing (S3 bucket policies on input/sanitized buckets when enabled by the host module)."
   default     = false
 }
 
+variable "aws_principal_arn_when_testing" {
+  type        = string
+  description = "ARN of AWS principal (IAM role or user) to use when downloading from the sanitized bucket during tests. If a role ARN, the generated test command passes it to the test tool to assume; if a user ARN (or null), run tests with credentials for that principal directly (which must be allowed via `test_aws_principal_arns` / bucket policy when `provision_iam_policy_for_testing` is enabled)."
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.aws_principal_arn_when_testing == null || can(regex("^arn:aws:iam::\\d{12}:(role|user)/", var.aws_principal_arn_when_testing))
+    error_message = "if provided, aws_principal_arn_when_testing must be a valid IAM role or user ARN"
+  }
+}
+
+# TODO: remove in next major version; use aws_principal_arn_when_testing instead.
+variable "aws_role_to_assume_when_testing" {
+  type        = string
+  description = "DEPRECATED (use aws_principal_arn_when_testing); ARN of role to assume when downloading from the sanitized bucket during tests"
+  default     = null
+  nullable    = true
+}
+
+variable "aws_write_role_to_assume_when_testing" {
+  type        = string
+  description = "ARN of IAM role to assume for S3 writes during bulk connector tests (input upload and sanitized output delete). Typically the role used when running Terraform, if Terraform runs via role assumption."
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.aws_write_role_to_assume_when_testing == null || can(regex("^arn:aws:iam::\\d{12}:role/", var.aws_write_role_to_assume_when_testing))
+    error_message = "if provided, aws_write_role_to_assume_when_testing must be a valid IAM role ARN"
+  }
+}
+
+# TODO: remove in next major version; use aws_write_role_to_assume_when_testing instead.
+variable "aws_upload_role_to_assume_when_testing" {
+  type        = string
+  description = "DEPRECATED (use aws_write_role_to_assume_when_testing); ARN of role to assume when uploading test files to the input bucket"
+  default     = null
+  nullable    = true
+}
+
+# TODO: remove in next major version; output-bucket read access is provisioned by aws-host (0.6.4+).
 variable "api_caller_role_arn" {
   type        = string
-  description = "DEPRECATED; arn of role which can be assumed to call API"
+  description = "DEPRECATED (ignored since 0.6.4); arn of role which can be assumed to call API"
   default     = null
 }
 
+# TODO: remove in next major version; output-bucket read access is provisioned by aws-host (0.6.4+).
 variable "api_caller_role_name" {
   type        = string
-  description = "DEPRECATED; name of role which can be assumed to call API"
+  description = "DEPRECATED (ignored since 0.6.4); name of role which can be assumed to call API"
   default     = null
 }
 
+# TODO: remove in next major version; output-bucket read access is provisioned by aws-host (0.6.4+).
 variable "sanitized_accessor_role_names" {
   type        = list(string)
-  description = "list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
+  description = "DEPRECATED (ignored since 0.6.4); list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
+  default     = null
+  nullable    = true
 }
 
 variable "psoxy_base_dir" {

@@ -113,21 +113,22 @@ public class NetworkSecurityUtils {
                 return null;
             }
             List<String> parts = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(raw);
-            if (parts.isEmpty()) {
+            if (parts.size() != 1) {
+                log.warning("Client IP could not be parsed (expected single IP, got comma-separated chain): " + raw);
                 return null;
             }
-            String first = parts.get(0);
-            if (first.indexOf(':') >= 0 && first.chars().filter(ch -> ch == ':').count() == 1) {
-                String beforePort = first.substring(0, first.indexOf(':'));
+            String clientIp = parts.get(0);
+            if (clientIp.contains(":") && clientIp.chars().filter(ch -> ch == ':').count() == 1) {
+                String beforePort = clientIp.substring(0, clientIp.indexOf(':'));
                 if (InetAddresses.isInetAddress(beforePort)) {
                     return beforePort;
                 }
             }
-            int zone = first.indexOf('%');
+            int zone = clientIp.indexOf('%');
             if (zone >= 0) {
-                return first.substring(0, zone);
+                return clientIp.substring(0, zone);
             }
-            return first;
+            return clientIp;
         }
     }
 }

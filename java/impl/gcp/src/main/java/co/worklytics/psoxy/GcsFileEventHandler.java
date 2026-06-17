@@ -78,8 +78,10 @@ public class GcsFileEventHandler {
 
             Supplier<OutputStream> outputStreamSupplier = () -> {
                 BlobInfo.Builder blobInfoBuilder = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
-                    .setContentType(sourceBlobInfo.getContentType())
                     .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform));
+
+                Optional.ofNullable(request.getContentType())
+                    .ifPresent(blobInfoBuilder::setContentType);
 
                 if (request.getCompressOutput()) {
                     blobInfoBuilder.setContentEncoding(StorageHandler.CONTENT_ENCODING_GZIP);

@@ -1,0 +1,2 @@
+endpoints:
+  - pathRegex: /custom-api-rules

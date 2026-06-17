@@ -33,8 +33,10 @@ import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.ParameterSchema;
+import com.avaulta.gateway.rules.RequestBodySchema;
 import com.avaulta.gateway.rules.transforms.EncryptIp;
 import com.avaulta.gateway.rules.transforms.HashIp;
 import com.avaulta.gateway.rules.transforms.Transform;
@@ -314,6 +316,36 @@ class RESTApiSanitizerImplTest {
 
         assertTrue(strictSanitizer.isAllowed("GET", EXAMPLE_URL));
         assertFalse(strictSanitizer.isAllowed(notGet, EXAMPLE_URL));
+    }
+
+    @SneakyThrows
+    @CsvSource(value = {
+            "application/json; charset=utf-8",
+            "Application/JSON; Charset=UTF-8",
+    })
+    @ParameterizedTest
+    void requestBodySchema_matchesParameterizedJsonContentType(String contentType) {
+        JsonSchema bodySchema = JsonSchema.builder()
+                .type("object")
+                .required(List.of("operation"))
+                .properties(Map.of("operation", JsonSchema.builder().type("string").build()))
+                .additionalProperties(false)
+                .build();
+
+        RESTApiSanitizerImpl strictSanitizer = sanitizerFactory.create(Rules2.builder()
+                .endpoint(Endpoint.builder()
+                        .allowedMethods(Set.of("POST"))
+                        .pathTemplate("/api/v1/search")
+                        .requestBody(RequestBodySchema.builder()
+                                .content(Map.of("application/json", bodySchema))
+                                .build())
+                        .build())
+                .build(), sanitizer.pseudonymizer);
+        URL url = new URL("https://api.example.com/api/v1/search");
+
+        assertFalse(strictSanitizer.isAllowed("POST", url, contentType, "{}"));
+        assertTrue(strictSanitizer.isAllowed("POST", url, contentType,
+                "{\"operation\":\"list\"}"));
     }
 
     @SneakyThrows

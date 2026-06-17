@@ -39,6 +39,10 @@ locals {
   # 3 days before the sample date, for interesting API calls (without repeating computation a dozen times)
   example_api_calls_sample_interval_start = timeadd(var.example_api_calls_sample_date, "-72h")
 
+  anthropic_api_headers = {
+    "anthropic-version" = "2023-06-01"
+  }
+
   chat_gpt_enterprise_example_workspace_id = coalesce(var.chat_gpt_enterprise_example_workspace_id, try(var.connector_settings["chat_gpt_enterprise_example_workspace_id"], null), "YOUR_WORKSPACEID")
   confluence_example_cloud_id              = coalesce(var.confluence_example_cloud_id, try(var.connector_settings["confluence_example_cloud_id"], null), "YOUR_confluence_example_cloud_id")
   confluence_example_group_id              = coalesce(var.confluence_example_group_id, try(var.connector_settings["confluence_example_group_id"], null), "YOUR_confluence_example_group_id")
@@ -126,6 +130,12 @@ EOT
       reserved_concurrent_executions : null
       enable_async_processing : true
       enable_side_output : false
+      environment_variables : {
+        # ChatGPT Enterprise's API issues redirects that must be intercepted manually by the proxy
+        # in async mode; disable automatic redirect following so the 3xx Location URL is fetched
+        # by the async redirect-handling block rather than transparently by the HTTP client.
+        FOLLOW_REDIRECTS : "FALSE"
+      }
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
@@ -158,16 +168,57 @@ EOT
         {
           method : "GET"
           path : "/v1/compliance/organizations"
+          headers : local.anthropic_api_headers
         },
         {
           method : "GET"
           path : "/v1/compliance/activities"
+          headers : local.anthropic_api_headers
         }
       ],
       external_token_todo : templatefile("${path.module}/docs/claude/claude_instructions.tftpl", {
         path_to_instance_parameters = "PSOXY_CLAUDE_"
       })
       instructions_template = "${path.module}/docs/claude/instructions.tftpl"
+    }
+    claude-enterprise-analytics = {
+      source_kind : "claude-enterprise-analytics"
+      availability : "beta",
+      enable_by_default : false
+      worklytics_connector_id : "claude-enterprise-analytics-psoxy"
+      display_name : "Claude Enterprise Analytics",
+      worklytics_connector_name : "Claude Enterprise Analytics via Psoxy"
+      target_host : "api.anthropic.com"
+      source_auth_strategy : "claude_admin_api_key"
+      secured_variables : [
+        {
+          name : "ADMIN_API_KEY"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ]
+      example_api_requests : [
+        {
+          method : "GET"
+          path : "/v1/organizations/analytics/users?date=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/analytics/apps/chat/projects?date=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/analytics/user_usage_report?starting_at=${formatdate("YYYY-MM-DD", local.example_api_calls_sample_interval_start)}&ending_at=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/analytics/user_cost_report?starting_at=${formatdate("YYYY-MM-DD", local.example_api_calls_sample_interval_start)}&ending_at=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}"
+        }
+      ],
+      external_token_todo : templatefile("${path.module}/docs/claude/claude_enterprise_analytics_instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_CLAUDE_ENTERPRISE_ANALYTICS_"
+      })
     }
     claude-code = {
       source_kind : "claude-code"
@@ -190,10 +241,12 @@ EOT
         {
           method : "GET"
           path : "/v1/organizations/users"
+          headers : local.anthropic_api_headers
         },
         {
           method : "GET"
           path : "/v1/organizations/usage_report/claude_code"
+          headers : local.anthropic_api_headers
         }
       ],
       external_token_todo : templatefile("${path.module}/docs/claude/claude_code_instructions.tftpl", {
@@ -706,7 +759,10 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/api/admin.analytics.getFile?type=member&date=${urlencode(formatdate("YYYY-MM-DD", var.example_api_calls_sample_date))}"
+        "/api/admin.analytics.getFile?type=member&date=${urlencode(formatdate("YYYY-MM-DD", var.example_api_calls_sample_date))}",
+        "/api/admin.analytics.getFile?type=public_channel&metadata_only=true",
+        "/api/admin.analytics.messages.metadata?channel={CHANNEL_ID}&limit=100",
+        "/api/admin.analytics.messages.activity?channel={CHANNEL_ID}&limit=50",
       ]
       instructions_template = "${path.module}/docs/slack/analytics/instructions.tftpl"
       external_token_todo : templatefile("${path.module}/docs/slack/analytics/instructions.tftpl", {
@@ -1401,6 +1457,16 @@ EOT
         ]
       }
       example_file = "docs/sources/slack/slack-ai-bulk/slack-ai-analytics-sample.csv"
+    }
+    "glean-customer-events-log-bulk" = {
+      source_kind               = "glean"
+      availability              = "beta"
+      enable_by_default         = false
+      worklytics_connector_id   = "glean-customer-events-log-bulk-psoxy"
+      worklytics_connector_name = "Glean Customer Event Logs - Bulk via Psoxy"
+      rules_file                = "docs/sources/glean/glean-customer-events-log-bulk/glean-customer-events-log-bulk.yaml"
+      example_file              = "docs/sources/glean/glean-customer-events-log-bulk/example-bulk/original/sample.ndjson"
+      instructions_template     = "${path.module}/docs/glean/customer-events-log-bulk-instructions.tftpl"
     }
   }
 

@@ -4,24 +4,28 @@
 
 **Availability:** Beta
 
-Our Claude data connector uses the [Compliance API](https://platform.claude.com/docs/en/claude-api/compliance) to import data about Users (accounts), Chats (work events), and Activities (audit logs) to Worklytics. This API is intended for compliance, security, and data privacy use.
+Our Claude data connector uses the [Compliance API](https://platform.claude.com/docs/en/manage-claude/compliance-api-access) to import data about Users (accounts), Chats (work events), and Activities (audit logs) to Worklytics. This API is intended for compliance, security, and data privacy use.
 
 ## Data Collected
 
-| Endpoint | Description |
-|---|---|
-| Activities | Audit log of actions taken by users in Claude (chat created, file uploaded, etc.) |
-| Chats | Chat conversations, including metadata about the user and project |
-| Chat Messages | Individual messages within a chat (message text is hashed) |
-| Organization Users | User accounts in the organization |
+| Endpoint | Description | Required Scope |
+|---|---|---|
+| `GET /v1/compliance/activities` | Audit log of actions taken by users in Claude (chat created, file uploaded, etc.) | `read:compliance_activities` |
+| `GET /v1/compliance/apps/chats` | Chat conversations, including metadata about the user and project | `read:compliance_user_data` |
+| `GET /v1/compliance/apps/chats/{chatId}/messages` | Individual messages within a chat (message text is hashed) | `read:compliance_user_data` |
+| `GET /v1/compliance/organizations` | Organizations metadata | `read:compliance_org_data` |
+| `GET /v1/compliance/organizations/{organizationUuid}/users` | User accounts in the organization | `read:compliance_user_data` |
 
 ## Steps to Connect
 
-See [Anthropic's documentation](https://platform.claude.com/docs/en/build-with-claude/administration-api) for the latest, but as of early 2026 the following is required:
+See [Anthropic's documentation](https://platform.claude.com/docs/en/manage-claude/compliance-api-access) for the latest, but as of early 2026 the following is required:
 
-1. An admin user from the organization must generate an API key with `admin` permission in the [Anthropic Console](https://console.anthropic.com/).
+1. The **primary owner** of the parent organization must create a **Compliance Access Key** in [claude.ai > Organization settings > Data and privacy](https://claude.ai/admin-settings/data-privacy-controls) with the following scopes:
+   - `read:compliance_activities`
+   - `read:compliance_user_data`
+   - `read:compliance_org_data`
 
-2. Copy the API key into the proxy as the `PSOXY_CLAUDE_ACCESS_TOKEN` parameter value in your proxy's host platform.
+2. Copy the key (starts with `sk-ant-api01-`) into the proxy as the `PSOXY_CLAUDE_ACCESS_TOKEN` parameter value in your proxy's host platform.
 
 ## Examples
 

@@ -8,7 +8,7 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths: # these are actually NDJSON, not JSON response
-          - "$.user_id" # tbd - don't think we do this by default in other slack
+          - "$.user_id"
           - "$.email_address"
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
@@ -16,3 +16,22 @@ endpoints:
           - "$.topic"
           - "$.name"
           - "$.description"
+  - pathTemplate: "/api/admin.analytics.messages.metadata"
+    allowedQueryParams:
+      - "channel"
+      - "oldest_ts"
+      - "latest_ts"
+      - "cursor"
+      - "limit"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.messages[?(@.user_id!='USLACKBOT')].user_id"
+        encoding: "URL_SAFE_TOKEN"
+  - pathTemplate: "/api/admin.analytics.messages.activity"
+    allowedQueryParams:
+      - "channel"
+      - "oldest_ts"
+      - "latest_ts"
+      - "cursor"
+      - "limit"

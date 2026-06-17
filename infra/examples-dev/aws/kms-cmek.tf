@@ -13,15 +13,17 @@
 #locals {
 #  key_arn = aws_kms_key.example_key.arn # alternatively, use ar.project_aws_kms_key_arn
 #
-#  # TODO: can eliminate this if test tool doesn't assume role when uploading to bucket
-#  testing_policy_statements = var.provision_testing_infra ? [
+#  upload_testing_policy_statements = length(module.psoxy.test_aws_principal_arns) > 0 ? [
 #    {
-#      "Sid": "Allow Test Users to Use Key",
+#      "Sid": "Allow Test Principals to Encrypt for Input Upload",
 #      "Effect": "Allow",
-#      "Principal": { # tests
-#        "AWS": "arn:aws:iam::${var.aws_account_id}:role/${module.psoxy.caller_role_name}"
+#      "Principal": {
+#        "AWS": module.psoxy.test_aws_principal_arns
 #      },
-#      "Action": "kms:*",
+#      "Action": [
+#        "kms:Encrypt",
+#        "kms:GenerateDataKey",
+#      ],
 #      "Resource": local.key_arn
 #    }
 #  ] : []
@@ -93,7 +95,7 @@
 #          }
 #      ],
 #      local.bulk_writer_policy_statements,
-#      local.testing_policy_statements,
+#      local.upload_testing_policy_statements,
 #      local.proxy_caller_policy_statements
 #      )
 #    })

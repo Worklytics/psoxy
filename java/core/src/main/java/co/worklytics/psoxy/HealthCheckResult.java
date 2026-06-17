@@ -77,6 +77,13 @@ public class HealthCheckResult {
     String callerIp;
 
     /**
+     * Whether the caller IP is allowed for API data access. Set only when IP lockdown is configured;
+     * omitted when {@code ALLOWED_DATA_ACCESS_IP_BLOCKS} is empty.
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Boolean clientIpAuthorized;
+
+    /**
      *  A SHA-256 hash of the salt, to aid in detecting changes to the salt value.
      *
      *  If salt changes, client needs to know; as all subsequent pseudonyms produced by proxy instance from that point
@@ -90,7 +97,8 @@ public class HealthCheckResult {
     public boolean passed() {
         return getConfiguredSource() != null
             && getNonDefaultSalt()
-            && getMissingConfigProperties().isEmpty();
+            && getMissingConfigProperties().isEmpty()
+            && (clientIpAuthorized == null || clientIpAuthorized);
     }
 
     //unknownProperties + any setter, so robust across versions (eg, proxy server has something that proxy client lacks)

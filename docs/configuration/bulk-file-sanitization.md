@@ -112,10 +112,19 @@ eg.
 
 ```yaml
 format: NDJSON
+outputSchemaFilter:
+  type: object
+  properties:
+    email:
+      type: string
+    summary:
+      type: string
 transforms:
   - redact: "$.summary"
   - pseudonymize: "$.email"
 ```
+
+When `outputSchemaFilter` is set, each record is filtered to declared properties after transforms are applied. Undeclared fields (including unknown fields from future schema versions) are removed from the output.
 
 Each `transform` is a map from transform type --> to a JSONPath to which the transform should be applied. The JSONPath is evaluated from the root of each record in the file.
 

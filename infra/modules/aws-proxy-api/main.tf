@@ -322,7 +322,7 @@ locals {
   role_param = local.arn_for_test_calls == null ? "" : " -r \"${local.arn_for_test_calls}\""
 
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
-  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} --region \"${data.aws_region.current.id}\""
+  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} --region \"${data.aws_region.current.region}\""
 
   # Merge example_api_calls into example_api_requests for unified processing
   all_example_api_requests = concat(
@@ -335,9 +335,25 @@ locals {
     var.example_api_requests
   )
 
+  example_api_get_requests = [for r in local.all_example_api_requests : r if r.method == "GET"]
+
+  example_request_header_flags = { for request in local.all_example_api_requests :
+    "${request.method} ${request.path}" => join("", [for name, value in try(request.headers, {}) : " -H \"${name}: ${value}\""])
+  }
+
+  example_api_get_requests_for_script = [for r in local.example_api_get_requests : merge(r, {
+    header_flags = trimspace(lookup(local.example_request_header_flags, "${r.method} ${r.path}", ""))
+  })]
+
+  example_api_post_requests_for_script = [for r in local.all_example_api_requests : merge(r, {
+    header_flags = trimspace(lookup(local.example_request_header_flags, "${r.method} ${r.path}", ""))
+  }) if r.method == "POST" && r.body != null]
+
+  default_header_flags = length(local.example_api_get_requests_for_script) > 0 ? local.example_api_get_requests_for_script[0].header_flags : ""
+
   # Generate test calls from all example requests
   sync_test_calls = [for request in local.all_example_api_requests :
-    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${request.path}\" -m ${request.method}${request.body != null ? " -b \"${request.body}\"" : ""}${local.impersonation_param}"
+    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${request.path}\" -m ${request.method}${request.body != null ? " -b \"${request.body}\"" : ""}${local.example_request_header_flags["${request.method} ${request.path}"]}${local.impersonation_param}"
   ]
 
   command_test_calls = concat(local.sync_test_calls,
@@ -345,9 +361,9 @@ locals {
   )
 
 
-  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} --region \"${data.aws_region.current.id}\" -l \"${module.psoxy_lambda.log_group}\""
+  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} --region \"${data.aws_region.current.region}\" -l \"${module.psoxy_lambda.log_group}\""
 
-  awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a ${local.role_param} -e \"${data.aws_region.current.id}\""
+  awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a ${local.role_param} -e \"${data.aws_region.current.region}\""
   awscurl_test_calls = [for path in var.example_api_calls :
     "${local.awscurl_test_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
@@ -358,11 +374,11 @@ locals {
 
 Review the deployed function in AWS console:
 
-- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
+- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.region}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
 
 We provide some Node.js scripts to simplify testing your proxy deployment. To be able run test
 commands below, you will need
-   - Node.js (>=16) and npm (v >=8) installed.
+   - Node.js (>=20) and npm (v >=8) installed.
    - install the tool itself (in the location from which you plan to run the test commands, if it's
      not the same location where you originally ran the Terraform apply)
 
@@ -429,8 +445,9 @@ locals {
     function_name             = module.psoxy_lambda.function_name,
     impersonation_param       = local.impersonation_param,
     command_cli_call          = local.command_cli_call,
-    example_api_get_requests  = [for r in local.all_example_api_requests : r if r.method == "GET"],
-    example_api_post_requests = [for r in local.all_example_api_requests : r if r.method == "POST" && r.body != null], # body being null will blow up the templating
+    default_header_flags      = local.default_header_flags,
+    example_api_get_requests  = local.example_api_get_requests_for_script,
+    example_api_post_requests = local.example_api_post_requests_for_script,
     enable_async_processing   = var.enable_async_processing,
   })
 }

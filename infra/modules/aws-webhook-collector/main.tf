@@ -231,42 +231,6 @@ resource "aws_lambda_provisioned_concurrency_config" "keep_warm" {
   provisioned_concurrent_executions = var.keep_warm_instances
 }
 
-resource "aws_iam_policy" "sanitized_bucket_read" {
-  name        = "${module.env_id.id}_BucketRead_${module.sanitized_output.bucket_id}"
-  description = "Allow to read content from bucket: ${module.sanitized_output.bucket_id}"
-
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Action" : [
-            "s3:GetObject",
-            "s3:ListBucket"
-          ],
-          "Effect" : "Allow",
-          "Resource" : [
-            "${module.sanitized_output.bucket_arn}",
-            "${module.sanitized_output.bucket_arn}/*"
-          ]
-        }
-      ]
-  })
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
-  for_each = toset([for r in var.sanitized_accessor_role_names : r if r != null])
-
-  role       = each.key
-  policy_arn = aws_iam_policy.sanitized_bucket_read.arn
-}
-
 ## Authentication Key Pair Provisioning, if any
 
 # if rotation_days set, then we'll provision TWO keys, rotating one after N/2 days, and the other after N days
@@ -334,8 +298,8 @@ locals {
   role_param = var.test_caller_role_arn == null ? "" : " -r \"${var.test_caller_role_arn}\""
 
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
-  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} --region \"${data.aws_region.current.id}\""
-  command_test_logs   = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} --region \"${data.aws_region.current.id}\" -l \"${module.gate_instance.log_group}\""
+  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} --region \"${data.aws_region.current.region}\""
+  command_test_logs   = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} --region \"${data.aws_region.current.region}\" -l \"${module.gate_instance.log_group}\""
 
   todo_content = <<EOT
 
@@ -343,7 +307,7 @@ locals {
 
 Review the deployed function in AWS console:
 
-- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${module.gate_instance.function_name}?tab=monitoring
+- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.region}#/functions/${module.gate_instance.function_name}?tab=monitoring
 
 We provide some Node.js scripts to simplify testing your proxy deployment. To be able run test
 commands below, you will need

@@ -37,7 +37,9 @@ public interface HttpEventRequest {
     }
 
     /**
-     * @return IP of the client making the request, if known
+     * @return IP of the client making the request, if known.
+     * Implementations that derive this from {@link #HTTP_HEADER_X_FORWARDED_FOR} should return one
+     * trusted platform-specific hop, not the raw forwarded chain.
      */
     Optional<String> getClientIp();
 

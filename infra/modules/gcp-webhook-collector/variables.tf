@@ -37,9 +37,29 @@ variable "config_parameter_prefix" {
   default     = null
 }
 
-variable "service_account_email" {
-  type        = string
-  description = "email of the service account that the cloud function will run as"
+# Both service_account_id and email are required even though either could be derived from the
+# other (with project_id). Passing both avoids coupling this module to GCP resource-name formats.
+variable "service_account" {
+  type = object({
+    service_account_id = string
+    email              = string
+  })
+  description = "Service account the Cloud Function runs as: long-form resource id and email."
+
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9-]+@[a-zA-Z0-9-]+\\.iam\\.gserviceaccount\\.com$", var.service_account.email))
+    error_message = "service_account.email must be a valid GCP service account email (e.g. my-sa@my-project.iam.gserviceaccount.com)."
+  }
+
+  validation {
+    condition     = can(regex("^projects/[^/]+/serviceAccounts/[^/]+$", var.service_account.service_account_id))
+    error_message = "service_account.service_account_id must be a long-form resource name (projects/{project}/serviceAccounts/{email})."
+  }
+
+  validation {
+    condition     = endswith(var.service_account.service_account_id, "/${var.service_account.email}")
+    error_message = "service_account.service_account_id must end with /{email} matching service_account.email."
+  }
 }
 
 variable "secret_bindings" {
@@ -267,18 +287,12 @@ variable "todo_step" {
 
 variable "vpc_config" {
   type = object({
-    serverless_connector = string # Format: projects/{project}/locations/{location}/connectors/{connector}
+    network              = optional(string)
+    subnet               = optional(string)
+    serverless_connector = optional(string) # TODO 0.7.x: remove; deprecated
   })
   description = "VPC configuration for the Cloud Run function."
   default     = null
-
-  validation {
-    condition = (
-      var.vpc_config == null ||
-      can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", var.vpc_config.serverless_connector))
-    )
-    error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
-  }
 }
 
 variable "enable_versioning" {

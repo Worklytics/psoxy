@@ -1,14 +1,17 @@
 #!/bin/bash
 
 # Publish Psoxy AWS JAR to multiple S3 buckets across regions
-# Usage: ./publish-aws-bundle.sh [--rc] [--non-interactive] 
+# Usage: ./publish-aws-bundle.sh [--rc] [--non-interactive] [--role-arn <arn>]
 #   --rc:              Mark this as a release candidate build (adds -rc suffix to artifact name)
 #   --non-interactive: Skip all interactive prompts (auto-confirm all prompts)
+#   --role-arn:        IAM role to assume before publishing (required locally; CI uses OIDC)
+#                      Can also be set via ROLE_ARN env var (matches GitHub secret AWS_ROLE_ARN)
 #
 # Examples:
-#   ./publish-aws-bundle.sh                    
+#   ./publish-aws-bundle.sh
 #   ./publish-aws-bundle.sh --rc               # RC build
 #   ./publish-aws-bundle.sh --non-interactive  # Non-interactive mode (for CI)
+#   ROLE_ARN=arn:aws:iam::123456789012:role/GithubActionPublishAgent ./publish-aws-bundle.sh --non-interactive
 
 set -e
 
@@ -195,7 +198,7 @@ if [ $? -eq 0 ]; then
 fi
 
 # run build with distribution profile
-./tools/build.sh -d "$IMPLEMENTATION" "$JAVA_SOURCE_ROOT"
+./tools/build.sh -qd "$IMPLEMENTATION" "$JAVA_SOURCE_ROOT"
 BUILT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
 
 # Validate JAR exists

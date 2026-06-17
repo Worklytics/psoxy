@@ -1,0 +1,975 @@
+# Glean Customer Event Logs (bulk)
+#
+# Applies to all files in the input bucket (no fileRules path filter).
+# Records are NDJSON lines exported from Glean's glean-customer-event log stream
+# (Cloud Logging / Firehose delivery to GCS or S3).
+#
+# Strategy:
+#  1. outputSchemaFilter allow-lists only documented GCE fields (drops unknown future payload types)
+#  2. transforms pseudonymize identities, tokenize document identifiers/URLs, and textDigest
+#     free-text fields that are retained for analytics metadata
+
+format: "NDJSON"
+
+outputSchemaFilter:
+  type: "object"
+  properties:
+    timestamp:
+      type: "string"
+    receiveTimestamp:
+      type: "string"
+    insertId:
+      type: "string"
+    jsonPayload:
+      $ref: "#/definitions/GleanCustomerEventPayload"
+  definitions:
+    GleanCustomerEventPayload:
+      type: "object"
+      properties:
+        Type:
+          type: "string"
+        IsScrubbed:
+          type: "boolean"
+        User:
+          $ref: "#/definitions/GleanCustomerEventUserIdentity"
+        Search:
+          $ref: "#/definitions/GleanCustomerEventSearch"
+        Autocomplete:
+          $ref: "#/definitions/GleanCustomerEventAutocomplete"
+        Chat:
+          $ref: "#/definitions/GleanCustomerEventChat"
+        ChatCitations:
+          $ref: "#/definitions/GleanCustomerEventChatCitations"
+        AiSummary:
+          $ref: "#/definitions/GleanCustomerEventAiSummary"
+        AiAnswer:
+          $ref: "#/definitions/GleanCustomerEventAiAnswer"
+        Shortcut:
+          $ref: "#/definitions/GleanCustomerEventShortcut"
+        SearchClick:
+          $ref: "#/definitions/GleanCustomerEventSearchClick"
+        ChatFeedback:
+          $ref: "#/definitions/GleanCustomerEventChatFeedback"
+        ClientEvent:
+          $ref: "#/definitions/GleanCustomerEventClientEvent"
+        SearchFeedback:
+          $ref: "#/definitions/GleanCustomerEventSearchFeedback"
+        AiAnswerVote:
+          $ref: "#/definitions/GleanCustomerEventAiAnswerVote"
+        AiSummaryVote:
+          $ref: "#/definitions/GleanCustomerEventAiSummaryVote"
+        ChatCitationClick:
+          $ref: "#/definitions/GleanCustomerEventChatCitationClick"
+        WorkflowRun:
+          $ref: "#/definitions/GleanCustomerEventWorkflowRun"
+        Workflow:
+          $ref: "#/definitions/GleanCustomerEventWorkflow"
+        GleanBotActivity:
+          $ref: "#/definitions/GleanCustomerEventGleanBotActivity"
+        ProductSnapshot:
+          $ref: "#/definitions/GleanCustomerEventProductSnapshot"
+        LlmCall:
+          $ref: "#/definitions/GleanCustomerEventLlmCall"
+        WorkflowConversation:
+          $ref: "#/definitions/GleanCustomerEventWorkflowConversation"
+        Action:
+          $ref: "#/definitions/GleanCustomerEventAction"
+        McpUsage:
+          $ref: "#/definitions/GleanCustomerEventMcpUsage"
+        VoiceChat:
+          $ref: "#/definitions/GleanCustomerEventVoiceChat"
+    GleanCustomerEventUserIdentity:
+      type: "object"
+      properties:
+        UserId:
+          type: "string"
+        UserEmail:
+          type: "string"
+        Department:
+          type: "string"
+        DepartmentId:
+          type: "integer"
+    GleanCustomerEventSearch:
+      type: "object"
+      properties:
+        TrackingToken:
+          type: "string"
+        SessionTrackingToken:
+          type: "string"
+        Initiator:
+          type: "string"
+        Modality:
+          type: "string"
+        HostDomain:
+          type: "string"
+        Query:
+          type: "string"
+        DatasourcesFilter:
+          type: "array"
+          items:
+            type: "string"
+        Results:
+          type: "array"
+          items:
+            $ref: "#/definitions/GleanCustomerEventSearchResult"
+        BackendMillis:
+          type: "integer"
+        IsRestClientApi:
+          type: "boolean"
+        NumPeopleResults:
+          type: "integer"
+        HttpStatusCode:
+          type: "integer"
+    GleanCustomerEventSearchResult:
+      type: "object"
+      properties:
+        Url:
+          type: "string"
+        Title:
+          type: "string"
+        DocId:
+          type: "string"
+        Datasource:
+          type: "string"
+        DocType:
+          type: "string"
+        CombinedTextLength:
+          type: "integer"
+    GleanCustomerEventAutocomplete:
+      type: "object"
+      properties:
+        TrackingToken:
+          type: "string"
+        SessionTrackingToken:
+          type: "string"
+        HostDomain:
+          type: "string"
+        Query:
+          type: "string"
+        QueryLength:
+          type: "integer"
+        BackendMillis:
+          type: "integer"
+        IsRestClientApi:
+          type: "boolean"
+        Results:
+          type: "array"
+          items:
+            $ref: "#/definitions/GleanCustomerEventAutocompleteResult"
+    GleanCustomerEventAutocompleteResult:
+      type: "object"
+      properties:
+        Entity:
+          type: "string"
+        Result:
+          type: "string"
+    GleanCustomerEventChat:
+      type: "object"
+      properties:
+        Qtt:
+          type: "string"
+        ResponseMessageId:
+          type: "string"
+        SessionTrackingToken:
+          type: "string"
+        ChatSessionId:
+          type: "string"
+        Platform:
+          type: "string"
+        Initiator:
+          type: "string"
+        ApplicationId:
+          type: "string"
+        AgentConfig:
+          $ref: "#/definitions/GleanCustomerEventAgentConfig"
+        UserQuery:
+          type: "string"
+        Response:
+          type: "string"
+        Datasource:
+          type: "string"
+        TotalResponseMillis:
+          type: "integer"
+        HostDomain:
+          type: "string"
+        SearchTrackingTokens:
+          type: "array"
+          items:
+            type: "string"
+        SerpOrderedDocIds:
+          type: "array"
+          items:
+            type: "string"
+        FollowupQuestions:
+          type: "array"
+          items:
+            type: "string"
+        Feature:
+          type: "string"
+        FirstResponseTokenMillis:
+          type: "integer"
+        UiTree:
+          type: "array"
+          items:
+            type: "string"
+        HasFileUpload:
+          type: "boolean"
+        IsRestClientApi:
+          type: "boolean"
+        WorkflowRunId:
+          type: "string"
+    GleanCustomerEventAgentConfig:
+      type: "object"
+      properties:
+        Agent:
+          type: "string"
+        Mode:
+          type: "string"
+    GleanCustomerEventChatCitations:
+      type: "object"
+      properties:
+        Qtt:
+          type: "string"
+        ChatSessionId:
+          type: "string"
+        Citations:
+          type: "array"
+          items:
+            $ref: "#/definitions/GleanCustomerEventChatCitation"
+        WorkflowRunId:
+          type: "string"
+    GleanCustomerEventChatCitation:
+      type: "object"
+      properties:
+        TrackingToken:
+          type: "string"
+        SourceDocument:
+          $ref: "#/definitions/GleanCustomerEventChatCitationSourceDocument"
+        SourceFile:
+          $ref: "#/definitions/GleanCustomerEventChatCitationSourceFile"
+        SourcePerson:
+          $ref: "#/definitions/GleanCustomerEventChatCitationSourcePerson"
+    GleanCustomerEventChatCitationSourceDocument:
+      type: "object"
+      properties:
+        Datasource:
+          type: "string"
+        DocType:
+          type: "string"
+        Id:
+          type: "string"
+        Title:
+          type: "string"
+        Url:
+          type: "string"
+    GleanCustomerEventChatCitationSourceFile:
+      type: "object"
+      properties:
+        Id:
+          type: "string"
+        Name:
+          type: "string"
+    GleanCustomerEventChatCitationSourcePerson:
+      type: "object"
+      properties:
+        Id:
+          type: "string"
+        Name:
+          type: "string"
+    GleanCustomerEventAiSummary:
+      type: "object"
+      properties:
+        DocIds:
+          type: "array"
+          items:
+            type: "string"
+        SummaryText:
+          type: "string"
+        TrackingToken:
+          type: "string"
+    GleanCustomerEventAiAnswer:
+      type: "object"
+      properties:
+        TrackingToken:
+          type: "string"
+        Response:
+          type: "string"
+        Qtt:
+          type: "string"
+        FollowupQuestions:
+          type: "array"
+          items:
+            type: "string"
+    GleanCustomerEventShortcut:
+      type: "object"
+      properties:
+        Event:
+          type: "string"
+        Id:
+          type: "integer"
+        Alias:
+          type: "string"
+        InputAlias:
+          type: "string"
+        DestinationUrl:
+          type: "string"
+        DocumentIdForUrl:
+          type: "string"
+    GleanCustomerEventSearchClick:
+      type: "object"
+      properties:
+        TrackingToken:
+          type: "string"
+        Position:
+          type: "integer"
+        DocId:
+          type: "string"
+        DocUrl:
+          type: "string"
+        Datasource:
+          type: "string"
+        DocTitle:
+          type: "string"
+        DocType:
+          type: "string"
+    GleanCustomerEventChatFeedback:
+      type: "object"
+      properties:
+        MessageId:
+          type: "string"
+        Event:
+          type: "string"
+        ApplicationId:
+          type: "string"
+        Comments:
+          type: "string"
+        Vote:
+          type: "string"
+        ChatSessionId:
+          type: "string"
+        RunId:
+          type: "string"
+        WorkflowId:
+          type: "string"
+        AgentId:
+          type: "string"
+    GleanCustomerEventClientEvent:
+      type: "object"
+      properties:
+        Event:
+          type: "string"
+        Category:
+          type: "string"
+        PagePath:
+          type: "string"
+        Label:
+          type: "string"
+        SessionTrackingToken:
+          type: "string"
+        HostDomain:
+          type: "string"
+        DocUrl:
+          type: "string"
+        Modality:
+          type: "string"
+        UiElement:
+          type: "string"
+    GleanCustomerEventSearchFeedback:
+      type: "object"
+      properties:
+        TrackingToken:
+          type: "string"
+        Rating:
+          type: "integer"
+        RatingKey:
+          type: "string"
+        Query:
+          type: "string"
+        Comments:
+          type: "string"
+        Issues:
+          type: "array"
+          items:
+            type: "string"
+    GleanCustomerEventAiAnswerVote:
+      type: "object"
+      properties:
+        TrackingToken:
+          type: "string"
+        Vote:
+          type: "string"
+    GleanCustomerEventAiSummaryVote:
+      type: "object"
+      properties:
+        TrackingToken:
+          type: "string"
+        Vote:
+          type: "string"
+    GleanCustomerEventChatCitationClick:
+      type: "object"
+      properties:
+        Datasource:
+          type: "string"
+        TrackingToken:
+          type: "string"
+        DocId:
+          type: "string"
+    GleanCustomerEventWorkflowRun:
+      type: "object"
+      properties:
+        ApplicationId:
+          type: "string"
+        RunId:
+          type: "string"
+        RootWorkflowId:
+          type: "string"
+        ChatSessionId:
+          type: "string"
+        SessionTrackingToken:
+          type: "string"
+        SourceTrackingToken:
+          type: "string"
+        Feature:
+          type: "string"
+        Initiator:
+          type: "string"
+        Platform:
+          type: "string"
+        KnowledgeMode:
+          type: "string"
+        WorkflowExecutions:
+          type: "array"
+          items:
+            $ref: "#/definitions/GleanCustomerEventWorkflowExecution"
+        StepExecutions:
+          type: "array"
+          items:
+            $ref: "#/definitions/GleanCustomerEventStepExecution"
+        ActionExecutions:
+          type: "array"
+          items:
+            $ref: "#/definitions/GleanCustomerEventActionExecution"
+    GleanCustomerEventWorkflowExecution:
+      type: "object"
+      properties:
+        WorkflowId:
+          type: "string"
+        CreationSource:
+          type: "string"
+        Namespace:
+          type: "string"
+        Status:
+          type: "string"
+        ErrorType:
+          type: "string"
+        HasLoop:
+          type: "boolean"
+    GleanCustomerEventStepExecution:
+      type: "object"
+      properties:
+        StepId:
+          type: "string"
+        WorkflowId:
+          type: "string"
+        Status:
+          type: "string"
+        ErrorType:
+          type: "string"
+        ActionInstanceId:
+          type: "string"
+        Citations:
+          type: "array"
+          items:
+            $ref: "#/definitions/GleanCustomerEventChatCitation"
+    GleanCustomerEventActionExecution:
+      type: "object"
+      properties:
+        ActionInstanceId:
+          type: "string"
+        StepId:
+          type: "string"
+        SearchTrackingTokens:
+          type: "array"
+          items:
+            type: "string"
+    GleanCustomerEventWorkflow:
+      type: "object"
+      properties:
+        ChatSessionId:
+          type: "string"
+        Citations:
+          type: "array"
+          items:
+            $ref: "#/definitions/GleanCustomerEventChatCitation"
+        Datasource:
+          type: "string"
+        Feature:
+          type: "string"
+        Initiator:
+          type: "string"
+        Platform:
+          type: "string"
+        RunId:
+          type: "string"
+        StepExecutionStatus:
+          type: "string"
+        StepId:
+          type: "string"
+        WorkflowExecutionStatus:
+          type: "string"
+        WorkflowId:
+          type: "string"
+    GleanCustomerEventGleanBotActivity:
+      type: "object"
+      properties:
+        ApplicationId:
+          type: "string"
+        ChannelId:
+          type: "string"
+        EventMetadata:
+          $ref: "#/definitions/GleanCustomerEventGleanBotEventMetadata"
+        EventTrackingToken:
+          type: "string"
+        EventType:
+          type: "string"
+        LatenciesMillisMap:
+          type: "object"
+          properties: {}
+        ResponseEvents:
+          type: "array"
+          items:
+            type: "string"
+        Source:
+          type: "string"
+        Stt:
+          type: "string"
+        WorkflowExecutionPoints:
+          type: "array"
+          items:
+            type: "string"
+        WorkspaceId:
+          type: "string"
+        AgentId:
+          type: "string"
+        TeamId:
+          type: "string"
+    GleanCustomerEventGleanBotEventMetadata:
+      type: "object"
+      properties:
+        INIT_EPOCH_MS:
+          type: "string"
+        PROACTIVE_MENTIONS_ROOT_TS:
+          type: "string"
+        PROACTIVE_MENTIONS_THREAD_TS:
+          type: "string"
+    GleanCustomerEventProductSnapshot:
+      type: "object"
+      properties:
+        Type:
+          type: "string"
+        User:
+          $ref: "#/definitions/GleanCustomerEventUserSnapshot"
+        Workflow:
+          $ref: "#/definitions/GleanCustomerEventWorkflowSnapshot"
+    GleanCustomerEventUserSnapshot:
+      type: "object"
+      properties:
+        Id:
+          type: "string"
+        CanonicalId:
+          type: "string"
+        AliasIds:
+          type: "array"
+          items:
+            type: "string"
+        LoggingId:
+          type: "string"
+        SignupTime:
+          type: "string"
+        PermissionsRole:
+          type: "string"
+        PermissionsSecondaryRoles:
+          type: "array"
+          items:
+            type: "string"
+        Department:
+          type: "string"
+        DepartmentId:
+          type: "integer"
+        JobFunction:
+          type: "string"
+        EmployeeType:
+          type: "string"
+        StartDate:
+          type: "string"
+        Timezone:
+          type: "string"
+        TimezoneOffset:
+          type: "string"
+        ProductEligibility:
+          type: "string"
+        UserSettings:
+          type: "array"
+          items:
+            $ref: "#/definitions/GleanCustomerEventUserSetting"
+    GleanCustomerEventUserSetting:
+      type: "object"
+      properties:
+        Key:
+          type: "string"
+        Value:
+          type: "string"
+    GleanCustomerEventWorkflowSnapshot:
+      type: "object"
+      properties:
+        WorkflowId:
+          type: "string"
+        CreatedAt:
+          type: "string"
+        UpdatedAt:
+          type: "string"
+        CreatedBy:
+          type: "string"
+        LastUpdateBy:
+          type: "string"
+        NamespaceEnum:
+          type: "string"
+        ApplicationId:
+          type: "string"
+        Name:
+          type: "string"
+    GleanCustomerEventLlmCall:
+      type: "object"
+      properties:
+        HttpStatusCode:
+          type: "integer"
+        Model:
+          type: "string"
+        InputTokens:
+          type: "integer"
+        OutputTokens:
+          type: "integer"
+        InputAudioTokens:
+          type: "integer"
+        OutputAudioTokens:
+          type: "integer"
+        AudioDurationMs:
+          type: "integer"
+        CacheCreationInputTokens:
+          type: "integer"
+        CacheReadInputTokens:
+          type: "integer"
+        CacheReadInputAudioTokens:
+          type: "integer"
+        Provider:
+          type: "string"
+        DeploymentType:
+          type: "string"
+        Feature:
+          type: "string"
+        Initiator:
+          type: "string"
+        Platform:
+          type: "string"
+        WorkflowRunId:
+          type: "string"
+        IsGleanHostedModel:
+          type: "boolean"
+        SubType:
+          type: "string"
+    GleanCustomerEventAction:
+      type: "object"
+      properties:
+        ActionId:
+          type: "string"
+        ActionInstanceId:
+          type: "string"
+        ActionName:
+          type: "string"
+        ActionRunId:
+          type: "string"
+        ApplicationId:
+          type: "string"
+        Caller:
+          type: "string"
+        EndTimeMs:
+          type: "integer"
+        EndpointRequestId:
+          type: "string"
+        ErrorStr:
+          type: "string"
+        ErrorType:
+          type: "string"
+        ExecutionMode:
+          type: "string"
+        ExecutionStatus:
+          type: "string"
+        SearchTrackingTokens:
+          type: "array"
+          items:
+            type: "string"
+        SessionTrackingToken:
+          type: "string"
+        StartTimeMs:
+          type: "integer"
+        WebSearchProvider:
+          type: "string"
+        WorkflowId:
+          type: "string"
+    GleanCustomerEventMcpUsage:
+      type: "object"
+      properties:
+        Application:
+          type: "string"
+        AuthMethod:
+          type: "string"
+        DurationMs:
+          type: "integer"
+        EventType:
+          type: "string"
+        McpProtocol:
+          type: "string"
+        McpType:
+          type: "string"
+        Server:
+          type: "string"
+        Status:
+          type: "string"
+        ToolName:
+          type: "string"
+        ToolType:
+          type: "string"
+    GleanCustomerEventVoiceChat:
+      type: "object"
+      properties: {}
+    GleanCustomerEventWorkflowConversation:
+      type: "object"
+      properties:
+        WorkflowRunId:
+          type: "string"
+        Messages:
+          type: "array"
+          items:
+            $ref: "#/definitions/GleanCustomerEventChatMessage"
+        InputFields:
+          type: "array"
+          items:
+            $ref: "#/definitions/GleanCustomerEventWorkflowInputField"
+    GleanCustomerEventChatMessage:
+      type: "object"
+      properties:
+        Author:
+          type: "string"
+        Text:
+          type: "string"
+    GleanCustomerEventWorkflowInputField:
+      type: "object"
+      properties:
+        Key:
+          type: "string"
+        Value:
+          type: "string"
+
+transforms:
+  # user identity
+  - pseudonymize:
+      - "$.jsonPayload.User.UserEmail"
+      - "$.jsonPayload.User.UserId"
+      - "$.jsonPayload..SourcePerson.Id"
+  # document identifiers and URLs (reversible tokens for cross-event joins)
+  - tokenize:
+      - "$.jsonPayload.Search.Results[*].DocId"
+      - "$.jsonPayload.Search.Results[*].Url"
+      - "$.jsonPayload.SearchClick.DocId"
+      - "$.jsonPayload.SearchClick.DocUrl"
+      - "$.jsonPayload.ChatCitationClick.DocId"
+      - "$.jsonPayload..SourceDocument.Id"
+      - "$.jsonPayload..SourceDocument.Url"
+      - "$.jsonPayload..SourceFile.Id"
+      - "$.jsonPayload.AiSummary.DocIds[*]"
+      - "$.jsonPayload.Chat.SerpOrderedDocIds[*]"
+      - "$.jsonPayload.ClientEvent.DocUrl"
+      - "$.jsonPayload.Shortcut.DocumentIdForUrl"
+      - "$.jsonPayload.GleanBotActivity.ChannelId"
+  # free-text prompts and responses (metadata digests with keyword counts)
+  - textDigestKeywords:
+      keywords:
+        - "write"
+        - "draft"
+        - "compose"
+        - "create"
+        - "generate"
+        - "craft"
+        - "prepare"
+        - "edit"
+        - "revise"
+        - "rewrite"
+        - "reword"
+        - "rephrase"
+        - "paraphrase"
+        - "improve"
+        - "refine"
+        - "polish"
+        - "fix"
+        - "correct"
+        - "update"
+        - "modify"
+        - "analyze"
+        - "calculate"
+        - "compute"
+        - "summarize"
+        - "condense"
+        - "extract"
+        - "explain"
+        - "describe"
+        - "compare"
+        - "brainstorm"
+        - "suggest"
+        - "explore"
+        - "automate"
+        - "organize"
+        - "prioritize"
+        - "email"
+        - "e-mail"
+        - "reply"
+        - "respond"
+        - "response"
+        - "follow up"
+        - "cold outreach"
+        - "subject line"
+        - "recipient"
+        - "cc"
+        - "bcc"
+        - "dear"
+        - "hi"
+        - "hello"
+        - "regards"
+        - "sincerely"
+        - "inbox"
+        - "send"
+        - "forward"
+        - "message"
+        - "slack"
+        - "chat"
+        - "memo"
+        - "letter"
+        - "report"
+        - "proposal"
+        - "blog post"
+        - "article"
+        - "presentation"
+        - "slides"
+        - "job posting"
+        - "social media post"
+        - "newsletter"
+        - "announcement"
+        - "documentation"
+        - "resume"
+        - "copy"
+        - "script"
+        - "speech"
+        - "agenda"
+        - "pitch"
+        - "proofread"
+        - "concise"
+        - "formal"
+        - "casual"
+        - "professional"
+        - "friendly"
+        - "tone"
+        - "grammar"
+        - "spelling"
+        - "translate"
+        - "restructure"
+        - "summary"
+        - "key points"
+        - "key takeaways"
+        - "highlights"
+        - "TLDR"
+        - "recap"
+        - "overview"
+        - "boil down"
+        - "digest"
+        - "distill"
+        - "what is"
+        - "how to"
+        - "ideas"
+        - "options"
+        - "alternatives"
+        - "approaches"
+        - "best practices"
+        - "pros and cons"
+        - "analysis"
+        - "formula"
+        - "spreadsheet"
+        - "pivot"
+        - "chart"
+        - "graph"
+        - "trend"
+        - "pattern"
+        - "correlation"
+        - "statistics"
+        - "metrics"
+        - "KPI"
+        - "forecast"
+        - "dataset"
+        - "data cleaning"
+        - "code"
+        - "function"
+        - "program"
+        - "debug"
+        - "error"
+        - "bug"
+        - "compile"
+        - "runtime"
+        - "refactor"
+        - "optimize"
+        - "test"
+        - "deploy"
+        - "algorithm"
+        - "API"
+        - "SQL"
+        - "Python"
+        - "JavaScript"
+        - "Codex"
+        - "Terminal"
+        - "Git"
+        - "workflow"
+        - "process"
+        - "checklist"
+        - "task list"
+        - "action items"
+        - "schedule"
+        - "timeline"
+        - "milestones"
+        - "project plan"
+        - "delegate"
+        - "SOP"
+        - "runbook"
+      jsonPaths:
+        - "$.jsonPayload.Search.Query"
+        - "$.jsonPayload.Autocomplete.Query"
+        - "$.jsonPayload.Chat.UserQuery"
+        - "$.jsonPayload.Chat.Response"
+        - "$.jsonPayload.Chat.FollowupQuestions[*]"
+        - "$.jsonPayload.AiSummary.SummaryText"
+        - "$.jsonPayload.AiAnswer.Response"
+        - "$.jsonPayload.AiAnswer.FollowupQuestions[*]"
+        - "$.jsonPayload.SearchFeedback.Query"
+        - "$.jsonPayload.SearchFeedback.Comments"
+        - "$.jsonPayload.ChatFeedback.Comments"
+        - "$.jsonPayload.WorkflowConversation.Messages[*].Text"
+        - "$.jsonPayload.WorkflowConversation.InputFields[*].Value"
+  # titles and other free-text metadata (length/word_count only)
+  - textDigest:
+      - "$.jsonPayload.Search.Results[*].Title"
+      - "$.jsonPayload.Autocomplete.Results[*].Entity"
+      - "$.jsonPayload.Autocomplete.Results[*].Result"
+      - "$.jsonPayload..SourceDocument.Title"
+      - "$.jsonPayload.SearchClick.DocTitle"
+      - "$.jsonPayload..SourcePerson.Name"
+      - "$.jsonPayload..SourceFile.Name"
+      - "$.jsonPayload.Shortcut.Alias"
+      - "$.jsonPayload.Shortcut.InputAlias"
+      - "$.jsonPayload.ProductSnapshot.Workflow.Name"
+      - "$.jsonPayload.ProductSnapshot.User.UserSettings[*].Value"

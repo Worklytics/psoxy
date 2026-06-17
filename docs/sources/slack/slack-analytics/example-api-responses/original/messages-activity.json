@@ -1,0 +1,46 @@
+{
+  "ok": true,
+  "message_activities": [
+    {
+      "channel_id": "C123ABC456",
+      "timestamp": "1234567890.123456",
+      "unique_user_reactions_count": 15,
+      "unique_user_shares_count": 8,
+      "unique_user_views_count": 142,
+      "unique_user_clicks_count": 23,
+      "unique_views_client": {
+        "desktop_views_count": 89,
+        "mobile_views_count": 42,
+        "web_views_count": 11
+      },
+      "unique_stats_by_department": [
+        {
+          "department": "Engineering",
+          "views": 45,
+          "reactions": 8,
+          "shares": 3,
+          "clicks": 12
+        },
+        {
+          "department": "Product",
+          "views": 32,
+          "reactions": 4,
+          "shares": 2,
+          "clicks": 7
+        }
+      ],
+      "unique_stats_by_org": [
+        {
+          "team_id": "T123ABC456",
+          "views": 98,
+          "reactions": 12,
+          "shares": 5,
+          "clicks": 18
+        }
+      ]
+    }
+  ],
+  "response_metadata": {
+    "next_cursor": "dXNlcjpVMDY2Q0E0RUFDOjE="
+  }
+}

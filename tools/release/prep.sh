@@ -14,14 +14,29 @@ NEXT_RELEASE=$2
 
 if [ -z "$CURRENT_RELEASE" ]; then
   printf "${ERR}Current release version not specified. Exiting.${NC}\n"
-  printf "Usage: ${INFO}./tools/check-release.sh <current-release> <next-release>${NC}\n"
+  printf "Usage: ${INFO}./tools/release/prep.sh <current-release> <next-release>${NC}\n"
   exit 1
 fi
 
 if [ -z "$NEXT_RELEASE" ]; then
   printf "${ERR}Next release version not specified. Exiting.${NC}\n"
-  printf "Usage: ${INFO}./tools/check-release.sh <current-release> <next-release>${NC}\n"
+  printf "Usage: ${INFO}./tools/release/prep.sh <current-release> <next-release>${NC}\n"
   exit 1
+fi
+
+if [ "$NEXT_RELEASE" = "rc-NEXT" ] || [ "$NEXT_RELEASE" = "NEXT" ]; then
+  printf "${ERR}Invalid next release '${NEXT_RELEASE}'. Provide an explicit rc branch, e.g. rc-v0.6.5.${NC}\n"
+  exit 1
+fi
+
+if [[ "$NEXT_RELEASE" =~ ^rc- ]]; then
+  if [[ ! "$NEXT_RELEASE" =~ ^rc-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    printf "${ERR}Invalid rc branch name '${NEXT_RELEASE}'. Expected format: rc-vX.Y.Z (e.g. rc-v0.6.5).${NC}\n"
+    exit 1
+  fi
+  IS_RC=1
+else
+  IS_RC=0
 fi
 
 if [ ! -f "java/pom.xml" ]; then
@@ -29,7 +44,6 @@ if [ ! -f "java/pom.xml" ]; then
   exit 1
 fi
 
-IS_RC=$(echo $NEXT_RELEASE | grep -c "rc")
 if [ "$IS_RC" -eq 1 ]; then
   printf "Preparing release candidate ${SUCCESS}${NEXT_RELEASE}${NC} ...\n"
   CURRENT_BRANCH=$(git branch --show-current)
@@ -41,7 +55,6 @@ if [ "$IS_RC" -eq 1 ]; then
   fi
 
   if [ "$CURRENT_BRANCH" != "main" ]; then
-
     printf "${ERR}Current branch is not main. Please checkout main branch and try again to prepare release candidate.${NC}\n"
     exit 1
   fi
@@ -101,14 +114,11 @@ case "$REPLY" in
 esac
 echo "" # newline
 
-git add java/**.java
 git add java/pom.xml
-git add infra/examples/**/main.tf
-git add infra/examples-dev/**/main.tf
-git add infra/examples-dev/**/msft-365.tf
-git add infra/examples-dev/**/google-workspace.tf
-git add infra/modular-examples/**/main.tf
+git add infra/examples-dev/
 git add tools/init-tfvars.sh
+git add -u java/
+git add -u tools/
 
 git status
 

@@ -141,6 +141,14 @@ variable "caller_aws_arns" {
 }
 
 
+variable "test_aws_principal_arns" {
+  type        = list(string)
+  description = "AWS principal ARNs allowed to test the deployment. When null and provision_testing_infra is true, defaults to the IAM principal running Terraform."
+  default     = null
+  nullable    = true
+}
+
+
 variable "connector_display_name_suffix" {
   type        = string
   description = "suffix to append to display_names of connector SAs; helpful to distinguish between various ones in testing/dev scenarios"
@@ -260,6 +268,7 @@ variable "custom_api_connectors" {
       path         = string
       content_type = optional(string, "application/json")
       body         = optional(string, null)
+      headers      = optional(map(string), {})
     })), [])
     example_api_calls_user_to_impersonate = optional(string)
     secured_variables = optional(list(object({

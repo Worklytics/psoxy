@@ -29,7 +29,7 @@ locals {
 
   # rules_file paths may be absolute, relative to the Terraform root module (deployment dir), or
   # relative to psoxy_base_dir (paths into the psoxy repo, eg docs/sources/...)
-  api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
+  api_connector_rules_files = merge({ for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null }, var.custom_api_connector_rules)
 
   _rules_file_references = distinct(concat(
     values(local.api_connector_rules_files),
@@ -358,11 +358,15 @@ module "webhook_collector" {
 
   source = "../../modules/gcp-webhook-collector"
 
-  project_id                         = var.gcp_project_id
-  region                             = var.gcp_region
-  environment_id_prefix              = local.environment_id_prefix
-  instance_id                        = each.key
-  service_account_email              = google_service_account.webhook_collector[each.key].email
+  project_id            = var.gcp_project_id
+  region                = var.gcp_region
+  environment_id_prefix = local.environment_id_prefix
+  instance_id           = each.key
+  service_account = {
+    # .id is the provider's fully-qualified name (projects/.../serviceAccounts/...); same value google_service_account_iam_member.service_account_id expects
+    service_account_id = google_service_account.webhook_collector[each.key].id
+    email              = google_service_account.webhook_collector[each.key].email
+  }
   artifacts_bucket_name              = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name      = module.psoxy.deployment_bundle_object_name
   artifact_repository_id             = module.psoxy.artifact_repository
@@ -567,11 +571,35 @@ resource "google_secret_manager_secret_iam_member" "additional_transforms" {
 # END LOOKUP TABLES
 
 locals {
+  api_connector_test_examples = { for k, connector in var.api_connectors : k => merge(
+    {
+      api_requests = concat(
+        [for path in try(connector.example_api_calls, []) : {
+          method       = "GET"
+          path         = path
+          content_type = null
+          body         = null
+          headers      = {}
+        }],
+        [for req in try(connector.example_api_requests, []) : {
+          method       = try(req.method, "GET")
+          path         = req.path
+          content_type = try(req.content_type, null)
+          body         = try(req.body, null)
+          headers      = try(req.headers, {})
+        }]
+      )
+    },
+    try(connector.enable_async_processing, false) ? { supports_async = true } : {},
+    try(connector.example_api_calls_user_to_impersonate, null) != null ? { user_to_impersonate = connector.example_api_calls_user_to_impersonate } : {}
+  ) }
+
   api_instances = { for instance in module.api_connector :
     instance.instance_id => merge(
       {
-        endpoint_url : instance.cloud_function_url,
-        sanitized_bucket : try(instance.async_output_bucket_name, null),
+        endpoint_url     = instance.cloud_function_url,
+        sanitized_bucket = try(instance.async_output_bucket_name, null),
+        test_examples    = local.api_connector_test_examples[instance.instance_id],
       },
       instance,
       var.api_connectors[instance.instance_id]
@@ -634,4 +662,9 @@ output "secrets_to_provision" {
 output "bulk_connector" {
   description = "INTERNAL USE ONLY - For testing purposes."
   value       = module.bulk_connector
+}
+
+output "api_connector" {
+  description = "INTERNAL USE ONLY - For testing purposes."
+  value       = module.api_connector
 }

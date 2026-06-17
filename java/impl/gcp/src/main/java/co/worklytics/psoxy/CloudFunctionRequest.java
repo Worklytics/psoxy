@@ -98,14 +98,23 @@ public class CloudFunctionRequest implements HttpEventRequest {
     @Override
     public Optional<String> getClientIp() {
         return getHeader(HttpEventRequest.HTTP_HEADER_X_FORWARDED_FOR)
-            .flatMap(value -> Splitter.on(',').trimResults().omitEmptyStrings().splitToList(value).stream()
-                .reduce((previous, current) -> current));
+            .flatMap(CloudFunctionRequest::trustedGcpClientIp);
+    }
+
+    private static Optional<String> trustedGcpClientIp(String xForwardedFor) {
+        List<String> hops = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(xForwardedFor);
+        if (hops.isEmpty()) {
+            return Optional.empty();
+        }
+        // GCP HTTP(S) load balancers append the observed client IP and then the load balancer IP.
+        // Existing left-side values can be client-supplied and must not drive IP allowlist checks.
+        return Optional.of(hops.get(hops.size() >= 2 ? hops.size() - 2 : 0));
     }
 
     @Override
     public Optional<Boolean> isHttps() {
-        return Optional.ofNullable(request.getHeaders().get(HttpEventRequest.HTTP_HEADER_X_FORWARDED_PROTO))
-            .map(values -> values.get(0).equals("https"));
+        return getHeader(HttpEventRequest.HTTP_HEADER_X_FORWARDED_PROTO)
+            .map(proto -> proto.equalsIgnoreCase("https"));
     }
 
     @Override

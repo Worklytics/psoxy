@@ -113,8 +113,9 @@ variable "example_api_requests" {
     path         = string
     content_type = optional(string, "application/json")
     body         = optional(string, null)
+    headers      = optional(map(string), {})
   }))
-  description = "example API requests with method, content_type and body parameters that can be called via proxy"
+  description = "example API requests with method, content_type, body, and headers parameters that can be called via proxy"
   default     = []
 }
 
@@ -226,18 +227,12 @@ variable "todo_step" {
 
 variable "vpc_config" {
   type = object({
-    serverless_connector = string # Format: projects/{project}/locations/{location}/connectors/{connector}
+    network              = optional(string)
+    subnet               = optional(string)
+    serverless_connector = optional(string) # TODO 0.7.x: remove; deprecated
   })
   description = "VPC configuration for the Cloud Run function."
   default     = null
-
-  validation {
-    condition = (
-      var.vpc_config == null ||
-      can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", var.vpc_config.serverless_connector))
-    )
-    error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
-  }
 }
 
 variable "enable_versioning" {

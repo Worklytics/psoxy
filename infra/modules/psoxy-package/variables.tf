@@ -13,6 +13,11 @@ variable "implementation" {
   type        = string
   description = "reference to implementation to build (subdirectory of java/impl/)"
   default     = "aws"
+
+  validation {
+    condition     = contains(["aws", "gcp"], var.implementation)
+    error_message = "The implementation value must be 'aws' or 'gcp'."
+  }
 }
 
 variable "deployment_bundle" {

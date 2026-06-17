@@ -22,6 +22,11 @@ output "caller_role_arn" {
   value = module.psoxy.api_caller_role_arn
 }
 
+output "test_aws_principal_arns" {
+  description = "AWS principal ARNs allowed to test the deployment when provision_testing_infra is enabled."
+  value       = local.test_aws_principal_arns
+}
+
 output "api_connector_instances" {
   value = local.api_instances
 }

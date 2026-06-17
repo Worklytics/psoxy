@@ -1,10 +1,14 @@
 #!/bin/bash
 
-#see ../infra/modules/psoxy-package/build.sh
-# this is VERY similar, and should be unified - but it's a breaking change bc argument order is different
+# CLI wrapper for building Psoxy deployment JARs outside Terraform.
+# Shared logic: tools/lib/build-java-common.sh
+# Terraform entry point: infra/modules/psoxy-package/build.sh (different argument order; see TODOs there)
 
 # set to fail on errors
 set -e
+
+# shellcheck source=lib/build-java-common.sh
+source "$(dirname "$0")/lib/build-java-common.sh"
 
 # colors
 COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
@@ -36,22 +40,13 @@ done
 IMPLEMENTATION=${@:$OPTIND:1}
 JAVA_SOURCE_ROOT=${@:$OPTIND+1:1}
 
-if [[ "$IMPLEMENTATION" != "aws" && "$IMPLEMENTATION" != "gcp" ]]; then
-    printf "${ERR}Error: HOST_PLATFORM value '${IMPLEMENTATION}' must be 'aws' or 'gcp'.${NC}\n"
-    printf "Usage: build.sh [-qd] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
-    exit 1
-fi
-
-if [[ -z "$JAVA_SOURCE_ROOT" ]]; then
-    printf "${ERR}Error: JAVA_SOURCE_ROOT value is required.${NC}\n"
-    printf "Usage: build.sh [-qd] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
-    exit 1
-fi
-
 # Convert to absolute path if relative
 if [[ ! "$JAVA_SOURCE_ROOT" = /* ]]; then
     JAVA_SOURCE_ROOT="$(cd "${JAVA_SOURCE_ROOT}" && pwd)"
 fi
+
+psoxy_build_validate_implementation "$IMPLEMENTATION"
+psoxy_build_validate_java_source_root "$JAVA_SOURCE_ROOT"
 
 # Ensure trailing slash for path concatenation
 if [[ "$JAVA_SOURCE_ROOT" != */ ]]; then
@@ -61,8 +56,15 @@ fi
 PARENT_POM="${JAVA_SOURCE_ROOT}pom.xml"
 
 PSOXY_CHECKOUT_ROOT=$(dirname "${JAVA_SOURCE_ROOT%/}")
-# shellcheck source=lib/maven-local-repo.sh
-source "$(dirname "$0")/lib/maven-local-repo.sh"
+
+if [ -n "$DISTRIBUTION_PROFILE" ]; then
+    export PSOXY_SKIP_OPENNLP=1
+fi
+MAVEN_LOCAL_REPO_SH="$(dirname "$0")/lib/maven-local-repo.sh"
+if [ -f "$MAVEN_LOCAL_REPO_SH" ]; then
+  # shellcheck source=lib/maven-local-repo.sh
+  source "$MAVEN_LOCAL_REPO_SH"
+fi
 
 # Use reactor build approach: clean all modules, then build dependencies and target module
 # -f specifies the parent pom.xml file
