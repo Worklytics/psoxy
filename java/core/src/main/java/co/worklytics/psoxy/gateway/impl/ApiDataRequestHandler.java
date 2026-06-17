@@ -379,7 +379,7 @@ public class ApiDataRequestHandler {
             // setup request
             boolean followRedirects = config.getConfigPropertyAsOptional(ProxyConfigProperty.FOLLOW_REDIRECTS)
                     .map(Boolean::parseBoolean)
-                    .orElse(true);
+                    .orElse(!processingContext.getAsync());
 
             requestToSourceApi
                     .setThrowExceptionOnExecuteError(false)
