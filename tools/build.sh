@@ -87,6 +87,17 @@ mvn ${PSOXY_MAVEN_LOCAL_REPO:+-Dmaven.repo.local="$PSOXY_MAVEN_LOCAL_REPO"} \
     ${PSOXY_SKIP_OPENNLP:+-DskipOpenNlpModelDownload=true} \
     package $QUIET_OPTIONS -f "${PARENT_POM}" -pl impl/${IMPLEMENTATION} -am $DISTRIBUTION_PROFILE
 
-DEPLOYMENT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
+DEPLOYMENT_DIR="${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment"
+if [ ! -d "$DEPLOYMENT_DIR" ]; then
+  printf "${ERR}Deployment directory not found at ${DEPLOYMENT_DIR}.${NC}\n"
+  exit 1
+fi
+
+DEPLOYMENT_ARTIFACT=$(find "$DEPLOYMENT_DIR" -maxdepth 1 -type f -name 'psoxy-*.jar' | head -1)
+DEPLOYMENT_ARTIFACT="${DEPLOYMENT_ARTIFACT##*/}"
+if [ -z "$DEPLOYMENT_ARTIFACT" ]; then
+  printf "${ERR}No deployment JAR found under ${DEPLOYMENT_DIR}.${NC}\n"
+  exit 1
+fi
 
 printf "${SUCCESS}Build complete.${NC} Deployment artifact: ${INFO}${DEPLOYMENT_ARTIFACT}${NC}\n"
