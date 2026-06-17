@@ -4,8 +4,10 @@ import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,7 +53,16 @@ public class GenMetadataProcessor {
                 "genMetadata input empty or not serializable");
         }
         try {
-            Object raw = backend.generate(taskPrompt, outputSchema, inputJson);
+            Instant startedAt = Instant.now();
+            long startedNanos = System.nanoTime();
+            log.info("genMetadata augment inference call started at " + startedAt);
+            Object raw;
+            try {
+                raw = backend.generate(taskPrompt, outputSchema, inputJson);
+            } finally {
+                long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedNanos);
+                log.info("genMetadata augment inference call completed in " + elapsedMs + "ms");
+            }
             if (raw instanceof String rawText) {
                 log.info("genMetadata raw backend response: " + truncateForLog(rawText));
             } else if (raw != null) {

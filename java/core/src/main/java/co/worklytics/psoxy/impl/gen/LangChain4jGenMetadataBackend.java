@@ -13,6 +13,7 @@ import lombok.extern.java.Log;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -125,12 +126,25 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         try {
             acquired = inferenceLock.tryLock(config.getTimeoutSeconds(), TimeUnit.SECONDS);
             if (!acquired) {
-                log.warning("genMetadata inference lock timeout for model " + config.getModelId());
+                log.warning("genMetadata inference lock timeout for model " + config.getModelId()
+                    + " after " + config.getTimeoutSeconds() + "s");
                 return null;
             }
-            ChatResponse response = handle.chatModel.chat(ChatRequest.builder()
-                .messages(messages)
-                .build());
+            Instant inferenceStartedAt = Instant.now();
+            long inferenceStartedNanos = System.nanoTime();
+            log.info("genMetadata LLM inference started at " + inferenceStartedAt
+                + " modelId=" + config.getModelId());
+            ChatResponse response;
+            try {
+                response = handle.chatModel.chat(ChatRequest.builder()
+                    .messages(messages)
+                    .build());
+            } finally {
+                long inferenceMs = TimeUnit.NANOSECONDS.toMillis(
+                    System.nanoTime() - inferenceStartedNanos);
+                log.info("genMetadata LLM inference completed in " + inferenceMs + "ms"
+                    + " modelId=" + config.getModelId());
+            }
             if (response == null || response.aiMessage() == null) {
                 return null;
             }
