@@ -1,5 +1,8 @@
 variables {
-  project_id                    = "test-project"
+  gcp_project = {
+    project_id = "test-project"
+    number     = 123456789
+  }
   environment_id_prefix         = "dev-"
   instance_id                   = "test-instance"
   service_account_email         = "test@example.com"
@@ -7,18 +10,12 @@ variables {
   deployment_bundle_object_name = "bundle.zip"
   builder_sa_id                 = "projects/test-project/serviceAccounts/builder@example.com"
   source_kind                   = "test"
+  tf_runner_iam_principal       = "user:terraform@example.com"
 
   allowed_data_access_ip_blocks = ["192.168.0.0/24"]
 }
 
 mock_provider "google" {
-  mock_data "google_project" {
-    defaults = {
-      project_id = "test-project"
-      number     = "123456789"
-    }
-  }
-
   mock_data "google_service_account" {
     defaults = {
       account_id = "test@example.com"

@@ -51,7 +51,7 @@ locals {
 # trivy:ignore:AVD-GCP-0078
 # trivy:ignore:AVD-GCP-0077
 resource "google_storage_bucket" "input_bucket" {
-  project                     = var.project_id
+  project                     = var.gcp_project.project_id
   name                        = coalesce(var.input_bucket_name, "${local.bucket_prefix}-input")
   location                    = var.region
   force_destroy               = var.bucket_force_destroy
@@ -85,7 +85,7 @@ resource "google_storage_bucket" "input_bucket" {
 module "output_bucket" {
   source = "../gcp-output-bucket"
 
-  project_id                     = var.project_id
+  project_id                     = var.gcp_project.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = google_service_account.service_account.email
   bucket_name_prefix             = coalesce(var.sanitized_bucket_name, local.bucket_prefix)
@@ -98,7 +98,7 @@ module "output_bucket" {
 }
 
 resource "google_service_account" "service_account" {
-  project      = var.project_id
+  project      = var.gcp_project.project_id
   account_id   = local.sa_name
   display_name = "Psoxy Connector - ${var.source_kind}"
   description  = "${local.function_name} runs as this service account"
@@ -157,7 +157,7 @@ resource "google_storage_bucket_iam_member" "grant_testers_admin_on_processed_bu
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
   for_each = var.secret_bindings
 
-  project   = var.project_id
+  project   = var.gcp_project.project_id
   secret_id = each.value.secret_id
   member    = "serviceAccount:${google_service_account.service_account.email}"
   role      = "roles/secretmanager.secretAccessor"
@@ -170,13 +170,13 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 # historically, we used the GCP Compute Engine default service account as the event trigger SA, and relied on it having 'Editor' by default on most GCP projects
 # but that does not seem to be universally true - so we'll stop relying on that assumption from 0.5.9 onwards
 resource "google_project_iam_member" "grant_sa_event_receiver" {
-  project = var.project_id
+  project = var.gcp_project.project_id
   member  = "serviceAccount:${google_service_account.service_account.email}"
   role    = "roles/eventarc.eventReceiver"
 }
 
 resource "google_cloud_run_service_iam_member" "grant_sa_invoker" {
-  project  = var.project_id
+  project  = var.gcp_project.project_id
   location = google_cloudfunctions2_function.function.location
   service  = google_cloudfunctions2_function.function.name
   member   = "serviceAccount:${google_service_account.service_account.email}"
@@ -204,7 +204,7 @@ removed {
 resource "google_cloudfunctions2_function" "function" {
   name        = local.function_name
   description = "Psoxy instance to process ${var.source_kind} files"
-  project     = var.project_id
+  project     = var.gcp_project.project_id
   location    = var.region
 
   build_config {
@@ -252,7 +252,7 @@ resource "google_cloudfunctions2_function" "function" {
 
       content {
         key        = secret_environment_variable.key
-        project_id = var.gcp_project_number
+        project_id = var.gcp_project.number
         secret     = secret_environment_variable.value.secret_id
         version    = secret_environment_variable.value.version_number
       }
@@ -321,7 +321,7 @@ EOT
 
 Review the deployed Cloud function in GCP console:
 
-[Function in GCP Console](https://console.cloud.google.com/functions/details/${var.region}/${google_cloudfunctions2_function.function.name}?project=${var.project_id})
+[Function in GCP Console](https://console.cloud.google.com/functions/details/${var.region}/${google_cloudfunctions2_function.function.name}?project=${var.gcp_project.project_id})
 
 We provide some Node.js scripts to easily validate the deployment. To be able
 to run the test commands below, you need Node.js (>=20) and npm (v >=8)

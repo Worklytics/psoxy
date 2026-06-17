@@ -21,16 +21,12 @@ locals {
 # deployment for a single Psoxy instance in GCP project that has be initialized for Psoxy.
 # project itself may hold MULTIPLE psoxy instances
 
-data "google_project" "project" {
-  project_id = var.project_id
-}
-
 # perms for secrets
 # TODO: imho, would be cleaner to combine into a custom project role??
 resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_secret" {
   for_each = var.secret_bindings
 
-  project   = var.project_id
+  project   = var.gcp_project.project_id
   secret_id = each.value.secret_id
   member    = "serviceAccount:${var.service_account.email}"
   role      = "roles/secretmanager.viewer"
@@ -39,7 +35,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_secret" {
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
   for_each = var.secret_bindings
 
-  project   = var.project_id
+  project   = var.gcp_project.project_id
   secret_id = each.value.secret_id
   member    = "serviceAccount:${var.service_account.email}"
   role      = "roles/secretmanager.secretAccessor" # this is ONLY accessing payload of a secret version
@@ -152,7 +148,7 @@ module "sanitized_webhook_output" {
 
   enable_versioning              = var.enable_versioning
   bucket_access_logs_destination = var.bucket_access_logs_destination
-  project_id                     = var.project_id
+  project_id                     = var.gcp_project.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account.email
   bucket_name_prefix             = local.bucket_name_prefix
@@ -172,7 +168,7 @@ module "side_output_bucket" {
 
   enable_versioning              = var.enable_versioning
   bucket_access_logs_destination = var.bucket_access_logs_destination
-  project_id                     = var.project_id
+  project_id                     = var.gcp_project.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account.email
   bucket_name_prefix             = local.bucket_name_prefix
@@ -241,7 +237,7 @@ locals {
 module "auth_issuer_secret" {
   source = "../../modules/gcp-secrets"
 
-  secret_project    = var.project_id
+  secret_project    = var.gcp_project.project_id
   path_prefix       = local.path_to_instance_config_parameters
   replica_locations = var.secret_replica_locations
   secrets = {
@@ -273,7 +269,7 @@ locals {
 resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_parameter" {
   for_each = local.secrets_to_grant_access_to
 
-  project   = var.project_id
+  project   = var.gcp_project.project_id
   secret_id = each.value.secret_id
   member    = "serviceAccount:${var.service_account.email}"
   role      = "roles/secretmanager.viewer"
@@ -282,7 +278,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_parameter
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_parameter" {
   for_each = local.secrets_to_grant_access_to
 
-  project   = var.project_id
+  project   = var.gcp_project.project_id
   secret_id = each.value.secret_id
   member    = "serviceAccount:${var.service_account.email}"
   role      = "roles/secretmanager.secretAccessor" # this is ONLY accessing payload of a secret version
@@ -311,7 +307,7 @@ resource "google_cloudfunctions2_function" "function" {
   name        = "${var.environment_id_prefix}${var.instance_id}"
   description = "Webhook Collector - ${var.source_kind}"
 
-  project  = var.project_id
+  project  = var.gcp_project.project_id
   location = var.region
 
   build_config {
@@ -372,7 +368,7 @@ resource "google_cloudfunctions2_function" "function" {
 
       content {
         key        = secret_environment_variable.key
-        project_id = data.google_project.project.number
+        project_id = var.gcp_project.number
         secret     = secret_environment_variable.value.secret_id
         version    = secret_environment_variable.value.version_number
       }
@@ -404,14 +400,14 @@ resource "google_cloud_run_service_iam_binding" "invokers" {
 # Pub/Sub topic for individual webhook messages
 resource "google_pubsub_topic" "webhook_topic" {
   name    = "${var.environment_id_prefix}${var.instance_id}-webhooks"
-  project = var.project_id
+  project = var.gcp_project.project_id
 }
 
 # Pub/Sub subscription for batch processing
 resource "google_pubsub_subscription" "webhook_subscription" {
   name    = "${var.environment_id_prefix}${var.instance_id}-webhook-subscription"
   topic   = google_pubsub_topic.webhook_topic.name
-  project = var.project_id
+  project = var.gcp_project.project_id
 
   # Configure for batch processing
   ack_deadline_seconds       = 600       # 10 minutes to process messages
@@ -428,7 +424,7 @@ resource "google_pubsub_subscription" "webhook_subscription" {
 
 # IAM binding to allow the Cloud Function to publish to the topic
 resource "google_pubsub_topic_iam_member" "publisher" {
-  project = var.project_id
+  project = var.gcp_project.project_id
   topic   = google_pubsub_topic.webhook_topic.name
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:${var.service_account.email}"
@@ -436,7 +432,7 @@ resource "google_pubsub_topic_iam_member" "publisher" {
 
 # IAM binding to allow the Cloud Function to pull from the subscription
 resource "google_pubsub_subscription_iam_member" "subscriber" {
-  project      = var.project_id
+  project      = var.gcp_project.project_id
   subscription = google_pubsub_subscription.webhook_subscription.name
   role         = "roles/pubsub.subscriber"
   member       = "serviceAccount:${var.service_account.email}"
@@ -444,7 +440,7 @@ resource "google_pubsub_subscription_iam_member" "subscriber" {
 
 
 resource "google_cloud_scheduler_job" "trigger_batch_processing" {
-  project     = var.project_id
+  project     = var.gcp_project.project_id
   region      = var.region
   name        = "${var.environment_id_prefix}${var.instance_id}-batch-processing"
   schedule    = "*/${var.batch_processing_frequency_minutes} * * * *"

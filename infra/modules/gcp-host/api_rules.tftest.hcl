@@ -25,6 +25,13 @@ variables {
 }
 
 mock_provider "google" {
+  mock_data "google_project" {
+    defaults = {
+      project_id = "test-project-123456"
+      number     = 123456789
+    }
+  }
+
   mock_data "google_compute_default_service_account" {
     defaults = {
       email = "123456789-compute@developer.gserviceaccount.com"
