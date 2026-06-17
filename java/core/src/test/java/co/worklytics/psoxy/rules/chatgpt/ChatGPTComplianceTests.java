@@ -29,6 +29,7 @@ public class ChatGPTComplianceTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs", "logs.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs?event_type=something&after=after&limit=limit&before=before", "logs.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs/some_id", "sample_log_message.json"),
+            InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs/some_id", "sample_log_message_2.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/{workspaceId}/automations", "automations.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/projects", "projects.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/projects?after=blabla&limit=100", "projects.json"),
