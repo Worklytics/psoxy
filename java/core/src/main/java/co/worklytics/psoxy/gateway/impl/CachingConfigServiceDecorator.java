@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Ticker;
 import com.google.common.cache.CacheBuilder;
@@ -77,25 +78,22 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
                             public String load(@NonNull ConfigProperty key) {
                                 TransientConfigException lastException = null;
                                 for (int attempt = 0; attempt < MAX_TRANSIENT_RETRIES; attempt++) {
-                                    if (attempt > 0) {
-                                        try {
-                                            if (transientRetryDelayMs > 0) Thread.sleep(transientRetryDelayMs);
-                                        } catch (InterruptedException ie) {
-                                            Thread.currentThread().interrupt();
-                                            throw new TransientConfigException("Config load for " + key.name() + " interrupted during retry", ie);
-                                        }
-                                        log.log(Level.WARNING, "Retrying config property {0}, attempt {1}/{2}",
-                                            new Object[]{key.name(), attempt + 1, MAX_TRANSIENT_RETRIES});
-                                    }
                                     try {
                                         return delegate.getConfigPropertyAsOptional(key).orElse(NEGATIVE_VALUE);
                                     } catch (TransientConfigException e) {
                                         lastException = e;
-                                        log.log(Level.WARNING, "Transient failure on attempt {0}/{1} for config property {2}",
-                                            new Object[]{attempt + 1, MAX_TRANSIENT_RETRIES, key.name()});
+                                        log.log(Level.WARNING, String.format("Transient failure on attempt {0}/{1} for config property {2}",
+                                            attempt + 1, MAX_TRANSIENT_RETRIES, key.name()));
+                                    }
+                                    try {
+                                        if (transientRetryDelayMs > 0)
+                                            Thread.sleep(transientRetryDelayMs);
+                                    } catch (InterruptedException ie) {
+                                        Thread.currentThread().interrupt();
+                                        throw new TransientConfigException("Config load for " + key.name() + " interrupted during retry", ie);
                                     }
                                 }
-                                throw Objects.requireNonNull(lastException);
+                                throw lastException;
                             }
 
                             @Override
