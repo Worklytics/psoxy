@@ -285,6 +285,7 @@ endpoints:
           - "$.conversation.title"
           - "$[?(@.actor.type =~ /account_user/i)].message.content.value"
           - "$[?(@.actor.type =~ /account_user/i)].message.annotations[*].quote_text"
+          - "$.message.content.quote"
           - "$.event_details.prompt_text"
         keywords:
           - "generate image"
@@ -530,6 +531,16 @@ definitions:
     properties:
       client_type:
         type: "string"
+      model:
+        type: "string"
+      skills_used:
+        type: "array"
+        items:
+          type: "string"
+      tools_used:
+        type: "array"
+        items:
+          type: "string"
       type:
         type: "string"
   BaseFile:
@@ -540,6 +551,11 @@ definitions:
       id:
         type: "string"
       object:
+        type: "string"
+  CitedFile:
+    type: "object"
+    properties:
+      id:
         type: "string"
   CodexEventDetails:
     type: "object"
@@ -595,9 +611,30 @@ definitions:
   Content:
     type: "object"
     properties:
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/definitions/ContentAnnotation"
+      file_id:
+        type: "string"
+      quote:
+        type: "string"
       type:
         type: "string"
       value:
+        type: "string"
+  ContentAnnotation:
+    type: "object"
+    properties:
+      action_domain:
+        type: "string"
+      action_name:
+        type: "string"
+      files:
+        type: "array"
+        items:
+          $ref: "#/definitions/CitedFile"
+      type:
         type: "string"
   Conversation:
     type: "object"
@@ -626,12 +663,20 @@ definitions:
       created_at:
         type: "string"
         format: "date-time"
+      gpt_id:
+        type: "string"
+      gpt_name:
+        type: "string"
       id:
         type: "string"
       is_pinned:
         type: "boolean"
       is_temporary_chat:
         type: "boolean"
+      project_id:
+        type: "string"
+      project_name:
+        type: "string"
       title:
         type: "string"
   ExportAutomation:
@@ -661,6 +706,9 @@ definitions:
         $ref: "#/definitions/Author"
       content:
         $ref: "#/definitions/Content"
+      created_at:
+        type: "string"
+        format: "date-time"
       files:
         type: "array"
         items:
