@@ -140,3 +140,43 @@ resource "google_compute_router_nat" "nat" {
 This allows data sources to restrict access by IP. The NAT and router above may present scalability limits at high volume; size them for your workload.
 
 Your VPC must provide connectivity to all data sources you connect to. Google Workspace sources generally work with Private Google Access on the subnet; other SaaS APIs require the NAT path above to reach the public internet with your fixed IP.
+
+## Removing VPC egress
+
+GCP Cloud Functions (gen2) cannot clear Direct VPC egress or Serverless VPC Access connector settings via an in-place Terraform update. If you remove or comment out `vpc_config` and run `terraform apply`, you may see:
+
+```
+Error 400: Could not update Cloud Run service ... spec.template.metadata.annotations: The run.googleapis.com/vpc-access-egress annotation cannot be set without also setting the run.googleapis.com/vpc-access-connector annotation or the run.googleapis.com/network-interfaces annotation.
+```
+
+Workaround: destroy each affected Cloud Function in Terraform, then apply to recreate it without VPC networking.
+
+1. Remove `vpc_config` from your `terraform.tfvars` (or set it to `null`).
+2. List function resources in state:
+
+```bash
+terraform state list | grep google_cloudfunctions2_function
+```
+
+3. Destroy each function that previously had VPC egress (API connectors, webhook collectors, and bulk connectors if applicable). The resource address depends on your root module; with the standard `gcp-host` example it looks like:
+
+```bash
+# API connector (replace CONNECTOR_ID with the map key from your config, e.g. gcal, msft-teams)
+terraform destroy -target='module.psoxy.module.api_connector["CONNECTOR_ID"].google_cloudfunctions2_function.function'
+
+# Webhook collector
+terraform destroy -target='module.psoxy.module.webhook_collector["WEBHOOK_ID"].google_cloudfunctions2_function.function'
+
+# Bulk connector (only if it used a serverless connector)
+terraform destroy -target='module.psoxy.module.bulk_connector["BULK_ID"].google_cloudfunctions2_function.function'
+```
+
+4. Recreate the functions:
+
+```bash
+terraform apply
+```
+
+Each destroyed function is recreated on apply. Expect brief downtime per connector while the function is destroyed and redeployed. IAM bindings and secrets are unchanged; only the Cloud Function resource is replaced.
+
+See also [GCP troubleshooting](./troubleshooting.md#error-400-vpc-access-egress-annotation-cannot-be-set-without-connector-or-network-interfaces) for the same error with additional context.
