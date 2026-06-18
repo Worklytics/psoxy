@@ -1,14 +1,14 @@
 # Plan succeeds with testing IAM/bucket policies enabled and disabled.
 
 variables {
-  environment_name                  = "test"
-  instance_id                       = "hris"
-  aws_account_id                    = "123456789012"
-  path_to_function_zip              = "../aws-proxy-lambda/tests/deployment.zip"
-  function_zip_hash                 = "dummy-hash-for-test"
-  path_to_instance_ssm_parameters   = "PSOXY_TEST_HRIS_"
-  provision_iam_policy_for_testing  = false
-  aws_principal_arn_when_testing    = null
+  environment_name                      = "test"
+  instance_id                           = "hris"
+  aws_account_id                        = "123456789012"
+  path_to_function_zip                  = "../aws-proxy-lambda/tests/deployment.zip"
+  function_zip_hash                     = "dummy-hash-for-test"
+  path_to_instance_ssm_parameters       = "PSOXY_TEST_HRIS_"
+  provision_iam_policy_for_testing      = false
+  aws_principal_arn_when_testing        = null
   aws_write_role_to_assume_when_testing = null
 }
 

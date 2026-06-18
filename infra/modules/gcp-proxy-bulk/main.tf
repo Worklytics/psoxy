@@ -251,7 +251,7 @@ resource "google_cloudfunctions2_function" "function" {
       iterator = secret_environment_variable
 
       content {
-        key        = secret_environment_variable.key
+        key = secret_environment_variable.key
         # project_id string (not number) avoids apply-time drift: number comes from data.google_project
         project_id = var.gcp_project.project_id
         secret     = secret_environment_variable.value.secret_id
