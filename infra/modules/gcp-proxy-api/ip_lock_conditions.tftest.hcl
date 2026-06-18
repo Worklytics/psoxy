@@ -1,5 +1,8 @@
 variables {
-  project_id                    = "test-project"
+  gcp_project = {
+    project_id = "test-project"
+    number     = 123456789
+  }
   environment_id_prefix         = "dev-"
   instance_id                   = "test-instance"
   config_parameter_prefix       = "TEST_"
@@ -14,13 +17,6 @@ variables {
 }
 
 mock_provider "google" {
-  mock_data "google_project" {
-    defaults = {
-      project_id = "test-project"
-      number     = "123456789"
-    }
-  }
-
   mock_data "google_service_account" {
     defaults = {
       account_id = "test@example.com"

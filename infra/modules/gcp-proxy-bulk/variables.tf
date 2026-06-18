@@ -1,6 +1,9 @@
-variable "project_id" {
-  type        = string
-  description = "id of GCP project that will host psoxy instance"
+variable "gcp_project" {
+  type = object({
+    project_id = string
+    number     = number
+  })
+  description = "GCP project hosting this Psoxy instance. project_id and number must refer to the same project (same fields as data.google_project); pass from parent (eg module.psoxy.gcp_project) to avoid data.google_project lookups in each connector instance."
 }
 
 variable "tf_runner_iam_principal" {

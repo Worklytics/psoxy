@@ -1,14 +1,10 @@
 # deployment for a single Psoxy instance in GCP project that has be initialized for Psoxy.
 # project itself may hold MULTIPLE psoxy instances
 
-data "google_project" "project" {
-  project_id = var.project_id
-}
-
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
   for_each = var.secret_bindings
 
-  project   = var.project_id
+  project   = var.gcp_project.project_id
   secret_id = each.value.secret_id
   member    = "serviceAccount:${var.service_account_email}"
   role      = "roles/secretmanager.secretAccessor"
@@ -65,7 +61,7 @@ module "async_output" {
 
   count = var.enable_async_processing ? 1 : 0
 
-  project_id                     = var.project_id
+  project_id                     = var.gcp_project.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
   bucket_name_prefix             = local.bucket_name_prefix
@@ -83,7 +79,7 @@ module "async_output" {
 resource "google_pubsub_topic" "async_output_topic" {
   count = var.enable_async_processing ? 1 : 0
 
-  project = var.project_id
+  project = var.gcp_project.project_id
   name    = "${var.environment_id_prefix}${var.instance_id}-async-output"
 }
 
@@ -91,7 +87,7 @@ resource "google_pubsub_topic" "async_output_topic" {
 resource "google_pubsub_subscription" "async_output_subscription" {
   count = var.enable_async_processing ? 1 : 0
 
-  project = var.project_id
+  project = var.gcp_project.project_id
   name    = "${var.environment_id_prefix}${var.instance_id}-async-output-subscription"
   topic   = google_pubsub_topic.async_output_topic[0].name
 
@@ -119,14 +115,14 @@ resource "google_pubsub_subscription" "async_output_subscription" {
 
 locals {
   # TODO: there's a `google_project_service_identity` resource in `google-beta` provider, which we might be able to leverage from 0.6+
-  pubsub_service_identity = "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  pubsub_service_identity = "service-${var.gcp_project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
 }
 
 # 1. Allow the Cloud Function's service account to publish to the topic
 resource "google_pubsub_topic_iam_member" "function_publisher" {
   count = var.enable_async_processing ? 1 : 0
 
-  project = var.project_id
+  project = var.gcp_project.project_id
   topic   = google_pubsub_topic.async_output_topic[0].id
   member  = "serviceAccount:${var.service_account_email}"
   role    = "roles/pubsub.publisher"
@@ -140,7 +136,7 @@ resource "google_pubsub_topic_iam_member" "function_publisher" {
 resource "google_service_account_iam_member" "pubsub_oidc_minter" {
   count = var.enable_async_processing ? 1 : 0
 
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.service_account_email}"
+  service_account_id = "projects/${var.gcp_project.project_id}/serviceAccounts/${var.service_account_email}"
   member             = "serviceAccount:${local.pubsub_service_identity}"
   role               = "roles/iam.serviceAccountOpenIdTokenCreator"
 }
@@ -150,7 +146,7 @@ module "side_output_bucket" {
 
   for_each = local.side_outputs_to_provision
 
-  project_id                     = var.project_id
+  project_id                     = var.gcp_project.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
   bucket_name_prefix             = local.bucket_name_prefix
@@ -217,7 +213,7 @@ locals {
 resource "google_service_account_iam_member" "tf_runner_act_as" {
   member             = var.tf_runner_iam_principal
   role               = "roles/iam.serviceAccountUser"
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.service_account_email}"
+  service_account_id = "projects/${var.gcp_project.project_id}/serviceAccounts/${var.service_account_email}"
 }
 
 # migration: remove old resource address from state (destroyed in GCP)
@@ -233,7 +229,7 @@ resource "google_cloudfunctions2_function" "function" {
   name        = "${var.environment_id_prefix}${var.instance_id}"
   description = "Psoxy Connector - ${var.source_kind}"
 
-  project  = var.project_id
+  project  = var.gcp_project.project_id
   location = var.region
 
   build_config {
@@ -296,7 +292,8 @@ resource "google_cloudfunctions2_function" "function" {
 
       content {
         key        = secret_environment_variable.key
-        project_id = data.google_project.project.number
+        # project_id string (not number) avoids apply-time drift: number comes from data.google_project
+        project_id = var.gcp_project.project_id
         secret     = secret_environment_variable.value.secret_id
         version    = secret_environment_variable.value.version_number
       }
@@ -317,7 +314,7 @@ module "service_url_parameter" {
 
   count = var.enable_async_processing ? 1 : 0
 
-  secret_project    = var.project_id
+  secret_project    = var.gcp_project.project_id
   path_prefix       = local.path_to_instance_config_parameters
   replica_locations = var.secret_replica_locations
   secrets = {
@@ -343,7 +340,7 @@ locals {
 resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_parameter" {
   for_each = local.secrets_to_grant_access_to
 
-  project   = var.project_id
+  project   = var.gcp_project.project_id
   secret_id = each.value.secret_id
   member    = "serviceAccount:${var.service_account_email}"
   role      = "roles/secretmanager.viewer"
@@ -352,7 +349,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_parameter
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_parameter" {
   for_each = local.secrets_to_grant_access_to
 
-  project   = var.project_id
+  project   = var.gcp_project.project_id
   secret_id = each.value.secret_id
   member    = "serviceAccount:${var.service_account_email}"
   role      = "roles/secretmanager.secretAccessor" # this is ONLY accessing payload of a secret version
