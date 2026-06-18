@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -45,6 +44,9 @@ public class RulesUtils {
      * cloud storage). Distinct from the {@link ProxyConfigProperty#RULES} config property name.
      */
     public static final String RULES_RESOURCE_PATH = "rules.yaml";
+
+    /** Max chars of decoded RULES YAML included in parse log lines. */
+    private static final int RULES_LOG_SNIPPET_MAX_CHARS = 200;
 
     @Inject @Named("ForYAML")
     ObjectMapper yamlMapper;
@@ -158,7 +160,8 @@ public class RulesUtils {
             try {
                 com.avaulta.gateway.rules.RuleSet rules =
                     yamlMapper.readerFor(impl).readValue(yamlString);
-                log.log(Level.INFO, "RULES parsed as {0}", impl.getSimpleName());
+                log.info(String.format("RULES parsed as %s (sha1=%s, snippet=%s)",
+                    impl.getSimpleName(), sha(rules), rulesLogSnippet(yamlString)));
                 validator.validate(rules);
                 return rules;
             } catch (com.fasterxml.jackson.core.JsonParseException | com.fasterxml.jackson.databind.JsonMappingException e) {
@@ -176,6 +179,14 @@ public class RulesUtils {
             }
         }
         throw new InvalidRulesException("Failed to parse RULES from config", ErrorCauses.RULES_INVALID);
+    }
+
+    private static String rulesLogSnippet(String yaml) {
+        String singleLine = yaml.replace('\r', ' ').replace('\n', ' ').trim();
+        if (singleLine.length() <= RULES_LOG_SNIPPET_MAX_CHARS) {
+            return singleLine;
+        }
+        return singleLine.substring(0, RULES_LOG_SNIPPET_MAX_CHARS) + "...";
     }
 
     public List<StorageHandler.ObjectTransform> parseAdditionalTransforms(ConfigService config) {
