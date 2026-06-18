@@ -31,9 +31,9 @@ delete_gh_maven_package_versions() {
   printf "Checking for GitHub Packages artifacts at version ${INFO}${target_version}${NC}...\n"
 
   local repo_full_name
-  repo_full_name=$(git -C "$path_to_repo" config --get remote.origin.url | sed -E 's/.*github.com[:\/](.*)\.git/\1/')
+  repo_full_name=$(git -C "$path_to_repo" config --get remote.origin.url | sed -E 's#.*github\.com[:/]+([^/]+/[^/.]+)(\.git)?$#\1#')
   local org_name
-  org_name=$(echo "$repo_full_name" | cut -d'/' -f1)
+  org_name=$(printf '%s\n' "$repo_full_name" | cut -d'/' -f1)
 
   local group_ids=("co.worklytics.psoxy" "com.avaulta.gateway")
   local packages_json
