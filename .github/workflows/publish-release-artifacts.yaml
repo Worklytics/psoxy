@@ -69,23 +69,26 @@ jobs:
         run: |
           # generate-sbom.sh runs mvn clean verify, which removes shaded deployment JARs.
           # Rebuild distribution artifacts for GitHub release upload.
+          # Each build.sh run cleans the full reactor, so stash JARs before the next build.
+          mkdir -p release-assets
           ./tools/build.sh -qd aws java/
+          cp java/impl/aws/target/deployment/psoxy-aws-*.jar release-assets/
           ./tools/build.sh -qd gcp java/
+          cp java/impl/gcp/target/deployment/psoxy-gcp-*.jar release-assets/
 
       - name: Locate Artifacts
         id: locate-artifacts
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          # Find the generated JARs - verifying path assumptions from build scripts
-          AWS_JAR=$(find java/impl/aws/target/deployment -name "psoxy-aws-*.jar" | head -n 1)
-          GCP_JAR=$(find java/impl/gcp/target/deployment -name "psoxy-gcp-*.jar" | head -n 1)
+          AWS_JAR=$(find release-assets -name "psoxy-aws-*.jar" | head -n 1)
+          GCP_JAR=$(find release-assets -name "psoxy-gcp-*.jar" | head -n 1)
 
           if [ -z "$AWS_JAR" ] || [ ! -f "$AWS_JAR" ]; then
-            echo "::error::AWS deployment JAR not found under java/impl/aws/target/deployment"
+            echo "::error::AWS deployment JAR not found under release-assets"
             exit 1
           fi
           if [ -z "$GCP_JAR" ] || [ ! -f "$GCP_JAR" ]; then
-            echo "::error::GCP deployment JAR not found under java/impl/gcp/target/deployment"
+            echo "::error::GCP deployment JAR not found under release-assets"
             exit 1
           fi
 

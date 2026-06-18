@@ -7,6 +7,9 @@ else
     ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
 fi
 
+# shellcheck source=lib/delete-gh-maven-packages.sh
+source "$(dirname "$0")/lib/delete-gh-maven-packages.sh"
+
 PATH_TO_REPO="$1"
 
 if [ -z "$PATH_TO_REPO" ]; then
@@ -63,63 +66,7 @@ if [ "$IS_RC" = true ]; then
   printf "RC build detected. Using version: ${INFO}${TARGET_VERSION}${NC}\n"
 
   # 3. Delete existing SNAPSHOT artifacts
-  printf "Checking for existing artifacts to clean up...\n"
-
-  REPO_FULL_NAME=$(git -C "$PATH_TO_REPO" config --get remote.origin.url | sed -E 's/.*github.com[:\/](.*).git/\1/')
-  ORG_NAME=$(echo "$REPO_FULL_NAME" | cut -d'/' -f1)
-
-  # List of relevant group IDs to check
-  GROUP_IDS=("co.worklytics.psoxy" "com.avaulta.gateway")
-
-  printf "  Fetching packages for org: ${INFO}${ORG_NAME}${NC}...\n"
-
-  PACKAGES_JSON=$(gh api "/orgs/${ORG_NAME}/packages?package_type=maven" 2>/dev/null)
-
-  if [ $? -ne 0 ]; then
-     printf "${ERR}Warning: Failed to list packages. Check 'read:packages' scope.${NC}\n"
-     PACKAGES_JSON="[]"
-  fi
-
-  if command -v jq &> /dev/null; then
-
-      for GROUP_ID in "${GROUP_IDS[@]}"; do
-        printf "  Scanning for packages starting with: ${INFO}${GROUP_ID}${NC}...\n"
-
-        # Filter packages by group ID
-        PACKAGE_NAMES=$(echo "$PACKAGES_JSON" | jq -r ".[] | select(.name | startswith(\"${GROUP_ID}\")) | .name")
-
-        for PKG in $PACKAGE_NAMES; do
-            printf "    Checking package: ${INFO}${PKG}${NC} for version ${TARGET_VERSION}...\n"
-
-            VERSIONS_JSON=$(gh api "/orgs/${ORG_NAME}/packages/maven/${PKG}/versions" 2>/dev/null)
-
-            if [ $? -ne 0 ]; then
-               printf "      ${ERR}Failed to list versions for ${PKG}.${NC}\n"
-               continue
-            fi
-
-            VERSION_ID=$(echo "$VERSIONS_JSON" | jq -r ".[] | select(.name == \"${TARGET_VERSION}\") | .id")
-
-            if [ -n "$VERSION_ID" ] && [ "$VERSION_ID" != "null" ]; then
-               printf "      Found version ${TARGET_VERSION} (ID: ${VERSION_ID}). Deleting...\n"
-
-               if gh api -X DELETE "/orgs/${ORG_NAME}/packages/maven/${PKG}/versions/${VERSION_ID}" 2>/dev/null; then
-                  printf "      ${SUCCESS}✓ Deleted ${PKG}:${TARGET_VERSION}${NC}\n"
-               else
-                  printf "      ${ERR}✗ Failed to delete ${PKG}:${TARGET_VERSION}. Likely 403 Forbidden.${NC}\n"
-                  printf "        Ensure your token has ${INFO}delete:packages${NC} scope.\n"
-               fi
-            else
-               # Verbose but useful for debugging
-               # printf "      Version ${TARGET_VERSION} not found.\n"
-               :
-            fi
-        done
-      done
-  else
-      printf "${ERR}Warning: 'jq' not found. Skipping automated cleanup of old artifacts.${NC}\n"
-      printf "  Install 'jq' to enable this feature.\n"
-  fi
+  delete_gh_maven_package_versions "$PATH_TO_REPO" "$TARGET_VERSION"
 
 else
   TARGET_VERSION="${POM_VERSION}"
@@ -135,4 +82,10 @@ else
   printf "${ERR}✗${NC} Maven deploy failed. You may need to configure authentication in ~/.m2/settings.xml\n"
   printf "  See: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry\n"
   exit 1
+fi
+
+if [ "$IS_TAG" = true ]; then
+  SNAPSHOT_VERSION="${TARGET_VERSION}-SNAPSHOT"
+  printf "\nRelease published. Removing RC SNAPSHOT artifacts (${INFO}${SNAPSHOT_VERSION}${NC}) from GitHub Packages...\n"
+  delete_gh_maven_package_versions "$PATH_TO_REPO" "$SNAPSHOT_VERSION"
 fi
