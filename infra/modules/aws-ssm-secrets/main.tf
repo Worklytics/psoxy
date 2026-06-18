@@ -11,8 +11,21 @@ locals {
   path_prefix              = local.non_empty_path && local.non_fully_qualified_path ? "/${var.path}" : var.path
   PLACEHOLDER_VALUE        = "fill me"
 
-  externally_managed_secrets = { for k, spec in var.secrets : k => spec if !(spec.value_managed_by_tf) }
-  terraform_managed_secrets  = { for k, spec in var.secrets : k => spec if spec.value_managed_by_tf }
+  # for_each keys must not be derived from sensitive secret values; keep metadata only here
+  externally_managed_secrets = nonsensitive({
+    for k, spec in var.secrets : k => {
+      description         = spec.description
+      value_managed_by_tf = spec.value_managed_by_tf
+      sensitive           = try(spec.sensitive, true)
+    } if !spec.value_managed_by_tf
+  })
+  terraform_managed_secrets = nonsensitive({
+    for k, spec in var.secrets : k => {
+      description         = spec.description
+      value_managed_by_tf = spec.value_managed_by_tf
+      sensitive           = try(spec.sensitive, true)
+    } if spec.value_managed_by_tf
+  })
 }
 
 # see: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter
@@ -24,7 +37,7 @@ resource "aws_ssm_parameter" "secret" {
   # all are added as secureString
   type        = "SecureString"
   description = each.value.description
-  value       = sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE))
+  value       = sensitive(coalesce(var.secrets[each.key].value, local.PLACEHOLDER_VALUE))
   key_id      = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {
@@ -44,7 +57,7 @@ resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
   # all are added as secureString
   type        = "SecureString"
   description = each.value.description
-  value       = sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE))
+  value       = sensitive(coalesce(var.secrets[each.key].value, local.PLACEHOLDER_VALUE))
   key_id      = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {

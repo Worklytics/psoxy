@@ -332,6 +332,7 @@ module "test_tool" {
 }
 
 output "secrets" {
+  sensitive = true
   value = {
     PSOXY_ENCRYPTION_KEY = {
       value               = sensitive(random_password.encryption_key.result),

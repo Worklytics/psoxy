@@ -13,6 +13,7 @@ jobs:
     name: 'validate tf modules'
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         terraform_version: [ 
           # '~1.6.0', # doesn't support mock_provider
@@ -23,7 +24,12 @@ jobs:
           # Modules that have tests
           - { name: 'worklytics-connector-specs', test: true }
           - { name: 'gcp-host', test: true }
-          - { name: 'aws-proxy-lambda', test: true } 
+          - { name: 'gcp-proxy-api', test: true }
+          - { name: 'gcp-webhook-collector', test: true }
+          - { name: 'aws', test: true }
+          - { name: 'aws-host', test: true }
+          - { name: 'aws-proxy-bulk', test: true }
+          - { name: 'aws-proxy-lambda', test: true }
     steps:
       - name: Check out code
         uses: actions/checkout@v4

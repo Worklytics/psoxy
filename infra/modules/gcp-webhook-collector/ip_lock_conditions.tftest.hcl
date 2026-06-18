@@ -1,5 +1,8 @@
 variables {
-  project_id              = "test-project"
+  gcp_project = {
+    project_id = "test-project"
+    number     = 123456789
+  }
   environment_id_prefix   = "dev-"
   instance_id             = "test-instance"
   config_parameter_prefix = "TEST_"
@@ -17,20 +20,15 @@ variables {
   bucket_write_role_id           = "roles/storage.objectCreator"
   webhook_batch_invoker_sa_email = "batch@test-project.iam.gserviceaccount.com"
   key_ring_id                    = "projects/test-project/locations/us-central1/keyRings/test-key-ring"
-  provision_auth_key             = {}
+  provision_auth_key = {
+    rotation_days = 30
+  }
   example_identity               = "test-user@example.com"
 
   allowed_webhook_ip_blocks = ["10.0.0.0/16"]
 }
 
 mock_provider "google" {
-  mock_data "google_project" {
-    defaults = {
-      project_id = "test-project"
-      number     = "123456789"
-    }
-  }
-
 }
 
 run "validate_cloud_run_webhook_invokers_no_ip_condition" {

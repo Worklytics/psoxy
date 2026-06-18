@@ -231,7 +231,7 @@ module "api_connector" {
 
   source = "../../modules/gcp-proxy-api"
 
-  project_id                            = var.gcp_project_id
+  gcp_project                           = module.psoxy.gcp_project
   region                                = var.gcp_region
   source_kind                           = each.value.source_kind
   environment_id_prefix                 = local.environment_id_prefix
@@ -332,7 +332,7 @@ module "webhook_collector" {
 
   source = "../../modules/gcp-webhook-collector"
 
-  project_id            = var.gcp_project_id
+  gcp_project           = module.psoxy.gcp_project
   region                = var.gcp_region
   environment_id_prefix = local.environment_id_prefix
   instance_id           = each.key
@@ -397,7 +397,7 @@ module "bulk_connector" {
 
   source = "../../modules/gcp-proxy-bulk"
 
-  project_id                        = var.gcp_project_id
+  gcp_project                       = module.psoxy.gcp_project
   region                            = var.gcp_region
   environment_id_prefix             = local.environment_id_prefix
   instance_id                       = each.key
@@ -572,8 +572,8 @@ locals {
     instance.instance_id => merge(
       {
         endpoint_url     = instance.cloud_function_url,
-        sanitized_bucket   = try(instance.async_output_bucket_name, null),
-        test_examples      = local.api_connector_test_examples[instance.instance_id],
+        sanitized_bucket = try(instance.async_output_bucket_name, null),
+        test_examples    = local.api_connector_test_examples[instance.instance_id],
       },
       instance,
       var.api_connectors[instance.instance_id]

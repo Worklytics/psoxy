@@ -1,6 +1,9 @@
-variable "project_id" {
-  type        = string
-  description = "name of the gcp project"
+variable "gcp_project" {
+  type = object({
+    project_id = string
+    number     = number
+  })
+  description = "GCP project hosting this Psoxy instance. project_id and number must refer to the same project (same fields as data.google_project); pass from parent (eg module.psoxy.gcp_project) to avoid data.google_project lookups in each connector instance."
 }
 
 variable "tf_runner_iam_principal" {
@@ -191,11 +194,9 @@ variable "provision_auth_key" {
 
   validation {
     condition = (
-      var.provision_auth_key == null ||
-      (
-        try(var.provision_auth_key.rotation_days, null) == null ||
-        try(var.provision_auth_key.rotation_days, 0) > 0
-      )
+      var.provision_auth_key == null ? true :
+      var.provision_auth_key.rotation_days == null ? true :
+      var.provision_auth_key.rotation_days > 0
     )
     error_message = "If `provision_auth_key` is provided, `rotation_days` must be a positive number or null."
   }

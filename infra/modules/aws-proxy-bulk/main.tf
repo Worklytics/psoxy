@@ -337,13 +337,21 @@ locals {
 
   example_files_csv = join(",", [for f in local.all_example_files : "${var.psoxy_base_dir}${f}"])
 
-  aws_principal_arn_when_testing = coalesce(var.aws_principal_arn_when_testing, var.aws_role_to_assume_when_testing)
-  aws_write_role_to_assume_when_testing = coalesce(var.aws_write_role_to_assume_when_testing, var.aws_upload_role_to_assume_when_testing)
+  aws_principal_arn_when_testing = (
+    var.aws_principal_arn_when_testing != null ? var.aws_principal_arn_when_testing :
+    var.aws_role_to_assume_when_testing != null ? var.aws_role_to_assume_when_testing :
+    ""
+  )
+  aws_write_role_to_assume_when_testing = (
+    var.aws_write_role_to_assume_when_testing != null ? var.aws_write_role_to_assume_when_testing :
+    var.aws_upload_role_to_assume_when_testing != null ? var.aws_upload_role_to_assume_when_testing :
+    ""
+  )
 
   cli_file_upload_role_args = compact([
-    local.aws_write_role_to_assume_when_testing != null ? "--write-role-to-assume ${local.aws_write_role_to_assume_when_testing}" : null,
+    local.aws_write_role_to_assume_when_testing != "" ? "--write-role-to-assume ${local.aws_write_role_to_assume_when_testing}" : null,
     # test tool assumes roles via STS; user principals use default credentials instead
-    local.aws_principal_arn_when_testing != null && can(regex(":role/", local.aws_principal_arn_when_testing)) ? "-r ${local.aws_principal_arn_when_testing}" : null,
+    local.aws_principal_arn_when_testing != "" && can(regex(":role/", local.aws_principal_arn_when_testing)) ? "-r ${local.aws_principal_arn_when_testing}" : null,
   ])
   cli_file_upload_role_args_todo  = join("\n", [for arg in local.cli_file_upload_role_args : "  ${arg} \\"])
   cli_file_upload_role_args_shell = join("\n", [for arg in local.cli_file_upload_role_args : "    ${arg} \\"])
