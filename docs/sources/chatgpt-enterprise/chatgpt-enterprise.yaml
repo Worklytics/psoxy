@@ -283,8 +283,8 @@ endpoints:
       - !<textDigest>
         jsonPaths:
           - "$.conversation.title"
-          - "$[?(@.actor.type =~ /account_user/i)].message.content.value"
-          - "$[?(@.actor.type =~ /account_user/i)].message.annotations[*].quote_text"
+          - "$[?(@.actor.type =~ /account_user/i || @.message.author.type == 'user' || @.message.author.role == 'user')].message.content.value"
+          - "$[?(@.actor.type =~ /account_user/i || @.message.author.type == 'user' || @.message.author.role == 'user')].message.annotations[*].quote_text"
           - "$.message.content.quote"
           - "$.event_details.prompt_text"
         keywords:
@@ -412,6 +412,9 @@ endpoints:
           - "craft"
           - "design"
           - "linkedin"
+      - !<textDigest>
+        jsonPaths:
+          - "$[?(@.message.author.type != 'user' && @.message.author.role != 'user')].message.content.value"
     responseSchema:
       type: "object"
       properties:
@@ -530,6 +533,8 @@ definitions:
     type: "object"
     properties:
       client_type:
+        type: "string"
+      role:
         type: "string"
       model:
         type: "string"
