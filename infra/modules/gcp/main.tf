@@ -526,6 +526,14 @@ resource "google_project_iam_member" "data_sanitization_tester_grant" {
 
 
 
+output "gcp_project" {
+  value = {
+    project_id = var.project_id
+    number     = data.google_project.project.number
+  }
+  description = "GCP project hosting this Psoxy environment. project_id is the configured project id (known at plan time); number is from data.google_project (for IAM principal patterns that require it)."
+}
+
 output "artifacts_bucket_name" {
   value = local.artifact_bucket_name
 }
