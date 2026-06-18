@@ -58,7 +58,7 @@ delete_gh_maven_package_versions() {
         continue
       fi
 
-      version_id=$(echo "$versions_json" | jq -r ".[] | select(.name == \"${target_version}\") | .id")
+      version_id=$(jq -r ".[] | select(.name == \"${target_version}\") | .id" <<< "$versions_json")
       if [ -n "$version_id" ] && [ "$version_id" != "null" ]; then
         printf "      Found version ${target_version} (ID: ${version_id}). Deleting...\n"
         if gh api -X DELETE "/orgs/${org_name}/packages/maven/${pkg}/versions/${version_id}" 2>/dev/null; then
@@ -68,6 +68,6 @@ delete_gh_maven_package_versions() {
           printf "        Ensure your token has ${INFO}delete:packages${NC} scope.\n"
         fi
       fi
-    done < <(echo "$packages_json" | jq -r ".[] | select(.name | startswith(\"${group_id}\")) | .name")
+    done < <(jq -r ".[] | select(.name | startswith(\"${group_id}\")) | .name" <<< "$packages_json")
   done
 }
