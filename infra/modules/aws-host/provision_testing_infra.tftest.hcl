@@ -1,4 +1,4 @@
-# aws-host should plan cleanly with provision_testing_infra=false (no test bucket policies / principals).
+# aws-host should plan cleanly with and without provision_testing_infra.
 
 variables {
   aws_account_id          = "123456789012"
@@ -46,5 +46,23 @@ run "plan_without_provision_testing_infra" {
   assert {
     error_message = "bulk connector should be provisioned through aws-proxy-bulk"
     condition     = length(module.bulk_connector) == 1
+  }
+}
+
+run "plan_with_provision_testing_infra" {
+  command = plan
+
+  variables {
+    provision_testing_infra = true
+  }
+
+  assert {
+    error_message = "bulk connector should be provisioned when testing infra is enabled"
+    condition     = length(module.bulk_connector) == 1
+  }
+
+  assert {
+    error_message = "global secrets should be provisioned in SSM when testing infra is enabled"
+    condition     = length(module.global_secrets_ssm[0].secret_arns) > 0
   }
 }
