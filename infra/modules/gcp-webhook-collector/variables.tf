@@ -191,11 +191,9 @@ variable "provision_auth_key" {
 
   validation {
     condition = (
-      var.provision_auth_key == null ||
-      (
-        try(var.provision_auth_key.rotation_days, null) == null ||
-        try(var.provision_auth_key.rotation_days, 0) > 0
-      )
+      var.provision_auth_key == null ? true :
+      var.provision_auth_key.rotation_days == null ? true :
+      var.provision_auth_key.rotation_days > 0
     )
     error_message = "If `provision_auth_key` is provided, `rotation_days` must be a positive number or null."
   }

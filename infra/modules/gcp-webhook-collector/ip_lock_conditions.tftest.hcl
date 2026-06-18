@@ -17,7 +17,9 @@ variables {
   bucket_write_role_id           = "roles/storage.objectCreator"
   webhook_batch_invoker_sa_email = "batch@test-project.iam.gserviceaccount.com"
   key_ring_id                    = "projects/test-project/locations/us-central1/keyRings/test-key-ring"
-  provision_auth_key             = {}
+  provision_auth_key = {
+    rotation_days = 30
+  }
   example_identity               = "test-user@example.com"
 
   allowed_webhook_ip_blocks = ["10.0.0.0/16"]

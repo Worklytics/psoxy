@@ -13,6 +13,7 @@ jobs:
     name: 'validate tf modules'
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         terraform_version: [ 
           # '~1.6.0', # doesn't support mock_provider
