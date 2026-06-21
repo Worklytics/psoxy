@@ -47,8 +47,10 @@ jobs:
             matrix:
                 include:
                     - language: java-kotlin
+                      category: java
                       build-mode: none # This mode only analyzes Java. Set this to 'autobuild' or 'manual' to analyze Kotlin too.
                     - language: javascript-typescript
+                      category: javascript
                       build-mode: none
         steps:
             - name: Checkout repository
@@ -62,7 +64,7 @@ jobs:
                     distribution: zulu
             # Initializes the CodeQL tools for scanning.
             - name: Initialize CodeQL
-              uses: github/codeql-action/init@v3
+              uses: github/codeql-action/init@v4
               with:
                   languages: ${{ matrix.language }}
                   build-mode: ${{ matrix.build-mode }}
@@ -90,6 +92,6 @@ jobs:
                   exit 1
 
             - name: Perform CodeQL Analysis
-              uses: github/codeql-action/analyze@v3
+              uses: github/codeql-action/analyze@v4
               with:
-                  category: "/language:${{matrix.language}}"
+                  category: "/language:${{ matrix.category }}"
