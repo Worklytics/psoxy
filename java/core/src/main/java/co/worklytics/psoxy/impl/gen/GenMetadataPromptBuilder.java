@@ -17,8 +17,10 @@ class GenMetadataPromptBuilder {
 
     static final String SYSTEM_PROMPT =
         "You are a data-processing component in a privacy proxy. "
-            + "Respond with exactly one JSON object (no markdown, no prose). "
-            + "Use only the property names defined in the JSON Schema.";
+            + "Respond with exactly one JSON object that is an INSTANCE of the task result, "
+            + "not a JSON Schema definition. "
+            + "Never include schema keywords such as type, properties, required, or enum. "
+            + "No markdown fences, no prose before or after the JSON.";
 
     static List<ChatMessage> toMessages(String taskPrompt, JsonSchemaFilter outputSchema,
                                         String inputData, ObjectMapper objectMapper) {
@@ -39,7 +41,7 @@ class GenMetadataPromptBuilder {
         return """
             Task: %s
 
-            The JSON MUST validate against this JSON Schema:
+            Your response must be a JSON object that validates against this schema (return an instance, NOT the schema itself):
             %s
 
             Input data to process:

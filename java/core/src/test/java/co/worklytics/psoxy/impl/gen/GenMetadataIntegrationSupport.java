@@ -69,8 +69,11 @@ final class GenMetadataIntegrationSupport {
     /** MS Copilot PoC classification task (mirrors {@code PrebuiltSanitizerRules}). */
     static String copilotTaskPrompt() {
         return """
-            Classify the user's LLM prompt (input text) into exactly one category.
-            Use one of these category names verbatim:
+            Return ONLY a JSON object with a single property "category" (no other keys).
+            Do NOT return a JSON Schema (never use type, properties, required, or enum as keys).
+            Examples: {"category":"Research and Ideation"} or {"category":"Excluded"}
+
+            Classify the input text into exactly one category. Use the category name verbatim:
             Email Drafting, General Content Drafting, Email Editing and Refinement,
             General Content Editing and Refinement, Summarization and Synthesis,
             Research and Ideation, Analysis and Data Work, Code Generation and Development,
