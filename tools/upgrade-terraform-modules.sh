@@ -105,5 +105,31 @@ if [[ "$NEXT_MINOR" =~ ^[0-9]+$ ]] && [[ "$CURRENT_MINOR" =~ ^[0-9]+$ ]]; then
   fi
 fi
 
+UPGRADE_GUIDE_URL="https://github.com/Worklytics/psoxy/blob/main/docs/guides/upgrading-versions.md#reviewing-your-terraform-plan"
+PLAN_TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+PLAN_FILE="${PLAN_TIMESTAMP}-upgrade-plan.txt"
+
 printf "\n${WARN}NOTE:${NC} No changes have yet been made to your infrastructure.\n"
-printf "The updated Terraform configuration must still be applied. Run ${CODE}terraform plan${NC} followed by ${CODE}terraform apply${NC} to provision these upgrades.\n"
+printf "The updated Terraform configuration must still be applied.\n\n"
+
+printf "Before applying, preview what will change:\n"
+printf "  ${CODE}terraform plan${NC}\n\n"
+printf "To save the plan for review, redirect output to a dated file:\n"
+printf "  ${CODE}terraform plan -no-color > \"${PLAN_FILE}\" 2>&1${NC}\n\n"
+
+printf "${WARN}Review the plan carefully${NC} before running ${CODE}terraform apply${NC}.\n"
+printf "Consider sharing it with Worklytics support, teammates, or an LLM.\n"
+printf "Full guidance: ${INFO}${UPGRADE_GUIDE_URL}${NC}\n\n"
+
+printf "Key items to watch for:\n"
+printf "  - ${ERR}Rotating/destroying the pseudonymization SALT${NC} — previously pseudonymized data will be inconsistent; restore the prior salt or re-ingest all data to Worklytics\n"
+printf "  - ${ERR}Replacing Lambda/Cloud Function resources${NC} — especially their function URLs (update connections in Worklytics)\n"
+printf "  - ${ERR}Replacing any -input buckets${NC} — update data pipelines that write to these buckets\n"
+printf "  - ${ERR}Replacing any -sanitized buckets${NC} — update connections in Worklytics\n"
+printf "  - ${ERR}Replacing parameters/secrets with API credentials${NC} — when NOT managed by this Terraform configuration (recover credentials or obtain new ones)\n"
+printf "  - ${ERR}Replacing the IAM role used by Worklytics${NC} — to invoke cloud functions or read from -sanitized buckets (update connections in Worklytics)\n\n"
+
+printf "Example LLM prompt:\n"
+printf "  ${CODE}Review and summarize the output of terraform plan stored in ${PLAN_FILE}. Flag any high-risk changes, especially destruction or replacement of the pseudonymization SALT, Lambda/Cloud Function resources (and their function URLs), -input buckets, -sanitized buckets, unmanaged API credential parameters/secrets, and the IAM role Worklytics uses to invoke functions or read sanitized buckets. For each issue, explain the operational impact and what I must do before applying.${NC}\n\n"
+
+printf "When the plan looks safe, run ${CODE}terraform apply${NC} to provision these upgrades.\n"
