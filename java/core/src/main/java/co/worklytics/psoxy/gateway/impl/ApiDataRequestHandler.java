@@ -484,19 +484,21 @@ public class ApiDataRequestHandler {
                     ErrorCauses.CONNECTION_TO_SOURCE.name());
             builder.body("Error connecting to source API: " + e.getMessage());
             log.log(Level.SEVERE, "Error connecting to source API: " + e.getMessage(), e);
-            return builder.build();
+            return writeAsyncErrorResponseIfNeeded(builder.build(), processingContext);
         } catch (SocketTimeoutException e) {
-            return buildSourceApiTimeoutErrorResponse(builder, e);
+            return writeAsyncErrorResponseIfNeeded(
+                    buildSourceApiTimeoutErrorResponse(builder, e), processingContext);
         } catch (IOException e) {
             if (isSocketTimeoutException(e)) {
-                return buildSourceApiTimeoutErrorResponse(builder, e);
+                return writeAsyncErrorResponseIfNeeded(
+                        buildSourceApiTimeoutErrorResponse(builder, e), processingContext);
             }
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     ErrorCauses.CONNECTION_TO_SOURCE.name());
             builder.body("Error communicating with source API: " + e.getMessage());
             log.log(Level.SEVERE, "Error communicating with source API", e);
-            return builder.build();
+            return writeAsyncErrorResponseIfNeeded(builder.build(), processingContext);
         }
 
 
@@ -515,7 +517,7 @@ public class ApiDataRequestHandler {
                         ErrorCauses.API_ERROR.name());
                 builder.body("Async redirect Location is not HTTPS; refusing to follow");
                 log.log(Level.WARNING, "Async redirect to non-HTTPS Location refused: {0}", locationUrl);
-                return builder.build();
+                return writeAsyncErrorResponseIfNeeded(builder.build(), processingContext);
             }
             log.info("Async request received " + sourceApiResponse.getStatusCode()
                     + " redirect; fetching content from Location header");
@@ -536,7 +538,7 @@ public class ApiDataRequestHandler {
                         ErrorCauses.CONNECTION_TO_SOURCE.name());
                 builder.body("Error fetching content from redirect location: " + e.getMessage());
                 log.log(Level.SEVERE, "Error fetching content from redirect location", e);
-                return builder.build();
+                return writeAsyncErrorResponseIfNeeded(builder.build(), processingContext);
             }
         }
 
@@ -598,11 +600,9 @@ public class ApiDataRequestHandler {
                         ErrorCauses.API_ERROR.name());
                 proxyResponseContent = original.getContentAsString();
 
-                // q: in async case, perhaps we should write the error to the async output, too, for
-                // clarity??? could do it with metadata indicating the error to the caller, so it
-                // doesn't wait forever???
-                // if versioning is enabled in the bucket, then subsequent successful calls will
-                // overwrite the error response
+                if (processingContext.getAsync()) {
+                    writeAsyncErrorContent(original, ErrorCauses.API_ERROR.name(), processingContext);
+                }
             }
 
             // only if not async, write content to body of response
@@ -828,6 +828,41 @@ public class ApiDataRequestHandler {
 
     boolean isSafeMethod(String method) {
         return "GET".equalsIgnoreCase(method) || "HEAD".equalsIgnoreCase(method);
+    }
+
+    private HttpEventResponse writeAsyncErrorResponseIfNeeded(HttpEventResponse response,
+            ProcessingContext processingContext) throws IOException {
+        if (!processingContext.getAsync()) {
+            return response;
+        }
+
+        String errorCause = Optional.ofNullable(response.getHeaders())
+                .map(headers -> headers.get(ProcessedDataMetadataFields.ERROR.getHttpHeader()))
+                .filter(StringUtils::isNotBlank)
+                .orElse(ErrorCauses.UNKNOWN.name());
+
+        ProcessedContent errorContent = ProcessedContent.builder()
+                .contentType(ContentType.TEXT_PLAIN.getMimeType())
+                .contentCharset(StandardCharsets.UTF_8)
+                .content(StringUtils.defaultString(response.getBody()).getBytes(StandardCharsets.UTF_8))
+                .build();
+        writeAsyncErrorContent(errorContent, errorCause, processingContext);
+        return response;
+    }
+
+    private void writeAsyncErrorContent(ProcessedContent content, String errorCause,
+            ProcessingContext processingContext) throws IOException {
+        Map<String, String> metadata = new HashMap<>(content.getMetadata());
+        metadata.put(ProcessedDataMetadataFields.ERROR.getMetadataKey(), errorCause);
+        metadata.put(ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(),
+                ProxyConstants.JAVA_SOURCE_CODE_VERSION);
+
+        ProcessedContent asyncError = content.toBuilder()
+                .metadata(metadata)
+                .content(Objects.requireNonNullElse(content.getContent(), new byte[0]))
+                .build();
+
+        asyncSanitizedDataOutput.get().writeSanitized(asyncError, processingContext);
     }
 
     @SneakyThrows

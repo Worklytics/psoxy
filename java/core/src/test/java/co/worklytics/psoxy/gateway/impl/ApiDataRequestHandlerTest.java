@@ -2,15 +2,19 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.ConfigRulesModule;
 import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.ErrorCauses;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PseudonymizerImplFactory;
+import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.RESTApiSanitizer;
 import co.worklytics.psoxy.RESTApiSanitizerFactory;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
@@ -694,6 +698,21 @@ class ApiDataRequestHandlerTest {
             .normalizeHeader(org.apache.http.HttpHeaders.CONTENT_TYPE)));
     }
 
+    static class RecordingApiSanitizedDataOutput implements ApiSanitizedDataOutput {
+
+        int writes;
+        ProcessedContent content;
+        ApiDataRequestHandler.ProcessingContext processingContext;
+
+        @Override
+        public void writeSanitized(ProcessedContent content,
+            ApiDataRequestHandler.ProcessingContext processingContext) {
+            this.writes++;
+            this.content = content;
+            this.processingContext = processingContext;
+        }
+    }
+
     private void setup(String source, String host) {
         ApiDataRequestHandlerTest.Container container =
             DaggerApiDataRequestHandlerTest_Container.create();
@@ -912,6 +931,125 @@ class ApiDataRequestHandlerTest {
         ArgumentCaptor<String> sanitizedBodyCaptor = ArgumentCaptor.forClass(String.class);
         verify(sanitizer).sanitize(eq("GET"), any(URL.class), sanitizedBodyCaptor.capture());
         assertEquals(redirectedContent, sanitizedBodyCaptor.getValue());
+    }
+
+    @Test
+    @SneakyThrows
+    void handleShouldWriteSourceApiErrorsToAsyncOutput() {
+        setup("gmail", "google.apis.com");
+
+        ApiDataRequestHandler spy = spy(handler);
+
+        String errorContent = "{\"error\":\"source unavailable\"}";
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+            .thenReturn(Optional.empty());
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/admin/directory/v1/users");
+        when(request.getQuery()).thenReturn(Optional.empty());
+
+        MockHttpTransport sourceTransport = new MockHttpTransport() {
+            @Override
+            public LowLevelHttpRequest buildRequest(String method, String url) throws IOException {
+                return new MockLowLevelHttpRequest() {
+                    @Override
+                    public LowLevelHttpResponse execute() throws IOException {
+                        MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
+                        response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+                        response.setContentType(Json.MEDIA_TYPE);
+                        response.setContent(errorContent);
+                        return response;
+                    }
+                };
+            }
+        };
+        doReturn(sourceTransport.createRequestFactory()).when(spy).getRequestFactory(any());
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        when(sanitizer.getAllowedRequestHeaders(anyString(), any())).thenReturn(Optional.empty());
+        spy.sanitizer = sanitizer;
+
+        RecordingApiSanitizedDataOutput asyncOutput = new RecordingApiSanitizedDataOutput();
+        spy.asyncSanitizedDataOutput = () -> asyncOutput;
+        ApiDataRequestHandler.ProcessingContext processingContext =
+            ApiDataRequestHandler.ProcessingContext.builder()
+                .async(true)
+                .requestId("r")
+                .asyncOutputLocation("gs://bucket/output.json")
+                .requestReceivedAt(clock.instant())
+                .build();
+
+        HttpEventResponse response = spy.handle(request, processingContext);
+
+        assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertNull(response.getBody());
+
+        assertEquals(1, asyncOutput.writes);
+        assertSame(processingContext, asyncOutput.processingContext);
+        ProcessedContent asyncContent = asyncOutput.content;
+        assertEquals(errorContent, asyncContent.getContentAsString());
+        assertEquals(ErrorCauses.API_ERROR.name(), asyncContent.getMetadata()
+            .get(ProcessedDataMetadataFields.ERROR.getMetadataKey()));
+    }
+
+    @Test
+    @SneakyThrows
+    void handleShouldWriteAsyncRedirectFailuresToAsyncOutput() {
+        setup("gmail", "google.apis.com");
+
+        ApiDataRequestHandler spy = spy(handler);
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+            .thenReturn(Optional.empty());
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/admin/directory/v1/users");
+        when(request.getQuery()).thenReturn(Optional.empty());
+
+        MockHttpTransport redirectTransport = new MockHttpTransport() {
+            @Override
+            public LowLevelHttpRequest buildRequest(String method, String url) throws IOException {
+                return new MockLowLevelHttpRequest() {
+                    @Override
+                    public LowLevelHttpResponse execute() throws IOException {
+                        MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
+                        response.setStatusCode(307);
+                        response.addHeader("location", "http://pre-signed.example.com/data.json");
+                        response.setContent("");
+                        return response;
+                    }
+                };
+            }
+        };
+        doReturn(redirectTransport.createRequestFactory()).when(spy).getRequestFactory(any());
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        when(sanitizer.getAllowedRequestHeaders(anyString(), any())).thenReturn(Optional.empty());
+        spy.sanitizer = sanitizer;
+
+        RecordingApiSanitizedDataOutput asyncOutput = new RecordingApiSanitizedDataOutput();
+        spy.asyncSanitizedDataOutput = () -> asyncOutput;
+        ApiDataRequestHandler.ProcessingContext processingContext =
+            ApiDataRequestHandler.ProcessingContext.builder()
+                .async(true)
+                .requestId("r")
+                .asyncOutputLocation("gs://bucket/output.json")
+                .requestReceivedAt(clock.instant())
+                .build();
+
+        HttpEventResponse response = spy.handle(request, processingContext);
+
+        assertEquals(HttpStatus.SC_BAD_GATEWAY, response.getStatusCode());
+
+        assertEquals(1, asyncOutput.writes);
+        assertSame(processingContext, asyncOutput.processingContext);
+        ProcessedContent asyncContent = asyncOutput.content;
+        assertTrue(asyncContent.getContentAsString().contains("Async redirect Location is not HTTPS"));
+        assertEquals(ErrorCauses.API_ERROR.name(), asyncContent.getMetadata()
+            .get(ProcessedDataMetadataFields.ERROR.getMetadataKey()));
     }
 
     @Test
