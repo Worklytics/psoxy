@@ -178,3 +178,9 @@ variable "example_api_calls_sample_date" {
   default     = "2025-08-01T00:00:00Z"
   description = "RFC3339 date to use for example API calls; should be in the past, but not so far in the past as to not return interesting data from example API calls."
 }
+
+variable "google_workspace_connector_settings" {
+  type        = map(any)
+  description = "Map of configuration settings specifically for Google Workspace connectors. Supported keys: example_user, example_admin, provision_keys, key_rotation_days, provision_service_accounts, enable_apis. Provider-controlling parameters (like GCP project IDs or impersonation SAs) remain top-level variables."
+  default     = {}
+}

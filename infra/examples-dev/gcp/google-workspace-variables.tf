@@ -50,7 +50,7 @@ variable "google_workspace_example_admin" {
 
 variable "google_workspace_provision_keys" {
   type        = bool
-  description = "whether to provision key for each Google Workspace connector's GCP Service Account (OAuth Client). If false, you must create the key manually and provide it."
+  description = "[DEPRECATED - use google_workspace_connector_settings map instead] whether to provision key for each Google Workspace connector's GCP Service Account (OAuth Client). If false, you must create the key manually and provide it. Ignored if provision_service_accounts is false in google_workspace_connector_settings."
   default     = true
 }
 
@@ -75,4 +75,10 @@ locals {
     (!local.validate_google_workspace_gcp_project_id
       ? local.validate_google_workspace_gcp_project_id_message
   : ""))
+}
+
+variable "google_workspace_connector_settings" {
+  type        = map(any)
+  description = "Map of configuration settings specifically for Google Workspace connectors. Supported keys: example_user, example_admin, provision_keys, key_rotation_days, provision_service_accounts, enable_apis. Provider-controlling parameters (like GCP project IDs or impersonation SAs) remain top-level variables."
+  default     = {}
 }

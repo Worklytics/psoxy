@@ -1,0 +1,18 @@
+In the GCP console for `${gcp_project_id}` (or via `gcloud`), create a service account to use as the OAuth client for the `${connector_id}` connector:
+
+- **Account ID**: `${service_account_id}`
+- **Display name**: `${display_name}`
+- **Description**: `${description}`
+
+The service account email should be `${expected_service_account_email}`.
+
+Via the GCP console: navigate to "IAM & Admin" --> "Service Accounts" --> "Create Service Account", and use the values above.
+
+Via gcloud:
+`gcloud iam service-accounts create ${service_account_id} --display-name="${display_name}" --description="${description}" --project=${gcp_project_id}`
+
+After creating the service account, note its numeric **Client ID** (unique ID) from the service account details page. You will need it when completing domain-wide delegation setup.
+
+See the page below for more information on provisioning Google Workspace connectors without Terraform:
+
+https://docs.worklytics.co/psoxy/sources/google-workspace#provisioning-api-clients-without-terraform
