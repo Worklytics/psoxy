@@ -80,6 +80,6 @@ locals {
 
 variable "google_workspace_connector_settings" {
   type        = map(any)
-  description = "Map of configuration settings specifically for Google Workspace connectors (e.g. example users). Note that provider-controlling parameters (like GCP project IDs or impersonation SAs) remain top-level variables."
+  description = "Map of configuration settings specifically for Google Workspace connectors. Supported keys: google_workspace_example_user, google_workspace_example_admin, google_workspace_provision_keys, google_workspace_key_rotation_days, google_workspace_provision_service_accounts, google_workspace_enable_apis. Provider-controlling parameters (like GCP project IDs or impersonation SAs) remain top-level variables."
   default     = {}
 }

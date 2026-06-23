@@ -1,0 +1,16 @@
+In the GCP console for `${gcp_project_id}` (or via `gcloud`), enable the following APIs required by the `${connector_id}` connector:
+
+%{ for api in apis_consumed ~}
+- `${api}`
+%{ endfor ~}
+
+Via the GCP console: navigate to "APIs & Services" --> "Library", search for each API above, and click "Enable".
+
+Via gcloud (one command per API):
+%{ for api in apis_consumed ~}
+`gcloud services enable ${api} --project=${gcp_project_id}`
+%{ endfor ~}
+
+See the page below for more information on provisioning Google Workspace connectors without Terraform:
+
+https://docs.worklytics.co/psoxy/sources/google-workspace#provisioning-api-clients-without-terraform

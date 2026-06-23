@@ -50,7 +50,7 @@ variable "google_workspace_example_admin" {
 
 variable "provision_gcp_sa_keys" {
   type        = bool
-  description = "whether to provision key for each connector's GCP Service Account (OAuth Client). If false, you must create the key manually and provide it."
+  description = "[DEPRECATED - use google_workspace_connector_settings map instead] whether to provision key for each connector's GCP Service Account (OAuth Client). If false, you must create the key manually and provide it. Ignored if service accounts are not provisioned by Terraform."
   default     = true
 }
 
@@ -80,6 +80,6 @@ variable "todo_step" {
 
 variable "google_workspace_connector_settings" {
   type        = map(any)
-  description = "Map of configuration settings specifically for Google Workspace connectors (e.g. example users). Note that provider-controlling parameters (like GCP project IDs or impersonation SAs) remain top-level variables."
+  description = "Map of configuration settings specifically for Google Workspace connectors. Supported keys: google_workspace_example_user, google_workspace_example_admin, google_workspace_provision_keys, google_workspace_key_rotation_days, google_workspace_provision_service_accounts, google_workspace_enable_apis. Provider-controlling parameters (like GCP project IDs or impersonation SAs) remain top-level variables."
   default     = {}
 }
