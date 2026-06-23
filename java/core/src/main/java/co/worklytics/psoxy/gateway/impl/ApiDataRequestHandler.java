@@ -6,6 +6,7 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -99,6 +100,16 @@ import co.worklytics.psoxy.gateway.ProxyConstants;
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
 public class ApiDataRequestHandler {
+
+    private static final Set<String> PROCESSED_DATA_METADATA_KEYS = Arrays.stream(
+                    ProcessedDataMetadataFields.values())
+            .map(ProcessedDataMetadataFields::getMetadataKey)
+            .collect(Collectors.toUnmodifiableSet());
+
+    private static final Set<String> OUTPUT_OBJECT_METADATA_KEYS = Arrays.stream(
+                    ApiDataOutputUtils.OutputObjectMetadata.values())
+            .map(Enum::name)
+            .collect(Collectors.toUnmodifiableSet());
 
     @Inject
     ApiModeConfig apiModeConfig;
@@ -379,7 +390,7 @@ public class ApiDataRequestHandler {
             // setup request
             boolean followRedirects = config.getConfigPropertyAsOptional(ProxyConfigProperty.FOLLOW_REDIRECTS)
                     .map(Boolean::parseBoolean)
-                    .orElse(true);
+                    .orElse(!processingContext.getAsync());
 
             requestToSourceApi
                     .setThrowExceptionOnExecuteError(false)
@@ -572,7 +583,8 @@ public class ApiDataRequestHandler {
                                 processingContext);
                     } else {
                         proxyResponseContent = sanitizationResult.getContentAsString();
-                        sanitizationResult.getMetadata().entrySet()
+                        sanitizationResult.getMetadata().entrySet().stream()
+                                .filter(e -> PROCESSED_DATA_METADATA_KEYS.contains(e.getKey()))
                                 .forEach(e -> builder.header(e.getKey(), e.getValue()));
                     }
 
@@ -626,7 +638,9 @@ public class ApiDataRequestHandler {
         String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
         log.info("response sanitized with rule set " + rulesSha);
 
-        Map<String, String> metadata = new HashMap<>(originalContent.getMetadata());
+        Map<String, String> metadata = originalContent.getMetadata().entrySet().stream()
+                .filter(e -> !OUTPUT_OBJECT_METADATA_KEYS.contains(e.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         metadata.put(ProcessedDataMetadataFields.RULES_SHA.getMetadataKey(), rulesSha);
         metadata.put(ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(),
                 ProxyConstants.JAVA_SOURCE_CODE_VERSION);

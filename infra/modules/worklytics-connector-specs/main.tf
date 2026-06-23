@@ -746,7 +746,11 @@ EOT
         "admin.analytics:read",
       ]
       enable_async_processing : true
-      environment_variables : {}
+      environment_variables : {
+        # Slack Analytics returns 3xx redirects to pre-signed download URLs; async mode must
+        # intercept those manually rather than following them transparently in the HTTP client.
+        FOLLOW_REDIRECTS : "FALSE"
+      }
       secured_variables : [
         {
           name : "ACCESS_TOKEN"
