@@ -1,5 +1,8 @@
 package co.worklytics.psoxy.gateway.impl.output;
 
+import co.worklytics.psoxy.gateway.ProcessedContent;
+import co.worklytics.psoxy.gateway.output.Output;
+
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -12,6 +15,14 @@ import java.util.zip.GZIPInputStream;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CompressedOutputWrapperTest {
+
+    @Test
+    void writeNullContent() throws Exception {
+        Output delegate = new NoOutput();
+        CompressedOutputWrapper wrapper = CompressedOutputWrapper.wrap(delegate);
+        ProcessedContent content = ProcessedContent.builder().content(null).build();
+        assertDoesNotThrow(() -> wrapper.write(content));
+    }
 
     @Test
     void gzipContent() throws Exception {
