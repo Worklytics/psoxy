@@ -142,12 +142,12 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     /**
      * Whether the proxy should follow HTTP redirects (3xx responses) when calling source APIs.
      *
-     * OPTIONAL; defaults to {@code true} (redirects are followed), matching the default behavior
-     * of the underlying HTTP client.
+     * OPTIONAL; defaults to {@code true} in sync mode and {@code false} in async mode. Async
+     * connectors that issue redirects (e.g. Slack Analytics) rely on the proxy intercepting 3xx
+     * responses to fetch data from the Location URL manually.
      *
-     * Set to {@code FALSE} for connectors whose APIs issue redirects that must not be
-     * automatically followed — e.g. ChatGPT Enterprise, which uses async processing and relies
-     * on the proxy intercepting 3xx responses to fetch data from the Location URL manually.
+     * Set explicitly to override the mode-specific default when needed — e.g. ChatGPT Enterprise
+     * sets {@code FALSE} to ensure redirects are never followed automatically.
      *
      * Accepted values: {@code true} / {@code false} (case-insensitive).
      */

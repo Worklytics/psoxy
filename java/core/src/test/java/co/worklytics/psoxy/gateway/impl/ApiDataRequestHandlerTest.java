@@ -836,6 +836,62 @@ class ApiDataRequestHandlerTest {
 
     @Test
     @SneakyThrows
+    void asyncModeDisablesRedirectFollowingByDefault() {
+        setup("gmail", "google.apis.com");
+
+        ApiDataRequestHandler spy = spy(handler);
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+            .thenReturn(Optional.empty());
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/admin/directory/v1/users");
+        when(request.getQuery()).thenReturn(Optional.empty());
+
+        HttpRequest[] captured = new HttpRequest[1];
+        MockHttpTransport transport = new MockHttpTransport();
+        HttpRequestFactory requestFactory = spy(transport.createRequestFactory());
+        doAnswer(invocation -> {
+            HttpRequest built = (HttpRequest) invocation.callRealMethod();
+            captured[0] = built;
+            return built;
+        }).when(requestFactory).buildRequest(anyString(), any(GenericUrl.class), any());
+        doReturn(requestFactory).when(spy).getRequestFactory(any());
+
+        MockHttpTransport contentTransport = new MockHttpTransport() {
+            @Override
+            public LowLevelHttpRequest buildRequest(String method, String url) throws IOException {
+                return new MockLowLevelHttpRequest() {
+                    @Override
+                    public LowLevelHttpResponse execute() throws IOException {
+                        MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
+                        response.setStatusCode(200);
+                        response.setContentType(Json.MEDIA_TYPE);
+                        response.setContent("[]");
+                        return response;
+                    }
+                };
+            }
+        };
+        when(spy.httpTransportFactory.create()).thenReturn(contentTransport);
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        spy.sanitizer = sanitizer;
+
+        spy.handle(request, ApiDataRequestHandler.ProcessingContext.builder()
+            .async(true)
+            .requestId("r")
+            .asyncOutputLocation("gs://bucket/output.json")
+            .requestReceivedAt(clock.instant())
+            .build());
+
+        assertNotNull(captured[0]);
+        assertFalse(captured[0].getFollowRedirects());
+    }
+
+    @Test
+    @SneakyThrows
     void handleShouldFollowRedirectManuallyInAsyncMode() {
         setup("gmail", "google.apis.com");
 
