@@ -112,9 +112,9 @@ If your organization's policies don't allow Terraform to manage some or all of t
 
 ```hcl
 google_workspace_connector_settings = {
-  google_workspace_enable_apis                 = false
-  google_workspace_provision_service_accounts  = false
-  google_workspace_provision_keys              = false
+  enable_apis                = false
+  provision_service_accounts = false
+  provision_keys             = false
 }
 ```
 
@@ -128,7 +128,7 @@ If your organization's policies don't allow GCP service account keys to be manag
 
 ```hcl
 google_workspace_connector_settings = {
-  google_workspace_provision_keys = false
+  provision_keys = false
 }
 ```
 

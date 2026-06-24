@@ -1,11 +1,11 @@
 locals {
 
   google_workspace_example_user = try(
-    coalesce(var.google_workspace_connector_settings["google_workspace_example_user"]),
+    coalesce(var.google_workspace_connector_settings["example_user"]),
     coalesce(var.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_USER@YOUR_COMPANY.COM")
   )
   google_workspace_example_admin = try(
-    coalesce(var.google_workspace_connector_settings["google_workspace_example_admin"]),
+    coalesce(var.google_workspace_connector_settings["example_admin"]),
     coalesce(var.google_workspace_example_admin, local.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_ADMIN@YOUR_COMPANY.COM")
   )
   google_workspace_sources = {

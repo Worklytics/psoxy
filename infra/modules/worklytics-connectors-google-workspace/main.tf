@@ -1,12 +1,12 @@
 locals {
-  provision_service_accounts = try(var.google_workspace_connector_settings["google_workspace_provision_service_accounts"], true)
-  enable_apis                = try(var.google_workspace_connector_settings["google_workspace_enable_apis"], true)
+  provision_service_accounts = try(var.google_workspace_connector_settings["provision_service_accounts"], true)
+  enable_apis                = try(var.google_workspace_connector_settings["enable_apis"], true)
   provision_gcp_sa_keys = (
     local.provision_service_accounts
-    ? try(var.google_workspace_connector_settings["google_workspace_provision_keys"], var.provision_gcp_sa_keys)
+    ? try(var.google_workspace_connector_settings["provision_keys"], var.provision_gcp_sa_keys)
     : false
   )
-  gcp_sa_key_rotation_days = try(var.google_workspace_connector_settings["google_workspace_key_rotation_days"], var.gcp_sa_key_rotation_days)
+  gcp_sa_key_rotation_days = try(var.google_workspace_connector_settings["key_rotation_days"], var.gcp_sa_key_rotation_days)
 
   manual_steps_before_dwd = (local.enable_apis ? 0 : 1) + (local.provision_service_accounts ? 0 : 1)
   dwd_todo_step           = var.todo_step + local.manual_steps_before_dwd
