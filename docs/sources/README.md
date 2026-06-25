@@ -58,8 +58,10 @@ The following additional bulk connectors are documented but configured via `cust
 
 | Connector ID / key   | Data Source                                                          | Type | Availability |
 |----------------------|----------------------------------------------------------------------|------|--------------|
+| `claude-code-bulk`   | [Claude Code Bulk](anthropic/claude-code-bulk/README.md)             | Bulk | BETA         |
 | `gong-bulk`          | [Gong Bulk](gong/gong-bulk/README.md)                                | Bulk | ALPHA        |
 | `miro-ai-bulk`       | [Miro AI Bulk](miro/miro-ai-bulk/README.md)                          | Bulk | ALPHA        |
+| `copilot-for-sales`  | [Microsoft Copilot for Sales Bulk](microsoft-365/copilot-for-sales/README.md) | Bulk | BETA  |
 | `slack-discovery-bulk` | [Slack Bulk Exports](slack/slack-discovery-bulk/README.md)         | Bulk | GA           |
 | `zoom-ai-metrics`    | [Zoom AI Metrics Snapshot](zoom/README.md#zoom-ai-metric-snapshot-bulk) | Bulk | ALPHA     |
 

@@ -1,0 +1,2 @@
+columnsToPseudonymize:
+  - USER_EMAIL
