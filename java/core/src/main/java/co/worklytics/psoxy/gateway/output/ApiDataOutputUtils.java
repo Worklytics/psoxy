@@ -68,6 +68,11 @@ public class ApiDataOutputUtils {
         ;
     }
 
+    private static final Set<String> UNSANITIZED_REQUEST_METADATA_KEYS = Set.of(
+        OutputObjectMetadata.REQUEST_BODY.name(),
+        OutputObjectMetadata.QUERY_STRING.name()
+    );
+
     ApiModeConfig apiModeConfig;
     ConfigService config;
     Provider<UUID> uuidProvider;
@@ -188,6 +193,21 @@ public class ApiDataOutputUtils {
      * @param requestToProxy
      * @return
      */
+    /**
+     * Returns a copy of sanitized side-output metadata with upstream request fields removed.
+     *
+     * {@link #responseAsRawProcessedContent} attaches the actual upstream request body and query
+     * string to metadata; {@link co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler#sanitize}
+     * copies that map onto sanitized content. Side-output backends persist metadata on the object,
+     * so leaving those keys in place would store unsanitized request payloads alongside sanitized
+     * response bodies.
+     */
+    public ProcessedContent withoutUnsanitizedRequestMetadata(ProcessedContent sanitizedContent) {
+        Map<String, String> metadata = new HashMap<>(sanitizedContent.getMetadata());
+        UNSANITIZED_REQUEST_METADATA_KEYS.forEach(metadata::remove);
+        return sanitizedContent.toBuilder().metadata(metadata).build();
+    }
+
     Map<String, String> buildMetadata(HttpEventRequest requestToProxy) {
 
         Map<String, String> metadata = new HashMap<>();

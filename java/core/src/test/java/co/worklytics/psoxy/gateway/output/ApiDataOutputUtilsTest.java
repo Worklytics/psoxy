@@ -94,6 +94,32 @@ class ApiDataOutputUtilsTest {
     }
 
     @Test
+    void withoutUnsanitizedRequestMetadata_stripsUpstreamRequestFields() {
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put(OutputObjectMetadata.API_HOST.name(), "api.example.com");
+        metadata.put(OutputObjectMetadata.PATH.name(), "v1/resource");
+        metadata.put(OutputObjectMetadata.HTTP_METHOD.name(), "POST");
+        metadata.put(OutputObjectMetadata.QUERY_STRING.name(), "email=alice@example.com");
+        metadata.put(OutputObjectMetadata.REQUEST_BODY.name(), Base64.getEncoder().encodeToString(
+            "{\"email\":\"alice@example.com\"}".getBytes(StandardCharsets.UTF_8)));
+        metadata.put("Rules-SHA", "abc123");
+
+        ProcessedContent sanitized = ProcessedContent.builder()
+            .content("{\"email\":\"\"}".getBytes(StandardCharsets.UTF_8))
+            .metadata(metadata)
+            .build();
+
+        ProcessedContent forOutput = utils.withoutUnsanitizedRequestMetadata(sanitized);
+
+        assertEquals("api.example.com", forOutput.getMetadata().get(OutputObjectMetadata.API_HOST.name()));
+        assertEquals("v1/resource", forOutput.getMetadata().get(OutputObjectMetadata.PATH.name()));
+        assertEquals("POST", forOutput.getMetadata().get(OutputObjectMetadata.HTTP_METHOD.name()));
+        assertEquals("abc123", forOutput.getMetadata().get("Rules-SHA"));
+        assertFalse(forOutput.getMetadata().containsKey(OutputObjectMetadata.REQUEST_BODY.name()));
+        assertFalse(forOutput.getMetadata().containsKey(OutputObjectMetadata.QUERY_STRING.name()));
+    }
+
+    @Test
     void buildMetadata() {
         HttpEventRequest mockRequest = MockModules.provideMock(HttpEventRequest.class);
         Map<String, List<String>> headers = new HashMap<>();
