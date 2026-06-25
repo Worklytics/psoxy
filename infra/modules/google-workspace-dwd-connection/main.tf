@@ -69,14 +69,14 @@ locals {
      If you have already created a sufficiently privileged service account user for a different
      Google Workspace connection, you can re-use that one.
 
-  6. Assign the account a sufficiently privileged role. At minimum, the role must have permission
-     to READ the following [Administrator Setting Privileges](https://support.google.com/a/answer/1219251):
-       * Admin API
-       * Domain Settings
-       * Groups
-       * Organizational Units
-       * Reports (required only if you are connecting to the Audit Logs, used for Google Chat, Meet, etc)
-       * Users
+  6. Assign the account a sufficiently privileged role. At minimum, the role must grant read-only
+     access to the following [Administrator privileges](https://knowledge.workspace.google.com/admin/users/administrator-privilege-definitions)
+     (expand each category in the Custom Role editor and enable only the Read sub-action):
+       * Users → Read (required)
+       * Groups → Read (required)
+       * Organizational Units → Read (optional; for org-unit segmentation)
+       * Domain Management (optional; for list of internal domains)
+       * Reports (required only if connecting to Google Chat, Google Meet, or other audit-log connectors)
      You may use a predefined role, or define a [Custom Role](https://support.google.com/a/answer/2406043?fl=1).
 
 (NOTE: Steps 5/6 are optional, but highly recommended. You could use the account of a sufficiently
