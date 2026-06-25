@@ -45,7 +45,7 @@ custom_bulk_connectors = {
 
 ## Sanitization
 
-Only `USER_EMAIL` contains PII. All other columns are passed through unchanged.
+Only `userEmail` contains PII. All other fields are passed through unchanged.
 
 See [copilot-for-sales-rules.yaml](copilot-for-sales-rules.yaml) for the full rule set.
 
