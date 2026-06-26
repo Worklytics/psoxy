@@ -93,7 +93,6 @@
   * [HRIS](sources/hris/README.md)
   * [Metrics](sources/metrics/README.md)
   * [Microsoft 365](sources/microsoft-365/README.md)
-    * [API Call Examples](sources/microsoft-365/example-api-calls.md)
     * [Entra ID](sources/microsoft-365/entra-id/README.md)
     * [Microsoft Copilot](sources/microsoft-365/msft-copilot/README.md)
     * [Microsoft Teams](sources/microsoft-365/msft-teams/README.md)
