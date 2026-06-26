@@ -1,0 +1,27 @@
+# Link checker configuration for docs/
+# Validates fully-qualified http(s) URLs found in docs/. Relative links are not checked
+# (no base_url is set, and non-http(s) links are excluded via workflow args).
+
+verbose = "info"
+no_progress = true
+
+# Do not extract links from fenced code blocks or inline code.
+include_verbatim = false
+
+scheme = ["https", "http"]
+
+accept = ["200", "204", "429"]
+
+max_redirects = 10
+timeout = 20
+
+# Skip localhost URLs (see also --exclude-loopback in the workflow).
+exclude_loopback = true
+
+# Skip relative markdown links.
+exclude = [
+  '^/',
+  '^\\./',
+  '^\\.\\./',
+  '^mailto:',
+]

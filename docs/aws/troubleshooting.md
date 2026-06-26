@@ -52,7 +52,7 @@ AWS_PROFILE="production" terraform plan
 ```
 
 References:
-https://discuss.hashicorp.com/t/using-credential-created-by-aws-sso-for-terraform/23075/7
+[https://discuss.hashicorp.com/t/using-credential-created-by-aws-sso-for-terraform/23075/7](https://discuss.hashicorp.com/t/using-credential-created-by-aws-sso-for-terraform/23075/7)
 
 ## Your AWS User has MFA
 

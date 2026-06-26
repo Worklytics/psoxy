@@ -121,7 +121,7 @@ If you lack the `Cloud Application Administrator` role, you can ask someone in y
 Then you obtain the `Object ID` of the Entra ID application you created, and set it as the value of `msft_connector_app_object_id`
 in your `terraform.tfvars` file. See:
 
-https://github.com/Worklytics/psoxy-example-aws/blob/main/msft-365-variables.tf
+[https://github.com/Worklytics/psoxy-example-aws/blob/main/msft-365-variables.tf](https://github.com/Worklytics/psoxy-example-aws/blob/main/msft-365-variables.tf)
 
 ### Configure Workload Identity Federation (OIDC) Authentication via Entra ID
 
@@ -173,7 +173,7 @@ the settings necessary for the proxy to connect to Microsoft Graph API. After th
 still need a Microsoft 365 admin to perform the admin consent step for each application.
 
 See
-https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application#import
+[https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application#import](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application#import)
 for details.
 
 

@@ -1,0 +1,38 @@
+name: Link Checker
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**/*.md'
+      - 'lychee.toml'
+      - '.github/workflows/link-checker.yml'
+  pull_request:
+    paths:
+      - 'docs/**/*.md'
+      - 'lychee.toml'
+      - '.github/workflows/link-checker.yml'
+  workflow_dispatch:
+
+jobs:
+  link-checker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@v2
+        with:
+          fail: true
+          args: >-
+            --config lychee.toml
+            --accept 200,204
+            --exclude-loopback
+            --verbose
+            --no-progress
+            docs/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

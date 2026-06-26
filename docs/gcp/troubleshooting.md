@@ -35,7 +35,7 @@ If you receive an error such as:
 Error: Error applying IAM policy for cloudfunctions cloudfunction googleapi: Error 400: One or more users named in the policy do not belong to a permitted customer.
 ```
 
-This may be due to an [Organization Policy](https://cloud.google.com/resource-manager/docs/organization-policy/overview) that restricts the domains that can be used in IAM policies. See https://cloud.google.com/resource-manager/docs/organization-policy/restricting-domains
+This may be due to an [Organization Policy](https://cloud.google.com/resource-manager/docs/organization-policy/overview) that restricts the domains that can be used in IAM policies. See [https://cloud.google.com/resource-manager/docs/organization-policy/restricting-domains](https://cloud.google.com/resource-manager/docs/organization-policy/restricting-domains).
 
 You may need define an exception for the GCP project in which you're deploying the proxy, or add the domain of your Worklytics Tenant SA to the list of allowed domains.
 

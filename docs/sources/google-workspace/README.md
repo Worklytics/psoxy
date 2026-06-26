@@ -84,7 +84,7 @@ When the proxy connects to Google, it first authenticates with Google API using 
 
 The service account key can be rotated at any time, and the terraform configuration examples we provide can be configured to do this for you if applied regularly.
 
-More information: https://developers.google.com/workspace/guides/auth-overview
+More information: [https://developers.google.com/workspace/guides/auth-overview](https://developers.google.com/workspace/guides/auth-overview)
 
 To initially authorize each connector, a sufficiently privileged Google Workspace&trade; Admin must make a Domain-wide Delegation grant to the Oauth Client you create, by pasting its numeric ID and a CSV of the required OAuth Scopes into the Google Workspace&trade; Admin console. This is a one-time setup step.
 

@@ -10,7 +10,7 @@ As of Feb 2025, these reports must be downloaded periodically by a sufficiently 
 The reports cover ~4 weeks of history; we recommend downloading them at least weekly to provide granular insights into AI adoption.
 
 More information:
-https://support.google.com/a/answer/14564320
+[https://support.google.com/a/answer/14564320](https://support.google.com/a/answer/14564320)
 
 The CSV report file must then be uploaded to a proxy `-input` bucket for your connector, which will then be processed by the pseudonymization proxy to prepare it
 for import to Worklytics&trade;.

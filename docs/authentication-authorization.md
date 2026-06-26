@@ -24,7 +24,7 @@ A data source admin (eg, a Google Workspace admin) must **authorize** the proxy 
 
 See [https://docs.worklytics.co/psoxy#supported-data-sources](https://docs.worklytics.co/psoxy#supported-data-sources)
 
-The proxy **authenticates** itself for calls to the data source using one of the supported OAuth 2.0 mechanisms, see [https://oauth.net/2/client-authentication/]. Most commonly, these are [Client Credentials](https://oauth.net/2/grant-types/client-credentials/) or [Workload Identity Federation](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation).
+The proxy **authenticates** itself for calls to the data source using one of the supported OAuth 2.0 mechanisms; see [https://oauth.net/2/client-authentication/](https://oauth.net/2/client-authentication/). Most commonly, these are [Client Credentials](https://oauth.net/2/grant-types/client-credentials/) or [Workload Identity Federation](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation).
 
 In particular, a quick overview for common sources:
   - Google Workspace sources authenticate via Client Credentials (a GCP Service Account key)

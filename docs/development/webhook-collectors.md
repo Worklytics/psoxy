@@ -43,7 +43,7 @@ Webhooks will always be written as NDJSON (newline-delimited JSON) to the output
 
 To do this efficiently, we'd split into 2 steps: 1) webhook collector that receives webhook payload, accepts + sanitizes it, and then sends it to SQS. Then separately a trigger that 2) batches messages from SQS and writes them to the output bucket as NDJSON files.
 
-https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html
+[https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html](https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html)
 
 To handle both in same lambda, we need `WebhookCollectionModeHandler` to handle streams, and parse whether those are direct invocations of the webhook collector or SQS message batches
 

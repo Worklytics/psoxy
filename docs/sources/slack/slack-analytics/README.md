@@ -48,7 +48,7 @@ All requests are proxied to `https://www.slack.com/api/…` with a **User OAuth 
 
 For enabling Slack Analytics with the Psoxy you must first create an app on your Slack Enterprise Grid organization.
 
-1. Go to https://api.slack.com/apps and create an app.
+1. Go to [https://api.slack.com/apps](https://api.slack.com/apps) and create an app.
    - Select "From scratch", choose a name (for example "Worklytics connector") and a development workspace.
 
 ![](../slack-discovery-api/img/slack-step-1.png)
