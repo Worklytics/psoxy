@@ -19,7 +19,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
@@ -70,16 +69,6 @@ public class StorageHandler {
 
     public static final String CONTENT_ENCODING_GZIP = "gzip";
     public static final String EXTENSION_GZIP = ".gz";
-
-    /**
-     * Well-defined Content-Types that cloud consoles often attach to bulk uploads, but that do not
-     * reflect the file format (e.g. AWS S3 console may use {@code application/x-www-form-urlencoded}
-     * for arbitrary objects). When the object path implies a bulk format, extension-inferred types
-     * are preferred over these values.
-     */
-    private static final Set<String> KNOWN_GENERIC_CONTENT_TYPES = BulkContentTypes.KNOWN_GENERIC_UPLOAD_TYPES;
-
-    private static final Set<String> SUPPORTED_BULK_CONTENT_TYPE_BASES = BulkContentTypes.SUPPORTED_BULK_BASES;
 
     // gzip magic number bytes (RFC 1952)
     private static final int GZIP_MAGIC_BYTE_1 = 0x1f;
@@ -134,7 +123,7 @@ public class StorageHandler {
      * <ol>
      *   <li>Use object metadata when it is a supported bulk type (including parameters such as
      *       {@code charset}).</li>
-     *   <li>When metadata is absent, or is a {@link #KNOWN_GENERIC_CONTENT_TYPES known generic}
+     *   <li>When metadata is absent, or is a {@link BulkContentTypes#KNOWN_GENERIC_UPLOAD_TYPES known generic}
      *       upload type, prefer a type inferred from the file extension when recognized.</li>
      *   <li>Otherwise use the metadata value when present.</li>
      * </ol>
@@ -166,12 +155,12 @@ public class StorageHandler {
 
     private boolean isKnownGenericContentType(@Nullable String contentType) {
         String base = baseContentType(contentType);
-        return base != null && KNOWN_GENERIC_CONTENT_TYPES.contains(base);
+        return base != null && BulkContentTypes.KNOWN_GENERIC_UPLOAD_TYPES.contains(base);
     }
 
     private boolean matchesSupportedBulkContentType(@Nullable String contentType) {
         String base = baseContentType(contentType);
-        return base != null && SUPPORTED_BULK_CONTENT_TYPE_BASES.contains(base);
+        return base != null && BulkContentTypes.SUPPORTED_BULK_BASES.contains(base);
     }
 
     @Nullable
@@ -190,13 +179,13 @@ public class StorageHandler {
 
         String inferredContentType = null;
         if (path.endsWith(".ndjson") || path.endsWith(".jsonl")) {
-            inferredContentType = BulkContentTypes.MimeType.NDJSON;
+            inferredContentType = BulkContentTypes.NDJSON.getMimeType();
         } else if (path.endsWith(".csv")) {
-            inferredContentType = BulkContentTypes.MimeType.CSV_UTF8;
+            inferredContentType = BulkContentTypes.CSV_UTF8;
         } else if (path.endsWith(".json")) {
-            inferredContentType = BulkContentTypes.MimeType.JSON;
+            inferredContentType = BulkContentTypes.JSON.getMimeType();
         } else if (path.endsWith(".parquet")) {
-            inferredContentType = BulkContentTypes.MimeType.PARQUET;
+            inferredContentType = BulkContentTypes.PARQUET.getMimeType();
         }
         return Optional.ofNullable(inferredContentType);
     }

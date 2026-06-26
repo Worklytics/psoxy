@@ -34,6 +34,7 @@ import com.avaulta.gateway.rules.RuleSet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.gateway.BulkContentTypes;
 import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -439,29 +440,29 @@ class StorageHandlerTest {
             "items.ndjson",
             handler.buildDefaultTransform(),
             null,
-            "application/x-www-form-urlencoded");
+            BulkContentTypes.FORM_URLENCODED.getMimeType());
 
-        assertEquals("application/x-ndjson", request.getContentType());
+        assertEquals(BulkContentTypes.NDJSON.getMimeType(), request.getContentType());
     }
 
     @Test
     void effectiveContentType_replacesGenericWithInferred() {
         assertEquals(
-            "application/x-ndjson",
-            handler.effectiveContentType("items.ndjson", "application/x-www-form-urlencoded"));
+            BulkContentTypes.NDJSON.getMimeType(),
+            handler.effectiveContentType("items.ndjson", BulkContentTypes.FORM_URLENCODED.getMimeType()));
         assertEquals(
-            "text/csv; charset=utf-8",
-            handler.effectiveContentType("data.csv", "application/x-www-form-urlencoded"));
+            BulkContentTypes.CSV_UTF8,
+            handler.effectiveContentType("data.csv", BulkContentTypes.FORM_URLENCODED.getMimeType()));
         assertEquals(
-            "application/json",
-            handler.effectiveContentType("export/file.json", "application/x-www-form-urlencoded"));
+            BulkContentTypes.JSON.getMimeType(),
+            handler.effectiveContentType("export/file.json", BulkContentTypes.FORM_URLENCODED.getMimeType()));
     }
 
     @Test
     void effectiveContentType_preservesSupportedSourceType() {
         assertEquals(
-            "text/csv; charset=us-ascii",
-            handler.effectiveContentType("data.csv", "text/csv; charset=us-ascii"));
+            BulkContentTypes.CSV.getMimeType() + "; charset=us-ascii",
+            handler.effectiveContentType("data.csv", BulkContentTypes.CSV.getMimeType() + "; charset=us-ascii"));
     }
 
     @Test
@@ -474,21 +475,21 @@ class StorageHandlerTest {
     @Test
     void effectiveContentType_infersWhenAbsent() {
         assertEquals(
-            "application/x-ndjson",
+            BulkContentTypes.NDJSON.getMimeType(),
             handler.effectiveContentType("items.ndjson", null));
         assertEquals(
-            "application/x-ndjson",
+            BulkContentTypes.NDJSON.getMimeType(),
             handler.effectiveContentType("items.jsonl", null));
     }
 
     @Test
     void effectiveContentType_preservesJsonLinesContentType() {
         assertEquals(
-            "application/jsonlines",
-            handler.effectiveContentType("items.jsonl", "application/jsonlines"));
+            BulkContentTypes.JSONLINES.getMimeType(),
+            handler.effectiveContentType("items.jsonl", BulkContentTypes.JSONLINES.getMimeType()));
         assertEquals(
-            "application/x-jsonlines",
-            handler.effectiveContentType("export/file.jsonl", "application/x-jsonlines"));
+            BulkContentTypes.JSONLINES_ALT.getMimeType(),
+            handler.effectiveContentType("export/file.jsonl", BulkContentTypes.JSONLINES_ALT.getMimeType()));
     }
 
     @Test
@@ -503,8 +504,8 @@ class StorageHandlerTest {
             "items.jsonl",
             handler.buildDefaultTransform(),
             null,
-            "application/x-www-form-urlencoded");
+            BulkContentTypes.FORM_URLENCODED.getMimeType());
 
-        assertEquals("application/x-ndjson", request.getContentType());
+        assertEquals(BulkContentTypes.NDJSON.getMimeType(), request.getContentType());
     }
 }

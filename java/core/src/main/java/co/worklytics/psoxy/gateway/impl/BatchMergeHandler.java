@@ -104,7 +104,7 @@ public class BatchMergeHandler {
                 ProcessedContent combined = ProcessedContent.builder()
                     .contentEncoding(GZIP_CONTENT_ENCODING)
                     .content(byteArrayOutputStream.toByteArray())
-                    .contentType(BulkContentTypes.MimeType.NDJSON) // suggested, but not yet an official standard IANA type
+                    .contentType(BulkContentTypes.NDJSON.getMimeType()) // suggested, but not yet an official standard IANA type
                     .build();
                 outputUtils.forBatchedWebhookContent().write(combined);
                 
