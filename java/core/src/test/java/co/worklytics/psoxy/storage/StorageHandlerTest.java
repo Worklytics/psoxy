@@ -476,5 +476,35 @@ class StorageHandlerTest {
         assertEquals(
             "application/x-ndjson",
             handler.effectiveContentType("items.ndjson", null));
+        assertEquals(
+            "application/x-ndjson",
+            handler.effectiveContentType("items.jsonl", null));
+    }
+
+    @Test
+    void effectiveContentType_preservesJsonLinesContentType() {
+        assertEquals(
+            "application/jsonlines",
+            handler.effectiveContentType("items.jsonl", "application/jsonlines"));
+        assertEquals(
+            "application/x-jsonlines",
+            handler.effectiveContentType("export/file.jsonl", "application/x-jsonlines"));
+    }
+
+    @Test
+    void buildRequest_replacesGenericContentTypeWithInferredForJsonl() {
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.INPUT_BASE_PATH)))
+            .thenReturn(Optional.empty());
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
+            .thenReturn(Optional.empty());
+
+        StorageEventRequest request = handler.buildRequest(
+            "bucket-in",
+            "items.jsonl",
+            handler.buildDefaultTransform(),
+            null,
+            "application/x-www-form-urlencoded");
+
+        assertEquals("application/x-ndjson", request.getContentType());
     }
 }

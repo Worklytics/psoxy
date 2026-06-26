@@ -274,6 +274,7 @@ async function upload(bucket, key, file, options, client) {
   const ext = baseName.slice(baseName.lastIndexOf('.')).toLowerCase();
   const MIME_TYPES = {
     '.ndjson': 'application/x-ndjson',
+    '.jsonl': 'application/jsonlines',
     '.json': 'application/json',
     '.csv': 'text/csv',
     '.tsv': 'text/tab-separated-values',

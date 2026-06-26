@@ -38,6 +38,7 @@ import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.annotations.VisibleForTesting;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
+import co.worklytics.psoxy.gateway.BulkContentTypes;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -70,33 +71,15 @@ public class StorageHandler {
     public static final String CONTENT_ENCODING_GZIP = "gzip";
     public static final String EXTENSION_GZIP = ".gz";
 
-    private static final String CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded";
-    private static final String CONTENT_TYPE_CSV = "text/csv";
-    private static final String CONTENT_TYPE_APPLICATION_CSV = "application/csv";
-    private static final String CONTENT_TYPE_JSON = "application/json";
-    private static final String CONTENT_TYPE_NDJSON = "application/x-ndjson";
-    private static final String CONTENT_TYPE_NDJSON_ALT = "application/ndjson";
-    private static final String CONTENT_TYPE_PARQUET = "application/vnd.apache.parquet";
-    private static final String CONTENT_TYPE_CSV_UTF8 = CONTENT_TYPE_CSV + "; charset=utf-8";
-
     /**
      * Well-defined Content-Types that cloud consoles often attach to bulk uploads, but that do not
      * reflect the file format (e.g. AWS S3 console may use {@code application/x-www-form-urlencoded}
      * for arbitrary objects). When the object path implies a bulk format, extension-inferred types
      * are preferred over these values.
      */
-    private static final Set<String> KNOWN_GENERIC_CONTENT_TYPES = Set.of(
-        CONTENT_TYPE_FORM_URLENCODED
-    );
+    private static final Set<String> KNOWN_GENERIC_CONTENT_TYPES = BulkContentTypes.KNOWN_GENERIC_UPLOAD_TYPES;
 
-    private static final Set<String> SUPPORTED_BULK_CONTENT_TYPE_BASES = Set.of(
-        CONTENT_TYPE_CSV,
-        CONTENT_TYPE_APPLICATION_CSV,
-        CONTENT_TYPE_JSON,
-        CONTENT_TYPE_NDJSON,
-        CONTENT_TYPE_NDJSON_ALT,
-        CONTENT_TYPE_PARQUET
-    );
+    private static final Set<String> SUPPORTED_BULK_CONTENT_TYPE_BASES = BulkContentTypes.SUPPORTED_BULK_BASES;
 
     // gzip magic number bytes (RFC 1952)
     private static final int GZIP_MAGIC_BYTE_1 = 0x1f;
@@ -207,13 +190,13 @@ public class StorageHandler {
 
         String inferredContentType = null;
         if (path.endsWith(".ndjson") || path.endsWith(".jsonl")) {
-            inferredContentType = CONTENT_TYPE_NDJSON;
+            inferredContentType = BulkContentTypes.MimeType.NDJSON;
         } else if (path.endsWith(".csv")) {
-            inferredContentType = CONTENT_TYPE_CSV_UTF8;
+            inferredContentType = BulkContentTypes.MimeType.CSV_UTF8;
         } else if (path.endsWith(".json")) {
-            inferredContentType = CONTENT_TYPE_JSON;
+            inferredContentType = BulkContentTypes.MimeType.JSON;
         } else if (path.endsWith(".parquet")) {
-            inferredContentType = CONTENT_TYPE_PARQUET;
+            inferredContentType = BulkContentTypes.MimeType.PARQUET;
         }
         return Optional.ofNullable(inferredContentType);
     }
