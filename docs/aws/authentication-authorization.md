@@ -49,4 +49,6 @@ Then you use this AWS IAM role as the principal in AWS IAM policies you define t
 
 When `allowed_data_access_ip_blocks` or `allowed_webhook_ip_blocks` is set in Terraform, the AWS core module adds `aws:SourceIp` conditions to the **assume-role** policies for the deployment's caller roles. Principals cannot assume those roles unless the request originates from an allowed IP or CIDR. This is **infrastructure-level** enforcement, in addition to per-request checks inside the proxy.
 
+Worklytics can ensure fixed egress IP addresses for outbound requests from your tenant as a paid add-on. Contact [sales@worklytics.co](mailto:sales@worklytics.co) for details.
+
 See [Client IP Allowlisting](../configuration/ip-allowlisting.md).

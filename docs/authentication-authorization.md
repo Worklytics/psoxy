@@ -14,6 +14,8 @@ Worklytics is **authorized** to access your proxy instance via an Identity and A
 
 Worklytics **authenticates** in all cases via Workload Identity Federation; as your Worklytics tenant is running natively in the cloud, it can leverage the cloud provider's native IAM service to establish identity which can be asserted to other services in the cloud.
 
+If you restrict proxy access by client IP, Worklytics can ensure fixed egress IP addresses for outbound requests from your tenant as a paid add-on. Contact [sales@worklytics.co](mailto:sales@worklytics.co) or see [Client IP Allowlisting](configuration/ip-allowlisting.md).
+
 ## Proxy to Data Source API (2)
 
 Although exact details vary by data source, most utilize some form of [OAuth 2.0](https://oauth.net/2/) for authorization and authentication.
