@@ -109,7 +109,7 @@ EOT
     }
     chatgpt-enterprise = {
       source_kind : "chatgpt-enterprise",
-      availability : "alpha",
+      availability : "beta",
       enable_by_default : false,
       worklytics_connector_id : "chatgpt-enterprise-psoxy"
       display_name : "ChatGPT Enterprise"

@@ -2,7 +2,7 @@
 
 **Connector ID:** `chatgpt-enterprise`
 
-**Availability:** Alpha
+**Availability:** Beta
 
 ## ChatGPT Enterprise via Compliance API
 
