@@ -4,6 +4,10 @@
 
 **Availability:** Deprecated
 
+## Required OAuth Scopes
+
+None. This is a bulk connector; reports are downloaded from the Google Workspace Admin Console and uploaded to the proxy rather than retrieved via OAuth-scoped APIs.
+
 Worklytics&trade; supports the import of Gemini&trade; Usage reports to analyze AI adoption in your organization.
 
 As of Feb 2025, these reports must be downloaded periodically by a sufficiently privileged user from the Google Workspace&trade; Admin Console.

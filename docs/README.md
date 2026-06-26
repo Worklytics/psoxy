@@ -96,7 +96,7 @@ If you use our provided Terraform modules, specific instructions that you can pa
 | Gemini in Google Workspace (**beta**)                                                                                           | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini-in-workspace-apps/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini-in-workspace-apps/gemini-in-workspace-apps.yaml) | `admin.reports.audit.readonly`                                                                                                                                                                           |
 
 
-NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](https://github.com/Worklytics/psoxy/tree/main/infra/modules/worklytics-connector-specs). Please refer to that module for a definitive list.
+NOTE: the above scopes are copied from [`infra/modules/worklytics-connector-specs/google-workspace.tf`](https://github.com/Worklytics/psoxy/blob/main/infra/modules/worklytics-connector-specs/google-workspace.tf). Per-connector scope lists are on each [Google Workspace connector](sources/google-workspace/README.md) page. Please refer to that module for a definitive list.
 
 NOTE: 'Google Directory' connection is required prerequisite for all other Google Workspace connectors.
 

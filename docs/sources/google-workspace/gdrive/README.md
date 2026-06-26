@@ -7,6 +7,9 @@
 Please review the [Google Workspace&trade; README](../README.md) for general information applicable to
 all Google Workspace connectors.
 
+## Required OAuth Scopes
+- `drive.metadata.readonly`
+
 
 ## Examples
 
