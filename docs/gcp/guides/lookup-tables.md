@@ -2,7 +2,7 @@
 
 If you use Psoxy to send pseudonymized data to Worklytics and later wish to re-identify the data that you export from Worklytics to your premises, you'll need a lookup table in your data warehouse to JOIN with that data.
 
-Our `gcp-host` Terraform module, as used in our [Psoxy GCS Example](https://github.com/Worklytics/psoxy-example-gcs/tree/main), provides a variable `lookup_tables` to control generation of these lookup tables.
+Our `gcp-host` Terraform module, as used in our [Psoxy GCP Example](https://github.com/Worklytics/psoxy-example-gcp/tree/main), provides a variable `lookup_tables` to control generation of these lookup tables.
 
 Populating this variable will generate another version of your HRIS data (aside from the one exposed to Worklytics) which you can then import back to your data warehouse.
 

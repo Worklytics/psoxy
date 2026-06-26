@@ -29,7 +29,6 @@ jobs:
           fail: true
           args: >-
             --config lychee.toml
-            --accept 200,204
             --exclude-loopback
             --verbose
             --no-progress

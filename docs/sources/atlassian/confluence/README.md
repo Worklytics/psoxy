@@ -89,7 +89,7 @@ it will print the all the values to complete the configuration:
 curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'`
 ```
 5. After running that command, if successful you will see a
-   [JSON response](https://developer.atlassian.com/cloud/confluence/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
+   [JSON response](https://developer.atlassian.com/cloud/confluence/oauth-2-3lo-apps/) like this:
    ```json
    {
     "access_token": "some short live access token",

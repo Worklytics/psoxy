@@ -10,9 +10,9 @@ include_verbatim = false
 
 scheme = ["https", "http"]
 
-accept = ["200", "204", "429"]
+accept = ["200", "204", "302", "403", "429"]
 
-max_redirects = 10
+max_redirects = 20
 timeout = 20
 
 # Skip localhost URLs (see also --exclude-loopback in the workflow).
