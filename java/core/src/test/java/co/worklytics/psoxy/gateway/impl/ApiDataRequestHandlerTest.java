@@ -10,7 +10,10 @@ import co.worklytics.psoxy.RESTApiSanitizerFactory;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
+import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
@@ -54,10 +57,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -888,6 +893,44 @@ class ApiDataRequestHandlerTest {
 
         assertNotNull(captured[0]);
         assertFalse(captured[0].getFollowRedirects());
+    }
+
+    @Test
+    @SneakyThrows
+    void sanitizeStripsOutputObjectMetadataFromSanitizedOutput() {
+        setup("gmail", "google.apis.com");
+
+        RESTApiSanitizer sanitizer = spy(buildSanitizer(
+            co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules.GOOGLE_DEFAULT_RULES_MAP
+                .get("gmail")));
+        doReturn("[]").when(sanitizer).sanitize(anyString(), any(), anyString());
+        handler.sanitizer = sanitizer;
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHttpMethod()).thenReturn("POST");
+
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put(ApiDataOutputUtils.OutputObjectMetadata.REQUEST_BODY.name(), "c29tZXBpaQ==");
+        metadata.put(ApiDataOutputUtils.OutputObjectMetadata.PATH.name(), "users/me");
+        metadata.put(ApiDataOutputUtils.OutputObjectMetadata.HTTP_METHOD.name(), "POST");
+
+        ProcessedContent original = ProcessedContent.builder()
+            .content("{\"id\":1}".getBytes(StandardCharsets.UTF_8))
+            .metadata(metadata)
+            .build();
+
+        URL url = URI.create("https://google.apis.com/users/me").toURL();
+        ApiDataRequestHandler.RequestUrls requestUrls =
+            new ApiDataRequestHandler.RequestUrls(url, url);
+
+        ProcessedContent sanitized = handler.sanitize(request, requestUrls, original);
+
+        assertFalse(sanitized.getMetadata().containsKey(
+            ApiDataOutputUtils.OutputObjectMetadata.REQUEST_BODY.name()));
+        assertFalse(sanitized.getMetadata().containsKey(
+            ApiDataOutputUtils.OutputObjectMetadata.PATH.name()));
+        assertTrue(sanitized.getMetadata().containsKey(
+            ProcessedDataMetadataFields.RULES_SHA.getMetadataKey()));
     }
 
     @Test
