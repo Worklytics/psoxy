@@ -25,7 +25,7 @@ custom_bulk_connectors = {
     display_name              = "Microsoft Copilot for Sales Bulk"
     rules_file                = "copilot-for-sales-rules.yaml"
     settings_to_provide = {
-      "Parser" = "copilot-for-sales"
+      "Parser" = "copilot-for-sales-bulk"
     }
   }
 }
