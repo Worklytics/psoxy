@@ -33,9 +33,10 @@ public class CompressedOutputWrapper implements Output {
     @Override
     public void write(String key, ProcessedContent content) throws WriteFailure {
         try {
-            if (!Objects.equals(COMPRESSION_TYPE, content.getContentEncoding())) {             
+            byte[] rawContent = content.getContent() != null ? content.getContent() : new byte[0];
+            if (!Objects.equals(COMPRESSION_TYPE, content.getContentEncoding())) {
                 log.info("Compressing response with gzip encoding through wrapper");
-                byte[] compressedContent = gzipContent(content.getContent());
+                byte[] compressedContent = gzipContent(rawContent);
                 content = content.withContentEncoding(COMPRESSION_TYPE).withContent(compressedContent);
             }
             delegate.write(key, content);
@@ -50,7 +51,7 @@ public class CompressedOutputWrapper implements Output {
      * @param content to compress
      * @return a byte[] reflecting gzip-encoding of the content
      */
-    byte[] gzipContent(@NonNull byte[] content) throws WriteFailure {
+    byte[] gzipContent(byte[] content) throws WriteFailure {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
             gzipOutputStream.write(content);
