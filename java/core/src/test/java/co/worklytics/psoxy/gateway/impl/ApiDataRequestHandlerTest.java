@@ -10,7 +10,10 @@ import co.worklytics.psoxy.RESTApiSanitizerFactory;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
+import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
@@ -54,10 +57,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -832,6 +837,100 @@ class ApiDataRequestHandlerTest {
         assertTrue(handler.isRedirectFamily(307));
         assertTrue(handler.isRedirectFamily(399));
         assertFalse(handler.isRedirectFamily(400));
+    }
+
+    @Test
+    @SneakyThrows
+    void asyncModeDisablesRedirectFollowingByDefault() {
+        setup("gmail", "google.apis.com");
+
+        ApiDataRequestHandler spy = spy(handler);
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+            .thenReturn(Optional.empty());
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/admin/directory/v1/users");
+        when(request.getQuery()).thenReturn(Optional.empty());
+
+        HttpRequest[] captured = new HttpRequest[1];
+        MockHttpTransport transport = new MockHttpTransport();
+        HttpRequestFactory requestFactory = spy(transport.createRequestFactory());
+        doAnswer(invocation -> {
+            HttpRequest built = (HttpRequest) invocation.callRealMethod();
+            captured[0] = built;
+            return built;
+        }).when(requestFactory).buildRequest(anyString(), any(GenericUrl.class), any());
+        doReturn(requestFactory).when(spy).getRequestFactory(any());
+
+        MockHttpTransport contentTransport = new MockHttpTransport() {
+            @Override
+            public LowLevelHttpRequest buildRequest(String method, String url) throws IOException {
+                return new MockLowLevelHttpRequest() {
+                    @Override
+                    public LowLevelHttpResponse execute() throws IOException {
+                        MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
+                        response.setStatusCode(200);
+                        response.setContentType(Json.MEDIA_TYPE);
+                        response.setContent("[]");
+                        return response;
+                    }
+                };
+            }
+        };
+        when(spy.httpTransportFactory.create()).thenReturn(contentTransport);
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        spy.sanitizer = sanitizer;
+
+        spy.handle(request, ApiDataRequestHandler.ProcessingContext.builder()
+            .async(true)
+            .requestId("r")
+            .asyncOutputLocation("gs://bucket/output.json")
+            .requestReceivedAt(clock.instant())
+            .build());
+
+        assertNotNull(captured[0]);
+        assertFalse(captured[0].getFollowRedirects());
+    }
+
+    @Test
+    @SneakyThrows
+    void sanitizeStripsOutputObjectMetadataFromSanitizedOutput() {
+        setup("gmail", "google.apis.com");
+
+        RESTApiSanitizer sanitizer = spy(buildSanitizer(
+            co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules.GOOGLE_DEFAULT_RULES_MAP
+                .get("gmail")));
+        doReturn("[]").when(sanitizer).sanitize(anyString(), any(), anyString());
+        handler.sanitizer = sanitizer;
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHttpMethod()).thenReturn("POST");
+
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put(ApiDataOutputUtils.OutputObjectMetadata.REQUEST_BODY.name(), "c29tZXBpaQ==");
+        metadata.put(ApiDataOutputUtils.OutputObjectMetadata.PATH.name(), "users/me");
+        metadata.put(ApiDataOutputUtils.OutputObjectMetadata.HTTP_METHOD.name(), "POST");
+
+        ProcessedContent original = ProcessedContent.builder()
+            .content("{\"id\":1}".getBytes(StandardCharsets.UTF_8))
+            .metadata(metadata)
+            .build();
+
+        URL url = URI.create("https://google.apis.com/users/me").toURL();
+        ApiDataRequestHandler.RequestUrls requestUrls =
+            new ApiDataRequestHandler.RequestUrls(url, url);
+
+        ProcessedContent sanitized = handler.sanitize(request, requestUrls, original);
+
+        assertFalse(sanitized.getMetadata().containsKey(
+            ApiDataOutputUtils.OutputObjectMetadata.REQUEST_BODY.name()));
+        assertFalse(sanitized.getMetadata().containsKey(
+            ApiDataOutputUtils.OutputObjectMetadata.PATH.name()));
+        assertTrue(sanitized.getMetadata().containsKey(
+            ProcessedDataMetadataFields.RULES_SHA.getMetadataKey()));
     }
 
     @Test
