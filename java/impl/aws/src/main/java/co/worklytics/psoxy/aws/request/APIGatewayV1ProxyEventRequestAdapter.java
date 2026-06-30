@@ -37,21 +37,24 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
 
     @Override
     public Optional<String> getQuery() {
-
-        Stream<Pair<String, String>> paramStream = Stream.concat(
-            Optional.ofNullable(event.getQueryStringParameters())
+        // API Gateway payload 1.0 populates both queryStringParameters and multiValueQueryStringParameters
+        // with the same parameters; prefer multiValue to preserve repeated keys without duplication.
+        Stream<Pair<String, String>> paramStream;
+        if (event.getMultiValueQueryStringParameters() == null
+            || event.getMultiValueQueryStringParameters().isEmpty()) {
+            paramStream = Optional.ofNullable(event.getQueryStringParameters())
                 .map(params -> params.entrySet().stream()
                     .map(k -> Pair.of(k.getKey(), k.getValue())))
-                .orElse(Stream.empty()),
-            Optional.ofNullable(event.getMultiValueQueryStringParameters())
-                .map(params -> params.entrySet().stream()
-                    .flatMap(k -> k.getValue().stream().map(v -> Pair.of(k.getKey(), v))))
-                .orElse(Stream.empty())
-        );
+                .orElse(Stream.empty());
+        } else {
+            paramStream = event.getMultiValueQueryStringParameters().entrySet().stream()
+                .flatMap(entry -> Optional.ofNullable(entry.getValue()).orElse(List.of()).stream()
+                    .map(v -> Pair.of(entry.getKey(), v)));
+        }
 
         return Optional.ofNullable(StringUtils.trimToNull(paramStream
-                .map(pair -> pair.getLeft() + "=" + pair.getRight())
-                .collect(Collectors.joining("&"))));
+            .map(pair -> pair.getLeft() + "=" + pair.getRight())
+            .collect(Collectors.joining("&"))));
     }
 
     @Override

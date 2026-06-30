@@ -20,6 +20,19 @@ Within those, the `google-workspace.tf` and `google-workspace-variables.tf` file
 - [google-chat](google-chat/README.md) (Google Chat&trade;)
 - [meet](meet/README.md) (Google Meet&trade;)
 
+OAuth scopes omit the `https://www.googleapis.com/auth/` prefix. See [OAuth 2.0 Scopes for Google APIs](https://developers.google.com/identity/protocols/oauth2/scopes). Definitive values are defined in [`google-workspace.tf`](../../../infra/modules/worklytics-connector-specs/google-workspace.tf).
+
+| Connector | Connector ID | OAuth Scopes |
+|-----------|--------------|--------------|
+| [calendar](calendar/README.md) | `gcal` | `calendar.readonly` |
+| [google-chat](google-chat/README.md) | `google-chat` | `admin.reports.audit.readonly` |
+| [directory](directory/README.md) | `gdirectory` | `admin.directory.user.readonly` `admin.directory.domain.readonly` `admin.directory.group.readonly` `admin.directory.orgunit.readonly` |
+| [gdrive](gdrive/README.md) | `gdrive` | `drive.metadata.readonly` |
+| [gmail](gmail/README.md) | `gmail` | `gmail.metadata` |
+| [meet](meet/README.md) | `google-meet` | `admin.reports.audit.readonly` |
+| [gemini-in-workspace-apps](gemini-in-workspace-apps/README.md) | `gemini-in-workspace-apps` | `admin.reports.audit.readonly` |
+| [gemini-usage-bulk](gemini-usage-bulk/README.md) | `gemini-usage` | n/a (bulk CSV upload) |
+
 ## Required Permissions
 
 You (the user running Terraform) must have the following roles (or some of the permissions within them) in the GCP project in which you will provision the OAuth clients that will be used to connect to your Google Workspace&trade; data:
@@ -38,24 +51,23 @@ Additionally, a Google Workspace&trade; Admin will need to make a Domain-wide De
 
 We also recommend you create a dedicated Google Workspace&trade; user for Psoxy to use when connecting to your Google Workspace&trade; Admin API, with the specific permissions needed. This avoids the connection being tied to a personal account and helps with auditing and security.
 
-This is not to be confused with a GCP Service Account. Rather, this is a regular Google Workspace&trade; user account, but intended to be assigned to a service rather than a human user. Your proxy instance will impersonate this user when accessing the [Google Admin Directory](https://developers.google.com/admin-sdk/directory/v1/guides) and [Reports](https://developers.google.com/admin-sdk/reports/v1/guides) APIs. (Google requires thatthese be accessed via impersonation of a Google user account, rather than directly using a GCP service account).
+This is not to be confused with a GCP Service Account. Rather, this is a regular Google Workspace&trade; user account, but intended to be assigned to a service rather than a human user. Your proxy instance will impersonate this user when accessing the [Google Admin Directory](https://developers.google.com/admin-sdk/directory/v1/guides) and [Reports](https://developers.google.com/workspace/admin/reports) APIs. (Google requires that these be accessed via impersonation of a Google user account, rather than directly using a GCP service account).
 
 We recommend naming the account `svc-worklytics@{your-domain.com}`.
 
 If you have already created a sufficiently privileged service account user for a different Google Workspace&trade; connection, you can re-use that one.
 
-Assign the account a sufficiently privileged role. At minimum, the role must have the following privileges, _read-only_:
+Assign the account a sufficiently privileged role. At minimum, the role must grant _read-only_ access to the following [Administrator privileges](https://knowledge.workspace.google.com/admin/users/administrator-privilege-definitions) (expand each category in the Custom Role editor and enable only the **Read** sub-action, rather than checking the parent checkbox):
 
-- Admin API
-- Domain Settings
-- Groups
-- Organizational Units
-- Reports (required only if you are connecting to the Audit Logs, used for Google Chat&trade;, Google Meet&trade;, etc)
-- Users
+| Privilege | Required? | Purpose |
+| --------- | --------- | ------- |
+| **Users** → Read | Yes | Directory user data |
+| **Groups** → Read | Yes | Directory group membership |
+| **Organizational Units** → Read | Optional | Org-unit segmentation |
+| **Domain Management** | Optional | List of internal domains |
+| **Reports** | Only if using [Google Chat](google-chat/README.md), [Google Meet](meet/README.md), or other audit-log connectors | Audit / usage reports |
 
-Those refer to [Google's documentation](https://support.google.com/a/answer/1219251?fl=1&sjid=8026519161455224599-NA), as shown below (as of Aug 2023); you can refer there for more details about these privileges.
-
-![google-workspace-admin-privileges.png](google-workspace-admin-privileges.png)
+All of the above are found under **Admin settings privileges** in the Custom Role editor. Google reorganized administrator privileges in 2025; expand each category and enable only the **Read** sub-action where available. See Google's [privilege definitions](https://knowledge.workspace.google.com/admin/users/administrator-privilege-definitions) for the full list.
 
 The email address of the account you created will be used when creating the data connection to the Google Directory in the Worklytics&trade; portal. Provide it as the value of the 'Google Account to Use for Connection' setting when they create the connection.
 
@@ -63,18 +75,18 @@ The email address of the account you created will be used when creating the data
 
 If you choose not to use a predefined role that covers the above, you can define a [Custom Role](https://support.google.com/a/answer/2406043?fl=1).
 
-Using a Custom Role, with 'Read' access to each of the required Admin API privileges is good practice, but least-privilege is also enforced in TWO additional ways:
+Using a Custom Role with read-only access to each required privilege is good practice, but least-privilege is also enforced in TWO additional ways:
 
 - the Proxy API rules restrict the API endpoints that Worklytics&trade; can access, as well as the HTTP methods that may be used. This enforces read-only access, limited to the required data types (and actually even more granular that what Workspace Admin privileges and OAuth Scopes support).
 - the Oauth Scopes granted to the API client via Domain-wide delegation. Each OAuth Client used by Worklytics&trade; is granted only read-only scopes, least-permissive for the data types required. eg `https://www.googleapis.com/auth/admin.directory.users.readonly`.
 
 So a least-privileged custom role is essentially a 3rd layer of enforcement.
 
-In the Google Workspace&trade; Admin Console as of August 2023, creating a 'Custom Role' for this user will look something like the following:
+An example least-privilege Custom Role for the Directory connector:
 
-![custom-role.png](custom-role.png)
+![custom-role-least-privilege.png](custom-role-least-privilege.png)
 
-**YMMV** - Google's UI changes frequently and varies by Google Workspace&trade; edition, so you may see more or fewer options than shown above. Please scroll the list of privileges to ensure you grant READ access to API for all required data.
+**YMMV** - Google's UI changes frequently and varies by Google Workspace&trade; edition, so you may see more or fewer options than shown above. Scroll the privilege list and enable only the **Read** sub-actions required for your connectors.
 
 ## General Authentication Overview
 
@@ -84,7 +96,7 @@ When the proxy connects to Google, it first authenticates with Google API using 
 
 The service account key can be rotated at any time, and the terraform configuration examples we provide can be configured to do this for you if applied regularly.
 
-More information: https://developers.google.com/workspace/guides/auth-overview
+More information: [https://developers.google.com/workspace/guides/auth-overview](https://developers.google.com/workspace/guides/auth-overview)
 
 To initially authorize each connector, a sufficiently privileged Google Workspace&trade; Admin must make a Domain-wide Delegation grant to the Oauth Client you create, by pasting its numeric ID and a CSV of the required OAuth Scopes into the Google Workspace&trade; Admin console. This is a one-time setup step.
 
@@ -108,6 +120,18 @@ While not recommended, it is possible to set up Google API clients without Terra
 
 Then follow the steps in the next section to create the keys for the Oauth Clients.
 
+If your organization's policies don't allow Terraform to manage some or all of these GCP resources, you can still use our Terraform modules for the rest of your deployment and disable the parts you must do manually via `google_workspace_connector_settings` in your `terraform.tfvars`:
+
+```hcl
+google_workspace_connector_settings = {
+  enable_apis                = false
+  provision_service_accounts = false
+  provision_keys             = false
+}
+```
+
+When any of these are `false`, Terraform will skip creating the corresponding resources and instead emit TODO files (or `todos_1` outputs, if configured) with instructions to complete those steps outside of Terraform.
+
 NOTE: if you are creating connections to multiple Google Workspace&trade; sources, you can use a single OAuth client and share it between all the proxy instances. You just need to authorize the entire superset of Oauth scopes required by those connnections for the OAuth Client via the Google Workspace&trade; Admin console.
 
 ### Provisioning API Keys without Terraform
@@ -115,8 +139,12 @@ NOTE: if you are creating connections to multiple Google Workspace&trade; source
 If your organization's policies don't allow GCP service account keys to be managed via Terraform (or you lack the perms to do so), you can still use our Terraform modules to create the clients, and just add the following to your `terraform.tfvars` to disable provisioning of the keys:
 
 ```hcl
-google_workspace_provision_keys = false
+google_workspace_connector_settings = {
+  provision_keys = false
+}
 ```
+
+The deprecated top-level variable `google_workspace_provision_keys` is still supported, but the map form above is preferred.
 
 Then you can create the keys manually, and store them in your secrets manager of choice.
 

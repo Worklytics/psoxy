@@ -8,10 +8,10 @@ Changes to be including in future/planned release notes will be added here.
 ## [Unreleased]
 - `aws`/`gcp`: fix Terraform plan failure when `enable_remote_resources = true` but no artifacts bucket exists (e.g. with a prebuilt `deployment_bundle`). When remote resources are enabled, an artifacts bucket is now provisioned if one is not already created or provided via `artifacts_bucket_name` / `custom_artifacts_bucket_name`.
 
-## [0.6.5]
+## [0.6.5](https://github.com/Worklytics/psoxy/releases/tag/v0.6.5)
 - added `claude-enterprise-analytics` connector in **beta**; imports per-user daily activity, token usage, and cost data from the [Claude Enterprise Analytics API](https://support.claude.com/en/articles/13703965-claude-enterprise-analytics-api-reference-guide); see [docs/sources/anthropic/claude-enterprise-analytics/README.md](docs/sources/anthropic/claude-enterprise-analytics/README.md)
 
-## [0.6.4]
+## [0.6.4](https://github.com/Worklytics/psoxy/releases/tag/v0.6.4)
 - `aws`: consolidate IAM policies at the `aws-host` level to reduce per-connector policy/attachment churn (important for customers with low per-role IAM policy limits). PsoxyCaller now receives a single `CallerAccess` policy (lambda invoke, when applicable, plus read access to all provisioned output buckets: bulk sanitized, async, side-output, webhook, and lookup). Non-caller lookup-table accessor roles receive per-lookup `LookupBucketRead` policies scoped to their lookup bucket only. Bulk connector testing uses S3 bucket policies on each input/sanitized bucket granting the Terraform test principal upload/read/delete as needed, avoiding additional IAM policy attachments on the test role. **Upgrading customers should expect Terraform to destroy and recreate several IAM policies and attachments**; effective access should be unchanged, but we encourage reviewing the plan.
 
 ## [0.6.3](https://github.com/Worklytics/psoxy/releases/tag/v0.6.3)

@@ -219,7 +219,7 @@ A "response schema" is a "JSON Schema Filter" structure, specifying how response
 Our "JSON Schema Filter" implementation attempts to align to the [JSON Schema](https://json-schema.org/specification-links.html) specification, with some variation as it is intended for _filtering_ rather than _validation_. But generally speaking, you should be able to copy the JSON Schema for an API endpoint from its
 [OpenAPI specification](https://swagger.io/specification/) as a starting point for the `responseSchema` value in your rule set. Similarly, there are tools that can generate JSON Schema from example JSON content, as well as from data models in various languages, that may be useful.
 
-See: [https://json-schema.org/implementations.html#schema-generators](https://json-schema.org/implementations.html#schema-generators)
+See: [https://json-schema.org/tools](https://json-schema.org/tools)
 
 If a `responseSchema` attribute is specified for an `endpoint`, the response content will be _filtered_ (rather than validated) against that schema. Eg, fields NOT specified in the schema, or not of expected type, will be removed from the response.
 

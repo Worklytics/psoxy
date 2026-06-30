@@ -36,6 +36,18 @@ variable "oauth_scopes_needed" {
   default     = []
 }
 
+variable "provision_service_account" {
+  type        = bool
+  description = "whether to provision the GCP service account (OAuth client) via Terraform. If false, you must create it manually."
+  default     = true
+}
+
+variable "enable_apis" {
+  type        = bool
+  description = "whether to enable required GCP APIs via Terraform. If false, you must enable them manually."
+  default     = true
+}
+
 variable "todos_as_local_files" {
   type        = bool
   description = "whether to render TODOs as flat files"
@@ -47,4 +59,3 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 1
 }
-

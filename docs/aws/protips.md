@@ -20,7 +20,7 @@ default_tags = {
 
 If you're not using our AWS example, you can add the following to your configuration, then you will need to modify the `aws` provider block in your configuration to add a `default_tags`. Example shown below:
 
-See: [https://registry.terraform.io/providers/hashicorp/aws/latest/docs#default_tags]
+See: [https://registry.terraform.io/providers/hashicorp/aws/latest/docs#default_tags](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#default_tags)
 
 ```hcl
 provider "aws" {
@@ -176,7 +176,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "data_buckets" {
 
 The terraform modules we provide provision execution roles for each lambda function, and attach by default attach the appropriate AWS Managed Policy to each.
 
-Specifically, this is [`AWSLambdaBasicExecutionRole`](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSLambdaBasicExecutionRole.html), unless you're using a VPC - in which case it is `AWSLambdaVPCAccessExecutionRole`(https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSLambdaVPCAccessExecutionRole.html).
+Specifically, this is [`AWSLambdaBasicExecutionRole`](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSLambdaBasicExecutionRole.html), unless you're using a VPC - in which case it is [`AWSLambdaVPCAccessExecutionRole`](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSLambdaVPCAccessExecutionRole.html).
 
 For organizations that don't allow use of AWS Managed Policies, you can use the `aws_lambda_execution_role_policy_arn` variable to pass in an alternative which will be used INSTEAD of the AWS Managed Policy.
 
