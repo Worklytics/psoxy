@@ -51,7 +51,7 @@ Additionally, a Google Workspace&trade; Admin will need to make a Domain-wide De
 
 We also recommend you create a dedicated Google Workspace&trade; user for Psoxy to use when connecting to your Google Workspace&trade; Admin API, with the specific permissions needed. This avoids the connection being tied to a personal account and helps with auditing and security.
 
-This is not to be confused with a GCP Service Account. Rather, this is a regular Google Workspace&trade; user account, but intended to be assigned to a service rather than a human user. Your proxy instance will impersonate this user when accessing the [Google Admin Directory](https://developers.google.com/admin-sdk/directory/v1/guides) and [Reports](https://developers.google.com/workspace/admin/reports) APIs. (Google requires thatthese be accessed via impersonation of a Google user account, rather than directly using a GCP service account).
+This is not to be confused with a GCP Service Account. Rather, this is a regular Google Workspace&trade; user account, but intended to be assigned to a service rather than a human user. Your proxy instance will impersonate this user when accessing the [Google Admin Directory](https://developers.google.com/admin-sdk/directory/v1/guides) and [Reports](https://developers.google.com/workspace/admin/reports) APIs. (Google requires that these be accessed via impersonation of a Google user account, rather than directly using a GCP service account).
 
 We recommend naming the account `svc-worklytics@{your-domain.com}`.
 
