@@ -56,13 +56,13 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 
 The following additional bulk connectors are documented but configured via `custom_bulk_connectors` in Terraform rather than `enabled_connectors`:
 
-| Connector ID / key   | Data Source                                                          | Type | Availability |
-|----------------------|----------------------------------------------------------------------|------|--------------|
-| `claude-code-bulk`   | [Claude Code Bulk](anthropic/claude-code-bulk/README.md)             | Bulk | BETA         |
-| `gong-bulk`          | [Gong Bulk](gong/gong-bulk/README.md)                                | Bulk | ALPHA        |
-| `miro-ai-bulk`       | [Miro AI Bulk](miro/miro-ai-bulk/README.md)                          | Bulk | ALPHA        |
-| `copilot-for-sales`  | [Microsoft Copilot for Sales Bulk](microsoft-365/copilot-for-sales/README.md) | Bulk | BETA  |
-| `slack-discovery-bulk` | [Slack Bulk Exports](slack/slack-discovery-bulk/README.md)         | Bulk | GA           |
+| Connector ID / key   | Data Source                                                             | Type | Availability |
+|----------------------|-------------------------------------------------------------------------|------|--------------|
+| `claude-code-bulk`   | [Claude Code Bulk](anthropic/claude-code-bulk/README.md)                | Bulk | BETA         |
+| `gong-bulk`          | [Gong Bulk](gong/gong-bulk/README.md)                                   | Bulk | ALPHA        |
+| `miro-ai-bulk`       | [Miro AI Bulk](miro/miro-ai-bulk/README.md)                             | Bulk | ALPHA        |
+| `sales-for-copilot`  | [Sales for Copilot Bulk](salesforce/sales-for-copilot/README.md)        | Bulk | BETA  |
+| `slack-discovery-bulk` | [Slack Bulk Exports](slack/slack-discovery-bulk/README.md)              | Bulk | GA           |
 | `zoom-ai-metrics`    | [Zoom AI Metrics Snapshot](zoom/README.md#zoom-ai-metric-snapshot-bulk) | Bulk | ALPHA     |
 
 From v0.4.58, you can confirm the availability of a connector by running the following command from the root of one of our examples:
