@@ -1,5 +1,8 @@
 package co.worklytics.psoxy.gateway;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import org.apache.hc.core5.http.ContentType;
 
@@ -20,6 +23,7 @@ public final class BulkContentTypes {
 
     // Not defined by HttpCore ContentType
     public static final ContentType NDJSON_ALT = ContentType.create("application/ndjson");
+    public static final ContentType JSONL = ContentType.create("application/jsonl");
     public static final ContentType JSONLINES = ContentType.create("application/jsonlines");
     public static final ContentType JSONLINES_ALT = ContentType.create("application/x-jsonlines");
     public static final ContentType CSV = ContentType.create("text/csv");
@@ -46,6 +50,7 @@ public final class BulkContentTypes {
         JSON.getMimeType(),
         NDJSON.getMimeType(),
         NDJSON_ALT.getMimeType(),
+        JSONL.getMimeType(),
         JSONLINES.getMimeType(),
         JSONLINES_ALT.getMimeType(),
         PARQUET.getMimeType()
@@ -58,11 +63,14 @@ public final class BulkContentTypes {
         JSON.getMimeType(),
         NDJSON.getMimeType(),
         NDJSON_ALT.getMimeType(),
+        JSONL.getMimeType(),
         JSONLINES.getMimeType(),
         JSONLINES_ALT.getMimeType()
     );
 
     public static String describeContentTypes(Set<String> types) {
-        return String.join(", ", types);
+        List<String> sorted = new ArrayList<>(types);
+        Collections.sort(sorted);
+        return String.join(", ", sorted);
     }
 }

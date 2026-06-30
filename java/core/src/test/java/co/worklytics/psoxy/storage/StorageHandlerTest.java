@@ -490,6 +490,9 @@ class StorageHandlerTest {
         assertEquals(
             BulkContentTypes.JSONLINES_ALT.getMimeType(),
             handler.effectiveContentType("export/file.jsonl", BulkContentTypes.JSONLINES_ALT.getMimeType()));
+        assertEquals(
+            BulkContentTypes.JSONL.getMimeType(),
+            handler.effectiveContentType("items.jsonl", BulkContentTypes.JSONL.getMimeType()));
     }
 
     @Test
