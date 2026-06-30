@@ -260,7 +260,9 @@ resource "google_storage_bucket_object" "function" {
 }
 
 locals {
-  artifacts_bucket_name         = coalesce(var.custom_artifacts_bucket_name, try(google_storage_bucket.artifacts[0].name, null))
+  # NOTE: not coalesce; Terraform evaluates all coalesce() args even when an earlier one is non-null,
+  # and coalesce fails when every argument is null (e.g. prebuilt gs:// bundle without remote resources).
+  artifacts_bucket_name         = var.custom_artifacts_bucket_name != null ? var.custom_artifacts_bucket_name : try(google_storage_bucket.artifacts[0].name, null)
   deployment_bundle_bucket      = local.is_remote_bundle ? local.remote_bucket_name : local.artifacts_bucket_name
   deployment_bundle_object_name = local.is_remote_bundle ? local.remote_bundle_artifact : google_storage_bucket_object.function[0].name
 }
