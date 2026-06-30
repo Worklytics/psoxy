@@ -108,6 +108,18 @@ While not recommended, it is possible to set up Google API clients without Terra
 
 Then follow the steps in the next section to create the keys for the Oauth Clients.
 
+If your organization's policies don't allow Terraform to manage some or all of these GCP resources, you can still use our Terraform modules for the rest of your deployment and disable the parts you must do manually via `google_workspace_connector_settings` in your `terraform.tfvars`:
+
+```hcl
+google_workspace_connector_settings = {
+  enable_apis                = false
+  provision_service_accounts = false
+  provision_keys             = false
+}
+```
+
+When any of these are `false`, Terraform will skip creating the corresponding resources and instead emit TODO files (or `todos_1` outputs, if configured) with instructions to complete those steps outside of Terraform.
+
 NOTE: if you are creating connections to multiple Google Workspace&trade; sources, you can use a single OAuth client and share it between all the proxy instances. You just need to authorize the entire superset of Oauth scopes required by those connnections for the OAuth Client via the Google Workspace&trade; Admin console.
 
 ### Provisioning API Keys without Terraform
@@ -115,8 +127,12 @@ NOTE: if you are creating connections to multiple Google Workspace&trade; source
 If your organization's policies don't allow GCP service account keys to be managed via Terraform (or you lack the perms to do so), you can still use our Terraform modules to create the clients, and just add the following to your `terraform.tfvars` to disable provisioning of the keys:
 
 ```hcl
-google_workspace_provision_keys = false
+google_workspace_connector_settings = {
+  provision_keys = false
+}
 ```
+
+The deprecated top-level variable `google_workspace_provision_keys` is still supported, but the map form above is preferred.
 
 Then you can create the keys manually, and store them in your secrets manager of choice.
 
