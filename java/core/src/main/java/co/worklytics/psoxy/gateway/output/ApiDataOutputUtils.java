@@ -3,10 +3,12 @@ package co.worklytics.psoxy.gateway.output;
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
@@ -32,9 +34,9 @@ public class ApiDataOutputUtils {
     /**
      * keys for metadata that will be added to API Data output objects.
      *
-     * in all of these cases, except API_HOST, the values will be as follows:
-     *    - original (raw) case, will be the ACTUAL value sent with the request to the source API
-     *    - sanitized case, will be the value as it was sent to the proxy, which is presumably sanitized to reduce exposure of sensitive data
+     * in all of these cases, the values will be as follows:
+     *    - sanitized output: {@link #buildProxyRequestMetadata} from the client request to the proxy
+     *    - raw side output: {@link #buildSourceApiRequestMetadata} from the request sent to the source API
      */
     public enum OutputObjectMetadata {
 
@@ -67,11 +69,6 @@ public class ApiDataOutputUtils {
         // status code? other headers?
         ;
     }
-
-    private static final Set<String> UNSANITIZED_REQUEST_METADATA_KEYS = Set.of(
-        OutputObjectMetadata.REQUEST_BODY.name(),
-        OutputObjectMetadata.QUERY_STRING.name()
-    );
 
     ApiModeConfig apiModeConfig;
     ConfigService config;
@@ -128,46 +125,76 @@ public class ApiDataOutputUtils {
             }
         }
 
-        Map<String, String> metadata = this.buildRawMetadata(sourceApiRequest);
-
-
-        //not sure this will work; are we certain to be able to consume HttpContent after request has been sent?
-        if (sourceApiRequest.getContent() != null
-            && sourceApiRequest.getContent().getLength() > 0) {
-            // if the request has a body, add it to metadata
-            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                sourceApiRequest.getContent().writeTo(out);
-                metadata.put(OutputObjectMetadata.REQUEST_BODY.name(),
-                    base64encoder.encodeToString(out.toByteArray()));
-            } catch (IOException e) {
-                log.log(Level.WARNING, "Error reading request body to fill in metadata; possibly bc request already sent, so some implementations we cannot re-read the content stream", e);
-            }
-        }
-
-        builder.metadata(metadata);
-
-
+        builder.metadata(Collections.emptyMap());
 
         return builder.build();
     }
 
-    Map<String, String> buildRawMetadata(HttpRequest sourceApiRequest) {
-        HashMap<String, String> metadata = new HashMap<>();
-        metadata.put(ApiDataOutputUtils.OutputObjectMetadata.API_HOST.name(), sourceApiRequest.getUrl().getHost());
+    /**
+     * Request metadata from the client request to the proxy, for sanitized output.
+     */
+    public Map<String, String> buildProxyRequestMetadata(HttpEventRequest requestToProxy) {
+        Map<String, String> metadata = new HashMap<>();
 
-        // split rawPath into path and query string
-        String path = normalizePath(sourceApiRequest.getUrl().getRawPath());
-        if (!StringUtils.isEmpty(path)) {
-            metadata.put(ApiDataOutputUtils.OutputObjectMetadata.PATH.name(), path);
+        requestToProxy.getHeaders().entrySet().stream()
+            .filter(entry -> this.isParameterHeader(entry.getKey()))
+            .forEach(entry -> metadata.put(entry.getKey(), String.join(",", entry.getValue())));
+
+        requestToProxy.getHeader(HttpHeaders.HOST)
+            .filter(StringUtils::isNotBlank)
+            .ifPresent(host -> metadata.put(OutputObjectMetadata.API_HOST.name(), host));
+
+        metadata.put(OutputObjectMetadata.HTTP_METHOD.name(), requestToProxy.getHttpMethod());
+
+        String path = normalizePath(requestToProxy.getPath());
+        if (StringUtils.isNotEmpty(path)) {
+            metadata.put(OutputObjectMetadata.PATH.name(), path);
         }
 
-        Pair<String, String> splitPathAndQuery = splitPathAndQuery(sourceApiRequest.getUrl().buildRelativeUrl());
+        requestToProxy.getQuery()
+            .filter(StringUtils::isNotBlank)
+            .ifPresent(query -> metadata.put(OutputObjectMetadata.QUERY_STRING.name(), query));
 
-        if (splitPathAndQuery.getRight() != null) {
-            metadata.put(ApiDataOutputUtils.OutputObjectMetadata.QUERY_STRING.name(), canonicalQuery(Optional.of(splitPathAndQuery.getRight())));
+        Optional.ofNullable(requestToProxy.getBody())
+            .filter(ArrayUtils::isNotEmpty)
+            .map(base64encoder::encodeToString)
+            .ifPresent(body -> metadata.put(OutputObjectMetadata.REQUEST_BODY.name(), body));
+
+        return metadata;
+    }
+
+    /**
+     * Request metadata from the request sent to the source API, for raw side output.
+     */
+    public Map<String, String> buildSourceApiRequestMetadata(HttpRequest sourceApiRequest) {
+        Map<String, String> metadata = new HashMap<>();
+
+        metadata.put(OutputObjectMetadata.API_HOST.name(), sourceApiRequest.getUrl().getHost());
+        metadata.put(OutputObjectMetadata.HTTP_METHOD.name(), sourceApiRequest.getRequestMethod());
+
+        Pair<String, String> splitPathAndQuery =
+            splitPathAndQuery(sourceApiRequest.getUrl().buildRelativeUrl());
+        if (StringUtils.isNotEmpty(splitPathAndQuery.getLeft())) {
+            metadata.put(OutputObjectMetadata.PATH.name(), splitPathAndQuery.getLeft());
+        }
+        if (StringUtils.isNotBlank(splitPathAndQuery.getRight())) {
+            metadata.put(OutputObjectMetadata.QUERY_STRING.name(),
+                canonicalQuery(Optional.of(splitPathAndQuery.getRight())));
         }
 
-        metadata.put(ApiDataOutputUtils.OutputObjectMetadata.HTTP_METHOD.name(), sourceApiRequest.getRequestMethod());
+        //not sure this will work; are we certain to be able to consume HttpContent after request has been sent?
+        try {
+            HttpContent content = sourceApiRequest.getContent();
+            if (content != null && content.getLength() > 0) {
+                try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                    content.writeTo(out);
+                    metadata.put(OutputObjectMetadata.REQUEST_BODY.name(),
+                        base64encoder.encodeToString(out.toByteArray()));
+                }
+            }
+        } catch (IOException e) {
+            log.log(Level.WARNING, "Error reading request body to fill in metadata; possibly bc request already sent, so some implementations we cannot re-read the content stream", e);
+        }
 
         return metadata;
     }
@@ -181,52 +208,6 @@ public class ApiDataOutputUtils {
         String query = parts.length > 1 ? parts[1] : null;
         return Pair.of(path, query);
     }
-
-    /**
-     * builds metadata for output object based on request, which intended for writing to GCS/S3 metadata
-     *
-     * (Azure Blob Storage metadata support is more limited, so likely this will not work there)
-     *
-     * does NOT enforce platform-specific constraints on metadata keys/values; we leave it to the platform
-     * implementation to truncate/warn/encode as desired.
-     *
-     * @param requestToProxy
-     * @return
-     */
-    /**
-     * Returns a copy of sanitized side-output metadata with upstream request fields removed.
-     *
-     * {@link #responseAsRawProcessedContent} attaches the actual upstream request body and query
-     * string to metadata; {@link co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler#sanitize}
-     * copies that map onto sanitized content. Side-output backends persist metadata on the object,
-     * so leaving those keys in place would store unsanitized request payloads alongside sanitized
-     * response bodies.
-     */
-    public ProcessedContent withoutUnsanitizedRequestMetadata(ProcessedContent sanitizedContent) {
-        Map<String, String> metadata = new HashMap<>(sanitizedContent.getMetadata());
-        UNSANITIZED_REQUEST_METADATA_KEYS.forEach(metadata::remove);
-        return sanitizedContent.toBuilder().metadata(metadata).build();
-    }
-
-    Map<String, String> buildMetadata(HttpEventRequest requestToProxy) {
-
-        Map<String, String> metadata = new HashMap<>();
-
-        requestToProxy.getHeaders().entrySet().stream()
-            .filter(entry -> this.isParameterHeader(entry.getKey()))
-            .forEach(entry -> metadata.put(entry.getKey(), String.join(",", entry.getValue())));
-
-        metadata.put(OutputObjectMetadata.HTTP_METHOD.name(), requestToProxy.getHttpMethod());
-        metadata.put(OutputObjectMetadata.PATH.name(), requestToProxy.getPath());
-        requestToProxy.getQuery().ifPresent(query -> metadata.put(OutputObjectMetadata.QUERY_STRING.name(), query));
-
-        Optional.ofNullable(requestToProxy.getBody())
-            .map(base64encoder::encodeToString)
-            .ifPresent(body -> metadata.put(OutputObjectMetadata.REQUEST_BODY.name(), body));
-
-        return metadata;
-    }
-
 
     final static Set<String> HEADERS_TO_IGNORE = Set.of(
         HttpHeaders.HOST,

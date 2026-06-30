@@ -11,8 +11,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static co.worklytics.psoxy.gateway.output.ApiDataOutputUtils.OutputObjectMetadata.*;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.ProcessedContent;
+import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 
@@ -21,6 +23,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.*;
 
 class ApiDataOutputUtilsTest {
@@ -32,7 +35,7 @@ class ApiDataOutputUtilsTest {
     public void setup() {
        utils = new ApiDataOutputUtils(mock(ApiModeConfig.class), mock(ConfigService.class),
                () -> UUID.fromString("123e4567-e89b-12d3-a456-426614174000"), Base64.getEncoder());
-       clock = Clock.fixed(Instant.parse("2024-10-01T10:15:30Z"), java.time.ZoneOffset.UTC);
+       clock = Clock.fixed(Instant.parse("2024-10-01T10:15:30Z"), ZoneOffset.UTC);
     }
 
 
@@ -67,7 +70,7 @@ class ApiDataOutputUtilsTest {
     @Test
     void responseAsRawProcessedContent() throws Exception {
         HttpRequest mockRequest = mock(HttpRequest.class);
-        when(mockRequest.getUrl()).thenReturn(new com.google.api.client.http.GenericUrl("https://api.example.com/v1/resource"));
+        when(mockRequest.getUrl()).thenReturn(new GenericUrl("https://api.example.com/v1/resource"));
         when(mockRequest.getRequestMethod()).thenReturn("GET");
         HttpResponse mockResponse = mock(HttpResponse.class);
         when(mockResponse.getContentType()).thenReturn("application/json");
@@ -78,68 +81,50 @@ class ApiDataOutputUtilsTest {
         ProcessedContent processed = utils.responseAsRawProcessedContent(mockRequest, mockResponse);
         assertEquals("application/json", processed.getContentType());
         assertArrayEquals(contentBytes, processed.getContent());
+        assertTrue(processed.getMetadata().isEmpty());
     }
 
     @Test
-    void buildRawMetadata() {
+    void buildSourceApiRequestMetadata() {
         HttpRequest mockRequest = mock(HttpRequest.class);
-        com.google.api.client.http.GenericUrl url = new com.google.api.client.http.GenericUrl("https://api.example.com/v1/resource?foo=bar");
+        GenericUrl url = new GenericUrl("https://api.example.com/v1/resource?foo=bar");
         when(mockRequest.getUrl()).thenReturn(url);
         when(mockRequest.getRequestMethod()).thenReturn("POST");
-        Map<String, String> metadata = utils.buildRawMetadata(mockRequest);
-        assertEquals("api.example.com", metadata.get("API_HOST"));
-        assertEquals("v1/resource", metadata.get("PATH"));
-        assertEquals("POST", metadata.get("HTTP_METHOD"));
-        assertTrue(metadata.get(ApiDataOutputUtils.OutputObjectMetadata.QUERY_STRING.name()).contains("foo=bar"));
+        Map<String, String> metadata = utils.buildSourceApiRequestMetadata(mockRequest);
+        assertEquals("api.example.com", metadata.get(API_HOST.name()));
+        assertEquals("v1/resource", metadata.get(PATH.name()));
+        assertEquals("POST", metadata.get(HTTP_METHOD.name()));
+        assertTrue(metadata.get(QUERY_STRING.name()).contains("foo=bar"));
     }
 
     @Test
-    void withoutUnsanitizedRequestMetadata_stripsUpstreamRequestFields() {
-        Map<String, String> metadata = new HashMap<>();
-        metadata.put(ApiDataOutputUtils.OutputObjectMetadata.API_HOST.name(), "api.example.com");
-        metadata.put(ApiDataOutputUtils.OutputObjectMetadata.PATH.name(), "v1/resource");
-        metadata.put(ApiDataOutputUtils.OutputObjectMetadata.HTTP_METHOD.name(), "POST");
-        metadata.put(ApiDataOutputUtils.OutputObjectMetadata.QUERY_STRING.name(), "email=alice@example.com");
-        metadata.put(ApiDataOutputUtils.OutputObjectMetadata.REQUEST_BODY.name(), Base64.getEncoder().encodeToString(
-            "{\"email\":\"alice@example.com\"}".getBytes(StandardCharsets.UTF_8)));
-        metadata.put("Rules-SHA", "abc123");
-
-        ProcessedContent sanitized = ProcessedContent.builder()
-            .content("{\"email\":\"\"}".getBytes(StandardCharsets.UTF_8))
-            .metadata(metadata)
-            .build();
-
-        ProcessedContent forOutput = utils.withoutUnsanitizedRequestMetadata(sanitized);
-
-        assertEquals("api.example.com", forOutput.getMetadata().get(ApiDataOutputUtils.OutputObjectMetadata.API_HOST.name()));
-        assertEquals("v1/resource", forOutput.getMetadata().get(ApiDataOutputUtils.OutputObjectMetadata.PATH.name()));
-        assertEquals("POST", forOutput.getMetadata().get(ApiDataOutputUtils.OutputObjectMetadata.HTTP_METHOD.name()));
-        assertEquals("abc123", forOutput.getMetadata().get("Rules-SHA"));
-        assertFalse(forOutput.getMetadata().containsKey(ApiDataOutputUtils.OutputObjectMetadata.REQUEST_BODY.name()));
-        assertFalse(forOutput.getMetadata().containsKey(ApiDataOutputUtils.OutputObjectMetadata.QUERY_STRING.name()));
-    }
-
-    @Test
-    void buildMetadata() {
+    void buildProxyRequestMetadata() {
         HttpEventRequest mockRequest = MockModules.provideMock(HttpEventRequest.class);
         Map<String, List<String>> headers = new HashMap<>();
         headers.put("Authorization", List.of("Bearer token"));
+        headers.put("Host", List.of("proxy.example.com"));
         when(mockRequest.getHeaders()).thenReturn(headers);
+        when(mockRequest.getHeader("Host")).thenReturn(Optional.of("proxy.example.com"));
         when(mockRequest.getHttpMethod()).thenReturn("GET");
         when(mockRequest.getPath()).thenReturn("v1/resource");
-        when(mockRequest.getQuery()).thenReturn(Optional.of("foo=bar"));
-        when(mockRequest.getBody()).thenReturn("body".getBytes());
-        Map<String, String> metadata = utils.buildMetadata(mockRequest);
-        assertEquals("GET", metadata.get("HTTP_METHOD"));
-        assertEquals("v1/resource", metadata.get("PATH"));
-        assertTrue(metadata.get("QUERY_STRING").contains("foo=bar"));
-        assertNotNull(metadata.get("REQUEST_BODY"));
+        when(mockRequest.getQuery()).thenReturn(Optional.of("email=tokenized-value"));
+        when(mockRequest.getBody()).thenReturn("{\"email\":\"tokenized-value\"}".getBytes(StandardCharsets.UTF_8));
+
+        Map<String, String> metadata = utils.buildProxyRequestMetadata(mockRequest);
+
+        assertEquals("proxy.example.com", metadata.get(API_HOST.name()));
+        assertEquals("GET", metadata.get(HTTP_METHOD.name()));
+        assertEquals("v1/resource", metadata.get(PATH.name()));
+        assertEquals("email=tokenized-value", metadata.get(QUERY_STRING.name()));
+        assertEquals(Base64.getEncoder().encodeToString(
+                "{\"email\":\"tokenized-value\"}".getBytes(StandardCharsets.UTF_8)),
+            metadata.get(REQUEST_BODY.name()));
     }
 
     @Test
     void responseAsRawProcessedContent_nullCharsetDoesNotThrow() throws Exception {
         HttpRequest mockRequest = mock(HttpRequest.class);
-        when(mockRequest.getUrl()).thenReturn(new com.google.api.client.http.GenericUrl("https://api.example.com/v1/resource"));
+        when(mockRequest.getUrl()).thenReturn(new GenericUrl("https://api.example.com/v1/resource"));
         when(mockRequest.getRequestMethod()).thenReturn("GET");
         HttpResponse mockResponse = mock(HttpResponse.class);
         when(mockResponse.getContentType()).thenReturn("application/json");
@@ -156,7 +141,7 @@ class ApiDataOutputUtilsTest {
     @Test
     void responseAsRawProcessedContent_nullContentDoesNotThrow() throws Exception {
         HttpRequest mockRequest = mock(HttpRequest.class);
-        when(mockRequest.getUrl()).thenReturn(new com.google.api.client.http.GenericUrl("https://api.example.com/v1/resource"));
+        when(mockRequest.getUrl()).thenReturn(new GenericUrl("https://api.example.com/v1/resource"));
         when(mockRequest.getRequestMethod()).thenReturn("GET");
         HttpResponse mockResponse = mock(HttpResponse.class);
         when(mockResponse.getContentType()).thenReturn(null);

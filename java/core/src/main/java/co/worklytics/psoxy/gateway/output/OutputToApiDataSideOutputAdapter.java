@@ -33,10 +33,7 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
     public void writeSanitized(ProcessedContent sanitizedContent,
             ApiDataRequestHandler.ProcessingContext processingContext) throws IOException {
         String key = apiDataOutputUtils.buildSanitizedOutputKey(processingContext);
-
-        ProcessedContent contentForOutput =
-            apiDataOutputUtils.withoutUnsanitizedRequestMetadata(sanitizedContent);
-        wrappedOutput.write(key, contentForOutput);
+        wrappedOutput.write(key, sanitizedContent);
     }
 
 }

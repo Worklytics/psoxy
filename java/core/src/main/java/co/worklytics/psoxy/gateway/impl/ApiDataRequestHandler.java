@@ -550,7 +550,11 @@ public class ApiDataRequestHandler {
             ProcessedContent original = apiDataOutputUtils
                     .responseAsRawProcessedContent(requestToSourceApi, sourceApiResponse);
             try {
-                apiDataSideOutput.writeRaw(original, processingContext);
+                apiDataSideOutput.writeRaw(
+                    original.toBuilder()
+                        .metadata(apiDataOutputUtils.buildSourceApiRequestMetadata(requestToSourceApi))
+                        .build(),
+                    processingContext);
             } catch (Output.WriteFailure e) {
                 log.log(Level.WARNING, "Error writing to side output for original content", e);
                 builder.multivaluedHeader(
@@ -616,17 +620,18 @@ public class ApiDataRequestHandler {
         }
     }
 
-    ProcessedContent sanitize(HttpEventRequest request, RequestUrls requestUrls,
+    ProcessedContent sanitize(HttpEventRequest requestToProxy, RequestUrls requestUrls,
             ProcessedContent originalContent) {
-        RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
+        RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(requestToProxy);
         String sanitized =
-                StringUtils.trimToEmpty(sanitizerForRequest.sanitize(request.getHttpMethod(),
+                StringUtils.trimToEmpty(sanitizerForRequest.sanitize(requestToProxy.getHttpMethod(),
                         requestUrls.getOriginal(), originalContent.getContentAsString()));
 
         String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
         log.info("response sanitized with rule set " + rulesSha);
 
-        Map<String, String> metadata = new HashMap<>(originalContent.getMetadata());
+        Map<String, String> metadata =
+            new HashMap<>(apiDataOutputUtils.buildProxyRequestMetadata(requestToProxy));
         metadata.put(ProcessedDataMetadataFields.RULES_SHA.getMetadataKey(), rulesSha);
         metadata.put(ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(),
                 ProxyConstants.JAVA_SOURCE_CODE_VERSION);
