@@ -12,7 +12,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `atlassian-organization` | [Atlassian Organization](atlassian/organization/README.md)                  | API  | BETA         |
 | `azure-ad`                 | [Azure Active Directory](microsoft-365/entra-id/README.md)                  | API  | DEPRECATED   |
 | `badge`                    | [Badge](badge/README.md)                                                    | Bulk | GA           |
-| `chatgpt-enterprise`       | [ChatGPT Enterprise](chatgpt-enterprise/README.md)                          | API  | ALPHA        |
+| `chatgpt-enterprise`       | [ChatGPT Enterprise](chatgpt-enterprise/README.md)                          | API  | BETA         |
 | `claude`                   | [Claude](anthropic/claude/README.md)                                        | API  | BETA         |
 | `claude-enterprise-analytics` | [Claude Enterprise Analytics](anthropic/claude-enterprise-analytics/README.md) | API  | BETA         |
 | `claude-code`              | [Claude Code](anthropic/claude-code/README.md)                              | API  | BETA         |

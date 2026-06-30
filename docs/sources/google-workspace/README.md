@@ -20,6 +20,19 @@ Within those, the `google-workspace.tf` and `google-workspace-variables.tf` file
 - [google-chat](google-chat/README.md) (Google Chat&trade;)
 - [meet](meet/README.md) (Google Meet&trade;)
 
+OAuth scopes omit the `https://www.googleapis.com/auth/` prefix. See [OAuth 2.0 Scopes for Google APIs](https://developers.google.com/identity/protocols/oauth2/scopes). Definitive values are defined in [`google-workspace.tf`](../../../infra/modules/worklytics-connector-specs/google-workspace.tf).
+
+| Connector | Connector ID | OAuth Scopes |
+|-----------|--------------|--------------|
+| [calendar](calendar/README.md) | `gcal` | `calendar.readonly` |
+| [google-chat](google-chat/README.md) | `google-chat` | `admin.reports.audit.readonly` |
+| [directory](directory/README.md) | `gdirectory` | `admin.directory.user.readonly` `admin.directory.domain.readonly` `admin.directory.group.readonly` `admin.directory.orgunit.readonly` |
+| [gdrive](gdrive/README.md) | `gdrive` | `drive.metadata.readonly` |
+| [gmail](gmail/README.md) | `gmail` | `gmail.metadata` |
+| [meet](meet/README.md) | `google-meet` | `admin.reports.audit.readonly` |
+| [gemini-in-workspace-apps](gemini-in-workspace-apps/README.md) | `gemini-in-workspace-apps` | `admin.reports.audit.readonly` |
+| [gemini-usage-bulk](gemini-usage-bulk/README.md) | `gemini-usage` | n/a (bulk CSV upload) |
+
 ## Required Permissions
 
 You (the user running Terraform) must have the following roles (or some of the permissions within them) in the GCP project in which you will provision the OAuth clients that will be used to connect to your Google Workspace&trade; data:
@@ -38,7 +51,7 @@ Additionally, a Google Workspace&trade; Admin will need to make a Domain-wide De
 
 We also recommend you create a dedicated Google Workspace&trade; user for Psoxy to use when connecting to your Google Workspace&trade; Admin API, with the specific permissions needed. This avoids the connection being tied to a personal account and helps with auditing and security.
 
-This is not to be confused with a GCP Service Account. Rather, this is a regular Google Workspace&trade; user account, but intended to be assigned to a service rather than a human user. Your proxy instance will impersonate this user when accessing the [Google Admin Directory](https://developers.google.com/admin-sdk/directory/v1/guides) and [Reports](https://developers.google.com/admin-sdk/reports/v1/guides) APIs. (Google requires thatthese be accessed via impersonation of a Google user account, rather than directly using a GCP service account).
+This is not to be confused with a GCP Service Account. Rather, this is a regular Google Workspace&trade; user account, but intended to be assigned to a service rather than a human user. Your proxy instance will impersonate this user when accessing the [Google Admin Directory](https://developers.google.com/admin-sdk/directory/v1/guides) and [Reports](https://developers.google.com/workspace/admin/reports) APIs. (Google requires that these be accessed via impersonation of a Google user account, rather than directly using a GCP service account).
 
 We recommend naming the account `svc-worklytics@{your-domain.com}`.
 
@@ -83,7 +96,7 @@ When the proxy connects to Google, it first authenticates with Google API using 
 
 The service account key can be rotated at any time, and the terraform configuration examples we provide can be configured to do this for you if applied regularly.
 
-More information: https://developers.google.com/workspace/guides/auth-overview
+More information: [https://developers.google.com/workspace/guides/auth-overview](https://developers.google.com/workspace/guides/auth-overview)
 
 To initially authorize each connector, a sufficiently privileged Google Workspace&trade; Admin must make a Domain-wide Delegation grant to the Oauth Client you create, by pasting its numeric ID and a CSV of the required OAuth Scopes into the Google Workspace&trade; Admin console. This is a one-time setup step.
 

@@ -8,6 +8,8 @@ locals {
     coalesce(var.google_workspace_connector_settings["example_admin"]),
     coalesce(var.google_workspace_example_admin, local.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_ADMIN@YOUR_COMPANY.COM")
   )
+  # oauth_scopes_needed below are documented (short form, without the
+  # https://www.googleapis.com/auth/ prefix) in docs/sources/google-workspace/.
   google_workspace_sources = {
     "gcal" : {
       source_kind : "gcal",

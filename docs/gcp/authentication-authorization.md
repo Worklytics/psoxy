@@ -20,6 +20,8 @@ You can obtain the identity of your Worklytics tenant's GCP service account from
 
 When `allowed_data_access_ip_blocks` or `allowed_webhook_ip_blocks` is set in Terraform, the proxy enforces allowlists **inside the Cloud Function** via `ALLOWED_DATA_ACCESS_IP_BLOCKS` and `ALLOWED_WEBHOOK_IP_BLOCKS` environment variables. The shipped modules do **not** add source-IP IAM conditions on Cloud Run invoker bindings (GCP does not support that pattern on `roles/run.invoker`).
 
+Worklytics can ensure fixed egress IP addresses for outbound requests from your tenant as a paid add-on. Contact [sales@worklytics.co](mailto:sales@worklytics.co) for details.
+
 For network ingress filtering in front of Cloud Run (for example Cloud Armor on a load balancer), see [GCP Private Service Connect and connectivity options](../development/gcp-private-service-connect.md#enhancing-public-internet-options-with-ip-allowlisting). That is separate from the Terraform allowlist variables.
 
 See [Client IP Allowlisting](../configuration/ip-allowlisting.md).

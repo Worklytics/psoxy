@@ -4,13 +4,17 @@
 
 **Availability:** Deprecated
 
+## Required OAuth Scopes
+
+None. This is a bulk connector; reports are downloaded from the Google Workspace Admin Console and uploaded to the proxy rather than retrieved via OAuth-scoped APIs.
+
 Worklytics&trade; supports the import of Gemini&trade; Usage reports to analyze AI adoption in your organization.
 
 As of Feb 2025, these reports must be downloaded periodically by a sufficiently privileged user from the Google Workspace&trade; Admin Console.
 The reports cover ~4 weeks of history; we recommend downloading them at least weekly to provide granular insights into AI adoption.
 
 More information:
-https://support.google.com/a/answer/14564320
+[https://support.google.com/a/answer/14564320](https://support.google.com/a/answer/14564320)
 
 The CSV report file must then be uploaded to a proxy `-input` bucket for your connector, which will then be processed by the pseudonymization proxy to prepare it
 for import to Worklytics&trade;.

@@ -13,7 +13,7 @@ To consume packages from GitHub Packages, you need:
 
 1. A GitHub account
 2. A GitHub Personal Access Token (PAT) with `read:packages` permission
-   - Create one at: https://github.com/settings/tokens
+   - Create one at: [https://github.com/settings/tokens](https://github.com/settings/tokens)
    - Select the `read:packages` scope
 
 ### Maven Configuration

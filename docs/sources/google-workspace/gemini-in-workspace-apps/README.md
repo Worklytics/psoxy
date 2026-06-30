@@ -9,6 +9,9 @@ all Google Workspace connectors.
 
 This connector pulls Gemini-events from the Google Workspace audit log.
 
+## Required OAuth Scopes
+- `admin.reports.audit.readonly`
+
 
 ## Examples
 
