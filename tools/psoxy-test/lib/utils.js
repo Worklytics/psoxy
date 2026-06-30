@@ -570,11 +570,11 @@ async function signJwtWithGCPKMS(claims, keyId) {
 
 /**
  * Known compound extensions where the "real" extension precedes a compression
- * extension (e.g. `.ndjson.gz`, `.csv.gz`).  We treat the entire compound
+ * extension (e.g. `.ndjson.gz`, `.jsonl.gz`, `.csv.gz`).  We treat the entire compound
  * extension as one unit so the suffix is inserted before it:
  *   `events0.ndjson.gz` + timestamp  →  `events0-<timestamp>.ndjson.gz`
  */
-const COMPOUND_EXTENSIONS = ['.ndjson.gz', '.csv.gz', '.json.gz', '.tsv.gz', '.parquet.gz'];
+const COMPOUND_EXTENSIONS = ['.ndjson.gz', '.jsonl.gz', '.csv.gz', '.json.gz', '.tsv.gz', '.parquet.gz'];
 
 /**
  * Append suffix to filename (before extension)

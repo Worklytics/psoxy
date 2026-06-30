@@ -5,7 +5,10 @@
 **Availability:** GA
 
 Please review the [Google Workspace&trade; README](../README.md) for general information applicable to
-all Google Workspace&trade connectors.
+all Google Workspace&trade; connectors.
+
+## Required OAuth Scopes
+- `calendar.readonly`
 
 
 ## Examples

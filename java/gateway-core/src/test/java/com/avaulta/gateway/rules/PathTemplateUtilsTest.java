@@ -96,6 +96,10 @@ class PathTemplateUtilsTest {
         "{exportId}/events{shardIndex}.ndjson{suffix?},export123/events0-1775063099227.ndjson,true",
         // matches .ndjson.gz
         "{exportId}/events{shardIndex}.ndjson{suffix?},export123/events0-1775019339023.ndjson.gz,true",
+        // matches .jsonl (JSON Lines equivalent)
+        "{exportId}/events{shardIndex}.jsonl{suffix?},export123/events0-1775063099227.jsonl,true",
+        // matches .jsonl.gz
+        "{exportId}/events{shardIndex}.jsonl{suffix?},export123/events0-1775019339023.jsonl.gz,true",
         // doesn't match wrong base name
         "{exportId}/events{shardIndex}.ndjson{suffix?},export123/items0.ndjson,false",
     })
