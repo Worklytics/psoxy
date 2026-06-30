@@ -70,13 +70,13 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
     @Test
     public void getQuery_preservesRepeatedKeysFromMultiValueMap() {
         APIGatewayProxyRequestEvent apiGatewayEvent = new APIGatewayProxyRequestEvent()
-            .withQueryStringParameters(Map.of("$select", "id,mail"))
-            .withMultiValueQueryStringParameters(Map.of("$select", List.of("id,mail")));
+            .withQueryStringParameters(Map.of("$select", "mail"))
+            .withMultiValueQueryStringParameters(Map.of("$select", List.of("id", "mail")));
 
         APIGatewayV1ProxyEventRequestAdapter requestAdapter =
             APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
 
-        assertEquals("$select=id,mail", requestAdapter.getQuery().get());
+        assertEquals("$select=id&$select=mail", requestAdapter.getQuery().get());
     }
 
     @SneakyThrows

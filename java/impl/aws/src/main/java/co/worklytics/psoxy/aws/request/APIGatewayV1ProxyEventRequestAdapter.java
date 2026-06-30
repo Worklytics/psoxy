@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.tuple.Pair;
@@ -36,20 +37,24 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
 
     @Override
     public Optional<String> getQuery() {
-        // API Gateway V1 REST populates both queryStringParameters and multiValueQueryStringParameters
+        // API Gateway payload 1.0 populates both queryStringParameters and multiValueQueryStringParameters
         // with the same parameters; prefer multiValue to preserve repeated keys without duplication.
-        if (event.getMultiValueQueryStringParameters() != null) {
-            return Optional.ofNullable(StringUtils.trimToNull(
-                event.getMultiValueQueryStringParameters().entrySet().stream()
-                    .flatMap(entry -> entry.getValue().stream().map(v -> Pair.of(entry.getKey(), v)))
-                    .map(pair -> pair.getLeft() + "=" + pair.getRight())
-                    .collect(Collectors.joining("&"))));
+        Stream<Pair<String, String>> paramStream;
+        if (event.getMultiValueQueryStringParameters() == null
+            || event.getMultiValueQueryStringParameters().isEmpty()) {
+            paramStream = Optional.ofNullable(event.getQueryStringParameters())
+                .map(params -> params.entrySet().stream()
+                    .map(k -> Pair.of(k.getKey(), k.getValue())))
+                .orElse(Stream.empty());
+        } else {
+            paramStream = event.getMultiValueQueryStringParameters().entrySet().stream()
+                .flatMap(entry -> Optional.ofNullable(entry.getValue()).orElse(List.of()).stream()
+                    .map(v -> Pair.of(entry.getKey(), v)));
         }
 
-        return Optional.ofNullable(event.getQueryStringParameters())
-            .map(params -> StringUtils.trimToNull(params.entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining("&"))));
+        return Optional.ofNullable(StringUtils.trimToNull(paramStream
+            .map(pair -> pair.getLeft() + "=" + pair.getRight())
+            .collect(Collectors.joining("&"))));
     }
 
     @Override
