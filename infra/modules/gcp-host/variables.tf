@@ -181,7 +181,7 @@ variable "kms_key_ring" {
 
 variable "custom_artifacts_bucket_name" {
   type        = string
-  description = "name of bucket to use for custom artifacts, if you want something other than default"
+  description = "Name of an existing GCS bucket to use for deployment artifacts and remote resources (rules, NLP models, etc.). If null, one will be provisioned when needed for a local deployment bundle or when enable_remote_resources is true."
   default     = null
 }
 
@@ -463,6 +463,6 @@ variable "max_instances_per_api_connector" {
 
 variable "enable_remote_resources" {
   type        = bool
-  description = "**beta** Whether to enable remote resource loading from the artifacts GCS bucket (rules, NLP models, etc.). When true, sets REMOTE_RESOURCE_BUCKET env var and grants roles/storage.objectViewer to each Cloud Function. Default will change to `true` in next major version."
-  default     = false # will change to true in 0.7.x
+  description = "**beta** Whether to enable remote resource loading from the artifacts GCS bucket (rules, NLP models, etc.). When true, sets REMOTE_RESOURCE_BUCKET env var and grants roles/storage.objectViewer to each Cloud Function. Provisions an artifacts bucket if one is not already created or provided."
+  default     = false
 }

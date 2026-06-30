@@ -201,9 +201,10 @@ module "psoxy_package" {
 
 locals {
   # NOTE: `try` needed here bc Terraform doesn't short-circuit boolean evaluation
-  is_remote_bundle       = var.deployment_bundle != null && try(startswith(var.deployment_bundle, "gs://"), false)
-  remote_bucket_name     = local.is_remote_bundle ? split("/", var.deployment_bundle)[2] : null
-  remote_bundle_artifact = local.is_remote_bundle ? split("/", var.deployment_bundle)[3] : null
+  is_remote_bundle                  = var.deployment_bundle != null && try(startswith(var.deployment_bundle, "gs://"), false)
+  remote_bucket_name                = local.is_remote_bundle ? split("/", var.deployment_bundle)[2] : null
+  remote_bundle_artifact            = local.is_remote_bundle ? split("/", var.deployment_bundle)[3] : null
+  should_provision_artifacts_bucket = !local.is_remote_bundle || var.enable_remote_resources
 
   file_name_with_sha1 = local.is_remote_bundle ? sha1(var.deployment_bundle) : replace(module.psoxy_package.filename, ".jar",
   "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.zip")
@@ -229,7 +230,7 @@ data "archive_file" "source" {
 # trivy:ignore:AVD-GCP-0078
 # trivy:ignore:AVD-GCP-0077
 resource "google_storage_bucket" "artifacts" {
-  count = local.is_remote_bundle ? 0 : 1
+  count = local.should_provision_artifacts_bucket ? 1 : 0
 
   project                     = var.project_id
   name                        = coalesce(var.custom_artifacts_bucket_name, "${var.project_id}-${var.environment_id_prefix}artifacts-bucket")
@@ -259,7 +260,8 @@ resource "google_storage_bucket_object" "function" {
 }
 
 locals {
-  artifact_bucket_name          = local.is_remote_bundle ? local.remote_bucket_name : google_storage_bucket.artifacts[0].name
+  artifacts_bucket_name         = coalesce(var.custom_artifacts_bucket_name, try(google_storage_bucket.artifacts[0].name, null))
+  deployment_bundle_bucket      = local.is_remote_bundle ? local.remote_bucket_name : local.artifacts_bucket_name
   deployment_bundle_object_name = local.is_remote_bundle ? local.remote_bundle_artifact : google_storage_bucket_object.function[0].name
 }
 
@@ -535,7 +537,12 @@ output "gcp_project" {
 }
 
 output "artifacts_bucket_name" {
-  value = local.artifact_bucket_name
+  value = local.artifacts_bucket_name
+}
+
+output "deployment_bundle_bucket" {
+  value       = local.deployment_bundle_bucket
+  description = "GCS bucket containing the Cloud Function deployment bundle (may differ from artifacts_bucket_name when using a gs:// deployment_bundle)"
 }
 
 output "artifacts_bucket_id" {
