@@ -3,6 +3,7 @@ package co.worklytics.psoxy.aws.request;
 import co.worklytics.test.TestUtils;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import java.util.Map;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,43 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
 
 
         assertFalse(requestAdapter.isHttps().isPresent());
+    }
+
+    @SneakyThrows
+    @Test
+    public void getQuery_doesNotDuplicateWhenBothQueryMapsPopulated() {
+        APIGatewayProxyRequestEvent apiGatewayEvent = objectMapper.readerFor(APIGatewayProxyRequestEvent.class)
+            .readValue(TestUtils.getData("lambda-proxy-events/api-gateway-v2-payload-v1.json"));
+
+        APIGatewayV1ProxyEventRequestAdapter requestAdapter =
+            APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
+
+        assertEquals("page_size=30", requestAdapter.getQuery().get());
+    }
+
+    @SneakyThrows
+    @Test
+    public void getQuery_preservesRepeatedKeysFromMultiValueMap() {
+        APIGatewayProxyRequestEvent apiGatewayEvent = new APIGatewayProxyRequestEvent()
+            .withQueryStringParameters(Map.of("$select", "id,mail"))
+            .withMultiValueQueryStringParameters(Map.of("$select", List.of("id,mail")));
+
+        APIGatewayV1ProxyEventRequestAdapter requestAdapter =
+            APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
+
+        assertEquals("$select=id,mail", requestAdapter.getQuery().get());
+    }
+
+    @SneakyThrows
+    @Test
+    public void getQuery_fallsBackToSingleValueMapWhenMultiValueAbsent() {
+        APIGatewayProxyRequestEvent apiGatewayEvent = objectMapper.readerFor(APIGatewayProxyRequestEvent.class)
+            .readValue(TestUtils.getData("lambda-proxy-events/api-gateway-v1-example_interesting.json"));
+
+        APIGatewayV1ProxyEventRequestAdapter requestAdapter =
+            APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
+
+        assertEquals("name=John", requestAdapter.getQuery().get());
     }
 
     @SneakyThrows

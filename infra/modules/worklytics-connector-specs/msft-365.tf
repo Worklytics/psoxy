@@ -66,7 +66,7 @@ locals {
       external_todo : null
       enable_side_output : false
       example_api_calls : [
-        "/v1.0/users",
+        "/v1.0/users?\\$select=id,mail,otherMails",
         "/v1.0/users/${local.example_msft_user_guid}/events",
         "/v1.0/users/${local.example_msft_user_guid}/calendarView?startDateTime=${timeadd(var.example_api_calls_sample_date, "-4320h")}&endDateTime=${var.example_api_calls_sample_date}",
         "/v1.0/users/${local.example_msft_user_guid}/mailboxSettings",
@@ -93,7 +93,7 @@ locals {
       external_todo : null
       enable_side_output : false
       example_api_calls : [
-        "/v1.0/users",
+        "/v1.0/users?\\$select=id,mail,otherMails",
         "/v1.0/users/${local.example_msft_user_guid}/mailboxSettings",
         "/v1.0/users/${local.example_msft_user_guid}/mailFolders/SentItems/messages",
         "/v1.0/groups",
