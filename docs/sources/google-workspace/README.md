@@ -44,18 +44,17 @@ We recommend naming the account `svc-worklytics@{your-domain.com}`.
 
 If you have already created a sufficiently privileged service account user for a different Google Workspace&trade; connection, you can re-use that one.
 
-Assign the account a sufficiently privileged role. At minimum, the role must have the following privileges, _read-only_:
+Assign the account a sufficiently privileged role. At minimum, the role must grant _read-only_ access to the following [Administrator privileges](https://knowledge.workspace.google.com/admin/users/administrator-privilege-definitions) (expand each category in the Custom Role editor and enable only the **Read** sub-action, rather than checking the parent checkbox):
 
-- Admin API
-- Domain Settings
-- Groups
-- Organizational Units
-- Reports (required only if you are connecting to the Audit Logs, used for Google Chat&trade;, Google Meet&trade;, etc)
-- Users
+| Privilege | Required? | Purpose |
+| --------- | --------- | ------- |
+| **Users** → Read | Yes | Directory user data |
+| **Groups** → Read | Yes | Directory group membership |
+| **Organizational Units** → Read | Optional | Org-unit segmentation |
+| **Domain Management** | Optional | List of internal domains |
+| **Reports** | Only if using [Google Chat](google-chat/README.md), [Google Meet](meet/README.md), or other audit-log connectors | Audit / usage reports |
 
-Those refer to [Google's documentation](https://support.google.com/a/answer/1219251?fl=1&sjid=8026519161455224599-NA), as shown below (as of Aug 2023); you can refer there for more details about these privileges.
-
-![google-workspace-admin-privileges.png](google-workspace-admin-privileges.png)
+All of the above are found under **Admin settings privileges** in the Custom Role editor. Google reorganized administrator privileges in 2025; expand each category and enable only the **Read** sub-action where available. See Google's [privilege definitions](https://knowledge.workspace.google.com/admin/users/administrator-privilege-definitions) for the full list.
 
 The email address of the account you created will be used when creating the data connection to the Google Directory in the Worklytics&trade; portal. Provide it as the value of the 'Google Account to Use for Connection' setting when they create the connection.
 
@@ -63,18 +62,18 @@ The email address of the account you created will be used when creating the data
 
 If you choose not to use a predefined role that covers the above, you can define a [Custom Role](https://support.google.com/a/answer/2406043?fl=1).
 
-Using a Custom Role, with 'Read' access to each of the required Admin API privileges is good practice, but least-privilege is also enforced in TWO additional ways:
+Using a Custom Role with read-only access to each required privilege is good practice, but least-privilege is also enforced in TWO additional ways:
 
 - the Proxy API rules restrict the API endpoints that Worklytics&trade; can access, as well as the HTTP methods that may be used. This enforces read-only access, limited to the required data types (and actually even more granular that what Workspace Admin privileges and OAuth Scopes support).
 - the Oauth Scopes granted to the API client via Domain-wide delegation. Each OAuth Client used by Worklytics&trade; is granted only read-only scopes, least-permissive for the data types required. eg `https://www.googleapis.com/auth/admin.directory.users.readonly`.
 
 So a least-privileged custom role is essentially a 3rd layer of enforcement.
 
-In the Google Workspace&trade; Admin Console as of August 2023, creating a 'Custom Role' for this user will look something like the following:
+An example least-privilege Custom Role for the Directory connector:
 
-![custom-role.png](custom-role.png)
+![custom-role-least-privilege.png](custom-role-least-privilege.png)
 
-**YMMV** - Google's UI changes frequently and varies by Google Workspace&trade; edition, so you may see more or fewer options than shown above. Please scroll the list of privileges to ensure you grant READ access to API for all required data.
+**YMMV** - Google's UI changes frequently and varies by Google Workspace&trade; edition, so you may see more or fewer options than shown above. Scroll the privilege list and enable only the **Read** sub-actions required for your connectors.
 
 ## General Authentication Overview
 
