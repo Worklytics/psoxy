@@ -159,15 +159,58 @@ deployment_bundle_public_path() {
   esac
 }
 
+deployment_bundle_s3_parts() {
+  local bundle_path="$1"
+
+  if [[ ! "$bundle_path" =~ ^s3://([^/]+)/(.+)$ ]]; then
+    return 1
+  fi
+
+  DEPLOYMENT_BUNDLE_S3_BUCKET="${BASH_REMATCH[1]}"
+  DEPLOYMENT_BUNDLE_S3_KEY="${BASH_REMATCH[2]}"
+  DEPLOYMENT_BUNDLE_S3_REGION="us-east-1"
+  if [[ "$DEPLOYMENT_BUNDLE_S3_BUCKET" =~ ^psoxy-public-artifacts-(.+)$ ]]; then
+    DEPLOYMENT_BUNDLE_S3_REGION="${BASH_REMATCH[1]}"
+  fi
+}
+
+deployment_bundle_s3_to_http_url() {
+  local bundle_path="$1"
+  local bucket key region
+
+  if ! deployment_bundle_s3_parts "$bundle_path"; then
+    return 1
+  fi
+  bucket="$DEPLOYMENT_BUNDLE_S3_BUCKET"
+  key="$DEPLOYMENT_BUNDLE_S3_KEY"
+  region="$DEPLOYMENT_BUNDLE_S3_REGION"
+
+  printf 'https://%s.s3.%s.amazonaws.com/%s' "$bucket" "$region" "$key"
+}
+
 deployment_bundle_public_exists() {
   local bundle_path="$1"
 
   case "$bundle_path" in
     s3://*)
-      if ! command -v aws >/dev/null 2>&1; then
-        return 1
+      if command -v aws >/dev/null 2>&1 && deployment_bundle_s3_parts "$bundle_path"; then
+        # head-object only needs object-level access; s3 ls requires s3:ListBucket on the bucket
+        if aws s3api head-object \
+          --bucket "$DEPLOYMENT_BUNDLE_S3_BUCKET" \
+          --key "$DEPLOYMENT_BUNDLE_S3_KEY" \
+          --region "$DEPLOYMENT_BUNDLE_S3_REGION" \
+          >/dev/null 2>&1; then
+          return 0
+        fi
       fi
-      aws s3 ls "$bundle_path" >/dev/null 2>&1
+      if command -v curl >/dev/null 2>&1; then
+        local http_url=""
+        if http_url="$(deployment_bundle_s3_to_http_url "$bundle_path")"; then
+          curl -fsSI "$http_url" >/dev/null 2>&1
+          return $?
+        fi
+      fi
+      return 1
       ;;
     gs://*)
       if command -v gsutil >/dev/null 2>&1; then
