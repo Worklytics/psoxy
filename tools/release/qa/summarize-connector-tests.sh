@@ -116,7 +116,7 @@ for _, status in connectors:
     counts[status] = counts.get(status, 0) + 1
 
 
-def category_status(category_ids: set[str]) -> str:
+def category_status(category_ids: set) -> str:
     tested = [(n, s) for n, s in connectors if n in category_ids]
     if not tested:
         return "skip"
