@@ -19,8 +19,6 @@ locals {
     local.resolved_memory_mb <= 24576 ? "6" :
     "8"
   )
-
-  resolved_available_cpu = coalesce(var.available_cpu, local.auto_available_cpu)
 }
 
 # computed
@@ -219,24 +217,11 @@ removed {
   }
 }
 
-resource "terraform_data" "bulk_service_config" {
-  input = {
-    available_memory_mb = local.resolved_memory_mb
-    available_cpu       = local.resolved_available_cpu
-  }
-}
-
 resource "google_cloudfunctions2_function" "function" {
   name        = local.function_name
   description = "Psoxy instance to process ${var.source_kind} files"
   project     = var.gcp_project.project_id
   location    = var.region
-
-  lifecycle {
-    replace_triggered_by = [
-      terraform_data.bulk_service_config
-    ]
-  }
 
   build_config {
     runtime         = "java25"
@@ -257,7 +242,7 @@ resource "google_cloudfunctions2_function" "function" {
 
   service_config {
     available_memory      = "${local.resolved_memory_mb}M"
-    available_cpu         = local.resolved_available_cpu
+    available_cpu         = local.auto_available_cpu
     service_account_email = google_service_account.service_account.email
     timeout_seconds       = var.timeout_seconds
     ingress_settings      = "ALLOW_INTERNAL_ONLY"

@@ -1,5 +1,5 @@
 
-# Test bulk connector memory/CPU defaults and overrides in gcp-host module
+# Test bulk connector memory/CPU defaults in gcp-host module
 
 variables {
   gcp_project_id       = "test-project-123456"
@@ -21,10 +21,9 @@ variables {
         columnsToPseudonymize = ["employee_id"]
       }
     }
-    "custom-combo" = {
+    "custom-memory" = {
       source_kind         = "hris"
       available_memory_mb = 2048
-      available_cpu       = "4"
       rules = {
         columnsToPseudonymize = ["employee_id"]
       }
@@ -34,7 +33,6 @@ variables {
   custom_bulk_connector_arguments = {
     "args-override" = {
       available_memory_mb = 512
-      available_cpu       = "0.333"
     }
   }
 
@@ -96,17 +94,17 @@ run "auto_cpu_for_high_memory" {
   }
 }
 
-run "explicit_cpu_and_memory" {
+run "custom_memory_with_auto_cpu" {
   command = plan
 
   assert {
-    error_message = "Explicit CPU should be applied without adjustment"
-    condition     = run.setup.bulk_connector["custom-combo"].function_config.service_config[0].available_cpu == "4"
+    error_message = "Configured memory should be applied"
+    condition     = run.setup.bulk_connector["custom-memory"].function_config.service_config[0].available_memory == "2048M"
   }
 
   assert {
-    error_message = "Explicit memory should be applied without adjustment"
-    condition     = run.setup.bulk_connector["custom-combo"].function_config.service_config[0].available_memory == "2048M"
+    error_message = "2048M memory should auto-select 1 CPU"
+    condition     = run.setup.bulk_connector["custom-memory"].function_config.service_config[0].available_cpu == "1"
   }
 }
 
@@ -119,7 +117,7 @@ run "custom_bulk_connector_arguments_override" {
   }
 
   assert {
-    error_message = "custom_bulk_connector_arguments should override connector CPU"
+    error_message = "512M memory should auto-select 0.333 CPU"
     condition     = run.setup.bulk_connector["args-override"].function_config.service_config[0].available_cpu == "0.333"
   }
 }
