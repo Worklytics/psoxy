@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.46</dependency.lombok.version>
         <dependency.dagger.version>2.40.5</dependency.dagger.version>
-        <dependency.jackson.version>2.19.4</dependency.jackson.version>
+        <dependency.jackson.version>2.22.0</dependency.jackson.version>
         <dependency.apache-commons-lang3.version>3.20.0</dependency.apache-commons-lang3.version>
         <dependency.apache-commons-csv.version>1.14.1</dependency.apache-commons-csv.version>
         <dependency.guava.version>33.6.0-jre</dependency.guava.version>
@@ -41,6 +41,14 @@
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
                 <version>${dependency.junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Jackson 2.22+ uses patch-less version for jackson-annotations; BOM aligns module versions -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${dependency.jackson.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
