@@ -56,7 +56,7 @@ else
   printf "${SUCCESS}No stale ref=%s module references under infra/, java/, or tools/.${NC}\n" "$RC_RELEASE"
 fi
 
-MISSING_RELEASE_REFS="$(git grep -n "ref=${RELEASE}" -- 'infra/examples-dev/' 2>/dev/null | wc -l | tr -d ' ')"
+MISSING_RELEASE_REFS="$( (git grep -n "ref=${RELEASE}" -- 'infra/examples-dev/' 2>/dev/null || true) | wc -l | tr -d ' ' )"
 if [ "$MISSING_RELEASE_REFS" -eq 0 ]; then
   printf "${WARN}No commented ref=%s lines found in infra/examples-dev/ (expected in example .tf files).${NC}\n" "$RELEASE"
 else
