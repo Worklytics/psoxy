@@ -9,8 +9,7 @@ description: |
 
 # Release QA
 
-End-to-end release QA for the Psoxy repo on an `rc-vX.Y.Z` branch that has been prepared for
-release (`./tools/release/prep.sh rc-vX.Y.Z vX.Y.Z`).
+End-to-end release QA for the Psoxy repo on an `rc-vX.Y.Z` branch that has been prepared for release (`./tools/release/prep.sh rc-vX.Y.Z vX.Y.Z`).
 
 ## Prerequisites
 
