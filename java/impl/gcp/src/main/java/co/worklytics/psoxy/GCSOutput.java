@@ -42,8 +42,10 @@ public class GCSOutput implements Output {
 
     @Override
     public void write(String key, ProcessedContent content) throws WriteFailure {
+        byte[] body = content.getContent();
+
         if (key == null) {
-            key = DigestUtils.md5Hex(content.getContent());
+            key = DigestUtils.md5Hex(body);
         }
 
         try {
@@ -58,7 +60,9 @@ public class GCSOutput implements Output {
                     .setContentEncoding(content.getContentEncoding())
                     .setMetadata(metadata)
                     .build())) {
-                writeChannel.write(java.nio.ByteBuffer.wrap(content.getContent(), 0, content.getContent().length));
+                if (body.length > 0) {
+                    writeChannel.write(java.nio.ByteBuffer.wrap(body));
+                }
             }
         } catch (Exception e) {
             log.log(Level.WARNING, "Failed to write to GCS sideOutput", e);

@@ -50,19 +50,27 @@ public class ProcessedContent implements Serializable {
     Map<String, String> metadata = new HashMap<>();
 
     /**
-     * the actual content
+     * the actual content; may be null when the upstream response has no body (e.g. 204, HEAD)
      */
+    @Getter(lombok.AccessLevel.NONE)
     byte[] content;
 
     /**
+     * Returns content bytes for consumers that need to read or write the body.
+     * Missing bodies are treated as an empty array to avoid NPEs in output writers.
+     */
+    public byte[] getContent() {
+        return content != null ? content : new byte[0];
+    }
+
+    /**
      * for convenience, a method to get the content as a string - rather than byte array
-     * @return the content as a string, using the specified contentCharset
+     * @return the content as a string, using the specified contentCharset; null if no body
      */
     public String getContentAsString() {
-        if (getContent() == null) {
+        if (content == null) {
             return null;
-        } else {
-            return new String(getContent(), contentCharset);
         }
+        return new String(content, contentCharset);
     }
 }

@@ -49,9 +49,10 @@ public class S3Output implements Output {
 
     @Override
     public void write(String key, ProcessedContent content) throws WriteFailure {
+        byte[] body = content.getContent();
 
         if (key == null) {
-            key = DigestUtils.md5Hex(content.getContent());
+            key = DigestUtils.md5Hex(body);
         }
 
         try {
@@ -66,14 +67,14 @@ public class S3Output implements Output {
             PutObjectRequest.Builder putBuilder = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(pathPrefix + key)
-                .contentLength((long) content.getContent().length)
+                .contentLength((long) body.length)
                 .metadata(userMetadata);
 
             // s3 client blows up if these are filled with 'null' values, so only set if present
             Optional.ofNullable(content.getContentEncoding()).ifPresent(putBuilder::contentEncoding);
             Optional.ofNullable(content.getContentType()).ifPresent(putBuilder::contentType);
 
-            s3Client.putObject(putBuilder.build(), RequestBody.fromBytes(content.getContent()));
+            s3Client.putObject(putBuilder.build(), RequestBody.fromBytes(body));
         } catch (Exception e) {
             throw new WriteFailure("Failed to write to S3 output", e);
         }
