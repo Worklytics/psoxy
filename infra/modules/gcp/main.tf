@@ -204,7 +204,7 @@ locals {
   is_remote_bundle                  = var.deployment_bundle != null && try(startswith(var.deployment_bundle, "gs://"), false)
   remote_bucket_name                = local.is_remote_bundle ? split("/", var.deployment_bundle)[2] : null
   remote_bundle_artifact            = local.is_remote_bundle ? join("/", slice(split("/", var.deployment_bundle), 3, length(split("/", var.deployment_bundle)))) : null
-  should_provision_artifacts_bucket = !local.is_remote_bundle || var.enable_remote_resources
+  should_provision_artifacts_bucket = var.custom_artifacts_bucket_name == null && (!local.is_remote_bundle || var.enable_remote_resources)
 
   file_name_with_sha1 = local.is_remote_bundle ? sha1(var.deployment_bundle) : replace(module.psoxy_package.filename, ".jar",
   "_${filesha1(module.psoxy_package.path_to_deployment_jar)}.zip")

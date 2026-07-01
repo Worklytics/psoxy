@@ -206,7 +206,7 @@ deployment_bundle_public_exists() {
       if command -v curl >/dev/null 2>&1; then
         local http_url=""
         if http_url="$(deployment_bundle_s3_to_http_url "$bundle_path")"; then
-          curl -fsSI "$http_url" >/dev/null 2>&1
+          curl -fsSIL "$http_url" >/dev/null 2>&1
           return $?
         fi
       fi
