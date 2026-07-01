@@ -82,7 +82,7 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
                                         return delegate.getConfigPropertyAsOptional(key).orElse(NEGATIVE_VALUE);
                                     } catch (TransientConfigException e) {
                                         lastException = e;
-                                        log.log(Level.WARNING, String.format("Transient failure on attempt {0}/{1} for config property {2}",
+                                        log.log(Level.WARNING, String.format("Transient failure on attempt %d/%d for config property %s",
                                             attempt + 1, MAX_TRANSIENT_RETRIES, key.name()));
                                     }
                                     try {
