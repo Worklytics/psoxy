@@ -1,12 +1,17 @@
 package co.worklytics.psoxy;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 /**
- * metadata fields that Psoxy may add to processed data responses
- *  -- as HTTP headers on http responses
- *  -- as metadata if written to objects
+ * metadata fields that Psoxy may add to processed data responses.
+ *
+ * <p>On sync HTTP responses, only these fields are exposed as headers (via {@link #getHttpHeader()}).
+ * Request-capture metadata ({@link co.worklytics.psoxy.gateway.output.ApiDataOutputUtils.OutputObjectMetadata})
+ * is stored on {@link co.worklytics.psoxy.gateway.ProcessedContent} for async/side outputs only.
  */
 @RequiredArgsConstructor
 public enum ProcessedDataMetadataFields {
@@ -49,6 +54,12 @@ public enum ProcessedDataMetadataFields {
 
     public String getMetadataKey() {
         return formattedName;
+    }
+
+    public static Optional<ProcessedDataMetadataFields> fromMetadataKey(String metadataKey) {
+        return Arrays.stream(values())
+            .filter(f -> f.getMetadataKey().equals(metadataKey))
+            .findFirst();
     }
 
 }
