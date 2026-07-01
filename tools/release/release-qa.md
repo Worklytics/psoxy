@@ -2,8 +2,7 @@
 
 End-to-end QA before merging an `rc-vX.Y.Z` branch to `main`. Run from the repository root.
 
-This supplements [releases.md](../../docs/development/releases.md) and automates the dev-example
-apply/test workflow described in [test_plan.md](test_plan.md).
+This supplements [releases.md](../../docs/development/releases.md) and automates the dev-example apply/test workflow described in [test_plan.md](test_plan.md).
 
 ## Prerequisites
 
