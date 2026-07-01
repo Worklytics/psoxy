@@ -83,7 +83,7 @@ def checkbox(status: str) -> str:
     return "[x]" if status in ("pass", "partial") else "[ ]"
 
 
-def update_section(section_name: str, statuses: dict[str, str], text: str) -> str:
+def update_section(section_name: str, statuses: dict, text: str) -> str:
     pattern = rf"(### {re.escape(section_name)}\s.*?Confirm everything worked:\s*)(.*?)(?=\n### |\Z)"
     m = re.search(pattern, text, flags=re.S)
     if not m:
