@@ -30,7 +30,6 @@ fi
 ROOT="$(git rev-parse --show-toplevel)"
 EXAMPLE_DIR="${ROOT}/infra/examples-dev/${EXAMPLE}"
 DATE_STAMP="$(date +%Y%m%d)"
-RELEASE_TAG="${RELEASE#v}"
 PLAN_LOG="${EXAMPLE_DIR}/${DATE_STAMP}_${EXAMPLE}-${RELEASE}-plan.txt"
 APPLY_LOG="${EXAMPLE_DIR}/${DATE_STAMP}_${EXAMPLE}-${RELEASE}-apply.txt"
 
