@@ -3,6 +3,7 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.TransientConfigException;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.utils.DevLogUtils;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
@@ -137,11 +138,17 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
             // does not exist, that could be OK depending on case.
             DevLogUtils.info(envVarsConfig, log, "No SSM parameter for " + paramName + " (may be expected)");
             return Optional.empty();
-        } catch (SsmException ignore) {
-            // very likely the policy doesn't allow reading this parameter
-            // may be OK in those cases
-            DevLogUtils.warn(envVarsConfig, log, "Failed to read SSM parameter for " + paramName, ignore);
-            return Optional.empty();
+        } catch (SsmException e) {
+            if (AwsExceptionUtils.isAccessDenied(e)) {
+                // IAM grants are created explicitly per parameter; access-denied is expected for
+                // optional parameters with no grant in this deployment.
+                DevLogUtils.warn(envVarsConfig, log, "Access denied reading SSM parameter " + paramName + "; expected if optional with no IAM grant", e);
+                return Optional.empty();
+            }
+            // Any other SsmException is a transient failure (credential rotation window, service
+            // hiccup, etc.) — signal to the cache layer to retain the previous value.
+            log.log(Level.WARNING, "Transient failure reading SSM parameter " + paramName + "; will retry on next cache refresh", e);
+            throw new TransientConfigException("Transient failure reading SSM parameter: " + paramName, e);
         } catch (AwsServiceException e) {
             if (e.isThrottlingException()) {
                 log.log(Level.SEVERE, String.format("Throttling issues for key %s, rate limit reached most likely despite retries", paramName), e);

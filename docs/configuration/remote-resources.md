@@ -1,6 +1,7 @@
-# Remote Resources (beta)
+# Remote Resources
 
-> **Status: beta** — This feature is functional but may evolve. Feedback welcome.
+> [!NOTE]
+> This feature is in beta. It is functional but may evolve; feedback welcome.
 
 Psoxy supports loading resources (sanitization rules, NLP models, etc.) from a remote cloud storage
 bucket (S3 on AWS, GCS on GCP). This enables configuration that is too large for environment
@@ -28,13 +29,19 @@ mounted locally.
 
 ## Terraform Configuration
 
-By default, the host modules in this repository (`aws-host` and `gcp-host`) will configure the
-`REMOTE_RESOURCE_BUCKET` for you if you set the `enable_remote_resources` variable to `true`. This
-automatically wires the **artifacts bucket** (used for deployment bundles) as the remote resource bucket.
+Remote resources are **opt-in**. Set `enable_remote_resources = true` on the host module
+(`aws-host` or `gcp-host`) when you want psoxy to load rules, NLP models, or other assets from
+the artifacts bucket at runtime. The host module does not infer this from your connector list.
+
+When enabled, the host module uses the artifacts bucket — either one you provide
+(`artifacts_bucket_name` / `custom_artifacts_bucket_name`), one already provisioned for a local
+deployment bundle, or a newly provisioned bucket when using a prebuilt `s3://` / `gs://`
+`deployment_bundle`.
 
 > [!IMPORTANT]
-> - If you configure an existing bucket (e.g., by providing `artifacts_bucket_name`), the bucket must already exist.
-> - The Terraform runner (the credentials running the `terraform` command) must have sufficient IAM permissions on that bucket to apply permissions (since it will grant read access to the proxy's service account or Lambda execution role).
+> If you supply an existing bucket (`artifacts_bucket_name` / `custom_artifacts_bucket_name`), it must already exist.
+>
+> The Terraform runner (the credentials running the `terraform` command) must have sufficient IAM permissions on that bucket to apply permissions, since it will grant read access to the proxy's service account or Lambda execution role.
 
 ### AWS (`aws-host`)
 
@@ -44,7 +51,6 @@ module "psoxy" {
 
   # ... existing configuration ...
 
-  # Enable remote resource loading from the artifacts S3 bucket
   enable_remote_resources = true
 }
 ```
@@ -61,7 +67,6 @@ module "psoxy" {
 
   # ... existing configuration ...
 
-  # Enable remote resource loading from the artifacts GCS bucket
   enable_remote_resources = true
 }
 ```

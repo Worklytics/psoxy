@@ -110,6 +110,7 @@ module "psoxy" {
   enable_webhook_testing             = local.enable_webhook_testing
   webhook_allow_origins              = distinct(flatten([for v in var.webhook_collectors : v.allow_origins]))
   artifacts_bucket_name              = var.artifacts_bucket_name
+  enable_remote_resources            = var.enable_remote_resources
   allowed_data_access_ip_blocks      = var.allowed_data_access_ip_blocks
   allowed_webhook_ip_blocks          = var.allowed_webhook_ip_blocks
 }
@@ -127,6 +128,7 @@ locals {
   connector_instance_resource_path = { for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) :
     k => "${local.shared_resource_path}${replace(upper(k), "-", "_")}/"
   }
+  remote_resources_enabled = var.enable_remote_resources && module.psoxy.artifacts_bucket_name != null
 
   # convert custom_side_outputs to the format expected by the psoxy module
   custom_original_side_outputs = { for k, v in var.custom_side_outputs :
@@ -261,9 +263,9 @@ module "api_connector" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
+  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = local.remote_resources_enabled ? local.shared_resource_path : null
 }
 
 
@@ -349,9 +351,9 @@ module "bulk_connector" {
     var.general_environment_variables
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
+  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = local.remote_resources_enabled ? local.shared_resource_path : null
 }
 
 
@@ -401,9 +403,9 @@ module "webhook_collectors" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
+  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = local.remote_resources_enabled ? local.shared_resource_path : null
 }
 
 # Policy to allow test caller to invoke webhook collector urls and sign webhook requests
@@ -493,7 +495,6 @@ locals {
   caller_has_configured_output_buckets = (
     length(var.bulk_connectors) > 0 ||
     length(var.webhook_collectors) > 0 ||
-    length(var.lookup_table_builders) > 0 ||
     length([for k, v in var.api_connectors : k if try(v.enable_async_processing, false)]) > 0 ||
     length([for k, v in local.sanitized_side_outputs : k if v != null]) > 0
   )
@@ -503,7 +504,6 @@ locals {
     [for k, v in module.webhook_collectors : v.output_sanitized_bucket_id],
     [for k, v in module.api_connector : v.async_output_bucket_id if try(v.async_output_bucket_id, null) != null],
     [for k, v in module.api_connector : v.side_output_sanitized_bucket_id if try(v.side_output_sanitized_bucket_id, null) != null],
-    [for k, v in module.lookup_output : v.output_bucket],
   )))
 
   caller_output_bucket_read_resources = flatten([

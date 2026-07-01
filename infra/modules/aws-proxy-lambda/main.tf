@@ -98,8 +98,8 @@ resource "aws_lambda_function" "instance" {
       length(var.path_to_shared_ssm_parameters) > 0 ? { PATH_TO_SHARED_CONFIG = var.path_to_shared_ssm_parameters } : {},
       local.is_instance_ssm_prefix_default ? {} : { PATH_TO_INSTANCE_CONFIG = var.path_to_instance_ssm_parameters },
       var.remote_resource_bucket != null ? { REMOTE_RESOURCE_BUCKET = var.remote_resource_bucket } : {},
-      var.remote_resource_instance_path != null ? { INSTANCE_RESOURCE_PATH = var.remote_resource_instance_path } : {},
-      var.remote_resource_shared_path != null ? { SHARED_RESOURCE_PATH = var.remote_resource_shared_path } : {},
+      var.remote_resource_bucket != null && var.remote_resource_instance_path != null ? { INSTANCE_RESOURCE_PATH = var.remote_resource_instance_path } : {},
+      var.remote_resource_bucket != null && var.remote_resource_shared_path != null ? { SHARED_RESOURCE_PATH = var.remote_resource_shared_path } : {},
     )
   }
 
@@ -301,14 +301,14 @@ locals {
   remote_resource_instance_prefix = var.remote_resource_instance_path != null ? trimsuffix(var.remote_resource_instance_path, "/") : ""
   remote_resource_shared_prefix   = var.remote_resource_shared_path != null ? trimsuffix(var.remote_resource_shared_path, "/") : ""
 
-  remote_resource_s3_object_arns = distinct(compact([
+  remote_resource_s3_object_arns = var.remote_resource_bucket != null ? distinct(compact([
     var.remote_resource_instance_path != null ? (
       local.remote_resource_instance_prefix != "" ? "arn:aws:s3:::${var.remote_resource_bucket}/${local.remote_resource_instance_prefix}/*" : "arn:aws:s3:::${var.remote_resource_bucket}/*"
     ) : "",
     var.remote_resource_shared_path != null ? (
       local.remote_resource_shared_prefix != "" ? "arn:aws:s3:::${var.remote_resource_bucket}/${local.remote_resource_shared_prefix}/*" : "arn:aws:s3:::${var.remote_resource_bucket}/*"
     ) : "",
-  ]))
+  ])) : []
 
   remote_resource_bucket_statements = var.remote_resource_bucket != null ? [{
     Sid = "ReadRemoteResourceBucket"

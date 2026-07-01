@@ -164,7 +164,7 @@ available options (keep sanitized file in the output bucket, save it to disk, et
 [signed]: https://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html
 [Google Calendar]: https://developers.google.com/calendar/api
 [Zoom]: https://zoom.us
-[Zoom API endpoint]: https://marketplace.zoom.us/docs/api-reference/zoom-api/methods/#operation/users
+[Zoom API endpoint]: https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#operation/users
 [Google Cloud SDK]: https://cloud.google.com/sdk/gcloud/reference/auth/print-identity-token
 [authorize gcloud first]: https://cloud.google.com/sdk/gcloud/reference/auth/login
 [S3]: https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html

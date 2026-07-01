@@ -358,6 +358,7 @@ export default {
       {
         name: 'Users',
         path: '/v1.0/users',
+        params: { $select: 'id,mail,otherMails' },
         refs: [
           {
             name: 'Events',
@@ -393,6 +394,7 @@ export default {
       {
         name: 'Users',
         path: '/beta/users',
+        params: { $select: 'id,mail,otherMails' },
         refs: [
           {
             name: 'Mailbox Settings',

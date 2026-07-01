@@ -26,6 +26,7 @@ locals {
   connector_instance_resource_path = { for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) :
     k => "${local.shared_resource_path}${replace(upper(k), "-", "_")}/"
   }
+  remote_resources_enabled = var.enable_remote_resources && module.psoxy.artifacts_bucket_name != null
 
   # rules_file paths may be absolute, relative to the Terraform root module (deployment dir), or
   # relative to psoxy_base_dir (paths into the psoxy repo, eg docs/sources/...)
@@ -55,6 +56,14 @@ locals {
   bulk_connector_rules_file_paths = {
     for k, v in var.bulk_connectors : k => local._resolved_rules_file_paths[v.rules_file]
     if try(v.rules_file, null) != null
+  }
+
+  bulk_connector_available_memory_mb = {
+    for k, v in var.bulk_connectors : k => coalesce(
+      try(var.custom_bulk_connector_arguments[k].available_memory_mb, null),
+      try(v.available_memory_mb, null),
+      1024,
+    )
   }
 
   webhook_collector_rules_file_paths = {
@@ -99,6 +108,7 @@ module "psoxy" {
   provision_testing_infra           = var.provision_testing_infra
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   custom_artifacts_bucket_name      = var.custom_artifacts_bucket_name
+  enable_remote_resources           = var.enable_remote_resources
   support_bulk_mode                 = length(var.bulk_connectors) > 0
   support_webhook_collectors        = length(var.webhook_collectors) > 0
   vpc_config                        = var.vpc_config
@@ -237,7 +247,7 @@ module "api_connector" {
   environment_id_prefix                 = local.environment_id_prefix
   instance_id                           = each.key
   service_account_email                 = google_service_account.api_connectors[each.key].email
-  artifacts_bucket_name                 = module.psoxy.artifacts_bucket_name
+  artifacts_bucket_name                 = module.psoxy.deployment_bundle_bucket
   deployment_bundle_object_name         = module.psoxy.deployment_bundle_object_name
   artifact_repository_id                = module.psoxy.artifact_repository
   vpc_config                            = module.psoxy.vpc_config
@@ -282,9 +292,9 @@ module "api_connector" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
+  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = local.remote_resources_enabled ? local.shared_resource_path : null
 
   secret_bindings = merge(
     local.secrets_bound_as_env_vars[each.key],
@@ -341,7 +351,7 @@ module "webhook_collector" {
     service_account_id = google_service_account.webhook_collector[each.key].id
     email              = google_service_account.webhook_collector[each.key].email
   }
-  artifacts_bucket_name              = module.psoxy.artifacts_bucket_name
+  artifacts_bucket_name              = module.psoxy.deployment_bundle_bucket
   deployment_bundle_object_name      = module.psoxy.deployment_bundle_object_name
   artifact_repository_id             = module.psoxy.artifact_repository
   path_to_repo_root                  = var.psoxy_base_dir
@@ -378,9 +388,9 @@ module "webhook_collector" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
+  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = local.remote_resources_enabled ? local.shared_resource_path : null
 
   secret_bindings = module.psoxy.secrets
 
@@ -404,7 +414,7 @@ module "bulk_connector" {
   worklytics_sa_emails              = var.worklytics_sa_emails
   config_parameter_prefix           = local.config_parameter_prefix
   source_kind                       = each.value.source_kind
-  artifacts_bucket_name             = module.psoxy.artifacts_bucket_name
+  artifacts_bucket_name             = module.psoxy.deployment_bundle_bucket
   artifact_repository_id            = module.psoxy.artifact_repository
   deployment_bundle_object_name     = module.psoxy.deployment_bundle_object_name
   psoxy_base_dir                    = var.psoxy_base_dir
@@ -420,7 +430,7 @@ module "bulk_connector" {
   sanitized_bucket_name             = try(each.value.sanitized_bucket_name, null)
   todos_as_local_files              = var.todos_as_local_files
   tf_runner_iam_principal           = module.tf_runner.iam_principal
-  available_memory_mb               = coalesce(try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null), try(each.value.available_memory_mb, null), 512)
+  available_memory_mb               = local.bulk_connector_available_memory_mb[each.key]
   timeout_seconds                   = coalesce(try(var.custom_bulk_connector_arguments[each.key].timeout_seconds, null), try(each.value.timeout_seconds, null), 540)
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   bucket_force_destroy              = var.bucket_force_destroy
@@ -446,9 +456,9 @@ module "bulk_connector" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
+  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = local.remote_resources_enabled ? local.shared_resource_path : null
 
   depends_on = [
     module.psoxy # some of the set-up IAM grants done there, but not EXPLICITLY passed out as outputs and into above as inputs, are required; so make this explicit

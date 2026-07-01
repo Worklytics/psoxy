@@ -7,6 +7,12 @@
 Please review the [Google Workspace&trade; README](../README.md) for general information applicable to
 all Google Workspace connectors.
 
+## Required OAuth Scopes
+- `admin.directory.user.readonly`
+- `admin.directory.domain.readonly`
+- `admin.directory.group.readonly`
+- `admin.directory.orgunit.readonly`
+
 
 ## Examples
 

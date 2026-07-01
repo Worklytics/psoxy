@@ -1,10 +1,10 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.5",
-  "serialNumber" : "urn:uuid:c05f478f-e25e-3ca5-b754-23273b8f4267",
+  "serialNumber" : "urn:uuid:9059d82b-181e-35e7-b147-52818670473e",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2026-06-18T18:28:44Z",
+    "timestamp" : "2026-06-30T21:44:17Z",
     "lifecycles" : [
       {
         "phase" : "build"
@@ -59,9 +59,9 @@
     "component" : {
       "group" : "co.worklytics.psoxy",
       "name" : "psoxy-gcp",
-      "version" : "0.6.6",
+      "version" : "0.6.7",
       "licenses" : [ ],
-      "purl" : "pkg:maven/co.worklytics.psoxy/psoxy-gcp@0.6.6?type=jar",
+      "purl" : "pkg:maven/co.worklytics.psoxy/psoxy-gcp@0.6.7?type=jar",
       "externalReferences" : [
         {
           "type" : "distribution-intake",
@@ -69,7 +69,7 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/co.worklytics.psoxy/psoxy-gcp@0.6.6?type=jar"
+      "bom-ref" : "pkg:maven/co.worklytics.psoxy/psoxy-gcp@0.6.7?type=jar"
     },
     "properties" : [
       {
@@ -86,40 +86,40 @@
     {
       "group" : "co.worklytics.psoxy",
       "name" : "psoxy-core",
-      "version" : "0.6.6",
+      "version" : "0.6.7",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "87eddc8e5f702c1d998d1acdde344e74"
+          "content" : "a17ba39408f20db81bb93cf7c7ec547d"
         },
         {
           "alg" : "SHA-1",
-          "content" : "3f2032603ef48fb9120d307918bd46620530ecc2"
+          "content" : "d97bf36b4ddbafcf06e066b25be0a82845b3921a"
         },
         {
           "alg" : "SHA-256",
-          "content" : "c7be10b9ead4a542f4c2c326d74efb413f941c527511864ea41e868b1a9c5880"
+          "content" : "405f9b46a2c55cf7788a5bce70d95b25df235e5b7a9afef73dae42160739f199"
         },
         {
           "alg" : "SHA-512",
-          "content" : "43fcdc7676cc91ae1ed38b4b88b4d82612bfa60cf1583bdbb82a1a1638fb1354a78c131386a8f240a022f8a7a9f14e34b686bea7e1462a6329c8dce741992815"
+          "content" : "fd176a40804d00be57b1640b065963d12a1383da7bec6c3607d37e1f99fc9ae1258b7e0d77a2757ab4ef0f41035bcee88fa788057e6e00d36b532d202432c5b4"
         },
         {
           "alg" : "SHA-384",
-          "content" : "4fe58a6da8ba4c00d4dd08ef302e890cedd03975a7c431175968c6812cc6e84feb32c1f88e6dc546af10a1c70213a9e6"
+          "content" : "401b60509be776510a146a7806ccace87a9ba909b77a5b2f3414d7201bc06a18f983fc12410fb548f2e1d0ace588ce0f"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "50a2178426c532494f967aba1441d7412a6e0faa5fe539fd5c577ffc114ff589373855b4db3d69f28d18a704241d8eca"
+          "content" : "91e61ed70cbfdf78a59b6c2e5efdbba7e9e232d3030203ca6af7ccfe1f43c0ec96590ddd6967dce9f1015fad4c63e8ff"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "5a6ef60a278035c6f92212058fe8b9ee6c87b4adc27ef9739e3b5b35c399150e"
+          "content" : "2cc9772be46ecb2c3d4b337baa23bde25e33ab1a6d41f98957b5c9a75bf6c6bb"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "a9b6b25f67523199f6f0bed8931ed3b3c6ee461762d5a371ef8684ac6798a19b3877d6fe3537636cac80dfdfe0b1500fc74504d1f882685fabccb6252c197128"
+          "content" : "dcea1dbdf1e40cfc39788b2a7e90a3fb36e4efafbee919d383808dc535ad23022e72c95c45120ae02e9a122ca6660620573bdf22c0e5761005eb1911099eeecf"
         }
       ],
       "licenses" : [
@@ -130,47 +130,47 @@
           }
         }
       ],
-      "purl" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.6?type=jar",
+      "purl" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.7?type=jar",
       "type" : "library",
-      "bom-ref" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.6?type=jar"
+      "bom-ref" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.7?type=jar"
     },
     {
       "group" : "com.avaulta.gateway",
       "name" : "gateway-core",
-      "version" : "0.6.6",
+      "version" : "0.6.7",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "3695b96697effac61ec4284edd27087e"
+          "content" : "fbeb7519e3acdc6f46fd05ce2c6dae67"
         },
         {
           "alg" : "SHA-1",
-          "content" : "868705aed1f6306c1cb47a5845f0f744feaf053d"
+          "content" : "36e298d96f45781d912e7e25f5511e68956906f1"
         },
         {
           "alg" : "SHA-256",
-          "content" : "c3ca35438db7144a36ead65d6c05abf45a611bdc7a39fedc6bed4d904a3c8eba"
+          "content" : "4c4a60c4ec67364b0a8425798410e4148b6aa2c530a644c9cee0427f480ebd6a"
         },
         {
           "alg" : "SHA-512",
-          "content" : "d0fc39ac5c829b9850f341f762061e56e351be3336e543542b4f00cdb2785302a37abd3d80c289d33f0c8f8ba94ea4e9d703b1d1401f11302fe95f2a72e1b827"
+          "content" : "a7f00f52a2e75358e8be60d001e12e56e4337f05702bd20cac6ba0cf7943e34d1a87d9a2c29b7b6568ba8e39d45666f20ff4eea38a2128456871157e378520d6"
         },
         {
           "alg" : "SHA-384",
-          "content" : "2d5f32b9f2c8327ece89422d831d2a61adeeba825b98d8c5822c5585fcf61bd0df041f0e8298920ae50382f17a159d6f"
+          "content" : "5415de37a97e4323616484316176fe1d564308a37255e5dafabb2bae5c76909b8f078ae3bd1c271b21a1c56c79916c4c"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "e32df957913151cc9afe2f9c58f0fdd16150a78f9475060bf1bb7ee2008cabb59f41069d727c5fca24b0071d524b1498"
+          "content" : "661394aad82be83222495690fd5c41a7659024487f2d6c86312241bee6607bb844f0302f83d7bd96e56513b0fd937f48"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "537955bb8865270fc345fe5f9e9c90c440fa04c5f9934c88cc907b8eec410312"
+          "content" : "d7f99bd299f9d649f827e1cad170a56ee20c1dff64f741f598b8a5edbd022ef2"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "2a0a3b1d740ef1d0c381ce58e0b0325f7bdc0d08250075cc6a6a833389c84b5333d97af249cd763f9567c49e22b34bb9dd36a4b2b79060e7b9df0f35f7524bed"
+          "content" : "f83031b85723fb74b4f75cfb1838271b667d1a6e2d8cc5d55f5ca6aea273f89d5a8c3ad4e9893e3ce17db235aaec59562e39d14bd4efd8b8f5f86232549da6b5"
         }
       ],
       "licenses" : [
@@ -181,9 +181,9 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.avaulta.gateway/gateway-core@0.6.6?type=jar",
+      "purl" : "pkg:maven/com.avaulta.gateway/gateway-core@0.6.7?type=jar",
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.avaulta.gateway/gateway-core@0.6.6?type=jar"
+      "bom-ref" : "pkg:maven/com.avaulta.gateway/gateway-core@0.6.7?type=jar"
     },
     {
       "publisher" : "FasterXML",
@@ -10589,9 +10589,9 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/co.worklytics.psoxy/psoxy-gcp@0.6.6?type=jar",
+      "ref" : "pkg:maven/co.worklytics.psoxy/psoxy-gcp@0.6.7?type=jar",
       "dependsOn" : [
-        "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.6?type=jar",
+        "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.7?type=jar",
         "pkg:maven/org.projectlombok/lombok@1.18.42?type=jar",
         "pkg:maven/com.google.dagger/dagger@2.40.5?type=jar",
         "pkg:maven/com.google.dagger/dagger-compiler@2.40.5?type=jar",
@@ -10604,9 +10604,9 @@
       ]
     },
     {
-      "ref" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.6?type=jar",
+      "ref" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.6.7?type=jar",
       "dependsOn" : [
-        "pkg:maven/com.avaulta.gateway/gateway-core@0.6.6?type=jar",
+        "pkg:maven/com.avaulta.gateway/gateway-core@0.6.7?type=jar",
         "pkg:maven/org.apache.commons/commons-lang3@3.19.0?type=jar",
         "pkg:maven/org.apache.commons/commons-csv@1.14.1?type=jar",
         "pkg:maven/commons-io/commons-io@2.18.0?type=jar",
@@ -10631,7 +10631,7 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.avaulta.gateway/gateway-core@0.6.6?type=jar",
+      "ref" : "pkg:maven/com.avaulta.gateway/gateway-core@0.6.7?type=jar",
       "dependsOn" : [
         "pkg:maven/org.apache.commons/commons-lang3@3.19.0?type=jar",
         "pkg:maven/org.apache.commons/commons-csv@1.14.1?type=jar",

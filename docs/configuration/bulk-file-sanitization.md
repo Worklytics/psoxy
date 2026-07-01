@@ -283,4 +283,4 @@ If you encounter issues processing your files, check the logs of the Psoxy insta
 1. Use compression in the file (see [Compression](#compression)); if already compressed, then:
 2. Split the file into smaller files and process them separately
 3. (AWS only) Update the proxy version to v0.4.55 or later
-4. (AWS only) If in v0.4.55 or later, process the files one by one or increase the ephemeral storage allocated to the Lambda function (see https://aws.amazon.com/blogs/aws/aws-lambda-now-supports-up-to-10-gb-ephemeral-storage/)
+4. (AWS only) If in v0.4.55 or later, process the files one by one or increase the ephemeral storage allocated to the Lambda function (see [https://aws.amazon.com/blogs/aws/aws-lambda-now-supports-up-to-10-gb-ephemeral-storage/](https://aws.amazon.com/blogs/aws/aws-lambda-now-supports-up-to-10-gb-ephemeral-storage/)).

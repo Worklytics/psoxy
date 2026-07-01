@@ -405,6 +405,14 @@ public class ApiDataRequestHandler {
             log.log(Level.WARNING,
                     "Confirm oauth scopes set in config.yaml match those granted in data source");
             return builder.build();
+        } catch (co.worklytics.psoxy.gateway.TransientConfigException e) {
+            // Config store was temporarily unreachable (e.g. credential rotation, AWS hiccup).
+            // The proxy already retried internally; this is not a misconfiguration.
+            builder.statusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
+            builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                    ErrorCauses.CONFIGURATION_FAILURE.name());
+            log.log(Level.WARNING, "Transient config store failure after retries: " + e.getMessage(), e);
+            return builder.build();
         } catch (java.util.NoSuchElementException e) {
             // missing config, such as ACCESS_TOKEN
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -550,7 +558,11 @@ public class ApiDataRequestHandler {
             ProcessedContent original = apiDataOutputUtils
                     .responseAsRawProcessedContent(requestToSourceApi, sourceApiResponse);
             try {
-                apiDataSideOutput.writeRaw(original, processingContext);
+                apiDataSideOutput.writeRaw(
+                    original.toBuilder()
+                        .metadata(apiDataOutputUtils.buildSourceApiRequestMetadata(requestToSourceApi))
+                        .build(),
+                    processingContext);
             } catch (Output.WriteFailure e) {
                 log.log(Level.WARNING, "Error writing to side output for original content", e);
                 builder.multivaluedHeader(
@@ -572,8 +584,8 @@ public class ApiDataRequestHandler {
                                 processingContext);
                     } else {
                         proxyResponseContent = sanitizationResult.getContentAsString();
-                        sanitizationResult.getMetadata().entrySet()
-                                .forEach(e -> builder.header(e.getKey(), e.getValue()));
+                        sanitizedApiResponseMetadata(sanitizationResult.getMetadata())
+                                .forEach((header, value) -> builder.header(header, value));
                     }
 
 
@@ -616,17 +628,18 @@ public class ApiDataRequestHandler {
         }
     }
 
-    ProcessedContent sanitize(HttpEventRequest request, RequestUrls requestUrls,
+    ProcessedContent sanitize(HttpEventRequest requestToProxy, RequestUrls requestUrls,
             ProcessedContent originalContent) {
-        RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
+        RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(requestToProxy);
         String sanitized =
-                StringUtils.trimToEmpty(sanitizerForRequest.sanitize(request.getHttpMethod(),
+                StringUtils.trimToEmpty(sanitizerForRequest.sanitize(requestToProxy.getHttpMethod(),
                         requestUrls.getOriginal(), originalContent.getContentAsString()));
 
         String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
         log.info("response sanitized with rule set " + rulesSha);
 
-        Map<String, String> metadata = new HashMap<>(originalContent.getMetadata());
+        Map<String, String> metadata =
+            new HashMap<>(apiDataOutputUtils.buildProxyRequestMetadata(requestToProxy));
         metadata.put(ProcessedDataMetadataFields.RULES_SHA.getMetadataKey(), rulesSha);
         metadata.put(ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(),
                 ProxyConstants.JAVA_SOURCE_CODE_VERSION);
@@ -754,6 +767,19 @@ public class ApiDataRequestHandler {
     static Set<String> normalizeHeaders(Set<String> headers) {
         return headers.stream().map(ApiDataRequestHandler::normalizeHeader)
                 .collect(Collectors.toUnmodifiableSet());
+    }
+
+    /**
+     * Filters processed-content metadata to fields intended for sync HTTP responses.
+     * Request-capture metadata remains on {@link ProcessedContent} for async/side outputs.
+     */
+    @VisibleForTesting
+    static Map<String, String> sanitizedApiResponseMetadata(Map<String, String> metadata) {
+        return metadata.entrySet().stream()
+            .flatMap(e -> ProcessedDataMetadataFields.fromMetadataKey(e.getKey())
+                .stream()
+                .map(f -> Map.entry(f.getHttpHeader(), e.getValue())))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @SneakyThrows

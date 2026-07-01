@@ -1,0 +1,8 @@
+userEmail,timestamp,ai_tool,model,input_tokens,output_tokens,event_type
+alice@acme-corp.com,1753344000000,copilot,gpt-4o,1200,280,
+alice@acme-corp.com,1753344900000,copilot,gpt-4o,950,210,email_draft
+alice@acme-corp.com,1753430400000,copilot,gpt-4o,1800,420,meeting_summary
+bob@acme-corp.com,1753344060000,copilot,gpt-4o-mini,600,120,
+bob@acme-corp.com,1753347600000,copilot,gpt-4o,1350,310,email_draft
+carol@acme-corp.com,1753430460000,copilot,gpt-4o-mini,450,95,
+carol@acme-corp.com,1753516800000,copilot,gpt-4o,2100,530,meeting_summary

@@ -93,3 +93,18 @@ run "duplicate_prefixes_dedupe_to_one_arn" {
     condition     = toset(one([for s in jsondecode(aws_iam_policy.required_resource_access.policy).Statement : s.Resource if s.Sid == "ReadRemoteResourceBucket"])) == toset(["arn:aws:s3:::my-artifacts/shared/*"])
   }
 }
+
+run "paths_without_bucket_skip_iam" {
+  command = plan
+
+  variables {
+    remote_resource_bucket        = null
+    remote_resource_instance_path = "instances/foo/"
+    remote_resource_shared_path   = "shared/models/"
+  }
+
+  assert {
+    error_message = "paths without a bucket should not create ReadRemoteResourceBucket IAM statement"
+    condition     = length([for s in jsondecode(aws_iam_policy.required_resource_access.policy).Statement : s if s.Sid == "ReadRemoteResourceBucket"]) == 0
+  }
+}

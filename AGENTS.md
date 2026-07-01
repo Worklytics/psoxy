@@ -32,6 +32,10 @@ fi
 printf "${SUCCESS}Operation completed successfully.${NC}\n"
 ```
 
+## Release QA
+
+Before merging an `rc-vX.Y.Z` branch to `main`, follow [tools/release/release-qa.md](tools/release/release-qa.md). The orchestrator is `./tools/release/run-release-qa.sh vX.Y.Z`.
+
 ## Testing Conventions
 
 When modifying code in this repository, you should ensure that your changes pass our standardized tests. 

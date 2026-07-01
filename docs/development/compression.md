@@ -38,7 +38,7 @@ request for compressed response, and then compress the response.
 API Gateway is no longer used by our default terraform examples. But compression can be enabled at
 the gateway level (rather than relying on function url implementation, or in addition to).
 
-https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-gzip-compression-decompression.html
+[https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-gzip-compression-decompression.html](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-gzip-compression-decompression.html)
 
 ### GCP
 
@@ -47,7 +47,7 @@ GCP Cloud Functions will handle compression themselves IF the request meets vari
 There is no explicit, Cloud Function-specific documentation about this, but it seems that the
 behavior for App Engine applies:
 
-https://cloud.google.com/appengine/docs/legacy/standard/go111/how-requests-are-handled#:~:text=For%20responses%20that%20are%20returned,HTML%2C%20CSS%2C%20or%20JavaScript.
+[https://cloud.google.com/appengine/docs/legacy/standard/go111/how-requests-are-handled#:~:text=For%20responses%20that%20are%20returned,HTML%2C%20CSS%2C%20or%20JavaScript.](https://cloud.google.com/appengine/docs/legacy/standard/go111/how-requests-are-handled#:~:text=For%20responses%20that%20are%20returned,HTML%2C%20CSS%2C%20or%20JavaScript.)
 
 ## Source-to-Proxy Response
 
