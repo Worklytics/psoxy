@@ -5,6 +5,22 @@ locals {
   CLOUD_FUNCTION_NAME_MAX_LENGTH = 63
 }
 
+# GCP Cloud Run / Cloud Functions gen2 minimum CPU for a memory allocation.
+# https://cloud.google.com/run/docs/configuring/services/cpu#cpu-memory
+locals {
+  resolved_memory_mb = coalesce(var.available_memory_mb, 1024)
+
+  auto_available_cpu = (
+    local.resolved_memory_mb <= 512 ? "0.333" :
+    local.resolved_memory_mb <= 1024 ? "0.5" :
+    local.resolved_memory_mb <= 4096 ? "1" :
+    local.resolved_memory_mb <= 8192 ? "2" :
+    local.resolved_memory_mb <= 16384 ? "4" :
+    local.resolved_memory_mb <= 24576 ? "6" :
+    "8"
+  )
+}
+
 # computed
 locals {
   # legacy pre 0.5 may not pass instance_id
@@ -225,7 +241,8 @@ resource "google_cloudfunctions2_function" "function" {
   # NOTE: bulk connectors are STILL triggered through HTTPS invocations, so these have default HTTPS endpoint URls
 
   service_config {
-    available_memory      = "${coalesce(var.available_memory_mb, 1024)}M"
+    available_memory      = "${local.resolved_memory_mb}M"
+    available_cpu         = local.auto_available_cpu
     service_account_email = google_service_account.service_account.email
     timeout_seconds       = var.timeout_seconds
     ingress_settings      = "ALLOW_INTERNAL_ONLY"
