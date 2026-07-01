@@ -1,5 +1,7 @@
 package co.worklytics.psoxy.gateway.impl.output;
 
+import co.worklytics.psoxy.gateway.ProcessedContent;
+import co.worklytics.psoxy.gateway.output.Output;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -24,6 +26,32 @@ class CompressedOutputWrapperTest {
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String decompressedContent = reader.readLine();
             assertEquals(content, decompressedContent);
+        }
+    }
+
+    @Test
+    void writeNullBodyDoesNotThrow() throws Exception {
+        CapturingOutput delegate = new CapturingOutput();
+        CompressedOutputWrapper wrapper = CompressedOutputWrapper.wrap(delegate);
+
+        wrapper.write(ProcessedContent.builder().content(null).build());
+
+        assertNotNull(delegate.lastContent);
+        assertArrayEquals(new byte[0], delegate.lastContent.getContent());
+        assertEquals("gzip", delegate.lastContent.getContentEncoding());
+    }
+
+    static class CapturingOutput implements Output {
+        ProcessedContent lastContent;
+
+        @Override
+        public void write(ProcessedContent content) throws WriteFailure {
+            write(null, content);
+        }
+
+        @Override
+        public void write(String key, ProcessedContent content) {
+            lastContent = content;
         }
     }
 }
