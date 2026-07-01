@@ -6,6 +6,7 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -99,6 +100,11 @@ import co.worklytics.psoxy.gateway.ProxyConstants;
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
 public class ApiDataRequestHandler {
+
+    private static final Set<String> PROCESSED_DATA_METADATA_KEYS = Arrays.stream(
+                    ProcessedDataMetadataFields.values())
+            .map(ProcessedDataMetadataFields::getMetadataKey)
+            .collect(Collectors.toUnmodifiableSet());
 
     @Inject
     ApiModeConfig apiModeConfig;
@@ -379,7 +385,7 @@ public class ApiDataRequestHandler {
             // setup request
             boolean followRedirects = config.getConfigPropertyAsOptional(ProxyConfigProperty.FOLLOW_REDIRECTS)
                     .map(Boolean::parseBoolean)
-                    .orElse(true);
+                    .orElse(!processingContext.getAsync());
 
             requestToSourceApi
                     .setThrowExceptionOnExecuteError(false)
@@ -584,7 +590,8 @@ public class ApiDataRequestHandler {
                                 processingContext);
                     } else {
                         proxyResponseContent = sanitizationResult.getContentAsString();
-                        sanitizationResult.getMetadata().entrySet()
+                        sanitizationResult.getMetadata().entrySet().stream()
+                                .filter(e -> PROCESSED_DATA_METADATA_KEYS.contains(e.getKey()))
                                 .forEach(e -> builder.header(e.getKey(), e.getValue()));
                     }
 
