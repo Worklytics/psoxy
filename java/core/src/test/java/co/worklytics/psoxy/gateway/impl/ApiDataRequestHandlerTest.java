@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.ConfigRulesModule;
 import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PseudonymizerImplFactory;
 import co.worklytics.psoxy.PsoxyModule;
@@ -11,6 +12,7 @@ import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
@@ -612,6 +614,32 @@ class ApiDataRequestHandlerTest {
             handler.getSanitizerForRequest(mock(HttpEventRequest.class))
                 .getPseudonymizer().getOptions()
                 .getPseudonymImplementation());
+    }
+
+    @Test
+    void sanitizedApiResponseMetadata_includesOnlyProcessedDataFields() {
+        Map<String, String> metadata = Map.of(
+            ProcessedDataMetadataFields.RULES_SHA.getMetadataKey(), "abc123",
+            ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(), "v0.6.7",
+            ApiDataOutputUtils.OutputObjectMetadata.REQUEST_BODY.name(), "base64body",
+            ApiDataOutputUtils.OutputObjectMetadata.QUERY_STRING.name(), "foo=bar",
+            ApiDataOutputUtils.OutputObjectMetadata.PATH.name(), "users/me"
+        );
+
+        Map<String, String> responseMetadata =
+            ApiDataRequestHandler.sanitizedApiResponseMetadata(metadata);
+
+        assertEquals("abc123",
+            responseMetadata.get(ProcessedDataMetadataFields.RULES_SHA.getHttpHeader()));
+        assertEquals("v0.6.7",
+            responseMetadata.get(ProcessedDataMetadataFields.PROXY_VERSION.getHttpHeader()));
+        assertEquals(2, responseMetadata.size());
+        assertFalse(responseMetadata.containsKey(
+            ApiDataOutputUtils.OutputObjectMetadata.REQUEST_BODY.name()));
+        assertFalse(responseMetadata.containsKey(
+            ApiDataOutputUtils.OutputObjectMetadata.QUERY_STRING.name()));
+        assertFalse(responseMetadata.containsKey(
+            ApiDataOutputUtils.OutputObjectMetadata.PATH.name()));
     }
 
     @Test

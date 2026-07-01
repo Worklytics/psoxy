@@ -584,8 +584,8 @@ public class ApiDataRequestHandler {
                                 processingContext);
                     } else {
                         proxyResponseContent = sanitizationResult.getContentAsString();
-                        sanitizationResult.getMetadata().entrySet()
-                                .forEach(e -> builder.header(e.getKey(), e.getValue()));
+                        sanitizedApiResponseMetadata(sanitizationResult.getMetadata())
+                                .forEach((header, value) -> builder.header(header, value));
                     }
 
 
@@ -767,6 +767,19 @@ public class ApiDataRequestHandler {
     static Set<String> normalizeHeaders(Set<String> headers) {
         return headers.stream().map(ApiDataRequestHandler::normalizeHeader)
                 .collect(Collectors.toUnmodifiableSet());
+    }
+
+    /**
+     * Filters processed-content metadata to fields intended for sync HTTP responses.
+     * Request-capture metadata remains on {@link ProcessedContent} for async/side outputs.
+     */
+    @VisibleForTesting
+    static Map<String, String> sanitizedApiResponseMetadata(Map<String, String> metadata) {
+        return metadata.entrySet().stream()
+            .flatMap(e -> ProcessedDataMetadataFields.fromMetadataKey(e.getKey())
+                .stream()
+                .map(f -> Map.entry(f.getHttpHeader(), e.getValue())))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @SneakyThrows
