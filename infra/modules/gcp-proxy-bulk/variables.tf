@@ -97,8 +97,16 @@ variable "bucket_write_role_id" {
 
 variable "available_memory_mb" {
   type        = number
+  # TODO: future version - replace with available_memory (string), passed through to
+  # google_cloudfunctions2_function.service_config.available_memory (e.g. "1024M"), consistent with available_cpu.
   description = "Memory (in MB), available to the function. Default value is 1024. Possible values include 128, 256, 512, 1024, 2048, 4096; above that requires multiple CPUs, beyond scope of our built-in configurations."
   default     = 1024
+}
+
+variable "available_cpu" {
+  type        = string
+  description = "vCPUs for the function (e.g. '0.333', '0.5', '1'). When null, a minimum CPU for the configured memory is chosen automatically per GCP limits. If you set both available_cpu and available_memory_mb, both values are applied as given (not validated against GCP limits)."
+  default     = null
 }
 
 variable "timeout_seconds" {

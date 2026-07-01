@@ -57,6 +57,22 @@ locals {
     if try(v.rules_file, null) != null
   }
 
+  bulk_connector_available_memory_mb = {
+    for k, v in var.bulk_connectors : k => coalesce(
+      try(var.custom_bulk_connector_arguments[k].available_memory_mb, null),
+      try(v.available_memory_mb, null),
+      1024,
+    )
+  }
+
+  bulk_connector_available_cpu = {
+    for k, v in var.bulk_connectors : k => (
+      try(var.custom_bulk_connector_arguments[k].available_cpu, null) != null ? var.custom_bulk_connector_arguments[k].available_cpu :
+      try(v.available_cpu, null) != null ? v.available_cpu :
+      null
+    )
+  }
+
   webhook_collector_rules_file_paths = {
     for k, v in var.webhook_collectors : k => local._resolved_rules_file_paths[v.rules_file]
     if try(v.rules_file, null) != null
@@ -420,7 +436,8 @@ module "bulk_connector" {
   sanitized_bucket_name             = try(each.value.sanitized_bucket_name, null)
   todos_as_local_files              = var.todos_as_local_files
   tf_runner_iam_principal           = module.tf_runner.iam_principal
-  available_memory_mb               = coalesce(try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null), try(each.value.available_memory_mb, null), 512)
+  available_memory_mb               = local.bulk_connector_available_memory_mb[each.key]
+  available_cpu                     = local.bulk_connector_available_cpu[each.key]
   timeout_seconds                   = coalesce(try(var.custom_bulk_connector_arguments[each.key].timeout_seconds, null), try(each.value.timeout_seconds, null), 540)
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   bucket_force_destroy              = var.bucket_force_destroy

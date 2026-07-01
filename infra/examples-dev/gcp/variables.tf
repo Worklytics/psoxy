@@ -342,6 +342,7 @@ variable "custom_bulk_connectors" {
       })))
     }))
     available_memory_mb = optional(number)
+    available_cpu       = optional(string)
     timeout_seconds     = optional(number)
     rules_file          = optional(string)
     settings_to_provide = optional(map(string), {})
@@ -401,6 +402,7 @@ variable "custom_bulk_connector_rules" {
 variable "custom_bulk_connector_arguments" {
   type = map(object({
     available_memory_mb = optional(number)
+    available_cpu       = optional(string)
     timeout_seconds     = optional(number)
   }))
 
