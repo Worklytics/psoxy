@@ -32,8 +32,11 @@ git commit -a -m "update deps in psoxy-test"
 TODO: review versions of terraform, java, node uses in github actions. Ensure we're explicitly using the latest of each, and that we're ALSO testing explicitly for latest-1 version, even if it's not officially supported still.
 
 
-QA aws, gcp dev examples by running `terraform apply` for each, and testing various connectors.
+QA aws and gcp dev examples before merging. See [release QA runbook](../../tools/release/release-qa.md) or run:
 
+```shell
+./tools/release/run-release-qa.sh vX.Y.Z
+```
 
 Create PR to merge `rc-` to `main`.
 
