@@ -204,9 +204,11 @@ deployment_bundle_public_exists() {
         fi
       fi
       if command -v curl >/dev/null 2>&1; then
-        local http_url=""
+        local http_url="" http_code=""
         if http_url="$(deployment_bundle_s3_to_http_url "$bundle_path")"; then
-          curl -fsSIL "$http_url" >/dev/null 2>&1
+          # follow redirects, then require a final 2xx (3xx alone is not success)
+          http_code="$(curl -sSIL --max-redirs 5 -o /dev/null -w "%{http_code}" "$http_url" 2>/dev/null)" || return 1
+          [[ "$http_code" =~ ^2[0-9]{2}$ ]]
           return $?
         fi
       fi
