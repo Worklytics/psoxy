@@ -107,14 +107,16 @@ locals {
   current_todo_step = try(max(values(module.google_workspace_connection)[*].next_todo_step...), local.dwd_todo_step)
   next_todo_step    = local.provision_gcp_sa_keys ? local.current_todo_step : local.current_todo_step + 1
 
-  connectors_needing_manual_api_enablement = local.enable_apis ? {} : {
+  connectors_needing_manual_api_enablement = {
     for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
     k => v
+    if !local.enable_apis
   }
 
-  connectors_needing_manual_sa_creation = local.provision_service_accounts ? {} : {
+  connectors_needing_manual_sa_creation = {
     for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
     k => v
+    if !local.provision_service_accounts
   }
 
   service_accounts_tf_managed_keys = local.provision_gcp_sa_keys ? {
@@ -122,9 +124,10 @@ locals {
     k => module.google_workspace_connection[k].service_account_id
   } : {}
 
-  service_accounts_user_managed_keys = local.provision_gcp_sa_keys ? {} : {
+  service_accounts_user_managed_keys = {
     for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
     k => module.google_workspace_connection[k].service_account_id
+    if !local.provision_gcp_sa_keys
   }
 }
 

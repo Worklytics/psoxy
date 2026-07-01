@@ -400,14 +400,37 @@ locals {
     "${request.method} ${request.path}" => join("", [for name, value in try(request.headers, {}) : " -H \"${name}: ${value}\""])
   }
 
+  # Shell script positional args; omit empty content-type/body/header slots unless needed
+  example_api_script_invocation = { for request in local.all_example_api_requests :
+    "${request.method} ${request.path}" => join(" ", concat(
+      [request.method, "'${replace(request.path, "'", "'\\''")}'"],
+      request.body != null ? [
+        coalesce(request.content_type, "application/json"),
+        "'${replace(request.body, "\"", "\\\"")}'"
+      ] : [],
+      (request.body == null && trimspace(lookup(local.example_request_header_flags, "${request.method} ${request.path}", "")) != "") ? ["''", "''"] : [],
+      trimspace(lookup(local.example_request_header_flags, "${request.method} ${request.path}", "")) != "" ? [
+        "'${replace(trimspace(lookup(local.example_request_header_flags, "${request.method} ${request.path}", "")), "'", "'\\''")}'"
+      ] : []
+    ))
+  }
+
   example_api_get_requests_for_script = [for r in local.example_api_get_requests : merge(r, {
-    header_flags = trimspace(lookup(local.example_request_header_flags, "${r.method} ${r.path}", ""))
+    header_flags      = trimspace(lookup(local.example_request_header_flags, "${r.method} ${r.path}", ""))
+    script_invocation = local.example_api_script_invocation["${r.method} ${r.path}"]
   })]
 
   example_api_post_requests_for_script = [for r in local.all_example_api_requests : merge(r, {
-    header_flags = trimspace(lookup(local.example_request_header_flags, "${r.method} ${r.path}", ""))
+    header_flags      = trimspace(lookup(local.example_request_header_flags, "${r.method} ${r.path}", ""))
+    script_invocation = local.example_api_script_invocation["${r.method} ${r.path}"]
   }) if r.method == "POST" && r.body != null]
 
+  example_api_script_invocations = concat(
+    [for r in local.example_api_get_requests_for_script : r.script_invocation],
+    [for r in local.example_api_post_requests_for_script : r.script_invocation]
+  )
+
+  test_script_filename = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   default_header_flags = length(local.example_api_get_requests_for_script) > 0 ? local.example_api_get_requests_for_script[0].header_flags : ""
 
   # Generate test calls from all example requests
@@ -449,6 +472,20 @@ ${join("\n", local.command_test_calls)}
 Feel free to try the above calls, and reference to the source's API docs for other parameters /
 endpoints to experiment with. If you spot any additional fields you believe should be
 redacted/pseudonymized, feel free to modify [customize the rules](${var.path_to_repo_root}docs/gcp/custom-rules.md).
+
+### Or use the test script
+
+We also generated `${local.test_script_filename}`, a wrapper script around the test tool.
+Run it with no arguments to exercise the default example endpoint, or pass arguments to try
+others:
+
+```shell
+./${local.test_script_filename}
+```
+
+```shell
+${join("\n", [for invocation in local.example_api_script_invocations : "./${local.test_script_filename} ${invocation}"])}
+```
 
 ### Check logs (GCP runtime logs)
 
