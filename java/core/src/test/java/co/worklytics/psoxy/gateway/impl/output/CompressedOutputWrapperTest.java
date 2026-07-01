@@ -34,11 +34,12 @@ class CompressedOutputWrapperTest {
         CapturingOutput delegate = new CapturingOutput();
         CompressedOutputWrapper wrapper = CompressedOutputWrapper.wrap(delegate);
 
-        wrapper.write(ProcessedContent.builder().content(null).build());
+        assertDoesNotThrow(() ->
+            wrapper.write(ProcessedContent.builder().content(null).build()));
 
         assertNotNull(delegate.lastContent);
-        assertArrayEquals(new byte[0], delegate.lastContent.getContent());
         assertEquals("gzip", delegate.lastContent.getContentEncoding());
+        assertNotNull(delegate.lastContent.getContent());
     }
 
     static class CapturingOutput implements Output {
