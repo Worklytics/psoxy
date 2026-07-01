@@ -96,8 +96,14 @@ variable "gcp_principals_authorized_to_test" {
 
 variable "custom_artifacts_bucket_name" {
   type        = string
-  description = "name of bucket to use for custom artifacts, if you want something other than default"
+  description = "Name of an existing GCS bucket to use for deployment artifacts and remote resources (rules, NLP models, etc.). If null, one will be provisioned when needed for a local deployment bundle or when enable_remote_resources is true."
   default     = null
+}
+
+variable "enable_remote_resources" {
+  type        = bool
+  description = "Whether to provision an artifacts bucket for remote resources when one is not otherwise needed for deployment (e.g. with a gs:// deployment_bundle)."
+  default     = false
 }
 
 

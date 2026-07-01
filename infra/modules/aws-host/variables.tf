@@ -468,13 +468,12 @@ variable "todo_step" {
 
 variable "artifacts_bucket_name" {
   type        = string
-  description = "Name of an existing S3 bucket to use for deployment artifacts. If null, one will be provisioned if needed."
+  description = "Name of an existing S3 bucket to use for deployment artifacts and remote resources (rules, NLP models, etc.). If null, one will be provisioned when needed for a local deployment bundle or when enable_remote_resources is true."
   default     = null
 }
 
-
 variable "enable_remote_resources" {
   type        = bool
-  description = "**beta** Whether to enable remote resource loading from the artifacts S3 bucket (rules, NLP models, etc.). When true, sets REMOTE_RESOURCE_BUCKET env var and grants s3:GetObject to each Lambda. Default will change to `true` in next major version."
-  default     = false # will change to true in 0.7.x
+  description = "**beta** Whether to enable remote resource loading from the artifacts S3 bucket (rules, NLP models, etc.). When true, sets REMOTE_RESOURCE_BUCKET env var and grants s3:GetObject to each Lambda. Provisions an artifacts bucket if one is not already created or provided."
+  default     = false
 }
