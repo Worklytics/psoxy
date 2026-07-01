@@ -49,7 +49,7 @@ public class S3Output implements Output {
 
     @Override
     public void write(String key, ProcessedContent content) throws WriteFailure {
-        byte[] body = content.getContent() != null ? content.getContent() : new byte[0];
+        byte[] body = content.getContent();
 
         if (key == null) {
             key = DigestUtils.md5Hex(body);
@@ -84,8 +84,7 @@ public class S3Output implements Output {
     public void write(ProcessedContent content) throws WriteFailure {
         // Generate a canonical key based on the content's hash
         // random UUID better??
-        byte[] body = content.getContent() != null ? content.getContent() : new byte[0];
-        String key = DigestUtils.sha256Hex(body);
+        String key = DigestUtils.sha256Hex(content.getContent());
         write(key, content);
     }
 }

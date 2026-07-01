@@ -42,7 +42,7 @@ public class GCSOutput implements Output {
 
     @Override
     public void write(String key, ProcessedContent content) throws WriteFailure {
-        byte[] body = content.getContent() != null ? content.getContent() : new byte[0];
+        byte[] body = content.getContent();
 
         if (key == null) {
             key = DigestUtils.md5Hex(body);
@@ -73,8 +73,7 @@ public class GCSOutput implements Output {
     @Override
     public void write(ProcessedContent content) throws WriteFailure {
         // Generate a canonical key for the response
-        byte[] body = content.getContent() != null ? content.getContent() : new byte[0];
-        String key = DigestUtils.md5Hex(body);
+        String key = DigestUtils.md5Hex(content.getContent());
         write(key, content);
     }
 

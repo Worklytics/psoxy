@@ -25,6 +25,17 @@ class CompressedOutputWrapperTest {
     }
 
     @Test
+    void writeNullContentAlreadyGzipEncoded() throws Exception {
+        Output delegate = new NoOutput();
+        CompressedOutputWrapper wrapper = CompressedOutputWrapper.wrap(delegate);
+        ProcessedContent content = ProcessedContent.builder()
+            .content(null)
+            .contentEncoding(CompressedOutputWrapper.COMPRESSION_TYPE)
+            .build();
+        assertDoesNotThrow(() -> wrapper.write(content));
+    }
+
+    @Test
     void gzipContent() throws Exception {
         String content = "Hello, world!";
         // Verify that the content is gzipped
