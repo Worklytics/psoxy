@@ -3,6 +3,8 @@ package co.worklytics.psoxy.aws.request;
 import co.worklytics.test.TestUtils;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -46,11 +48,66 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
         assertEquals("/something", requestAdapter.getPath());
 
         assertTrue(requestAdapter.getQuery().isPresent());
-
-        assertEquals("name=John", requestAdapter.getQuery().get());
+        assertEquals("name=John", requestAdapter.getQuery().orElseThrow());
 
 
         assertFalse(requestAdapter.isHttps().isPresent());
+    }
+
+    @Test
+    public void getQuery_doesNotDuplicateWhenBothQueryMapsPopulated() {
+        Map<String, String> queryStringParameters = new LinkedHashMap<>();
+        queryStringParameters.put("$select", "id,mail,otherMails");
+        queryStringParameters.put("$top", "50");
+
+        Map<String, List<String>> multiValueQueryStringParameters = new LinkedHashMap<>();
+        multiValueQueryStringParameters.put("$select", List.of("id,mail,otherMails"));
+        multiValueQueryStringParameters.put("$top", List.of("50"));
+
+        APIGatewayProxyRequestEvent apiGatewayEvent = new APIGatewayProxyRequestEvent()
+            .withQueryStringParameters(queryStringParameters)
+            .withMultiValueQueryStringParameters(multiValueQueryStringParameters);
+
+        APIGatewayV1ProxyEventRequestAdapter requestAdapter =
+            APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
+
+        assertTrue(requestAdapter.getQuery().isPresent());
+        assertEquals("$select=id,mail,otherMails&$top=50", requestAdapter.getQuery().orElseThrow());
+    }
+
+    @Test
+    public void getQuery_preservesRepeatedKeysFromMultiValueMap() {
+        Map<String, String> queryStringParameters = new LinkedHashMap<>();
+        queryStringParameters.put("$select", "id,mail,otherMails");
+        queryStringParameters.put("$top", "50");
+
+        Map<String, List<String>> multiValueQueryStringParameters = new LinkedHashMap<>();
+        multiValueQueryStringParameters.put("$select", List.of("id", "mail", "otherMails"));
+        multiValueQueryStringParameters.put("$top", List.of("50"));
+
+        APIGatewayProxyRequestEvent apiGatewayEvent = new APIGatewayProxyRequestEvent()
+            .withQueryStringParameters(queryStringParameters)
+            .withMultiValueQueryStringParameters(multiValueQueryStringParameters);
+
+        APIGatewayV1ProxyEventRequestAdapter requestAdapter =
+            APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
+
+        assertTrue(requestAdapter.getQuery().isPresent());
+        assertEquals("$select=id&$select=mail&$select=otherMails&$top=50",
+            requestAdapter.getQuery().orElseThrow());
+    }
+
+    @SneakyThrows
+    @Test
+    public void getQuery_fallsBackToSingleValueMapWhenMultiValueAbsent() {
+        APIGatewayProxyRequestEvent apiGatewayEvent = objectMapper.readerFor(APIGatewayProxyRequestEvent.class)
+            .readValue(TestUtils.getData("lambda-proxy-events/api-gateway-v1-example_interesting.json"));
+
+        APIGatewayV1ProxyEventRequestAdapter requestAdapter =
+            APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
+
+        assertTrue(requestAdapter.getQuery().isPresent());
+        assertEquals("name=John", requestAdapter.getQuery().orElseThrow());
     }
 
     @SneakyThrows
