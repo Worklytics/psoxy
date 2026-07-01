@@ -27,10 +27,10 @@ ASYNC_CALL_RC=0
 echo "Invoke this script with any of the following as arguments to test other endpoints:"
 
 %{ for example_api_get_request in example_api_get_requests ~}
-    printf "\t%s\n" "${example_api_get_request.method} '${example_api_get_request.path}' '' '' '${replace(example_api_get_request.header_flags, "'", "'\\''")}'"
+    printf "\t%s\n" "${example_api_get_request.script_invocation}"
 %{ endfor ~}
 %{ for example_api_post_request in example_api_post_requests ~}
-    printf "\t%s\n" "${example_api_post_request.method} '${example_api_post_request.path}' ${example_api_post_request.content_type} '${replace(example_api_post_request.body, "\"", "\\\"")}' '${replace(example_api_post_request.header_flags, "'", "'\\''")}'"
+    printf "\t%s\n" "${example_api_post_request.script_invocation}"
 %{ endfor ~}
 
 exit $(( HEALTHCHECK_RC + SYNC_CALL_RC + ASYNC_CALL_RC ))
