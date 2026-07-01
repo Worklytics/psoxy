@@ -4,13 +4,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 import javax.inject.Inject;
-import org.apache.hc.core5.http.ContentType;
+import co.worklytics.psoxy.gateway.BulkContentTypes;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
 import co.worklytics.psoxy.gateway.output.Output;
@@ -31,14 +30,6 @@ import lombok.extern.java.Log;
  */
 @Log
 public class BatchMergeHandler {
-
-    // supported input content types
-    // eg, stuff that can be concatenated into ndjson output
-    // which is json, or other ndjson
-    public static final Set<String> SUPPORTED_INPUT_CONTENT_TYPES = Set.of(
-        ContentType.APPLICATION_JSON.getMimeType(),
-        ContentType.APPLICATION_NDJSON.getMimeType()
-    );
 
     public static final String GZIP_CONTENT_ENCODING = "gzip";
 
@@ -75,8 +66,11 @@ public class BatchMergeHandler {
                 if (item.getContentType() == null) {
                     throw new IllegalArgumentException("Batch items must have a content type");
                 }
-                if (!SUPPORTED_INPUT_CONTENT_TYPES.contains(item.getContentType())) {
-                    throw new IllegalArgumentException("Batch items must have content type 'application/json' or 'application/x-ndjson'; was " + item.getContentType());
+                if (!BulkContentTypes.MERGEABLE_JSON_RECORD_TYPES.contains(item.getContentType())) {
+                    throw new IllegalArgumentException(
+                        "Batch items must have one of the supported content types: "
+                            + BulkContentTypes.describeContentTypes(BulkContentTypes.MERGEABLE_JSON_RECORD_TYPES)
+                            + "; was " + item.getContentType());
                 }
                 byte[] uncompressedContent;
                 if (GZIP_CONTENT_ENCODING.equals(item.getContentEncoding())) {
@@ -110,7 +104,7 @@ public class BatchMergeHandler {
                 ProcessedContent combined = ProcessedContent.builder()
                     .contentEncoding(GZIP_CONTENT_ENCODING)
                     .content(byteArrayOutputStream.toByteArray())
-                    .contentType(ContentType.APPLICATION_NDJSON.getMimeType()) // suggested, but not yet an official standard IANA type
+                    .contentType(BulkContentTypes.NDJSON.getMimeType()) // suggested, but not yet an official standard IANA type
                     .build();
                 outputUtils.forBatchedWebhookContent().write(combined);
                 

@@ -13,6 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import com.google.common.base.Ticker;
+import co.worklytics.psoxy.gateway.TransientConfigException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -73,6 +77,98 @@ class CachingConfigServiceDecoratorTest {
     }
 
     @Test
+    void retainsStaleValueOnTransientReloadFailure() {
+        FakeTicker ticker = new FakeTicker();
+        ToggleableConfigService delegate = new ToggleableConfigService();
+        delegate.putConfigProperty(TestConfigProperties.EXAMPLE_PROPERTY, "valid_token");
+
+        CachingConfigServiceDecorator cache =
+            new CachingConfigServiceDecorator(delegate, Duration.ofMinutes(1), ticker);
+
+        // initial load succeeds
+        assertEquals(Optional.of("valid_token"),
+            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(1, delegate.getReads());
+
+        // simulate transient SSM failure and advance past TTL
+        delegate.setSimulateFailure(true);
+        ticker.advance(2, TimeUnit.MINUTES);
+
+        // reload fails silently; old value is retained — caller sees no error
+        assertEquals(Optional.of("valid_token"),
+            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(2, delegate.getReads()); // reload was attempted
+
+        // SSM recovers; advance past TTL again
+        delegate.setSimulateFailure(false);
+        ticker.advance(2, TimeUnit.MINUTES);
+
+        // next reload succeeds; value still valid
+        assertEquals(Optional.of("valid_token"),
+            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(3, delegate.getReads());
+    }
+
+    @Test
+    void retainsStaleValueOnExplicitTransientException() {
+        FakeTicker ticker = new FakeTicker();
+        ThrowingConfigService delegate = new ThrowingConfigService("valid_token");
+
+        CachingConfigServiceDecorator cache =
+            new CachingConfigServiceDecorator(delegate, Duration.ofMinutes(1), ticker);
+
+        // initial load succeeds
+        assertEquals(Optional.of("valid_token"),
+            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(1, delegate.getReads());
+
+        // backend starts throwing TransientConfigException
+        delegate.setThrowTransient(true);
+        ticker.advance(2, TimeUnit.MINUTES);
+
+        // reload catches TransientConfigException; old value retained, no error to caller
+        assertEquals(Optional.of("valid_token"),
+            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(2, delegate.getReads());
+
+        // backend recovers
+        delegate.setThrowTransient(false);
+        ticker.advance(2, TimeUnit.MINUTES);
+
+        assertEquals(Optional.of("valid_token"),
+            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(3, delegate.getReads());
+    }
+
+    @Test
+    void transientExceptionOnColdStartDoesNotCacheNegativeValue() {
+        FakeTicker ticker = new FakeTicker();
+        ThrowingConfigService delegate = new ThrowingConfigService("valid_token");
+        delegate.setThrowTransient(true);
+
+        // 0ms delay so the retry loop is fast in tests
+        CachingConfigServiceDecorator cache =
+            new CachingConfigServiceDecorator(delegate, Duration.ofMinutes(1), ticker, 0L);
+
+        // cold start with transient error: retries MAX_TRANSIENT_RETRIES times then throws —
+        // nothing is cached as NEGATIVE_VALUE, so the next request will retry immediately
+        assertThrows(TransientConfigException.class,
+            () -> cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(CachingConfigServiceDecorator.MAX_TRANSIENT_RETRIES, delegate.getReads());
+
+        // second request: still failing, retries again from scratch (nothing was cached)
+        assertThrows(TransientConfigException.class,
+            () -> cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(CachingConfigServiceDecorator.MAX_TRANSIENT_RETRIES * 2, delegate.getReads());
+
+        // backend recovers — no TTL advance needed since nothing was ever cached
+        delegate.setThrowTransient(false);
+        assertEquals(Optional.of("valid_token"),
+            cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
+        assertEquals(CachingConfigServiceDecorator.MAX_TRANSIENT_RETRIES * 2 + 1, delegate.getReads());
+    }
+
+    @Test
     void getConfigProperty_noCache() {
         assertTrue(config.getConfigPropertyAsOptional(TestConfigProperties.NO_CACHE).isEmpty());
         assertEquals(1, localHashMapConfigService.getReads());
@@ -90,6 +186,88 @@ class CachingConfigServiceDecoratorTest {
         assertEquals(3, localHashMapConfigService.getReads());
     }
 
+
+    static class FakeTicker extends Ticker {
+        private long nanos = 0;
+
+        @Override
+        public long read() {
+            return nanos;
+        }
+
+        void advance(long amount, TimeUnit unit) {
+            nanos += unit.toNanos(amount);
+        }
+    }
+
+    static class ThrowingConfigService implements WritableConfigService {
+        private String value;
+        private boolean throwTransient = false;
+
+        @Getter
+        private int reads = 0;
+
+        ThrowingConfigService(String value) {
+            this.value = value;
+        }
+
+        void setThrowTransient(boolean throwTransient) {
+            this.throwTransient = throwTransient;
+        }
+
+        @Override
+        public void putConfigProperty(ConfigProperty property, String newValue) {
+            this.value = newValue;
+        }
+
+        @Override
+        public String getConfigPropertyOrError(ConfigProperty property) {
+            return getConfigPropertyAsOptional(property)
+                .orElseThrow(() -> new NoSuchElementException("no value for " + property));
+        }
+
+        @Override
+        public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
+            reads++;
+            if (throwTransient) {
+                throw new TransientConfigException("simulated transient failure");
+            }
+            return Optional.ofNullable(value);
+        }
+    }
+
+    static class ToggleableConfigService implements WritableConfigService {
+        private final Map<ConfigProperty, String> map = new HashMap<>();
+
+        @Getter
+        private int reads = 0;
+
+        private boolean simulateFailure = false;
+
+        void setSimulateFailure(boolean simulateFailure) {
+            this.simulateFailure = simulateFailure;
+        }
+
+        @Override
+        public void putConfigProperty(ConfigProperty property, String value) {
+            map.put(property, value);
+        }
+
+        @Override
+        public String getConfigPropertyOrError(ConfigProperty property) {
+            return getConfigPropertyAsOptional(property)
+                .orElseThrow(() -> new NoSuchElementException("no value for " + property));
+        }
+
+        @Override
+        public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
+            reads++;
+            if (simulateFailure) {
+                return Optional.empty();
+            }
+            return Optional.ofNullable(map.get(property));
+        }
+    }
 
     static class LocalHashMapConfigService implements WritableConfigService {
 

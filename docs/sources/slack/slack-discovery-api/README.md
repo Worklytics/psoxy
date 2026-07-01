@@ -30,7 +30,7 @@ of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 For enabling Slack via Discovery API with the Psoxy you must first set up an app on your Slack Enterprise instance.
 
-1. Go to https://api.slack.com/apps and create an app.
+1. Go to [https://api.slack.com/apps](https://api.slack.com/apps) and create an app.
    - Select "From scratch", choose a name (for example "Worklytics connector") and a development workspace
 
 ![](./img/slack-step-1.png)

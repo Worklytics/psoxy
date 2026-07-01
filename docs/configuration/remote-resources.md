@@ -1,6 +1,7 @@
-# Remote Resources (beta)
+# Remote Resources
 
-> **Status: beta** — This feature is functional but may evolve. Feedback welcome.
+> [!NOTE]
+> This feature is in beta. It is functional but may evolve; feedback welcome.
 
 Psoxy supports loading resources (sanitization rules, NLP models, etc.) from a remote cloud storage
 bucket (S3 on AWS, GCS on GCP). This enables configuration that is too large for environment
@@ -33,8 +34,9 @@ By default, the host modules in this repository (`aws-host` and `gcp-host`) will
 automatically wires the **artifacts bucket** (used for deployment bundles) as the remote resource bucket.
 
 > [!IMPORTANT]
-> - If you configure an existing bucket (e.g., by providing `artifacts_bucket_name`), the bucket must already exist.
-> - The Terraform runner (the credentials running the `terraform` command) must have sufficient IAM permissions on that bucket to apply permissions (since it will grant read access to the proxy's service account or Lambda execution role).
+> If you configure an existing bucket (e.g., by providing `artifacts_bucket_name`), the bucket must already exist.
+>
+> The Terraform runner (the credentials running the `terraform` command) must have sufficient IAM permissions on that bucket to apply permissions, since it will grant read access to the proxy's service account or Lambda execution role.
 
 ### AWS (`aws-host`)
 

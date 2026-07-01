@@ -44,7 +44,7 @@ Then `source ~/.bashrc`, to execute the above.
 
 4. if using Microsoft 365 data sources, install Azure CLI and authenticate.
 
-https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
+[https://docs.microsoft.com/en-us/cli/azure/install-azure-cli](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
 You should now be ready for the general instructions in the [README.md](../../README.md).
 

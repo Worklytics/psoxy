@@ -493,7 +493,6 @@ locals {
   caller_has_configured_output_buckets = (
     length(var.bulk_connectors) > 0 ||
     length(var.webhook_collectors) > 0 ||
-    length(var.lookup_table_builders) > 0 ||
     length([for k, v in var.api_connectors : k if try(v.enable_async_processing, false)]) > 0 ||
     length([for k, v in local.sanitized_side_outputs : k if v != null]) > 0
   )
@@ -503,7 +502,6 @@ locals {
     [for k, v in module.webhook_collectors : v.output_sanitized_bucket_id],
     [for k, v in module.api_connector : v.async_output_bucket_id if try(v.async_output_bucket_id, null) != null],
     [for k, v in module.api_connector : v.side_output_sanitized_bucket_id if try(v.side_output_sanitized_bucket_id, null) != null],
-    [for k, v in module.lookup_output : v.output_bucket],
   )))
 
   caller_output_bucket_read_resources = flatten([

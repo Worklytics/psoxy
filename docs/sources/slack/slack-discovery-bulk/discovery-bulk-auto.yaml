@@ -1,5 +1,5 @@
 # Auto-detect format rules for Slack Discovery Bulk
-# Works with NDJSON, JSON Array, and Parquet files
+# Works with NDJSON, JSON Lines (.jsonl), JSON Array, and Parquet files
 # Use prefix patterns (e.g., users*, channels*) to match files regardless of extension
 
 fileRules:

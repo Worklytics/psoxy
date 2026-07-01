@@ -8,7 +8,7 @@ NOTE: this is tested only for gcp; for aws YMMV, and in particular we expect Mic
 
 Prereqs:
 
-- git/java/maven, as described here https://github.com/Worklytics/psoxy#required-software-and-permissions
+- git/java/maven, as described here [https://github.com/Worklytics/psoxy#required-software-and-permissions](https://github.com/Worklytics/psoxy#required-software-and-permissions)
 - for testing, you'll need the CLI of your host environment (eg, AWS CLI, GCloud CLI, Azure CLI) as well as npm/NodeJS installed on your local machine
 
 After authenticating your terraform CLI to Terraform Cloud/enterprise, you'll need to:
@@ -47,7 +47,7 @@ To get them nicely on your local machine, something like the following:
 
 ### Terraform API
 
-1. get an API token from your Terraform Cloud or Enterprise instance (eg, https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/api-tokens).
+1. get an API token from your Terraform Cloud or Enterprise instance (eg, [https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/api-tokens](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/api-tokens)).
 
 2. set it as an env variable, as well as the host:
 

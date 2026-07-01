@@ -23,7 +23,7 @@ variables {
   provision_auth_key = {
     rotation_days = 30
   }
-  example_identity               = "test-user@example.com"
+  example_identity = "test-user@example.com"
 
   allowed_webhook_ip_blocks = ["10.0.0.0/16"]
 }

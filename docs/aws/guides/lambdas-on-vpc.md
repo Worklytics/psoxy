@@ -89,5 +89,5 @@ So:
 
 ## References
 
-- https://docs.aws.amazon.com/lambda/latest/dg/foundation-networking.html
-- https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html
+- [https://docs.aws.amazon.com/lambda/latest/dg/foundation-networking.html](https://docs.aws.amazon.com/lambda/latest/dg/foundation-networking.html)
+- [https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html)

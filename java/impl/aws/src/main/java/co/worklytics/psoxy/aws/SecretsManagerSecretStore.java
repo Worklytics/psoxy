@@ -14,6 +14,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.TransientConfigException;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -113,7 +114,7 @@ public class SecretsManagerSecretStore implements SecretStore {
 
             GetSecretValueResponse response = client.getSecretValue(request);
             return Optional.ofNullable(mapping.apply(response));
-        } catch (DecryptionFailureException e ) {
+        } catch (DecryptionFailureException e) {
             log.log(Level.SEVERE, "failed to read secret due to decryption error; check lambda's exec role perms for secret " + id);
             return Optional.empty();
         } catch (ResourceNotFoundException e) {
@@ -123,15 +124,19 @@ public class SecretsManagerSecretStore implements SecretStore {
             }
             return Optional.empty();
         } catch (SecretsManagerException e) {
-            //permissions error hits this case ... could still be expected for optional secrets, as
-            // explicit IAM grant made for each one that exists
-            //eg
-            // software.amazon.awssdk.services.secretsmanager.model.SecretsManagerException:
-            // User: arn:aws:sts::{{SOME_ACCOUNT_ID}}}:assumed-role/{{LAMBDAS_EXEC_ROLE}}/{{SESSION_NAME}} is not authorized to perform: secretsmanager:GetSecretValue on resource: {{SECRET_ID}} because no identity-based policy allows the secretsmanager:GetSecretValue action (Service: SecretsManager, Status Code: 400, Request ID: ---, Extended Request ID: null)
-            if (envVarsConfig.isDevelopment()) {
-                log.log(Level.WARNING, "failed to read secret " + id, e);
+            if (AwsExceptionUtils.isAccessDenied(e)) {
+                // IAM grants are created explicitly for each secret that exists; access-denied is
+                // therefore expected for optional secrets that have no grant in this deployment.
+                if (envVarsConfig.isDevelopment()) {
+                    log.log(Level.WARNING, "access denied reading secret " + id + "; expected if this is an optional secret with no IAM grant");
+                }
+                return Optional.empty();
             }
-            return Optional.empty();
+            // Any other SecretsManagerException (credential rotation window, transient service
+            // error, etc.) — signal to the cache layer that this is a transient failure so it can
+            // retain the previous cached value rather than treating it as "not configured".
+            log.log(Level.WARNING, "transient failure reading secret " + id + "; will retry on next cache refresh", e);
+            throw new TransientConfigException("Transient failure reading secret: " + id, e);
         } catch (AwsServiceException e) {
             if (e.isThrottlingException()) {
                 log.log(Level.SEVERE, String.format("Throttling issues for Secrets Manager Secret %s, rate limit reached most likely despite retries", id), e);
