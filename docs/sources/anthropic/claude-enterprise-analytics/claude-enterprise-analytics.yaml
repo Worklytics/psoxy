@@ -341,6 +341,7 @@ definitions:
         type: "integer"
       last_activity_date:
         type: "string"
+        format: "date"
       office_metrics:
         $ref: "#/definitions/OfficeMetrics"
       rbac_group_id:
