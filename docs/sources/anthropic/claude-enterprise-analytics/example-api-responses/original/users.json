@@ -1,8 +1,10 @@
 {
   "data": [
     {
-      "user": { "id": "user_abc123", "email_address": "alice@example.com" },
-      "date": "2026-06-01",
+      "user": {
+        "id": "t~Wd2U4lmivWESn4fNgZWtjnW3j4TXciQNif50hO_QMVM",
+        "email_address": "t~knxWE5tapsutcz6pLWSC3wfb5t34lCrXNZsKnhwyVXk@example.com"
+      },
       "chat_metrics": {
         "distinct_conversation_count": 5,
         "message_count": 42,
@@ -20,63 +22,210 @@
         "core_metrics": {
           "commit_count": 3,
           "pull_request_count": 1,
-          "lines_of_code": { "added_count": 120, "removed_count": 45 },
+          "lines_of_code": {
+            "added_count": 120,
+            "removed_count": 45
+          },
           "distinct_session_count": 4
         },
         "tool_actions": {
-          "edit_tool": { "accepted": 10, "rejected": 2 },
-          "multi_edit_tool": { "accepted": 3, "rejected": 0 },
-          "write_tool": { "accepted": 5, "rejected": 1 },
-          "notebook_edit_tool": { "accepted": 0, "rejected": 0 }
+          "edit_tool": {
+            "accepted_count": 10,
+            "rejected_count": 2
+          },
+          "multi_edit_tool": {
+            "accepted_count": 3,
+            "rejected_count": 0
+          },
+          "write_tool": {
+            "accepted_count": 5,
+            "rejected_count": 1
+          },
+          "notebook_edit_tool": {
+            "accepted_count": 0,
+            "rejected_count": 0
+          }
         }
       },
       "web_search_count": 2,
       "office_metrics": {
-        "excel": { "distinct_session_count": 2, "message_count": 8, "skills_used_count": 0, "distinct_skills_used_count": 0, "connectors_used_count": 0, "distinct_connectors_used_count": 0 },
-        "powerpoint": { "distinct_session_count": 0, "message_count": 0, "skills_used_count": 0, "distinct_skills_used_count": 0, "connectors_used_count": 0, "distinct_connectors_used_count": 0 },
-        "word": { "distinct_session_count": 1, "message_count": 3, "skills_used_count": 0, "distinct_skills_used_count": 0, "connectors_used_count": 0, "distinct_connectors_used_count": 0 },
-        "outlook": { "distinct_session_count": 0, "message_count": 0, "skills_used_count": 0, "distinct_skills_used_count": 0, "connectors_used_count": 0, "distinct_connectors_used_count": 0 }
+        "excel": {
+          "distinct_session_count": 2,
+          "message_count": 8,
+          "skills_used_count": 0,
+          "distinct_skills_used_count": 0,
+          "connectors_used_count": 0,
+          "distinct_connectors_used_count": 0
+        },
+        "powerpoint": {
+          "distinct_session_count": 0,
+          "message_count": 0,
+          "skills_used_count": 0,
+          "distinct_skills_used_count": 0,
+          "connectors_used_count": 0,
+          "distinct_connectors_used_count": 0
+        },
+        "word": {
+          "distinct_session_count": 1,
+          "message_count": 3,
+          "skills_used_count": 0,
+          "distinct_skills_used_count": 0,
+          "connectors_used_count": 0,
+          "distinct_connectors_used_count": 0
+        },
+        "outlook": {
+          "distinct_session_count": 0,
+          "message_count": 0,
+          "skills_used_count": 0,
+          "distinct_skills_used_count": 0,
+          "connectors_used_count": 0,
+          "distinct_connectors_used_count": 0
+        }
       },
       "cowork_metrics": {
-        "distinct_session_count": 0, "message_count": 0, "action_count": 0,
-        "dispatch_turn_count": 0, "skills_used_count": 0, "distinct_skills_used_count": 0,
-        "connectors_used_count": 0, "distinct_connectors_used_count": 0
+        "distinct_session_count": 0,
+        "message_count": 0,
+        "action_count": 0,
+        "dispatch_turn_count": 0,
+        "skills_used_count": 0,
+        "distinct_skills_used_count": 0,
+        "connectors_used_count": 0,
+        "distinct_connectors_used_count": 0,
+        "distinct_plugins_used_count": 0,
+        "edit_tool_count": 0,
+        "file_edit_count": 0,
+        "multi_edit_tool_count": 0,
+        "notebook_edit_tool_count": 0,
+        "plugins_used_count": 0,
+        "sessions_with_file_edits_count": 0,
+        "write_tool_count": 0
+      },
+      "design_metrics": {
+        "distinct_projects_created_count": 0,
+        "distinct_projects_used_count": 0,
+        "distinct_session_count": 0,
+        "message_count": 0
+      },
+      "science_metrics": {
+        "delegation_count": 0,
+        "distinct_session_count": 0,
+        "message_count": 0,
+        "remote_compute_job_count": 0,
+        "skills_used_count": 0
       }
     },
     {
-      "user": { "id": "user_def456", "email_address": "bob@example.com" },
-      "date": "2026-06-01",
+      "user": {
+        "id": "t~rUNP43joGY2IUQzpGJcOH7nY9pzIOXRLPOKi_PdHieA",
+        "email_address": "t~PFsxS8oxlBJ9dZkL1zNMvRIajvbO3VzZpbdT-ty6Gm0@example.com"
+      },
       "chat_metrics": {
-        "distinct_conversation_count": 2, "message_count": 10, "distinct_projects_created_count": 0,
-        "distinct_projects_used_count": 1, "distinct_files_uploaded_count": 0,
-        "distinct_artifacts_created_count": 0, "distinct_shared_artifacts_viewed_count": 0,
-        "thinking_message_count": 0, "distinct_skills_used_count": 0,
-        "connectors_used_count": 0, "shared_conversations_viewed_count": 0
+        "distinct_conversation_count": 2,
+        "message_count": 10,
+        "distinct_projects_created_count": 0,
+        "distinct_projects_used_count": 1,
+        "distinct_files_uploaded_count": 0,
+        "distinct_artifacts_created_count": 0,
+        "distinct_shared_artifacts_viewed_count": 0,
+        "thinking_message_count": 0,
+        "distinct_skills_used_count": 0,
+        "connectors_used_count": 0,
+        "shared_conversations_viewed_count": 0
       },
       "claude_code_metrics": {
         "core_metrics": {
-          "commit_count": 0, "pull_request_count": 0,
-          "lines_of_code": { "added_count": 0, "removed_count": 0 },
+          "commit_count": 0,
+          "pull_request_count": 0,
+          "lines_of_code": {
+            "added_count": 0,
+            "removed_count": 0
+          },
           "distinct_session_count": 0
         },
         "tool_actions": {
-          "edit_tool": { "accepted": 0, "rejected": 0 },
-          "multi_edit_tool": { "accepted": 0, "rejected": 0 },
-          "write_tool": { "accepted": 0, "rejected": 0 },
-          "notebook_edit_tool": { "accepted": 0, "rejected": 0 }
+          "edit_tool": {
+            "accepted_count": 0,
+            "rejected_count": 0
+          },
+          "multi_edit_tool": {
+            "accepted_count": 0,
+            "rejected_count": 0
+          },
+          "write_tool": {
+            "accepted_count": 0,
+            "rejected_count": 0
+          },
+          "notebook_edit_tool": {
+            "accepted_count": 0,
+            "rejected_count": 0
+          }
         }
       },
       "web_search_count": 0,
       "office_metrics": {
-        "excel": { "distinct_session_count": 0, "message_count": 0, "skills_used_count": 0, "distinct_skills_used_count": 0, "connectors_used_count": 0, "distinct_connectors_used_count": 0 },
-        "powerpoint": { "distinct_session_count": 1, "message_count": 4, "skills_used_count": 0, "distinct_skills_used_count": 0, "connectors_used_count": 0, "distinct_connectors_used_count": 0 },
-        "word": { "distinct_session_count": 0, "message_count": 0, "skills_used_count": 0, "distinct_skills_used_count": 0, "connectors_used_count": 0, "distinct_connectors_used_count": 0 },
-        "outlook": { "distinct_session_count": 0, "message_count": 0, "skills_used_count": 0, "distinct_skills_used_count": 0, "connectors_used_count": 0, "distinct_connectors_used_count": 0 }
+        "excel": {
+          "distinct_session_count": 0,
+          "message_count": 0,
+          "skills_used_count": 0,
+          "distinct_skills_used_count": 0,
+          "connectors_used_count": 0,
+          "distinct_connectors_used_count": 0
+        },
+        "powerpoint": {
+          "distinct_session_count": 1,
+          "message_count": 4,
+          "skills_used_count": 0,
+          "distinct_skills_used_count": 0,
+          "connectors_used_count": 0,
+          "distinct_connectors_used_count": 0
+        },
+        "word": {
+          "distinct_session_count": 0,
+          "message_count": 0,
+          "skills_used_count": 0,
+          "distinct_skills_used_count": 0,
+          "connectors_used_count": 0,
+          "distinct_connectors_used_count": 0
+        },
+        "outlook": {
+          "distinct_session_count": 0,
+          "message_count": 0,
+          "skills_used_count": 0,
+          "distinct_skills_used_count": 0,
+          "connectors_used_count": 0,
+          "distinct_connectors_used_count": 0
+        }
       },
       "cowork_metrics": {
-        "distinct_session_count": 0, "message_count": 0, "action_count": 0,
-        "dispatch_turn_count": 0, "skills_used_count": 0, "distinct_skills_used_count": 0,
-        "connectors_used_count": 0, "distinct_connectors_used_count": 0
+        "distinct_session_count": 0,
+        "message_count": 0,
+        "action_count": 0,
+        "dispatch_turn_count": 0,
+        "skills_used_count": 0,
+        "distinct_skills_used_count": 0,
+        "connectors_used_count": 0,
+        "distinct_connectors_used_count": 0,
+        "distinct_plugins_used_count": 0,
+        "edit_tool_count": 0,
+        "file_edit_count": 0,
+        "multi_edit_tool_count": 0,
+        "notebook_edit_tool_count": 0,
+        "plugins_used_count": 0,
+        "sessions_with_file_edits_count": 0,
+        "write_tool_count": 0
+      },
+      "design_metrics": {
+        "distinct_projects_created_count": 0,
+        "distinct_projects_used_count": 0,
+        "distinct_session_count": 0,
+        "message_count": 0
+      },
+      "science_metrics": {
+        "delegation_count": 0,
+        "distinct_session_count": 0,
+        "message_count": 0,
+        "remote_compute_job_count": 0,
+        "skills_used_count": 0
       }
     }
   ],
