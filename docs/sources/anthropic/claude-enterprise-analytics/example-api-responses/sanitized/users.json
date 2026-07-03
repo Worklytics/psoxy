@@ -2,8 +2,8 @@
   "data":[
     {
       "user":{
-        "id":"t~qFnFEOaoBWsR-lekuUE6S6ctlJNemXLpS_nmVApKoUo",
-        "email_address":"t~zujbdRSV4D7ir226W9xCgPFWN4wxPRPaztX6Ggvwdr4@example.com"
+        "id":"t~Wd2U4lmivWESn4fNgZWtjnW3j4TXciQNif50hO_QMVM",
+        "email_address":"t~knxWE5tapsutcz6pLWSC3wfb5t34lCrXNZsKnhwyVXk@example.com"
       },
       "chat_metrics":{
         "distinct_conversation_count":5,
@@ -16,6 +16,7 @@
         "thinking_message_count":0,
         "distinct_skills_used_count":2,
         "connectors_used_count":1,
+        "distinct_connectors_used_count":1,
         "shared_conversations_viewed_count":0
       },
       "claude_code_metrics":{
@@ -112,12 +113,16 @@
         "message_count":0,
         "remote_compute_job_count":0,
         "skills_used_count":0
-      }
+      },
+      "distinct_user_count":null,
+      "last_activity_date":"2026-06-01",
+      "rbac_group_id":"rbac_group_abc123",
+      "rbac_group_name":"Engineering"
     },
     {
       "user":{
-        "id":"t~ip33sD9DvRLmyuW2WJI8mH7kjgWZziny4Ngo3J1uoXE",
-        "email_address":"t~u2XaNryhHo82tTI1r6Ug-xqLIwsi68Naen7ZK4B60hE@example.com"
+        "id":"t~rUNP43joGY2IUQzpGJcOH7nY9pzIOXRLPOKi_PdHieA",
+        "email_address":"t~PFsxS8oxlBJ9dZkL1zNMvRIajvbO3VzZpbdT-ty6Gm0@example.com"
       },
       "chat_metrics":{
         "distinct_conversation_count":2,
@@ -130,6 +135,7 @@
         "thinking_message_count":0,
         "distinct_skills_used_count":0,
         "connectors_used_count":0,
+        "distinct_connectors_used_count":0,
         "shared_conversations_viewed_count":0
       },
       "claude_code_metrics":{
@@ -226,7 +232,11 @@
         "message_count":0,
         "remote_compute_job_count":0,
         "skills_used_count":0
-      }
+      },
+      "distinct_user_count":null,
+      "last_activity_date":null,
+      "rbac_group_id":null,
+      "rbac_group_name":null
     }
   ],
   "next_page":"cursor_token_abc"
