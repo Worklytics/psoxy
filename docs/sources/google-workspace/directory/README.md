@@ -13,6 +13,19 @@ all Google Workspace connectors.
 - `admin.directory.group.readonly`
 - `admin.directory.orgunit.readonly`
 
+## Required GCP APIs
+
+Enable the following API in the GCP project where you provision the OAuth client:
+
+- `admin.googleapis.com` (Admin SDK API)
+
+## Domain-wide Delegation Scopes
+
+Paste the following comma-separated list into the **Scopes** field when granting Domain-wide Delegation in the Google Workspace Admin console:
+
+```
+https://www.googleapis.com/auth/admin.directory.user.readonly,https://www.googleapis.com/auth/admin.directory.domain.readonly,https://www.googleapis.com/auth/admin.directory.group.readonly,https://www.googleapis.com/auth/admin.directory.orgunit.readonly
+```
 
 ## Examples
 

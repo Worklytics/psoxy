@@ -20,18 +20,39 @@ Within those, the `google-workspace.tf` and `google-workspace-variables.tf` file
 - [google-chat](google-chat/README.md) (Google Chat&trade;)
 - [meet](meet/README.md) (Google Meet&trade;)
 
-OAuth scopes omit the `https://www.googleapis.com/auth/` prefix. See [OAuth 2.0 Scopes for Google APIs](https://developers.google.com/identity/protocols/oauth2/scopes). Definitive values are defined in [`google-workspace.tf`](../../../infra/modules/worklytics-connector-specs/google-workspace.tf).
+OAuth scopes in the table below omit the `https://www.googleapis.com/auth/` prefix. See [OAuth 2.0 Scopes for Google APIs](https://developers.google.com/identity/protocols/oauth2/scopes). Definitive values are defined in [`google-workspace.tf`](../../../infra/modules/worklytics-connector-specs/google-workspace.tf).
 
-| Connector | Connector ID | OAuth Scopes |
-|-----------|--------------|--------------|
-| [calendar](calendar/README.md) | `gcal` | `calendar.readonly` |
-| [google-chat](google-chat/README.md) | `google-chat` | `admin.reports.audit.readonly` |
-| [directory](directory/README.md) | `gdirectory` | `admin.directory.user.readonly` `admin.directory.domain.readonly` `admin.directory.group.readonly` `admin.directory.orgunit.readonly` |
-| [gdrive](gdrive/README.md) | `gdrive` | `drive.metadata.readonly` |
-| [gmail](gmail/README.md) | `gmail` | `gmail.metadata` |
-| [meet](meet/README.md) | `google-meet` | `admin.reports.audit.readonly` |
-| [gemini-in-workspace-apps](gemini-in-workspace-apps/README.md) | `gemini-in-workspace-apps` | `admin.reports.audit.readonly` |
-| [gemini-usage-bulk](gemini-usage-bulk/README.md) | `gemini-usage` | n/a (bulk CSV upload) |
+Each connector page includes the full comma-separated OAuth scope string to paste into the Google Workspace Admin console when granting Domain-wide Delegation.
+
+| Connector | Connector ID | GCP APIs to Enable | OAuth Scopes |
+|-----------|--------------|--------------------|--------------|
+| [calendar](calendar/README.md) | `gcal` | `calendar-json.googleapis.com` | `calendar.readonly` |
+| [google-chat](google-chat/README.md) | `google-chat` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
+| [directory](directory/README.md) | `gdirectory` | `admin.googleapis.com` | `admin.directory.user.readonly` `admin.directory.domain.readonly` `admin.directory.group.readonly` `admin.directory.orgunit.readonly` |
+| [gdrive](gdrive/README.md) | `gdrive` | `drive.googleapis.com` | `drive.metadata.readonly` |
+| [gmail](gmail/README.md) | `gmail` | `gmail.googleapis.com` | `gmail.metadata` |
+| [meet](meet/README.md) | `google-meet` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
+| [gemini-in-workspace-apps](gemini-in-workspace-apps/README.md) | `gemini-in-workspace-apps` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
+| [gemini-usage-bulk](gemini-usage-bulk/README.md) | `gemini-usage` | n/a (bulk CSV upload) | n/a (bulk CSV upload) |
+
+Enable the listed GCP APIs in the project where you provision each OAuth client. If you use our Terraform modules with `enable_apis = true` (the default), this is done automatically; otherwise, enable them via the GCP console ("APIs & Services" → "Library") or `gcloud services enable`.
+
+### Domain-wide Delegation scope strings
+
+When granting Domain-wide Delegation in the Google Workspace Admin console, paste the connector's comma-separated OAuth scope string into the **Scopes** field. Use the full `https://www.googleapis.com/auth/...` URLs (as shown below and on each connector page), not the short form from the table above.
+
+If you share a **single OAuth client** across multiple connectors (see [Provisioning API clients without Terraform](#provisioning-api-clients-without-terraform)), enable the union of all required GCP APIs and grant the superset of OAuth scopes:
+
+```
+https://www.googleapis.com/auth/calendar.readonly,https://www.googleapis.com/auth/admin.directory.user.readonly,https://www.googleapis.com/auth/admin.directory.domain.readonly,https://www.googleapis.com/auth/admin.directory.group.readonly,https://www.googleapis.com/auth/admin.directory.orgunit.readonly,https://www.googleapis.com/auth/drive.metadata.readonly,https://www.googleapis.com/auth/gmail.metadata,https://www.googleapis.com/auth/admin.reports.audit.readonly
+```
+
+Required GCP APIs for the single shared OAuth client:
+
+- `admin.googleapis.com`
+- `calendar-json.googleapis.com`
+- `drive.googleapis.com`
+- `gmail.googleapis.com`
 
 ## Required Permissions
 

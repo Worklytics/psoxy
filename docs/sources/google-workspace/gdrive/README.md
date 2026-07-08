@@ -10,6 +10,19 @@ all Google Workspace connectors.
 ## Required OAuth Scopes
 - `drive.metadata.readonly`
 
+## Required GCP APIs
+
+Enable the following API in the GCP project where you provision the OAuth client:
+
+- `drive.googleapis.com` (Google Drive API)
+
+## Domain-wide Delegation Scopes
+
+Paste the following comma-separated list into the **Scopes** field when granting Domain-wide Delegation in the Google Workspace Admin console:
+
+```
+https://www.googleapis.com/auth/drive.metadata.readonly
+```
 
 ## Examples
 

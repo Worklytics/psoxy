@@ -10,6 +10,19 @@ all Google Workspace&trade; connectors.
 ## Required OAuth Scopes
 - `calendar.readonly`
 
+## Required GCP APIs
+
+Enable the following API in the GCP project where you provision the OAuth client:
+
+- `calendar-json.googleapis.com` (Google Calendar API)
+
+## Domain-wide Delegation Scopes
+
+Paste the following comma-separated list into the **Scopes** field when granting Domain-wide Delegation in the Google Workspace Admin console:
+
+```
+https://www.googleapis.com/auth/calendar.readonly
+```
 
 ## Examples
 
