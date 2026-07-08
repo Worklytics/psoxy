@@ -10,21 +10,20 @@ all Google Workspace connectors.
 This connector pulls Gemini-events from the Google Workspace audit log.
 
 ## Required OAuth Scopes
+
 - `admin.reports.audit.readonly`
+
+For Domain-wide Delegation in the Google Workspace Admin console, paste the following comma-separated list into the **Scopes** field:
+
+```
+https://www.googleapis.com/auth/admin.reports.audit.readonly
+```
 
 ## Required GCP APIs
 
 Enable the following API in the GCP project where you provision the OAuth client:
 
 - `admin.googleapis.com` (Admin SDK API)
-
-## Domain-wide Delegation Scopes
-
-Paste the following comma-separated list into the **Scopes** field when granting Domain-wide Delegation in the Google Workspace Admin console:
-
-```
-https://www.googleapis.com/auth/admin.reports.audit.readonly
-```
 
 ## Examples
 
