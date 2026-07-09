@@ -21,3 +21,18 @@ output "api_clients" {
     }
   }
 }
+
+output "provision_gcp_sa_keys" {
+  description = "Whether Terraform should provision GCP service account keys for enabled connectors. False when provision_service_accounts or provision_keys is false in google_workspace_connector_settings."
+  value       = local.provision_gcp_sa_keys
+}
+
+output "service_accounts_tf_managed_keys" {
+  description = "Map of connector id to GCP service account id for connectors whose keys Terraform should create and manage."
+  value       = local.service_accounts_tf_managed_keys
+}
+
+output "service_accounts_user_managed_keys" {
+  description = "Map of connector id to GCP service account id for connectors whose keys must be created and stored outside Terraform."
+  value       = local.service_accounts_user_managed_keys
+}

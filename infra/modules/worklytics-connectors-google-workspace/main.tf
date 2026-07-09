@@ -119,10 +119,11 @@ locals {
     if !local.provision_service_accounts
   }
 
-  service_accounts_tf_managed_keys = local.provision_gcp_sa_keys ? {
+  service_accounts_tf_managed_keys = {
     for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
     k => module.google_workspace_connection[k].service_account_id
-  } : {}
+    if local.provision_gcp_sa_keys
+  }
 
   service_accounts_user_managed_keys = {
     for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :

@@ -146,6 +146,8 @@ google_workspace_connector_settings = {
 
 The deprecated top-level variable `google_workspace_provision_keys` is still supported, but the map form above is preferred.
 
+If your deployment wraps `gcp-sa-auth-key-aws-secret` (or similar) outside `worklytics-connectors-google-workspace`, gate that module on `module.worklytics_connectors_google_workspace.service_accounts_tf_managed_keys` rather than `var.google_workspace_provision_keys`. The deprecated variable defaults to `true` and does not reflect `google_workspace_connector_settings`.
+
 Then you can create the keys manually, and store them in your secrets manager of choice.
 
 For each API client you need to:

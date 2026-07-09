@@ -50,7 +50,7 @@ variable "google_workspace_example_admin" {
 
 variable "google_workspace_provision_keys" {
   type        = bool
-  description = "[DEPRECATED - use map instead] whether to provision key for each Google Workspace connector's GCP Service Account (OAuth Client). If false, you must create the key manually and provide it."
+  description = "[DEPRECATED - use google_workspace_connector_settings map instead] whether to provision key for each Google Workspace connector's GCP Service Account (OAuth Client). If false, you must create the key manually and provide it. Ignored if provision_service_accounts is false in google_workspace_connector_settings. Superseded by provision_keys in that map when set."
   default     = true
 }
 
