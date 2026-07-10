@@ -16,6 +16,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `claude`                   | [Claude](anthropic/claude/README.md)                                        | API  | BETA         |
 | `claude-enterprise-analytics` | [Claude Enterprise Analytics](anthropic/claude-enterprise-analytics/README.md) | API  | BETA         |
 | `claude-code`              | [Claude Code](anthropic/claude-code/README.md)                              | API  | BETA         |
+| `codex-enterprise-analytics` | [Codex Enterprise Analytics](codex-enterprise-analytics/README.md)        | API  | BETA         |
 | `confluence-cloud`         | [Confluence Cloud](atlassian/confluence/README.md)                          | API  | BETA         |
 | `cursor`                   | [Cursor](cursor/README.md)                                                  | API  | BETA         |
 | `dropbox-business`         | [Dropbox Business](dropbox-business/README.md)                              | API  | DEPRECATED   |
