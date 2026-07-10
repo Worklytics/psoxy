@@ -1,0 +1,102 @@
+{
+  "object": "page",
+  "data": [
+    {
+      "object": "workspace.codex.usage.result",
+      "start_time": 1780272000,
+      "end_time": 1780358400,
+      "user_id": "user_abc123",
+      "actor": {
+        "type": "ACCOUNT_USER",
+        "user_id": "user_abc123",
+        "email": "alice@example.com"
+      },
+      "totals": {
+        "threads": 123,
+        "turns": 456,
+        "credits": 12.5,
+        "uncached_text_input_tokens": 1000,
+        "cached_text_input_tokens": 250,
+        "text_output_tokens": 400,
+        "text_total_tokens": 1650
+      },
+      "clients": [
+        {
+          "client_id": "CODEX_WEB",
+          "threads": 80,
+          "turns": 300,
+          "credits": 4.5,
+          "uncached_text_input_tokens": 700,
+          "cached_text_input_tokens": 150,
+          "text_output_tokens": 250,
+          "text_total_tokens": 1100
+        },
+        {
+          "client_id": "CODEX_CLI",
+          "threads": 43,
+          "turns": 156,
+          "credits": 8.0,
+          "uncached_text_input_tokens": 300,
+          "cached_text_input_tokens": 100,
+          "text_output_tokens": 150,
+          "text_total_tokens": 550
+        }
+      ],
+      "models": [
+        {
+          "model": "gpt-5.4",
+          "speed": "standard",
+          "credits": 12.5,
+          "uncached_text_input_tokens": 1000,
+          "cached_text_input_tokens": 250,
+          "text_output_tokens": 400,
+          "text_total_tokens": 1650
+        }
+      ],
+      "code_attribution": {
+        "lines_of_code": {
+          "added": 123,
+          "removed": 45,
+          "committed": 123,
+          "committed_percentage": 27
+        },
+        "commits": {
+          "with_codex_contribution": 12,
+          "with_codex_contribution_percentage": 57.1
+        }
+      }
+    },
+    {
+      "object": "workspace.codex.usage.result",
+      "start_time": 1780272000,
+      "end_time": 1780358400,
+      "user_id": "user_def456",
+      "actor": {
+        "type": "ACCOUNT_USER",
+        "user_id": "user_def456",
+        "email": null
+      },
+      "totals": {
+        "threads": 10,
+        "turns": 30,
+        "credits": 1.2,
+        "uncached_text_input_tokens": null,
+        "cached_text_input_tokens": null,
+        "text_output_tokens": null,
+        "text_total_tokens": null
+      },
+      "clients": [
+        {
+          "client_id": "CODEX_CLI",
+          "threads": 10,
+          "turns": 30,
+          "credits": 1.2
+        }
+      ],
+      "models": null,
+      "code_attribution": null
+    }
+  ],
+  "has_more": true,
+  "next_page": "cursor_token_abc"
+}
