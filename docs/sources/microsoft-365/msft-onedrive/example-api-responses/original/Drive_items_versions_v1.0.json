@@ -1,0 +1,41 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#Collection(driveItemVersion)",
+  "value": [
+    {
+      "id": "3.0",
+      "lastModifiedDateTime": "2024-03-10T14:30:00Z",
+      "size": 204800,
+      "lastModifiedBy": {
+        "user": {
+          "id": "382f7e1a-59bf-4d40-9c69-f44a6836c40e",
+          "displayName": "Bob Smith",
+          "email": "bob@contoso.com"
+        }
+      }
+    },
+    {
+      "id": "2.0",
+      "lastModifiedDateTime": "2024-02-01T10:15:00Z",
+      "size": 150000,
+      "lastModifiedBy": {
+        "user": {
+          "id": "7c6b0c43-2d1e-4f5a-8b9c-0d1e2f3a4b5c",
+          "displayName": "Carol Diaz",
+          "email": "carol@contoso.com"
+        }
+      }
+    },
+    {
+      "id": "1.0",
+      "lastModifiedDateTime": "2024-01-15T09:00:00Z",
+      "size": 98000,
+      "lastModifiedBy": {
+        "user": {
+          "id": "48d31887-5fad-4d73-a9f5-3c356e68a038",
+          "displayName": "Alice Johnson",
+          "email": "alice@contoso.com"
+        }
+      }
+    }
+  ]
+}

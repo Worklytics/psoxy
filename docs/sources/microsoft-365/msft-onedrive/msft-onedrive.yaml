@@ -1,0 +1,92 @@
+---
+endpoints:
+  - pathTemplate: "/v1.0/users/{userId}/drive/root/delta"
+    allowedQueryParams:
+      - "$skiptoken"
+      - "$deltatoken"
+      - "$select"
+      - "$top"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.value[*].createdBy.user.id"
+          - "$.value[*].createdBy.user.email"
+          - "$.value[*].lastModifiedBy.user.id"
+          - "$.value[*].lastModifiedBy.user.email"
+          - "$.value[*].shared.owner.user.id"
+          - "$.value[*].shared.owner.user.email"
+          - "$.value[*].shared.sharedBy.user.id"
+          - "$.value[*].shared.sharedBy.user.email"
+          - "$.value[*].remoteItem.createdBy.user.id"
+          - "$.value[*].remoteItem.createdBy.user.email"
+          - "$.value[*].remoteItem.lastModifiedBy.user.id"
+          - "$.value[*].remoteItem.lastModifiedBy.user.email"
+        encoding: "URL_SAFE_TOKEN"
+  - pathTemplate: "/v1.0/groups/{groupId}/drive/root/delta"
+    allowedQueryParams:
+      - "$skiptoken"
+      - "$deltatoken"
+      - "$select"
+      - "$top"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.value[*].createdBy.user.id"
+          - "$.value[*].createdBy.user.email"
+          - "$.value[*].lastModifiedBy.user.id"
+          - "$.value[*].lastModifiedBy.user.email"
+          - "$.value[*].shared.owner.user.id"
+          - "$.value[*].shared.owner.user.email"
+          - "$.value[*].shared.sharedBy.user.id"
+          - "$.value[*].shared.sharedBy.user.email"
+          - "$.value[*].remoteItem.createdBy.user.id"
+          - "$.value[*].remoteItem.createdBy.user.email"
+          - "$.value[*].remoteItem.lastModifiedBy.user.id"
+          - "$.value[*].remoteItem.lastModifiedBy.user.email"
+        encoding: "URL_SAFE_TOKEN"
+  - pathTemplate: "/v1.0/sites/{siteId}/drive/root/delta"
+    allowedQueryParams:
+      - "$skiptoken"
+      - "$deltatoken"
+      - "$select"
+      - "$top"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.value[*].createdBy.user.id"
+          - "$.value[*].createdBy.user.email"
+          - "$.value[*].lastModifiedBy.user.id"
+          - "$.value[*].lastModifiedBy.user.email"
+          - "$.value[*].shared.owner.user.id"
+          - "$.value[*].shared.owner.user.email"
+          - "$.value[*].shared.sharedBy.user.id"
+          - "$.value[*].shared.sharedBy.user.email"
+          - "$.value[*].remoteItem.createdBy.user.id"
+          - "$.value[*].remoteItem.createdBy.user.email"
+          - "$.value[*].remoteItem.lastModifiedBy.user.id"
+          - "$.value[*].remoteItem.lastModifiedBy.user.email"
+        encoding: "URL_SAFE_TOKEN"
+  - pathTemplate: "/v1.0/users/{userId}/drive/items/{itemId}/versions"
+    allowedQueryParams: []
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.value[*].lastModifiedBy.user.id"
+          - "$.value[*].lastModifiedBy.user.email"
+        encoding: "URL_SAFE_TOKEN"
+  - pathTemplate: "/v1.0/groups/{groupId}/drive/items/{itemId}/versions"
+    allowedQueryParams: []
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.value[*].lastModifiedBy.user.id"
+          - "$.value[*].lastModifiedBy.user.email"
+        encoding: "URL_SAFE_TOKEN"
+  - pathTemplate: "/v1.0/sites/{siteId}/drive/items/{itemId}/versions"
+    allowedQueryParams: []
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.value[*].lastModifiedBy.user.id"
+          - "$.value[*].lastModifiedBy.user.email"
+        encoding: "URL_SAFE_TOKEN"

@@ -1,0 +1,41 @@
+{
+  "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#Collection(driveItemVersion)",
+  "value":[
+    {
+      "id":"3.0",
+      "lastModifiedDateTime":"2024-03-10T14:30:00Z",
+      "size":204800,
+      "lastModifiedBy":{
+        "user":{
+          "id":"t~jKIuJOPnsYq7eKbyGzoPAkntqacZAy07uLXkOg0ygOc",
+          "displayName":"Bob Smith",
+          "email":"t~NttC3KNgmfBytDUHQ6TNJdyX3qUaxeMIrkO6j2yhEuY@contoso.com"
+        }
+      }
+    },
+    {
+      "id":"2.0",
+      "lastModifiedDateTime":"2024-02-01T10:15:00Z",
+      "size":150000,
+      "lastModifiedBy":{
+        "user":{
+          "id":"t~NsUj8tEOjkh-8iDxJF9wsxN4SZcZdLhnmP468zQcjUs",
+          "displayName":"Carol Diaz",
+          "email":"t~qqv2Razd4spNvnTBJiLuO45zkh_oJ0hIAWMoCALapdk@contoso.com"
+        }
+      }
+    },
+    {
+      "id":"1.0",
+      "lastModifiedDateTime":"2024-01-15T09:00:00Z",
+      "size":98000,
+      "lastModifiedBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "displayName":"Alice Johnson",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      }
+    }
+  ]
+}

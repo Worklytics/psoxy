@@ -1,0 +1,223 @@
+{
+  "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#Collection(driveItem)",
+  "value":[
+    {
+      "id":"01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K",
+      "name":"Project Proposal.pptx",
+      "createdDateTime":"2024-01-15T09:00:00Z",
+      "lastModifiedDateTime":"2024-03-10T14:30:00Z",
+      "size":204800,
+      "webUrl":"https://contoso.sharepoint.com/sites/team/Shared Documents/Project Proposal.pptx",
+      "file":{
+        "mimeType":"application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "hashes":{
+          "quickXorHash":"a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+        }
+      },
+      "parentReference":{
+        "driveId":"b!aBcDeFgHiJkLmNoPqRsTuVwXyZaBcDeFgHiJkLmNoPqRsTuVwXyZ01234567",
+        "driveType":"documentLibrary",
+        "id":"01BYE5RZ4Y2GOVW7725BZO354PWSELRRZ3",
+        "name":"Shared Documents",
+        "path":"/drives/b!aBcDeFgHiJkLmNoPqRsTuVwXyZaBcDeFgHiJkLmNoPqRsTuVwXyZ01234567/root:",
+        "siteId":"contoso.sharepoint.com,a1b2c3d4-e5f6-7890-abcd-ef1234567890,b2c3d4e5-f6a1-2345-bcde-f12345678901"
+      },
+      "createdBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "displayName":"Alice Johnson",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      },
+      "lastModifiedBy":{
+        "user":{
+          "id":"t~jKIuJOPnsYq7eKbyGzoPAkntqacZAy07uLXkOg0ygOc",
+          "displayName":"Bob Smith",
+          "email":"t~NttC3KNgmfBytDUHQ6TNJdyX3qUaxeMIrkO6j2yhEuY@contoso.com"
+        }
+      },
+      "shared":{
+        "scope":"organization",
+        "owner":{
+          "user":{
+            "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+            "displayName":"Alice Johnson",
+            "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+          }
+        },
+        "sharedBy":{
+          "user":{
+            "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+            "displayName":"Alice Johnson",
+            "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+          }
+        },
+        "sharedDateTime":"2024-01-16T10:00:00Z"
+      }
+    },
+    {
+      "id":"01BYE5RZ5MOXWZNKOQPVF2IQGVNMXZX5BS",
+      "name":"Team Documents",
+      "createdDateTime":"2023-06-01T08:00:00Z",
+      "lastModifiedDateTime":"2024-03-10T14:30:00Z",
+      "folder":{
+        "childCount":12,
+        "view":{
+          "viewType":"thumbnails",
+          "sortBy":"name",
+          "sortOrder":"ascending"
+        }
+      },
+      "parentReference":{
+        "driveId":"b!aBcDeFgHiJkLmNoPqRsTuVwXyZaBcDeFgHiJkLmNoPqRsTuVwXyZ01234567",
+        "driveType":"documentLibrary",
+        "id":"01BYE5RZ4Y2GOVW7725BZO354PWSELRRZ3",
+        "siteId":"contoso.sharepoint.com,a1b2c3d4-e5f6-7890-abcd-ef1234567890,b2c3d4e5-f6a1-2345-bcde-f12345678901"
+      },
+      "createdBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "displayName":"Alice Johnson",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      },
+      "lastModifiedBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "displayName":"Alice Johnson",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      }
+    },
+    {
+      "id":"01BYE5RZ2NOTEBOOKPACKAGEXYZ0001",
+      "name":"Research Notebook",
+      "createdDateTime":"2023-11-01T12:00:00Z",
+      "lastModifiedDateTime":"2024-02-20T08:45:00Z",
+      "webUrl":"https://contoso.sharepoint.com/sites/team/Shared Documents/Research Notebook",
+      "package":{
+        "type":"oneNote"
+      },
+      "createdBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "displayName":"Alice Johnson",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      },
+      "lastModifiedBy":{
+        "user":{
+          "id":"t~NsUj8tEOjkh-8iDxJF9wsxN4SZcZdLhnmP468zQcjUs",
+          "displayName":"Carol Diaz",
+          "email":"t~qqv2Razd4spNvnTBJiLuO45zkh_oJ0hIAWMoCALapdk@contoso.com"
+        }
+      }
+    },
+    {
+      "id":"01BYE5RZROOTFOLDER00000000000001",
+      "name":"root",
+      "createdDateTime":"2023-01-01T00:00:00Z",
+      "lastModifiedDateTime":"2024-03-10T14:30:00Z",
+      "size":5242880,
+      "root":{ },
+      "folder":{
+        "childCount":42
+      },
+      "createdBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "displayName":"Alice Johnson",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      },
+      "lastModifiedBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "displayName":"Alice Johnson",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      }
+    },
+    {
+      "id":"01BYE5RZSPECIALFOLDERDOCS000001",
+      "name":"Documents",
+      "createdDateTime":"2023-01-01T00:00:00Z",
+      "lastModifiedDateTime":"2024-01-05T11:00:00Z",
+      "folder":{
+        "childCount":5
+      },
+      "specialFolder":{
+        "name":"documents"
+      },
+      "createdBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "displayName":"Alice Johnson",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      },
+      "lastModifiedBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "displayName":"Alice Johnson",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      }
+    },
+    {
+      "id":"01BYE5RZREMOTESHORTCUT00000001",
+      "name":"Shared from Marketing",
+      "createdDateTime":"2024-02-01T09:00:00Z",
+      "lastModifiedDateTime":"2024-02-01T09:00:00Z",
+      "createdBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "displayName":"Alice Johnson",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      },
+      "lastModifiedBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "displayName":"Alice Johnson",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      },
+      "remoteItem":{
+        "id":"01MKTREMOTEITEM0000000000000001",
+        "name":"Marketing Plan.docx",
+        "webUrl":"https://contoso.sharepoint.com/sites/marketing/Shared Documents/Marketing Plan.docx",
+        "size":51200,
+        "createdDateTime":"2023-12-01T10:00:00Z",
+        "lastModifiedDateTime":"2024-01-20T16:00:00Z",
+        "file":{
+          "mimeType":"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        },
+        "createdBy":{
+          "user":{
+            "id":"t~DTbvYdTNRIQXAF1SvLNyAIENog0-Dy0dxTEB2Yoo5Ys",
+            "displayName":"Dana Lee",
+            "email":"t~1ECTeY42RlWDU6D4DtrXKyFmVrUHbEEpdYzI34l0y9Q@contoso.com"
+          }
+        },
+        "lastModifiedBy":{
+          "user":{
+            "id":"t~DTbvYdTNRIQXAF1SvLNyAIENog0-Dy0dxTEB2Yoo5Ys",
+            "displayName":"Dana Lee",
+            "email":"t~1ECTeY42RlWDU6D4DtrXKyFmVrUHbEEpdYzI34l0y9Q@contoso.com"
+          }
+        },
+        "shared":{
+          "scope":"organization"
+        }
+      }
+    },
+    {
+      "id":"01BYE5RZ7DELETED123456789ABCDEF0001",
+      "deleted":{
+        "state":"deleted"
+      }
+    }
+  ],
+  "@odata.deltaLink":"https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/drive/root/delta?$deltatoken=GqDPRa3_OhHELMD2sOfzPqvX-EtqeNghvAi4KmJ1"
+}
