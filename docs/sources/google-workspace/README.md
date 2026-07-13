@@ -208,65 +208,105 @@ Cons:
 
 ## Troubleshooting
 
-Match log patterns and the proxy response header `X-Psoxy-Error` to a setup issue. Token failures occur on `POST https://oauth2.googleapis.com/token`; API failures occur on `admin.googleapis.com` / `www.googleapis.com`. For recognized setup failures, the proxy returns a sanitized JSON body (without GCP project IDs or activation URLs) and a specific error code in `X-Psoxy-Error`.
+Match log patterns and the proxy response header `X-Psoxy-Error` to a setup issue. Token failures occur on `POST https://oauth2.googleapis.com/token`; API failures occur on `admin.googleapis.com` / `www.googleapis.com`.
 
-| `X-Psoxy-Error` | Log / response signal | Condition | Fix |
-|-----------------|----------------------|-----------|-----|
-| `SOURCE_API_NOT_ENABLED` | `403` — `usageLimits` — `accessNotConfigured`; or `details[].reason` = `SERVICE_DISABLED` | GCP API not enabled | [Required GCP APIs](#available-connectors) on connector page |
-| `SOURCE_AUTHORIZATION_NOT_GRANTED` | `401 Unauthorized` on `oauth2.googleapis.com/token`; or `unauthorized_client` | DWD not granted (or wrong Client ID) | [Domain-wide Delegation scope strings](#domain-wide-delegation-scope-strings) |
-| `SOURCE_OAUTH_SCOPE_MISMATCH` | `access_denied` or `invalid_scope` on `oauth2.googleapis.com/token` | `OAUTH_SCOPES` not covered by DWD grant | Connector README OAuth scopes |
-| `SOURCE_CREDENTIALS_INVALID` | `invalid_grant` + `Invalid JWT Signature` / `SignatureException` on `oauth2.googleapis.com/token` | SA key wrong, revoked, or rotated | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
+Recent proxy versions classify the cases below and return a specific `X-Psoxy-Error` plus a sanitized response body (without GCP project IDs). **Older versions** still surface the same underlying Google errors — look for the **parsed signals** in proxy logs or the raw response body. Those versions typically return `X-Psoxy-Error: API_ERROR` (Workspace API failures) or `X-Psoxy-Error: CONNECTION_SETUP` (token-exchange failures) instead of the codes in the first column.
+
+| `X-Psoxy-Error` | Parsed signals (all versions) | Condition | Fix |
+|-----------------|------------------------------|-----------|-----|
+| `SOURCE_API_NOT_ENABLED` | `403`; `usageLimits` / `accessNotConfigured`; `SERVICE_DISABLED`; `has not been used in project` … `disabled` | GCP API not enabled | [Required GCP APIs](#available-connectors) |
+| `SOURCE_AUTHORIZATION_NOT_GRANTED` | `401 Unauthorized` on `oauth2.googleapis.com/token`; `"error":"unauthorized_client"` | DWD not granted (or wrong Client ID) | [Domain-wide Delegation scope strings](#domain-wide-delegation-scope-strings) |
+| `SOURCE_OAUTH_SCOPE_MISMATCH` | `"error":"access_denied"` or `"error":"invalid_scope"` on `oauth2.googleapis.com/token` | `OAUTH_SCOPES` not covered by DWD grant | Connector README OAuth scopes |
+| `SOURCE_CREDENTIALS_INVALID` | `"error":"invalid_grant"` + `Invalid JWT Signature` / `SignatureException` on `oauth2.googleapis.com/token` | SA key wrong, revoked, or rotated | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
 | `CONNECTION_SETUP` | `IllegalArgumentException` parsing service account key secret | Malformed key secret (not JSON / not base64 JSON) | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
 | `API_ERROR` | `403` + `insufficientPermissions` (after token succeeds) | Impersonated user lacks Workspace admin privileges | [Google Workspace User for Connection](#google-workspace-user-for-connection) |
 
 ### `403` — `usageLimits` — `accessNotConfigured`
 
-**`X-Psoxy-Error`:** `SOURCE_API_NOT_ENABLED`
+**`X-Psoxy-Error`:** `SOURCE_API_NOT_ENABLED` (older: `API_ERROR`)
 
-Proxy logs still contain the full Google error (including project ID). The proxy **response body** is sanitized, e.g.:
+**Parsed signals** — any of these in the Google error JSON or proxy logs:
+
+```json
+"errors": [{ "domain": "usageLimits", "reason": "accessNotConfigured" }]
+```
+
+```json
+"details": [{ "reason": "SERVICE_DISABLED", "metadata": { "service": "admin.googleapis.com", "serviceTitle": "Admin SDK API" } }]
+```
+
+```json
+"message": "Admin SDK API has not been used in project 123456789012 before or it is disabled."
+```
+
+Recent proxy response body (sanitized):
 
 ```json
 {"message":"GCP API is not enabled for the OAuth client project","api":"admin.googleapis.com","apiTitle":"Admin SDK API"}
 ```
 
-**Log signals:** `"domain":"usageLimits"`, `"reason":"accessNotConfigured"`, `"reason":"SERVICE_DISABLED"` in `details`, message contains `has not been used in project` / `disabled`.
-
 **Fix:** [Required GCP APIs](#available-connectors).
 
 ### `401` — `oauth2.googleapis.com/token`
 
-**`X-Psoxy-Error`:** `SOURCE_AUTHORIZATION_NOT_GRANTED`
+**`X-Psoxy-Error`:** `SOURCE_AUTHORIZATION_NOT_GRANTED` (older: `CONNECTION_SETUP`)
+
+**Parsed signals:**
 
 ```
 Error getting access token for service account: 401 Unauthorized
 POST https://oauth2.googleapis.com/token, iss: psoxy-example-google-meet@example-project.iam.gserviceaccount.com
 ```
 
-May also include `"error": "unauthorized_client"`.
+```json
+{ "error": "unauthorized_client", "error_description": "Unauthorized client or scope in request." }
+```
 
 **Fix:** [Domain-wide Delegation scope strings](#domain-wide-delegation-scope-strings).
 
 ### `400` — `access_denied` — `oauth2.googleapis.com/token`
 
-**`X-Psoxy-Error`:** `SOURCE_OAUTH_SCOPE_MISMATCH`
+**`X-Psoxy-Error`:** `SOURCE_OAUTH_SCOPE_MISMATCH` (older: `CONNECTION_SETUP`)
 
-`OAUTH_SCOPES` on the proxy (space-separated) requests scopes not in the DWD grant.
+**Parsed signals:**
+
+```
+Error getting access token for service account: 400 Bad Request POST https://oauth2.googleapis.com/token
+```
+
+```json
+{ "error": "access_denied" }
+```
+
+Proxy may also log: `Confirm oauth scopes set in config.yaml match those granted in data source`.
 
 **Fix:** Connector README OAuth scopes; note `OAUTH_SCOPES` uses spaces, Admin console uses commas.
 
 ### `400` — `invalid_grant` — `oauth2.googleapis.com/token`
 
-**`X-Psoxy-Error`:** `SOURCE_CREDENTIALS_INVALID`
+**`X-Psoxy-Error`:** `SOURCE_CREDENTIALS_INVALID` (older: `CONNECTION_SETUP`)
 
-`invalid_grant` with `Invalid JWT Signature` or `SignatureException` — key revoked, rotated, or wrong secret.
+**Parsed signals:**
+
+```json
+{ "error": "invalid_grant", "error_description": "Invalid JWT Signature." }
+```
+
+```
+java.security.SignatureException: Invalid signature for token
+```
 
 **Fix:** [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform).
 
 ### `invalid_scope` — `oauth2.googleapis.com/token`
 
-**`X-Psoxy-Error`:** `SOURCE_OAUTH_SCOPE_MISMATCH`
+**`X-Psoxy-Error`:** `SOURCE_OAUTH_SCOPE_MISMATCH` (older: `CONNECTION_SETUP`)
 
-Malformed or non-existent scope URL in `OAUTH_SCOPES`.
+**Parsed signals:**
+
+```json
+{ "error": "invalid_scope", "error_description": "Invalid OAuth scope or ID token audience provided." }
+```
 
 **Fix:** [`google-workspace.tf`](../../../infra/modules/worklytics-connector-specs/google-workspace.tf) and connector README.
 
