@@ -77,7 +77,7 @@ public class GoogleApiSetupErrorInterpreter {
         if (message.contains("401 Unauthorized") || message.contains("unauthorized_client")) {
             return Optional.of(tokenError(
                 ErrorCauses.SOURCE_AUTHORIZATION_NOT_GRANTED,
-                "OAuth client authorization has not been granted by the data source administrator"));
+                "OAuth client authorization has not been granted, or granted OAuth scopes do not match OAUTH_SCOPES"));
         }
         return Optional.empty();
     }
