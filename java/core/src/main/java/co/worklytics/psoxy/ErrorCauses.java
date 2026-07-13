@@ -32,6 +32,26 @@ public enum ErrorCauses {
     CONNECTION_SETUP,
 
     /**
+     * Source API returned 403 because the required GCP API is not enabled for the OAuth client project.
+     */
+    SOURCE_API_NOT_ENABLED,
+
+    /**
+     * Domain-wide Delegation has not been granted for the service account (or grant used wrong Client ID).
+     */
+    SOURCE_DWD_NOT_GRANTED,
+
+    /**
+     * OAuth scopes configured on the proxy do not match the Domain-wide Delegation grant.
+     */
+    SOURCE_OAUTH_SCOPE_MISMATCH,
+
+    /**
+     * Service account key in the proxy secret is invalid, revoked, or does not match the provisioned account.
+     */
+    SOURCE_CREDENTIALS_INVALID,
+
+    /**
      * failed to get configuration data; or misconfigured.
      */
     CONFIGURATION_FAILURE,

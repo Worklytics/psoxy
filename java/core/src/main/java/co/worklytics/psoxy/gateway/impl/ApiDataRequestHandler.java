@@ -396,12 +396,18 @@ public class ApiDataRequestHandler {
             }
             
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            builder.body("Failed to parse request; review logs");
-            builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+            Optional<GoogleApiSetupErrorInterpreter.InterpretedSetupError> setupError =
+                GoogleApiSetupErrorInterpreter.interpretTokenExchangeFailure(e.getMessage());
+            if (setupError.isPresent()) {
+                builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                    setupError.get().getErrorCause().name());
+                builder.body(setupError.get().getClientResponseBody());
+            } else {
+                builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     ErrorCauses.CONNECTION_SETUP.name());
+                builder.body("Failed to establish connection to data source; review logs");
+            }
             log.log(Level.WARNING, e.getMessage(), e);
-            // something like "Error getting access token for service account: 401 Unauthorized POST
-            // https://oauth2.googleapis.com/token,"
             log.log(Level.WARNING,
                     "Confirm oauth scopes set in config.yaml match those granted in data source");
             return builder.build();
@@ -603,12 +609,21 @@ public class ApiDataRequestHandler {
 
                 }
             } else {
-                // write error, which shouldn't contain PII, directly
-                log.log(Level.WARNING, "Source API Error " + original.getContentAsString());
+                String sourceErrorBody = original.getContentAsString();
+                log.log(Level.WARNING, "Source API Error " + sourceErrorBody);
 
-                builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                Optional<GoogleApiSetupErrorInterpreter.InterpretedSetupError> setupError =
+                    GoogleApiSetupErrorInterpreter.interpretSourceApiError(
+                        sourceApiResponse.getStatusCode(), sourceErrorBody);
+                if (setupError.isPresent()) {
+                    builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                        setupError.get().getErrorCause().name());
+                    proxyResponseContent = setupError.get().getClientResponseBody();
+                } else {
+                    builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                         ErrorCauses.API_ERROR.name());
-                proxyResponseContent = original.getContentAsString();
+                    proxyResponseContent = sourceErrorBody;
+                }
 
                 // q: in async case, perhaps we should write the error to the async output, too, for
                 // clarity??? could do it with metadata indicating the error to the caller, so it

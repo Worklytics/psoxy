@@ -208,24 +208,69 @@ Cons:
 
 ## Troubleshooting
 
-Google Workspace&trade; API errors/error codes are NOT exhaustively documented by Google, nor do they appear to be viewed as under the scope of API contract. So YMMV; below are some of our notes on errors we've seen in the past, and ideas on root causes of each in case you see them in the future.
+Match log patterns and the proxy response header `X-Psoxy-Error` to a setup issue. Token failures occur on `POST https://oauth2.googleapis.com/token`; API failures occur on `admin.googleapis.com` / `www.googleapis.com`. For recognized setup failures, the proxy returns a sanitized JSON body (without GCP project IDs or activation URLs) and a specific error code in `X-Psoxy-Error`.
 
+| `X-Psoxy-Error` | Log / response signal | Condition | Fix |
+|-----------------|----------------------|-----------|-----|
+| `SOURCE_API_NOT_ENABLED` | `403` — `usageLimits` — `accessNotConfigured`; or `details[].reason` = `SERVICE_DISABLED` | GCP API not enabled | [Required GCP APIs](#available-connectors) on connector page |
+| `SOURCE_DWD_NOT_GRANTED` | `401 Unauthorized` on `oauth2.googleapis.com/token`; or `unauthorized_client` | DWD not granted (or wrong Client ID) | [Domain-wide Delegation scope strings](#domain-wide-delegation-scope-strings) |
+| `SOURCE_OAUTH_SCOPE_MISMATCH` | `access_denied` or `invalid_scope` on `oauth2.googleapis.com/token` | `OAUTH_SCOPES` not covered by DWD grant | Connector README OAuth scopes |
+| `SOURCE_CREDENTIALS_INVALID` | `invalid_grant` + `Invalid JWT Signature` / `SignatureException` on `oauth2.googleapis.com/token` | SA key wrong, revoked, or rotated | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
+| `CONNECTION_SETUP` | `IllegalArgumentException` parsing service account key secret | Malformed key secret (not JSON / not base64 JSON) | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
+| `API_ERROR` | `403` + `insufficientPermissions` (after token succeeds) | Impersonated user lacks Workspace admin privileges | [Google Workspace User for Connection](#google-workspace-user-for-connection) |
 
-### `"error": "invalid_grant"`
-A couple possible cause of `invalid_grant` errors being returned by Google Workspace&trade; APIs.  The error_description / HTTP response codes can provide additional clues.
+### `403` — `usageLimits` — `accessNotConfigured`
 
-#### 400
+**`X-Psoxy-Error`:** `SOURCE_API_NOT_ENABLED`
+
+Proxy logs still contain the full Google error (including project ID). The proxy **response body** is sanitized, e.g.:
+
+```json
+{"message":"GCP API is not enabled for the OAuth client project","api":"admin.googleapis.com","apiTitle":"Admin SDK API"}
 ```
-com.google.auth.oauth2.GoogleAuthException: Error getting access token for service account: 400 Bad Request POST https://oauth2.googleapis.com/token { "error": "invalid_grant", "error_description": "java.security.SignatureException: Invalid signature for token
+
+**Log signals:** `"domain":"usageLimits"`, `"reason":"accessNotConfigured"`, `"reason":"SERVICE_DISABLED"` in `details`, message contains `has not been used in project` / `disabled`.
+
+**Fix:** [Required GCP APIs](#available-connectors).
+
+### `401` — `oauth2.googleapis.com/token`
+
+**`X-Psoxy-Error`:** `SOURCE_DWD_NOT_GRANTED`
+
+```
+Error getting access token for service account: 401 Unauthorized
+POST https://oauth2.googleapis.com/token, iss: psoxy-example-google-meet@example-project.iam.gserviceaccount.com
 ```
 
-This indicates that the service account key (stored as a secret in your proxy instance) has been disabled/destroyed. Ensure that 1) a service account key is set on the service account for the connection, and 2) 
+May also include `"error": "unauthorized_client"`.
 
-#### 401
-If response code seen in your logs from google is a 401, check that Google Workspace&trade; Admin has done DWD grant, as described above.
+**Fix:** [Domain-wide Delegation scope strings](#domain-wide-delegation-scope-strings).
 
-#### 403
-If response code seen in your logs from Google is a 403, check that Google Workspace&trade; Admin has done DWD grant, as described above, **with the proper list of OAuth scopes**. Confirm that the list in the grant as shown in the Google Workspace&trade; Admin console MATCHES what is configured on the `OAUTH_SCOPES` environment variable of your proxy instance.  
+### `400` — `access_denied` — `oauth2.googleapis.com/token`
+
+**`X-Psoxy-Error`:** `SOURCE_OAUTH_SCOPE_MISMATCH`
+
+`OAUTH_SCOPES` on the proxy (space-separated) requests scopes not in the DWD grant.
+
+**Fix:** Connector README OAuth scopes; note `OAUTH_SCOPES` uses spaces, Admin console uses commas.
+
+### `400` — `invalid_grant` — `oauth2.googleapis.com/token`
+
+**`X-Psoxy-Error`:** `SOURCE_CREDENTIALS_INVALID`
+
+`invalid_grant` with `Invalid JWT Signature` or `SignatureException` — key revoked, rotated, or wrong secret.
+
+**Fix:** [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform).
+
+### `invalid_scope` — `oauth2.googleapis.com/token`
+
+**`X-Psoxy-Error`:** `SOURCE_OAUTH_SCOPE_MISMATCH`
+
+Malformed or non-existent scope URL in `OAUTH_SCOPES`.
+
+**Fix:** [`google-workspace.tf`](../../../infra/modules/worklytics-connector-specs/google-workspace.tf) and connector README.
+
+See also Google's [JWT error codes](https://developers.google.com/identity/protocols/oauth2/service-account#jwt-error-codes).
 
 ---
 Google Workspace&trade; and related marks are trademarks of Google LLC.
