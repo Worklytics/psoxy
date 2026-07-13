@@ -282,7 +282,7 @@ Error getting access token for service account: 400 Bad Request POST https://oau
 { "error": "access_denied" }
 ```
 
-Proxy may also log: `Confirm oauth scopes set in config.yaml match those granted in data source`.
+Proxy may also log: `Confirm OAUTH_SCOPES environment variable matches scopes granted in data source`.
 
 **Fix:** Connector README OAuth scopes; note `OAUTH_SCOPES` uses spaces, Admin console uses commas.
 
