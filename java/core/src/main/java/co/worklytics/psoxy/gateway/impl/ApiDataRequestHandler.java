@@ -151,6 +151,8 @@ public class ApiDataRequestHandler {
     ProxyConstants proxyConstants;
     @Inject
     NetworkSecurityUtils networkSecurityUtils;
+    @Inject
+    GoogleApiSetupErrorInterpreter googleApiSetupErrorInterpreter;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -397,7 +399,7 @@ public class ApiDataRequestHandler {
             
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             Optional<GoogleApiSetupErrorInterpreter.InterpretedSetupError> setupError =
-                GoogleApiSetupErrorInterpreter.interpretTokenExchangeFailure(e.getMessage());
+                googleApiSetupErrorInterpreter.interpretTokenExchangeFailure(e.getMessage());
             if (setupError.isPresent()) {
                 builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     setupError.get().getErrorCause().name());
@@ -613,7 +615,7 @@ public class ApiDataRequestHandler {
                 log.log(Level.WARNING, "Source API Error " + sourceErrorBody);
 
                 Optional<GoogleApiSetupErrorInterpreter.InterpretedSetupError> setupError =
-                    GoogleApiSetupErrorInterpreter.interpretSourceApiError(
+                    googleApiSetupErrorInterpreter.interpretSourceApiError(
                         sourceApiResponse.getStatusCode(), sourceErrorBody);
                 if (setupError.isPresent()) {
                     builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),

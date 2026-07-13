@@ -213,7 +213,7 @@ Match log patterns and the proxy response header `X-Psoxy-Error` to a setup issu
 | `X-Psoxy-Error` | Log / response signal | Condition | Fix |
 |-----------------|----------------------|-----------|-----|
 | `SOURCE_API_NOT_ENABLED` | `403` — `usageLimits` — `accessNotConfigured`; or `details[].reason` = `SERVICE_DISABLED` | GCP API not enabled | [Required GCP APIs](#available-connectors) on connector page |
-| `SOURCE_DWD_NOT_GRANTED` | `401 Unauthorized` on `oauth2.googleapis.com/token`; or `unauthorized_client` | DWD not granted (or wrong Client ID) | [Domain-wide Delegation scope strings](#domain-wide-delegation-scope-strings) |
+| `SOURCE_AUTHORIZATION_NOT_GRANTED` | `401 Unauthorized` on `oauth2.googleapis.com/token`; or `unauthorized_client` | DWD not granted (or wrong Client ID) | [Domain-wide Delegation scope strings](#domain-wide-delegation-scope-strings) |
 | `SOURCE_OAUTH_SCOPE_MISMATCH` | `access_denied` or `invalid_scope` on `oauth2.googleapis.com/token` | `OAUTH_SCOPES` not covered by DWD grant | Connector README OAuth scopes |
 | `SOURCE_CREDENTIALS_INVALID` | `invalid_grant` + `Invalid JWT Signature` / `SignatureException` on `oauth2.googleapis.com/token` | SA key wrong, revoked, or rotated | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
 | `CONNECTION_SETUP` | `IllegalArgumentException` parsing service account key secret | Malformed key secret (not JSON / not base64 JSON) | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
@@ -235,7 +235,7 @@ Proxy logs still contain the full Google error (including project ID). The proxy
 
 ### `401` — `oauth2.googleapis.com/token`
 
-**`X-Psoxy-Error`:** `SOURCE_DWD_NOT_GRANTED`
+**`X-Psoxy-Error`:** `SOURCE_AUTHORIZATION_NOT_GRANTED`
 
 ```
 Error getting access token for service account: 401 Unauthorized

@@ -4,10 +4,13 @@ import co.worklytics.psoxy.ErrorCauses;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.inject.Inject;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
@@ -16,9 +19,11 @@ import java.util.stream.StreamSupport;
  * {@link ErrorCauses} and a sanitized response body (without project IDs, activation URLs, etc.).
  */
 @Log
-public final class GoogleApiSetupErrorInterpreter {
+@RequiredArgsConstructor(onConstructor_ = {@Inject})
+public class GoogleApiSetupErrorInterpreter {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    @NonNull
+    private final ObjectMapper objectMapper;
 
     @Value
     @Builder
@@ -27,14 +32,12 @@ public final class GoogleApiSetupErrorInterpreter {
         String clientResponseBody;
     }
 
-    private GoogleApiSetupErrorInterpreter() {}
-
-    public static Optional<InterpretedSetupError> interpretSourceApiError(int statusCode, String responseBody) {
+    public Optional<InterpretedSetupError> interpretSourceApiError(int statusCode, String responseBody) {
         if (statusCode != 403 || StringUtils.isBlank(responseBody)) {
             return Optional.empty();
         }
         try {
-            JsonNode error = MAPPER.readTree(responseBody).get("error");
+            JsonNode error = objectMapper.readTree(responseBody).get("error");
             if (error == null || !isApiNotEnabledError(error)) {
                 return Optional.empty();
             }
@@ -51,14 +54,14 @@ public final class GoogleApiSetupErrorInterpreter {
         }
     }
 
-    public static Optional<InterpretedSetupError> interpretTokenExchangeFailure(String message) {
+    public Optional<InterpretedSetupError> interpretTokenExchangeFailure(String message) {
         if (StringUtils.isBlank(message) || !message.contains("oauth2.googleapis.com/token")) {
             return Optional.empty();
         }
         if (message.contains("access_denied")) {
             return Optional.of(tokenError(
                 ErrorCauses.SOURCE_OAUTH_SCOPE_MISMATCH,
-                "OAuth scopes requested by the proxy are not granted via Domain-wide Delegation"));
+                "OAuth scopes requested by the proxy are not granted by the data source administrator"));
         }
         if (message.contains("invalid_scope")) {
             return Optional.of(tokenError(
@@ -73,13 +76,13 @@ public final class GoogleApiSetupErrorInterpreter {
         }
         if (message.contains("401 Unauthorized") || message.contains("unauthorized_client")) {
             return Optional.of(tokenError(
-                ErrorCauses.SOURCE_DWD_NOT_GRANTED,
-                "Domain-wide Delegation has not been granted for this service account"));
+                ErrorCauses.SOURCE_AUTHORIZATION_NOT_GRANTED,
+                "OAuth client authorization has not been granted by the data source administrator"));
         }
         return Optional.empty();
     }
 
-    private static InterpretedSetupError apiNotEnabledResponse(JsonNode error) {
+    private InterpretedSetupError apiNotEnabledResponse(JsonNode error) {
         String service = extractMetadataField(error, "service");
         String serviceTitle = extractMetadataField(error, "serviceTitle");
         return InterpretedSetupError.builder()
@@ -88,7 +91,7 @@ public final class GoogleApiSetupErrorInterpreter {
             .build();
     }
 
-    private static InterpretedSetupError tokenError(ErrorCauses cause, String message) {
+    private InterpretedSetupError tokenError(ErrorCauses cause, String message) {
         return InterpretedSetupError.builder()
             .errorCause(cause)
             .clientResponseBody("{\"message\":\"" + escapeJson(message) + "\"}")

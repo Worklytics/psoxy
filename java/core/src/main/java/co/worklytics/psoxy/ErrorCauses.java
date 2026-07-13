@@ -37,9 +37,10 @@ public enum ErrorCauses {
     SOURCE_API_NOT_ENABLED,
 
     /**
-     * Domain-wide Delegation has not been granted for the service account (or grant used wrong Client ID).
+     * Source administrator has not granted authorization for the OAuth client (eg, Domain-wide
+     * Delegation for Google Workspace, admin consent for Microsoft 365).
      */
-    SOURCE_DWD_NOT_GRANTED,
+    SOURCE_AUTHORIZATION_NOT_GRANTED,
 
     /**
      * OAuth scopes configured on the proxy do not match the Domain-wide Delegation grant.

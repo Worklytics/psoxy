@@ -1,6 +1,8 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.ErrorCauses;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -8,6 +10,13 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GoogleApiSetupErrorInterpreterTest {
+
+    GoogleApiSetupErrorInterpreter interpreter;
+
+    @BeforeEach
+    void setUp() {
+        interpreter = new GoogleApiSetupErrorInterpreter(new ObjectMapper());
+    }
 
     private static final String API_NOT_ENABLED_BODY = """
         {
@@ -42,7 +51,7 @@ class GoogleApiSetupErrorInterpreterTest {
     @Test
     void interpretSourceApiError_apiNotEnabled() {
         Optional<GoogleApiSetupErrorInterpreter.InterpretedSetupError> result =
-            GoogleApiSetupErrorInterpreter.interpretSourceApiError(403, API_NOT_ENABLED_BODY);
+            interpreter.interpretSourceApiError(403, API_NOT_ENABLED_BODY);
 
         assertTrue(result.isPresent());
         assertEquals(ErrorCauses.SOURCE_API_NOT_ENABLED, result.get().getErrorCause());
@@ -54,13 +63,13 @@ class GoogleApiSetupErrorInterpreterTest {
 
     @Test
     void interpretSourceApiError_other403_returnsEmpty() {
-        assertTrue(GoogleApiSetupErrorInterpreter.interpretSourceApiError(403,
+        assertTrue(interpreter.interpretSourceApiError(403,
             "{\"error\":{\"code\":403,\"message\":\"Insufficient Permission\"}}").isEmpty());
     }
 
     @Test
     void interpretSourceApiError_non403_returnsEmpty() {
-        assertTrue(GoogleApiSetupErrorInterpreter.interpretSourceApiError(401, API_NOT_ENABLED_BODY)
+        assertTrue(interpreter.interpretSourceApiError(401, API_NOT_ENABLED_BODY)
             .isEmpty());
     }
 
@@ -72,11 +81,11 @@ class GoogleApiSetupErrorInterpreterTest {
             """;
 
         Optional<GoogleApiSetupErrorInterpreter.InterpretedSetupError> result =
-            GoogleApiSetupErrorInterpreter.interpretTokenExchangeFailure(message);
+            interpreter.interpretTokenExchangeFailure(message);
 
         assertTrue(result.isPresent());
-        assertEquals(ErrorCauses.SOURCE_DWD_NOT_GRANTED, result.get().getErrorCause());
-        assertTrue(result.get().getClientResponseBody().contains("Domain-wide Delegation"));
+        assertEquals(ErrorCauses.SOURCE_AUTHORIZATION_NOT_GRANTED, result.get().getErrorCause());
+        assertTrue(result.get().getClientResponseBody().contains("OAuth client authorization"));
     }
 
     @Test
@@ -87,7 +96,7 @@ class GoogleApiSetupErrorInterpreterTest {
             """;
 
         Optional<GoogleApiSetupErrorInterpreter.InterpretedSetupError> result =
-            GoogleApiSetupErrorInterpreter.interpretTokenExchangeFailure(message);
+            interpreter.interpretTokenExchangeFailure(message);
 
         assertTrue(result.isPresent());
         assertEquals(ErrorCauses.SOURCE_OAUTH_SCOPE_MISMATCH, result.get().getErrorCause());
@@ -101,7 +110,7 @@ class GoogleApiSetupErrorInterpreterTest {
             """;
 
         Optional<GoogleApiSetupErrorInterpreter.InterpretedSetupError> result =
-            GoogleApiSetupErrorInterpreter.interpretTokenExchangeFailure(message);
+            interpreter.interpretTokenExchangeFailure(message);
 
         assertTrue(result.isPresent());
         assertEquals(ErrorCauses.SOURCE_CREDENTIALS_INVALID, result.get().getErrorCause());
@@ -109,7 +118,7 @@ class GoogleApiSetupErrorInterpreterTest {
 
     @Test
     void interpretTokenExchangeFailure_unrelated_returnsEmpty() {
-        assertTrue(GoogleApiSetupErrorInterpreter.interpretTokenExchangeFailure(
+        assertTrue(interpreter.interpretTokenExchangeFailure(
             "connection reset").isEmpty());
     }
 }
