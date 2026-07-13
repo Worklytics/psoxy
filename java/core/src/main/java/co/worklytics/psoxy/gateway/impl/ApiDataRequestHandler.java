@@ -409,9 +409,13 @@ public class ApiDataRequestHandler {
                     ErrorCauses.CONNECTION_SETUP.name());
                 builder.body("Failed to establish connection to data source; review logs");
             }
-            log.log(Level.WARNING, e.getMessage(), e);
-            log.log(Level.WARNING,
+            boolean tokenExchangeFailure = StringUtils.contains(e.getMessage(), "oauth2.googleapis.com/token");
+            Level logLevel = (setupError.isPresent() || tokenExchangeFailure) ? Level.SEVERE : Level.WARNING;
+            log.log(logLevel, e.getMessage(), e);
+            if (tokenExchangeFailure) {
+                log.log(logLevel,
                     "Confirm OAUTH_SCOPES environment variable matches scopes granted in data source");
+            }
             return builder.build();
         } catch (co.worklytics.psoxy.gateway.TransientConfigException e) {
             // Config store was temporarily unreachable (e.g. credential rotation, AWS hiccup).
