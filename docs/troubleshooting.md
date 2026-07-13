@@ -2,6 +2,7 @@
 
 ## Specific Data Sources
 
+- [Google Workspace](sources/google-workspace/README.md#troubleshooting)
 - [Microsoft 365](sources/microsoft-365/README.md)
 
 ### Error: Attempted to load application default credentials (Google provider authentication failure)

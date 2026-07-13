@@ -47,6 +47,8 @@ As these are very permissive roles, we recommend that you use a _dedicated_ GCP 
 
 Additionally, a Google Workspace&trade; Admin will need to make a Domain-wide Delegation grant to the Oauth Clients you create. This is done via the Google Workspace&trade; Admin console. In default setup, this requires [Super Admin](https://support.google.com/a/answer/2405986?hl=en&fl=1) role, but your organization may have a Custom Role with sufficient privileges.
 
+**Important:** Domain-wide Delegation is granted **per Google Workspace tenant** (domain / organization). The DWD grant, the impersonation user (`svc-worklytics@...` or similar), and the data you intend to connect must all belong to the **same** tenant. If your organization has separate environments (e.g. a sandbox and a production Google Workspace), you must complete DWD setup separately in each tenant's Admin console, using impersonation users that exist in that tenant. A DWD grant in your sandbox tenant does not authorize impersonation of users in your production tenant, even if the GCP service account and key are the same.
+
 ## Google Workspace&trade; User for Connection
 
 We also recommend you create a dedicated Google Workspace&trade; user for Psoxy to use when connecting to your Google Workspace&trade; Admin API, with the specific permissions needed. This avoids the connection being tied to a personal account and helps with auditing and security.
@@ -70,6 +72,8 @@ Assign the account a sufficiently privileged role. At minimum, the role must gra
 All of the above are found under **Admin settings privileges** in the Custom Role editor. Google reorganized administrator privileges in 2025; expand each category and enable only the **Read** sub-action where available. See Google's [privilege definitions](https://knowledge.workspace.google.com/admin/users/administrator-privilege-definitions) for the full list.
 
 The email address of the account you created will be used when creating the data connection to the Google Directory in the Worklytics&trade; portal. Provide it as the value of the 'Google Account to Use for Connection' setting when they create the connection.
+
+The impersonation user's email domain must match the Google Workspace tenant in which you made the DWD grant. When testing with `psoxy-test` or example API calls, the `-i` / `User-To-Impersonate` value must also be a user in that same tenant.
 
 ### Custom Role
 
@@ -206,7 +210,42 @@ This indicates that the service account key (stored as a secret in your proxy in
 If response code seen in your logs from google is a 401, check that Google Workspace&trade; Admin has done DWD grant, as described above.
 
 #### 403
-If response code seen in your logs from Google is a 403, check that Google Workspace&trade; Admin has done DWD grant, as described above, **with the proper list of OAuth scopes**. Confirm that the list in the grant as shown in the Google Workspace&trade; Admin console MATCHES what is configured on the `OAUTH_SCOPES` environment variable of your proxy instance.  
+If response code seen in your logs from Google is a 403, check that Google Workspace&trade; Admin has done DWD grant, as described above, **with the proper list of OAuth scopes**. Confirm that the list in the grant as shown in the Google Workspace&trade; Admin console MATCHES what is configured on the `OAUTH_SCOPES` environment variable of your proxy instance.
+
+### `"error": "access_denied"` / `"Requested client not authorized."`
+
+This error is returned by Google's OAuth token endpoint (`POST https://oauth2.googleapis.com/token`) when the proxy exchanges a service account JWT for an access token. It usually means the OAuth client is not authorized for the requested scopes in the Google Workspace tenant relevant to the call—not that the service account key itself is malformed.
+
+Common causes:
+
+- DWD grant missing, incomplete, or using the wrong numeric Client ID
+- `OAUTH_SCOPES` on the proxy does not match the scopes in the DWD grant
+- Service account key in the proxy secret belongs to a different GCP service account than the one granted DWD
+
+#### Cross-tenant mismatch (sandbox vs production)
+
+**Symptom:** Token exchange fails with `403 Forbidden` and:
+
+```
+{
+  "error": "access_denied",
+  "error_description": "Requested client not authorized."
+}
+```
+
+DWD appears correctly configured (correct Client ID and scopes), but authentication still fails.
+
+**Cause:** The DWD grant was made in one Google Workspace tenant (e.g. a sandbox), while the impersonation user used for testing or in the Worklytics connection settings belongs to a different tenant (e.g. production). Domain-wide Delegation authorizes a GCP service account to act **within a specific Workspace organization**. Impersonating `admin@production.example.com` requires a DWD grant in the **production** tenant's Admin console; a grant in `sandbox.example.com` does not apply.
+
+**Fix:**
+
+1. Identify which Google Workspace tenant you intend to connect (confirm the domain of the users whose data you need).
+2. Sign in to **that** tenant's Admin console (`admin.google.com` for that organization).
+3. Add or verify the DWD grant there (Client ID + scopes).
+4. Use an impersonation user that exists in that tenant (e.g. `svc-worklytics@production.example.com`, not a user from sandbox).
+5. Re-test with that user in the `User-To-Impersonate` header / `-i` flag.
+
+If you connect to multiple tenants, repeat DWD setup and impersonation-user configuration for each one. The GCP project and service account can be shared, but each Workspace tenant needs its own DWD authorization.
 
 ---
 Google Workspace&trade; and related marks are trademarks of Google LLC.

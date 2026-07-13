@@ -38,13 +38,38 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
     private final String configIdentifier = "gcp_service_account_key";
 
     /**
-     * config properties that control how Psoxy authenticates against host
+     * Configuration properties for authenticating to Google APIs via a GCP service account key.
      */
     public enum ConfigProperty implements ConfigService.ConfigProperty {
+
+        /**
+         * Space-delimited list of OAuth 2.0 scopes to request when exchanging the service account
+         * key for an access token (e.g. {@code https://www.googleapis.com/auth/admin.directory.user.readonly}).
+         *
+         * <p>These scopes must be granted to the service account (OAuth client) in Google Cloud /
+         * Google Workspace admin configuration. {@link GoogleCloudPlatformServiceAccountKeyAuthStrategy}
+         * signs a JWT with the private key from {@link #SERVICE_ACCOUNT_KEY} and requests a
+         * short-lived OAuth access token from Google that is limited to this scope list.
+         */
         OAUTH_SCOPES,
-        //this should ACTUALLY be stored in secret manager, and then exposed as env var to the
-        // cloud function
-        // see "https://cloud.google.com/functions/docs/configuring/secrets#gcloud"
+
+        /**
+         * JSON credentials for a GCP service account, as downloaded from the Google Cloud console
+         * or created via the IAM API.
+         *
+         * <p>Accepted in either format:
+         * <ul>
+         *   <li><b>Plain JSON</b> — the default when downloading a key from the GCP console
+         *       (a {@code .json} file whose content begins with {@code {})</li>
+         *   <li><b>Base64-encoded JSON</b> — the same key content, base64-encoded (as returned by
+         *       Terraform's {@code google_service_account_key.private_key})</li>
+         * </ul>
+         *
+         * <p>Store this value in your host's secret manager and expose it to the proxy as an
+         * environment variable (e.g. via
+         * <a href="https://cloud.google.com/functions/docs/configuring/secrets#gcloud">GCP Cloud
+         * Functions secrets</a>).
+         */
         SERVICE_ACCOUNT_KEY,
     }
 
