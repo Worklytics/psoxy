@@ -409,11 +409,9 @@ public class ApiDataRequestHandler {
                     ErrorCauses.CONNECTION_SETUP.name());
                 builder.body("Failed to establish connection to data source; review logs");
             }
-            boolean tokenExchangeFailure = StringUtils.contains(e.getMessage(), "oauth2.googleapis.com/token");
-            Level logLevel = (setupError.isPresent() || tokenExchangeFailure) ? Level.SEVERE : Level.WARNING;
-            log.log(logLevel, e.getMessage(), e);
-            if (tokenExchangeFailure) {
-                log.log(logLevel,
+            log.log(Level.SEVERE, e.getMessage(), e);
+            if (setupError.isPresent()) {
+                log.log(Level.SEVERE,
                     "Confirm OAUTH_SCOPES environment variable matches scopes granted in data source");
             }
             return builder.build();
