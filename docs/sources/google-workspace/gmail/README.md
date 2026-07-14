@@ -8,7 +8,20 @@ Please review the [Google Workspace&trade; README](../README.md) for general inf
 all Google Workspace connectors.
 
 ## Required OAuth Scopes
+
 - `gmail.metadata`
+
+For Domain-wide Delegation in the Google Workspace Admin console, paste the following comma-separated list into the **Scopes** field:
+
+```
+https://www.googleapis.com/auth/gmail.metadata
+```
+
+## Required GCP APIs
+
+Enable the following API in the GCP project where you provision the OAuth client:
+
+- `gmail.googleapis.com` (Gmail API)
 
 ## Examples
 
