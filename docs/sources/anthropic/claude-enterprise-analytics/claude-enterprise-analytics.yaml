@@ -155,6 +155,8 @@ definitions:
         type: "integer"
       distinct_artifacts_created_count:
         type: "integer"
+      distinct_connectors_used_count:
+        type: "integer"
       distinct_conversation_count:
         type: "integer"
       distinct_files_uploaded_count:
@@ -220,13 +222,40 @@ definitions:
         type: "integer"
       distinct_connectors_used_count:
         type: "integer"
+      distinct_plugins_used_count:
+        type: "integer"
       distinct_session_count:
         type: "integer"
       distinct_skills_used_count:
         type: "integer"
+      edit_tool_count:
+        type: "integer"
+      file_edit_count:
+        type: "integer"
       message_count:
         type: "integer"
+      multi_edit_tool_count:
+        type: "integer"
+      notebook_edit_tool_count:
+        type: "integer"
+      plugins_used_count:
+        type: "integer"
+      sessions_with_file_edits_count:
+        type: "integer"
       skills_used_count:
+        type: "integer"
+      write_tool_count:
+        type: "integer"
+  DesignMetrics:
+    type: "object"
+    properties:
+      distinct_projects_created_count:
+        type: "integer"
+      distinct_projects_used_count:
+        type: "integer"
+      distinct_session_count:
+        type: "integer"
+      message_count:
         type: "integer"
   LinesOfCode:
     type: "object"
@@ -261,6 +290,19 @@ definitions:
         $ref: "#/definitions/OfficeAppMetrics"
       word:
         $ref: "#/definitions/OfficeAppMetrics"
+  ScienceMetrics:
+    type: "object"
+    properties:
+      delegation_count:
+        type: "integer"
+      distinct_session_count:
+        type: "integer"
+      message_count:
+        type: "integer"
+      remote_compute_job_count:
+        type: "integer"
+      skills_used_count:
+        type: "integer"
   ServerToolUse:
     type: "object"
     properties:
@@ -269,9 +311,9 @@ definitions:
   ToolAction:
     type: "object"
     properties:
-      accepted:
+      accepted_count:
         type: "integer"
-      rejected:
+      rejected_count:
         type: "integer"
   ToolActions:
     type: "object"
@@ -293,11 +335,21 @@ definitions:
         $ref: "#/definitions/ClaudeCodeMetrics"
       cowork_metrics:
         $ref: "#/definitions/CoworkMetrics"
-      date:
+      design_metrics:
+        $ref: "#/definitions/DesignMetrics"
+      distinct_user_count:
+        type: "integer"
+      last_activity_date:
         type: "string"
         format: "date"
       office_metrics:
         $ref: "#/definitions/OfficeMetrics"
+      rbac_group_id:
+        type: "string"
+      rbac_group_name:
+        type: "string"
+      science_metrics:
+        $ref: "#/definitions/ScienceMetrics"
       user:
         $ref: "#/definitions/AnalyticsUser"
       web_search_count:
@@ -358,4 +410,3 @@ definitions:
         type: "integer"
       uncached_input_tokens:
         type: "integer"
-

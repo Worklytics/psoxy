@@ -513,8 +513,6 @@ endpoints:
           type: "string"
         name:
           type: "string"
-        organization_id:
-          type: "string"
         organization_uuid:
           type: "string"
         project_id:
@@ -727,8 +725,6 @@ definitions:
       model:
         type: "string"
       name:
-        type: "string"
-      organization_id:
         type: "string"
       organization_uuid:
         type: "string"
