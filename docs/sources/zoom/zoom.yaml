@@ -1,7 +1,9 @@
 ---
 endpoints:
   - pathTemplate: "/v2/meetings/{meetingId}"
-    allowedQueryParams: []
+    allowedQueryParams:
+      - "occurrence_id"
+      - "show_previous_occurrences"
     transforms:
       - !<pseudonymize>
         jsonPaths:
