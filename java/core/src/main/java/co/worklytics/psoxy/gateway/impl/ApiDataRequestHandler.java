@@ -151,8 +151,6 @@ public class ApiDataRequestHandler {
     ProxyConstants proxyConstants;
     @Inject
     NetworkSecurityUtils networkSecurityUtils;
-    @Inject
-    GoogleApiSetupErrorInterpreter googleApiSetupErrorInterpreter;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -398,22 +396,14 @@ public class ApiDataRequestHandler {
             }
             
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            Optional<GoogleApiSetupErrorInterpreter.InterpretedSetupError> setupError =
-                googleApiSetupErrorInterpreter.interpretTokenExchangeFailure(e.getMessage());
-            if (setupError.isPresent()) {
-                builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
-                    setupError.get().getErrorCause().name());
-                builder.body(setupError.get().getClientResponseBody());
-            } else {
-                builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+            builder.body("Failed to parse request; review logs");
+            builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     ErrorCauses.CONNECTION_SETUP.name());
-                builder.body("Failed to establish connection to data source; review logs");
-            }
-            log.log(Level.SEVERE, e.getMessage(), e);
-            if (setupError.isPresent()) {
-                log.log(Level.SEVERE,
+            log.log(Level.WARNING, e.getMessage(), e);
+            // something like "Error getting access token for service account: 401 Unauthorized POST
+            // https://oauth2.googleapis.com/token,"
+            log.log(Level.WARNING,
                     "Confirm OAUTH_SCOPES environment variable matches scopes granted in data source");
-            }
             return builder.build();
         } catch (co.worklytics.psoxy.gateway.TransientConfigException e) {
             // Config store was temporarily unreachable (e.g. credential rotation, AWS hiccup).
@@ -613,21 +603,12 @@ public class ApiDataRequestHandler {
 
                 }
             } else {
-                String sourceErrorBody = original.getContentAsString();
-                log.log(Level.WARNING, "Source API Error " + sourceErrorBody);
+                // write error, which shouldn't contain PII, directly
+                log.log(Level.WARNING, "Source API Error " + original.getContentAsString());
 
-                Optional<GoogleApiSetupErrorInterpreter.InterpretedSetupError> setupError =
-                    googleApiSetupErrorInterpreter.interpretSourceApiError(
-                        sourceApiResponse.getStatusCode(), sourceErrorBody);
-                if (setupError.isPresent()) {
-                    builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
-                        setupError.get().getErrorCause().name());
-                    proxyResponseContent = setupError.get().getClientResponseBody();
-                } else {
-                    builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                         ErrorCauses.API_ERROR.name());
-                    proxyResponseContent = sourceErrorBody;
-                }
+                proxyResponseContent = original.getContentAsString();
 
                 // q: in async case, perhaps we should write the error to the async output, too, for
                 // clarity??? could do it with metadata indicating the error to the caller, so it

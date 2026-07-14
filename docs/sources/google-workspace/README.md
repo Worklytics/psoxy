@@ -208,24 +208,20 @@ Cons:
 
 ## Troubleshooting
 
-Match log patterns and the proxy response header `X-Psoxy-Error` to a setup issue. Token failures occur on `POST https://oauth2.googleapis.com/token`; API failures occur on `admin.googleapis.com` / `www.googleapis.com`.
+Match log / response signals to a setup issue. Token failures occur on `POST https://oauth2.googleapis.com/token` and usually set `X-Psoxy-Error: CONNECTION_SETUP`. Failures calling a Workspace API (`admin.googleapis.com`, `www.googleapis.com`, etc.) usually set `X-Psoxy-Error: API_ERROR` and may echo Google's error JSON in the response body.
 
-Recent proxy versions classify the cases below and return a specific `X-Psoxy-Error` plus a sanitized response body (without GCP project IDs). **Older versions** still surface the same underlying Google errors — look for the **parsed signals** in proxy logs or the raw response body. Those versions typically return `X-Psoxy-Error: API_ERROR` (Workspace API failures) or `X-Psoxy-Error: CONNECTION_SETUP` (token-exchange failures) instead of the codes in the first column.
-
-| `X-Psoxy-Error` | Parsed signals (all versions) | Condition | Fix |
-|-----------------|------------------------------|-----------|-----|
-| `SOURCE_API_NOT_ENABLED` | `403`; `usageLimits` / `accessNotConfigured`; `SERVICE_DISABLED`; `has not been used in project` … `disabled` | GCP API not enabled | [Required GCP APIs](#available-connectors) |
-| `SOURCE_AUTHORIZATION_NOT_GRANTED` | `401 Unauthorized` on `oauth2.googleapis.com/token`; `"error":"unauthorized_client"` | DWD not granted, wrong Client ID, **or** granted scopes ≠ `OAUTH_SCOPES` | [Domain-wide Delegation scope strings](#domain-wide-delegation-scope-strings) |
-| `SOURCE_OAUTH_SCOPE_MISMATCH` | `"error":"access_denied"` or `"error":"invalid_scope"` on `oauth2.googleapis.com/token`; **may also appear as `401`** (same as above) | `OAUTH_SCOPES` not covered by DWD grant | Connector README OAuth scopes |
-| `SOURCE_CREDENTIALS_INVALID` | `"error":"invalid_grant"` + `Invalid JWT Signature` / `SignatureException` on `oauth2.googleapis.com/token` | SA key wrong, revoked, or rotated | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
-| `CONNECTION_SETUP` | `IllegalArgumentException` parsing service account key secret | Malformed key secret (not JSON / not base64 JSON) | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
-| `API_ERROR` | `403` + `insufficientPermissions` (after token succeeds) | Impersonated user lacks Workspace admin privileges | [Google Workspace User for Connection](#google-workspace-user-for-connection) |
+| Signal | Condition | Fix |
+|--------|-----------|-----|
+| `403` — `usageLimits` — `accessNotConfigured`; or `SERVICE_DISABLED`; or `has not been used in project` … `disabled` | GCP API not enabled | [Required GCP APIs](#available-connectors) |
+| `401 Unauthorized` on `oauth2.googleapis.com/token`; or `"error":"unauthorized_client"` | DWD not granted, wrong Client ID, **or** granted scopes ≠ `OAUTH_SCOPES` | [Domain-wide Delegation scope strings](#domain-wide-delegation-scope-strings) |
+| `"error":"access_denied"` or `"error":"invalid_scope"` on `oauth2.googleapis.com/token` (some scope mismatches appear as `401` instead) | `OAUTH_SCOPES` not covered by DWD grant | Connector README OAuth scopes |
+| `"error":"invalid_grant"` + `Invalid JWT Signature` / `SignatureException` on `oauth2.googleapis.com/token` | SA key wrong, revoked, or rotated | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
+| `IllegalArgumentException` parsing service account key secret | Malformed key secret (not JSON / not base64 JSON) | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
+| `403` + `insufficientPermissions` (after token succeeds) | Impersonated user lacks Workspace admin privileges | [Google Workspace User for Connection](#google-workspace-user-for-connection) |
 
 ### `403` — `usageLimits` — `accessNotConfigured`
 
-**`X-Psoxy-Error`:** `SOURCE_API_NOT_ENABLED` (older: `API_ERROR`)
-
-**Parsed signals** — any of these in the Google error JSON or proxy logs:
+GCP API not enabled for the OAuth client project. Signals in the Google error JSON / proxy logs:
 
 ```json
 "errors": [{ "domain": "usageLimits", "reason": "accessNotConfigured" }]
@@ -239,19 +235,11 @@ Recent proxy versions classify the cases below and return a specific `X-Psoxy-Er
 "message": "Admin SDK API has not been used in project 123456789012 before or it is disabled."
 ```
 
-Recent proxy response body (sanitized):
-
-```json
-{"message":"GCP API is not enabled for the OAuth client project","api":"admin.googleapis.com","apiTitle":"Admin SDK API"}
-```
-
 **Fix:** [Required GCP APIs](#available-connectors).
 
 ### `401` — `oauth2.googleapis.com/token`
 
-**`X-Psoxy-Error`:** `SOURCE_AUTHORIZATION_NOT_GRANTED` (older: `CONNECTION_SETUP`)
-
-**Parsed signals:**
+DWD missing, wrong Client ID, or scopes that do not match `OAUTH_SCOPES`:
 
 ```
 Error getting access token for service account: 401 Unauthorized
@@ -262,17 +250,13 @@ POST https://oauth2.googleapis.com/token, iss: psoxy-example-google-meet@example
 { "error": "unauthorized_client", "error_description": "Unauthorized client or scope in request." }
 ```
 
-NOTE: Google does not always distinguish missing DWD from a **scope mismatch** (DWD granted, but with different scopes than `OAUTH_SCOPES` requests). A wrong-scope grant can produce the same `401 Unauthorized` stack trace as no grant at all — compare `OAUTH_SCOPES` on the proxy against the scopes listed in the Admin console for this Client ID.
+NOTE: Google does not always distinguish a missing DWD grant from a **scope mismatch** (DWD granted, but with different scopes than `OAUTH_SCOPES`). A wrong-scope grant can produce the same `401 Unauthorized` stack trace as no grant at all — compare `OAUTH_SCOPES` on the proxy against the scopes listed in the Admin console for this Client ID.
 
 **Fix:** [Domain-wide Delegation scope strings](#domain-wide-delegation-scope-strings) and connector README OAuth scopes.
 
 ### `400` — `access_denied` — `oauth2.googleapis.com/token`
 
-**`X-Psoxy-Error`:** `SOURCE_OAUTH_SCOPE_MISMATCH` (older: `CONNECTION_SETUP`)
-
-NOTE: Some scope mismatches surface as `401` instead — see above.
-
-**Parsed signals:**
+`OAUTH_SCOPES` requests scopes not in the DWD grant. Some mismatches surface as `401` instead — see above.
 
 ```
 Error getting access token for service account: 400 Bad Request POST https://oauth2.googleapis.com/token
@@ -288,9 +272,7 @@ Proxy may also log: `Confirm OAUTH_SCOPES environment variable matches scopes gr
 
 ### `400` — `invalid_grant` — `oauth2.googleapis.com/token`
 
-**`X-Psoxy-Error`:** `SOURCE_CREDENTIALS_INVALID` (older: `CONNECTION_SETUP`)
-
-**Parsed signals:**
+Service account key wrong, revoked, rotated, or not matching the provisioned account:
 
 ```json
 { "error": "invalid_grant", "error_description": "Invalid JWT Signature." }
@@ -304,9 +286,7 @@ java.security.SignatureException: Invalid signature for token
 
 ### `invalid_scope` — `oauth2.googleapis.com/token`
 
-**`X-Psoxy-Error`:** `SOURCE_OAUTH_SCOPE_MISMATCH` (older: `CONNECTION_SETUP`)
-
-**Parsed signals:**
+Malformed or non-existent scope URL in `OAUTH_SCOPES`:
 
 ```json
 { "error": "invalid_scope", "error_description": "Invalid OAuth scope or ID token audience provided." }
