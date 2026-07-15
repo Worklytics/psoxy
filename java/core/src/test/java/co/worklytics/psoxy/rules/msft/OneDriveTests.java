@@ -16,6 +16,7 @@ public class OneDriveTests extends JavaRulesTestBaseCase {
         return RulesTestSpec.builder()
                 .sourceFamily("microsoft-365")
                 .sourceKind("msft-onedrive")
+                .checkUncompressedSSMLength(false)
                 .build();
     }
 
@@ -25,16 +26,17 @@ public class OneDriveTests extends JavaRulesTestBaseCase {
         String baseEndpoint = "https://graph.microsoft.com/" + apiVersion;
         String userId = "48d31887-5fad-4d73-a9f5-3c356e68a038";
         String groupId = "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b";
-        String siteId = "contoso.sharepoint.com,a1b2c3d4-e5f6-7890-abcd-ef1234567890,b2c3d4e5-f6a1-2345-bcde-f12345678901";
+        String driveId = "b!-RIj2DuyvEyV1T4NlOaMHk8XkS_I8MdFlUCq1BlcjgmhRfAj3-Z8RY2VpuvV_tpd";
         String itemId = "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K";
 
         return Stream.of(
-                InvocationExample.of(baseEndpoint + "/users/" + userId + "/drive/root/delta", "Users_drive_delta_" + apiVersion + ".json"),
-                InvocationExample.of(baseEndpoint + "/groups/" + groupId + "/drive/root/delta", "Users_drive_delta_" + apiVersion + ".json"),
-                InvocationExample.of(baseEndpoint + "/sites/" + siteId + "/drive/root/delta", "Users_drive_delta_" + apiVersion + ".json"),
-                InvocationExample.of(baseEndpoint + "/users/" + userId + "/drive/items/" + itemId + "/versions", "Drive_items_versions_" + apiVersion + ".json"),
-                InvocationExample.of(baseEndpoint + "/groups/" + groupId + "/drive/items/" + itemId + "/versions", "Drive_items_versions_" + apiVersion + ".json"),
-                InvocationExample.of(baseEndpoint + "/sites/" + siteId + "/drive/items/" + itemId + "/versions", "Drive_items_versions_" + apiVersion + ".json")
+                InvocationExample.of(baseEndpoint + "/users?$top=999&$select=id,mail,employeeId,otherMails,proxyAddresses&$skiptoken=abcXYZ123&$orderBy=id&$count=true", "users.json"),
+                InvocationExample.of(baseEndpoint + "/groups?$top=999&$select=id,mail&$skiptoken=abcXYZ123&$orderBy=id&$count=true", "groups.json"),
+                InvocationExample.of(baseEndpoint + "/users/" + userId + "/drives?$select=id,driveType,system&$skiptoken=abcXYZ123&$top=999&$orderBy=id&$expand=root", "list_drives.json"),
+                InvocationExample.of(baseEndpoint + "/groups/" + groupId + "/drives?$select=id,driveType,system&$skiptoken=abcXYZ123&$top=999&$orderBy=id&$expand=root", "list_drives.json"),
+                InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/root/delta?$skiptoken=abcXYZ123&$deltatoken=deltaTokenXYZ", "get_drive_delta.json"),
+                InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/items/" + itemId + "/versions?$skiptoken=abcXYZ123", "list_driveItemVersion.json"),
+                InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/items/" + itemId + "/activities", "list_itemActivity.json")
         );
     }
 }

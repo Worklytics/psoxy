@@ -1,71 +1,71 @@
 {
-  "value": [
+  "value":[
     {
-      "id": "0123456789abc",
-      "folder": { },
-      "createdBy": {
-        "user": {
-          "id": "t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
-          "email": "t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+      "id":"0123456789abc",
+      "folder":{ },
+      "createdBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
         }
       },
-      "lastModifiedBy": {
-        "user": {
-          "id": "t~jKIuJOPnsYq7eKbyGzoPAkntqacZAy07uLXkOg0ygOc",
-          "email": "t~NttC3KNgmfBytDUHQ6TNJdyX3qUaxeMIrkO6j2yhEuY@contoso.com"
+      "lastModifiedBy":{
+        "user":{
+          "id":"t~jKIuJOPnsYq7eKbyGzoPAkntqacZAy07uLXkOg0ygOc",
+          "email":"t~NttC3KNgmfBytDUHQ6TNJdyX3qUaxeMIrkO6j2yhEuY@contoso.com"
         }
       }
     },
     {
-      "id": "123010204abac",
-      "file": { },
-      "createdBy": {
-        "user": {
-          "id": "t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
-          "email": "t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+      "id":"123010204abac",
+      "file":{ },
+      "createdBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
         }
       },
-      "lastModifiedBy": {
-        "user": {
-          "id": "t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
-          "email": "t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+      "lastModifiedBy":{
+        "user":{
+          "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
         }
       },
-      "shared": {
-        "owner": {
-          "user": {
-            "id": "t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
-            "email": "t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+      "shared":{
+        "owner":{
+          "user":{
+            "id":"t~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpA",
+            "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
           }
         },
-        "sharedBy": {
-          "user": {
-            "id": "t~jKIuJOPnsYq7eKbyGzoPAkntqacZAy07uLXkOg0ygOc",
-            "email": "t~NttC3KNgmfBytDUHQ6TNJdyX3qUaxeMIrkO6j2yhEuY@contoso.com"
+        "sharedBy":{
+          "user":{
+            "id":"t~jKIuJOPnsYq7eKbyGzoPAkntqacZAy07uLXkOg0ygOc",
+            "email":"t~NttC3KNgmfBytDUHQ6TNJdyX3qUaxeMIrkO6j2yhEuY@contoso.com"
           }
         },
-        "sharedDateTime": "2023-10-20T02:06:58.147Z"
+        "sharedDateTime":"2023-10-20T02:06:58.147Z"
       }
     },
     {
-      "id": "2353010204ddgg",
-      "deleted": { }
+      "id":"2353010204ddgg",
+      "deleted":{ }
     },
     {
-      "id": "9a8b7c6d5e4f",
-      "file": { },
-      "remoteItem": {
-        "id": "remote-item-1",
-        "createdBy": {
-          "user": {
-            "id": "t~DTbvYdTNRIQXAF1SvLNyAIENog0-Dy0dxTEB2Yoo5Ys",
-            "email": "t~1ECTeY42RlWDU6D4DtrXKyFmVrUHbEEpdYzI34l0y9Q@contoso.com"
+      "id":"9a8b7c6d5e4f",
+      "file":{ },
+      "remoteItem":{
+        "id":"remote-item-1",
+        "createdBy":{
+          "user":{
+            "id":"t~DTbvYdTNRIQXAF1SvLNyAIENog0-Dy0dxTEB2Yoo5Ys",
+            "email":"t~1ECTeY42RlWDU6D4DtrXKyFmVrUHbEEpdYzI34l0y9Q@contoso.com"
           }
         },
-        "lastModifiedBy": {
-          "user": {
-            "id": "t~DTbvYdTNRIQXAF1SvLNyAIENog0-Dy0dxTEB2Yoo5Ys",
-            "email": "t~1ECTeY42RlWDU6D4DtrXKyFmVrUHbEEpdYzI34l0y9Q@contoso.com"
+        "lastModifiedBy":{
+          "user":{
+            "id":"t~DTbvYdTNRIQXAF1SvLNyAIENog0-Dy0dxTEB2Yoo5Ys",
+            "email":"t~1ECTeY42RlWDU6D4DtrXKyFmVrUHbEEpdYzI34l0y9Q@contoso.com"
           }
         }
       }
