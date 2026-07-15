@@ -5,6 +5,7 @@ endpoints:
   transforms:
   - !<pseudonymize>
     jsonPaths:
+    - "$..user.id"
     - "$..user.email"
     encoding: "URL_SAFE_TOKEN"
   responseSchema:
@@ -24,6 +25,7 @@ endpoints:
   transforms:
   - !<pseudonymize>
     jsonPaths:
+    - "$..user.id"
     - "$..user.email"
     encoding: "URL_SAFE_TOKEN"
   responseSchema:
@@ -44,8 +46,12 @@ endpoints:
   transforms:
   - !<pseudonymize>
     jsonPaths:
+    - "$..user.id"
     - "$..user.email"
     encoding: "URL_SAFE_TOKEN"
+  - !<redact>
+    jsonPaths:
+    - "$.['@odata.nextLink', '@odata.deltaLink']"
   responseSchema:
     type: "object"
     properties:
@@ -90,6 +96,7 @@ endpoints:
   transforms:
   - !<pseudonymize>
     jsonPaths:
+    - "$..user.id"
     - "$..user.email"
     encoding: "URL_SAFE_TOKEN"
   responseSchema:
@@ -117,6 +124,11 @@ endpoints:
     - "$..mail"
     - "$..otherMails[*]"
     encoding: "URL_SAFE_TOKEN"
+  - !<pseudonymize>
+    jsonPaths:
+    - "$..id"
+    includeReversible: true
+    encoding: "URL_SAFE_TOKEN"
   - !<pseudonymizeRegexMatches>
     jsonPaths:
     - "$..proxyAddresses[*]"
@@ -142,8 +154,12 @@ endpoints:
   transforms:
   - !<pseudonymize>
     jsonPaths:
+    - "$..user.id"
     - "$..user.email"
     encoding: "URL_SAFE_TOKEN"
+  pathParameterSchemas:
+    userId:
+      format: "reversible-pseudonym"
   responseSchema:
     type: "object"
     properties:

@@ -1,0 +1,32 @@
+{
+  "value": [
+    {
+      "id": "p~joNj9Enmo3314H1QQxhamNymEojbsJWepQPn_RbBQlR8Cm3ir9asuPWYKj7PKKFoZX7iM90IYlri2ahC_UoTGKrDZ7fOAIJnzD1Nt69NloI",
+      "employeeId": "t~NOvA4GA30mnrO5AurfSXLsFWkt6-D0JW-FYpkEKiKHg",
+      "mail": "t~qqaVOvhbd9W75iECcKPMdxaBk9wTEig9loxQYTxY6CE@worklytics.onmicrosoft.com",
+      "otherMails": [
+        "t~QiKRLVRGDjLHDes3J5YOMOkNHZmPQWatYgup6uAstZQ@worklytics.co"
+      ],
+      "proxyAddresses": [
+        "SMTP:t~qqaVOvhbd9W75iECcKPMdxaBk9wTEig9loxQYTxY6CE@worklytics.onmicrosoft.com",
+        "smtp:t~QiKRLVRGDjLHDes3J5YOMOkNHZmPQWatYgup6uAstZQ@worklytics.co"
+      ]
+    },
+    {
+      "id": "p~Nqg4h4JifSLOfcXftNhFUNo8eIVtugpHCRBrNqPMsyo9O1ch-LgmY664Rvy-7rmCWvZqqAf0OvC8FyY7TWiPmatcBYbTBYndA5AP5G1uDfk",
+      "mail": "t~8ooPMu_uHiLVL-w_T7gTwJDA4S_ttDhB93_NhIXfkkE@worklytics.onmicrosoft.com"
+    },
+    {
+      "id": "p~CBRYQdohf24wt2ERzO_2CUZ1D7HWgla01CtX9RnFgko9_YX4INCm3pJZDkOYr_wJHHXNWuFYA5yKMQ0GOunQ_yECslrs_0kt_P_0uAUlKes",
+      "mail": "t~Q9wxg-wyPDGhNdH7JolbuWBL0bpL53cy5WH4bz9MZ9U@worklytics.onmicrosoft.com"
+    },
+    {
+      "id": "p~OW7ZPP3SZPbcYb8dOA3XeLYduJyQguykNkq45I9dTBxHWZv-zpqqsNWIzKIH1XD53-dd27RBdD8mY5pH5Ly8GlDWPN8fcTLzeG3Nw3JIicM",
+      "mail": "t~_oJw-9fORXMFfHtwNXQ5xyTsva2CebpVGKae78dHEeQ@worklytics.onmicrosoft.com"
+    },
+    {
+      "id": "p~EIq5paHuN5T175KpKJdN5PDHdqwhxAfnzuvLCDFcuUAaERr-McIAHGOYZmdNWZuG18EuP9OpUUSrXyYMQ2QeWyDwsNdOPrpUdG_Fj8t73hY",
+      "mail": "t~HOW6FbD1IjMTBxsYktLCex-vmxAr2lsC3P7adsLqDXk@worklytics.onmicrosoft.com"
+    }
+  ]
+}

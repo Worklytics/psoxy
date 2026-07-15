@@ -1,0 +1,41 @@
+{
+  "value": [
+    {
+      "id": "b!-RIj2DuyvEyV1T4NlOaMHk8XkS_I8MdFlUCq1BlcjgmhRfAj3-Z8RY2VpuvV_tpd",
+      "driveType": "documentLibrary",
+      "createdDateTime": "2017-07-27T02:41:36Z",
+      "createdBy": {
+        "user": {
+          "id": "CE251278-EF9E-4FE5-833C-1D89EEAE68E0",
+          "email": "t~rhHXsIpQCoOYdgzj6URY4x8oUcvnLMLR5d71_wRuVAA@contoso.com"
+        }
+      },
+      "lastModifiedDateTime": "2018-03-27T07:34:38Z",
+      "lastModifiedBy": {
+        "user": {
+          "id": "9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
+          "email": "t~1ECTeY42RlWDU6D4DtrXKyFmVrUHbEEpdYzI34l0y9Q@contoso.com"
+        }
+      }
+    },
+    {
+      "id": "b!kjtJnMGCeEeNkZsY18PtOiNjCV0Z9s9Fqyly8jKvPEB2kal9T5pOT5y7TXClirlE",
+      "driveType": "documentLibrary",
+      "system": { },
+      "createdDateTime": "2017-07-27T02:41:36Z",
+      "createdBy": {
+        "user": {
+          "id": "CE251278-EF9E-4FE5-833C-1D89EEAE68E0",
+          "email": "t~rhHXsIpQCoOYdgzj6URY4x8oUcvnLMLR5d71_wRuVAA@contoso.com"
+        }
+      },
+      "lastModifiedDateTime": "2017-07-27T02:41:36Z",
+      "lastModifiedBy": {
+        "user": {
+          "id": "CE251278-EF9E-4FE5-833C-1D89EEAE68E0",
+          "email": "t~rhHXsIpQCoOYdgzj6URY4x8oUcvnLMLR5d71_wRuVAA@contoso.com"
+        }
+      }
+    }
+  ]
+}

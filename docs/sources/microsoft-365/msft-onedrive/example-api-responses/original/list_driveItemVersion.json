@@ -1,0 +1,40 @@
+{
+  "value": [
+    {
+      "id": "3.0",
+      "lastModifiedBy": {
+        "user": {
+          "id": "CE251278-EF9E-4FE5-833C-1D89EEAE68E0",
+          "displayName": "Ryan Gregg",
+          "email": "ryan@contoso.com"
+        }
+      },
+      "lastModifiedDateTime": "2017-09-14T12:34:53.912Z",
+      "size": 123
+    },
+    {
+      "id": "2.0",
+      "lastModifiedBy": {
+        "user": {
+          "id": "9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
+          "displayName": "Dana Lee",
+          "email": "dana@contoso.com"
+        }
+      },
+      "lastModifiedDateTime": "2017-09-11T10:21:03.000Z",
+      "size": 62
+    },
+    {
+      "id": "1.0",
+      "lastModifiedBy": {
+        "user": {
+          "id": "CE251278-EF9E-4FE5-833C-1D89EEAE68E0",
+          "displayName": "Ryan Gregg",
+          "email": "ryan@contoso.com"
+        }
+      },
+      "lastModifiedDateTime": "2017-09-10T15:20:01.125Z",
+      "size": 16
+    }
+  ]
+}

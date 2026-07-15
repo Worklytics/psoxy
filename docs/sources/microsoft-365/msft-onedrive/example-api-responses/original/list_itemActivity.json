@@ -1,0 +1,40 @@
+{
+  "value": [
+    {
+      "id": "oINi48Hd3kgKGEeLAAAAAA==",
+      "action": {
+        "edit": {},
+        "version": {
+          "newVersion": "3.0"
+        }
+      },
+      "actor": {
+        "user": {
+          "id": "CE251278-EF9E-4FE5-833C-1D89EEAE68E0",
+          "displayName": "Ryan Gregg",
+          "email": "ryan@contoso.com"
+        }
+      },
+      "times": {
+        "recordedDateTime": "2017-07-29T18:34:40Z"
+      }
+    },
+    {
+      "id": "gMkFggja3khHaUGLAAAAAA==",
+      "action": {
+        "delete": {}
+      },
+      "actor": {
+        "user": {
+          "id": "9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
+          "displayName": "Dana Lee",
+          "email": "dana@contoso.com"
+        }
+      },
+      "times": {
+        "observedDateTime": "2017-07-29T16:20:00Z",
+        "recordedDateTime": "2017-07-29T16:23:35Z"
+      }
+    }
+  ]
+}
