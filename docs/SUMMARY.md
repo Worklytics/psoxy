@@ -96,6 +96,7 @@
   * [Microsoft 365](sources/microsoft-365/README.md)
     * [Entra ID](sources/microsoft-365/entra-id/README.md)
     * [Microsoft Copilot](sources/microsoft-365/msft-copilot/README.md)
+    * [Microsoft OneDrive](sources/microsoft-365/msft-onedrive/README.md)
     * [Microsoft Teams](sources/microsoft-365/msft-teams/README.md)
     * [Outlook Calendar](sources/microsoft-365/outlook-cal/README.md)
     * [Outlook Mail](sources/microsoft-365/outlook-mail/README.md)

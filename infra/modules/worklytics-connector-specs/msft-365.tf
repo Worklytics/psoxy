@@ -112,8 +112,8 @@ locals {
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : []
       required_app_roles : [
-        # least-privilege permission for the driveItem delta + versions endpoints this connector
-        # calls; covers users', groups', and (once site enumeration is wired up) sites' drives.
+        # least-privilege permission for enumerating users'/groups' drives and reading the
+        # driveItem delta, versions, and activities feeds this connector calls.
         "Files.Read.All",
         # to enumerate the users/groups whose OneDrives are polled; this connector also requires
         # a separate Microsoft Entra ID connection to be configured.
@@ -125,11 +125,12 @@ locals {
       enable_side_output : false
       example_api_calls : [
         "/v1.0/users",
-        "/v1.0/users/${local.example_msft_user_guid}/drive/root/delta",
-        "/v1.0/users/${local.example_msft_user_guid}/drive/items/{ITEM_ID}/versions",
         "/v1.0/groups",
-        "/v1.0/groups/{GROUP_ID}/drive/root/delta",
-        "/v1.0/groups/{GROUP_ID}/drive/items/{ITEM_ID}/versions",
+        "/v1.0/users/${local.example_msft_user_guid}/drives",
+        "/v1.0/groups/{GROUP_ID}/drives",
+        "/v1.0/drives/{DRIVE_ID}/root/delta",
+        "/v1.0/drives/{DRIVE_ID}/items/{ITEM_ID}/versions",
+        "/v1.0/drives/{DRIVE_ID}/items/{ITEM_ID}/activities",
       ]
     },
     "msft-teams" : {

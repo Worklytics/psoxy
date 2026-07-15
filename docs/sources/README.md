@@ -41,6 +41,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `metrics`                  | [Metrics](metrics/README.md)                                                | Bulk | BETA         |
 | `msft-copilot`             | [Microsoft 365 Copilot](microsoft-365/msft-copilot/README.md)               | API  | ALPHA        |
 | `msft-entra-id`            | [Microsoft Entra ID](microsoft-365/entra-id/README.md)                      | API  | GA           |
+| `msft-onedrive`            | [Microsoft OneDrive](microsoft-365/msft-onedrive/README.md)                 | API  | ALPHA        |
 | `msft-teams`               | [Microsoft Teams](microsoft-365/msft-teams/README.md)                       | API  | GA           |
 | `outlook-cal`              | [Outlook Calendar](microsoft-365/outlook-cal/README.md)                     | API  | GA           |
 | `outlook-mail`             | [Outlook Mail](microsoft-365/outlook-mail/README.md)                        | API  | GA           |
