@@ -33,6 +33,21 @@
         "observedDateTime":"2017-07-29T16:20:00Z",
         "recordedDateTime":"2017-07-29T16:23:35Z"
       }
+    },
+    {
+      "id":"vY0uYbz9EU2xrEeLAAAAAA==",
+      "action":{
+        "access":{ }
+      },
+      "actor":{
+        "user":{
+          "id":"6c1e3a2f-8b4d-4a1e-9f3c-2d5b6a7c8e9f",
+          "email":"t~LY719LfeTXfLgFFmNHqJd9mhirFsW5IOZpbvy3F6CVI@contoso.com"
+        }
+      },
+      "times":{
+        "observedDateTime":"2017-07-30T09:15:00Z"
+      }
     }
   ]
 }

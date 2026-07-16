@@ -17,12 +17,15 @@
       },
       "times": {
         "recordedDateTime": "2017-07-29T18:34:40Z"
+      },
+      "driveItem": {
+        "id": "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K"
       }
     },
     {
       "id": "gMkFggja3khHaUGLAAAAAA==",
       "action": {
-        "delete": {}
+        "share": {}
       },
       "actor": {
         "user": {
@@ -34,12 +37,15 @@
       "times": {
         "observedDateTime": "2017-07-29T16:20:00Z",
         "recordedDateTime": "2017-07-29T16:23:35Z"
+      },
+      "listItem": {
+        "id": "01BYE5RZ4RMOFDTMLLPFCKZ3H5QCJPKZ7B"
       }
     },
     {
       "id": "vY0uYbz9EU2xrEeLAAAAAA==",
       "action": {
-        "access": {}
+        "mention": {}
       },
       "actor": {
         "user": {

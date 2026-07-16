@@ -1,5 +1,23 @@
 ---
 endpoints:
+- pathTemplate: "/v1.0/drives/{driveId}/activities"
+  allowedQueryParams: []
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$..user.email"
+    encoding: "URL_SAFE_TOKEN"
+  responseSchema:
+    type: "object"
+    properties:
+      '@odata.deltaLink':
+        type: "string"
+      '@odata.nextLink':
+        type: "string"
+      value:
+        type: "array"
+        items:
+          $ref: "#/definitions/ItemActivity"
 - pathTemplate: "/v1.0/drives/{driveId}/items/{itemId}/activities"
   allowedQueryParams: []
   transforms:
@@ -156,6 +174,11 @@ endpoints:
         items:
           $ref: "#/definitions/Drive"
 definitions:
+  ActivityItemRef:
+    type: "object"
+    properties:
+      id:
+        type: "string"
   AutomaticRepliesSettings:
     type: "object"
     properties:
@@ -346,6 +369,8 @@ definitions:
   ItemActionSet:
     type: "object"
     properties:
+      access:
+        $ref: "#/definitions/ItemAction"
       comment:
         $ref: "#/definitions/ItemAction"
       create:
@@ -373,8 +398,12 @@ definitions:
         $ref: "#/definitions/ItemActionSet"
       actor:
         $ref: "#/definitions/IdentitySet"
+      driveItem:
+        $ref: "#/definitions/ActivityItemRef"
       id:
         type: "string"
+      listItem:
+        $ref: "#/definitions/ActivityItemRef"
       times:
         $ref: "#/definitions/ItemActivityTimeSet"
   ItemActivityTimeSet:
