@@ -26,6 +26,7 @@ all Microsoft 365 connectors.
 | `GET /v1.0/drives/{driveId}/root/delta`                          | Enumerate created/edited/deleted files and folders in a drive.                                       |
 | `GET /v1.0/drives/{driveId}/items/{itemId}/versions`             | Per-file edit history (real actor + timestamp per edit).                                             |
 | `GET /v1.0/drives/{driveId}/items/{itemId}/activities`           | Per-file recent activity (create/edit/delete/move/rename/restore/share/comment/mention, by whom, and when). |
+| `GET /v1.0/drives/{driveId}/activities`                          | Drive-wide recent activity feed (same shape as the per-file activity feed, but not scoped to a single item). |
 
 **Known limitation:** SharePoint site drives (`/v1.0/sites/{siteId}/...`) are not yet enumerated by
 this connector; only users' and groups' drives are covered.
@@ -55,6 +56,7 @@ See the [Microsoft 365 Authorization](../README.md#authorization) section of the
 | `/v1.0/drives/{driveId}/root/delta`                    | [original/get_drive_delta.json](example-api-responses/original/get_drive_delta.json)             | [sanitized/get_drive_delta.json](example-api-responses/sanitized/get_drive_delta.json)          |
 | `/v1.0/drives/{driveId}/items/{itemId}/versions`       | [original/list_driveItemVersion.json](example-api-responses/original/list_driveItemVersion.json) | [sanitized/list_driveItemVersion.json](example-api-responses/sanitized/list_driveItemVersion.json) |
 | `/v1.0/drives/{driveId}/items/{itemId}/activities`     | [original/list_itemActivity.json](example-api-responses/original/list_itemActivity.json)         | [sanitized/list_itemActivity.json](example-api-responses/sanitized/list_itemActivity.json)     |
+| `/v1.0/drives/{driveId}/activities`                    | [original/list_driveActivity.json](example-api-responses/original/list_driveActivity.json)       | [sanitized/list_driveActivity.json](example-api-responses/sanitized/list_driveActivity.json)   |
 
 See more examples in the `docs/sources/microsoft-365/msft-onedrive/example-api-responses` folder of
 the [Psoxy repository](https://github.com/Worklytics/psoxy).
