@@ -53,6 +53,28 @@ To enable sandboxing:
 2. The `apply` and `init` wrapper scripts will automatically detect the local `.azure` directory and use it for Terraform's AzureAD provider.
 3. **Note:** If you choose to run `terraform` commands manually instead of using the wrapper scripts, you must first run `export AZURE_CONFIG_DIR="${PWD}/.azure"` in your shell.
 
+### Example API Calls
+
+Each connector's Terraform-generated setup instructions include a list of example API calls you can
+use to test your connection once it's deployed. Some of these calls include path segments (a user
+GUID, a Teams team/channel/chat id, a OneDrive group/drive/item id, etc.) that Terraform cannot
+enumerate on its own — by default these are left as bracketed placeholders (e.g.
+`{EXAMPLE_MSFT_USER_GUID}`) for you to substitute by hand.
+
+If you'd rather have real, directly-runnable example calls generated, provide real values for these
+via the `msft_365_connector_settings` Terraform variable (a map), e.g. in your `terraform.tfvars`:
+
+```hcl
+msft_365_connector_settings = {
+  example_msft_user_guid = "48d31887-5fad-4d73-a9f5-3c356e68a038"
+}
+```
+
+The full set of supported keys is documented on the `msft_365_connector_settings` variable itself
+(`infra/modules/worklytics-connector-specs/variables.tf`); see
+[Microsoft OneDrive](msft-onedrive/README.md#populating-example-api-calls-with-real-ids) for a
+worked example of populating a connector's group/drive/item ids this way.
+
 ## Security
 
 ### Authentication

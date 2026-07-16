@@ -127,10 +127,11 @@ locals {
         "/v1.0/users",
         "/v1.0/groups",
         "/v1.0/users/${local.example_msft_user_guid}/drives",
-        "/v1.0/groups/{GROUP_ID}/drives",
-        "/v1.0/drives/{DRIVE_ID}/root/delta",
-        "/v1.0/drives/{DRIVE_ID}/items/{ITEM_ID}/versions",
-        "/v1.0/drives/{DRIVE_ID}/items/{ITEM_ID}/activities",
+        "/v1.0/groups/${local.example_msft_group_guid}/drives",
+        "/v1.0/drives/${local.msft_onedrive_example_drive_id}/root/delta",
+        "/v1.0/drives/${local.msft_onedrive_example_drive_id}/items/${local.msft_onedrive_example_item_id}/versions",
+        "/v1.0/drives/${local.msft_onedrive_example_drive_id}/items/${local.msft_onedrive_example_item_id}/activities",
+        "/v1.0/drives/${local.msft_onedrive_example_drive_id}/activities",
       ]
     },
     "msft-teams" : {

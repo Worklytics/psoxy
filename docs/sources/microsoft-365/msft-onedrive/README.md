@@ -61,6 +61,30 @@ See the [Microsoft 365 Authorization](../README.md#authorization) section of the
 See more examples in the `docs/sources/microsoft-365/msft-onedrive/example-api-responses` folder of
 the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
+### Populating example API calls with real IDs
+
+By default, the `{groupId}`/`{driveId}`/`{itemId}` segments of this connector's example test calls
+(generated as part of your Terraform deployment) are left as placeholders, since Terraform has no
+way to enumerate real values from your tenant. To have real, directly-runnable example calls
+generated instead, set the following keys in the `msft_365_connector_settings` Terraform variable:
+
+| Key                              | Value                                                                                                    |
+|------------------------------------|--------------------------------------------------------------------------------------------------------|
+| `example_msft_group_guid`          | id (GUID) of a group whose SharePoint document library you want to use as an example, from `GET /v1.0/groups` |
+| `msft_onedrive_example_drive_id`   | a `Drive.id` from that group's (or a user's) `GET .../drives` response                                   |
+| `msft_onedrive_example_item_id`    | a `driveItem.id` from that drive's `GET /v1.0/drives/{driveId}/root/delta` response                      |
+
+e.g., in your `terraform.tfvars`:
+```hcl
+msft_365_connector_settings = {
+  example_msft_group_guid        = "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b"
+  msft_onedrive_example_drive_id = "b!-RIj2DuyvEyV1T4NlOaMHk8XkS_I8MdFlUCq1BlcjgmhRfAj3-Z8RY2VpuvV_tpd"
+  msft_onedrive_example_item_id  = "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K"
+}
+```
+(`example_msft_user_guid` — used for the `/v1.0/users/{userId}/drives` example call — is shared
+across all Microsoft 365 connectors; see the [Microsoft 365 README](../README.md).)
+
 ## Example Rules
 
 - [Example Rules](msft-onedrive.yaml)
