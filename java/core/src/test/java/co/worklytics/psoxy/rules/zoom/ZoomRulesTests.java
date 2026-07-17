@@ -260,6 +260,8 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.zoom.us/v2/users", "list-users.json"),
             InvocationExample.of("https://api.zoom.us/v2/users/USER_ID/recordings", "user-recordings.json"),
             InvocationExample.of("https://api.zoom.us/v2/meetings/MEETING_ID", "meeting-details.json"),
+            InvocationExample.of("https://api.zoom.us/v2/meetings/99460000470?show_previous_occurrences=false&occurrence_id=abcdeg%3D%3D", "meeting-details.json"),
+
             InvocationExample.of("https://api.zoom.us/v2/meetings/MEETING_ID/meeting_summary", "meeting-summary.json"),
             InvocationExample.of("https://api.zoom.us/v2/past_meetings/MEETING_ID", "past-meeting-details.json"),
             InvocationExample.of("https://api.zoom.us/v2/past_meetings/MEETING_ID/instances", "past-meeting-instances.json"),
