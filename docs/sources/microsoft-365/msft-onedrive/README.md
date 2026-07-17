@@ -2,7 +2,7 @@
 
 **Connector ID:** `msft-onedrive`
 
-**Availability:** Alpha
+**Availability:** Beta
 
 Connect Microsoft OneDrive data to Worklytics, enabling analysis of collaboration and work
 happening in files stored in OneDrive (personal drives) and SharePoint document libraries (group

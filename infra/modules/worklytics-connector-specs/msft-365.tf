@@ -104,7 +104,7 @@ locals {
     },
     "msft-onedrive" : {
       source_kind : "msft-onedrive"
-      availability : "alpha",
+      availability : "beta",
       enable_by_default : false,
       worklytics_connector_id : "msft-onedrive-psoxy",
       display_name : "Microsoft OneDrive"
