@@ -91,13 +91,13 @@ resource "google_pubsub_subscription" "async_output_subscription" {
   name    = "${var.environment_id_prefix}${var.instance_id}-async-output-subscription"
   topic   = google_pubsub_topic.async_output_topic[0].name
 
-  # Push config: deliver messages to the Cloud Function's HTTP endpoint
+  # Push config: deliver messages to the Cloud Function's HTTP endpoint (not an external ALB URL)
   push_config {
-    push_endpoint = local.proxy_endpoint_url
+    push_endpoint = local.cloud_function_url
 
     oidc_token {
       service_account_email = var.service_account_email
-      audience              = local.proxy_endpoint_url
+      audience              = local.cloud_function_url
     }
   }
 
@@ -250,7 +250,7 @@ resource "google_cloudfunctions2_function" "function" {
     service_account_email = var.service_account_email
     available_memory      = "${var.available_memory_mb}M"
     timeout_seconds       = var.timeout_seconds
-    ingress_settings      = "ALLOW_ALL"
+    ingress_settings      = var.ingress_settings
 
     max_instance_request_concurrency = var.instance_concurrency
     available_cpu                    = var.instance_concurrency > 1 ? "1" : null
@@ -378,10 +378,26 @@ resource "google_cloud_run_service_iam_binding" "invokers" {
 }
 
 locals {
-  proxy_endpoint_url  = google_cloudfunctions2_function.function.service_config[0].uri
+  cloud_function_url = google_cloudfunctions2_function.function.service_config[0].uri
+  # Public URL for tests/TODOs: per-connector path on shared external LB, else Cloud Function URI
+  proxy_endpoint_url = trimsuffix(
+    var.external_lb_base_url != null
+    ? "${trimsuffix(var.external_lb_base_url, "/")}/${google_cloudfunctions2_function.function.name}"
+    : local.cloud_function_url,
+    "/"
+  )
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
-  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js"
+  # -f gcp: non-*.run.app / non-*.cloudfunctions.net hosts must be flagged explicitly as a GCP-hosted deployment
+  # --allow-insecure-tls: IP hosts (self-signed PoC ALB) proceed despite untrusted cert
+  proxy_endpoint_is_cloud_function = can(regex("\\.run\\.app", local.proxy_endpoint_url)) || can(regex("\\.cloudfunctions\\.net", local.proxy_endpoint_url))
+  proxy_endpoint_host              = try(regex("^https?://([^/]+)", local.proxy_endpoint_url), "")
+  proxy_endpoint_is_ip             = can(regex("^[0-9.]+$", local.proxy_endpoint_host)) || can(regex("^\\[[0-9a-fA-F:]+\\]$", local.proxy_endpoint_host))
+  command_cli_call_flags = trimspace(join(" ", compact([
+    local.proxy_endpoint_is_cloud_function ? "" : "-f gcp",
+    local.proxy_endpoint_is_ip ? "--allow-insecure-tls" : "",
+  ])))
+  command_cli_call = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js${local.command_cli_call_flags != "" ? " ${local.command_cli_call_flags}" : ""}"
 
   # Merge example_api_calls into example_api_requests for unified processing
   all_example_api_requests = concat(
@@ -542,7 +558,12 @@ output "cloud_function_name" {
 }
 
 output "cloud_function_url" {
-  value = local.proxy_endpoint_url
+  value = local.cloud_function_url
+}
+
+output "proxy_endpoint_url" {
+  description = "Public URL used for tests / TODOs (per-connector path on external_lb_base_url when set, otherwise Cloud Function URI)."
+  value       = local.proxy_endpoint_url
 }
 
 output "proxy_kind" {

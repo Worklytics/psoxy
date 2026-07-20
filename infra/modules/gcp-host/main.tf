@@ -236,6 +236,26 @@ locals {
   }
 }
 
+check "api_connector_external_lb_host_ip_allowlist" {
+  assert {
+    condition     = var.api_connector_external_lb_host == null || var.allowed_data_access_ip_blocks != null
+    error_message = "When api_connector_external_lb_host is set, also set allowed_data_access_ip_blocks (Worklytics static egress IPs). Use the same list for Cloud Armor in your root networking.tf."
+  }
+}
+
+locals {
+  api_connector_external_lb_enabled = var.api_connector_external_lb_host != null
+  # Shared LB base (no per-connector path); gcp-proxy-api appends /<function-name>
+  api_connector_external_lb_base_url = local.api_connector_external_lb_enabled ? "https://${var.api_connector_external_lb_host}" : null
+  api_connector_function_names = {
+    for k in keys(var.api_connectors) : k => "${local.environment_id_prefix}${k}"
+  }
+  api_connector_external_endpoint_urls = local.api_connector_external_lb_enabled ? {
+    for k, function_name in local.api_connector_function_names :
+    k => "${local.api_connector_external_lb_base_url}/${function_name}/"
+  } : {}
+}
+
 module "api_connector" {
   for_each = var.api_connectors
 
@@ -275,6 +295,8 @@ module "api_connector" {
   instance_concurrency                  = var.api_connector_instance_concurrency
   max_instance_count                    = var.max_instances_per_api_connector
   timeout_seconds                       = coalesce(try(each.value.timeout_seconds, null), 180)
+  ingress_settings     = local.api_connector_external_lb_enabled ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
+  external_lb_base_url = local.api_connector_external_lb_base_url
 
 
   environment_variables = merge(
@@ -581,12 +603,16 @@ locals {
   api_instances = { for instance in module.api_connector :
     instance.instance_id => merge(
       {
-        endpoint_url     = instance.cloud_function_url,
         sanitized_bucket = try(instance.async_output_bucket_name, null),
         test_examples    = local.api_connector_test_examples[instance.instance_id],
       },
       instance,
-      var.api_connectors[instance.instance_id]
+      var.api_connectors[instance.instance_id],
+      {
+        # With external LB: only ALB path is reachable from the internet (ALLOW_INTERNAL_AND_GCLB).
+        # Without: Cloud Function URI for direct invocation.
+        endpoint_url = try(local.api_connector_external_endpoint_urls[instance.instance_id], instance.cloud_function_url)
+      }
     )
   }
 

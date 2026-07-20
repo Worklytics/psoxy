@@ -36,6 +36,8 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     .option('-v, --verbose', 'Verbose output', false)
     .option('-z, --gzip [type]', 'Add gzip compression header (default: true, "-z false" to remove)', true)
     .option('--health-check', 'Health Check call: check Psoxy deploy is running')
+    .option('--allow-insecure-tls', 'Allow requests when the server presents an untrusted/self-signed TLS cert (PoC ALB only; do not use in production)', false)
+    .option('--cacert <path>', 'Path to PEM file to trust as CA (e.g. self-signed ALB cert from Terraform output)')
     .option('--signing-key <key-ref>', 'Signing key reference to use for signing requests (e.g. "aws-kms:arn:aws:kms:us-east-1:123456789012:key/abcd1234-12ab-34cd-56ef-1234567890ab")')
     .option('--identity-issuer <issuer>', 'issuer of JWT (iss claim)')
     .option('--identity-subject <sub>', 'subject (sub) claim to include in JWT claims to be signed')

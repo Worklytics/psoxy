@@ -2,6 +2,7 @@ import test from 'ava';
 import * as td from 'testdouble';
 import {
   addFilenameSuffix,
+  buildHttpsRequestOptions,
   executeWithRetry,
   resolveHTTPMethod,
   resolveAWSRegion,
@@ -111,6 +112,29 @@ test('Resolve AWS region', (t) => {
   t.is('us-east-1', resolveAWSRegion(new URL('https://foo.com')));
   t.is('us-east-1', resolveAWSRegion(''));
 })
+
+test('buildHttpsRequestOptions: IP host and allowInsecureTls', (t) => {
+  const opts = buildHttpsRequestOptions(
+    'https://203.0.113.10/myenv-outlook-cal/calendar/v3/calendars/primary',
+    'GET',
+    { Authorization: 'Bearer x' },
+    { allowInsecureTls: true }
+  );
+  t.is(opts.hostname, '203.0.113.10');
+  t.is(opts.port, 443);
+  t.is(opts.path, '/myenv-outlook-cal/calendar/v3/calendars/primary');
+  t.false(opts.rejectUnauthorized);
+});
+
+test('buildHttpsRequestOptions: custom domain without allowInsecureTls', (t) => {
+  const opts = buildHttpsRequestOptions(
+    'https://proxy.example.com/myenv-outlook-cal/',
+    'GET',
+    {}
+  );
+  t.is(opts.hostname, 'proxy.example.com');
+  t.is(opts.rejectUnauthorized, undefined);
+});
 
 test('Add filename suffix', (t) => {
   t.is(addFilenameSuffix('foo.csv', 'bar'), 'foo-bar.csv');

@@ -10,7 +10,7 @@ import isgzipBuffer from '@stdlib/assert-is-gzip-buffer';
 import aws4 from 'aws4';
 import chalk from 'chalk';
 import { execSync } from 'child_process';
-import { createReadStream, createWriteStream } from 'fs';
+import { createReadStream, createWriteStream, readFileSync } from 'fs';
 import https from 'https';
 import _ from 'lodash';
 import crypto from 'node:crypto';
@@ -106,27 +106,55 @@ function getCommonHTTPHeaders(options = {}) {
 }
 
 /**
- * Wrapper for requests using Node.js HTTP interfaces: focused on
- * Psoxy use-case (*)
+ * Build Node.js https.request options for a Psoxy call.
  *
  * @param {String|URL} url
- * @param {Object} headers
  * @param {String} method
- * @param {Object} body
- * @return {Promise}
+ * @param {Object} headers
+ * @param {Object} [tlsOptions]
+ * @param {boolean} [tlsOptions.allowInsecureTls]
+ * @param {string} [tlsOptions.cacert]
+ * @return {Object}
  */
-function requestWrapper(url, method = 'GET', headers, body = {}) {
+function buildHttpsRequestOptions(url, method = 'GET', headers = {}, tlsOptions = {}) {
   url = typeof url === 'string' ? new URL(url) : url;
   const params = url.searchParams.toString();
-  const responseBody = [];
   const requestOptions = {
-    hostname: url.host,
-    port: 443,
+    hostname: url.hostname,
+    port: url.port || 443,
     path: url.pathname + (params !== '' ? `?${params}` : ''),
     method: method,
     headers: headers,
     timeout: REQUEST_TIMEOUT_MS,
+  };
+
+  if (tlsOptions.allowInsecureTls) {
+    requestOptions.rejectUnauthorized = false;
   }
+  if (tlsOptions.cacert) {
+    requestOptions.ca = readFileSync(tlsOptions.cacert);
+  }
+
+  return requestOptions;
+}
+
+/**
+ * Wrapper for requests using Node.js HTTP interfaces: focused on
+ * Psoxy use-case (*)
+ *
+ * @param {String|URL} url
+ * @param {String} method
+ * @param {Object} headers
+ * @param {Object} body
+ * @param {Object} [tlsOptions]
+ * @param {boolean} [tlsOptions.allowInsecureTls] - allow untrusted/self-signed server certs (PoC only)
+ * @param {string} [tlsOptions.cacert] - path to PEM file to trust as CA
+ * @return {Promise}
+ */
+function requestWrapper(url, method = 'GET', headers, body = {}, tlsOptions = {}) {
+  url = typeof url === 'string' ? new URL(url) : url;
+  const responseBody = [];
+  const requestOptions = buildHttpsRequestOptions(url, method, headers, tlsOptions);
 
   return new Promise((resolve, reject) => {
     const req = https.request(requestOptions,
@@ -942,6 +970,7 @@ function sleep(ms) {
 
 export {
   addFilenameSuffix,
+  buildHttpsRequestOptions,
   compareContent,
   environmentCheck,
   executeCommand,

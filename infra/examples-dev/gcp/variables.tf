@@ -464,7 +464,7 @@ variable "todos_as_local_files" {
 
 variable "allowed_data_access_ip_blocks" {
   description = <<-EOT
-    IPs or CIDR blocks allowed to make data access requests at the application layer (not IAM on Cloud Run). Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md.
+    IPs or CIDR blocks allowed to make data access requests at the application layer (not IAM on Cloud Run). Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md. When using the external ALB composition in networking.tf, use the same list for Cloud Armor.
   EOT
   type        = list(string)
   nullable    = true
@@ -474,6 +474,15 @@ variable "allowed_data_access_ip_blocks" {
     condition     = var.allowed_data_access_ip_blocks == null || try(length(var.allowed_data_access_ip_blocks) > 0, false)
     error_message = "allowed_data_access_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
   }
+}
+
+variable "api_connector_external_lb_host" {
+  type        = string
+  description = <<-EOT
+    Hostname or IP of a customer-provisioned external ALB fronting API connectors (beta; see networking.tf and docs/development/gcp-external-alb.md). After uncommenting the ALB composition, set to the domain (managed TLS) or reserved global IP (self-signed PoC).
+  EOT
+  default     = null
+  nullable    = true
 }
 
 variable "allowed_webhook_ip_blocks" {

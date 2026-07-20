@@ -98,7 +98,7 @@ async function call(options = {}) {
   logger.verbose('Request Options:', { additional: options });
   logger.verbose('Request Headers: ', { additional: headers });
 
-  return await request(url, method, headers, options.body);
+  return await request(url, method, headers, options.body, _.pick(options, ['allowInsecureTls', 'cacert']));
 }
 
 /**
