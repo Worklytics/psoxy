@@ -129,6 +129,8 @@ function buildHttpsRequestOptions(url, method = 'GET', headers = {}, tlsOptions 
   };
 
   if (tlsOptions.allowInsecureTls) {
+    // Intentional: --allow-insecure-tls for PoC self-signed ALB testing only.
+    // codeql[js/disabling-certificate-verification]
     requestOptions.rejectUnauthorized = false;
   }
   if (tlsOptions.cacert) {
@@ -152,11 +154,18 @@ function buildHttpsRequestOptions(url, method = 'GET', headers = {}, tlsOptions 
  * @return {Promise}
  */
 function requestWrapper(url, method = 'GET', headers, body = {}, tlsOptions = {}) {
-  url = typeof url === 'string' ? new URL(url) : url;
-  const responseBody = [];
-  const requestOptions = buildHttpsRequestOptions(url, method, headers, tlsOptions);
-
   return new Promise((resolve, reject) => {
+    let parsedUrl;
+    let requestOptions;
+    try {
+      parsedUrl = typeof url === 'string' ? new URL(url) : url;
+      requestOptions = buildHttpsRequestOptions(parsedUrl, method, headers, tlsOptions);
+    } catch (error) {
+      reject({ status: error.code, statusMessage: error.message });
+      return;
+    }
+
+    const responseBody = [];
     const req = https.request(requestOptions,
       (res) => {
         res.on('data', (data) => {

@@ -310,7 +310,7 @@ variable "ingress_settings" {
 variable "external_lb_base_url" {
   type        = string
   description = <<-EOT
-    Deprecated (used only for test scripts / TODOs generated in this module; prefer lifting those to gcp-host or higher). Base URL of the shared external load balancer that fronts API connectors in this deployment (e.g. `https://proxy.example.com` or `https://203.0.113.10`), without a per-connector path. When set, example calls use `${external_lb_base_url}/${function_name}` instead of the Cloud Function URI. Pub/Sub push always uses the Cloud Function URI.
+    Deprecated (used only for test scripts / TODOs generated in this module; prefer lifting those to gcp-host or higher). Base URL of the shared external load balancer that fronts API connectors in this deployment (e.g. https://proxy.example.com or https://203.0.113.10), without a per-connector path. When set, example calls use that base plus /function-name instead of the Cloud Function URI. Pub/Sub push always uses the Cloud Function URI.
   EOT
   default     = null
   nullable    = true

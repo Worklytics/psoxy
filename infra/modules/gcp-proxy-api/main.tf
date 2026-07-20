@@ -391,8 +391,9 @@ locals {
   # -f gcp: non-*.run.app / non-*.cloudfunctions.net hosts must be flagged explicitly as a GCP-hosted deployment
   # --allow-insecure-tls: IP hosts (self-signed PoC ALB) proceed despite untrusted cert
   proxy_endpoint_is_cloud_function = can(regex("\\.run\\.app", local.proxy_endpoint_url)) || can(regex("\\.cloudfunctions\\.net", local.proxy_endpoint_url))
-  proxy_endpoint_host              = try(regex("^https?://([^/]+)", local.proxy_endpoint_url), "")
-  proxy_endpoint_is_ip             = can(regex("^[0-9.]+$", local.proxy_endpoint_host)) || can(regex("^\\[[0-9a-fA-F:]+\\]$", local.proxy_endpoint_host))
+  # Prefer split/trimprefix over regex capture groups (capture groups return a list when >1 group)
+  proxy_endpoint_host = split("/", trimprefix(trimprefix(local.proxy_endpoint_url, "https://"), "http://"))[0]
+  proxy_endpoint_is_ip = can(regex("^[0-9.]+$", local.proxy_endpoint_host)) || can(regex("^\\[[0-9a-fA-F:]+\\]$", local.proxy_endpoint_host))
   command_cli_call_flags = trimspace(join(" ", compact([
     local.proxy_endpoint_is_cloud_function ? "" : "-f gcp",
     local.proxy_endpoint_is_ip ? "--allow-insecure-tls" : "",

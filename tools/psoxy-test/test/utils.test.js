@@ -4,6 +4,7 @@ import {
   addFilenameSuffix,
   buildHttpsRequestOptions,
   executeWithRetry,
+  request,
   resolveHTTPMethod,
   resolveAWSRegion,
   transformSpecWithResponse,
@@ -134,6 +135,18 @@ test('buildHttpsRequestOptions: custom domain without allowInsecureTls', (t) => 
   );
   t.is(opts.hostname, 'proxy.example.com');
   t.is(opts.rejectUnauthorized, undefined);
+});
+
+test('request: invalid cacert path rejects the Promise', async (t) => {
+  try {
+    await request('https://203.0.113.10/', 'GET', {}, {}, {
+      cacert: '/nonexistent/path/to/cacert.pem',
+    });
+    t.fail('expected request to reject');
+  } catch (err) {
+    t.is(err.status, 'ENOENT');
+    t.regex(err.statusMessage, /no such file/i);
+  }
 });
 
 test('Add filename suffix', (t) => {
