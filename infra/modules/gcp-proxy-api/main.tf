@@ -406,10 +406,12 @@ locals {
   command_cli_call = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js${local.command_cli_call_flags != "" ? " ${local.command_cli_call_flags}" : ""}"
 }
 
-check "proxy_endpoint_requires_https" {
+# Only assert on the customer-provided LB base URL (known at plan time). The Cloud Function URI
+# path is always https:// from Google but is unknown until apply, which breaks terraform test.
+check "external_lb_base_url_requires_https" {
   assert {
-    condition     = startswith(local.proxy_endpoint_url, "https://")
-    error_message = "API connector proxy endpoint URL must use https:// (got a non-TLS URL). For PoC self-signed ALB certs, keep https:// and use psoxy-test --allow-insecure-tls or --cacert."
+    condition     = var.external_lb_base_url == null || startswith(var.external_lb_base_url, "https://")
+    error_message = "external_lb_base_url must use https:// (got a non-TLS URL). For PoC self-signed ALB certs, keep https:// and use psoxy-test --allow-insecure-tls or --cacert."
   }
 }
 
