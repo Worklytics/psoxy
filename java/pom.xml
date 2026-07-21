@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.46</dependency.lombok.version>
         <dependency.dagger.version>2.40.5</dependency.dagger.version>
-        <dependency.jackson.version>2.22.0</dependency.jackson.version>
+        <dependency.jackson.version>2.22.1</dependency.jackson.version>
         <dependency.apache-commons-lang3.version>3.20.0</dependency.apache-commons-lang3.version>
         <dependency.apache-commons-csv.version>1.14.1</dependency.apache-commons-csv.version>
         <dependency.guava.version>33.6.0-jre</dependency.guava.version>
