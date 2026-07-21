@@ -5,6 +5,10 @@ terraform {
     google = {
       version = "~> 7.0"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 
   # NOTE: Terraform backend block is configured in a separate 'backend.tf' file, as expect everyone
