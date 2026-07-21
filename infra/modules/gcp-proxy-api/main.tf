@@ -410,7 +410,8 @@ locals {
 # path is always https:// from Google but is unknown until apply, which breaks terraform test.
 check "external_lb_base_url_requires_https" {
   assert {
-    condition     = var.external_lb_base_url == null || startswith(var.external_lb_base_url, "https://")
+    # Ternary (not ||) so older Terraform does not evaluate startswith(null)
+    condition     = var.external_lb_base_url == null ? true : startswith(var.external_lb_base_url, "https://")
     error_message = "external_lb_base_url must use https:// (got a non-TLS URL). For PoC self-signed ALB certs, keep https:// and use psoxy-test --allow-insecure-tls or --cacert."
   }
 }
