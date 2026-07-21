@@ -24,9 +24,9 @@ See also [GCP Private Service Connect and connectivity options](gcp-private-serv
 
 ## Current approach (v0.6.8): customer composition
 
-Psoxy does **not** provision the ALB inside `gcp-host`. Customers (or the example template) own ALB/Cloud Armor Terraform in root `networking.tf`, then tell the modules the LB host.
+Psoxy does **not** provision the ALB inside `gcp-host`. Customers (or the example template) own ALB/Cloud Armor Terraform in root `external-api-alb.tf`, then tell the modules the LB host.
 
-1. Uncomment / adapt the ALB section in [`infra/examples-dev/gcp/networking.tf`](../../infra/examples-dev/gcp/networking.tf) (syncs to `psoxy-example-gcp`).
+1. Enable and adapt [`infra/examples-dev/gcp/external-api-alb.tf`](../../infra/examples-dev/gcp/external-api-alb.tf) (syncs to `psoxy-example-gcp`).
 2. Set `allowed_data_access_ip_blocks` to Worklytics egress IPs (same list for Cloud Armor and the proxy).
 3. Pass into `gcp-host`:
 
@@ -61,7 +61,7 @@ Path routing relies on the proxy stripping the function-name prefix via `K_SERVI
 
 `allowed_data_access_ip_blocks` does double duty:
 
-1. **Cloud Armor** (network) — customer attaches the same CIDRs in `networking.tf`.
+1. **Cloud Armor** (network) — customer attaches the same CIDRs in `external-api-alb.tf`.
 2. **Psoxy app check** — still set on connectors (covers direct `*.run.app` bypass until ingress is locked down).
 
 ### Testing
@@ -135,7 +135,7 @@ gcloud logging read 'resource.type="http_load_balancer"' \
   --format='table(httpRequest.remoteIp,httpRequest.status,httpRequest.requestUrl)'
 ```
 
-5. **Re-apply after changing the allowlist** — if you edit `terraform.tfvars` but still see the old CIDRs in step 2, run `terraform apply`. The example `networking.tf` uses separate `google_compute_security_policy_rule` resources so `src_ip_ranges` updates are applied reliably; inline `rule` blocks on `google_compute_security_policy` are known to miss in-place IP changes in some provider versions.
+5. **Re-apply after changing the allowlist** — if you edit `terraform.tfvars` but still see the old CIDRs in step 2, run `terraform apply`. The example `external-api-alb.tf` uses separate `google_compute_security_policy_rule` resources so `src_ip_ranges` updates are applied reliably; inline `rule` blocks on `google_compute_security_policy` are known to miss in-place IP changes in some provider versions.
 
 **Quick fix for local testing:** add both your current IPv4 `/32` and IPv6 `/128` to `allowed_data_access_ip_blocks`, apply, then re-run the test script.
 

@@ -30,7 +30,7 @@ On **GCP**, only the **application layer** is enforced by the shipped Terraform.
 
 For **additional** network ingress restriction on GCP (outside the proxy process), you can attach [Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) in front of a load balancer.
 
-The example GCP root can compose a global external ALB + Cloud Armor policy that uses the same `allowed_data_access_ip_blocks` list, while `api_connector_external_lb_host` tells `gcp-host` to publish ALB URLs and set `ALLOW_INTERNAL_AND_GCLB` (beta; see [GCP External ALB + Cloud Armor](../development/gcp-external-alb.md) and the commented section in `infra/examples-dev/gcp/networking.tf`). That path is compositional (not provisioned inside `gcp-host` today).
+The example GCP root can compose a global external ALB + Cloud Armor policy that uses the same `allowed_data_access_ip_blocks` list, while `api_connector_external_lb_host` tells `gcp-host` to publish ALB URLs and set `ALLOW_INTERNAL_AND_GCLB` (beta; see [GCP External ALB + Cloud Armor](../development/gcp-external-alb.md) and `infra/examples-dev/gcp/external-api-alb.tf`). That path is compositional (not provisioned inside `gcp-host` today).
 
 Related design notes: [GCP Private Service Connect and connectivity options](../development/gcp-private-service-connect.md#enhancing-public-internet-options-with-ip-allowlisting).
 
