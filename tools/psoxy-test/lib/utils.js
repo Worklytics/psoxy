@@ -118,11 +118,13 @@ function getCommonHTTPHeaders(options = {}) {
  */
 function buildHttpsRequestOptions(url, method = 'GET', headers = {}, tlsOptions = {}) {
   url = typeof url === 'string' ? new URL(url) : url;
-  const params = url.searchParams.toString();
+  if (url.protocol !== 'https:') {
+    throw new Error(`Psoxy test calls require https:// (got ${url.protocol}//${url.host})`);
+  }
   const requestOptions = {
     hostname: url.hostname,
     port: url.port || 443,
-    path: url.pathname + (params !== '' ? `?${params}` : ''),
+    path: url.pathname + url.search,
     method: method,
     headers: headers,
     timeout: REQUEST_TIMEOUT_MS,

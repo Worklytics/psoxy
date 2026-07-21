@@ -116,14 +116,14 @@ test('Resolve AWS region', (t) => {
 
 test('buildHttpsRequestOptions: IP host and allowInsecureTls', (t) => {
   const opts = buildHttpsRequestOptions(
-    'https://203.0.113.10/myenv-outlook-cal/calendar/v3/calendars/primary',
+    'https://203.0.113.10/myenv-outlook-cal/calendar/v3/calendars/primary?page=1',
     'GET',
     { Authorization: 'Bearer x' },
     { allowInsecureTls: true }
   );
   t.is(opts.hostname, '203.0.113.10');
   t.is(opts.port, 443);
-  t.is(opts.path, '/myenv-outlook-cal/calendar/v3/calendars/primary');
+  t.is(opts.path, '/myenv-outlook-cal/calendar/v3/calendars/primary?page=1');
   t.false(opts.rejectUnauthorized);
 });
 
@@ -135,6 +135,13 @@ test('buildHttpsRequestOptions: custom domain without allowInsecureTls', (t) => 
   );
   t.is(opts.hostname, 'proxy.example.com');
   t.is(opts.rejectUnauthorized, undefined);
+});
+
+test('buildHttpsRequestOptions: rejects non-https URLs', (t) => {
+  t.throws(
+    () => buildHttpsRequestOptions('http://203.0.113.10/path', 'GET', {}),
+    { message: /require https/i }
+  );
 });
 
 test('request: invalid cacert path rejects the Promise', async (t) => {

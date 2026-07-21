@@ -97,6 +97,9 @@ async function call(options = {}) {
   };
 
   logger.info(`Calling Psoxy and waiting response: ${options.url}`);
+  if (options.allowInsecureTls) {
+    logger.info('WARNING: --allow-insecure-tls disables TLS certificate verification (PoC / self-signed only)');
+  }
   logger.verbose('Request Options:', { additional: options });
   logger.verbose('Request Headers:', { additional: headers });
 

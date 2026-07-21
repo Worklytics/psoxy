@@ -393,12 +393,27 @@ locals {
   proxy_endpoint_is_cloud_function = can(regex("\\.run\\.app", local.proxy_endpoint_url)) || can(regex("\\.cloudfunctions\\.net", local.proxy_endpoint_url))
   # Prefer split/trimprefix over regex capture groups (capture groups return a list when >1 group)
   proxy_endpoint_host = split("/", trimprefix(trimprefix(local.proxy_endpoint_url, "https://"), "http://"))[0]
-  proxy_endpoint_is_ip = can(regex("^[0-9.]+$", local.proxy_endpoint_host)) || can(regex("^\\[[0-9a-fA-F:]+\\]$", local.proxy_endpoint_host))
+  # Strip IPv6 brackets before cidrhost (URL host form is [::1])
+  proxy_endpoint_host_for_ip = trimsuffix(trimprefix(local.proxy_endpoint_host, "["), "]")
+  proxy_endpoint_is_ip = (
+    can(cidrhost("${local.proxy_endpoint_host_for_ip}/32", 0))
+    || can(cidrhost("${local.proxy_endpoint_host_for_ip}/128", 0))
+  )
   command_cli_call_flags = trimspace(join(" ", compact([
     local.proxy_endpoint_is_cloud_function ? "" : "-f gcp",
     local.proxy_endpoint_is_ip ? "--allow-insecure-tls" : "",
   ])))
   command_cli_call = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js${local.command_cli_call_flags != "" ? " ${local.command_cli_call_flags}" : ""}"
+}
+
+check "proxy_endpoint_requires_https" {
+  assert {
+    condition     = startswith(local.proxy_endpoint_url, "https://")
+    error_message = "API connector proxy endpoint URL must use https:// (got a non-TLS URL). For PoC self-signed ALB certs, keep https:// and use psoxy-test --allow-insecure-tls or --cacert."
+  }
+}
+
+locals {
 
   # Merge example_api_calls into example_api_requests for unified processing
   all_example_api_requests = concat(
