@@ -59,3 +59,9 @@ Health checks are not subject to this gate (they run before IP enforcement) but 
 - Confirm the IP or CIDR your client actually presents to the proxy (health check `callerIp`, or Cloud Run / Lambda logs). Egress IPv4 and IPv6 may differ; Node.js clients often prefer IPv6 unless you force IPv4 (for example `NODE_OPTIONS='--dns-result-order=ipv4first'`).
 - IP allowlisting is not authentication. IPs can be spoofed in some paths; treat this as a supplementary control.
 - Fixed egress IPs from Worklytics may require a subscription add-on; contact [sales@worklytics.co](mailto:sales@worklytics.co). See also [FAQ - Security](../faq-security.md).
+
+### GCP external ALB + Cloud Armor
+
+When the [external ALB composition](../development/gcp-external-alb.md) is enabled, `allowed_data_access_ip_blocks` is pushed to **Cloud Armor** (network layer) as well as the connector env vars (application layer). A mismatch between the list you configured and the IP you test from produces **`403 Forbidden`** from Cloud Armor before the proxy runs — typically a bare HTML page, not a Psoxy error body.
+
+After editing the allowlist in `terraform.tfvars`, run `terraform apply` and confirm the deployed rule (for example `gcloud compute security-policies rules describe 1000 ...`) includes your current IPv4 **and** IPv6 if either might be used. See [Troubleshooting](../development/gcp-external-alb.md#troubleshooting) in the ALB doc for `ECONNRESET` / TLS and 403 symptoms.
