@@ -97,13 +97,16 @@ async function call(options = {}) {
   };
 
   logger.info(`Calling Psoxy and waiting response: ${options.url}`);
+  if (options.allowInsecureTls) {
+    logger.info('WARNING: --allow-insecure-tls disables TLS certificate verification (PoC / self-signed only)');
+  }
   logger.verbose('Request Options:', { additional: options });
   logger.verbose('Request Headers:', { additional: headers });
 
   const url = new URL(options.url);
   const method = options.method || resolveHTTPMethod(url.pathname, options);
 
-  return await request(url, method, headers, options.body);
+  return await request(url, method, headers, options.body, _.pick(options, ['allowInsecureTls', 'cacert']));
 }
 
 /**
@@ -147,8 +150,11 @@ async function getLogs(options = {}) {
  * Tries to parse region without zone
  * ref: https://cloud.google.com/compute/docs/regions-zones
  *
+ * Only derives a console URL from Cloud Function hosts (`*.run.app` / `*.cloudfunctions.net`).
+ * External ALB / custom domain URLs return undefined — use `cli-logs.js -p <project> -f <function>` instead.
+ *
  * @param {string} cloudFunctionURL
- * @returns {string} - URL to logs
+ * @returns {string|undefined} - URL to logs
  */
 function getLogsURL(cloudFunctionURL = '') {
   try {

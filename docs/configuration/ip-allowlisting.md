@@ -28,7 +28,11 @@ On **AWS**, both layers apply when you set the Terraform variables: callers must
 
 On **GCP**, only the **application layer** is enforced by the shipped Terraform. Cloud Run IAM conditions do not support source-IP checks on `roles/run.invoker`, and GCS bucket IAM does not support the `inIpRange` patterns used on AWS. The proxy reads allowlists from environment variables set at deploy time.
 
-For **additional** network ingress restriction on GCP (outside the proxy process), you can attach [Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) in front of a load balancer — see [GCP Private Service Connect and connectivity options](../development/gcp-private-service-connect.md#enhancing-public-internet-options-with-ip-allowlisting). That is separate from the `allowed_*_ip_blocks` Terraform variables.
+For **additional** network ingress restriction on GCP (outside the proxy process), you can attach [Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) in front of a load balancer.
+
+The example GCP root can compose a global external ALB + Cloud Armor policy that uses the same `allowed_data_access_ip_blocks` list, while `api_connector_external_lb_host` tells `gcp-host` to publish ALB URLs and set `ALLOW_INTERNAL_AND_GCLB` (beta; see [GCP External ALB + Cloud Armor](../development/gcp-external-alb.md) and the commented section in `infra/examples-dev/gcp/networking.tf`). That path is compositional (not provisioned inside `gcp-host` today).
+
+Related design notes: [GCP Private Service Connect and connectivity options](../development/gcp-private-service-connect.md#enhancing-public-internet-options-with-ip-allowlisting).
 
 ## AWS infrastructure-level detail
 

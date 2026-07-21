@@ -1,9 +1,11 @@
 
 # VPC ***beta***
 
-As of v0.5.6, GCP-hosted proxy instances are [Cloud Run Functions](https://cloud.google.com/run/docs/functions/comparison) (gen2). Ingress to the functions is managed by Google and secured by GCP IAM; we do not support VPC-level ingress controls.
+As of v0.5.6, GCP-hosted proxy instances are [Cloud Run Functions](https://cloud.google.com/run/docs/functions/comparison) (gen2).
 
 For **egress**, Psoxy supports [Direct VPC egress](https://cloud.google.com/functions/docs/running/direct-vpc): Cloud Functions attach a network interface directly to your VPC subnet and route outbound traffic through it. This does **not** require a Serverless VPC Access connector.
+
+This document covers **egress** only. For optional **ingress** via a customer-composed external Application Load Balancer + Cloud Armor (beta), see [GCP External ALB + Cloud Armor](../development/gcp-external-alb.md). VPC-level ingress controls are not provided by these modules; default ingress remains Google-managed (`*.run.app`) with GCP IAM.
 
 The legacy `serverless_connector` path remains supported but is deprecated (TODO: remove in 0.7.x).
 
