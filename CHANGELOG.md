@@ -7,6 +7,7 @@ Changes to be including in future/planned release notes will be added here.
 
 ## [Unreleased]
 - `aws`/`gcp`: fix Terraform plan failure when `enable_remote_resources = true` but no artifacts bucket exists (e.g. with a prebuilt `deployment_bundle`). When remote resources are enabled, an artifacts bucket is now provisioned if one is not already created or provided via `artifacts_bucket_name` / `custom_artifacts_bucket_name`.
+- `msft-onedrive`: adding support for a new connector for fetching Microsoft OneDrive data from users and groups via Microsoft Graph API. See [docs](docs/sources/microsoft-365/msft-onedrive/README.md) for details.
 
 ## [0.6.5](https://github.com/Worklytics/psoxy/releases/tag/v0.6.5)
 - added `claude-enterprise-analytics` connector in **beta**; imports per-user daily activity, token usage, and cost data from the [Claude Enterprise Analytics API](https://support.claude.com/en/articles/13703965-claude-enterprise-analytics-api-reference-guide); see [docs/sources/anthropic/claude-enterprise-analytics/README.md](docs/sources/anthropic/claude-enterprise-analytics/README.md)
