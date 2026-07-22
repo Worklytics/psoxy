@@ -239,7 +239,7 @@ locals {
 check "api_connector_external_lb_host_ip_allowlist" {
   assert {
     condition     = var.api_connector_external_lb_host == null || var.allowed_data_access_ip_blocks != null
-    error_message = "When api_connector_external_lb_host is set, also set allowed_data_access_ip_blocks (Worklytics static egress IPs). Use the same list for Cloud Armor in your root networking.tf."
+    error_message = "When api_connector_external_lb_host is set, also set allowed_data_access_ip_blocks (Worklytics static egress IPs). Use the same list for Cloud Armor in your root external-api-alb.tf."
   }
 }
 
