@@ -208,8 +208,8 @@ output "path_to_deployment_jar" {
 
 output "api_connector_instances" {
   value = { for k, v in module.psoxy.api_connector_instances : k => merge({
-    endpoint_url         = v.endpoint_url
-    cloud_function_name  = v.cloud_function_name
+    endpoint_url        = v.endpoint_url
+    cloud_function_name = v.cloud_function_name
     }, v.sanitized_bucket != null ? {
     sanitized_bucket = v.sanitized_bucket
     } : {}, {
