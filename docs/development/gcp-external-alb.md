@@ -28,10 +28,11 @@ Psoxy does **not** provision the ALB inside `gcp-host`. Customers (or the exampl
 
 1. Enable and adapt [`infra/examples-dev/gcp/external-api-alb.tf`](../../infra/examples-dev/gcp/external-api-alb.tf) (syncs to `psoxy-example-gcp`).
 2. Set `allowed_data_access_ip_blocks` to Worklytics egress IPs (same list for Cloud Armor and the proxy).
-3. Pass into `gcp-host`:
+3. In `main.tf`, wire the ALB host into `module.psoxy` (uncomment one of):
 
 ```hcl
-api_connector_external_lb_host = var.api_proxy_domain != null ? var.api_proxy_domain : google_compute_global_address.api_proxy[0].address
+# api_connector_external_lb_host = local.api_connector_external_lb_host  # when using external-api-alb.tf
+# api_connector_external_lb_host = "proxy.example.com"                 # customer-provisioned ALB host/IP
 ```
 
 When `api_connector_external_lb_host` is non-null, `gcp-host`:
@@ -81,7 +82,7 @@ More common causes:
 1. **ALB still provisioning** — after the first `terraform apply` that creates the HTTPS proxy, self-signed cert, and global forwarding rule, wait several minutes and retry. Verify the handshake with curl before using `psoxy-test`:
 
 ```bash
-curl -vk https://<alb-ip>/<environment>-<connector>/
+curl -vk https://<alb-ip>/<cloud-function-name>/
 ```
 
 You should complete TLS even if the HTTP status is 404 or 403.
@@ -114,15 +115,17 @@ curl -6 -s ifconfig.me    # IPv6
 
 ```bash
 gcloud compute security-policies rules describe 1000 \
-  --security-policy=<environment_name>-worklytics-ingress \  # omit "<environment_name>-" if environment_name is empty
+  --security-policy=<environment_id_prefix>worklytics-ingress \
   --project=<gcp_project_id> \
   --format='yaml(match.config.srcIpRanges)'
 ```
 
+(`environment_id_prefix` is `{environment_name}-` when `environment_name` is set, or empty when unset — e.g. `psoxy-dev-erik-worklytics-ingress` vs `worklytics-ingress`.)
+
 3. **Compare to the connector app allowlist** (should match after apply):
 
 ```bash
-gcloud run services describe <environment_name>-<connector> \  # omit "<environment_name>-" if environment_name is empty
+gcloud run services describe <cloud-function-name> \
   --region=<gcp_region> --project=<gcp_project_id> \
   --format='value(spec.template.spec.containers[0].env)' | tr ';' '\n' | grep ALLOWED
 ```

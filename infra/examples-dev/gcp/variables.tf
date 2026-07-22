@@ -476,15 +476,6 @@ variable "allowed_data_access_ip_blocks" {
   }
 }
 
-variable "api_connector_external_lb_host" {
-  type        = string
-  description = <<-EOT
-    Hostname or IP of a customer-provisioned external ALB fronting API connectors (beta; see external-api-alb.tf and docs/development/gcp-external-alb.md). When the ALB composition is enabled, this is set automatically from `api_proxy_domain` or the reserved global IP.
-  EOT
-  default     = null
-  nullable    = true
-}
-
 variable "allowed_webhook_ip_blocks" {
   description = <<-EOT
     IPs or CIDR blocks allowed to send webhooks at the application layer (not IAM on Cloud Run). Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md.
