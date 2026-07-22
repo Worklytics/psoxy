@@ -122,7 +122,7 @@ gcloud compute security-policies rules describe 1000 \
 3. **Compare to the connector app allowlist** (should match after apply):
 
 ```bash
-gcloud run services describe <environment_name>-<connector> \
+gcloud run services describe <environment_name>-<connector> \  # omit "<environment_name>-" if environment_name is empty
   --region=<gcp_region> --project=<gcp_project_id> \
   --format='value(spec.template.spec.containers[0].env)' | tr ';' '\n' | grep ALLOWED
 ```
