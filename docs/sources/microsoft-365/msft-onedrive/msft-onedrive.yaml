@@ -1,178 +1,176 @@
 ---
 endpoints:
-- pathTemplate: "/v1.0/drives/{driveId}/activities"
-  allowedQueryParams: []
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.email"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/ItemActivity"
-- pathTemplate: "/v1.0/drives/{driveId}/items/{itemId}/activities"
-  allowedQueryParams: []
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.email"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/ItemActivity"
-- pathTemplate: "/v1.0/drives/{driveId}/items/{itemId}/versions"
-  allowedQueryParams:
-  - "$skiptoken"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.email"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/DriveItemVersion"
-- pathTemplate: "/v1.0/drives/{driveId}/root/delta"
-  allowedQueryParams:
-  - "$skiptoken"
-  - "$deltatoken"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.email"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/DriveItem"
-- pathTemplate: "/v1.0/groups"
-  allowedQueryParams:
-  - "$top"
-  - "$select"
-  - "$skiptoken"
-  - "$orderBy"
-  - "$count"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..mail"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/GraphGroup"
-- pathTemplate: "/v1.0/groups/{groupId}/drives"
-  allowedQueryParams:
-  - "$select"
-  - "$skiptoken"
-  - "$top"
-  - "$orderBy"
-  - "$expand"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.email"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/Drive"
-- pathTemplate: "/v1.0/users"
-  allowedQueryParams:
-  - "$top"
-  - "$select"
-  - "$skiptoken"
-  - "$orderBy"
-  - "$count"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..employeeId"
-    - "$..mail"
-    - "$..otherMails[*]"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/GraphUser"
-- pathTemplate: "/v1.0/users/{userId}/drives"
-  allowedQueryParams:
-  - "$select"
-  - "$skiptoken"
-  - "$top"
-  - "$orderBy"
-  - "$expand"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.email"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/Drive"
+  - pathTemplate: "/v1.0/drives/{driveId}/activities"
+    allowedQueryParams:
+      - "$expand"
+      - "$skiptoken"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/ItemActivity"
+  - pathTemplate: "/v1.0/drives/{driveId}/items/{itemId}/activities"
+    allowedQueryParams:
+      - "$expand"
+      - "$skiptoken"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/ItemActivity"
+  - pathTemplate: "/v1.0/drives/{driveId}/root/delta"
+    allowedQueryParams:
+      - "token"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/DriveItem"
+  - pathTemplate: "/v1.0/groups"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..mail"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/GraphGroup"
+  - pathTemplate: "/v1.0/groups/{groupId}/drives"
+    allowedQueryParams:
+      - "$select"
+      - "$skiptoken"
+      - "$top"
+      - "$orderBy"
+      - "$expand"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/Drive"
+  - pathTemplate: "/v1.0/users"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..mail"
+          - "$..otherMails[*]"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/GraphUser"
+  - pathTemplate: "/v1.0/users/{userId}/drives"
+    allowedQueryParams:
+      - "$select"
+      - "$skiptoken"
+      - "$top"
+      - "$orderBy"
+      - "$expand"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/Drive"
 definitions:
   ActivityItemRef:
     type: "object"
@@ -190,6 +188,17 @@ definitions:
         $ref: "#/definitions/DateTimeTimeZone"
       status:
         type: "string"
+  CommentAction:
+    type: "object"
+    properties:
+      isReply:
+        type: "boolean"
+      parentAuthor:
+        $ref: "#/definitions/IdentitySet"
+      participants:
+        type: "array"
+        items:
+          $ref: "#/definitions/IdentitySet"
   DateTimeTimeZone:
     type: "object"
     properties:
@@ -203,6 +212,13 @@ definitions:
   DeletedFacet:
     type: "object"
     properties: {}
+  DocumentActivityDetail:
+    type: "object"
+    properties:
+      contentId:
+        type: "string"
+      navigationId:
+        type: "string"
   Drive:
     type: "object"
     properties:
@@ -265,18 +281,6 @@ definitions:
         type: "integer"
       specialFolder:
         $ref: "#/definitions/SpecialFolderFacet"
-  DriveItemVersion:
-    type: "object"
-    properties:
-      id:
-        type: "string"
-      lastModifiedBy:
-        $ref: "#/definitions/IdentitySet"
-      lastModifiedDateTime:
-        type: "string"
-        format: "date-time"
-      size:
-        type: "integer"
   File:
     type: "object"
     properties:
@@ -372,7 +376,7 @@ definitions:
       access:
         $ref: "#/definitions/ItemAction"
       comment:
-        $ref: "#/definitions/ItemAction"
+        $ref: "#/definitions/CommentAction"
       create:
         $ref: "#/definitions/ItemAction"
       delete:
@@ -380,15 +384,15 @@ definitions:
       edit:
         $ref: "#/definitions/ItemAction"
       mention:
-        $ref: "#/definitions/ItemAction"
+        $ref: "#/definitions/MentionAction"
       move:
         $ref: "#/definitions/ItemAction"
       rename:
-        $ref: "#/definitions/ItemAction"
+        $ref: "#/definitions/RenameAction"
       restore:
         $ref: "#/definitions/ItemAction"
       share:
-        $ref: "#/definitions/ItemAction"
+        $ref: "#/definitions/ShareAction"
       version:
         $ref: "#/definitions/VersionAction"
   ItemActivity:
@@ -398,8 +402,10 @@ definitions:
         $ref: "#/definitions/ItemActionSet"
       actor:
         $ref: "#/definitions/IdentitySet"
+      docDetails:
+        $ref: "#/definitions/DocumentActivityDetail"
       driveItem:
-        $ref: "#/definitions/ActivityItemRef"
+        $ref: "#/definitions/DriveItem"
       id:
         type: "string"
       listItem:
@@ -446,6 +452,13 @@ definitions:
   MalwareFacet:
     type: "object"
     properties: {}
+  MentionAction:
+    type: "object"
+    properties:
+      mentionees:
+        type: "array"
+        items:
+          $ref: "#/definitions/IdentitySet"
   Package:
     type: "object"
     properties:
@@ -489,9 +502,21 @@ definitions:
         type: "integer"
       specialFolder:
         $ref: "#/definitions/SpecialFolderFacet"
+  RenameAction:
+    type: "object"
+    properties:
+      oldName:
+        type: "string"
   RootFacet:
     type: "object"
     properties: {}
+  ShareAction:
+    type: "object"
+    properties:
+      recipients:
+        type: "array"
+        items:
+          $ref: "#/definitions/IdentitySet"
   SharedFacet:
     type: "object"
     properties:
