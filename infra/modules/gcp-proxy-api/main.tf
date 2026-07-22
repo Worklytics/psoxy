@@ -251,6 +251,10 @@ resource "google_cloudfunctions2_function" "function" {
     available_memory      = "${var.available_memory_mb}M"
     timeout_seconds       = var.timeout_seconds
     ingress_settings      = var.ingress_settings
+    # TODO: when external_lb_base_url is set and enable_async_processing is false, disable the
+    # default *.run.app URL (Cloud Run default_uri_disabled / run.googleapis.com/default-url-disabled)
+    # so the console shows URL: None and traffic must use the ALB. Not exposed on
+    # google_cloudfunctions2_function today; async connectors must keep the default URL for Pub/Sub push.
 
     max_instance_request_concurrency = var.instance_concurrency
     available_cpu                    = var.instance_concurrency > 1 ? "1" : null

@@ -5,6 +5,10 @@ terraform {
     google = {
       version = "~> 7.0"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 
   # NOTE: Terraform backend block is configured in a separate 'backend.tf' file, as expect everyone
@@ -135,7 +139,9 @@ module "psoxy" {
   bulk_sanitized_expiration_days  = var.bulk_sanitized_expiration_days
   allowed_data_access_ip_blocks    = var.allowed_data_access_ip_blocks
   allowed_webhook_ip_blocks        = var.allowed_webhook_ip_blocks
-  api_connector_external_lb_host   = var.api_connector_external_lb_host
+  api_connector_external_lb_host   = null
+  # api_connector_external_lb_host = local.api_connector_external_lb_host  # uncomment when using external-api-alb.tf
+  # api_connector_external_lb_host = "proxy.example.com"                 # or your customer-provisioned ALB host/IP
   custom_bulk_connector_rules      = var.custom_bulk_connector_rules
   custom_bulk_connector_arguments  = var.custom_bulk_connector_arguments
   lookup_tables                    = var.lookup_tables

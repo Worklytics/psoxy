@@ -1,63 +1,12 @@
-# Customer networking (optional): VPC egress and/or external ALB ingress.
+# External API ALB ingress (optional, beta) — global external ALB + Cloud Armor (WAF).
 #
-# Status: External ALB + Cloud Armor is beta (composition pattern; not a first-class module). See:
-#   docs/development/gcp-external-alb.md
-#   docs/gcp/vpc.md
+# Status: composition pattern only; not a first-class module. See docs/development/gcp-external-alb.md.
 #
-# Uncomment and adapt sections below as needed. By default nothing here is applied.
-# After enabling the ALB section, pass the LB hostname or IP into module.psoxy via
-# `api_connector_external_lb_host` (see main.tf / variables.tf).
-
-# ------------------------------------------------------------------------------
-# VPC egress (optional) — Direct VPC egress for Cloud Functions; outbound via NAT
-# ------------------------------------------------------------------------------
-# Use when data sources must allowlist a fixed egress IP. Then set:
-#   vpc_config = {
-#     network = google_compute_network.vpc.name
-#     subnet  = google_compute_subnetwork.default.name
-#   }
-
-# resource "google_compute_network" "vpc" {
-#   project                 = var.gcp_project_id
-#   name                    = "${var.environment_name}-vpc"
-#   auto_create_subnetworks = false
-#   mtu                     = 1460
-# }
+# Orthogonal to vpc.tf (egress). Uncomment below and set enable_external_api_alb = true in terraform.tfvars.
+# After apply, endpoint URLs use the reserved global IP (self-signed PoC) or api_proxy_domain
+# (managed TLS). To auto-wire that host into gcp-host, set module.psoxy's
+# api_connector_external_lb_host to local.api_connector_external_lb_host in main.tf.
 #
-# resource "google_compute_subnetwork" "default" {
-#   project                  = var.gcp_project_id
-#   name                     = "${var.environment_name}-subnet"
-#   ip_cidr_range            = "10.10.0.0/24"
-#   region                   = var.gcp_region
-#   network                  = google_compute_network.vpc.id
-#   private_ip_google_access = true
-# }
-#
-# resource "google_compute_router" "router" {
-#   project = var.gcp_project_id
-#   name    = "${var.environment_name}-router"
-#   region  = var.gcp_region
-#   network = google_compute_network.vpc.id
-# }
-#
-# resource "google_compute_router_nat" "nat" {
-#   project = var.gcp_project_id
-#   name    = "${var.environment_name}-nat"
-#   router  = google_compute_router.router.name
-#   region  = var.gcp_region
-#
-#   nat_ip_allocate_option             = "AUTO_ONLY"
-#   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-#
-#   log_config {
-#     enable = true
-#     filter = "ERRORS_ONLY"
-#   }
-# }
-
-# ------------------------------------------------------------------------------
-# External ALB ingress (optional, beta)
-# ------------------------------------------------------------------------------
 # Worklytics reaches API connectors over the public internet from static egress IPs.
 # Cloud Armor enforces allowed_data_access_ip_blocks at the network layer; pass the
 # same list into module.psoxy for application-layer enforcement.
@@ -70,16 +19,12 @@
 #   - PoC: omit domain → self-signed cert with SAN = reserved global IP
 #     (test with psoxy-test --allow-insecure-tls or --cacert)
 #
-# Prerequisites when enabling:
-#   allowed_data_access_ip_blocks = ["<worklytics-egress-ip>/32"]
-#   api_connector_external_lb_host = var.api_proxy_domain != null ? var.api_proxy_domain : google_compute_global_address.api_proxy[0].address
-#
 # Future work: provision this ALB inside gcp-host instead of root composition
 # (see docs/development/gcp-external-alb.md).
 
 # variable "enable_external_api_alb" {
 #   type        = bool
-#   description = "Provision the commented external ALB resources below."
+#   description = "Provision the external ALB + Cloud Armor resources in this file."
 #   default     = false
 # }
 #
@@ -87,12 +32,16 @@
 #   type        = string
 #   description = "Optional. Google-managed HTTPS when set; self-signed HTTPS on global IP when null (PoC only)."
 #   default     = null
+#   nullable    = true
 # }
 #
 # locals {
+#   # Matches gcp-host environment_id_prefix; use for root-composed resource names.
+#   environment_id_prefix = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
+#
 #   api_connector_function_names = {
-#     for k, v in module.psoxy.api_connector_instances :
-#     k => v.cloud_function_name
+#     for k in keys(local.api_connectors) :
+#     k => "${local.environment_id_prefix}${k}"
 #   }
 #
 #   external_api_alb_enabled = (
@@ -103,6 +52,13 @@
 #
 #   external_api_alb_managed_https = local.external_api_alb_enabled && var.api_proxy_domain != null
 #   external_api_alb_self_signed   = local.external_api_alb_enabled && var.api_proxy_domain == null
+#
+#   # Hostname/IP for gcp-host when this composition is enabled (domain or reserved global IP).
+#   # main.tf passes var.api_connector_external_lb_host by default so this file can stay optional.
+#   # When using this ALB, replace that with local.api_connector_external_lb_host in module.psoxy.
+#   api_connector_external_lb_host = local.external_api_alb_enabled ? (
+#     var.api_proxy_domain != null ? var.api_proxy_domain : google_compute_global_address.api_proxy[0].address
+#   ) : null
 # }
 #
 # check "external_api_alb_config" {
@@ -125,37 +81,47 @@
 #   count = local.external_api_alb_enabled ? 1 : 0
 #
 #   project = var.gcp_project_id
-#   name    = "${var.environment_name}-api-alb"
+#   name    = "${local.environment_id_prefix}api-alb"
 # }
 #
 # resource "google_compute_security_policy" "worklytics_ingress" {
 #   count = local.external_api_alb_enabled ? 1 : 0
 #
 #   project = var.gcp_project_id
-#   name    = "${var.environment_name}-worklytics-ingress"
+#   name    = "${local.environment_id_prefix}worklytics-ingress"
+# }
 #
-#   rule {
-#     action   = "allow"
-#     priority = 1000
-#     match {
-#       versioned_expr = "SRC_IPS_V1"
-#       config {
-#         src_ip_ranges = var.allowed_data_access_ip_blocks
-#       }
+# resource "google_compute_security_policy_rule" "worklytics_ingress_allow" {
+#   count = local.external_api_alb_enabled ? 1 : 0
+#
+#   security_policy = google_compute_security_policy.worklytics_ingress[0].name
+#   project         = var.gcp_project_id
+#   priority        = 1000
+#   action          = "allow"
+#   description     = "Allow Worklytics static egress IPs"
+#
+#   match {
+#     versioned_expr = "SRC_IPS_V1"
+#     config {
+#       src_ip_ranges = var.allowed_data_access_ip_blocks
 #     }
-#     description = "Allow Worklytics static egress IPs"
 #   }
+# }
 #
-#   rule {
-#     action   = "deny(403)"
-#     priority = 2147483647
-#     match {
-#       versioned_expr = "SRC_IPS_V1"
-#       config {
-#         src_ip_ranges = ["*"]
-#       }
+# resource "google_compute_security_policy_rule" "worklytics_ingress_deny" {
+#   count = local.external_api_alb_enabled ? 1 : 0
+#
+#   security_policy = google_compute_security_policy.worklytics_ingress[0].name
+#   project         = var.gcp_project_id
+#   priority        = 2147483647
+#   action          = "deny(403)"
+#   description     = "Default deny"
+#
+#   match {
+#     versioned_expr = "SRC_IPS_V1"
+#     config {
+#       src_ip_ranges = ["*"]
 #     }
-#     description = "Default deny"
 #   }
 # }
 #
@@ -199,7 +165,7 @@
 #   count = local.external_api_alb_enabled ? 1 : 0
 #
 #   project = var.gcp_project_id
-#   name    = "${var.environment_name}-api-connectors"
+#   name    = "${local.environment_id_prefix}api-connectors"
 #
 #   default_service = values(google_compute_backend_service.api_connector)[0].id
 #
@@ -231,7 +197,7 @@
 #   count = local.external_api_alb_managed_https ? 1 : 0
 #
 #   project = var.gcp_project_id
-#   name    = "${var.environment_name}-api-proxy-cert"
+#   name    = "${local.environment_id_prefix}api-proxy-cert"
 #
 #   managed {
 #     domains = [var.api_proxy_domain]
@@ -244,14 +210,14 @@
 #   count = local.external_api_alb_managed_https ? 1 : 0
 #
 #   project = var.gcp_project_id
-#   name    = "${var.environment_name}-api-proxy-cert-map"
+#   name    = "${local.environment_id_prefix}api-proxy-cert-map"
 # }
 #
 # resource "google_certificate_manager_certificate_map_entry" "api_proxy" {
 #   count = local.external_api_alb_managed_https ? 1 : 0
 #
 #   project      = var.gcp_project_id
-#   name         = "${var.environment_name}-api-proxy-cert-entry"
+#   name         = "${local.environment_id_prefix}api-proxy-cert-entry"
 #   map          = google_certificate_manager_certificate_map.api_proxy[0].name
 #   certificates = [google_certificate_manager_certificate.api_proxy[0].id]
 #   hostname     = var.api_proxy_domain
@@ -261,13 +227,12 @@
 #   count = local.external_api_alb_managed_https ? 1 : 0
 #
 #   project         = var.gcp_project_id
-#   name            = "${var.environment_name}-api-connectors-https"
+#   name            = "${local.environment_id_prefix}api-connectors-https"
 #   url_map         = google_compute_url_map.api_connectors[0].id
 #   certificate_map = "//certificatemanager.googleapis.com/${google_certificate_manager_certificate_map.api_proxy[0].id}"
 # }
 #
 # # Self-signed TLS (PoC): omit api_proxy_domain; cert SAN includes the reserved global IP
-# # Requires hashicorp/tls in required_providers.
 #
 # resource "tls_private_key" "api_proxy" {
 #   count = local.external_api_alb_self_signed ? 1 : 0
@@ -282,7 +247,7 @@
 #   private_key_pem = tls_private_key.api_proxy[0].private_key_pem
 #
 #   subject {
-#     common_name = "${var.environment_name}-api-proxy.poc"
+#     common_name = "${local.environment_id_prefix}api-proxy.poc"
 #   }
 #
 #   validity_period_hours = 8760
@@ -300,7 +265,7 @@
 #   count = local.external_api_alb_self_signed ? 1 : 0
 #
 #   project     = var.gcp_project_id
-#   name        = "${var.environment_name}-api-proxy-self-signed"
+#   name        = "${local.environment_id_prefix}api-proxy-self-signed"
 #   private_key = tls_private_key.api_proxy[0].private_key_pem
 #   certificate = tls_self_signed_cert.api_proxy[0].cert_pem
 #
@@ -313,7 +278,7 @@
 #   count = local.external_api_alb_self_signed ? 1 : 0
 #
 #   project = var.gcp_project_id
-#   name    = "${var.environment_name}-api-connectors-https"
+#   name    = "${local.environment_id_prefix}api-connectors-https"
 #   url_map = google_compute_url_map.api_connectors[0].id
 #
 #   ssl_certificates = [google_compute_ssl_certificate.api_proxy_self_signed[0].id]
@@ -323,7 +288,7 @@
 #   count = local.external_api_alb_enabled ? 1 : 0
 #
 #   project               = var.gcp_project_id
-#   name                  = "${var.environment_name}-api-connectors-https"
+#   name                  = "${local.environment_id_prefix}api-connectors-https"
 #   load_balancing_scheme = "EXTERNAL_MANAGED"
 #   ip_protocol           = "TCP"
 #   port_range            = "443"
@@ -333,11 +298,6 @@
 #     try(google_compute_target_https_proxy.api_connectors_self_signed[0].id, null),
 #   )
 # }
-#
-# # Wire into module.psoxy (main.tf):
-# #   api_connector_external_lb_host = local.external_api_alb_enabled ? (
-# #     var.api_proxy_domain != null ? var.api_proxy_domain : google_compute_global_address.api_proxy[0].address
-# #   ) : null
 #
 # output "external_alb_ip_address" {
 #   description = "Reserved global IP for the external load balancer."

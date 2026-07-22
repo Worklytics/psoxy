@@ -16,12 +16,12 @@ variable "gcp_terraform_sa_account_email" {
 
 variable "environment_name" {
   type        = string
-  description = "Qualifier to append to names/ids of resources for psoxy. If not empty, A-Za-z0-9 or - characters only. Max length 10. Useful to distinguish between deployments into same GCP project."
+  description = "Qualifier to distinguish deployments in the same GCP project. Empty, or a GCP-safe slug: lowercase letters, digits, and hyphens only, max 20 characters, no leading/trailing hyphen."
   default     = ""
 
   validation {
-    condition     = can(regex("^[A-z0-9\\-]{0,20}$", var.environment_name))
-    error_message = "The environment_id must be 0-20 chars of [A-z0-9\\-] only."
+    condition     = var.environment_name == "" || (length(var.environment_name) <= 20 && can(regex("^[a-z0-9]([a-z0-9-]*[a-z0-9])?$", var.environment_name)))
+    error_message = "environment_name must be empty or a GCP-safe slug: lowercase letters, digits, and internal hyphens only, max 20 characters."
   }
 }
 
@@ -464,7 +464,7 @@ variable "todos_as_local_files" {
 
 variable "allowed_data_access_ip_blocks" {
   description = <<-EOT
-    IPs or CIDR blocks allowed to make data access requests at the application layer (not IAM on Cloud Run). Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md. When using the external ALB composition in networking.tf, use the same list for Cloud Armor.
+    IPs or CIDR blocks allowed to make data access requests at the application layer (not IAM on Cloud Run). Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md. When using the external ALB composition in external-api-alb.tf, use the same list for Cloud Armor.
   EOT
   type        = list(string)
   nullable    = true
@@ -474,15 +474,6 @@ variable "allowed_data_access_ip_blocks" {
     condition     = var.allowed_data_access_ip_blocks == null || try(length(var.allowed_data_access_ip_blocks) > 0, false)
     error_message = "allowed_data_access_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
   }
-}
-
-variable "api_connector_external_lb_host" {
-  type        = string
-  description = <<-EOT
-    Hostname or IP of a customer-provisioned external ALB fronting API connectors (beta; see networking.tf and docs/development/gcp-external-alb.md). After uncommenting the ALB composition, set to the domain (managed TLS) or reserved global IP (self-signed PoC).
-  EOT
-  default     = null
-  nullable    = true
 }
 
 variable "allowed_webhook_ip_blocks" {

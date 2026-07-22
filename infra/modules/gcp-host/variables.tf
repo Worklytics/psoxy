@@ -470,7 +470,7 @@ variable "enable_remote_resources" {
 variable "api_connector_external_lb_host" {
   type        = string
   description = <<-EOT
-    Hostname or IP of a customer-provisioned external Application Load Balancer that fronts API connectors (beta; see docs/development/gcp-external-alb.md and the commented example in networking.tf). When non-null, API connectors use ingress ALLOW_INTERNAL_AND_GCLB and public endpoint URLs become https://<host>/<function-name>/. Does not provision the ALB.
+    Hostname or IP of a customer-provisioned external Application Load Balancer that fronts API connectors (beta; see docs/development/gcp-external-alb.md and infra/examples-dev/gcp/external-api-alb.tf). When non-null, API connectors use ingress ALLOW_INTERNAL_AND_GCLB and public endpoint URLs become https://<host>/<function-name>/. Does not provision the ALB.
   EOT
   default     = null
   nullable    = true
