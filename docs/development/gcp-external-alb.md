@@ -114,7 +114,7 @@ curl -6 -s ifconfig.me    # IPv6
 
 ```bash
 gcloud compute security-policies rules describe 1000 \
-  --security-policy=<environment_name>-worklytics-ingress \
+  --security-policy=<environment_name>-worklytics-ingress \  # omit "<environment_name>-" if environment_name is empty
   --project=<gcp_project_id> \
   --format='yaml(match.config.srcIpRanges)'
 ```
