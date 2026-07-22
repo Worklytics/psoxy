@@ -30,7 +30,7 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.6.8"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.6.8"
 
   base_dir                                 = var.psoxy_base_dir
   enabled_connectors                       = var.enabled_connectors
@@ -104,7 +104,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=rc-v0.6.8"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.6.8"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
@@ -133,20 +133,21 @@ module "psoxy" {
   email_canonicalization          = var.email_canonicalization
   bulk_input_expiration_days      = var.bulk_input_expiration_days
   bulk_sanitized_expiration_days  = var.bulk_sanitized_expiration_days
-  allowed_data_access_ip_blocks   = var.allowed_data_access_ip_blocks
-  allowed_webhook_ip_blocks       = var.allowed_webhook_ip_blocks
-  custom_bulk_connector_rules     = var.custom_bulk_connector_rules
-  custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
-  lookup_tables                   = var.lookup_tables
-  custom_artifacts_bucket_name    = var.custom_artifacts_bucket_name
-  custom_side_outputs             = var.custom_side_outputs
-  todos_as_local_files            = var.todos_as_local_files
-  todo_step                       = local.max_auth_todo_step
-  bucket_force_destroy            = var.bucket_force_destroy
-  tf_gcp_principal_email          = var.gcp_terraform_sa_account_email
-  provision_project_level_iam     = var.provision_project_level_iam
-  bucket_access_logs_destination  = var.bucket_access_logs_destination
-  enable_remote_resources         = true
+  allowed_data_access_ip_blocks    = var.allowed_data_access_ip_blocks
+  allowed_webhook_ip_blocks        = var.allowed_webhook_ip_blocks
+  api_connector_external_lb_host   = var.api_connector_external_lb_host
+  custom_bulk_connector_rules      = var.custom_bulk_connector_rules
+  custom_bulk_connector_arguments  = var.custom_bulk_connector_arguments
+  lookup_tables                    = var.lookup_tables
+  custom_artifacts_bucket_name     = var.custom_artifacts_bucket_name
+  custom_side_outputs              = var.custom_side_outputs
+  todos_as_local_files             = var.todos_as_local_files
+  todo_step                        = local.max_auth_todo_step
+  bucket_force_destroy             = var.bucket_force_destroy
+  tf_gcp_principal_email           = var.gcp_terraform_sa_account_email
+  provision_project_level_iam      = var.provision_project_level_iam
+  bucket_access_logs_destination   = var.bucket_access_logs_destination
+  enable_remote_resources          = true
 }
 
 locals {
@@ -168,7 +169,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=rc-v0.6.8"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=v0.6.8"
 
   host_platform_id     = local.host_platform_id
   proxy_instance_id    = each.key
@@ -201,7 +202,8 @@ output "path_to_deployment_jar" {
 
 output "api_connector_instances" {
   value = { for k, v in module.psoxy.api_connector_instances : k => merge({
-    endpoint_url = v.endpoint_url
+    endpoint_url         = v.endpoint_url
+    cloud_function_name  = v.cloud_function_name
     }, v.sanitized_bucket != null ? {
     sanitized_bucket = v.sanitized_bucket
     } : {}, {

@@ -115,6 +115,7 @@ test.serial('Psoxy call: works as expected', async (t) => {
       td.matchers.isA(URL),
       td.matchers.contains('GET'),
       td.matchers.contains(signedRequest.headers),
+      td.matchers.anything(),
       td.matchers.anything()
     )
   ).thenReturn({ status: httpCodes.HTTP_STATUS_OK });
@@ -134,6 +135,7 @@ test.serial('Psoxy call: pathless URL results 500', async (t) => {
       td.matchers.isA(URL),
       td.matchers.contains('GET'),
       td.matchers.contains(signedRequest.headers),
+      td.matchers.anything(),
       td.matchers.anything(),
     )
   ).thenReturn({
@@ -183,7 +185,8 @@ test.serial('Psoxy call: with POST, signingKey, and identitySubject options (Web
           // if signing works this header must be included in the request,
           'Authorization': jwtSignatureExample,
         }),
-        td.matchers.contains(options.body)
+        td.matchers.contains(options.body),
+        td.matchers.anything()
       )
     ).thenReturn({ status: httpCodes.HTTP_STATUS_OK });
 
