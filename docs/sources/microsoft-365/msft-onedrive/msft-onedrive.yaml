@@ -47,6 +47,9 @@ endpoints:
   - pathTemplate: "/v1.0/drives/{driveId}/root/delta"
     allowedQueryParams:
       - "token"
+      - "$select"
+      - "$expand"
+      - "$top"
     transforms:
       - !<pseudonymize>
         jsonPaths:
