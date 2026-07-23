@@ -71,16 +71,16 @@ locals {
     if try(v.rules_file, null) != null
   }
 
-  # API connectors with rules_raw that don't have file-based overrides
-  api_connector_rules_raw = {
-    for k, v in var.api_connectors : k => v.rules_raw
-    if try(v.rules_raw, null) != null && !contains(keys(local.api_connector_rules_files), k)
+  # API connectors with inline rules content (not file-based overrides)
+  api_connector_rules_content = {
+    for k, v in var.api_connectors : k => coalesce(try(v.rules, null), try(v.rules_raw, null))
+    if coalesce(try(v.rules, null), try(v.rules_raw, null)) != null && !contains(keys(local.api_connector_rules_files), k)
   }
 
   api_connector_rules = {
     for k, v in var.api_connectors :
     k => try(local.api_connector_rules_file_paths[k], null) != null ? file(local.api_connector_rules_file_paths[k]) : (
-      try(local.api_connector_rules_raw[k], null) != null ? local.api_connector_rules_raw[k] : null
+      try(local.api_connector_rules_content[k], null)
     )
   }
 }
@@ -305,7 +305,7 @@ module "api_connector" {
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
       CUSTOM_RULES_SHA = try(local.api_connector_rules_file_paths[each.key], null) != null ? filesha1(local.api_connector_rules_file_paths[each.key]) : (
-        try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
+        try(local.api_connector_rules_content[each.key], null) != null ? sha1(local.api_connector_rules_content[each.key]) : null
       )
       RULES                  = local.api_connector_rules[each.key] != null ? base64gzip(local.api_connector_rules[each.key]) : null
       EMAIL_CANONICALIZATION = var.email_canonicalization

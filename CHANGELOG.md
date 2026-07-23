@@ -6,9 +6,10 @@ in each release's notes.
 Changes to be including in future/planned release notes will be added here.
 
 ## [0.6.9]
-- `worklytics-connector-specs`: connector specs now explicitly reference their sanitization rules YAML files via `rules_file`, which are provisioned as `RULES` (or SSM/Secret Manager) when `base_dir` is set. Bulk connectors `badge`, `hris`, and `metrics` now use YAML rules files instead of inline Terraform `rules`.
+- `worklytics-connector-specs`: connector specs now explicitly reference their sanitization rules YAML files via `rules_file`. Host modules (`aws-host`/`gcp-host`) resolve file paths and provision rules; connector specs pass paths through rather than pre-resolving file content. Bulk connectors `badge`, `hris`, and `metrics` now use YAML rules files instead of inline Terraform `rules`.
 - `msft-*`: Microsoft 365 connector rules YAML files renamed so the default (pseudonymizing) rules are the canonical `*.yaml` files; variants that include app/user IDs in the clear are now named `*_inc-app-ids.yaml` (e.g. `entra-id_inc-app-ids.yaml`). Terraform provisions the default pseudonymizing rules. Customers who set `pseudonymize_app_ids = false` (default is `true`) and need rules that pass app IDs in the clear should point `custom_api_connector_rules` at the `*_inc-app-ids.yaml` files.
 - proxy: log a warning when falling back to prebuilt Java rules because no `RULES` were configured explicitly. This fallback will be removed in v0.7; rules must be explicitly configured.
+- `aws-host`/`gcp-host`: `api_connectors` now accept a `rules` property (YAML rules content string) for hosted deployments that provide rules inline, deprecating `rules_raw` (TODO: remove in v0.7). `rules_file` remains the preferred path for self-hosted deployments with access to the rules YAML on disk.
 
 ## [0.6.8]
 - `aws`/`gcp`: fix Terraform plan failure when `enable_remote_resources = true` but no artifacts bucket exists (e.g. with a prebuilt `deployment_bundle`). When remote resources are enabled, an artifacts bucket is now provisioned if one is not already created or provided via `artifacts_bucket_name` / `custom_artifacts_bucket_name`.
