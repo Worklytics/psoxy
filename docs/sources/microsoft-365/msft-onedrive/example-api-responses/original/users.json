@@ -4,25 +4,25 @@
     {
       "id": "cdfb873d-61f9-4656-bbbb-a915ef1a255d",
       "businessPhones": [
-        "6175759475"
+        "555555555"
       ],
-      "displayName": "Erik Schultink",
+      "displayName": "Alice Warren",
       "employeeId": "10412",
-      "givenName": "Erik",
+      "givenName": "Alice",
       "jobTitle": null,
-      "mail": "erik@worklytics.onmicrosoft.com",
+      "mail": "Alice@worklytics.onmicrosoft.com",
       "otherMails": [
-        "erik.alt@worklytics.co"
+        "Alice@gmail.com"
       ],
-      "mobilePhone": "+1 6174483857",
+      "mobilePhone": "+1 5555555555",
       "officeLocation": null,
       "preferredLanguage": "en-US",
       "proxyAddresses": [
-        "SMTP:erik@worklytics.onmicrosoft.com",
-        "smtp:erik.alt@worklytics.co"
+        "SMTP:Alice@worklytics.onmicrosoft.com",
+        "smtp:Alice.Warren@worklytics.onmicrosoft.com"
       ],
-      "surname": "Schultink",
-      "userPrincipalName": "erik@worklytics.onmicrosoft.com"
+      "surname": "Warren",
+      "userPrincipalName": "Alice@worklytics.onmicrosoft.com"
     },
     {
       "id": "307ee26b-fe96-40a9-bc8a-c4dc44224621",
@@ -40,41 +40,41 @@
     {
       "id": "4ea7fc01-0264-4e84-b85e-9e49fba4de97",
       "businessPhones": [],
-      "displayName": "Jose Lorenzo",
-      "givenName": "Jose",
+      "displayName": "john Laurens",
+      "givenName": "john",
       "jobTitle": null,
-      "mail": "jose@worklytics.onmicrosoft.com",
+      "mail": "john@worklytics.onmicrosoft.com",
       "mobilePhone": null,
       "officeLocation": null,
       "preferredLanguage": "en-US",
-      "surname": "Lorenzo",
-      "userPrincipalName": "jose@worklytics.onmicrosoft.com"
+      "surname": "Laurens",
+      "userPrincipalName": "john@worklytics.onmicrosoft.com"
     },
     {
       "id": "219435cc-746e-48d6-8ccd-559808248f6e",
       "businessPhones": [],
-      "displayName": "Luis Peralta",
+      "displayName": "Lois Alberto",
       "givenName": "Luis",
       "jobTitle": null,
       "mail": "luis@worklytics.onmicrosoft.com",
       "mobilePhone": null,
       "officeLocation": null,
       "preferredLanguage": "es-ES",
-      "surname": "Peralta",
+      "surname": "Alberto",
       "userPrincipalName": "luis@worklytics.onmicrosoft.com"
     },
     {
       "id": "f8f2864c-c353-4471-bd75-f3be650de1e8",
       "businessPhones": [],
-      "displayName": "Philip Arkcoll",
-      "givenName": "Philip",
+      "displayName": "Paul Allen",
+      "givenName": "Paul",
       "jobTitle": null,
-      "mail": "philip@worklytics.onmicrosoft.com",
+      "mail": "Paul@worklytics.onmicrosoft.com",
       "mobilePhone": null,
       "officeLocation": null,
       "preferredLanguage": "en-US",
-      "surname": "Arkcoll",
-      "userPrincipalName": "philip@worklytics.onmicrosoft.com"
+      "surname": "Allen",
+      "userPrincipalName": "Paul@worklytics.onmicrosoft.com"
     }
   ]
 }
