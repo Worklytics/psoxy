@@ -18,7 +18,7 @@ public class Calendar_NoAppIds_NoGroups_Tests extends Calendar_NoAppIds_Tests {
         .sourceFamily("microsoft-365")
         .defaultScopeId("azure-ad")
         .sourceKind("outlook-cal")
-        .rulesFile("outlook-cal_no-app-ids_no-groups")
+        .rulesFile("outlook-cal_no-groups")
         .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids_no-groups/")
         .build();
 

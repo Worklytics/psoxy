@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathRegex: "^/v1.0/users/?[^/]*"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -42,6 +42,11 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
         encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/v1.0/groups/?[^/]*"
     transforms:
@@ -112,13 +117,20 @@ endpoints:
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
         encoding: "URL_SAFE_TOKEN"
-  - pathRegex: "^/v1.0/users/[^/]*/mailboxSettings"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        encoding: "URL_SAFE_TOKEN"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailboxSettings"
     transforms:
       - !<redact>
         jsonPaths:
           - "$..internalReplyMessage"
           - "$..externalReplyMessage"
-  - pathRegex: "^/v1.0/users/[^/]*/messages/[^/]*"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/messages/[^/]*"
     transforms:
       - !<redact>
         jsonPaths:
@@ -134,7 +146,15 @@ endpoints:
         jsonPaths:
           - "$..emailAddress.address"
         encoding: "URL_SAFE_TOKEN"
-  - pathRegex: "^/v1.0/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailFolders(/SentItems|\\('SentItems'\\\
+    ))/messages.*"
     transforms:
       - !<redact>
         jsonPaths:
@@ -150,3 +170,10 @@ endpoints:
         jsonPaths:
           - "$..emailAddress.address"
         encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"

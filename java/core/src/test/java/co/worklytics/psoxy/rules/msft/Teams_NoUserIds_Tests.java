@@ -26,7 +26,7 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
         return RulesTestSpec.builder()
                 .sourceFamily("microsoft-365")
                 .sourceKind("msft-teams")
-                .rulesFile("msft-teams_no-userIds")
+                .rulesFile("msft-teams")
                 .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-userIds/")
                 .build();
     }

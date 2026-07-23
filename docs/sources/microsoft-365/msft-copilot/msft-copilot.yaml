@@ -1,8 +1,7 @@
 ---
 endpoints:
-  - pathTemplate: "/beta/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions"
-    allowedQueryParams:
-      - "$filter"
+  - pathRegex: "^/beta/copilot/users/(/p~[a-zA-Z0-9_-]+?)?[^/]*/interactionHistory/getAllEnterpriseInteractions(\\\
+    ?.*)?"
     augments:
       - !<textDigest>
         jsonPaths:
@@ -16,6 +15,23 @@ endpoints:
         jsonPaths:
           - "$..emailAddress"
         encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$..sessionId"
+          - "$..attachments[*].attachmentId"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/beta/copilot/users/([a-zA-Z0-9_-]+)/.*$"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..from..[?(@.applicationIdentityType != \"bot\")].id"
+          - "$..mentions[*][?(@.applicationIdentityType != \"bot\")].id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..body.content"
+          - "$..attachments[*].content"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -25,20 +41,10 @@ endpoints:
           - "$..mentions[*].mentionText"
           - "$..contexts[*].contextReference"
           - "$..links[?(@.linkType == 'File')].linkUrl"
-      - !<redact>
-        jsonPaths:
-          - "$..body.content"
-          - "$..attachments[*].content"
-      - !<redact>
-        jsonPaths:
           - "$..['@odata.context']"
-      - !<redact>
-        jsonPaths:
           - "$..['@odata.count']"
-      - !<redact>
-        jsonPaths:
           - "$..['@odata.type']"
-  - pathRegex: "^/v1.0/users/?[^/]*"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -80,4 +86,9 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
         encoding: "URL_SAFE_TOKEN"

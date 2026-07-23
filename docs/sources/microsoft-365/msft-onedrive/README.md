@@ -85,4 +85,4 @@ across all Microsoft 365 connectors; see the [Microsoft 365 README](../README.md
 ## Example Rules
 
 - [Example Rules](msft-onedrive.yaml)
-- [Example Rules: no App IDs](msft-onedrive_no-app-ids.yaml)
+- [Example Rules: including App IDs](msft-onedrive_inc-app-ids.yaml)

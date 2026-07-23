@@ -775,8 +775,8 @@ public class PrebuiltSanitizerRules {
         .withAdditionalEndpoints(ENTRA_ID_USERS_NO_APP_IDS)
         .withTransformByEndpoint(ENTRA_ID_REGEX_USERS_BY_PSEUDO, ENTRA_ID_USERS_NO_APP_IDS_TRANSFORM_RULE);
 
-    static final RESTRules ONE_DRIVE = Rules2.load("sources/microsoft-365/msft-onedrive/msft-onedrive.yaml");
-    static final RESTRules ONE_DRIVE_NO_APP_IDS = Rules2.load("sources/microsoft-365/msft-onedrive/msft-onedrive_no-app-ids.yaml");
+    static final RESTRules ONE_DRIVE = Rules2.load("sources/microsoft-365/msft-onedrive/msft-onedrive_inc-app-ids.yaml");
+    static final RESTRules ONE_DRIVE_NO_APP_IDS = Rules2.load("sources/microsoft-365/msft-onedrive/msft-onedrive.yaml");
 
     public static final Map<String, RESTRules> MSFT_DEFAULT_RULES_MAP =
         ImmutableMap.<String, RESTRules>builder()

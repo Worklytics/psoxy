@@ -16,7 +16,7 @@ public class OneDrive_NoAppIds_Tests extends JavaRulesTestBaseCase {
         return RulesTestSpec.builder()
                 .sourceFamily("microsoft-365")
                 .sourceKind("msft-onedrive")
-                .rulesFile("msft-onedrive_no-app-ids")
+                .rulesFile("msft-onedrive")
                 .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
                 .checkUncompressedSSMLength(false)
                 .build();
