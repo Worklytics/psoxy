@@ -74,7 +74,7 @@ locals {
   # API connectors with inline rules content (not file-based overrides)
   api_connector_rules_content = {
     for k, v in var.api_connectors : k => coalesce(try(v.rules, null), try(v.rules_raw, null))
-    if coalesce(try(v.rules, null), try(v.rules_raw, null)) != null && !contains(keys(local.api_connector_rules_files), k)
+    if (try(v.rules, null) != null || try(v.rules_raw, null) != null) && !contains(keys(local.api_connector_rules_files), k)
   }
 
   api_connector_rules = {
