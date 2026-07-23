@@ -16,6 +16,7 @@ public class OneDriveTests extends JavaRulesTestBaseCase {
         return RulesTestSpec.builder()
             .sourceFamily("microsoft-365")
             .sourceKind("msft-onedrive")
+            .rulesFile("msft-onedrive_inc-app-ids")
             .checkUncompressedSSMLength(false)
             .build();
     }
