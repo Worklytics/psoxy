@@ -16,6 +16,7 @@ locals {
     enable_by_default : false,
     # really, ONLY do Outlook Cal in the min-case; get users and workday settings from there
     source_kind : "azure-ad",
+    rules_file : "docs/sources/microsoft-365/entra-id/entra-id_no-app-ids.yaml",
     display_name : "Microsoft Entra ID (former Azure AD)"
     source_auth_strategy : "oauth2_refresh_token"
     target_host : "graph.microsoft.com"
@@ -49,6 +50,7 @@ locals {
     "msft-entra-id" : local.entra_id_prototype,
     "outlook-cal" : {
       source_kind : "outlook-cal",
+      rules_file : "docs/sources/microsoft-365/outlook-cal/outlook-cal_no-app-ids.yaml",
       availability : "ga",
       enable_by_default : true,
       worklytics_connector_id : "outlook-cal-psoxy",
@@ -77,6 +79,7 @@ locals {
     },
     "outlook-mail" : {
       source_kind : "outlook-mail"
+      rules_file : "docs/sources/microsoft-365/outlook-mail/outlook-mail_no-app-ids.yaml",
       availability : "ga",
       enable_by_default : false,
       worklytics_connector_id : "outlook-mail-psoxy",
@@ -104,6 +107,7 @@ locals {
     },
     "msft-onedrive" : {
       source_kind : "msft-onedrive"
+      rules_file : "docs/sources/microsoft-365/msft-onedrive/msft-onedrive_no-app-ids.yaml",
       availability : "beta",
       enable_by_default : false,
       worklytics_connector_id : "msft-onedrive-psoxy",
@@ -135,6 +139,7 @@ locals {
     },
     "msft-teams" : {
       source_kind : "msft-teams"
+      rules_file : "docs/sources/microsoft-365/msft-teams/msft-teams_no-userIds.yaml",
       availability : "ga",
       enable_by_default : false,
       worklytics_connector_id : "msft-teams-psoxy",
@@ -202,6 +207,7 @@ EOT
     },
     "msft-copilot" : {
       source_kind : "msft-copilot"
+      rules_file : "docs/sources/microsoft-365/msft-copilot/msft-copilot_no-userIds.yaml",
       availability : "alpha",
       enable_by_default : false,
       worklytics_connector_id : "msft-copilot-psoxy",

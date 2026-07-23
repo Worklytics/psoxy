@@ -13,6 +13,7 @@ locals {
   google_workspace_sources = {
     "gcal" : {
       source_kind : "gcal",
+      rules_file : "docs/sources/google-workspace/calendar/calendar.yaml",
       availability : "ga",
       enable_by_default : true
       worklytics_connector_id : "gcal-psoxy",
@@ -43,6 +44,7 @@ locals {
     # to the Google Workspace, so may be directly connected in such scenarios.
     "gdirectory" : {
       source_kind : "gdirectory",
+      rules_file : "docs/sources/google-workspace/directory/directory.yaml",
       availability : "ga",
       enable_by_default : true
       worklytics_connector_id : "gdirectory-psoxy",
@@ -73,6 +75,7 @@ locals {
     },
     "gdrive" : {
       source_kind : "gdrive",
+      rules_file : "docs/sources/google-workspace/gdrive/gdrive.yaml",
       availability : "ga",
       enable_by_default : false
       worklytics_connector_id : "gdrive-psoxy",
@@ -98,6 +101,7 @@ locals {
     },
     "gmail" : {
       source_kind : "gmail",
+      rules_file : "docs/sources/google-workspace/gmail/gmail.yaml",
       availability : "ga",
       enable_by_default : false,
       worklytics_connector_id : "gmail-meta-psoxy",
@@ -120,6 +124,7 @@ locals {
     },
     "google-chat" : {
       source_kind : "google-chat",
+      rules_file : "docs/sources/google-workspace/google-chat/google-chat.yaml",
       availability : "ga",
       enable_by_default : false
       worklytics_connector_id : "google-chat-psoxy",
@@ -140,6 +145,7 @@ locals {
     },
     "google-meet" : {
       source_kind : "google-meet"
+      rules_file : "docs/sources/google-workspace/meet/meet.yaml",
       availability : "ga",
       enable_by_default : false
       worklytics_connector_id : "google-meet-psoxy"
@@ -161,6 +167,7 @@ locals {
     },
     "gemini-in-workspace-apps" : {
       source_kind : "gemini-in-workspace-apps"
+      rules_file : "docs/sources/google-workspace/gemini-in-workspace-apps/gemini-in-workspace-apps.yaml",
       availability : "beta",
       enable_by_default : false
       worklytics_connector_id : "gemini-in-workspace-apps-psoxy"

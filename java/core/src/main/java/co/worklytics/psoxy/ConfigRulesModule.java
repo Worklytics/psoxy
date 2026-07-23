@@ -79,7 +79,7 @@ public class ConfigRulesModule {
 
         return loadAndLog.apply(rulesUtils.getRulesFromConfig(config, envVarsConfigService), "Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
             .or( () -> loadAndLog.apply(rulesUtils.getRulesFromResource(resourceService), "Rules: loaded from instance resource (" + RulesUtils.RULES_RESOURCE_PATH + ")"))
-            .or( () -> loadAndLog.apply(getDefaults(log, config), "Rules: fallback to prebuilt rules"))
+            .or( () -> getDefaults(log, config))
                 .orElseThrow( () -> new RuntimeException("No rules found"));
 
     }
@@ -96,11 +96,18 @@ public class ConfigRulesModule {
                     ProxyConfigProperty.SOURCE.name(), ProxyConfigProperty.RULES.name())));
 
         String rulesIdSuffix = pseudonymizeAppIds ? NO_APP_IDS_SUFFIX : "";
+        String rulesKey = source + rulesIdSuffix;
+
+        log.warning(String.format(
+            "No custom RULES found (env var, parameter store, secret manager, GCS, or S3); "
+                + "falling back to prebuilt Java rules for SOURCE=%s. "
+                + "This fallback will be removed in v0.7; rules must be explicitly configured.",
+            rulesKey));
 
         RESTRules regularDefaults = PrebuiltSanitizerRules.DEFAULTS.get(source);
 
         //ok to fallback to regular rules, bc for many sources the 'NO_APP_IDS' variant doesn't
         // really matter
-        return Optional.ofNullable(PrebuiltSanitizerRules.DEFAULTS.getOrDefault(source + rulesIdSuffix, regularDefaults));
+        return Optional.ofNullable(PrebuiltSanitizerRules.DEFAULTS.getOrDefault(rulesKey, regularDefaults));
     }
 }

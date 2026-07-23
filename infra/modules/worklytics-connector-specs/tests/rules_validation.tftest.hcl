@@ -75,15 +75,15 @@ run "validate_rules_raw_computed_with_base_dir" {
     error_message = "workdata-generic should not have structured rules when using rules_file."
   }
 
-  # hris has inline rules, should NOT have rules_raw
+  # hris has rules_file set, so rules_raw should be non-null when base_dir is provided
   assert {
-    condition     = try(output.available_bulk_connectors["hris"].rules_raw, null) == null
-    error_message = "hris should not have rules_raw since it doesn't define rules_file."
+    condition     = try(output.available_bulk_connectors["hris"].rules_raw, null) != null
+    error_message = "hris should have rules_raw set when base_dir is provided."
   }
 
-  # hris should still have inline rules
+  # hris should NOT have inline rules since it uses rules_file
   assert {
-    condition     = try(output.available_bulk_connectors["hris"].rules, null) != null
-    error_message = "hris should still have structured rules."
+    condition     = try(output.available_bulk_connectors["hris"].rules, null) == null
+    error_message = "hris should not have structured rules when using rules_file."
   }
 }
