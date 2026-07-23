@@ -16,6 +16,10 @@ This directory contains documentation for developers working on or with Psoxy.
 - [GCP Parameter Manager](gcp-parameter-manager.md) - Why GCP Parameter Manager is not used for configuration
 - [GCP External ALB + Cloud Armor](gcp-external-alb.md) - Beta composition pattern for public ALB + IP allowlist (not PSC)
 
+## Connector Development Conventions
+
+Agent-oriented conventions for this repo (including example API response fixtures) live in [AGENTS.md](../../AGENTS.md) at the repository root. In particular, `original/` example data must use fake PII only — never commit real employee names, emails, or phone numbers.
+
 ## Alpha Features
 
 See [alpha-features/](alpha-features/) for documentation on experimental features.

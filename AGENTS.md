@@ -92,4 +92,22 @@ When writing or modifying documentation for data sources under `docs/sources/`, 
 **Connector ID:** `asana`
 ```
 
+### Example API Response Data
+
+Connectors document sanitization behavior with paired fixtures under `docs/sources/<family>/<connector>/example-api-responses/`:
+
+- `original/` — unsanitized API responses, as returned by the upstream source. These intentionally include PII-shaped fields (names, emails, phone numbers, etc.) so rules tests can exercise redaction and pseudonymization.
+- `sanitized/` — expected proxy output for the matching `original/` files. Java rules tests (e.g. `*Tests.java` extending `RulesBaseTestCase`) sanitize each `original/` example and assert byte-for-byte equivalence with `sanitized/`.
+- Variant directories such as `sanitized_no-app-ids/` follow the same pairing rules for alternate rule sets.
+
+**All PII in committed `original/` examples must be fake.** You may capture real responses locally while developing a connector, but before committing to this repository replace every value that could identify a real person or organization. Never commit employee names, work emails, phone numbers, or other customer/tenant-specific identifiers from a live environment.
+
+Use clearly synthetic stand-ins instead, consistent with existing connectors:
+
+- Person names: generic personas (e.g. `Alice Warren`, `Sam Parker`) — not teammates, customers, or your own name
+- Emails: fictional domains such as `contoso.com`, `example.com`, or clearly fake addresses on `worklytics.onmicrosoft.com`
+- Phone numbers: obviously fake values (e.g. `555555555`, `+1 5555555555`)
+- Other identifiers: fake UUIDs/IDs as needed; avoid values tied to real accounts
+
+When you change `original/` fixtures, regenerate the matching `sanitized/` files and run the connector's Java rules tests (`mvn test -pl core -Dtest=<Connector>Tests`).
 
