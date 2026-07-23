@@ -79,7 +79,7 @@ public class ConfigRulesModule {
 
         return loadAndLog.apply(rulesUtils.getRulesFromConfig(config, envVarsConfigService), "Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
             .or( () -> loadAndLog.apply(rulesUtils.getRulesFromResource(resourceService), "Rules: loaded from instance resource (" + RulesUtils.RULES_RESOURCE_PATH + ")"))
-            .or( () -> getDefaults(log, config))
+            .or( () -> loadAndLog.apply(getDefaults(log, config), "Rules: fallback to prebuilt rules"))
                 .orElseThrow( () -> new RuntimeException("No rules found"));
 
     }
@@ -99,8 +99,7 @@ public class ConfigRulesModule {
         String rulesKey = source + rulesIdSuffix;
 
         log.warning(String.format(
-            "No custom RULES found (env var, parameter store, secret manager, GCS, or S3); "
-                + "falling back to prebuilt Java rules for SOURCE=%s. "
+            "No RULES found configured explicitly; falling back to prebuilt Java rules for SOURCE=%s. "
                 + "This fallback will be removed in v0.7; rules must be explicitly configured.",
             rulesKey));
 
