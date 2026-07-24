@@ -82,7 +82,7 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
                                         return delegate.getConfigPropertyAsOptional(key).orElse(NEGATIVE_VALUE);
                                     } catch (TransientConfigException e) {
                                         lastException = e;
-                                        log.log(Level.WARNING, String.format("Transient failure on attempt {0}/{1} for config property {2}",
+                                        log.log(Level.WARNING, String.format("Transient failure on attempt %d/%d for config property %s",
                                             attempt + 1, MAX_TRANSIENT_RETRIES, key.name()));
                                     }
                                     try {
@@ -105,8 +105,8 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
                                     // before but now comes back empty, assume transient and retain.
                                     if (NEGATIVE_VALUE.equals(newValue) && !NEGATIVE_VALUE.equals(oldValue)) {
                                         log.log(Level.WARNING,
-                                            "Backend returned empty for config property {0} which was previously set; assuming transient failure and retaining cached value",
-                                            key.name());
+                                            String.format("Backend returned empty for config property %s which was previously set; assuming transient failure and retaining cached value",
+                                            key.name()));
                                         return Futures.immediateFuture(oldValue);
                                     }
                                     return Futures.immediateFuture(newValue);
@@ -115,8 +115,8 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
                                     // Returning the old value resets the write-time so Guava waits a
                                     // full TTL before retrying, rather than retrying on every request.
                                     log.log(Level.WARNING,
-                                        "Transient failure reloading config property {0}; retaining cached value until next refresh cycle",
-                                        key.name());
+                                        String.format("Transient failure reloading config property %s; retaining cached value until next refresh cycle",
+                                        key.name()));
                                     return Futures.immediateFuture(oldValue);
                                 }
                             }

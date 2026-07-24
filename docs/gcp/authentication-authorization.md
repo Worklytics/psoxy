@@ -22,6 +22,6 @@ When `allowed_data_access_ip_blocks` or `allowed_webhook_ip_blocks` is set in Te
 
 Worklytics can ensure fixed egress IP addresses for outbound requests from your tenant as a paid add-on. Contact [sales@worklytics.co](mailto:sales@worklytics.co) for details.
 
-For network ingress filtering in front of Cloud Run (for example Cloud Armor on a load balancer), see [GCP Private Service Connect and connectivity options](../development/gcp-private-service-connect.md#enhancing-public-internet-options-with-ip-allowlisting). That is separate from the Terraform allowlist variables.
+For network ingress filtering in front of Cloud Run (for example Cloud Armor on a load balancer), see [GCP External ALB + Cloud Armor](../development/gcp-external-alb.md) (beta composition) and [GCP Private Service Connect and connectivity options](../development/gcp-private-service-connect.md#enhancing-public-internet-options-with-ip-allowlisting).
 
 See [Client IP Allowlisting](../configuration/ip-allowlisting.md).

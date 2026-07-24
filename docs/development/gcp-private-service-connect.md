@@ -12,8 +12,11 @@ output. It covers three architectures:
 | Architecture | Transport | Authentication | Applicability |
 |---|---|---|---|
 | **TLS over Public Internet** (current) | Google-managed TLS | GCP IAM | All deployments |
+| **External ALB + Cloud Armor** (beta) | Public external ALB + TLS | GCP IAM + IP allowlist | Worklytics (or similar) with static egress IPs — see [gcp-external-alb.md](gcp-external-alb.md) |
 | **mTLS over Public Internet** (enhanced) | Mutual TLS via External ALB | Client certificate + GCP IAM | Customers requiring transport-layer client auth |
 | **Private Service Connect** (private) | GCP private backbone | GCP IAM | GCP-hosted clients needing private connectivity |
+
+> **External ALB (public) ≠ Internal ILB (PSC).** A regional internal load balancer is for VPC-private / PSC backends (`ingress_settings = ALLOW_INTERNAL_ONLY`). Worklytics reaching the customer over the public internet from static egress IPs needs a **global external** ALB (`ALLOW_INTERNAL_AND_GCLB`). Shared building blocks (serverless NEGs, URL map, path routing by function name) differ in frontend and ingress settings.
 
 **Worklytics** is one such client service. As a GCP-hosted analytics platform, Worklytics can
 leverage these options to reach customer Psoxy instances. The examples throughout this doc use
@@ -41,7 +44,7 @@ For public-internet connectivity (TLS and mTLS), customers can restrict which cl
 
 1. **Application-level (Terraform `allowed_data_access_ip_blocks` / `allowed_webhook_ip_blocks`)** — enforced inside the Cloud Function on each request. This is what the shipped Psoxy GCP modules configure. See [Client IP Allowlisting](../configuration/ip-allowlisting.md).
 
-2. **Network ingress (Cloud Armor)** — optional, separate from the variables above. When the client service dials out from known static egress IPs, you can attach [Cloud Run ingress with Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) in front of a load balancer to block disallowed IPs before traffic reaches Cloud Run:
+2. **Network ingress (Cloud Armor)** — optional. When the client service dials out from known static egress IPs, attach Cloud Armor on an external ALB. A beta composition pattern (root `external-api-alb.tf` + `api_connector_external_lb_host`) is documented in [GCP External ALB + Cloud Armor](gcp-external-alb.md). You can also attach [Cloud Run ingress with Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) manually:
 
 Some client services (including Worklytics, as a paid feature) support dialing out from a
 determined set of static egress IPs. Cloud Armor adds a network-layer control even without PSC or VPC:
