@@ -19,9 +19,9 @@ locals {
   # TODO: md5 here is 32 chars of hex, so some risk of collision by truncating
   sa_account_id = length(local.padded_id) < 31 ? local.padded_id : substr(md5(local.padded_id), 0, 30)
 
-  instance_id        = coalesce(var.instance_id, var.display_name)
-  expected_sa_email  = "${local.sa_account_id}@${var.project_id}.iam.gserviceaccount.com"
-  oauth_client_id    = var.provision_service_account ? google_service_account.connector_sa[0].unique_id : "REPLACE_WITH_NUMERIC_CLIENT_ID_AFTER_CREATING_SERVICE_ACCOUNT"
+  instance_id                    = coalesce(var.instance_id, var.display_name)
+  expected_sa_email              = "${local.sa_account_id}@${var.project_id}.iam.gserviceaccount.com"
+  oauth_client_id                = var.provision_service_account ? google_service_account.connector_sa[0].unique_id : "REPLACE_WITH_NUMERIC_CLIENT_ID_AFTER_CREATING_SERVICE_ACCOUNT"
   service_account_email_for_todo = var.provision_service_account ? google_service_account.connector_sa[0].email : local.expected_sa_email
 }
 
