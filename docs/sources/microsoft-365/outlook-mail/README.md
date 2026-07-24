@@ -42,5 +42,5 @@ of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 ## Examples
 
 - [Example Rules](outlook-mail.yaml)
-- [Example Rules: no App IDs](outlook-mail_no-app-ids.yaml)
-- [Example Rules: no App IDs, no groups](outlook-mail_no-app-ids_no-groups.yaml)
+- [Example Rules: including App IDs](outlook-mail_inc-app-ids.yaml)
+- [Example Rules: no groups](outlook-mail_no-groups.yaml)

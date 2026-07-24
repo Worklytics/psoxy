@@ -22,7 +22,7 @@ public class Mail_NoAppIds_Tests extends EntraIDTests {
         .sourceFamily("microsoft-365")
         .defaultScopeId("azure-ad")
         .sourceKind("outlook-mail")
-        .rulesFile("outlook-mail_no-app-ids")
+        .rulesFile("outlook-mail")
         .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
         .build();
 

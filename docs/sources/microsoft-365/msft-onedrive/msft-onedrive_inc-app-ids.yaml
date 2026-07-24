@@ -1,0 +1,571 @@
+---
+endpoints:
+  - pathTemplate: "/v1.0/drives/{driveId}/activities"
+    allowedQueryParams:
+      - "$expand"
+      - "$skiptoken"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/ItemActivity"
+  - pathTemplate: "/v1.0/drives/{driveId}/items/{itemId}/activities"
+    allowedQueryParams:
+      - "$expand"
+      - "$skiptoken"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/ItemActivity"
+  - pathTemplate: "/v1.0/drives/{driveId}/root/delta"
+    allowedQueryParams:
+      - "token"
+      - "$select"
+      - "$expand"
+      - "$top"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/DriveItem"
+  - pathTemplate: "/v1.0/groups"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..mail"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/GraphGroup"
+  - pathTemplate: "/v1.0/groups/{groupId}/drives"
+    allowedQueryParams:
+      - "$select"
+      - "$skiptoken"
+      - "$top"
+      - "$orderBy"
+      - "$expand"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/Drive"
+  - pathTemplate: "/v1.0/users"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..mail"
+          - "$..otherMails[*]"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/GraphUser"
+  - pathTemplate: "/v1.0/users/{userId}/drives"
+    allowedQueryParams:
+      - "$select"
+      - "$skiptoken"
+      - "$top"
+      - "$orderBy"
+      - "$expand"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/Drive"
+definitions:
+  ActivityItemRef:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+  AutomaticRepliesSettings:
+    type: "object"
+    properties:
+      externalAudience:
+        type: "string"
+      scheduledEndDateTime:
+        $ref: "#/definitions/DateTimeTimeZone"
+      scheduledEndStartTime:
+        $ref: "#/definitions/DateTimeTimeZone"
+      status:
+        type: "string"
+  CommentAction:
+    type: "object"
+    properties:
+      isReply:
+        type: "boolean"
+      parentAuthor:
+        $ref: "#/definitions/IdentitySet"
+      participants:
+        type: "array"
+        items:
+          $ref: "#/definitions/IdentitySet"
+  DateTimeTimeZone:
+    type: "object"
+    properties:
+      dateTime:
+        type: "string"
+        format: "date-time"
+      timeZone:
+        type: "string"
+      timeZoneIANA:
+        type: "string"
+  DeletedFacet:
+    type: "object"
+    properties: {}
+  DocumentActivityDetail:
+    type: "object"
+    properties:
+      contentId:
+        type: "string"
+      navigationId:
+        type: "string"
+  Drive:
+    type: "object"
+    properties:
+      createdBy:
+        $ref: "#/definitions/IdentitySet"
+      createdDateTime:
+        type: "string"
+        format: "date-time"
+      driveType:
+        type: "string"
+      id:
+        type: "string"
+      lastModifiedBy:
+        $ref: "#/definitions/IdentitySet"
+      lastModifiedDateTime:
+        type: "string"
+        format: "date-time"
+      system:
+        $ref: "#/definitions/SystemFacet"
+  DriveItem:
+    type: "object"
+    properties:
+      createdBy:
+        $ref: "#/definitions/IdentitySet"
+      createdDateTime:
+        type: "string"
+        format: "date-time"
+      deleted:
+        $ref: "#/definitions/DeletedFacet"
+      file:
+        $ref: "#/definitions/File"
+      fileSystemInfo:
+        $ref: "#/definitions/FileSystemInfoFacet"
+      folder:
+        $ref: "#/definitions/Folder"
+      id:
+        type: "string"
+      lastModifiedBy:
+        $ref: "#/definitions/IdentitySet"
+      lastModifiedDateTime:
+        type: "string"
+        format: "date-time"
+      malware:
+        $ref: "#/definitions/MalwareFacet"
+      package:
+        $ref: "#/definitions/Package"
+      parentReference:
+        $ref: "#/definitions/ParentReference"
+      remoteItem:
+        $ref: "#/definitions/RemoteItem"
+      root:
+        $ref: "#/definitions/RootFacet"
+      rootDriveItem:
+        type: "boolean"
+      shared:
+        $ref: "#/definitions/SharedFacet"
+      sharepointIds:
+        $ref: "#/definitions/SharepointIdsFacet"
+      size:
+        type: "integer"
+      specialFolder:
+        $ref: "#/definitions/SpecialFolderFacet"
+  File:
+    type: "object"
+    properties:
+      mimeType:
+        type: "string"
+  FileSystemInfoFacet:
+    type: "object"
+    properties:
+      createdDateTime:
+        type: "string"
+        format: "date-time"
+      lastModifiedDateTime:
+        type: "string"
+        format: "date-time"
+  Folder:
+    type: "object"
+    properties:
+      childCount:
+        type: "integer"
+  GraphGroup:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      mail:
+        type: "string"
+  GraphUser:
+    type: "object"
+    properties:
+      accountEnabled:
+        type: "boolean"
+      employeeId:
+        type: "string"
+      hireDate:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      isResourceAccount:
+        type: "boolean"
+      mail:
+        type: "string"
+      mailboxSettings:
+        $ref: "#/definitions/MailboxSettings"
+      otherMails:
+        type: "array"
+        items:
+          type: "string"
+      proxyAddresses:
+        type: "array"
+        items:
+          type: "string"
+      userType:
+        type: "string"
+  Identity:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      id:
+        type: "string"
+      tenantId:
+        type: "string"
+  IdentitySet:
+    type: "object"
+    properties:
+      application:
+        $ref: "#/definitions/Identity"
+      applicationInstance:
+        $ref: "#/definitions/Identity"
+      conversation:
+        $ref: "#/definitions/Identity"
+      conversationIdentityType:
+        $ref: "#/definitions/Identity"
+      device:
+        $ref: "#/definitions/Identity"
+      encrypted:
+        $ref: "#/definitions/Identity"
+      guest:
+        $ref: "#/definitions/Identity"
+      onPremises:
+        $ref: "#/definitions/Identity"
+      phone:
+        $ref: "#/definitions/Identity"
+      user:
+        $ref: "#/definitions/Identity"
+  ItemAction:
+    type: "object"
+    properties: {}
+  ItemActionSet:
+    type: "object"
+    properties:
+      access:
+        $ref: "#/definitions/ItemAction"
+      comment:
+        $ref: "#/definitions/CommentAction"
+      create:
+        $ref: "#/definitions/ItemAction"
+      delete:
+        $ref: "#/definitions/ItemAction"
+      edit:
+        $ref: "#/definitions/ItemAction"
+      mention:
+        $ref: "#/definitions/MentionAction"
+      move:
+        $ref: "#/definitions/ItemAction"
+      rename:
+        $ref: "#/definitions/RenameAction"
+      restore:
+        $ref: "#/definitions/ItemAction"
+      share:
+        $ref: "#/definitions/ShareAction"
+      version:
+        $ref: "#/definitions/VersionAction"
+  ItemActivity:
+    type: "object"
+    properties:
+      action:
+        $ref: "#/definitions/ItemActionSet"
+      actor:
+        $ref: "#/definitions/IdentitySet"
+      docDetails:
+        $ref: "#/definitions/DocumentActivityDetail"
+      driveItem:
+        $ref: "#/definitions/DriveItem"
+      id:
+        type: "string"
+      listItem:
+        $ref: "#/definitions/ActivityItemRef"
+      times:
+        $ref: "#/definitions/ItemActivityTimeSet"
+  ItemActivityTimeSet:
+    type: "object"
+    properties:
+      observedDateTime:
+        type: "string"
+        format: "date-time"
+      recordedDateTime:
+        type: "string"
+        format: "date-time"
+  LocaleInfo:
+    type: "object"
+    properties:
+      displayName:
+        type: "string"
+      locale:
+        type: "string"
+  MailboxSettings:
+    type: "object"
+    properties:
+      archiveFolder:
+        type: "string"
+      automaticRepliesSetting:
+        $ref: "#/definitions/AutomaticRepliesSettings"
+      dateFormat:
+        type: "string"
+      delegateMeetingMessageDeliveryOptions:
+        type: "string"
+      language:
+        $ref: "#/definitions/LocaleInfo"
+      timeFormat:
+        type: "string"
+      timeZone:
+        type: "string"
+      userPurpose:
+        type: "string"
+      workingHours:
+        $ref: "#/definitions/WorkingHours"
+  MalwareFacet:
+    type: "object"
+    properties: {}
+  MentionAction:
+    type: "object"
+    properties:
+      mentionees:
+        type: "array"
+        items:
+          $ref: "#/definitions/IdentitySet"
+  Package:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+  ParentReference:
+    type: "object"
+    properties:
+      driveId:
+        type: "string"
+      driveType:
+        type: "string"
+      id:
+        type: "string"
+      siteId:
+        type: "string"
+  RemoteItem:
+    type: "object"
+    properties:
+      createdBy:
+        $ref: "#/definitions/IdentitySet"
+      createdDateTime:
+        type: "string"
+        format: "date-time"
+      file:
+        $ref: "#/definitions/File"
+      folder:
+        $ref: "#/definitions/Folder"
+      id:
+        type: "string"
+      lastModifiedBy:
+        $ref: "#/definitions/IdentitySet"
+      lastModifiedDateTime:
+        type: "string"
+        format: "date-time"
+      package:
+        $ref: "#/definitions/Package"
+      shared:
+        $ref: "#/definitions/SharedFacet"
+      size:
+        type: "integer"
+      specialFolder:
+        $ref: "#/definitions/SpecialFolderFacet"
+  RenameAction:
+    type: "object"
+    properties:
+      oldName:
+        type: "string"
+  RootFacet:
+    type: "object"
+    properties: {}
+  ShareAction:
+    type: "object"
+    properties:
+      recipients:
+        type: "array"
+        items:
+          $ref: "#/definitions/IdentitySet"
+  SharedFacet:
+    type: "object"
+    properties:
+      owner:
+        $ref: "#/definitions/IdentitySet"
+      sharedBy:
+        $ref: "#/definitions/IdentitySet"
+      sharedDateTime:
+        type: "string"
+        format: "date-time"
+  SharepointIdsFacet:
+    type: "object"
+    properties:
+      listId:
+        type: "string"
+      listItemId:
+        type: "string"
+      listItemUniqueId:
+        type: "string"
+      siteId:
+        type: "string"
+      webId:
+        type: "string"
+  SpecialFolderFacet:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+  SystemFacet:
+    type: "object"
+    properties: {}
+  VersionAction:
+    type: "object"
+    properties:
+      newVersion:
+        type: "string"
+  WorkingHours:
+    type: "object"
+    properties:
+      daysOfWeek:
+        type: "array"
+        items:
+          type: "string"
+      endTime:
+        type: "string"
+        format: "time"
+      startTime:
+        type: "string"
+        format: "time"

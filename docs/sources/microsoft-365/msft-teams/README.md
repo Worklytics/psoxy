@@ -75,4 +75,4 @@ In case of `PSEUDONYMIZE_APP_IDS` is set to `true` (default value), the `userId`
 ## Example Rules
 
 - [Example Rules](msft-teams.yaml)
-- [Example Rules: no User IDs](msft-teams_no-userIds.yaml)
+- [Example Rules: including User IDs](msft-teams_inc-app-ids.yaml)

@@ -18,7 +18,7 @@ locals {
 
 Visit the following page in the Microsoft Entra admin center and grant the required application permissions:
 
-https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/ApiPermissions/appId/${var.application_id}/isMSAApp~/false
+https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/CallAnAPI/appId/${var.application_id}/isMSAApp~/false
 
 If you are not a sufficiently privileged Microsoft Entra ID Administrator (likely Application or Global
 Administrator), you may need assistance from an appropriately privileged member of your IT team.

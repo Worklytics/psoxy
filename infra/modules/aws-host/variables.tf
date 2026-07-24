@@ -218,7 +218,8 @@ variable "api_connectors" {
     [])
     settings_to_provide = optional(map(string), {})
     rules_file          = optional(string, null)
-    rules_raw           = optional(string, null)
+    rules               = optional(string, null) # YAML rules content; preferred over rules_raw
+    rules_raw           = optional(string, null) # TODO: remove in v0.7; use rules instead
     timeout_seconds     = optional(number)
   }))
 

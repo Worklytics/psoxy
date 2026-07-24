@@ -41,6 +41,6 @@ of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 ## Sanitization Rule Examples
 
 - [Default Rules](entra-id.yaml)
-- [Rules, pseudonymizing MSFT account IDs](entra-id_no-app-ids.yaml)
-- [Rules, pseudonymizing MSFT account IDs](entra-id_no-app-ids_no-orig.yaml)
+- [Rules, including MSFT account IDs](entra-id_inc-app-ids.yaml)
+- [Rules, no orig](entra-id_no-orig.yaml)
 

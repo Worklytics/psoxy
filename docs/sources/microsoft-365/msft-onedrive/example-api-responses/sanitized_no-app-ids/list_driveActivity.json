@@ -1,0 +1,59 @@
+{
+  "value":[
+    {
+      "id":"oINi48Hd3kgKGEeLAAAAAA==",
+      "action":{
+        "edit":{ },
+        "version":{
+          "newVersion":"3.0"
+        }
+      },
+      "actor":{
+        "user":{
+          "id":"t~jL-PZwZ7AqMLlWzY4F0nkDdSpci8cF1GzIzZC51Y9Rg",
+          "email":"t~rhHXsIpQCoOYdgzj6URY4x8oUcvnLMLR5d71_wRuVAA@contoso.com"
+        }
+      },
+      "times":{
+        "recordedDateTime":"2017-07-29T18:34:40Z"
+      },
+      "driveItem":{
+        "id":"01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K"
+      }
+    },
+    {
+      "id":"gMkFggja3khHaUGLAAAAAA==",
+      "action":{
+        "share":{ }
+      },
+      "actor":{
+        "user":{
+          "id":"t~DTbvYdTNRIQXAF1SvLNyAIENog0-Dy0dxTEB2Yoo5Ys",
+          "email":"t~1ECTeY42RlWDU6D4DtrXKyFmVrUHbEEpdYzI34l0y9Q@contoso.com"
+        }
+      },
+      "times":{
+        "observedDateTime":"2017-07-29T16:20:00Z",
+        "recordedDateTime":"2017-07-29T16:23:35Z"
+      },
+      "listItem":{
+        "id":"01BYE5RZ4RMOFDTMLLPFCKZ3H5QCJPKZ7B"
+      }
+    },
+    {
+      "id":"vY0uYbz9EU2xrEeLAAAAAA==",
+      "action":{
+        "mention":{ }
+      },
+      "actor":{
+        "user":{
+          "id":"t~tGcP4a15NZwlnNJ1dlMUpsBuwyVNRch9q85sVinJrcE",
+          "email":"t~LY719LfeTXfLgFFmNHqJd9mhirFsW5IOZpbvy3F6CVI@contoso.com"
+        }
+      },
+      "times":{
+        "observedDateTime":"2017-07-30T09:15:00Z"
+      }
+    }
+  ]
+}

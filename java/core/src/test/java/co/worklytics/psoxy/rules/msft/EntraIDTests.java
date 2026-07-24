@@ -21,6 +21,7 @@ public class EntraIDTests extends JavaRulesTestBaseCase {
             .sourceFamily("microsoft-365")
             .defaultScopeId("azure-ad")
             .sourceKind("entra-id")
+            .rulesFile("entra-id_inc-app-ids")
             .build();
 
     // for cases where 'rulesTestSpec' will be overridden (Calendar)

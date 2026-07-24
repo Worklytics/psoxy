@@ -78,10 +78,10 @@ locals {
     if try(v.rules_file, null) != null
   }
 
-  # API connectors with rules_raw that don't have file-based overrides
-  api_connector_rules_raw = {
-    for k, v in var.api_connectors : k => v.rules_raw
-    if try(v.rules_raw, null) != null && !contains(keys(local.api_connector_rules_files), k)
+  # API connectors with inline rules content (not file-based overrides)
+  api_connector_rules_content = {
+    for k, v in var.api_connectors : k => coalesce(try(v.rules, null), try(v.rules_raw, null))
+    if (try(v.rules, null) != null || try(v.rules_raw, null) != null) && !contains(keys(local.api_connector_rules_files), k)
   }
 
   # proxy caller role requires direct lambda access if API Gateway v2 is not used and there are API connectors
@@ -255,7 +255,7 @@ module "api_connector" {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
       EMAIL_CANONICALIZATION = var.email_canonicalization
       CUSTOM_RULES_SHA = try(local.api_connector_rules_file_paths[each.key], null) != null ? filesha1(local.api_connector_rules_file_paths[each.key]) : (
-        try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
+        try(local.api_connector_rules_content[each.key], null) != null ? sha1(local.api_connector_rules_content[each.key]) : null
       )
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     },
@@ -279,11 +279,11 @@ module "custom_api_connector_rules" {
   file_path = local.api_connector_rules_file_paths[each.key]
 }
 
-# Rules provisioned from rules_raw (content string, not file path)
-module "api_connector_rules_raw" {
+# Rules provisioned from inline rules content (not file path)
+module "api_connector_rules_content" {
   source = "../../modules/aws-ssm-rules"
 
-  for_each = local.api_connector_rules_raw
+  for_each = local.api_connector_rules_content
 
   prefix  = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   content = each.value

@@ -20,6 +20,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         return RulesTestSpec.builder()
                 .sourceFamily("microsoft-365")
                 .sourceKind("msft-teams")
+                .rulesFile("msft-teams_inc-app-ids")
                 .build();
     }
 

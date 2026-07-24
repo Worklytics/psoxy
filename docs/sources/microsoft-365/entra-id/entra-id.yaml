@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathRegex: "^/v1.0/users/?[^/]*"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -42,6 +42,11 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
         encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/v1.0/groups/?[^/]*"
     transforms:
@@ -111,4 +116,8 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
         encoding: "URL_SAFE_TOKEN"
