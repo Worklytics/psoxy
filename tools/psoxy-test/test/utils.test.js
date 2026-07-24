@@ -2,7 +2,9 @@ import test from 'ava';
 import * as td from 'testdouble';
 import {
   addFilenameSuffix,
+  buildHttpsRequestOptions,
   executeWithRetry,
+  request,
   resolveHTTPMethod,
   resolveAWSRegion,
   transformSpecWithResponse,
@@ -111,6 +113,48 @@ test('Resolve AWS region', (t) => {
   t.is('us-east-1', resolveAWSRegion(new URL('https://foo.com')));
   t.is('us-east-1', resolveAWSRegion(''));
 })
+
+test('buildHttpsRequestOptions: IP host and allowInsecureTls', (t) => {
+  const opts = buildHttpsRequestOptions(
+    'https://203.0.113.10/myenv-outlook-cal/calendar/v3/calendars/primary?page=1',
+    'GET',
+    { Authorization: 'Bearer x' },
+    { allowInsecureTls: true }
+  );
+  t.is(opts.hostname, '203.0.113.10');
+  t.is(opts.port, 443);
+  t.is(opts.path, '/myenv-outlook-cal/calendar/v3/calendars/primary?page=1');
+  t.false(opts.rejectUnauthorized);
+});
+
+test('buildHttpsRequestOptions: custom domain without allowInsecureTls', (t) => {
+  const opts = buildHttpsRequestOptions(
+    'https://proxy.example.com/myenv-outlook-cal/',
+    'GET',
+    {}
+  );
+  t.is(opts.hostname, 'proxy.example.com');
+  t.is(opts.rejectUnauthorized, undefined);
+});
+
+test('buildHttpsRequestOptions: rejects non-https URLs', (t) => {
+  t.throws(
+    () => buildHttpsRequestOptions('http://203.0.113.10/path', 'GET', {}),
+    { message: /require https/i }
+  );
+});
+
+test('request: invalid cacert path rejects the Promise', async (t) => {
+  try {
+    await request('https://203.0.113.10/', 'GET', {}, {}, {
+      cacert: '/nonexistent/path/to/cacert.pem',
+    });
+    t.fail('expected request to reject');
+  } catch (err) {
+    t.is(err.status, 'ENOENT');
+    t.regex(err.statusMessage, /no such file/i);
+  }
+});
 
 test('Add filename suffix', (t) => {
   t.is(addFilenameSuffix('foo.csv', 'bar'), 'foo-bar.csv');

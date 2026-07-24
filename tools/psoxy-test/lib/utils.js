@@ -10,7 +10,7 @@ import isgzipBuffer from '@stdlib/assert-is-gzip-buffer';
 import aws4 from 'aws4';
 import chalk from 'chalk';
 import { execSync } from 'child_process';
-import { createReadStream, createWriteStream } from 'fs';
+import { createReadStream, createWriteStream, readFileSync } from 'fs';
 import https from 'https';
 import _ from 'lodash';
 import crypto from 'node:crypto';
@@ -106,29 +106,68 @@ function getCommonHTTPHeaders(options = {}) {
 }
 
 /**
+ * Build Node.js https.request options for a Psoxy call.
+ *
+ * @param {String|URL} url
+ * @param {String} method
+ * @param {Object} headers
+ * @param {Object} [tlsOptions]
+ * @param {boolean} [tlsOptions.allowInsecureTls]
+ * @param {string} [tlsOptions.cacert]
+ * @return {Object}
+ */
+function buildHttpsRequestOptions(url, method = 'GET', headers = {}, tlsOptions = {}) {
+  url = typeof url === 'string' ? new URL(url) : url;
+  if (url.protocol !== 'https:') {
+    throw new Error(`Psoxy test calls require https:// (got ${url.protocol}//${url.host})`);
+  }
+  const requestOptions = {
+    hostname: url.hostname,
+    port: url.port || 443,
+    path: url.pathname + url.search,
+    method: method,
+    headers: headers,
+    timeout: REQUEST_TIMEOUT_MS,
+  };
+
+  if (tlsOptions.allowInsecureTls) {
+    // Intentional: --allow-insecure-tls for PoC self-signed ALB testing only.
+    // codeql[js/disabling-certificate-verification]
+    requestOptions.rejectUnauthorized = false;
+  }
+  if (tlsOptions.cacert) {
+    requestOptions.ca = readFileSync(tlsOptions.cacert);
+  }
+
+  return requestOptions;
+}
+
+/**
  * Wrapper for requests using Node.js HTTP interfaces: focused on
  * Psoxy use-case (*)
  *
  * @param {String|URL} url
- * @param {Object} headers
  * @param {String} method
+ * @param {Object} headers
  * @param {Object} body
+ * @param {Object} [tlsOptions]
+ * @param {boolean} [tlsOptions.allowInsecureTls] - allow untrusted/self-signed server certs (PoC only)
+ * @param {string} [tlsOptions.cacert] - path to PEM file to trust as CA
  * @return {Promise}
  */
-function requestWrapper(url, method = 'GET', headers, body = {}) {
-  url = typeof url === 'string' ? new URL(url) : url;
-  const params = url.searchParams.toString();
-  const responseBody = [];
-  const requestOptions = {
-    hostname: url.host,
-    port: 443,
-    path: url.pathname + (params !== '' ? `?${params}` : ''),
-    method: method,
-    headers: headers,
-    timeout: REQUEST_TIMEOUT_MS,
-  }
-
+function requestWrapper(url, method = 'GET', headers, body = {}, tlsOptions = {}) {
   return new Promise((resolve, reject) => {
+    let parsedUrl;
+    let requestOptions;
+    try {
+      parsedUrl = typeof url === 'string' ? new URL(url) : url;
+      requestOptions = buildHttpsRequestOptions(parsedUrl, method, headers, tlsOptions);
+    } catch (error) {
+      reject({ status: error.code, statusMessage: error.message });
+      return;
+    }
+
+    const responseBody = [];
     const req = https.request(requestOptions,
       (res) => {
         res.on('data', (data) => {
@@ -942,6 +981,7 @@ function sleep(ms) {
 
 export {
   addFilenameSuffix,
+  buildHttpsRequestOptions,
   compareContent,
   environmentCheck,
   executeCommand,

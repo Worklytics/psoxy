@@ -91,13 +91,13 @@ resource "google_pubsub_subscription" "async_output_subscription" {
   name    = "${var.environment_id_prefix}${var.instance_id}-async-output-subscription"
   topic   = google_pubsub_topic.async_output_topic[0].name
 
-  # Push config: deliver messages to the Cloud Function's HTTP endpoint
+  # Push config: deliver messages to the Cloud Function's HTTP endpoint (not an external ALB URL)
   push_config {
-    push_endpoint = local.proxy_endpoint_url
+    push_endpoint = local.cloud_function_url
 
     oidc_token {
       service_account_email = var.service_account_email
-      audience              = local.proxy_endpoint_url
+      audience              = local.cloud_function_url
     }
   }
 
@@ -250,7 +250,11 @@ resource "google_cloudfunctions2_function" "function" {
     service_account_email = var.service_account_email
     available_memory      = "${var.available_memory_mb}M"
     timeout_seconds       = var.timeout_seconds
-    ingress_settings      = "ALLOW_ALL"
+    ingress_settings      = var.ingress_settings
+    # TODO: when external_lb_base_url is set and enable_async_processing is false, disable the
+    # default *.run.app URL (Cloud Run default_uri_disabled / run.googleapis.com/default-url-disabled)
+    # so the console shows URL: None and traffic must use the ALB. Not exposed on
+    # google_cloudfunctions2_function today; async connectors must keep the default URL for Pub/Sub push.
 
     max_instance_request_concurrency = var.instance_concurrency
     available_cpu                    = var.instance_concurrency > 1 ? "1" : null
@@ -378,10 +382,45 @@ resource "google_cloud_run_service_iam_binding" "invokers" {
 }
 
 locals {
-  proxy_endpoint_url  = google_cloudfunctions2_function.function.service_config[0].uri
+  cloud_function_url = google_cloudfunctions2_function.function.service_config[0].uri
+  # Public URL for tests/TODOs: per-connector path on shared external LB, else Cloud Function URI
+  proxy_endpoint_url = trimsuffix(
+    var.external_lb_base_url != null
+    ? "${trimsuffix(var.external_lb_base_url, "/")}/${google_cloudfunctions2_function.function.name}"
+    : local.cloud_function_url,
+    "/"
+  )
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
-  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js"
+  # -f gcp: non-*.run.app / non-*.cloudfunctions.net hosts must be flagged explicitly as a GCP-hosted deployment
+  # --allow-insecure-tls: IP hosts (self-signed PoC ALB) proceed despite untrusted cert
+  proxy_endpoint_is_cloud_function = can(regex("\\.run\\.app", local.proxy_endpoint_url)) || can(regex("\\.cloudfunctions\\.net", local.proxy_endpoint_url))
+  # Prefer split/trimprefix over regex capture groups (capture groups return a list when >1 group)
+  proxy_endpoint_host = split("/", trimprefix(trimprefix(local.proxy_endpoint_url, "https://"), "http://"))[0]
+  # Strip IPv6 brackets before cidrhost (URL host form is [::1])
+  proxy_endpoint_host_for_ip = trimsuffix(trimprefix(local.proxy_endpoint_host, "["), "]")
+  proxy_endpoint_is_ip = (
+    can(cidrhost("${local.proxy_endpoint_host_for_ip}/32", 0))
+    || can(cidrhost("${local.proxy_endpoint_host_for_ip}/128", 0))
+  )
+  command_cli_call_flags = trimspace(join(" ", compact([
+    local.proxy_endpoint_is_cloud_function ? "" : "-f gcp",
+    local.proxy_endpoint_is_ip ? "--allow-insecure-tls" : "",
+  ])))
+  command_cli_call = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js${local.command_cli_call_flags != "" ? " ${local.command_cli_call_flags}" : ""}"
+}
+
+# Only assert on the customer-provided LB base URL (known at plan time). The Cloud Function URI
+# path is always https:// from Google but is unknown until apply, which breaks terraform test.
+check "external_lb_base_url_requires_https" {
+  assert {
+    # Ternary (not ||) so older Terraform does not evaluate startswith(null)
+    condition     = var.external_lb_base_url == null ? true : startswith(var.external_lb_base_url, "https://")
+    error_message = "external_lb_base_url must use https:// (got a non-TLS URL). For PoC self-signed ALB certs, keep https:// and use psoxy-test --allow-insecure-tls or --cacert."
+  }
+}
+
+locals {
 
   # Merge example_api_calls into example_api_requests for unified processing
   all_example_api_requests = concat(
@@ -542,7 +581,12 @@ output "cloud_function_name" {
 }
 
 output "cloud_function_url" {
-  value = local.proxy_endpoint_url
+  value = local.cloud_function_url
+}
+
+output "proxy_endpoint_url" {
+  description = "Public URL used for tests / TODOs (per-connector path on external_lb_base_url when set, otherwise Cloud Function URI)."
+  value       = local.proxy_endpoint_url
 }
 
 output "proxy_kind" {

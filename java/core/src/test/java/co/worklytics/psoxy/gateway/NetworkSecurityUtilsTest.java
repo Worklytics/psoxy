@@ -80,4 +80,19 @@ class NetworkSecurityUtilsTest {
         NetworkSecurityUtils utils = dataAccessUtils(Arrays.asList("10.0.0.5"));
         assertTrue(utils.isDataAccessIpAllowed("10.0.0.5:443"));
     }
+
+    @Test
+    void testIsAllowed_Ipv6ExactCidrMatch() {
+        String allowed = "2601:600:8500:41a3:5ce2:fd98:5e36:2a47/128";
+        NetworkSecurityUtils utils = dataAccessUtils(Arrays.asList(allowed));
+        assertTrue(utils.isDataAccessIpAllowed("2601:600:8500:41a3:5ce2:fd98:5e36:2a47"));
+        assertFalse(utils.isDataAccessIpAllowed("2601:600:8500:41a3:5ce2:fd98:5e36:2a48"));
+    }
+
+    @Test
+    void testIsAllowed_Ipv6PrefixMatch() {
+        NetworkSecurityUtils utils = dataAccessUtils(Arrays.asList("2001:db8::/32"));
+        assertTrue(utils.isDataAccessIpAllowed("2001:db8:1::1"));
+        assertFalse(utils.isDataAccessIpAllowed("2001:db9::1"));
+    }
 }
