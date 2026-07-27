@@ -529,6 +529,10 @@ locals {
       display_name    = "Compute Viewer",
       description_url = "https://docs.cloud.google.com/iam/docs/roles-permissions/compute#compute.viewer"
     },
+    "roles/artifactregistry.editor" = {
+      display_name    = "Artifact Registry Editor",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/artifactregistry#artifactregistry.editor"
+    },
   }, local.required_gcp_roles_to_provision_webhook_collectors)
 
   required_gcp_perms_to_provision_host = concat([
@@ -608,10 +612,12 @@ locals {
     "run.services.setIamPolicy",
     "run.services.update",
 
-    # Artifact Registry
+    # Artifact Registry (create + update for initial apply; delete only needed for terraform destroy)
     "artifactregistry.locations.get",
+    "artifactregistry.repositories.create",
     "artifactregistry.repositories.get",
     "artifactregistry.repositories.list",
+    "artifactregistry.repositories.update",
 
     # Compute Engine (read-only for metadata access)
     "compute.projects.get",
@@ -724,10 +730,13 @@ locals {
     "run.services.setIamPolicy",
     "run.services.update",
 
-    # Artifact Registry
+    # Artifact Registry (delete only needed for terraform destroy)
     "artifactregistry.locations.get",
+    "artifactregistry.repositories.create",
+    "artifactregistry.repositories.delete",
     "artifactregistry.repositories.get",
     "artifactregistry.repositories.list",
+    "artifactregistry.repositories.update",
 
     # Pub/Sub
     "pubsub.subscriptions.create",
