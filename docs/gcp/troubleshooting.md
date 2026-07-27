@@ -86,7 +86,44 @@ terraform {
 
 2. `terraform init --upgrade` and `terraform apply`
 
-You will likely see MANY changes. These are caused by the provider version difference and should be benign. The vast majority are label changes; we utilize the `default_labels` functionality in google provider `5.x` to label all the infra created by this configuration;
+You will likely see MANY changes. These are caused by the provider version difference and should be benign. The vast majority are label changes; we utilize the `default_labels` functionality in the google provider `7.x` at the root `provider "google"` block to label all the infra created by this configuration;
+
+## Permission denied creating or updating Cloud Functions / Artifact Registry
+
+When `terraform apply` fails with `Error 403` and names a permission, grant that permission to the identity running Terraform (your user or `gcp_terraform_sa_account_email` service account).
+
+Common examples:
+
+```
+Error: Error creating Artifact Registry Repository: googleapi: Error 403: Permission 'artifactregistry.repositories.create' denied ...
+```
+
+```
+Error: Error updating function "projects/.../functions/outlook-mail": googleapi: Error 403: Permission '...' denied ...
+```
+
+**Fix:** grant the missing permission. Our [GCP prerequisites](./getting-started.md#iam-permissions) list the least-privileged predefined roles that cover a full Psoxy deployment; the [`psoxy-constants`](../../infra/modules/psoxy-constants) module exposes the same role list for bootstrapping (`required_gcp_roles_to_provision_host`). In particular, initial deploys often fail until the Terraform runner has **Artifact Registry Editor** (`roles/artifactregistry.editor`) — Terraform provisions the Docker repository used by Cloud Functions Gen 2.
+
+If you use a custom IAM role instead of the predefined roles, compare your role against `required_gcp_perms_to_provision_host` from `psoxy-constants`. If you use [VPC egress](./vpc.md), you may also need `roles/compute.networkAdmin` (when Terraform creates the VPC) and, for Shared VPC, `roles/compute.networkUser` on the host-project subnet for the Cloud Run service agent.
+
+## Organization policy blocks Cloud Run networking
+
+Some enterprises enforce Cloud Run networking via [organization policy](https://cloud.google.com/resource-manager/docs/organization-policy/overview), for example:
+
+- [`constraints/run.allowedVPCEgress`](https://cloud.google.com/run/docs/securing/using-vpc-service-controls) — may require all outbound traffic through a VPC (`all-traffic`) while blocking deployments that omit VPC egress.
+- [`constraints/run.allowedIngress`](https://cloud.google.com/run/docs/securing/private-networking) — may restrict ingress to `internal-and-cloud-load-balancing`, which disallows the default public `*.run.app` URL as the only entry point.
+
+When policy and your Terraform configuration disagree, `terraform apply` may fail updating API connectors (for example `outlook-cal`, `outlook-mail`, `zoom`). One symptom is:
+
+```
+Error: Error updating function "projects/.../functions/outlook-mail": googleapi: Error 400: Could not update Cloud Run service ... spec.template.metadata.annotations: The run.googleapis.com/vpc-access-egress annotation cannot be set without also setting the run.googleapis.com/vpc-access-connector annotation or the run.googleapis.com/network-interfaces annotation.
+```
+
+**Fix (preferred if your security team allows it):** request a **project-level exception** (or folder exception) so Psoxy can use the networking settings documented in [VPC configuration](./vpc.md) — Direct VPC egress for fixed outbound IPs, and default or ALB-compatible ingress as appropriate.
+
+**Fix (ingress restriction without VPC exception):** deploy an **external Application Load Balancer** in front of API connectors and pass its host to `api_connector_external_lb_host`. That sets `ingress_settings` to `ALLOW_INTERNAL_AND_GCLB`, which satisfies `internal-and-cloud-load-balancing` while Worklytics reaches connectors through the ALB. See [GCP External ALB + Cloud Armor](../development/gcp-external-alb.md) and the commented [`external-api-alb.tf`](../../infra/examples-dev/gcp/external-api-alb.tf) composition in our GCP example. VPC egress (`vpc_config`) is orthogonal to the ALB path.
+
+If your org mandates VPC egress for all Cloud Run traffic, keep `vpc_config` populated with valid `network` and `subnet` values and ensure the exception (or policy values) allow Direct VPC egress with `all-traffic`.
 
 ## Error 400: `vpc-access-egress` annotation cannot be set without connector or network-interfaces
 
