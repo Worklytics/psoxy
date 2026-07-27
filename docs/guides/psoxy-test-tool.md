@@ -45,6 +45,26 @@ Outlook Calendar example (token option omitted):
 node cli-call.js -u https://us-central1-acme.cloudfunctions.net/outlook-cal/v1.0/users
 ```
 
+#### External ALB URLs (beta)
+
+When API connectors are fronted by a customer-composed external ALB, test URLs look like `https://<domain-or-ip>/<function-name>/...` rather than `*.run.app`. Use:
+
+- `-f gcp` so the tool treats the host as a GCP-hosted deployment (required when the hostname is not `*.run.app` / `*.cloudfunctions.net`)
+- `--allow-insecure-tls` for PoC self-signed certs on a reserved global IP, **or** `--cacert <path>` to trust the PEM from Terraform output `external_alb_self_signed_ca_cert`
+
+```shell
+node cli-call.js -u https://203.0.113.10/myenv-outlook-cal/ -f gcp --allow-insecure-tls --health-check
+```
+
+Generated test scripts from Terraform add these flags when `api_connector_external_lb_host` is set. Your client IP must be allowlisted in Cloud Armor / `allowed_data_access_ip_blocks` to reach the ALB. See [GCP External ALB + Cloud Armor](../development/gcp-external-alb.md).
+
+**Common errors when testing through an external ALB:**
+
+| Symptom | Likely cause | What to check |
+|---|---|---|
+| `ECONNRESET` / "socket disconnected before secure TLS connection was established" | ALB not ready yet, or transient propagation | Wait after `terraform apply`; confirm TLS with `curl -vk https://<alb-ip>/...`. Not usually fixed by changing the allowlist. Use `--allow-insecure-tls` for PoC self-signed certs. |
+| `403 Forbidden` with a minimal HTML page (`<title>403</title>`) | Cloud Armor blocked your source IP | Add the IP you dial **from** to `allowed_data_access_ip_blocks` (include **both** IPv4 and IPv6 if unsure). Verify with `curl -4/-6 ifconfig.me` and [troubleshooting in the ALB doc](../development/gcp-external-alb.md#403-forbidden-minimal-html-page-title403title403-forbidden). |
+
 (*) You can obtain it by running `gcloud auth print-identity-token` (using [Google Cloud SDK])
 
 ### End-to-End Verification (Webhook Collection)

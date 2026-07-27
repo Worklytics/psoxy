@@ -466,3 +466,17 @@ variable "enable_remote_resources" {
   description = "**beta** Whether to enable remote resource loading from the artifacts GCS bucket (rules, NLP models, etc.). When true, sets REMOTE_RESOURCE_BUCKET env var and grants roles/storage.objectViewer to each Cloud Function. Provisions an artifacts bucket if one is not already created or provided."
   default     = false
 }
+
+variable "api_connector_external_lb_host" {
+  type        = string
+  description = <<-EOT
+    Hostname or IP of a customer-provisioned external Application Load Balancer that fronts API connectors (beta; see docs/development/gcp-external-alb.md and infra/examples-dev/gcp/external-api-alb.tf). When non-null, API connectors use ingress ALLOW_INTERNAL_AND_GCLB and public endpoint URLs become https://<host>/<function-name>/. Does not provision the ALB.
+  EOT
+  default     = null
+  nullable    = true
+
+  validation {
+    condition     = var.api_connector_external_lb_host == null || try(length(trimspace(var.api_connector_external_lb_host)) > 0, false)
+    error_message = "api_connector_external_lb_host must be null or a non-empty hostname/IP."
+  }
+}

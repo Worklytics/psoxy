@@ -403,7 +403,7 @@ public class ApiDataRequestHandler {
             // something like "Error getting access token for service account: 401 Unauthorized POST
             // https://oauth2.googleapis.com/token,"
             log.log(Level.WARNING,
-                    "Confirm oauth scopes set in config.yaml match those granted in data source");
+                    "Confirm OAUTH_SCOPES environment variable matches scopes granted in data source");
             return builder.build();
         } catch (co.worklytics.psoxy.gateway.TransientConfigException e) {
             // Config store was temporarily unreachable (e.g. credential rotation, AWS hiccup).

@@ -293,3 +293,25 @@ variable "remote_resource_shared_path" {
   description = "**beta** Path prefix within remote_resource_bucket for shared resources (NLP models, etc.). Used to scope IAM grants."
   default     = null
 }
+
+variable "ingress_settings" {
+  type        = string
+  description = <<-EOT
+    Cloud Functions `ingress_settings` value. Parent modules set this from a higher-level signal (e.g. gcp-host sets ALLOW_INTERNAL_AND_GCLB when `api_connector_external_lb_host` is non-null). Not intended as a per-connector customer knob.
+  EOT
+  default     = "ALLOW_ALL"
+
+  validation {
+    condition     = contains(["ALLOW_ALL", "ALLOW_INTERNAL_AND_GCLB", "ALLOW_INTERNAL_ONLY"], var.ingress_settings)
+    error_message = "ingress_settings must be one of: ALLOW_ALL, ALLOW_INTERNAL_AND_GCLB, ALLOW_INTERNAL_ONLY."
+  }
+}
+
+variable "external_lb_base_url" {
+  type        = string
+  description = <<-EOT
+    Deprecated (used only for test scripts / TODOs generated in this module; prefer lifting those to gcp-host or higher). Base URL of the shared external load balancer that fronts API connectors in this deployment (e.g. https://proxy.example.com or https://203.0.113.10), without a per-connector path. When set, example calls use that base plus /function-name instead of the Cloud Function URI. Pub/Sub push always uses the Cloud Function URI.
+  EOT
+  default     = null
+  nullable    = true
+}

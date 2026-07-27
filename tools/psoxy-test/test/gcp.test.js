@@ -41,6 +41,10 @@ test('Get logs link based on cloud function URL', (t) => {
     gcp.getLogsURL('https://psoxy-dev-gcal-boff2f476q-uc.a.run.app'))
 
   t.is('https://console.cloud.google.com', gcp.getLogsURL('https://foo76q-ux.a.run.app/'));
+
+  // External ALB / IP / custom domain: no console URL from request host
+  t.is(undefined, gcp.getLogsURL('https://203.0.113.10/myenv-outlook-cal/'));
+  t.is(undefined, gcp.getLogsURL('https://proxy.example.com/myenv-outlook-cal/'));
 })
 
 test('Psoxy Logs: parse log entries', (t) => {
@@ -84,6 +88,7 @@ test.serial('Psoxy Call: get identity token when option missing', async (t) => {
       td.matchers.contains({
         Authorization: `Bearer ${TOKEN}`,
       }),
+      td.matchers.anything(),
       td.matchers.anything()
     )
   ).thenReturn({ status: httpCodes.HTTP_STATUS_OK });

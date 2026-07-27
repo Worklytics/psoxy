@@ -20,18 +20,39 @@ Within those, the `google-workspace.tf` and `google-workspace-variables.tf` file
 - [google-chat](google-chat/README.md) (Google Chat&trade;)
 - [meet](meet/README.md) (Google Meet&trade;)
 
-OAuth scopes omit the `https://www.googleapis.com/auth/` prefix. See [OAuth 2.0 Scopes for Google APIs](https://developers.google.com/identity/protocols/oauth2/scopes). Definitive values are defined in [`google-workspace.tf`](../../../infra/modules/worklytics-connector-specs/google-workspace.tf).
+OAuth scopes in the table below omit the `https://www.googleapis.com/auth/` prefix. See [OAuth 2.0 Scopes for Google APIs](https://developers.google.com/identity/protocols/oauth2/scopes). Definitive values are defined in [`google-workspace.tf`](../../../infra/modules/worklytics-connector-specs/google-workspace.tf).
 
-| Connector | Connector ID | OAuth Scopes |
-|-----------|--------------|--------------|
-| [calendar](calendar/README.md) | `gcal` | `calendar.readonly` |
-| [google-chat](google-chat/README.md) | `google-chat` | `admin.reports.audit.readonly` |
-| [directory](directory/README.md) | `gdirectory` | `admin.directory.user.readonly` `admin.directory.domain.readonly` `admin.directory.group.readonly` `admin.directory.orgunit.readonly` |
-| [gdrive](gdrive/README.md) | `gdrive` | `drive.metadata.readonly` |
-| [gmail](gmail/README.md) | `gmail` | `gmail.metadata` |
-| [meet](meet/README.md) | `google-meet` | `admin.reports.audit.readonly` |
-| [gemini-in-workspace-apps](gemini-in-workspace-apps/README.md) | `gemini-in-workspace-apps` | `admin.reports.audit.readonly` |
-| [gemini-usage-bulk](gemini-usage-bulk/README.md) | `gemini-usage` | n/a (bulk CSV upload) |
+Each connector page includes the full comma-separated OAuth scope string to paste into the Google Workspace Admin console when granting Domain-wide Delegation.
+
+| Connector | Connector ID | GCP APIs to Enable | OAuth Scopes |
+|-----------|--------------|--------------------|--------------|
+| [calendar](calendar/README.md) | `gcal` | `calendar-json.googleapis.com` | `calendar.readonly` |
+| [google-chat](google-chat/README.md) | `google-chat` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
+| [directory](directory/README.md) | `gdirectory` | `admin.googleapis.com` | `admin.directory.user.readonly` `admin.directory.domain.readonly` `admin.directory.group.readonly` `admin.directory.orgunit.readonly` |
+| [gdrive](gdrive/README.md) | `gdrive` | `drive.googleapis.com` | `drive.metadata.readonly` |
+| [gmail](gmail/README.md) | `gmail` | `gmail.googleapis.com` | `gmail.metadata` |
+| [meet](meet/README.md) | `google-meet` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
+| [gemini-in-workspace-apps](gemini-in-workspace-apps/README.md) | `gemini-in-workspace-apps` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
+| [gemini-usage-bulk](gemini-usage-bulk/README.md) | `gemini-usage` | n/a (bulk CSV upload) | n/a (bulk CSV upload) |
+
+Enable the listed GCP APIs in the project where you provision each OAuth client. If you use our Terraform modules with `enable_apis = true` (the default), this is done automatically; otherwise, enable them via the GCP console ("APIs & Services" → "Library") or `gcloud services enable`.
+
+### Domain-wide Delegation scope strings
+
+When granting Domain-wide Delegation in the Google Workspace Admin console, paste the connector's comma-separated OAuth scope string into the **Scopes** field. Use the full `https://www.googleapis.com/auth/...` URLs (as shown below and on each connector page), not the short form from the table above.
+
+If you share a **single OAuth client** across multiple connectors (see [Provisioning API clients without Terraform](#provisioning-api-clients-without-terraform)), enable the union of all required GCP APIs and grant the superset of OAuth scopes:
+
+```
+https://www.googleapis.com/auth/calendar.readonly,https://www.googleapis.com/auth/admin.directory.user.readonly,https://www.googleapis.com/auth/admin.directory.domain.readonly,https://www.googleapis.com/auth/admin.directory.group.readonly,https://www.googleapis.com/auth/admin.directory.orgunit.readonly,https://www.googleapis.com/auth/drive.metadata.readonly,https://www.googleapis.com/auth/gmail.metadata,https://www.googleapis.com/auth/admin.reports.audit.readonly
+```
+
+Required GCP APIs for the single shared OAuth client:
+
+- `admin.googleapis.com`
+- `calendar-json.googleapis.com`
+- `drive.googleapis.com`
+- `gmail.googleapis.com`
 
 ## Required Permissions
 
@@ -187,24 +208,93 @@ Cons:
 
 ## Troubleshooting
 
-Google Workspace&trade; API errors/error codes are NOT exhaustively documented by Google, nor do they appear to be viewed as under the scope of API contract. So YMMV; below are some of our notes on errors we've seen in the past, and ideas on root causes of each in case you see them in the future.
+Match log / response signals to a setup issue. Token failures occur on `POST https://oauth2.googleapis.com/token` and usually set `X-Psoxy-Error: CONNECTION_SETUP`. Failures calling a Workspace API (`admin.googleapis.com`, `www.googleapis.com`, etc.) usually set `X-Psoxy-Error: API_ERROR` and may echo Google's error JSON in the response body.
 
+| Signal | Condition | Fix |
+|--------|-----------|-----|
+| `403` — `usageLimits` — `accessNotConfigured`; or `SERVICE_DISABLED`; or `has not been used in project` … `disabled` | GCP API not enabled | [Required GCP APIs](#available-connectors) |
+| `401 Unauthorized` on `oauth2.googleapis.com/token`; or `"error":"unauthorized_client"` | DWD not granted, wrong Client ID, **or** granted scopes ≠ `OAUTH_SCOPES` | [Domain-wide Delegation scope strings](#domain-wide-delegation-scope-strings) |
+| `"error":"access_denied"` or `"error":"invalid_scope"` on `oauth2.googleapis.com/token` (some scope mismatches appear as `401` instead) | `OAUTH_SCOPES` not covered by DWD grant | Connector README OAuth scopes |
+| `"error":"invalid_grant"` + `Invalid JWT Signature` / `SignatureException` on `oauth2.googleapis.com/token` | SA key wrong, revoked, or rotated | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
+| `IllegalArgumentException` parsing service account key secret | Malformed key secret (not JSON / not base64 JSON) | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
+| `403` + `insufficientPermissions` (after token succeeds) | Impersonated user lacks Workspace admin privileges | [Google Workspace User for Connection](#google-workspace-user-for-connection) |
 
-### `"error": "invalid_grant"`
-A couple possible cause of `invalid_grant` errors being returned by Google Workspace&trade; APIs.  The error_description / HTTP response codes can provide additional clues.
+### `403` — `usageLimits` — `accessNotConfigured`
 
-#### 400
+GCP API not enabled for the OAuth client project. Signals in the Google error JSON / proxy logs:
+
+```json
+"errors": [{ "domain": "usageLimits", "reason": "accessNotConfigured" }]
 ```
-com.google.auth.oauth2.GoogleAuthException: Error getting access token for service account: 400 Bad Request POST https://oauth2.googleapis.com/token { "error": "invalid_grant", "error_description": "java.security.SignatureException: Invalid signature for token
+
+```json
+"details": [{ "reason": "SERVICE_DISABLED", "metadata": { "service": "admin.googleapis.com", "serviceTitle": "Admin SDK API" } }]
 ```
 
-This indicates that the service account key (stored as a secret in your proxy instance) has been disabled/destroyed. Ensure that 1) a service account key is set on the service account for the connection, and 2) 
+```json
+"message": "Admin SDK API has not been used in project 123456789012 before or it is disabled."
+```
 
-#### 401
-If response code seen in your logs from google is a 401, check that Google Workspace&trade; Admin has done DWD grant, as described above.
+**Fix:** [Required GCP APIs](#available-connectors).
 
-#### 403
-If response code seen in your logs from Google is a 403, check that Google Workspace&trade; Admin has done DWD grant, as described above, **with the proper list of OAuth scopes**. Confirm that the list in the grant as shown in the Google Workspace&trade; Admin console MATCHES what is configured on the `OAUTH_SCOPES` environment variable of your proxy instance.  
+### `401` — `oauth2.googleapis.com/token`
+
+DWD missing, wrong Client ID, or scopes that do not match `OAUTH_SCOPES`:
+
+```
+Error getting access token for service account: 401 Unauthorized
+POST https://oauth2.googleapis.com/token, iss: psoxy-example-google-meet@example-project.iam.gserviceaccount.com
+```
+
+```json
+{ "error": "unauthorized_client", "error_description": "Unauthorized client or scope in request." }
+```
+
+NOTE: Google does not always distinguish a missing DWD grant from a **scope mismatch** (DWD granted, but with different scopes than `OAUTH_SCOPES`). A wrong-scope grant can produce the same `401 Unauthorized` stack trace as no grant at all — compare `OAUTH_SCOPES` on the proxy against the scopes listed in the Admin console for this Client ID.
+
+**Fix:** [Domain-wide Delegation scope strings](#domain-wide-delegation-scope-strings) and connector README OAuth scopes.
+
+### `400` — `access_denied` — `oauth2.googleapis.com/token`
+
+`OAUTH_SCOPES` requests scopes not in the DWD grant. Some mismatches surface as `401` instead — see above.
+
+```
+Error getting access token for service account: 400 Bad Request POST https://oauth2.googleapis.com/token
+```
+
+```json
+{ "error": "access_denied" }
+```
+
+Proxy may also log: `Confirm OAUTH_SCOPES environment variable matches scopes granted in data source`.
+
+**Fix:** Connector README OAuth scopes; note `OAUTH_SCOPES` uses spaces, Admin console uses commas.
+
+### `400` — `invalid_grant` — `oauth2.googleapis.com/token`
+
+Service account key wrong, revoked, rotated, or not matching the provisioned account:
+
+```json
+{ "error": "invalid_grant", "error_description": "Invalid JWT Signature." }
+```
+
+```
+java.security.SignatureException: Invalid signature for token
+```
+
+**Fix:** [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform).
+
+### `invalid_scope` — `oauth2.googleapis.com/token`
+
+Malformed or non-existent scope URL in `OAUTH_SCOPES`:
+
+```json
+{ "error": "invalid_scope", "error_description": "Invalid OAuth scope or ID token audience provided." }
+```
+
+**Fix:** [`google-workspace.tf`](../../../infra/modules/worklytics-connector-specs/google-workspace.tf) and connector README.
+
+See also Google's [JWT error codes](https://developers.google.com/identity/protocols/oauth2/service-account#jwt-error-codes).
 
 ---
 Google Workspace&trade; and related marks are trademarks of Google LLC.

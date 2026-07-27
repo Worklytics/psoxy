@@ -13,13 +13,13 @@ PATH_TO_MAIN_REPO_ROOT=$3
 
 if [ -z "$EXAMPLE_TO_COPY_FROM" ]; then
   printf "${ERR}Path to example is required.${NC}\n"
-  printf "Usage: ./example-copy.sh <path-to-example> <path-to-example-repo>\n"
+  printf "Usage: ./example-copy.sh <path-to-example> <path-to-example-repo> [path-to-main-repo]\n"
   exit 1
 fi
 
 if [ -z "$EXAMPLE_TEMPLATE_REPO" ]; then
   printf "${ERR}Path to example repo is required.${NC}\n"
-  printf "Usage: ./example-copy.sh <path-to-example> <path-to-example-repo>\n"
+  printf "Usage: ./example-copy.sh <path-to-example> <path-to-example-repo> [path-to-main-repo]\n"
   exit 1
 fi
 
@@ -27,6 +27,26 @@ fi
 if [[ "${EXAMPLE_TEMPLATE_REPO: -1}" != "/" ]]; then
     EXAMPLE_TEMPLATE_REPO="$EXAMPLE_TEMPLATE_REPO/"
 fi
+if [ -n "$PATH_TO_MAIN_REPO_ROOT" ] && [[ "${PATH_TO_MAIN_REPO_ROOT: -1}" != "/" ]]; then
+    PATH_TO_MAIN_REPO_ROOT="$PATH_TO_MAIN_REPO_ROOT/"
+fi
+
+# Copy a text file while forcing Unix (LF) line endings.
+# CRLF shebangs fail under WSL/Linux with: bad interpreter: /bin/bash^M
+copy_lf() {
+  local src="$1"
+  local dest="$2"
+  tr -d '\r' < "$src" > "$dest"
+}
+
+# Copy an executable script with LF endings and +x.
+copy_script_lf() {
+  local src="$1"
+  local dest="$2"
+  printf "copying ${CODE}%s${NC} -> ${CODE}%s${NC} (LF)\n" "$src" "$dest"
+  copy_lf "$src" "$dest"
+  chmod +x "$dest"
+}
 
 cd "$EXAMPLE_TO_COPY_FROM"
 FILES_TO_COPY=( *.tf )
@@ -35,7 +55,7 @@ for file in "${FILES_TO_COPY[@]}"
 do
   if [ -f ${EXAMPLE_TO_COPY_FROM}/${file} ]; then
      echo "copying ${EXAMPLE_TO_COPY_FROM}/${file} to ${EXAMPLE_TEMPLATE_REPO}${file}"
-     cp -f ${EXAMPLE_TO_COPY_FROM}/${file} ${EXAMPLE_TEMPLATE_REPO}${file}
+     copy_lf "${EXAMPLE_TO_COPY_FROM}/${file}" "${EXAMPLE_TEMPLATE_REPO}${file}"
 
      # uncomment Terraform module remotes
      sed -i .bck 's/^\(.*\)# source = "git::\(.*\)"/\1source = "git::\2"/' "${EXAMPLE_TEMPLATE_REPO}${file}"
@@ -48,29 +68,37 @@ done
 rm ${EXAMPLE_TEMPLATE_REPO}*.bck
 
 # copy the README template intended to be published to the example repo
-cp README.template.md ${EXAMPLE_TEMPLATE_REPO}README.md
+copy_lf README.template.md "${EXAMPLE_TEMPLATE_REPO}README.md"
 
 # copy AGENTS template if it exists
 if [ -f AGENTS.template.md ]; then
-  cp -f AGENTS.template.md ${EXAMPLE_TEMPLATE_REPO}AGENTS.md
+  copy_lf AGENTS.template.md "${EXAMPLE_TEMPLATE_REPO}AGENTS.md"
 fi
 
-cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/init-example.sh ${EXAMPLE_TEMPLATE_REPO}init
-chmod +x ${EXAMPLE_TEMPLATE_REPO}init
+copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/init-example.sh" "${EXAMPLE_TEMPLATE_REPO}init"
+copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/check-prereqs.sh" "${EXAMPLE_TEMPLATE_REPO}check-prereqs"
 
-cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}check-prereqs
-chmod +x ${EXAMPLE_TEMPLATE_REPO}check-prereqs
-
-if [ -f ${EXAMPLE_TO_COPY_FROM}/preflight.sh ]; then
-  cp -f ${EXAMPLE_TO_COPY_FROM}/preflight.sh ${EXAMPLE_TEMPLATE_REPO}preflight
-  chmod +x ${EXAMPLE_TEMPLATE_REPO}preflight
+if [ -f "${EXAMPLE_TO_COPY_FROM}/preflight.sh" ]; then
+  copy_script_lf "${EXAMPLE_TO_COPY_FROM}/preflight.sh" "${EXAMPLE_TEMPLATE_REPO}preflight"
 fi
 
-cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/available-connectors.sh ${EXAMPLE_TEMPLATE_REPO}available-connectors
-chmod +x ${EXAMPLE_TEMPLATE_REPO}available-connectors
+copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/available-connectors.sh" "${EXAMPLE_TEMPLATE_REPO}available-connectors"
+copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/az-auth.sh" "${EXAMPLE_TEMPLATE_REPO}az-auth"
 
-cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/az-auth.sh ${EXAMPLE_TEMPLATE_REPO}az-auth
-chmod +x ${EXAMPLE_TEMPLATE_REPO}az-auth
+# Force LF on checkout for customer-facing scripts (overrides Git for Windows autocrlf).
+# Scoped to scripts only — do not force LF on all text in the example repo.
+cat > "${EXAMPLE_TEMPLATE_REPO}.gitattributes" <<'EOF'
+# Shell scripts must stay LF; CRLF breaks shebangs under WSL/Linux
+# (bad interpreter: /bin/bash^M).
+*.sh text eol=lf
+
+# Extensionless customer-facing scripts published to this example repo
+init text eol=lf
+check-prereqs text eol=lf
+available-connectors text eol=lf
+az-auth text eol=lf
+preflight text eol=lf
+EOF
 
 # Dev-only artifacts present in examples-dev (symlinks, local scripts, backups).
 # Never publish these to customer example repos — cp would follow symlinks and copy script contents.
