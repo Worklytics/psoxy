@@ -310,6 +310,7 @@ module "api_connector" {
       RULES                  = local.api_connector_rules[each.key] != null ? base64gzip(local.api_connector_rules[each.key]) : null
       EMAIL_CANONICALIZATION = var.email_canonicalization
     },
+    var.api_connector_path_prefix_to_trim != null ? { REQUEST_PATH_PREFIX_TO_TRIM = var.api_connector_path_prefix_to_trim } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
   )

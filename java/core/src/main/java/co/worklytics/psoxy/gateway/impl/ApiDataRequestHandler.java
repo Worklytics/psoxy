@@ -70,6 +70,7 @@ import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.InboundRequestPathNormalizer;
 import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -102,6 +103,8 @@ public class ApiDataRequestHandler {
 
     @Inject
     ApiModeConfig apiModeConfig;
+    @Inject
+    InboundRequestPathNormalizer inboundRequestPathNormalizer;
     @Inject
     EnvVarsConfigService envVarsConfigService;
     @Inject
@@ -869,7 +872,7 @@ public class ApiDataRequestHandler {
         // directly to avoid re-encoding already-encoded path segments in the request.
         URL hostURL = new URIBuilder(targetBase).build().toURL();
         String hostPlusPath = StringUtils.stripEnd(hostURL.toString(), "/") + "/"
-                + StringUtils.stripStart(request.getPath(), "/");
+                + StringUtils.stripStart(inboundRequestPathNormalizer.normalize(request.getPath()), "/");
         String targetURLString = hostPlusPath;
         if (StringUtils.isNotBlank(request.getQuery().orElse(null))) {
             targetURLString = hostPlusPath + "?" + request.getQuery().get();

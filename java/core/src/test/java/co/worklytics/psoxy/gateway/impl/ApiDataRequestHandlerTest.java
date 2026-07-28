@@ -84,6 +84,7 @@ class ApiDataRequestHandlerTest {
         MockModules.ForHttpTransportFactory.class,
         MockModules.ForSideOutputs.class,
         MockModules.ForAsyncApiDataRequestHandler.class,
+        MockModules.ForHostEnvironment.class,
         TestModules.ForWebhookCollectorModeConfig.class,
         TestModules.ForApiModeConfig.class,
         TestModules.ForFixedUUID.class,
