@@ -109,11 +109,9 @@ function buildScriptInvocation(request, headerFlagsByKey) {
   const parts = [request.method, shellSingleQuote(request.path)];
   if (request.body != null) {
     parts.push(request.content_type ?? 'application/json');
-    const body =
-      typeof request.body === 'string'
-        ? `'${request.body.replace(/"/g, '\\"')}'`
-        : shellSingleQuote(JSON.stringify(request.body));
-    parts.push(body);
+    const bodyValue =
+      typeof request.body === 'string' ? request.body : JSON.stringify(request.body);
+    parts.push(shellSingleQuote(bodyValue));
   } else if (headerFlags.trim() !== '') {
     parts.push("''", "''");
   }
@@ -373,7 +371,7 @@ function buildAwsWebhookTestScript({
   awsRegion,
 }) {
   const example = Array.isArray(testExamples) ? testExamples[0] : null;
-  const payload = decodeExamplePayload(testExamples).replace(/'/g, "'\\''");
+  const payload = shellSingleQuote(decodeExamplePayload(testExamples));
   const roleParam = callerRoleArn ? ` -r "${callerRoleArn}"` : '';
   const regionParam = awsRegion ? ` --region "${awsRegion}"` : '';
   const commandCliCall = `node ${psoxyBaseDir}tools/psoxy-test/cli-call.js${roleParam}${regionParam}`;
@@ -386,7 +384,7 @@ function buildAwsWebhookTestScript({
   }
   let identityLine = '';
   if (example?.identity != null) {
-    identityLine = `--identity-subject '${String(example.identity).replace(/'/g, "'\\''")}' \\
+    identityLine = `--identity-subject ${shellSingleQuote(String(example.identity))} \\
 `;
   }
   return `#!/bin/bash
@@ -403,7 +401,7 @@ JWKS_RC=$?
 
 ${commandCliCall} -u "${endpointUrl}/" --method POST \\
 ${signingLines}${identityLine}--verify-collection "${sanitizedBucket}" \\
---body '${payload}'
+--body ${payload}
 COLLECTION_RC=$?
 
 exit $(( OPENID_CONFIG_RC + JWKS_RC + COLLECTION_RC ))
@@ -419,7 +417,7 @@ function buildGcpWebhookTestScript({
   schedulerJob,
 }) {
   const example = Array.isArray(testExamples) ? testExamples[0] : null;
-  const payload = decodeExamplePayload(testExamples).replace(/'/g, "'\\''");
+  const payload = shellSingleQuote(decodeExamplePayload(testExamples));
   const commandCliCall = `node ${psoxyBaseDir}tools/psoxy-test/cli-call.js`;
   let signingLines = '';
   if (example?.signing_key_id) {
@@ -429,7 +427,7 @@ function buildGcpWebhookTestScript({
   }
   let identityLine = '';
   if (example?.identity != null) {
-    identityLine = `--identity-subject '${String(example.identity).replace(/'/g, "'\\''")}' \\
+    identityLine = `--identity-subject ${shellSingleQuote(String(example.identity))} \\
 `;
   }
   const schedulerLine = schedulerJob ? `--scheduler-job "${schedulerJob}" \\\n` : '';
@@ -447,7 +445,7 @@ JWKS_RC=$?
 
 ${commandCliCall} -u "${endpointUrl}/" --method POST \\
 ${signingLines}${identityLine}--verify-collection "${sanitizedBucket}" \\
-${schedulerLine}--body '${payload}'
+${schedulerLine}--body ${payload}
 COLLECTION_RC=$?
 
 exit $(( OPENID_CONFIG_RC + JWKS_RC + COLLECTION_RC ))

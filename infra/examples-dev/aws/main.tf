@@ -253,6 +253,16 @@ output "caller_role_arn" {
   value       = module.psoxy.caller_role_arn
 }
 
+output "aws_region" {
+  description = "AWS region where Psoxy is deployed."
+  value       = var.aws_region
+}
+
+output "psoxy_base_dir" {
+  description = "Absolute path to the psoxy repository root (trailing slash)."
+  value       = var.psoxy_base_dir
+}
+
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
   value       = var.todos_as_outputs ? join("\n", local.source_authorization_todos) : null

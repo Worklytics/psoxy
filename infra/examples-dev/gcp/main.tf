@@ -232,12 +232,18 @@ output "webhook_collector_instances" {
     side_output_sanitized_bucket_id = try(v.side_output_sanitized_bucket_id, null)
     side_output_original_bucket_id  = try(v.side_output_original_bucket_id, null)
     test_examples                   = try(v.test_examples, [])
+    batch_scheduler_job_id          = try(v.batch_scheduler_job_id, null)
   } }
 }
 
 output "artifacts_bucket_id" {
   description = "The ID of the artifacts google_storage_bucket resource"
   value       = module.psoxy.artifacts_bucket_id
+}
+
+output "psoxy_base_dir" {
+  description = "Absolute path to the psoxy repository root (trailing slash)."
+  value       = var.psoxy_base_dir
 }
 
 output "todos_1" {
