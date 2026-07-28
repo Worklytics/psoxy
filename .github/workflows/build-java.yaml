@@ -55,9 +55,9 @@ jobs:
       - name: Compile
         working-directory: java/
         run: |
-          mvn clean compile -T 2C -Dversions.logOutput=false
+          mvn clean compile -T 2C -Dversions.logOutput=false -DskipOpenNlpModelDownload=false
       - name: Test
         working-directory: java/
         run: |
-          mvn post-clean test -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true
+          mvn post-clean test -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true -DskipOpenNlpModelDownload=false
 
