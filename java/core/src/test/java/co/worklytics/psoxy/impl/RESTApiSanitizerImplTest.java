@@ -477,6 +477,8 @@ class RESTApiSanitizerImplTest {
     @CsvSource(value = {"https://api.example.com/api/v1/users/1,true",
             "https://api.example.com/api/v1/users,false",
             "https://api.example.com/api/v1/users/1?foo=bar,true",
+            "https://api.example.com/api/v1/users/1?FOO=bar,true",
+            "https://api.example.com/api/v1/users/1?Foo=bar&BAR=baz,false",
             "https://api.example.com/api/v1/users/1?foo=bar&bar=foo,false",
             "https://api.example.com/api/v1/users/1?bar=foo,false",})
     @ParameterizedTest

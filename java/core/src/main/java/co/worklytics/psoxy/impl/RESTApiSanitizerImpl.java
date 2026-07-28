@@ -354,8 +354,14 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     boolean allowedQueryParams(Endpoint endpoint, List<Pair<String, String>> queryParams) {
         boolean matchesAllowed = endpoint.getAllowedQueryParamsOptional()
-                .map(allowedParams -> allowedParams.containsAll(
-                        queryParams.stream().map(Pair::getKey).collect(Collectors.toList())))
+                .map(allowedParams -> {
+                    var allowedLower = allowedParams.stream()
+                            .map(p -> p.toLowerCase(Locale.ROOT))
+                            .collect(Collectors.toSet());
+                    return queryParams.stream()
+                            .map(Pair::getKey)
+                            .allMatch(key -> allowedLower.contains(key.toLowerCase(Locale.ROOT)));
+                })
                 .orElse(true);
 
         return matchesAllowed
