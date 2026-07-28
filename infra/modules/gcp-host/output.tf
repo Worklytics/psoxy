@@ -19,6 +19,11 @@ output "artifacts_bucket_id" {
   value       = module.psoxy.artifacts_bucket_id
 }
 
+output "artifacts_bucket_name" {
+  description = "Name of the artifacts bucket (remote resources / deployment bundle)."
+  value       = module.psoxy.artifacts_bucket_name
+}
+
 output "api_connector_instances" {
   value = local.api_instances
 }
