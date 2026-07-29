@@ -34,16 +34,16 @@ public class OneDrive_NoAppIds_Tests extends JavaRulesTestBaseCase {
         return Stream.of(
             // /v1.0/users - no query params, and with all allowed query params
             InvocationExample.of(baseEndpoint + "/users", "users.json"),
-            InvocationExample.of(baseEndpoint + "/users?$top=999&$select=id,mail,employeeId,otherMails,proxyAddresses&$skiptoken=abcXYZ123&$orderBy=id&$count=true", "users.json"),
+            InvocationExample.of(baseEndpoint + "/users?$top=999&$select=id,mail,employeeId,otherMails,proxyAddresses&$skiptoken=abcXYZ123&$orderby=id&$count=true", "users.json"),
             // /v1.0/groups - no query params, and with all allowed query params
             InvocationExample.of(baseEndpoint + "/groups", "groups.json"),
-            InvocationExample.of(baseEndpoint + "/groups?$top=999&$select=id,mail&$skiptoken=abcXYZ123&$orderBy=id&$count=true", "groups.json"),
+            InvocationExample.of(baseEndpoint + "/groups?$top=999&$select=id,mail&$skiptoken=abcXYZ123&$orderby=id&$count=true", "groups.json"),
             // /v1.0/users/{userId}/drives - no query params, and with all allowed query params
             InvocationExample.of(baseEndpoint + "/users/" + userId + "/drives", "list_drives.json"),
-            InvocationExample.of(baseEndpoint + "/users/" + userId + "/drives?$select=id,driveType,system&$skiptoken=abcXYZ123&$top=999&$orderBy=id&$expand=root", "list_drives.json"),
+            InvocationExample.of(baseEndpoint + "/users/" + userId + "/drives?$select=id,driveType,system&$skiptoken=abcXYZ123&$top=999&$orderby=id&$expand=root", "list_drives.json"),
             // /v1.0/groups/{groupId}/drives - no query params, and with all allowed query params
             InvocationExample.of(baseEndpoint + "/groups/" + groupId + "/drives", "list_drives.json"),
-            InvocationExample.of(baseEndpoint + "/groups/" + groupId + "/drives?$select=id,driveType,system&$skiptoken=abcXYZ123&$top=999&$orderBy=id&$expand=root", "list_drives.json"),
+            InvocationExample.of(baseEndpoint + "/groups/" + groupId + "/drives?$select=id,driveType,system&$skiptoken=abcXYZ123&$top=999&$orderby=id&$expand=root", "list_drives.json"),
             // /v1.0/drives/{driveId}/root/delta - no query params, and with all allowed query params
             InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/root/delta", "get_drive_delta.json"),
             InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/root/delta?token=abcXYZ123&", "get_drive_delta.json"),
