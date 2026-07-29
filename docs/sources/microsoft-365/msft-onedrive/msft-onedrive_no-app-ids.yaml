@@ -76,7 +76,7 @@ endpoints:
       - "$top"
       - "$select"
       - "$skiptoken"
-      - "$orderBy"
+      - "$orderby"
       - "$count"
     transforms:
       - !<pseudonymize>
@@ -101,7 +101,7 @@ endpoints:
       - "$select"
       - "$skiptoken"
       - "$top"
-      - "$orderBy"
+      - "$orderby"
       - "$expand"
     transforms:
       - !<pseudonymize>
@@ -127,7 +127,7 @@ endpoints:
       - "$top"
       - "$select"
       - "$skiptoken"
-      - "$orderBy"
+      - "$orderby"
       - "$count"
     transforms:
       - !<pseudonymize>
@@ -159,7 +159,7 @@ endpoints:
       - "$select"
       - "$skiptoken"
       - "$top"
-      - "$orderBy"
+      - "$orderby"
       - "$expand"
     transforms:
       - !<pseudonymize>
