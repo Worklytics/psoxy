@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -476,7 +477,9 @@ class RESTApiSanitizerImplTest {
             "https://api.example.com/api/v1/users,false",
             "https://api.example.com/api/v1/users/1?foo=bar,true",
             "https://api.example.com/api/v1/users/1?foo=bar&bar=foo,false",
-            "https://api.example.com/api/v1/users/1?bar=foo,false",})
+            "https://api.example.com/api/v1/users/1?bar=foo,false",
+            "https://api.example.com/api/v1/users/1?FOO=bar,true",
+            "https://api.example.com/api/v1/users/1?Foo=bar,true",})
     @ParameterizedTest
     void hasPathTemplateMatchingUrl_queryParams(String url, Boolean expected) {
         Endpoint endpoint = Endpoint.builder().pathTemplate("/api/v1/users/{id}")
@@ -486,6 +489,27 @@ class RESTApiSanitizerImplTest {
                 Map.entry(endpoint, Pattern.compile(sanitizer.effectiveRegex(endpoint)));
 
         assertEquals(expected, sanitizer.getHasPathTemplateMatchingUrl(new URL(url)).test(entry));
+    }
+
+    @CsvSource(value = {"foo,true", "FOO,true", "Foo,true", "bar,false",})
+    @ParameterizedTest
+    void allowedQueryParams_caseInsensitive(String queryParamName, Boolean expected) {
+        Endpoint endpoint =
+                Endpoint.builder().pathTemplate("/api/v1/users/{id}")
+                        .allowedQueryParams(List.of("foo")).build();
+
+        assertEquals(expected, sanitizer.allowedQueryParams(endpoint,
+                List.of(Pair.of(queryParamName, "value"))));
+    }
+
+    @Test
+    void allowedQueryParams_caseInsensitive_allowListAlsoMatchedCaseInsensitively() {
+        Endpoint endpoint =
+                Endpoint.builder().pathTemplate("/api/v1/users/{id}")
+                        .allowedQueryParams(List.of("FOO")).build();
+
+        assertTrue(sanitizer.allowedQueryParams(endpoint,
+                List.of(Pair.of("foo", "value"))));
     }
 
     @SneakyThrows
