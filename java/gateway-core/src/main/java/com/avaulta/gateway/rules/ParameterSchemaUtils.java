@@ -104,7 +104,7 @@ public class ParameterSchemaUtils {
                 .allMatch(paramSchema -> {
 
                     List<String> values = bindings.stream()
-                        .filter(p -> p.getKey().equals(paramSchema.getKey()))
+                        .filter(p -> p.getKey().equalsIgnoreCase(paramSchema.getKey()))
                         .map(Pair::getValue)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toUnmodifiableList());

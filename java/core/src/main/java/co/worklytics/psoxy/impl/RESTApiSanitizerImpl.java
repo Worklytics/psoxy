@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -351,8 +352,15 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     boolean allowedQueryParams(Endpoint endpoint, List<Pair<String, String>> queryParams) {
         boolean matchesAllowed = endpoint.getAllowedQueryParamsOptional()
-                .map(allowedParams -> allowedParams.containsAll(
-                        queryParams.stream().map(Pair::getKey).collect(Collectors.toList())))
+                .map(allowedParams -> {
+                    Set<String> allowedParamsLowerCase = allowedParams.stream()
+                            .map(param -> param.toLowerCase(Locale.ROOT))
+                            .collect(Collectors.toSet());
+                    return allowedParamsLowerCase.containsAll(
+                            queryParams.stream()
+                                    .map(pair -> pair.getKey().toLowerCase(Locale.ROOT))
+                                    .collect(Collectors.toList()));
+                })
                 .orElse(true);
 
         return matchesAllowed
