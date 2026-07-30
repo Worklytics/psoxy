@@ -39,6 +39,7 @@
   * [Async API Data Sanitization](configuration/async-api-data.md)
   * [API Data Sanitization](configuration/api-data-sanitization.md)
   * [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
+  * [Control Headers](configuration/control-headers.md)
   * [Email Handling](configuration/email-handling.md)
   * [JSON Filter](configuration/json-filter.md)
   * [Side Outputs](configuration/side-outputs.md)
