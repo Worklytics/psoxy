@@ -85,13 +85,13 @@ public class PrebuiltSanitizerRules {
     );
     static final Endpoint ENTRA_ID_USERS = Endpoint.builder()
         .pathRegex(ENTRA_ID_REGEX_USERS)
-        .allowedQueryParams(List.of("$top", "$select", "$skiptoken", "$orderBy", "$count"))
+        .allowedQueryParams(List.of("$top", "$select", "$skiptoken", "$orderBy", "$count", "$filter"))
         .transforms(USER_TRANSFORMS)
         .build();
 
     static final Endpoint ENTRA_ID_USERS_NO_APP_IDS = Endpoint.builder()
         .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO)
-        .allowedQueryParams(List.of("$top", "$select", "$skiptoken", "$orderBy", "$count"))
+        .allowedQueryParams(List.of("$top", "$select", "$skiptoken", "$orderBy", "$count", "$filter"))
         .transforms(USER_TRANSFORMS)
         .build();
 

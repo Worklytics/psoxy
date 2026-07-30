@@ -45,6 +45,7 @@ endpoints:
       - "$skiptoken"
       - "$orderBy"
       - "$count"
+      - "$filter"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:
