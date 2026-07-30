@@ -682,6 +682,14 @@ class RESTApiSanitizerImplTest {
     }
 
     @Test
+    public void pathForRuleMatching_stripsTargetHostPathPrefixWithRegexMetacharacters() {
+        sanitizer.targetHostPath = "/api/v1.0";
+        when(apiModeConfig.getRequestPathPrefixToTrim()).thenReturn(Optional.empty());
+        assertEquals("/path", sanitizer.pathForRuleMatching("/api/v1.0/path"));
+        assertEquals("/api/v1X0/path", sanitizer.pathForRuleMatching("/api/v1X0/path"));
+    }
+
+    @Test
     public void pathForRuleMatching_stripsInboundRoutingPrefix() {
         when(apiModeConfig.getRequestPathPrefixToTrim()).thenReturn(Optional.of("/v1/"));
         assertEquals("/users", sanitizer.pathForRuleMatching("/v1/psoxy-test/users"));

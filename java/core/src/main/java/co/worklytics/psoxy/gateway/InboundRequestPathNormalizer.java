@@ -24,7 +24,22 @@ public class InboundRequestPathNormalizer {
             .orElse(rawPath);
         String functionName = hostEnvironment.getInstanceId();
         if (StringUtils.isNotBlank(functionName)) {
-            path = path.replace(functionName + "/", "");
+            path = stripLeadingFunctionName(path, functionName);
+        }
+        return path;
+    }
+
+    String stripLeadingFunctionName(String path, String functionName) {
+        if (StringUtils.isBlank(path) || StringUtils.isBlank(functionName)) {
+            return path;
+        }
+
+        String functionSegment = "/" + functionName;
+        if (path.equals(functionSegment)) {
+            return "/";
+        }
+        if (path.startsWith(functionSegment + "/")) {
+            return path.substring(functionSegment.length());
         }
         return path;
     }

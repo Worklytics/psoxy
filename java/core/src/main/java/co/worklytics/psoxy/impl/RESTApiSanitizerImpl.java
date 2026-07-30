@@ -416,7 +416,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     @VisibleForTesting
     String pathForRuleMatching(String path) {
         if (StringUtils.isNotBlank(getTargetHostPath())) {
-            path = path.replaceFirst("^" + getTargetHostPath(), "");
+            path = path.replaceFirst("^" + Pattern.quote(getTargetHostPath()), "");
         }
         return inboundRequestPathNormalizer.normalize(path);
     }

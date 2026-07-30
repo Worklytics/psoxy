@@ -47,6 +47,13 @@ class InboundRequestPathNormalizerTest {
     }
 
     @Test
+    void normalize_stripsFunctionNameOnlyAtLeadingSegment() {
+        assertEquals("/users", normalizer.normalize("/psoxy-gcal/users"));
+        assertEquals("/", normalizer.normalize("/psoxy-gcal"));
+        assertEquals("/foo/psoxy-gcal/users", normalizer.normalize("/foo/psoxy-gcal/users"));
+    }
+
+    @Test
     void normalize_withoutPrefix() {
         normalizer.apiModeConfig = ApiModeConfig.builder().build();
         assertEquals("/users", normalizer.normalize("/psoxy-gcal/users"));
@@ -57,7 +64,7 @@ class InboundRequestPathNormalizerTest {
         normalizer.apiModeConfig = ApiModeConfig.builder().build();
         assertEquals("/v1/users", normalizer.normalize("/v1/users"));
         assertEquals("/users", normalizer.normalize("/psoxy-gcal/users"));
-        assertEquals("/v1/users", normalizer.normalize("/v1/psoxy-gcal/users"));
+        assertEquals("/v1/psoxy-gcal/users", normalizer.normalize("/v1/psoxy-gcal/users"));
     }
 
     @Test

@@ -57,7 +57,7 @@ jobs:
       - name: Compile
         working-directory: java/
         run: |
-          mvn clean compile -T 2C -Dversions.logOutput=false -DskipOpenNlpModelDownload=false
+          mvn clean compile -T 2C -Dversions.logOutput=false
       - name: Submit Maven dependency snapshot
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/rc-'))
         uses: advanced-security/maven-dependency-submission-action@v5
