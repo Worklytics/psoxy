@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -139,6 +140,13 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     @Inject
     AugmentProcessor augmentProcessor;
 
+    private final ThreadLocal<List<String>> lastAugmentWarnings = new ThreadLocal<>();
+
+    @Override
+    public List<String> getLastSanitizationWarnings() {
+        List<String> warnings = lastAugmentWarnings.get();
+        return warnings == null ? List.of() : warnings;
+    }
 
     @Override
     public boolean isAllowed(@NonNull String httpMethod, @NonNull URL url) {
@@ -254,6 +262,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                          @NonNull URL url,
                          InputStream originalStream,
                          OutputStream outputStream) throws IOException {
+        lastAugmentWarnings.set(List.of());
         if (!isAllowed(httpMethod, url)) {
             throw new IllegalStateException(String.format(
                 "Sanitizer called to sanitize response that should not have been retrieved: %s",
@@ -266,6 +275,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         } else {
             final Endpoint endpoint = matchingEndpoint.get().getValue();
             final JsonFactory factory = objectMapper.getFactory();
+            List<String> aggregatedAugmentWarnings = new ArrayList<>();
             try (JsonParser parser = factory.createParser(originalStream);
                  OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
                  BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
@@ -281,7 +291,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     Object node = jsonConfiguration.jsonProvider()
                         .parse(objectMapper.writeValueAsString(objectMapper.readTree(parser)));
 
-                    Object sanitized = sanitize(endpoint, node);
+                    Object sanitized = sanitize(endpoint, node, aggregatedAugmentWarnings);
                     if (!first)
                         bufferedWriter.write("\n");
                     bufferedWriter.write(jsonConfiguration.jsonProvider().toJson(sanitized));
@@ -289,6 +299,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 }
                 bufferedWriter.flush();
             }
+            lastAugmentWarnings.set(List.copyOf(aggregatedAugmentWarnings));
         }
     }
 
@@ -297,12 +308,15 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
      *
      * if endpoint allows for ndjson, we expect this to be just a single JSON object at a time, and
      * you call this once per row in the response
+     *
+     * TODO: return a result type (document + warnings) instead of mutating {@code augmentWarnings}
+     * for NDJSON aggregation; a {@code Pair} or small record would invert control here.
      */
-    private Object sanitize(Endpoint endpoint, Object jsonResponse) {
+    private Object sanitize(Endpoint endpoint, Object jsonResponse, List<String> augmentWarnings) {
 
         // 1. Augments: add synthetic sibling properties before any filtering/transforms
         if (ObjectUtils.isNotEmpty(endpoint.getAugments())) {
-            augmentProcessor.applyAugments(endpoint.getAugments(), jsonResponse);
+            augmentWarnings.addAll(augmentProcessor.applyAugments(endpoint.getAugments(), jsonResponse));
         }
 
         // 2. Response schema filter (allow-list); auto-passes "+" properties when augments ran

@@ -139,6 +139,33 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      */
     SOURCE,
 
+    /** BETA: generative backend for genMetadata augment (`local`, `bedrock`, `vertex`). */
+    PSOXY_GEN_BACKEND,
+
+    /** BETA: Jlama HuggingFace model id or logical id for `{SHARED_RESOURCE_PATH}/llm/{id}.zip`. */
+    PSOXY_GEN_MODEL,
+
+    /** BETA: max seconds for a single genMetadata {@code chat()} call (and model-load wait). */
+    PSOXY_GEN_TIMEOUT_SECONDS,
+
+    /** BETA: max source characters passed into genMetadata prompts. */
+    PSOXY_GEN_MAX_INPUT_CHARS,
+
+    /** BETA: max tokens to generate per genMetadata inference. */
+    PSOXY_GEN_MAX_TOKENS,
+
+    /**
+     * BETA: total genMetadata inference attempts per augment when output is unparseable or fails
+     * {@code outputSchema} validation (minimum 1). Default {@code 2} = one retry.
+     */
+    PSOXY_GEN_META_RETRIES,
+
+    /**
+     * BETA: set when Terraform {@code enable_gen_metadata} is used; documents that deployment
+     * is sized for local generative augments.
+     */
+    ENABLE_GEN_METADATA,
+
     /**
      * Whether the proxy should follow HTTP redirects (3xx responses) when calling source APIs.
      *
