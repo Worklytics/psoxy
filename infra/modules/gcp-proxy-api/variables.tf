@@ -297,7 +297,7 @@ variable "remote_resource_shared_path" {
 variable "ingress_settings" {
   type        = string
   description = <<-EOT
-    Cloud Functions `ingress_settings` value. Parent modules set this from a higher-level signal (e.g. gcp-host sets ALLOW_INTERNAL_AND_GCLB when `api_connector_external_lb_host` is non-null). Not intended as a per-connector customer knob.
+    Cloud Functions `ingress_settings` value. Parent modules set this from a higher-level signal (e.g. gcp-host sets ALLOW_INTERNAL_AND_GCLB when an external ALB host is effective via `external_api_alb` or `api_connector_external_lb_host`). Not intended as a per-connector customer knob.
   EOT
   default     = "ALLOW_ALL"
 

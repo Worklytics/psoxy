@@ -474,10 +474,22 @@ variable "api_connector_path_prefix_to_trim" {
   nullable    = true
 }
 
+variable "external_api_alb" {
+  type = object({
+    # Google-managed HTTPS when set; self-signed on reserved global IP when null (PoC).
+    domain = optional(string)
+  })
+  description = <<-EOT
+    **beta** When non-null, provision a global external Application Load Balancer in front of API connectors (see docs/development/gcp-external-alb.md). Use `{}` for self-signed PoC on a reserved IP, or `{ domain = "proxy.example.com" }` for managed TLS. Cloud Armor allow/deny rules are added only when allowed_data_access_ip_blocks is non-null. Mutually exclusive with api_connector_external_lb_host.
+  EOT
+  default     = null
+  nullable    = true
+}
+
 variable "api_connector_external_lb_host" {
   type        = string
   description = <<-EOT
-    Hostname or IP of a customer-provisioned external Application Load Balancer that fronts API connectors (beta; see docs/development/gcp-external-alb.md and infra/examples-dev/gcp/external-api-alb.tf). When non-null, API connectors use ingress ALLOW_INTERNAL_AND_GCLB and public endpoint URLs become https://<host>/<function-name>/. Does not provision the ALB.
+    Hostname or IP of a **customer-provisioned** external Application Load Balancer that fronts API connectors (beta; see docs/development/gcp-external-alb.md). When non-null, API connectors use ingress ALLOW_INTERNAL_AND_GCLB and public endpoint URLs become https://<host>/<function-name>/. Does not provision an ALB — use external_api_alb to have gcp-host provision one. Mutually exclusive with external_api_alb. IP allowlisting via allowed_data_access_ip_blocks is independent.
   EOT
   default     = null
   nullable    = true
