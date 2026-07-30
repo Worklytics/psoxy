@@ -11,8 +11,8 @@ locals {
   manual_steps_before_dwd = (local.enable_apis ? 0 : 1) + (local.provision_service_accounts ? 0 : 1)
   dwd_todo_step           = var.todo_step + local.manual_steps_before_dwd
   api_todo_step           = var.todo_step
-  sa_todo_step              = var.todo_step + (local.enable_apis ? 0 : 1)
-  key_todo_step             = local.dwd_todo_step + 1
+  sa_todo_step            = var.todo_step + (local.enable_apis ? 0 : 1)
+  key_todo_step           = local.dwd_todo_step + 1
 }
 terraform {
   required_version = "~> 1.7"
