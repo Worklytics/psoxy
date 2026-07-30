@@ -611,6 +611,11 @@ output "test_examples" {
   description = "Array of test examples with base64-encoded content, signing key, and identity"
 }
 
+output "batch_scheduler_job_id" {
+  description = "Cloud Scheduler job ID used to trigger webhook batch processing (for test scripts)."
+  value       = google_cloud_scheduler_job.trigger_batch_processing.id
+}
+
 output "todo" {
   value = local.todo_content
 }
