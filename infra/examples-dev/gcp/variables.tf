@@ -464,7 +464,7 @@ variable "todos_as_local_files" {
 
 variable "allowed_data_access_ip_blocks" {
   description = <<-EOT
-    IPs or CIDR blocks allowed to make data access requests at the application layer (not IAM on Cloud Run). Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md. When using the external ALB composition in external-api-alb.tf, use the same list for Cloud Armor.
+    IPs or CIDR blocks allowed to make data access requests at the application layer (not IAM on Cloud Run). Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md. When external_api_alb is set, a non-null list also drives Cloud Armor allow/deny rules on the ALB; null leaves the ALB open at the network layer.
   EOT
   type        = list(string)
   nullable    = true
@@ -474,6 +474,17 @@ variable "allowed_data_access_ip_blocks" {
     condition     = var.allowed_data_access_ip_blocks == null || try(length(var.allowed_data_access_ip_blocks) > 0, false)
     error_message = "allowed_data_access_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
   }
+}
+
+variable "external_api_alb" {
+  type = object({
+    domain = optional(string)
+  })
+  description = <<-EOT
+    **beta** When non-null, gcp-host provisions a global external Application Load Balancer in front of API connectors. Use `{}` for self-signed PoC on a reserved IP, or `{ domain = "proxy.example.com" }` for Google-managed TLS. See docs/development/gcp-external-alb.md. Mutually exclusive with passing api_connector_external_lb_host into the module for a customer-owned ALB.
+  EOT
+  default     = null
+  nullable    = true
 }
 
 variable "allowed_webhook_ip_blocks" {

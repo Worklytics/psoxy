@@ -44,7 +44,7 @@ For public-internet connectivity (TLS and mTLS), customers can restrict which cl
 
 1. **Application-level (Terraform `allowed_data_access_ip_blocks` / `allowed_webhook_ip_blocks`)** — enforced inside the Cloud Function on each request. This is what the shipped Psoxy GCP modules configure. See [Client IP Allowlisting](../configuration/ip-allowlisting.md).
 
-2. **Network ingress (Cloud Armor)** — optional. When the client service dials out from known static egress IPs, attach Cloud Armor on an external ALB. A beta composition pattern (root `external-api-alb.tf` + `api_connector_external_lb_host`) is documented in [GCP External ALB + Cloud Armor](gcp-external-alb.md). You can also attach [Cloud Run ingress with Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) manually:
+2. **Network ingress (Cloud Armor)** — optional. When the client service dials out from known static egress IPs, attach Cloud Armor on an external ALB. Set `external_api_alb` on `gcp-host` (or BYO via `api_connector_external_lb_host`); see [GCP External ALB + Cloud Armor](gcp-external-alb.md). You can also attach [Cloud Run ingress with Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) manually:
 
 Some client services (including Worklytics, as a paid feature) support dialing out from a
 determined set of static egress IPs. Cloud Armor adds a network-layer control even without PSC or VPC:

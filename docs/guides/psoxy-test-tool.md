@@ -56,7 +56,7 @@ When API connectors are fronted by a customer-composed external ALB, test URLs l
 node cli-call.js -u https://203.0.113.10/myenv-outlook-cal/ -f gcp --allow-insecure-tls --health-check
 ```
 
-Generated test scripts from Terraform add these flags when `api_connector_external_lb_host` is set. Your client IP must be allowlisted in Cloud Armor / `allowed_data_access_ip_blocks` to reach the ALB. See [GCP External ALB + Cloud Armor](../development/gcp-external-alb.md).
+Generated test scripts from Terraform add these flags when `api_connector_external_lb_host` is set. When `allowed_data_access_ip_blocks` is set, your client IP must be allowlisted (Cloud Armor + app layer) to reach the ALB. See [GCP External ALB + Cloud Armor](../development/gcp-external-alb.md).
 
 **Common errors when testing through an external ALB:**
 

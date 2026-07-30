@@ -139,9 +139,10 @@ module "psoxy" {
   bulk_sanitized_expiration_days  = var.bulk_sanitized_expiration_days
   allowed_data_access_ip_blocks    = var.allowed_data_access_ip_blocks
   allowed_webhook_ip_blocks        = var.allowed_webhook_ip_blocks
-  api_connector_external_lb_host   = null
-  # api_connector_external_lb_host = local.api_connector_external_lb_host  # uncomment when using external-api-alb.tf
-  # api_connector_external_lb_host = "proxy.example.com"                 # or your customer-provisioned ALB host/IP
+  # Provision ALB inside gcp-host: external_api_alb = {} (self-signed PoC) or { domain = "proxy.example.com" }
+  external_api_alb = var.external_api_alb
+  # Or BYO ALB (mutually exclusive with external_api_alb):
+  # api_connector_external_lb_host = "proxy.example.com"
   custom_bulk_connector_rules      = var.custom_bulk_connector_rules
   custom_bulk_connector_arguments  = var.custom_bulk_connector_arguments
   lookup_tables                    = var.lookup_tables
@@ -238,6 +239,22 @@ output "webhook_collector_instances" {
 output "artifacts_bucket_id" {
   description = "The ID of the artifacts google_storage_bucket resource"
   value       = module.psoxy.artifacts_bucket_id
+}
+
+output "external_alb_ip_address" {
+  description = "Reserved global IP for the external ALB when external_api_alb is set."
+  value       = module.psoxy.external_alb_ip_address
+}
+
+output "external_alb_dns_setup" {
+  description = "DNS instructions when external_api_alb.domain is set (managed TLS)."
+  value       = module.psoxy.external_alb_dns_setup
+}
+
+output "external_alb_self_signed_ca_cert" {
+  description = "Self-signed server certificate PEM when external_api_alb is enabled without a domain."
+  value       = module.psoxy.external_alb_self_signed_ca_cert
+  sensitive   = true
 }
 
 output "todos_1" {

@@ -69,3 +69,24 @@ output "next_todo_step" {
     [var.todo_step]
   )...)
 }
+
+output "external_alb_ip_address" {
+  description = "Reserved global IP for the gcp-host-provisioned external ALB (null if external_api_alb is unset)."
+  value       = try(google_compute_global_address.api_connector_alb[0].address, null)
+}
+
+output "external_alb_dns_setup" {
+  description = "DNS instructions when external_api_alb.domain is set (managed TLS)."
+  value       = try(module.external_api_alb[0].dns_setup, null)
+}
+
+output "external_alb_self_signed_ca_cert" {
+  description = "Self-signed server certificate PEM when external_api_alb is enabled without a domain."
+  value       = try(module.external_api_alb[0].self_signed_ca_cert, null)
+  sensitive   = true
+}
+
+output "api_connector_external_lb_host" {
+  description = "Effective external LB host for API connectors (provisioned ALB host/IP, BYO host, or null)."
+  value       = local.api_connector_external_lb_host
+}

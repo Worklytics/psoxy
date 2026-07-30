@@ -9,5 +9,5 @@ Eg, auth info should be encoded within the variables passed in here; anything ne
 is outside the scope of this module. This module will just make that information available to the
 connector.
 
-
+Optional **beta** ingress: set `external_api_alb` to provision a global external Application Load Balancer in front of API connectors (or pass `api_connector_external_lb_host` for a customer-owned ALB). See [docs/development/gcp-external-alb.md](../../../docs/development/gcp-external-alb.md).
 
