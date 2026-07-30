@@ -125,6 +125,7 @@ endpoints:
       - "$skiptoken"
       - "$orderby"
       - "$count"
+      - "$filter"
     transforms:
       - !<pseudonymize>
         jsonPaths:
