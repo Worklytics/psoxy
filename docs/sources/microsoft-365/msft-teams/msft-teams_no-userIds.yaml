@@ -40,6 +40,8 @@ endpoints:
           - "$..['@odata.type']"
           - "$..['@odata.count']"
   - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/chats(\\?.*)?"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -341,6 +343,8 @@ endpoints:
       - "$orderBy"
       - "$count"
       - "$filter"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:

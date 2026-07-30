@@ -37,6 +37,8 @@ endpoints:
       - "$filter"
       - "$orderby"
       - "$expand"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -286,6 +288,8 @@ endpoints:
       - "$orderBy"
       - "$count"
       - "$filter"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:

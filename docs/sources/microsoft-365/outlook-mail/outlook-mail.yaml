@@ -8,6 +8,8 @@ endpoints:
       - "$orderBy"
       - "$count"
       - "$filter"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:
@@ -45,6 +47,8 @@ endpoints:
           - "$..identities[*].issuerAssignedId"
         encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/v1.0/groups/?[^/]*"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:
@@ -77,6 +81,8 @@ endpoints:
       - "$skiptoken"
       - "$orderBy"
       - "$count"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:
@@ -136,6 +142,8 @@ endpoints:
           - "$..emailAddress.address"
         encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/v1.0/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<redact>
         jsonPaths:

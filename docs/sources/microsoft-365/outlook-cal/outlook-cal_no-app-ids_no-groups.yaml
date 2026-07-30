@@ -8,6 +8,8 @@ endpoints:
       - "$orderBy"
       - "$count"
       - "$filter"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:

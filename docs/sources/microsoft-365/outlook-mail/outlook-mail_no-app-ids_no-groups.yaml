@@ -8,6 +8,8 @@ endpoints:
       - "$orderBy"
       - "$count"
       - "$filter"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:
@@ -83,6 +85,8 @@ endpoints:
           - "$..['@odata.context']"
   - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailFolders(/SentItems|\\('SentItems'\\\
     ))/messages.*"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<redact>
         jsonPaths:
