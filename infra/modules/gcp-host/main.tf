@@ -320,8 +320,8 @@ module "api_connector" {
   instance_concurrency                  = var.api_connector_instance_concurrency
   max_instance_count                    = var.max_instances_per_api_connector
   timeout_seconds                       = coalesce(try(each.value.timeout_seconds, null), 180)
-  ingress_settings     = local.api_connector_external_lb_enabled ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
-  external_lb_base_url = local.api_connector_external_lb_base_url
+  ingress_settings                      = local.api_connector_external_lb_enabled ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
+  external_lb_base_url                  = local.api_connector_external_lb_base_url
 
 
   environment_variables = merge(

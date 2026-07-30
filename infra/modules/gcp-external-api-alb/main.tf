@@ -1,5 +1,5 @@
 /**
- * Global external Application Load Balancer in front of GCP API connectors, with optional Cloud Armor.
+ * **Beta.** Global external Application Load Balancer (ALB) in front of GCP API connectors, with optional Cloud Armor.
  *
  * Caller reserves the global IP (to resolve connector endpoint host without a module cycle) and
  * ensures Cloud Run / Cloud Functions services exist before applying this module (depends_on).

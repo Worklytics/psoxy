@@ -58,7 +58,7 @@ Health checks are not subject to this gate (they run before IP enforcement) but 
 
 ## Cloud Armor (GCP)
 
-You can run a GCP Application Load Balancer (ALB) **without** Cloud Armor (open at the network layer; rely on IAM and application-layer auth). Cloud Armor IP filtering is optional and only applies when both of the following are true:
+**Beta:** You can run a GCP Application Load Balancer (ALB) **without** Cloud Armor (open at the network layer; rely on IAM and application-layer auth). Cloud Armor IP filtering is optional and only applies when both of the following are true:
 
 1. An external Application Load Balancer is enabled — set `external_api_alb` on `gcp-host`, or pass `api_connector_external_lb_host` for a customer-owned ALB (see [GCP External Application Load Balancer (ALB) + Cloud Armor](../development/gcp-external-alb.md)).
 2. `allowed_data_access_ip_blocks` is non-null (a non-empty CIDR list).

@@ -12,7 +12,7 @@ output. It covers three architectures:
 | Architecture | Transport | Authentication | Applicability |
 |---|---|---|---|
 | **TLS over Public Internet** (current) | Google-managed TLS | GCP IAM | All deployments |
-| **External ALB + Cloud Armor** (beta) | Public external ALB + TLS | GCP IAM + IP allowlist | Worklytics (or similar) with static egress IPs — see [gcp-external-alb.md](gcp-external-alb.md) |
+| **External Application Load Balancer (ALB) + Cloud Armor** (beta) | Public external ALB + TLS | GCP IAM + IP allowlist | Worklytics (or similar) with static egress IPs — see [gcp-external-alb.md](gcp-external-alb.md) |
 | **mTLS over Public Internet** (enhanced) | Mutual TLS via External ALB | Client certificate + GCP IAM | Customers requiring transport-layer client auth |
 | **Private Service Connect** (private) | GCP private backbone | GCP IAM | GCP-hosted clients needing private connectivity |
 

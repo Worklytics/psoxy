@@ -1,6 +1,6 @@
 # GCP External Application Load Balancer (ALB) + Cloud Armor (TLS + optional IP allowlist)
 
-> **Status**: Beta — provisioned by `gcp-host` when `external_api_alb` is set (or BYO via `api_connector_external_lb_host`)
+> **Status**: **Beta** — provisioned by `gcp-host` when `external_api_alb` is set (or BYO via `api_connector_external_lb_host`). Interfaces and resource shapes may change in a future release.
 > **Last Updated**: 2026-07-30
 
 ## Motivation

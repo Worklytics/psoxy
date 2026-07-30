@@ -72,7 +72,7 @@ output "next_todo_step" {
 
 output "external_api_alb" {
   description = <<-EOT
-    External Application Load Balancer (ALB) details when provisioned via external_api_alb or when a BYO host is set via api_connector_external_lb_host; null otherwise.
+    **beta** External Application Load Balancer (ALB) details when provisioned via external_api_alb or when a BYO host is set via api_connector_external_lb_host; null otherwise.
     Fields: host, ip_address (reserved IP when gcp-host provisions the ALB), todo_dns_setup (managed TLS), self_signed_ca_cert (PoC PEM).
   EOT
   value = local.api_connector_external_lb_host == null ? null : {

@@ -96,7 +96,7 @@ variable "bucket_write_role_id" {
 }
 
 variable "available_memory_mb" {
-  type        = number
+  type = number
   # TODO: future version - replace with available_memory (string), passed through to
   # google_cloudfunctions2_function.service_config.available_memory (e.g. "1024M").
   description = "Memory (in MB), available to the function. Default value is 1024. Possible values include 128, 256, 512, 1024, 2048, 4096; above that requires multiple CPUs, beyond scope of our built-in configurations."
