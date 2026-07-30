@@ -730,7 +730,7 @@ locals {
     "run.services.setIamPolicy",
     "run.services.update",
 
-    # Artifact Registry (delete only needed for terraform destroy)
+    # Artifact Registry (create + update for initial apply; delete only needed for terraform destroy)
     "artifactregistry.locations.get",
     "artifactregistry.repositories.create",
     "artifactregistry.repositories.delete",
