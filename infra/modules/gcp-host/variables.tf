@@ -467,6 +467,13 @@ variable "enable_remote_resources" {
   default     = false
 }
 
+variable "api_connector_path_prefix_to_trim" {
+  type        = string
+  description = "If set, passed as REQUEST_PATH_PREFIX_TO_TRIM on all API connectors. Stripped from inbound request paths before the function-name segment (e.g. `/v1/` when routing is `/<prefix>/<function-name>/...`)."
+  default     = null
+  nullable    = true
+}
+
 variable "external_api_alb" {
   type = object({
     # Google-managed HTTPS when set; self-signed on reserved global IP when null (PoC).

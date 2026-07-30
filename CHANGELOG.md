@@ -5,7 +5,8 @@ in each release's notes.
 
 Changes to be including in future/planned release notes will be added here.
 
-## [Unreleased]
+## [0.6.9]
+- `allowedQueryParams` rule checks are now case-insensitive (e.g., `$top` and `$TOP` are treated as equivalent).
 - `gcp`: **beta** first-class optional external Application Load Balancer (ALB) via `external_api_alb` on `gcp-host` (replaces the prior root `external-api-alb.tf` composition). Cloud Armor IP rules apply only when `allowed_data_access_ip_blocks` is non-null. BYO ALB remains available via `api_connector_external_lb_host`. If you applied the old root composition, destroy those root ALB resources (or `terraform state mv` into the new module addresses) before upgrading. Enabling the ALB may add `hashicorp/tls` to your root provider lockfile (self-signed PoC path).
 - `aws`/`gcp`: fix Terraform plan failure when `enable_remote_resources = true` but no artifacts bucket exists (e.g. with a prebuilt `deployment_bundle`). When remote resources are enabled, an artifacts bucket is now provisioned if one is not already created or provided via `artifacts_bucket_name` / `custom_artifacts_bucket_name`.
 - `msft-onedrive`: adding support for a new connector for fetching Microsoft OneDrive data from users and groups via Microsoft Graph API. See [docs](docs/sources/microsoft-365/msft-onedrive/README.md) for details.
