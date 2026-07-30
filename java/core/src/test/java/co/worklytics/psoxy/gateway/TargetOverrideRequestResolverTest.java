@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.test.MockModules;
 
 class TargetOverrideRequestResolverTest {
 
@@ -17,7 +18,8 @@ class TargetOverrideRequestResolverTest {
     @BeforeEach
     void setUp() {
         resolver = new TargetOverrideRequestResolver();
-        request = mock(HttpEventRequest.class);
+        // Use SUBCLASS mock maker on Java 17+ (required for Java 25/26 CI)
+        request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getPath()).thenReturn("/actual/path");
         when(request.getQuery()).thenReturn(Optional.of("a=1"));
         when(request.getHeader(anyString())).thenReturn(Optional.empty());
@@ -106,6 +108,15 @@ class TargetOverrideRequestResolverTest {
         assertThrows(IllegalArgumentException.class, () -> resolver.applyOverrides(request));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"/foo bar", "/path?query=1", "/path#frag"})
+    void targetPath_rejectsWhitespaceAndUrlDelimiters(String path) {
+        when(request.getHeader(ControlHeader.TARGET_PATH.getHttpHeader()))
+            .thenReturn(Optional.of(path));
+
+        assertThrows(IllegalArgumentException.class, () -> resolver.applyOverrides(request));
+    }
+
     @Test
     void targetPath_rejectsCrLf() {
         when(request.getHeader(ControlHeader.TARGET_PATH.getHttpHeader()))
@@ -141,6 +152,15 @@ class TargetOverrideRequestResolverTest {
     void targetQuery_rejectsCrLf() {
         when(request.getHeader(ControlHeader.TARGET_QUERY.getHttpHeader()))
             .thenReturn(Optional.of("a=1\nb=2"));
+
+        assertThrows(IllegalArgumentException.class, () -> resolver.applyOverrides(request));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"a=1 b=2", "a=1#frag"})
+    void targetQuery_rejectsWhitespaceAndFragmentDelimiter(String query) {
+        when(request.getHeader(ControlHeader.TARGET_QUERY.getHttpHeader()))
+            .thenReturn(Optional.of(query));
 
         assertThrows(IllegalArgumentException.class, () -> resolver.applyOverrides(request));
     }

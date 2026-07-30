@@ -74,11 +74,12 @@ public class TargetOverrideRequestResolver {
     }
 
     String validateTargetPath(String path) {
-        if (StringUtils.isEmpty(path)) {
+        if (StringUtils.isBlank(path)) {
             throw new IllegalArgumentException(
                 ControlHeader.TARGET_PATH.getHttpHeader() + " must not be empty");
         }
-        validateUntrustedHeaderValue(ControlHeader.TARGET_PATH.getHttpHeader(), path);
+        // Path must not include query/fragment delimiters — those belong in TargetQuery / nowhere.
+        validateUntrustedHeaderValue(ControlHeader.TARGET_PATH.getHttpHeader(), path, false);
         if (!path.startsWith("/")) {
             throw new IllegalArgumentException(
                 ControlHeader.TARGET_PATH.getHttpHeader() + " must start with '/'");
@@ -93,12 +94,18 @@ public class TargetOverrideRequestResolver {
         String normalized = StringUtils.removeStart(query, "?");
         // empty string is a valid override meaning "no query"
         if (StringUtils.isNotEmpty(normalized)) {
-            validateUntrustedHeaderValue(ControlHeader.TARGET_QUERY.getHttpHeader(), normalized);
+            // Query may contain literal '?' only if embedded oddly; after stripping one leading '?',
+            // further '?' is unusual but not a fragment — still disallow '#' and whitespace.
+            validateUntrustedHeaderValue(ControlHeader.TARGET_QUERY.getHttpHeader(), normalized, true);
         }
         return normalized;
     }
 
-    void validateUntrustedHeaderValue(String headerName, String value) {
+    /**
+     * @param allowQuestionMark whether {@code ?} is permitted (false for TargetPath; true for
+     *        TargetQuery after a leading {@code ?} has been stripped)
+     */
+    void validateUntrustedHeaderValue(String headerName, String value, boolean allowQuestionMark) {
         if (value.length() > MAX_HEADER_VALUE_LENGTH) {
             throw new IllegalArgumentException(
                 headerName + " exceeds max length of " + MAX_HEADER_VALUE_LENGTH);
@@ -106,6 +113,18 @@ public class TargetOverrideRequestResolver {
         if (value.indexOf('\r') >= 0 || value.indexOf('\n') >= 0) {
             throw new IllegalArgumentException(
                 headerName + " must not contain CR/LF");
+        }
+        if (value.indexOf(' ') >= 0 || value.indexOf('\t') >= 0) {
+            throw new IllegalArgumentException(
+                headerName + " must not contain whitespace");
+        }
+        if (value.indexOf('#') >= 0) {
+            throw new IllegalArgumentException(
+                headerName + " must not contain '#'");
+        }
+        if (!allowQuestionMark && value.indexOf('?') >= 0) {
+            throw new IllegalArgumentException(
+                headerName + " must not contain '?'");
         }
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);

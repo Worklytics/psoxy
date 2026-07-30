@@ -20,9 +20,10 @@ Values are used **as-is** (no base64 or other encoding round-trip). Percent-enco
 Both headers are treated as untrusted client input. Invalid values cause the proxy to respond with **HTTP 400** and `X-Psoxy-Error: INVALID_REQUEST`.
 
 - `X-Psoxy-TargetPath` must start with `/`
-- Neither header may contain CR/LF (header-injection defense)
+- Neither header may contain CR/LF (header-injection defense), whitespace, or `#`
+- `X-Psoxy-TargetPath` must not contain `?` (use `X-Psoxy-TargetQuery` for the query string)
 - Length is capped (4 KB)
-- Printable ASCII only (`0x20`–`0x7E`)
+- Printable ASCII only (`0x20`–`0x7E`; spaces are still rejected by the whitespace rule)
 
 When a valid `X-Psoxy-TargetPath` (or TargetQuery) is applied, the proxy logs the effective path/query and notes that it came from the control header (including the original request path/query for comparison).
 
