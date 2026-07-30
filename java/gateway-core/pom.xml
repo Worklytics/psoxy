@@ -166,7 +166,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.8.0</version>
+                <version>${plugin.flatten.version}</version>
                 <configuration>
                 </configuration>
                 <executions>
@@ -191,7 +191,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.6.3</version>
+                <version>${plugin.exec.version}</version>
                 <executions>
                     <execution>
                         <id>fetch-opennlp-models</id>

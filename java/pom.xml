@@ -31,6 +31,14 @@
         <skipOpenNlpModelDownload>false</skipOpenNlpModelDownload>
         <dependency.bouncycastle.version>1.85</dependency.bouncycastle.version>
         <plugin.surefire.version>3.5.6</plugin.surefire.version>
+        <plugin.compiler.version>3.15.0</plugin.compiler.version>
+        <plugin.flatten.version>1.8.0</plugin.flatten.version>
+        <plugin.shade.version>3.6.2</plugin.shade.version>
+        <plugin.resources.version>3.5.0</plugin.resources.version>
+        <plugin.jar.version>3.5.1</plugin.jar.version>
+        <plugin.exec.version>3.6.3</plugin.exec.version>
+        <plugin.cyclonedx.version>2.9.2</plugin.cyclonedx.version>
+        <plugin.license.version>2.7.1</plugin.license.version>
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
@@ -74,7 +82,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.15.0</version>
+                <version>${plugin.compiler.version}</version>
                 <configuration>
                     <source>21</source>
                     <target>21</target>
@@ -95,7 +103,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.8.0</version>
+                <version>${plugin.flatten.version}</version>
                 <configuration>
                     <outputDirectory>${project.build.directory}</outputDirectory>
                 </configuration>
