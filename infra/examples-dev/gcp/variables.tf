@@ -464,7 +464,7 @@ variable "todos_as_local_files" {
 
 variable "allowed_data_access_ip_blocks" {
   description = <<-EOT
-    IPs or CIDR blocks allowed to make data access requests at the application layer (not IAM on Cloud Run). Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md. When external_api_alb is set, a non-null list also drives Cloud Armor allow/deny rules on the ALB; null leaves the ALB open at the network layer.
+    IPs or CIDR blocks allowed to make data access requests at the application layer (not IAM on Cloud Run). Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md. When external_api_alb is set, a non-null list also configures Cloud Armor allow/deny rules on the ALB; null leaves the ALB open at the network layer.
   EOT
   type        = list(string)
   nullable    = true

@@ -52,7 +52,7 @@
   * [HTTP Compression](development/compression.md)
   * [Java Annotation Proccessing](development/intellij.md)
   * [Releases](development/releases.md)
-  * [GCP External ALB + Cloud Armor](development/gcp-external-alb.md)
+  * [GCP External Application Load Balancer (ALB) + Cloud Armor](development/gcp-external-alb.md)
   * [Alpha Features](development/alpha-features/README.md)
     * [Webhook Collectors](development/alpha-features/webhook-collectors.md)
 * [Data Sources](sources/README.md)

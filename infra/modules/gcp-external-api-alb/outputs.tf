@@ -8,7 +8,7 @@ output "host" {
   value       = coalesce(var.domain, var.global_address_ip)
 }
 
-output "dns_setup" {
+output "todo_dns_setup" {
   description = "DNS record required before the Google-managed certificate can provision (managed TLS mode only)."
   value = local.managed_https ? trimspace(<<-EOT
     Create a DNS record for ${var.domain}:

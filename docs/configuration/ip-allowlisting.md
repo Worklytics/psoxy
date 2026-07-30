@@ -28,11 +28,7 @@ On **AWS**, both layers apply when you set the Terraform variables: callers must
 
 On **GCP**, only the **application layer** is enforced by the shipped Terraform. Cloud Run IAM conditions do not support source-IP checks on `roles/run.invoker`, and GCS bucket IAM does not support the `inIpRange` patterns used on AWS. The proxy reads allowlists from environment variables set at deploy time.
 
-For **additional** network ingress restriction on GCP (outside the proxy process), you can attach [Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) in front of a load balancer.
-
-The example GCP root can enable a global external ALB via `external_api_alb` on `gcp-host`. When `allowed_data_access_ip_blocks` is non-null, that list also drives Cloud Armor on the ALB. `api_connector_external_lb_host` remains available for a customer-owned ALB (mutually exclusive with `external_api_alb`). See [GCP External ALB + Cloud Armor](../development/gcp-external-alb.md). Leave the IP list `null` to run the ALB without network-layer IP filtering.
-
-Related design notes: [GCP Private Service Connect and connectivity options](../development/gcp-private-service-connect.md#enhancing-public-internet-options-with-ip-allowlisting).
+For **additional** network ingress restriction on GCP (outside the proxy process), you can attach [Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) in front of a load balancer — see [Cloud Armor (GCP)](#cloud-armor-gcp) below. Related design notes: [GCP Private Service Connect and connectivity options](../development/gcp-private-service-connect.md#enhancing-public-internet-options-with-ip-allowlisting).
 
 ## AWS infrastructure-level detail
 
@@ -60,8 +56,13 @@ Health checks are not subject to this gate (they run before IP enforcement) but 
 - IP allowlisting is not authentication. IPs can be spoofed in some paths; treat this as a supplementary control.
 - Fixed egress IPs from Worklytics may require a subscription add-on; contact [sales@worklytics.co](mailto:sales@worklytics.co). See also [FAQ - Security](../faq-security.md).
 
-### GCP external ALB + Cloud Armor
+## Cloud Armor (GCP)
 
-When `external_api_alb` is set on `gcp-host` **and** `allowed_data_access_ip_blocks` is non-null, that list is pushed to **Cloud Armor** (network layer) as well as the connector env vars (application layer). A mismatch between the list you configured and the IP you test from produces **`403 Forbidden`** from Cloud Armor before the proxy runs — typically a bare HTML page, not a Psoxy error body. With a `null` list, no Cloud Armor IP rules are attached.
+You can run a GCP Application Load Balancer (ALB) **without** Cloud Armor (open at the network layer; rely on IAM and application-layer auth). Cloud Armor IP filtering is optional and only applies when both of the following are true:
+
+1. An external Application Load Balancer is enabled — set `external_api_alb` on `gcp-host`, or pass `api_connector_external_lb_host` for a customer-owned ALB (see [GCP External Application Load Balancer (ALB) + Cloud Armor](../development/gcp-external-alb.md)).
+2. `allowed_data_access_ip_blocks` is non-null (a non-empty CIDR list).
+
+Then that list is applied as **Cloud Armor** rules on the ALB backends (network layer) in addition to the connector env vars (application layer). A mismatch between the list you configured and the IP you test from produces **`403 Forbidden`** from Cloud Armor before the proxy runs — typically a bare HTML page, not a Psoxy error body. With a `null` list, no Cloud Armor IP rules are attached even if the ALB is enabled.
 
 After editing the allowlist in `terraform.tfvars`, run `terraform apply` and confirm the deployed rule (for example `gcloud compute security-policies rules describe 1000 ...`) includes your current IPv4 **and** IPv6 if either might be used. See [Troubleshooting](../development/gcp-external-alb.md#troubleshooting) in the ALB doc for `ECONNRESET` / TLS and 403 symptoms.

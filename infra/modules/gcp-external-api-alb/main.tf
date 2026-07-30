@@ -16,8 +16,8 @@ terraform {
       version = ">= 7.0"
     }
     tls = {
-      source  = "hashicorp/tls"
-      version = "~> 4.0"
+      source = "hashicorp/tls"
+      # Version constraint lives on gcp-host (and the root module); avoid pinning deeper in the hierarchy.
     }
   }
 }
@@ -202,7 +202,7 @@ resource "tls_self_signed_cert" "api_proxy" {
     common_name = "${var.environment_id_prefix}api-proxy.poc"
   }
 
-  validity_period_hours = 8760
+  validity_period_hours = 24 * 365 # 1 year
 
   allowed_uses = [
     "key_encipherment",

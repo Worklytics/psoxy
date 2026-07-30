@@ -241,21 +241,12 @@ output "artifacts_bucket_id" {
   value       = module.psoxy.artifacts_bucket_id
 }
 
-output "external_alb_ip_address" {
-  description = "Reserved global IP for the external ALB when external_api_alb is set."
-  value       = module.psoxy.external_alb_ip_address
-}
-
-output "external_alb_dns_setup" {
-  description = "DNS instructions when external_api_alb.domain is set (managed TLS)."
-  value       = module.psoxy.external_alb_dns_setup
-}
-
-output "external_alb_self_signed_ca_cert" {
-  description = "Self-signed server certificate PEM when external_api_alb is enabled without a domain."
-  value       = module.psoxy.external_alb_self_signed_ca_cert
-  sensitive   = true
-}
+# Uncomment when using external_api_alb (or BYO api_connector_external_lb_host) and you need these values:
+# output "external_api_alb" {
+#   description = "External Application Load Balancer (ALB) details from gcp-host (host, ip_address, todo_dns_setup, self_signed_ca_cert)."
+#   value       = module.psoxy.external_api_alb
+#   sensitive   = true
+# }
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."

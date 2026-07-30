@@ -47,18 +47,18 @@ node cli-call.js -u https://us-central1-acme.cloudfunctions.net/outlook-cal/v1.0
 
 #### External ALB URLs (beta)
 
-When API connectors are fronted by a customer-composed external ALB, test URLs look like `https://<domain-or-ip>/<function-name>/...` rather than `*.run.app`. Use:
+When API connectors are fronted by an external Application Load Balancer (ALB), test URLs look like `https://<domain-or-ip>/<function-name>/...` rather than `*.run.app`. Use:
 
 - `-f gcp` so the tool treats the host as a GCP-hosted deployment (required when the hostname is not `*.run.app` / `*.cloudfunctions.net`)
-- `--allow-insecure-tls` for PoC self-signed certs on a reserved global IP, **or** `--cacert <path>` to trust the PEM from Terraform output `external_alb_self_signed_ca_cert`
+- `--allow-insecure-tls` for PoC self-signed certs on a reserved global IP, **or** `--cacert <path>` to trust the PEM from Terraform output `external_api_alb.self_signed_ca_cert`
 
 ```shell
 node cli-call.js -u https://203.0.113.10/myenv-outlook-cal/ -f gcp --allow-insecure-tls --health-check
 ```
 
-Generated test scripts from Terraform add these flags when `api_connector_external_lb_host` is set. When `allowed_data_access_ip_blocks` is set, your client IP must be allowlisted (Cloud Armor + app layer) to reach the ALB. See [GCP External ALB + Cloud Armor](../development/gcp-external-alb.md).
+Generated test scripts from Terraform add these flags when an external LB base URL is set (`external_api_alb` on `gcp-host`, or BYO `api_connector_external_lb_host`). When `allowed_data_access_ip_blocks` is set, your client IP must be allowlisted (Cloud Armor + app layer) to reach the ALB. See [GCP External Application Load Balancer (ALB) + Cloud Armor](../development/gcp-external-alb.md).
 
-**Common errors when testing through an external ALB:**
+**Common errors when testing through an external Application Load Balancer (ALB):**
 
 | Symptom | Likely cause | What to check |
 |---|---|---|
