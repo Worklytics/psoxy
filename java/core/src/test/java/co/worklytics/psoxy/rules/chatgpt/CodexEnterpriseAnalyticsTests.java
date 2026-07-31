@@ -7,7 +7,7 @@ import lombok.Getter;
 import java.util.stream.Stream;
 
 @Getter
-public class CodexEnterpriseAnalyticsTests extends JavaRulesTestBaseCase {
+public class CodexEnterpriseAnalyticsTest extends JavaRulesTestBaseCase {
 
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.CODEX_ENTERPRISE_ANALYTICS;
 
