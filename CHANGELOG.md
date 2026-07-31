@@ -6,9 +6,35 @@ in each release's notes.
 Changes to be including in future/planned release notes will be added here.
 
 ## [Unreleased]
+
+## [0.6.9](https://github.com/Worklytics/psoxy/releases/tag/v0.6.9)
 - `gcp`: **beta** first-class optional external Application Load Balancer (ALB) via `external_api_alb` on `gcp-host` (replaces the prior root `external-api-alb.tf` composition). Cloud Armor IP rules apply only when `allowed_data_access_ip_blocks` is non-null. BYO ALB remains available via `api_connector_external_lb_host`. If you applied the old root composition, destroy those root ALB resources (or `terraform state mv` into the new module addresses) before upgrading. Enabling the ALB may add `hashicorp/tls` to your root provider lockfile (self-signed PoC path).
+- `msft-onedrive`: adding support for a new **beta** connector for fetching Microsoft OneDrive data from users and groups via Microsoft Graph API. See [docs/sources/microsoft-365/msft-onedrive/README.md](docs/sources/microsoft-365/msft-onedrive/README.md) for details.
+- `gcp`: add troubleshooting guidance for common deploy failures (permission prerequisites, org-policy networking constraints).
+
+## [0.6.8](https://github.com/Worklytics/psoxy/releases/tag/v0.6.8)
+- `gcp`: optional external Application Load Balancer in front of API connector deployments via root `external-api-alb.tf` composition (superseded in 0.6.9 by first-class `external_api_alb` on `gcp-host`).
+- `zoom`: default rules updated.
+- Anthropic connectors (`claude`, `claude-enterprise-analytics`): rules updated.
+- Google Workspace connector docs: document GCP APIs and DWD scope strings.
+- example-repo publish scripts: keep LF line endings for WSL shebang compatibility.
+
+## [0.6.7](https://github.com/Worklytics/psoxy/releases/tag/v0.6.7)
+- bulk: support JSONL input format.
+- `claude-code` / `sales-for-copilot`: **beta** bulk connector support for AI tool usage data.
+- `gcp`: skip Google Workspace provisioning when not configured.
 - `aws`/`gcp`: fix Terraform plan failure when `enable_remote_resources = true` but no artifacts bucket exists (e.g. with a prebuilt `deployment_bundle`). When remote resources are enabled, an artifacts bucket is now provisioned if one is not already created or provided via `artifacts_bucket_name` / `custom_artifacts_bucket_name`.
-- `msft-onedrive`: adding support for a new connector for fetching Microsoft OneDrive data from users and groups via Microsoft Graph API. See [docs](docs/sources/microsoft-365/msft-onedrive/README.md) for details.
+- fix unsanitized request metadata leaking into sync API response headers and sanitized side outputs.
+- fix duplicate query parameters from API Gateway 1.0 payloads.
+- fix possible null body in side outputs.
+- `gcp`: bulk connector memory controls.
+- secret reads: handle transient failures when fetching secrets.
+- `upgrade-terraform-modules.sh`: improved feedback during module ref upgrades.
+
+## [0.6.6](https://github.com/Worklytics/psoxy/releases/tag/v0.6.6)
+- `gcp`: reduce apparent Terraform drift on repeat applies.
+- `gcp`: VPC troubleshooting documentation and related Terraform style fixes.
+- `chatgpt-enterprise`: fix logs sanitization regression from rules update.
 
 ## [0.6.5](https://github.com/Worklytics/psoxy/releases/tag/v0.6.5)
 - added `claude-enterprise-analytics` connector in **beta**; imports per-user daily activity, token usage, and cost data from the [Claude Enterprise Analytics API](https://support.claude.com/en/articles/13703965-claude-enterprise-analytics-api-reference-guide); see [docs/sources/anthropic/claude-enterprise-analytics/README.md](docs/sources/anthropic/claude-enterprise-analytics/README.md)
