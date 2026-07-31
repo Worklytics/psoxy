@@ -70,6 +70,7 @@
     * [Atlassian Organization (Rovo)](sources/atlassian/organization/README.md)
   * [Badge](sources/badge/README.md)
   * [ChatGPT Enterprise](sources/chatgpt-enterprise/README.md)
+  * [Codex Enterprise Analytics](sources/codex-enterprise-analytics/README.md)
   * [Cursor](sources/cursor/README.md)
   * [Dropbox Business](sources/dropbox-business/README.md)
   * [GitHub](sources/github/README.md)
