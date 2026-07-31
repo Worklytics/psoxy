@@ -6,6 +6,14 @@ locals {
   msft_teams_example_call_guid               = try(var.msft_365_connector_settings["msft_teams_example_call_guid"], var.msft_teams_example_call_guid)
   msft_teams_example_call_record_guid        = try(var.msft_365_connector_settings["msft_teams_example_call_record_guid"], var.msft_teams_example_call_record_guid)
   msft_teams_example_online_meeting_join_url = try(var.msft_365_connector_settings["msft_teams_example_online_meeting_join_url"], var.msft_teams_example_online_meeting_join_url)
+
+  # example ids used to build msft-onedrive's example_api_calls; populate via
+  # msft_365_connector_settings (e.g. `{ msft_onedrive_example_drive_id = "b!abc123..." }`) once you
+  # have real values (from a `GET /v1.0/users/{userId}/drives` or `.../groups/{groupId}/drives`
+  # response, and a `driveItem.id` from that drive's `delta` feed, respectively).
+  example_msft_group_guid        = try(var.msft_365_connector_settings["example_msft_group_guid"], "{EXAMPLE_MSFT_GROUP_GUID}")
+  msft_onedrive_example_drive_id = try(var.msft_365_connector_settings["msft_onedrive_example_drive_id"], "{EXAMPLE_MSFT_ONEDRIVE_DRIVE_ID}")
+  msft_onedrive_example_item_id  = try(var.msft_365_connector_settings["msft_onedrive_example_item_id"], "{EXAMPLE_MSFT_ONEDRIVE_ITEM_ID}")
 }
 
 # TODO: arguably it does make sense to have these in yaml, and read them from there; bc YAML gives

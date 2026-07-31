@@ -14,7 +14,7 @@ This directory contains documentation for developers working on or with Psoxy.
 - [Webhook Collectors](webhook-collectors.md) - Webhook collector development
 - [Compression](compression.md) - Data compression handling
 - [GCP Parameter Manager](gcp-parameter-manager.md) - Why GCP Parameter Manager is not used for configuration
-- [GCP External ALB + Cloud Armor](gcp-external-alb.md) - Beta composition pattern for public ALB + IP allowlist (not PSC)
+- [GCP External Application Load Balancer (ALB) + Cloud Armor](gcp-external-alb.md) - Beta first-class `gcp-host` option for public ALB + optional IP allowlist (not PSC)
 
 ## Alpha Features
 

@@ -45,6 +45,9 @@ endpoints:
       - "$skiptoken"
       - "$orderBy"
       - "$count"
+      - "$filter"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:

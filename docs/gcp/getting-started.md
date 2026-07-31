@@ -24,6 +24,7 @@ NOTE: if you're connecting to Google Workspace as a data source, you'll also nee
 
 ### IAM Permissions
 - a GCP (Google) user or Service Account with permissions to provision Service Accounts, Secrets, Storage Buckets, Cloud Run Functions, KMS Keys, Pub/Sub Topics/Subscriptions, and enable APIs within that project. eg:
+  - [Artifact Registry Editor](https://cloud.google.com/iam/docs/roles-permissions/artifactregistry#artifactregistry.editor) - Cloud Functions Gen 2 container images are stored in Artifact Registry; Terraform provisions the Docker repository. (`roles/artifactregistry.repoAdmin` does not include `repositories.create`.)
   - [Cloud Functions Developer](https://docs.cloud.google.com/iam/docs/roles-permissions/cloudfunctions#cloudfunctions.developer) - proxy instances are deployed as GCP cloud functions
   - [Cloud KMS Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/cloudkms#cloudkms.admin) - webhook authentication keys are provisioned as KMS asymmetric signing keys. this is only required for Webhook collection mode.
   - [Cloud Run Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/run#run.admin) - cloud function deployment requires Cloud Run Admin role
