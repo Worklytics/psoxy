@@ -239,7 +239,7 @@
                 </configuration>
             </plugin>
 
-            <!-- builds deployment directory containing only 'uber' JAR for deployment as GCP cloud function -->
+            <!-- builds deployment directory containing only the uber JAR for Lambda deployment -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>${plugin.resources.version}</version>
