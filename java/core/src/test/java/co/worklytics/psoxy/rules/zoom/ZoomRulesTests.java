@@ -51,7 +51,14 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         "https://api.zoom.us/v2/report/meetings/{meetingId}/participants?page_size=300",
         "https://api.zoom.us/v2/report/meetings/NUXghb123TCj0bP6nPVe%252Fsg%253D%253D/participants?page_size=300",
         "https://api.zoom.us/v2/report/meetings/NUXghb123TCj0bP6nPVe%2Fsg%3D%3D/participants?page_size=300", // url decode id once
-        //"https://api.zoom.us/v2/report/meetings/NUXghb123TCj0bP6nPVe/sg==/participants?page_size=300", // url decode id twice
+        "https://api.zoom.us/v2/report/meetings/NUXghb123TCj0bP6nPVe/sg==/participants?page_size=300", // single unencoded /
+        "https://api.zoom.us/v2/meetings/NUXghb123TCj0bP6nPVe/sg==",
+        "https://api.zoom.us/v2/meetings/NUXghb123TCj0bP6nPVe/sg==/meeting_summary",
+        "https://api.zoom.us/v2/past_meetings/NUXghb123TCj0bP6nPVe/sg==",
+        "https://api.zoom.us/v2/past_meetings/NUXghb123TCj0bP6nPVe/sg==/instances",
+        "https://api.zoom.us/v2/past_meetings/NUXghb123TCj0bP6nPVe/sg==/participants",
+        "https://api.zoom.us/v2/meetings/%2Fabc", // encoded leading /
+        "https://api.zoom.us/v2/meetings/ab%2F%2Fcd", // encoded //
     })
     @ParameterizedTest
     void allowedEndpointRegex_allowed(String url) {
@@ -65,11 +72,15 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         "https://api.zoom.us/v2/users/USER_ID/meetings/",
         "https://api.zoom.us/v2/past_meetings",
         "https://api.zoom.us/v2/meetings",
+        // literal leading / or // in meeting id are not valid Zoom UUID path forms
+        "https://api.zoom.us/v2/meetings//abc",
+        "https://api.zoom.us/v2/meetings/ab//cd",
+        "https://api.zoom.us/v2/report/meetings/a/b/c/participants",
+        // more than one optional UUID segment (or known multi-segment sub-resources)
+        "https://api.zoom.us/v2/meetings/{meetingId}/polls/{pollId}",
+        "https://api.zoom.us/v2/meetings/{meetingId}/registrants/abc",
         // some random valid methods we don't use
         "https://api.zoom.us/v2/report/daily",
-        "https://api.zoom.us/v2/meetings/{meetingId}/registrants",
-        "https://api.zoom.us/v2/meetings/{meetingId}/polls",
-        "https://api.zoom.us/v2/meetings/{meetingId}/polls/{pollId}",
         "https://api.zoom.us/v2/users/{userId}/meeting_templates",
         "https://api.zoom.us/v2/groups",
         "https://api.zoom.us/v2/groups/{groupId}/admins",
