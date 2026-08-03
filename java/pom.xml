@@ -13,7 +13,7 @@
         <revision>0.6.9</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.46</dependency.lombok.version>
-        <dependency.dagger.version>2.40.5</dependency.dagger.version>
+        <dependency.dagger.version>2.60.1</dependency.dagger.version>
         <dependency.jackson.version>2.22.1</dependency.jackson.version>
         <dependency.apache-commons-lang3.version>3.20.0</dependency.apache-commons-lang3.version>
         <dependency.apache-commons-csv.version>1.14.1</dependency.apache-commons-csv.version>
@@ -21,16 +21,23 @@
         <dependency.commons-io.version>2.22.0</dependency.commons-io.version>
         <dependency.commons-net.version>3.13.0</dependency.commons-net.version>
         <dependency.apache-httpcore.version>5.4.3</dependency.apache-httpcore.version>
-        <dependency.google-cloud-bom.version>26.84.0</dependency.google-cloud-bom.version>
-        <dependency.google-http-client.version>1.45.1</dependency.google-http-client.version>
-        <dependency.google-auth-library-oauth2-http.version>1.48.0</dependency.google-auth-library-oauth2-http.version>
-        <dependency.junit-jupiter.version>5.11.4</dependency.junit-jupiter.version>
+        <dependency.google-cloud-bom.version>26.85.1</dependency.google-cloud-bom.version>
+        <dependency.google-http-client.version>1.47.1</dependency.google-http-client.version>
+        <dependency.google-auth-library-oauth2-http.version>1.49.0</dependency.google-auth-library-oauth2-http.version>
+        <dependency.junit-jupiter.version>5.14.4</dependency.junit-jupiter.version>
         <dependency.mockito-junit-jupiter.version>5.23.0</dependency.mockito-junit-jupiter.version>
         <dependency.json-path.version>2.9.0</dependency.json-path.version>
-        <dependency.opennlp.version>2.5.9</dependency.opennlp.version>
+        <dependency.opennlp.version>2.5.11</dependency.opennlp.version>
         <skipOpenNlpModelDownload>true</skipOpenNlpModelDownload>
-        <dependency.bouncycastle.version>1.84</dependency.bouncycastle.version>
-        <plugin.surefire.version>3.5.6</plugin.surefire.version>
+        <dependency.bouncycastle.version>1.85</dependency.bouncycastle.version>        <plugin.surefire.version>3.5.6</plugin.surefire.version>
+        <plugin.compiler.version>3.15.0</plugin.compiler.version>
+        <plugin.flatten.version>1.8.0</plugin.flatten.version>
+        <plugin.shade.version>3.6.2</plugin.shade.version>
+        <plugin.resources.version>3.5.0</plugin.resources.version>
+        <plugin.jar.version>3.5.1</plugin.jar.version>
+        <plugin.exec.version>3.6.3</plugin.exec.version>
+        <plugin.cyclonedx.version>2.9.2</plugin.cyclonedx.version>
+        <plugin.license.version>2.7.1</plugin.license.version>
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
@@ -74,20 +81,20 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>${plugin.compiler.version}</version>
                 <configuration>
                     <source>21</source>
                     <target>21</target>
                     <annotationProcessorPaths>
                         <path>
-                            <groupId>com.google.dagger</groupId>
-                            <artifactId>dagger-compiler</artifactId>
-                            <version>${dependency.dagger.version}</version>
-                        </path>
-                        <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>${dependency.lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>com.google.dagger</groupId>
+                            <artifactId>dagger-compiler</artifactId>
+                            <version>${dependency.dagger.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -95,7 +102,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.1.0</version>
+                <version>${plugin.flatten.version}</version>
                 <configuration>
                     <outputDirectory>${project.build.directory}</outputDirectory>
                 </configuration>
