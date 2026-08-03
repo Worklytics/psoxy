@@ -5,7 +5,10 @@ in each release's notes.
 
 Changes to be including in future/planned release notes will be added here.
 
-## [Unreleased]
+## [0.6.9]
+- `allowedQueryParams` rule checks are now case-insensitive (e.g., `$top` and `$TOP` are treated as equivalent).
+- `gcp`: **beta** first-class optional external Application Load Balancer (ALB) via `external_api_alb` on `gcp-host` (replaces the prior root `external-api-alb.tf` composition). Cloud Armor IP rules apply only when `allowed_data_access_ip_blocks` is non-null. BYO ALB remains available via `api_connector_external_lb_host`. If you applied the old root composition, destroy those root ALB resources (or `terraform state mv` into the new module addresses) before upgrading. Enabling the ALB may add `hashicorp/tls` to your root provider lockfile (self-signed PoC path).
+- `codex-enterprise-analytics` new connector in **beta**; imports per-user daily Codex usage (threads, turns, credits, token counts, per-client/per-model breakdowns, code attribution) from OpenAI's Codex Enterprise Analytics API; see [docs/sources/codex-enterprise-analytics/README.md](docs/sources/codex-enterprise-analytics/README.md)
 - `aws`/`gcp`: fix Terraform plan failure when `enable_remote_resources = true` but no artifacts bucket exists (e.g. with a prebuilt `deployment_bundle`). When remote resources are enabled, an artifacts bucket is now provisioned if one is not already created or provided via `artifacts_bucket_name` / `custom_artifacts_bucket_name`.
 - `msft-onedrive`: adding support for a new connector for fetching Microsoft OneDrive data from users and groups via Microsoft Graph API. See [docs](docs/sources/microsoft-365/msft-onedrive/README.md) for details.
 - Dependencies: update Java libraries within current majors (notably Dagger 2.60, AWS SDK 2.49, Google Cloud libraries BOM 26.85, JUnit 5.14, OpenNLP 2.5.11, BouncyCastle 1.85, google-http-client 1.47) and Maven plugins; update npm tooling deps / security overrides for `psoxy-test`, `schema-tool`, and `js-reference`.
@@ -48,7 +51,7 @@ Changes to be including in future/planned release notes will be added here.
 
 **BREAKING / UPGRADE NOTES:**
 - `aws`: Minimum `hashicorp/aws` provider version is now `~> 6.0`. When upgrading, users must update the version constraint under `terraform { required_providers { ... } }` for `hashicorp/aws` to this version or later, and run `terraform init -upgrade` to apply.
-- `gcp`: 
+- `gcp`:
   - Minimum `hashicorp/google` provider version is now `~> 7.0`. When upgrading, users must update the version constraint under `terraform { required_providers { ... } }` for `hashicorp/google` to this version or later, and run `terraform init -upgrade` to apply. Our GCP example sets `version = "~> 7.0"` in root `main.tf`.
   - `default_labels` is no longer passed into Psoxy modules. Set it on the root `provider "google"` block instead (see `infra/examples-dev/gcp/main.tf`). Provider 7.x applies `default_labels` to supported resources automatically; remove any `default_labels` arguments from module calls when upgrading from 0.5.x.
   - Terraform provisions a Docker repository in Artifact Registry for Cloud Functions Gen 2. Your deployer needs **Artifact Registry Editor** (`roles/artifactregistry.editor`) — the least-privileged predefined role that includes `artifactregistry.repositories.create`. (`roles/artifactregistry.repoAdmin` manages artifacts in existing repositories but cannot create them; `roles/artifactregistry.admin` also works but grants additional permissions such as `repositories.setIamPolicy`.) Custom roles built from `required_gcp_perms_to_provision_host` need `create`, `update`, `get`, and `list`; `repositories.delete` is only required for `terraform destroy` and is included in `required_gcp_permissions_to_host` instead. See [docs/gcp/getting-started.md](docs/gcp/getting-started.md).

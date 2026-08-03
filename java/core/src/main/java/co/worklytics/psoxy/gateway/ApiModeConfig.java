@@ -52,6 +52,9 @@ public class ApiModeConfig {
         configService.getConfigPropertyAsOptional(ApiModeConfigProperty.REQUEST_TIMEOUT_SECONDS)
                 .map(value -> ConfigService.parseIntValue(ApiModeConfigProperty.REQUEST_TIMEOUT_SECONDS, value))
                 .ifPresent(builder::requestTimeoutSeconds);
+        configService.getConfigPropertyAsOptional(ApiModeConfigProperty.REQUEST_PATH_PREFIX_TO_TRIM)
+                .map(StringUtils::trimToNull)
+                .ifPresent(builder::requestPathPrefixToTrim);
 
         String tlsRaw = configService.getConfigPropertyAsOptional(ApiModeConfigProperty.TLS_VERSION)
                 .orElse(TlsVersions.TLSv1_3);
@@ -97,6 +100,16 @@ public class ApiModeConfig {
      */
     @Builder.Default
     private final int requestTimeoutSeconds = DEFAULT_REQUEST_TIMEOUT_SECONDS;
+
+    /**
+     * if set, stripped from the beginning of inbound request paths before the function-name
+     * segment is removed (e.g. {@code /v1/} when routing is {@code /<prefix>/<function-name>/...})
+     */
+    private final String requestPathPrefixToTrim;
+
+    public Optional<String> getRequestPathPrefixToTrim() {
+        return Optional.ofNullable(requestPathPrefixToTrim).filter(s -> !s.isBlank());
+    }
 
     public Optional<String> getTargetHost() {
         return Optional.ofNullable(targetHost).filter(s -> !s.isBlank());
@@ -155,6 +168,12 @@ public class ApiModeConfig {
         TLS_VERSION,
 
         TARGET_HOST,
+
+        /**
+         * if set, stripped from the beginning of inbound request paths before the function-name
+         * segment is removed
+         */
+        REQUEST_PATH_PREFIX_TO_TRIM,
 
         REQUEST_TIMEOUT_SECONDS,
         ;

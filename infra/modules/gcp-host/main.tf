@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/google"
       version = ">= 7.0"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = ">= 4.0"
+    }
   }
 }
 
@@ -236,20 +240,41 @@ locals {
   }
 }
 
-check "api_connector_external_lb_host_ip_allowlist" {
+check "external_api_alb_xor_byo_host" {
   assert {
-    condition     = var.api_connector_external_lb_host == null || var.allowed_data_access_ip_blocks != null
-    error_message = "When api_connector_external_lb_host is set, also set allowed_data_access_ip_blocks (Worklytics static egress IPs). Use the same list for Cloud Armor in your root external-api-alb.tf."
+    condition     = !(var.external_api_alb != null && var.api_connector_external_lb_host != null)
+    error_message = "Set external_api_alb to have gcp-host provision an ALB, or api_connector_external_lb_host for a customer-provisioned ALB, not both."
   }
 }
 
 locals {
-  api_connector_external_lb_enabled = var.api_connector_external_lb_host != null
-  # Shared LB base (no per-connector path); gcp-proxy-api appends /<function-name>
-  api_connector_external_lb_base_url = local.api_connector_external_lb_enabled ? "https://${var.api_connector_external_lb_host}" : null
+  provision_external_api_alb = var.external_api_alb != null && length(var.api_connectors) > 0
+
   api_connector_function_names = {
     for k in keys(var.api_connectors) : k => "${local.environment_id_prefix}${k}"
   }
+}
+
+# Reserved before connectors so self-signed PoC endpoint URLs can use the IP without a module cycle
+# (ALB NEGs must depend on Cloud Functions; connectors need the host at create time).
+resource "google_compute_global_address" "api_connector_alb" {
+  count = local.provision_external_api_alb ? 1 : 0
+
+  project = var.gcp_project_id
+  name    = "${local.environment_id_prefix}api-alb"
+}
+
+locals {
+  # BYO host, else provisioned domain, else reserved global IP, else null (default *.run.app).
+  api_connector_external_lb_host = (
+    var.api_connector_external_lb_host != null ? var.api_connector_external_lb_host :
+    !local.provision_external_api_alb ? null :
+    try(var.external_api_alb.domain, null) != null ? var.external_api_alb.domain :
+    google_compute_global_address.api_connector_alb[0].address
+  )
+  api_connector_external_lb_enabled = local.api_connector_external_lb_host != null
+  # Shared LB base (no per-connector path); gcp-proxy-api appends /<function-name>
+  api_connector_external_lb_base_url = local.api_connector_external_lb_enabled ? "https://${local.api_connector_external_lb_host}" : null
   api_connector_external_endpoint_urls = local.api_connector_external_lb_enabled ? {
     for k, function_name in local.api_connector_function_names :
     k => "${local.api_connector_external_lb_base_url}/${function_name}/"
@@ -310,6 +335,7 @@ module "api_connector" {
       RULES                  = local.api_connector_rules[each.key] != null ? base64gzip(local.api_connector_rules[each.key]) : null
       EMAIL_CANONICALIZATION = var.email_canonicalization
     },
+    var.api_connector_path_prefix_to_trim != null ? { REQUEST_PATH_PREFIX_TO_TRIM = var.api_connector_path_prefix_to_trim } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
   )
@@ -329,6 +355,22 @@ module "api_connector" {
   ]
 }
 
+module "external_api_alb" {
+  count = local.provision_external_api_alb ? 1 : 0
+
+  source = "../gcp-external-api-alb"
+
+  gcp_project_id               = var.gcp_project_id
+  gcp_region                   = var.gcp_region
+  environment_id_prefix        = local.environment_id_prefix
+  global_address_id            = google_compute_global_address.api_connector_alb[0].id
+  global_address_ip            = google_compute_global_address.api_connector_alb[0].address
+  api_connector_function_names = local.api_connector_function_names
+  domain                       = try(var.external_api_alb.domain, null)
+  allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
+
+  depends_on = [module.api_connector]
+}
 
 # END API CONNECTORS
 
