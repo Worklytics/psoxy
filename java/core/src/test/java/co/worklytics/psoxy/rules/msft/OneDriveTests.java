@@ -33,6 +33,8 @@ public class OneDriveTests extends JavaRulesTestBaseCase {
             // /v1.0/users - no query params, and with all allowed query params
             InvocationExample.of(baseEndpoint + "/users", "users.json"),
             InvocationExample.of(baseEndpoint + "/users?$top=999&$select=id,mail,employeeId,otherMails,proxyAddresses&$skiptoken=abcXYZ123&$orderby=id&$count=true", "users.json"),
+            // /v1.0/users - $filter, as used to partition user enumeration across parallel jobs by userPrincipalName prefix
+            InvocationExample.of(baseEndpoint + "/users?$filter=startswith(userPrincipalName,'a')&$top=999&$select=id,mail,employeeId,otherMails,proxyAddresses", "users.json"),
             // /v1.0/groups - no query params, and with all allowed query params
             InvocationExample.of(baseEndpoint + "/groups", "groups.json"),
             InvocationExample.of(baseEndpoint + "/groups?$top=999&$select=id,mail&$skiptoken=abcXYZ123&$orderby=id&$count=true", "groups.json"),
