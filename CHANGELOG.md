@@ -6,6 +6,7 @@ in each release's notes.
 Changes to be including in future/planned release notes will be added here.
 
 ## [0.6.9]
+- `windsurf`: connector marked **deprecated**; we are not supporting new Windsurf connections as of Aug 2026 (acquisition/rebrand as Devin Desktop). Existing deployments may continue to work while the Analytics API remains available, but ongoing support should not be expected.
 - `allowedQueryParams` rule checks are now case-insensitive (e.g., `$top` and `$TOP` are treated as equivalent).
 - `gcp`: **beta** first-class optional external Application Load Balancer (ALB) via `external_api_alb` on `gcp-host` (replaces the prior root `external-api-alb.tf` composition). Cloud Armor IP rules apply only when `allowed_data_access_ip_blocks` is non-null. BYO ALB remains available via `api_connector_external_lb_host`. If you applied the old root composition, destroy those root ALB resources (or `terraform state mv` into the new module addresses) before upgrading. Enabling the ALB may add `hashicorp/tls` to your root provider lockfile (self-signed PoC path).
 - `codex-enterprise-analytics` new connector in **beta**; imports per-user daily Codex usage (threads, turns, credits, token counts, per-client/per-model breakdowns, code attribution) from OpenAI's Codex Enterprise Analytics API; see [docs/sources/codex-enterprise-analytics/README.md](docs/sources/codex-enterprise-analytics/README.md)
