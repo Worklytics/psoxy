@@ -5,9 +5,8 @@ in each release's notes.
 
 Changes to be including in future/planned release notes will be added here.
 
-## [Unreleased]
-
 ## [0.6.9](https://github.com/Worklytics/psoxy/releases/tag/v0.6.9)
+
 - `gcp`: **beta** first-class optional external Application Load Balancer (ALB) via `external_api_alb` on `gcp-host` (replaces the prior root `external-api-alb.tf` composition). Cloud Armor IP rules apply only when `allowed_data_access_ip_blocks` is non-null. BYO ALB remains available via `api_connector_external_lb_host`. If you applied the old root composition, destroy those root ALB resources (or `terraform state mv` into the new module addresses) before upgrading. Enabling the ALB may add `hashicorp/tls` to your root provider lockfile (self-signed PoC path).
 - `msft-onedrive`: adding support for a new **beta** connector for fetching Microsoft OneDrive data from users and groups via Microsoft Graph API. See [docs/sources/microsoft-365/msft-onedrive/README.md](docs/sources/microsoft-365/msft-onedrive/README.md) for details.
 - `gcp`: add troubleshooting guidance for common deploy failures (permission prerequisites, org-policy networking constraints).

@@ -4,7 +4,11 @@ METHOD=$${1:-"GET"}
 API_PATH=$${2:-${try(example_api_get_requests[0].path, "")}}
 CONTENT_TYPE=$${3:-""}
 BODY=$${4:-""}
+%{ if trimspace(default_header_flags) != "" ~}
 HEADER_FLAGS=$${5:-'${replace(default_header_flags, "'", "'\\''")}'}
+%{ else ~}
+HEADER_FLAGS=$${5:-}
+%{ endif ~}
 
 echo "Quick test of ${function_name} ..."
 
