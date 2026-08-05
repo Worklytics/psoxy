@@ -26,17 +26,18 @@ Changes to be including in future/planned release notes will be added here.
 - `claude-code` / `sales-for-copilot`: **beta** bulk connector support for AI tool usage data.
 - `gcp`: skip Google Workspace provisioning when not configured.
 - `aws`/`gcp`: fix Terraform plan failure when `enable_remote_resources = true` but no artifacts bucket exists (e.g. with a prebuilt `deployment_bundle`). When remote resources are enabled, an artifacts bucket is now provisioned if one is not already created or provided via `artifacts_bucket_name` / `custom_artifacts_bucket_name`.
-- fix unsanitized request metadata leaking into sync API response headers and sanitized side outputs.
+- `msft-onedrive`: adding support for a new connector for fetching Microsoft OneDrive data from users and groups via Microsoft Graph API. See [docs](docs/sources/microsoft-365/msft-onedrive/README.md) for details.
+- `zoom`: meeting-related endpoints that take a meeting UUID (`/v2/meetings/...`, `/v2/past_meetings/...`, `/v2/report/meetings/.../participants`) now use `pathRegex` instead of `pathTemplate`, so requests with a single unencoded `/` in the meeting ID are allowed, while encoded `/` (`%2F`) and `//` (`%2F%2F`) continue to work. Path templates cannot match an unencoded embedded `/`. **Anyone who has customized Zoom rules should apply the same `pathRegex` change** (see [`docs/sources/zoom/zoom.yaml`](docs/sources/zoom/zoom.yaml)).
 - fix duplicate query parameters from API Gateway 1.0 payloads.
 - fix possible null body in side outputs.
 - `gcp`: bulk connector memory controls.
 - secret reads: handle transient failures when fetching secrets.
-- `upgrade-terraform-modules.sh`: improved feedback during module ref upgrades.
 
 ## [0.6.6](https://github.com/Worklytics/psoxy/releases/tag/v0.6.6)
 - `gcp`: reduce apparent Terraform drift on repeat applies.
 - `gcp`: VPC troubleshooting documentation and related Terraform style fixes.
 - `chatgpt-enterprise`: fix logs sanitization regression from rules update.
+
 
 ## [0.6.5](https://github.com/Worklytics/psoxy/releases/tag/v0.6.5)
 - added `claude-enterprise-analytics` connector in **beta**; imports per-user daily activity, token usage, and cost data from the [Claude Enterprise Analytics API](https://support.claude.com/en/articles/13703965-claude-enterprise-analytics-api-reference-guide); see [docs/sources/anthropic/claude-enterprise-analytics/README.md](docs/sources/anthropic/claude-enterprise-analytics/README.md)

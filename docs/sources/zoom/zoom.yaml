@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathTemplate: "/v2/meetings/{meetingId}"
+  - pathRegex: "^/v2/meetings/[^/?]+(?:/(?!meeting_summary)[^/?]+)?(?:[?].*)?$"
     allowedQueryParams:
       - "occurrence_id"
       - "show_previous_occurrences"
@@ -42,7 +42,7 @@ endpoints:
           type: "integer"
         uuid:
           type: "string"
-  - pathTemplate: "/v2/meetings/{meetingId}/meeting_summary"
+  - pathRegex: "^/v2/meetings/[^/?]+(?:/[^/?]+)?/meeting_summary(?:[?].*)?$"
     allowedQueryParams: []
     transforms:
       - !<pseudonymize>
@@ -104,7 +104,7 @@ endpoints:
         summary_start_time:
           type: "string"
           format: "date-time"
-  - pathTemplate: "/v2/past_meetings/{meetingId}"
+  - pathRegex: "^/v2/past_meetings/[^/?]+(?:/(?!(?:instances|participants))[^/?]+)?(?:[?].*)?$"
     allowedQueryParams: []
     transforms:
       - !<pseudonymize>
@@ -149,7 +149,7 @@ endpoints:
           type: "string"
         uuid:
           type: "string"
-  - pathTemplate: "/v2/past_meetings/{occurrenceUuid}/instances"
+  - pathRegex: "^/v2/past_meetings/[^/?]+(?:/[^/?]+)?/instances(?:[?].*)?$"
     allowedQueryParams: []
     responseSchema:
       type: "object"
@@ -168,7 +168,7 @@ endpoints:
           type: "integer"
         total_records:
           type: "integer"
-  - pathTemplate: "/v2/past_meetings/{occurrenceUuid}/participants"
+  - pathRegex: "^/v2/past_meetings/[^/?]+(?:/[^/?]+)?/participants(?:[?].*)?$"
     allowedQueryParams:
       - "page_size"
       - "next_page_token"
@@ -197,7 +197,7 @@ endpoints:
             $ref: "#/definitions/MeetingParticipant"
         total_records:
           type: "integer"
-  - pathTemplate: "/v2/report/meetings/{occurrenceUuid}/participants"
+  - pathRegex: "^/v2/report/meetings/[^/?]+(?:/[^/?]+)?/participants(?:[?].*)?$"
     allowedQueryParams:
       - "page_size"
       - "next_page_token"
