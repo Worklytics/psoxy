@@ -845,7 +845,7 @@ EOT
     }
     windsurf = {
       source_kind : "windsurf"
-      availability : "alpha",
+      availability : "deprecated",
       enable_by_default : false
       worklytics_connector_id : "windsurf-psoxy"
       display_name : "Windsurf",
