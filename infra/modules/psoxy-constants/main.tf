@@ -651,6 +651,90 @@ locals {
     }
   }
 
+  # When gcp-host provisions external_api_alb (global external ALB + optional Cloud Armor).
+  # Not required when using api_connector_external_lb_host (customer-owned ALB).
+  required_gcp_roles_to_use_external_api_alb = {
+    "roles/compute.networkAdmin" = {
+      display_name    = "Compute Network Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/compute#compute.networkAdmin"
+    },
+    "roles/compute.securityAdmin" = {
+      display_name    = "Compute Security Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/compute#compute.securityAdmin"
+    },
+    # only when external_api_alb.domain is set (Google-managed TLS); omit for self-signed PoC
+    "roles/certificatemanager.editor" = {
+      display_name    = "Certificate Manager Editor",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/certificatemanager#certificatemanager.editor"
+    },
+  }
+
+  # Permissions to provision external_api_alb via gcp-host / gcp-external-api-alb.
+  # Subset suitable for a custom IAM role; see required_gcp_roles_to_use_external_api_alb for predefined roles.
+  required_gcp_perms_to_use_external_api_alb = [
+    # Global external Application Load Balancer (Compute Engine API)
+    "compute.globalAddresses.create",
+    "compute.globalAddresses.delete",
+    "compute.globalAddresses.get",
+    "compute.globalAddresses.list",
+    "compute.globalAddresses.use",
+    "compute.regionNetworkEndpointGroups.create",
+    "compute.regionNetworkEndpointGroups.delete",
+    "compute.regionNetworkEndpointGroups.get",
+    "compute.regionNetworkEndpointGroups.list",
+    "compute.backendServices.create",
+    "compute.backendServices.delete",
+    "compute.backendServices.get",
+    "compute.backendServices.list",
+    "compute.backendServices.update",
+    "compute.backendServices.setSecurityPolicy",
+    "compute.urlMaps.create",
+    "compute.urlMaps.delete",
+    "compute.urlMaps.get",
+    "compute.urlMaps.list",
+    "compute.urlMaps.update",
+    "compute.targetHttpsProxies.create",
+    "compute.targetHttpsProxies.delete",
+    "compute.targetHttpsProxies.get",
+    "compute.targetHttpsProxies.list",
+    "compute.targetHttpsProxies.update",
+    "compute.globalForwardingRules.create",
+    "compute.globalForwardingRules.delete",
+    "compute.globalForwardingRules.get",
+    "compute.globalForwardingRules.list",
+    "compute.globalForwardingRules.setTarget",
+    "compute.globalForwardingRules.use",
+
+    # Cloud Armor (when allowed_data_access_ip_blocks is set)
+    "compute.securityPolicies.create",
+    "compute.securityPolicies.delete",
+    "compute.securityPolicies.get",
+    "compute.securityPolicies.list",
+    "compute.securityPolicies.update",
+    "compute.securityPolicies.use",
+
+    # Self-signed TLS PoC (external_api_alb without domain)
+    "compute.sslCertificates.create",
+    "compute.sslCertificates.delete",
+    "compute.sslCertificates.get",
+    "compute.sslCertificates.list",
+
+    # Google-managed TLS (external_api_alb.domain)
+    "certificatemanager.certificates.create",
+    "certificatemanager.certificates.delete",
+    "certificatemanager.certificates.get",
+    "certificatemanager.certificates.list",
+    "certificatemanager.certificateMaps.create",
+    "certificatemanager.certificateMaps.delete",
+    "certificatemanager.certificateMaps.get",
+    "certificatemanager.certificateMaps.list",
+    "certificatemanager.certificateMaps.use",
+    "certificatemanager.certificateMapEntries.create",
+    "certificatemanager.certificateMapEntries.delete",
+    "certificatemanager.certificateMapEntries.get",
+    "certificatemanager.certificateMapEntries.list",
+  ]
+
   # TODO: add list of permissions, which customer could use to create custom role as alternative
   min_gcp_permissions_to_host = toset([
     # Project IAM administration
