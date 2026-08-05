@@ -176,6 +176,11 @@ endpoints:
           - "$..user.id"
           - "$..user.email"
         encoding: "URL_SAFE_TOKEN"
+    pathParameterSchemas:
+      userId:
+        anyOf:
+          - type: "string"
+            format: "reversible-pseudonym"
     responseSchema:
       type: "object"
       properties:
