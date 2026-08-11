@@ -106,6 +106,22 @@ Error: Error updating function "projects/.../functions/outlook-mail": googleapi:
 
 If you use a custom IAM role instead of the predefined roles, compare your role against `required_gcp_perms_to_provision_host` from `psoxy-constants`. If you use [VPC egress](./vpc.md), you may also need `roles/compute.networkAdmin` (when Terraform creates the VPC) and, for Shared VPC, `roles/compute.networkUser` on the host-project subnet for the Cloud Run service agent.
 
+If you set `external_api_alb` on `gcp-host`, grant `required_gcp_roles_to_use_external_api_alb` (or `required_gcp_permissions_to_use_external_api_alb` for a custom role). Typical missing-permission errors:
+
+```
+Error: Error creating GlobalAddress: googleapi: Error 403: Required 'compute.globalAddresses.create' permission ...
+```
+
+→ **Compute Network Admin** (`roles/compute.networkAdmin`).
+
+```
+Error: Error creating SslCertificate: googleapi: Error 403: Required 'compute.sslCertificates.create' permission ...
+```
+
+→ **Compute Security Admin** (`roles/compute.securityAdmin`).
+
+See [GCP External ALB](../development/gcp-external-alb.md#iam-permissions-terraform-provisioner).
+
 ## Organization policy blocks Cloud Run networking
 
 Some enterprises enforce Cloud Run networking via [organization policy](https://cloud.google.com/resource-manager/docs/organization-policy/overview), for example:

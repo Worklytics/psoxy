@@ -27,6 +27,20 @@ resource "google_project_iam_member" "perms" {
 }
 ```
 
+### Grant optional roles for external Application Load Balancer (GCP)
+
+When `external_api_alb` is set on `gcp-host` (not for BYO `api_connector_external_lb_host`):
+
+```hcl
+resource "google_project_iam_member" "external_api_alb" {
+  for_each = module.psoxy_constants.required_gcp_roles_to_use_external_api_alb
+
+  member  = "serviceAccount:{{YOUR_SERVICE_ACCOUNT_EMAIL_ADDRESS}}"
+  project = "{{YOUR_GCP_PROJECT_ID}}"
+  role    = each.key
+}
+```
+
 ### Attach min set of AWS-Managed Policies to an AWS IAM Role for Provisioning
 
 equivalent of https://docs.worklytics.co/psoxy/aws/getting-started#prerequisites step 2
