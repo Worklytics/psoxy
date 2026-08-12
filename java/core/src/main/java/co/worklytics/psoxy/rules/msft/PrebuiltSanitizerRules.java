@@ -731,6 +731,37 @@ public class PrebuiltSanitizerRules {
         .jsonPath("$..body.content")
         .build();
 
+    /**
+     * BETA genMetadata PoC — prompt classification into fixed categories via cloud constrained
+     * generation (Bedrock / Vertex). Requires {@code enable_gen_metadata} and platform cloud backend.
+     * See {@code docs/development/alpha-features/gen-metadata-augment.md}.
+     */
+    static final Augment.GenMetadata MS_COPILOT_GEN_METADATA_AUGMENT = Augment.GenMetadata.builder()
+        .jsonPath("$..body.content")
+        // Keep as a single folded line so Java-serialized YAML matches docs/sources yaml (`prompt: >`).
+        .prompt("Classify the input into exactly one category. Use \"Uncategorized\" when substantive but unclear. Use \"Excluded\" for greetings, thanks, or prompts too short to classify.\n")
+        .outputSchema(com.avaulta.gateway.rules.JsonSchemaFilter.builder()
+            .type("object")
+            .required(List.of("category"))
+            .properties(java.util.Map.of(
+                "category", com.avaulta.gateway.rules.JsonSchemaFilter.builder()
+                    .type("string")
+                    .enumValues(List.of(
+                        "Email Drafting",
+                        "General Content Drafting",
+                        "Email Editing and Refinement",
+                        "General Content Editing and Refinement",
+                        "Summarization and Synthesis",
+                        "Research and Ideation",
+                        "Analysis and Data Work",
+                        "Code Generation and Development",
+                        "Workflow and Task Management",
+                        "Uncategorized",
+                        "Excluded"))
+                    .build()))
+            .build())
+        .build();
+
     static final Transform.Redact MS_COPILOT_CONTENT_REDACT = Transform.Redact.builder()
         .jsonPath("$..body.content")
         .jsonPath("$..attachments[*].content")
@@ -741,6 +772,7 @@ public class PrebuiltSanitizerRules {
         .allowedQueryParams(List.of("$filter"))
         .augment(MS_COPILOT_AUGMENT_ATTACHMENT)
         .augment(MS_COPILOT_AUGMENT_BODY)
+        .augment(MS_COPILOT_GEN_METADATA_AUGMENT)
         .transform(MS_COPILOT_PSEUDONYMIZE)
         .transform(MS_COPILOT_INTERACTIONS_REDACT)
         .transform(MS_COPILOT_CONTENT_REDACT)
@@ -781,7 +813,8 @@ public class PrebuiltSanitizerRules {
                     .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                     .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
                     .build()))
-            .augments(Arrays.asList(MS_COPILOT_AUGMENT_ATTACHMENT, MS_COPILOT_AUGMENT_BODY))
+            .augments(Arrays.asList(MS_COPILOT_AUGMENT_ATTACHMENT, MS_COPILOT_AUGMENT_BODY,
+                MS_COPILOT_GEN_METADATA_AUGMENT))
             .build())
         .build()
         .withAdditionalEndpoints(ENTRA_ID_USERS_NO_APP_IDS)

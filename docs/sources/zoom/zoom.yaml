@@ -362,7 +362,74 @@ endpoints:
           type: "string"
         total_records:
           type: "integer"
+
+  - pathTemplate: "/v2/meetings/{meetingId}/transcript"
+    allowedQueryParams: []
+    augments:
+      - !<genMetadata>
+        jsonPaths:
+          - "$.timeline"
+        prompt: >
+          From the meeting transcript timeline, estimate how many seconds each person spoke.
+          Sum contiguous turns for the same speaker. Identify speakers by users[].user_id from the timeline (not display names).
+          Ignore non-speech system lines.
+        outputSchema:
+          type: object
+          required: [speakers]
+          properties:
+            speakers:
+              type: array
+              items:
+                type: object
+                required: [personId, secondsTalking]
+                properties:
+                  personId:
+                    type: string
+                  secondsTalking:
+                    type: number
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.timeline[*].users[*]['user_email','user_id']"
+          - "$['+timeline:genMetadata'].speakers[*].personId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.timeline[*].users[*].username"
+    responseSchema:
+      type: "object"
+      properties:
+        meeting_id:
+          type: "integer"
+        meeting_uuid:
+          type: "string"
+        timeline:
+          type: "array"
+          items:
+            $ref: "#/definitions/TranscriptTimelineItem"
+
 definitions:
+
+  TranscriptTimelineItem:
+    type: "object"
+    properties:
+      end_ts:
+        type: "number"
+      text:
+        type: "string"
+      ts:
+        type: "number"
+      users:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            user_email:
+              type: "string"
+            user_id:
+              type: "string"
+            username:
+              type: "string"
   AuthenticationException:
     type: "object"
     properties:

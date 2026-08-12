@@ -1,8 +1,14 @@
 package co.worklytics.psoxy.impl;
 
+import co.worklytics.psoxy.Warning;
 import com.avaulta.gateway.resources.ResourceService;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.augments.Augment;
+import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
+import com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
@@ -23,9 +29,11 @@ class AugmentProcessorTest {
 
     AugmentProcessor augmentProcessor;
     Configuration jsonConfiguration;
+    ObjectMapper objectMapper;
 
     @BeforeEach
     void setup() {
+        objectMapper = new ObjectMapper();
         jsonConfiguration = Configuration.builder()
             .jsonProvider(new JacksonJsonProvider())
             .mappingProvider(new JacksonMappingProvider())
@@ -33,7 +41,13 @@ class AugmentProcessorTest {
             .build();
 
         ResourceService noModels = path -> Optional.empty();
-        augmentProcessor = new AugmentProcessor(jsonConfiguration, new SentenceMetadataProcessor(noModels));
+        GenMetadataProcessor genMetadataProcessor =
+            new GenMetadataProcessor(new UnavailableGenMetadataBackend(), objectMapper);
+        augmentProcessor = new AugmentProcessor(jsonConfiguration,
+            new JsonSchemaValidationUtils(objectMapper),
+            objectMapper,
+            new SentenceMetadataProcessor(noModels),
+            genMetadataProcessor);
     }
 
     @Test
@@ -295,10 +309,20 @@ class AugmentProcessorTest {
         Map<String, Object> resultAttachment = (Map<String, Object>)
             ((List<?>) document.get("attachments")).get(0);
         assertFalse(resultAttachment.containsKey("+content.body[0].text:textDigest"));
-        String innerAugments = (String) resultAttachment.get("+content:textDigest");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> innerAugments = (Map<String, Object>) resultAttachment.get("+content:textDigest");
         assertNotNull(innerAugments);
-        assertTrue(innerAugments.contains("\"text\":\"{\\\"length\\\":11,\\\"word_count\\\":2}\""));
-        assertTrue(innerAugments.contains("\"text\":\"{\\\"length\\\":12,\\\"word_count\\\":2}\""));
+        assertEquals(2, innerAugments.size());
+        @SuppressWarnings("unchecked")
+        Map<String, Object> digest0 = (Map<String, Object>) innerAugments.get("body[0].text");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> digest1 = (Map<String, Object>) innerAugments.get("body[1].text");
+        assertNotNull(digest0);
+        assertNotNull(digest1);
+        assertEquals(11, digest0.get("length"));
+        assertEquals(2, digest0.get("word_count"));
+        assertEquals(12, digest1.get("length"));
+        assertEquals(2, digest1.get("word_count"));
     }
 
     @Test
@@ -344,5 +368,48 @@ class AugmentProcessorTest {
         String expected = AugmentProcessor.AUGMENT_PROPERTY_PREFIX + "content"
             + AugmentProcessor.AUGMENT_SEPARATOR + "textDigest";
         assertEquals("+content:textDigest", expected);
+    }
+
+    @SneakyThrows
+    @Test
+    void applyAugments_outputSchemaMismatch_omitsPropertyAndWarns() {
+        Augment.TextDigest augment = Augment.TextDigest.builder()
+            .jsonPath("$.body.content")
+            .outputSchema(JsonSchemaFilter.builder()
+                .type("object")
+                .required(List.of("category"))
+                .properties(Map.of(
+                    "category", JsonSchemaFilter.builder().type("string").build()))
+                .build())
+            .build();
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("content", "Hello world");
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("body", body);
+
+        List<String> warnings = augmentProcessor.applyAugments(List.of(augment), document);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> resultBody = (Map<String, Object>) document.get("body");
+        assertFalse(resultBody.containsKey("+content:textDigest"));
+        assertTrue(warnings.contains(Warning.AUGMENT_OUTPUT_SCHEMA_MISMATCH.asHttpHeaderCode()));
+    }
+
+    @Test
+    void applyAugments_conflictDetection_reportsWarning() {
+        Augment.TextDigest augment = Augment.TextDigest.builder()
+            .jsonPath("$.body.content")
+            .build();
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("content", "Hello world");
+        body.put("+content:someExisting", "conflict");
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("body", body);
+
+        List<String> warnings = augmentProcessor.applyAugments(List.of(augment), document);
+
+        assertTrue(warnings.contains(Warning.AUGMENT_CONFLICT_SKIPPED.asHttpHeaderCode()));
     }
 }

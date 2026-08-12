@@ -193,6 +193,10 @@ variable "api_connectors" {
     oauth_scopes_needed     = optional(list(string), [])
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
+    enable_remote_resources = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
+    gen_metadata_backend    = optional(string) # "vertex" (GCP); host default applies when null
+    available_memory_mb     = optional(number)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -240,8 +244,9 @@ variable "webhook_collectors" {
     batch_processing_frequency_minutes = optional(number, 5)           # frequency (in minutes) at which to batch process webhooks
     output_path_prefix                 = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket
 
-    example_identity = optional(string, null) # example identity to use in test payloads
-    example_payload  = optional(string, null) # example payload content to use in test scripts
+    example_identity        = optional(string, null) # example identity to use in test payloads
+    example_payload         = optional(string, null) # example payload content to use in test scripts
+    enable_remote_resources = optional(bool, false)
   }))
   default = {}
 
@@ -266,14 +271,15 @@ variable "bulk_connectors" {
         transforms = optional(list(map(string)), [])
       })))
     }))
-    rules_file            = optional(string)
-    rules_raw             = optional(string, null)
-    example_file          = optional(string)
-    example_files         = optional(list(string), [])
-    instructions_template = optional(string)
-    settings_to_provide   = optional(map(string), {})
-    available_memory_mb   = optional(number)
-    timeout_seconds       = optional(number)
+    rules_file              = optional(string)
+    rules_raw               = optional(string, null)
+    example_file            = optional(string)
+    example_files           = optional(list(string), [])
+    instructions_template   = optional(string)
+    settings_to_provide     = optional(map(string), {})
+    available_memory_mb     = optional(number)
+    timeout_seconds         = optional(number)
+    enable_remote_resources = optional(bool, false)
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -499,3 +505,34 @@ variable "api_connector_external_lb_host" {
     error_message = "api_connector_external_lb_host must be null or a non-empty hostname/IP."
   }
 }
+
+variable "gen_metadata_backend" {
+  type        = string
+  description = "Default genMetadata backend for API connectors with enable_gen_metadata when not set per connector. On GCP: \"vertex\" only. Default vertex."
+  default     = "vertex"
+
+  validation {
+    condition     = var.gen_metadata_backend == "vertex"
+    error_message = "gen_metadata_backend must be \"vertex\" on gcp-host (Bedrock is AWS-only; local/Jlama is no longer supported)."
+  }
+}
+
+variable "gen_metadata_daily_cost_limit_usd" {
+  type        = number
+  description = "Nominal daily Vertex spend target (USD) for genMetadata. Used to size a monthly Cloud Billing budget (~daily × 30). Set to 0 to disable budget alerts. GCP has no daily billing budget; alerts are monthly only."
+  default     = 20
+}
+
+variable "gen_metadata_budget_alert_emails" {
+  type        = list(string)
+  description = "Email addresses for genMetadata Vertex billing budget notifications."
+  default     = []
+}
+
+variable "billing_account_id" {
+  type        = string
+  description = "GCP billing account ID (e.g. 01ABCD-XXXXXX-XXXXXX) required to create a Vertex genMetadata billing budget. If null when Vertex genMetadata is enabled, budget is skipped and a TODO output is emitted."
+  default     = null
+  nullable    = true
+}
+

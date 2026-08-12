@@ -86,6 +86,41 @@ locals {
 
   # proxy caller role requires direct lambda access if API Gateway v2 is not used and there are API connectors
   caller_requires_direct_lambda_access = !local.use_api_gateway_v2 && length(module.api_connector) > 0
+
+  needs_opennlp_model_upload = length([
+    for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) : k
+    if try(v.enable_remote_resources, false)
+  ]) > 0
+
+  # Effective genMetadata backend per API connector (null if genMetadata disabled).
+  # AWS is cloud-only: bedrock (local/Jlama abandoned).
+  api_connector_gen_metadata_backend = {
+    for k, v in var.api_connectors : k => (
+      try(v.enable_gen_metadata, false)
+      ? lower(coalesce(try(v.gen_metadata_backend, null), var.gen_metadata_backend, "bedrock"))
+      : null
+    )
+  }
+
+  gen_metadata_uses_bedrock = length([
+    for k, backend in local.api_connector_gen_metadata_backend : k
+    if backend == "bedrock"
+  ]) > 0
+
+  bedrock_invoke_iam_statements = [{
+    Sid    = "InvokeBedrockForGenMetadata"
+    Effect = "Allow"
+    Action = [
+      "bedrock:InvokeModel",
+      "bedrock:Converse",
+      "bedrock:InvokeModelWithResponseStream",
+      "bedrock:ConverseStream",
+    ]
+    Resource = [
+      "arn:aws:bedrock:*::foundation-model/*",
+      "arn:aws:bedrock:*:*:inference-profile/*",
+    ]
+  }]
 }
 
 module "psoxy" {
@@ -243,12 +278,18 @@ module "api_connector" {
   side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
   enable_async_processing               = each.value.enable_async_processing
-  memory_size_mb                        = each.value.enable_async_processing ? 1024 : 512 # default is 512; double it for async case, to give additional margin
+  memory_size_mb                        = each.value.enable_async_processing ? coalesce(each.value.memory_size_mb, 1024) : coalesce(each.value.memory_size_mb, 512)
 
   todos_as_local_files          = var.todos_as_local_files
   todo_step                     = var.todo_step
   timeout_seconds               = coalesce(try(each.value.timeout_seconds, null), 180)
   allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
+
+  extra_lambda_role_iam_statements = (
+    local.api_connector_gen_metadata_backend[each.key] == "bedrock"
+    ? local.bedrock_invoke_iam_statements
+    : []
+  )
 
   environment_variables = merge(
     {
@@ -262,11 +303,29 @@ module "api_connector" {
     var.api_connector_path_prefix_to_trim != null ? { REQUEST_PATH_PREFIX_TO_TRIM = var.api_connector_path_prefix_to_trim } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? merge(
+      {
+        ENABLE_GEN_METADATA = "true"
+        PSOXY_GEN_BACKEND   = local.api_connector_gen_metadata_backend[each.key]
+      },
+      try(var.general_environment_variables["PSOXY_GEN_MODEL"], null) == null ? {
+        PSOXY_GEN_MODEL = "anthropic.claude-3-haiku-20240307-v1:0"
+      } : {},
+    ) : {},
   )
 
-  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = local.remote_resources_enabled ? local.shared_resource_path : null
+  remote_resource_bucket = (
+    local.remote_resources_enabled
+    || try(each.value.enable_remote_resources, false)
+  ) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (
+    local.remote_resources_enabled
+    || try(each.value.enable_remote_resources, false)
+  ) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path = (
+    local.remote_resources_enabled
+    || try(each.value.enable_remote_resources, false)
+  ) ? local.shared_resource_path : null
 }
 
 
@@ -352,11 +411,10 @@ module "bulk_connector" {
     var.general_environment_variables
   )
 
-  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = local.remote_resources_enabled ? local.shared_resource_path : null
+  remote_resource_bucket        = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? local.shared_resource_path : null
 }
-
 
 module "webhook_collectors" {
   for_each = var.webhook_collectors
@@ -404,11 +462,10 @@ module "webhook_collectors" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = local.remote_resources_enabled ? local.shared_resource_path : null
+  remote_resource_bucket        = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? local.shared_resource_path : null
 }
-
 # Policy to allow test caller to invoke webhook collector urls and sign webhook requests
 resource "aws_iam_policy" "invoke_webhook_collector_urls" {
   count = local.enable_webhook_testing ? 1 : 0

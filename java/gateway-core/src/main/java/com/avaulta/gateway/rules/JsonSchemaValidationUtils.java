@@ -29,6 +29,8 @@ import lombok.extern.java.Log;
 @RequiredArgsConstructor
 public class JsonSchemaValidationUtils {
 
+    private static final int MAX_LOG_OUTPUT_CHARS = 2000;
+
     final ObjectMapper objectMapper;
     private final static JsonMetaSchema metaSchema = JsonMetaSchema.builder(JsonMetaSchema.getV202012())
             // .format(PatternFormat.of("pseudonym",
@@ -44,6 +46,26 @@ public class JsonSchemaValidationUtils {
             CacheBuilder.newBuilder()
                     .maximumSize(100)
                     .build(CacheLoader.from(this::getJsonSchema));
+
+    private final LoadingCache<JsonSchemaFilter, JsonSchema> jsonSchemaFilterCache =
+            CacheBuilder.newBuilder()
+                    .maximumSize(100)
+                    .build(CacheLoader.from(this::getJsonSchemaFromFilter));
+
+    @SneakyThrows
+    public boolean validateJsonBySchema(String jsonString, JsonSchemaFilter schema) {
+        if (schema == null) {
+            return true;
+        }
+        JsonNode deserialized = objectMapper.readTree(jsonString);
+        JsonSchema jsonSchema = jsonSchemaFilterCache.get(schema);
+        Set<ValidationMessage> validationMessages = jsonSchema.validate(deserialized);
+        if (!validationMessages.isEmpty()) {
+            log.warning("Validation failed for augment output: " + validationMessages
+                + "; output=" + truncateForLog(jsonString));
+        }
+        return validationMessages.isEmpty();
+    }
 
     @SneakyThrows
     public boolean validateJsonBySchema(String jsonString,
@@ -151,6 +173,21 @@ public class JsonSchemaValidationUtils {
 
         JsonNode schemaNode = objectMapper.valueToTree(rewritePseudonymToPattern(schema));
         return jsonSchemaFactory.getSchema(schemaNode);
+    }
+
+    private JsonSchema getJsonSchemaFromFilter(JsonSchemaFilter schema) {
+        JsonNode schemaNode = objectMapper.valueToTree(schema);
+        return jsonSchemaFactory.getSchema(schemaNode);
+    }
+
+    private static String truncateForLog(String value) {
+        if (value == null) {
+            return "null";
+        }
+        if (value.length() <= MAX_LOG_OUTPUT_CHARS) {
+            return value;
+        }
+        return value.substring(0, MAX_LOG_OUTPUT_CHARS) + "... (" + value.length() + " chars total)";
     }
 
     com.avaulta.gateway.rules.JsonSchema rewritePseudonymToPattern(

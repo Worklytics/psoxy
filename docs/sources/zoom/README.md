@@ -19,6 +19,7 @@ Accounts on unpaid plans do not have access to some methods Worklytics use like:
 
 - [Example Rules](zoom.yaml)
 - Example Data : [original/meeting-details.json](example-api-responses/original/meeting-details.json) | [sanitized/meeting-details](example-api-responses/sanitized/meeting-details.json)
+- Meeting transcript extract PoC (genMetadata): [original/meeting-transcript.json](example-api-responses/original/meeting-transcript.json) — speaking time by `personId` via cloud constrained JSON (`enable_gen_metadata`)
 
 See more examples in the `docs/sources/zoom/example-api-responses` folder of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 

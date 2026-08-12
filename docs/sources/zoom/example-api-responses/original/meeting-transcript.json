@@ -1,0 +1,54 @@
+{
+  "meeting_id": 97763643886,
+  "meeting_uuid": "aDYlohsHRtCd4ii1uC2+hA==",
+  "timeline": [
+    {
+      "ts": 0.0,
+      "end_ts": 4.5,
+      "text": "Good morning everyone, let's start with the roadmap.",
+      "users": [
+        {
+          "username": "Alice Chen",
+          "user_email": "alice@example.com",
+          "user_id": "u_alice"
+        }
+      ]
+    },
+    {
+      "ts": 4.5,
+      "end_ts": 12.0,
+      "text": "Thanks Alice. I'll cover the metrics from last week.",
+      "users": [
+        {
+          "username": "Bob Smith",
+          "user_email": "bob@example.com",
+          "user_id": "u_bob"
+        }
+      ]
+    },
+    {
+      "ts": 12.0,
+      "end_ts": 18.5,
+      "text": "Bob, can you also share the churn numbers?",
+      "users": [
+        {
+          "username": "Alice Chen",
+          "user_email": "alice@example.com",
+          "user_id": "u_alice"
+        }
+      ]
+    },
+    {
+      "ts": 18.5,
+      "end_ts": 30.0,
+      "text": "Sure. Churn is down two points. Any questions before we wrap?",
+      "users": [
+        {
+          "username": "Bob Smith",
+          "user_email": "bob@example.com",
+          "user_id": "u_bob"
+        }
+      ]
+    }
+  ]
+}

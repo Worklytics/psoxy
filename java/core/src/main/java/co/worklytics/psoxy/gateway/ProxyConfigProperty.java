@@ -139,6 +139,32 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      */
     SOURCE,
 
+    /** BETA: generative backend for genMetadata augment (`bedrock` or `vertex`). */
+    PSOXY_GEN_BACKEND,
+
+    /** BETA: cloud model id (Bedrock model id or Vertex Gemini model name). */
+    PSOXY_GEN_MODEL,
+
+    /** BETA: max seconds for a single genMetadata {@code chat()} call. */
+    PSOXY_GEN_TIMEOUT_SECONDS,
+
+    /** BETA: max source characters passed into genMetadata prompts. */
+    PSOXY_GEN_MAX_INPUT_CHARS,
+
+    /** BETA: max tokens to generate per genMetadata inference. */
+    PSOXY_GEN_MAX_TOKENS,
+
+    /**
+     * BETA: total genMetadata inference attempts per augment when output is unparseable or fails
+     * {@code outputSchema} validation (minimum 1). Default {@code 2} = one retry.
+     */
+    PSOXY_GEN_META_RETRIES,
+
+    /**
+     * BETA: set when Terraform {@code enable_gen_metadata} is used (cloud Bedrock/Vertex genMetadata).
+     */
+    ENABLE_GEN_METADATA,
+
     /**
      * Whether the proxy should follow HTTP redirects (3xx responses) when calling source APIs.
      *
