@@ -6,63 +6,55 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.response.ChatResponse;
-import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.extern.java.Log;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
 /**
- * genMetadata inference via LangChain4j {@link ChatModel} (Jlama for local embedded models).
+ * genMetadata inference via LangChain4j {@link ChatModel} (Bedrock or Vertex only).
  *
- * <p>Thread-safety: per-{@link GenMetadataConfig#getModelId()} {@link #loadLocks} give single-flight
- * model load and zip extraction; {@link #inferenceLocks} serialize {@link ChatModel} use (Jlama is not
- * safe for concurrent inference on one instance). {@link ObjectMapper} is shared read-only.
+ * <p>Thread-safety: lazy per-modelId client init via {@link ConcurrentHashMap#computeIfAbsent};
+ * concurrent cloud calls limited by semaphore.
  */
 @Log
 public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
 
-    enum LoadState {
-        ABSENT, LOADING, READY, FAILED
-    }
+    static final int CLOUD_MAX_CONCURRENT = 4;
 
     static final class ModelHandle {
-        final LoadState state;
         final ChatModel chatModel;
         final Exception failure;
 
-        ModelHandle(LoadState state, ChatModel chatModel, Exception failure) {
-            this.state = state;
+        private ModelHandle(ChatModel chatModel, Exception failure) {
             this.chatModel = chatModel;
             this.failure = failure;
         }
 
-        static ModelHandle loading() {
-            return new ModelHandle(LoadState.LOADING, null, null);
-        }
-
         static ModelHandle ready(ChatModel chatModel) {
-            return new ModelHandle(LoadState.READY, chatModel, null);
+            return new ModelHandle(chatModel, null);
         }
 
         static ModelHandle failed(Exception e) {
-            return new ModelHandle(LoadState.FAILED, null, e);
+            return new ModelHandle(null, e);
+        }
+
+        boolean isReady() {
+            return chatModel != null;
         }
     }
 
@@ -70,51 +62,24 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     private final ObjectMapper objectMapper;
     private final GenMetadataPromptBudget promptBudget;
     private final GenMetadataChatModelFactory chatModelFactory;
-    /**
-     * Writable Jlama cache (extracted zips, HF downloads). Not the same as {@link ResourceService},
-     * which only supplies read-only model archives from remote storage.
-     */
-    @Getter(AccessLevel.PACKAGE)
-    private final Path modelCacheDir;
 
     private final ConcurrentHashMap<String, ModelHandle> models = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, ReentrantLock> loadLocks = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, ReentrantLock> inferenceLocks = new ConcurrentHashMap<>();
+    private final Semaphore cloudConcurrency = new Semaphore(CLOUD_MAX_CONCURRENT);
     private final ExecutorService chatExecutor = Executors.newCachedThreadPool(chatThreadFactory());
 
     public LangChain4jGenMetadataBackend(GenMetadataConfig config, ObjectMapper objectMapper,
                                          GenMetadataPromptBudget promptBudget,
                                          GenMetadataChatModelFactory chatModelFactory) {
-        this(config, objectMapper, promptBudget, chatModelFactory, null);
-    }
-
-    /**
-     * @param modelCacheDir when non-null, used instead of a fresh temp directory (integration tests)
-     */
-    LangChain4jGenMetadataBackend(GenMetadataConfig config, ObjectMapper objectMapper,
-                                  GenMetadataPromptBudget promptBudget,
-                                  GenMetadataChatModelFactory chatModelFactory,
-                                  Path modelCacheDir) {
         this.config = config;
         this.objectMapper = objectMapper;
         this.promptBudget = promptBudget;
         this.chatModelFactory = chatModelFactory;
-        try {
-            this.modelCacheDir = modelCacheDir != null
-                ? modelCacheDir
-                : Files.createTempDirectory("psoxy-jlama-cache");
-            if (modelCacheDir == null) {
-                this.modelCacheDir.toFile().deleteOnExit();
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to create genMetadata model cache directory", e);
-        }
     }
 
     @Override
     public Object generate(String taskPrompt, JsonSchemaFilter outputSchema, String inputData) {
         ModelHandle handle = resolveModel();
-        if (handle.state != LoadState.READY || handle.chatModel == null) {
+        if (!handle.isReady()) {
             return null;
         }
 
@@ -127,24 +92,26 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             config.getMaxTokens());
         List<ChatMessage> messages =
             GenMetadataPromptBuilder.toMessages(taskPrompt, outputSchema, fittedInput, objectMapper);
+        Optional<ResponseFormat> responseFormat =
+            GenMetadataResponseFormats.fromOutputSchema(outputSchema);
 
-        ReentrantLock inferenceLock =
-            inferenceLocks.computeIfAbsent(config.getModelId(), k -> new ReentrantLock());
-        boolean acquired = false;
+        boolean permitAcquired = false;
         try {
-            acquired = inferenceLock.tryLock(config.getTimeoutSeconds(), TimeUnit.SECONDS);
-            if (!acquired) {
-                log.warning("genMetadata inference lock timeout for model " + config.getModelId()
+            permitAcquired = cloudConcurrency.tryAcquire(config.getTimeoutSeconds(), TimeUnit.SECONDS);
+            if (!permitAcquired) {
+                log.warning("genMetadata cloud concurrency timeout for model " + config.getModelId()
                     + " after " + config.getTimeoutSeconds() + "s");
                 return null;
             }
+
             Instant inferenceStartedAt = Instant.now();
             long inferenceStartedNanos = System.nanoTime();
             log.info("genMetadata LLM inference started at " + inferenceStartedAt
-                + " modelId=" + config.getModelId());
+                + " modelId=" + config.getModelId()
+                + " backend=" + config.getBackend());
             ChatResponse response;
             try {
-                response = chatWithTimeout(handle.chatModel, messages);
+                response = chatWithTimeout(handle.chatModel, messages, responseFormat.orElse(null));
             } finally {
                 long inferenceMs = TimeUnit.NANOSECONDS.toMillis(
                     System.nanoTime() - inferenceStartedNanos);
@@ -163,70 +130,51 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             Thread.currentThread().interrupt();
             return null;
         } catch (Exception e) {
-            log.log(Level.WARNING, "genMetadata local inference failed", e);
+            if (isAuthOrQuotaFailure(e)) {
+                log.log(Level.WARNING,
+                    "genMetadata cloud inference denied/rate-limited (backend="
+                        + config.getBackend() + "); omitting augment", e);
+            } else {
+                log.log(Level.WARNING, "genMetadata inference failed", e);
+            }
             return null;
         } finally {
-            if (acquired) {
-                inferenceLock.unlock();
+            if (permitAcquired) {
+                cloudConcurrency.release();
             }
         }
     }
 
-    /**
-     * Conservative context length for pre-inference input budgeting before the model is loaded.
-     * Llama 3.2 1B supports much larger windows; Jlama defaults to model config when generating.
-     */
     int assumedContextLength() {
         return 8192;
     }
 
     ModelHandle resolveModel() {
-        String modelKey = config.getModelId();
-        ModelHandle existing = models.get(modelKey);
-        if (existing != null) {
-            return switch (existing.state) {
-                case READY, FAILED -> existing;
-                case LOADING -> waitForLoad(modelKey);
-                case ABSENT -> loadModel(modelKey);
-            };
-        }
-        return loadModel(modelKey);
+        return models.computeIfAbsent(config.getModelId(), this::createModelHandle);
     }
 
-    private ModelHandle loadModel(String modelKey) {
-        ReentrantLock loadLock = loadLocks.computeIfAbsent(modelKey, k -> new ReentrantLock());
-        loadLock.lock();
+    private ModelHandle createModelHandle(String modelKey) {
         try {
-            ModelHandle existing = models.get(modelKey);
-            if (existing != null) {
-                if (existing.state == LoadState.LOADING) {
-                    return waitForLoad(modelKey);
-                }
-                return existing;
-            }
-            models.put(modelKey, ModelHandle.loading());
-            try {
-                ChatModel chatModel =
-                    chatModelFactory.buildLocal(config, modelCacheDir);
-                ModelHandle ready = ModelHandle.ready(chatModel);
-                models.put(modelKey, ready);
-                log.info("Loaded genMetadata LangChain4j model: " + modelKey);
-                return ready;
-            } catch (Exception e) {
-                log.log(Level.WARNING,
-                    "Failed to load genMetadata model '" + modelKey + "' (archive path: "
-                        + config.localModelArchivePath() + ")", e);
-                ModelHandle failed = ModelHandle.failed(e);
-                models.put(modelKey, failed);
-                return failed;
-            }
-        } finally {
-            loadLock.unlock();
+            ChatModel chatModel = chatModelFactory.create(config, null);
+            log.info("Initialized genMetadata LangChain4j client: " + modelKey
+                + " backend=" + config.getBackend());
+            return ModelHandle.ready(chatModel);
+        } catch (Exception e) {
+            log.log(Level.WARNING,
+                "Failed to initialize genMetadata client '" + modelKey + "' backend="
+                    + config.getBackend(),
+                e);
+            return ModelHandle.failed(e);
         }
     }
 
-    ChatResponse chatWithTimeout(ChatModel chatModel, List<ChatMessage> messages) throws Exception {
-        ChatRequest request = ChatRequest.builder().messages(messages).build();
+    ChatResponse chatWithTimeout(ChatModel chatModel, List<ChatMessage> messages,
+                                 ResponseFormat responseFormat) throws Exception {
+        ChatRequest.Builder requestBuilder = ChatRequest.builder().messages(messages);
+        if (responseFormat != null) {
+            requestBuilder.responseFormat(responseFormat);
+        }
+        ChatRequest request = requestBuilder.build();
         Future<ChatResponse> future = chatExecutor.submit(() -> chatModel.chat(request));
         try {
             return future.get(config.getTimeoutSeconds(), TimeUnit.SECONDS);
@@ -242,6 +190,28 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             }
             throw e;
         }
+    }
+
+    static boolean isAuthOrQuotaFailure(Throwable t) {
+        for (Throwable c = t; c != null; c = c.getCause()) {
+            String name = c.getClass().getName();
+            String msg = c.getMessage() != null ? c.getMessage().toLowerCase() : "";
+            if (name.contains("AccessDenied")
+                || name.contains("Authorization")
+                || name.contains("PermissionDenied")
+                || name.contains("ResourceExhausted")
+                || name.contains("Throttling")
+                || msg.contains("access denied")
+                || msg.contains("not authorized")
+                || msg.contains("quota")
+                || msg.contains("throttl")
+                || msg.contains("rate exceeded")
+                || msg.contains("429")
+                || msg.contains("403")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static ThreadFactory chatThreadFactory() {
@@ -264,25 +234,4 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         }
         return value.substring(0, MAX_LOG_OUTPUT_CHARS) + "... (" + value.length() + " chars total)";
     }
-
-    private ModelHandle waitForLoad(String modelKey) {
-        long deadline = System.nanoTime()
-            + TimeUnit.SECONDS.toNanos(config.getTimeoutSeconds());
-        while (System.nanoTime() < deadline) {
-            ModelHandle handle = models.get(modelKey);
-            if (handle != null && handle.state != LoadState.LOADING) {
-                return handle;
-            }
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return ModelHandle.failed(e);
-            }
-        }
-        log.warning("Timed out waiting for genMetadata model load: " + modelKey);
-        return models.getOrDefault(modelKey, ModelHandle.failed(
-            new IllegalStateException("model load timeout")));
-    }
-
 }

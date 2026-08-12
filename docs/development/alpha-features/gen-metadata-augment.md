@@ -1,126 +1,198 @@
 # genMetadata Augment (BETA)
 
-> **Status:** BETA · PoC on branch `s225-gen-metadata-poc`
+> **Status:** BETA · Alpha feature · Design refined (cloud-only constrained generation)
 > **Since:** v0.6.x
-> **Relates to:** [augments.md](augments.md), [sentence-metadata-augment.md](sentence-metadata-augment.md), [remote-resources.md](../configuration/remote-resources.md)
+> **Relates to:** [augments.md](augments.md), [sentence-metadata-augment.md](sentence-metadata-augment.md), [remote-resources.md](../../configuration/remote-resources.md)
 
 ## Overview
 
-The **genMetadata** augment generates structured JSON metadata alongside a source field using a pluggable generative backend. All backends share a [LangChain4j](https://github.com/langchain4j/langchain4j) `ChatModel` integration inside `psoxy-core`. **Local** inference uses embedded [Jlama](https://github.com/tjake/Jlama) (pure Java). **Bedrock** and **Vertex** cloud backends are planned.
+**genMetadata** calls a cloud LLM to derive structured metadata from a source text field and attaches it as a sibling property: `+{sourceProperty}:genMetadata`.
 
-Output appears as a sibling property: `+{sourceProperty}:genMetadata`.
+**Product direction (refined):**
 
-## Rule configuration (required)
+| Decision | Choice |
+|----------|--------|
+| Runtime | **Cloud only** — Amazon Bedrock (AWS) or Vertex AI Gemini (GCP) |
+| Local / Jlama | **Abandoned** — no constrained decoding, poor JSON/enum reliability, heavy memory / `llm/*.zip` ops |
+| How structure is enforced | **Provider constrained generation**, not prompt begging |
+| First shipped shape | **Enum classification** (MS Copilot prompt categories) |
+| Also shipped (PoC) | **Structured extraction** via JSON Schema (Zoom meeting transcript → speaking time by person) |
+
+Wrong cloud on wrong platform → `augment-gen-unavailable`. Auth / quota / budget deny → omit augment + warning (response still succeeds).
+
+## Two inference modes (driven by `outputSchema`)
+
+Rules always declare `prompt` + `outputSchema`. The runtime **infers mode** from the schema (no separate `mode` field required for BETA):
+
+| Mode | When | Model output | Proxy normalizes to |
+|------|------|--------------|---------------------|
+| **classify** | Schema is an object with a **single** required string property that has `enum` | Plain enum label (Vertex `text/x.enum`) or tiny constrained JSON object (Bedrock) | `{"<property>":"<label>"}` |
+| **extract** | Any richer object / array schema | Constrained JSON matching the schema | Parsed object/array as-is (after schema gate) |
+
+Downstream always sees JSON under `+…:genMetadata`. The model is not asked to free-form invent JSON.
+
+```mermaid
+flowchart LR
+  Schema["outputSchema"] --> Detect{"single enum field?"}
+  Detect -->|yes| Classify["classify: constrained enum"]
+  Detect -->|no| Extract["extract: constrained JSON schema"]
+  Classify --> Norm["normalize to Map"]
+  Extract --> Gate["outputSchema gate"]
+  Norm --> Gate
+  Gate --> Out["+field:genMetadata"]
+```
+
+### Mode: classify (enum)
+
+**Use when:** closed vocabulary — Copilot prompt category, ticket type, sentiment bucket, etc.
+
+**Prompt:** task semantics only; **do not** list JSON shape requirements. Enum values live in `outputSchema` (and are pushed into the provider constraint).
+
+```text
+Classify the input into exactly one category.
+Use "Uncategorized" when substantive but unclear.
+Use "Excluded" for greetings, thanks, or prompts too short to classify.
+```
+
+**Provider wiring:**
+
+| Platform | Constraint |
+|----------|------------|
+| Vertex | `responseMimeType = text/x.enum` + `responseSchema = { type: STRING, enum: [...] }` → raw label |
+| Bedrock | Converse structured output JSON Schema: one required string property with `enum`, `additionalProperties: false` |
+
+**Java:** if response is a bare string (or quoted string) matching an enum value, wrap to `{ "category": "…" }`. If already a one-key object, validate and pass through.
+
+### Mode: extract (structured object / array)
+
+**Use when:** the result is not a single label — e.g. **meeting transcript → speaking time by participant**.
+
+Example `outputSchema` (illustrative):
+
+```yaml
+type: object
+required: [speakers]
+additionalProperties: false
+properties:
+  speakers:
+    type: array
+    items:
+      type: object
+      required: [personId, secondsTalking]
+      additionalProperties: false
+      properties:
+        personId:
+          type: string
+          description: Stable id or display name as it appears in the transcript
+        secondsTalking:
+          type: number
+          minimum: 0
+```
+
+**Prompt:** describe the extraction task (how to attribute turns, what to ignore), not “return valid JSON”.
+
+**Provider wiring:**
+
+| Platform | Constraint |
+|----------|------------|
+| Vertex | `responseMimeType = application/json` + `responseSchema` from `outputSchema` |
+| Bedrock | Converse `outputConfig.textFormat` / `json_schema` from `outputSchema` |
+
+**Caveats for transcript-scale inputs:**
+
+- genMetadata still runs **per matched `jsonPath` value** in an API (or bulk) payload — design rules so the source field is the transcript (or a chunk), not an entire multi-hour blob without bounds.
+- Enforce `PSOXY_GEN_MAX_INPUT_CHARS` (and consider higher defaults for extract mode later). Chunking / map-reduce across turns is **out of scope for v1**; if transcripts exceed budget, omit with warning or pre-truncate with an explicit rule.
+- Prefer numeric + id fields over free prose in the schema so constrained decoding stays tight. For Zoom transcript extract, use `personId` (from `users[].user_id`) and pseudonymize `$['+timeline:genMetadata'].speakers[*].personId` in transforms so speaker ids in the augment are not left in cleartext.
+
+Same augment type covers both Copilot classification and Zoom transcript extract analytics; only `prompt` + `outputSchema` change.
+
+## Rule configuration
 
 | Field | Required | Description |
 |-------|----------|-------------|
 | `jsonPaths` | yes | Source values to process |
-| `prompt` | yes | Task instruction (included in rules SHA) |
-| `outputSchema` | yes | JSON Schema predicate; invalid output is suppressed |
+| `prompt` | yes | Task instruction (SHA’d); **no** JSON formatting instructions |
+| `outputSchema` | yes | Shape + enums; drives classify vs extract and provider constraints |
 
-No `model`, `backend`, `quality`, or `maxTokens` in rules. Generation limits and model selection are deployment settings (see env vars below). The `outputSchema` gate ensures only structured, expected fields reach the response; it does not cap generation length — use `PSOXY_GEN_MAX_TOKENS` for that.
+No `model`, `backend`, or `maxTokens` in rules — those stay deployment config.
 
 ## Deployment configuration (env)
 
-Read via `ConfigService` / `ProxyConfigProperty`:
-
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `PSOXY_GEN_BACKEND` | `local` | `local` (Jlama), `bedrock` and `vertex` (future) |
-| `PSOXY_GEN_MODEL` | `tjake/Llama-3.2-1B-Instruct-JQ4` | Jlama HuggingFace id (`owner/name`) or logical id for a cached local archive |
-| `PSOXY_GEN_TIMEOUT_SECONDS` | `15` | Max seconds per genMetadata `chat()` call (and model-load wait) |
-| `PSOXY_GEN_MAX_INPUT_CHARS` | `4096` | Truncate source text before prompting |
-| `PSOXY_GEN_MAX_TOKENS` | `256` | Max tokens to generate per inference |
-| `PSOXY_GEN_META_RETRIES` | `2` | Total inference attempts per augment when output is unparseable or fails `outputSchema` (minimum 1; `2` = one retry) |
-| `ENABLE_GEN_METADATA` | unset | Set to `true` when that connector has Terraform `enable_gen_metadata = true` |
+| `PSOXY_GEN_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). Java defaults unset backend toward `bedrock`. | `bedrock` \| `vertex` only |
+| `PSOXY_GEN_MODEL` | Haiku / Gemini Flash defaults | Cloud model id |
+| `PSOXY_GEN_TIMEOUT_SECONDS` | `15` | Per-call timeout |
+| `PSOXY_GEN_MAX_INPUT_CHARS` | `4096` | Truncate source (raise carefully for transcripts) |
+| `PSOXY_GEN_MAX_TOKENS` | `256` (classify); consider higher for extract | Max generation tokens |
+| `PSOXY_GEN_META_RETRIES` | `2` | Retries on parse/schema failure (less critical once constraints work) |
+| `ENABLE_GEN_METADATA` | unset | Set by Terraform `enable_gen_metadata = true` |
 
-When `enable_gen_metadata` is set on an API connector, Terraform **appends** Jlama JVM flags to any existing `JAVA_TOOL_OPTIONS` from `general_environment_variables` or that connector's `environment_variables` (`--add-modules=jdk.incubator.vector --enable-preview --enable-native-access=ALL-UNNAMED`).
+Vertex uses the **same project/region as the Psoxy deployment** (`GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_REGION` / `FUNCTION_REGION`). No `PSOXY_GEN_VERTEX_*` properties.
 
-## Infrastructure
+**Removed / abandoned:** `PSOXY_GEN_BACKEND=local`, Jlama, `JAVA_TOOL_OPTIONS` vector flags for genMetadata, remote `llm/*.zip` model archives, 4096 MB memory floor for genMetadata.
 
-Set **`enable_gen_metadata = true`** on individual `api_connectors` entries (API connectors only). The `msft-copilot` entry in `worklytics-connector-specs` sets this by default when that connector is enabled; custom API connectors can set it in `custom_api_connectors`:
+## Infrastructure (Terraform)
 
-- Sets `ENABLE_GEN_METADATA=true` on that function
-- Sets `JAVA_TOOL_OPTIONS` for Jlama on that function's JVM
-- Floors memory at **4096 MB** on that connector unless a higher `memory_size_mb` / `available_memory_mb` is set
-- Enables remote resource loading for that connector (for `llm/*.zip` model archives)
+- `enable_gen_metadata = true` on API connectors; host `gen_metadata_backend` defaults to **bedrock** / **vertex**.
+- **Reject** `local` (and cross-cloud) via variable validation / `check` blocks.
+- Cloud memory defaults (no 4GB floor); Bedrock invoke IAM / `roles/aiplatform.user`; no genMetadata remote-resource upload TODOs.
+- Cost caps: see below (daily/weekly product requirement).
 
-You do not need a separate runtime failure if memory is too low — enable the flag on connectors whose rules use `genMetadata`. Without the flag, augments still run but return `augment-gen-unavailable` if the model cannot load.
+### Cost caps — daily / weekly pacing
 
-Manual setup (without Terraform flags): set env vars yourself, `memory_size_mb = 4096`, enable remote bucket access, and upload a model archive (see below).
+Worklytics cares about **weekly** aggregates. A monthly-only budget that allows burning the month in week 1 (then zero coverage) is unacceptable; a smaller uniform sample each week is better.
 
-## Java / LangChain4j
+| Horizon | Role |
+|---------|------|
+| Daily / weekly hard stop | **Required** for sampling policy (app-layer ledger still deferred; AWS daily Budget is the best infra stop today) |
+| Monthly GCP billing budget | Ops safety net only — **not** a sampling policy |
 
-BETA uses **LangChain4j** with the **Jlama** provider for local embedded inference (`langchain4j` **1.15.0**, `langchain4j-jlama` **1.15.0-beta25**, `jlama-native` in `psoxy-core`). Maven Central does not publish a non-beta `langchain4j-jlama` artifact for the 1.x `ChatModel` API (older **0.36.2** uses a different API). The beta suffix is LangChain4j’s release channel for this integration module, not a separate fork. This avoids JNI bindings to llama.cpp that can take down the JVM on native faults. The same `ChatModel` abstraction will back **Bedrock** (`langchain4j-bedrock`, AWS bundle only) and **Vertex** (`langchain4j-vertex-ai-gemini`, GCP bundle only) when implemented.
+See prior notes: target app-layer `day` / `ISO week` ledger; until then prefer AWS daily Deny when cost-sensitive.
 
-Jlama loads models in **SafeTensors** layout (HuggingFace-style directory with `config.json`), not single-file GGUF.
+## Java architecture
 
-### Local model deployment
-
-1. **HuggingFace id (dev / first run):** set `PSOXY_GEN_MODEL` to a Jlama-compatible id such as `tjake/Llama-3.2-1B-Instruct-JQ4`. Jlama may download weights on first use (requires outbound network from the function).
-2. **Production (recommended):** zip a SafeTensors model directory and upload to `{SHARED_RESOURCE_PATH}/llm/{cache-dir-name}.zip`, where `{cache-dir-name}` is `PSOXY_GEN_MODEL` with `/` replaced by `__` (e.g. `tjake__Llama-3.2-1B-Instruct-JQ4.zip` for `tjake/Llama-3.2-1B-Instruct-JQ4`). The runtime extracts the archive into a temp cache before loading.
-
-**Example `PSOXY_GEN_MODEL` values** (Jlama / HuggingFace; prefer small instruct models on the 4096 MB floor):
-
-| `PSOXY_GEN_MODEL` | Notes |
-|-------------------|-------|
-| `tjake/Llama-3.2-1B-Instruct-JQ4` | Default; pre-quantized Jlama build |
-| `tjake/Llama-3.2-3B-Instruct-JQ4` | Higher quality; verify memory |
-| `tjake/Qwen2.5-1.5B-Instruct-JQ4` | Strong small instruct |
-| `tjake/Phi-3.5-mini-instruct-JQ4` | Compact |
-| `tjake/gemma-2-2b-it-JQ4` | Google small instruct |
-
-See [tjake on Hugging Face](https://huggingface.co/tjake) for other pre-quantized `-JQ4` builds. Logical ids without `/` (e.g. `llama-3.2-1b-instruct`) work when the matching `llm/llama-3.2-1b-instruct.zip` archive is present.
-
-## MS Copilot PoC: prompt classification
-
-Classifies `body.content` into one of 11 categories (`category` only). See commented example in `docs/sources/microsoft-365/msft-copilot/msft-copilot.yaml` and `MS_COPILOT_GEN_METADATA_AUGMENT` in `PrebuiltSanitizerRules.java`.
-
-## Local integration tests
-
-Opt-in Jlama tests live in `LangChain4jGenMetadataBackendIntegrationTest` (token-budget regressions from live Copilot PoC). Run from the `java/` directory:
-
-```bash
-cd java
-mvn test -pl core -am -Pgen-metadata-integration
+```
+GenMetadataProcessor
+  → shape detect (classify | extract) from outputSchema
+  → GenMetadataChatModelProvider (Bedrock | Vertex only)
+       attaches provider constraints from schema
+  → normalize (enum string → Map; JSON → Map/List)
+  → outputSchema gate (safety net)
 ```
 
-Requires a Jlama model under `~/.jlama` (downloaded on first run) or set `PSOXY_GEN_MODEL_CACHE`. Optional: `PSOXY_GEN_MODEL` to override the default HuggingFace id.
+- Local/Jlama provider and dependencies removed; cloud providers only.
+- Providers apply constraints on each request (or model builder) from `outputSchema` — prompt builder does not embed full schema JSON for classify mode (optional short hint for extract).
+- Concurrent cloud calls use a semaphore; no model-load locks.
+
+## MS Copilot PoC (classify)
+
+Classifies `$..body.content` into one of 11 categories. `outputSchema.properties.category.enum` is the source of truth; prompt is short classification guidance only. See `MS_COPILOT_GEN_METADATA_AUGMENT` and `msft-copilot.yaml` / `msft-copilot_no-userIds.yaml`. Enabled via `enable_gen_metadata = true` on the Copilot connector specs.
+
+## Zoom transcript PoC (extract)
+
+Endpoint `/v2/meetings/{meetingId}/transcript` uses genMetadata on `$.timeline` with an extract schema `{speakers:[{personId, secondsTalking}]}`. Timeline user ids/emails are pseudonymized; `$['+timeline:genMetadata'].speakers[*].personId` is also pseudonymized so speaker ids in the augment are not left in cleartext. Unit tests omit the augment when no cloud backend is wired.
 
 ## Error handling
 
-Non-fatal: failures throw `AugmentProcessingException` (caught in `AugmentProcessor`) and surface as `X-Psoxy-Warning` headers on the response.
-
 | Code | Meaning |
 |------|---------|
-| `augment-gen-unavailable` | Model missing / not loaded / unsupported backend |
-| `augment-gen-inference-failed` | Inference or JSON parse failed |
-| `augment-output-schema-mismatch` | Output failed `outputSchema` predicate |
+| `augment-gen-unavailable` | Unsupported/missing backend, auth deny, budget IAM Deny |
+| `augment-gen-inference-failed` | Call/parse failure |
+| `augment-output-schema-mismatch` | Post-constraint gate failed (should be rare) |
 | `augment-conflict-skipped` | Upstream `+` properties present |
 
-## Roadmap
+## Migration from local Jlama PoC
 
-### Cloud backends (`PSOXY_GEN_BACKEND=bedrock` | `vertex`) — planned
+1. Set host backend to `bedrock` / `vertex`; remove `local` from configs.
+2. Stop uploading `llm/*.zip`; drop 4096 MB / Jlama JVM flags.
+3. Simplify prompts; keep enums in `outputSchema`.
+4. Provider constraints + enum normalization are implemented; Jlama provider / deps / local integration path are removed.
 
-Implement via LangChain4j in `psoxy-core`, behind the existing `GenMetadataBackend` SPI:
+## Deferred
 
-| Backend | Module | Bundle | Credentials |
-|---------|--------|--------|-------------|
-| `bedrock` | `langchain4j-bedrock` | **AWS** Lambda / `psoxy-aws` only | Lambda execution role |
-| `vertex` | `langchain4j-vertex-ai-gemini` | **GCP** Cloud Functions / `psoxy-gcp` only | Function service account |
-
-`PSOXY_GEN_MODEL` becomes the cloud model id. Use native JSON schema (`ResponseFormat`) where supported; no `llm/` remote weights. Wrong backend on the wrong platform should fail clearly. IAM for Bedrock / Vertex AI will ship with per-connector `enable_gen_metadata` extensions.
-
-### Alternative local engine: java-llama.cpp (`de.kherud`) — conditional
-
-[java-llama.cpp](https://github.com/kherud/java-llama.cpp) (GGUF via JNI) is **not** in use. Revisit only if **both** are true:
-
-1. Embedded local models prove valuable enough vs cloud inference, and
-2. Jlama performance is a significant bottleneck for production workloads.
-
-Rationale for deferring: JNI/native faults in llama.cpp can crash the JVM; LangChain4j + Jlama keeps inference in managed Java with a single `ChatModel` surface for local and cloud.
-
-### Deferred
-
-- **Rule-level `backend`, `model`, or `quality`** — env-only for BETA.
-- **ONNX Runtime GenAI, DJL, Ollama sidecars** — out of scope for in-process serverless.
+- App-layer daily/weekly spend ledger
+- Transcript chunking / multi-call map-reduce for long meetings
+- Rule-level model selection
+- Cross-cloud backends
+- Reintroducing any on-box LLM (explicitly rejected unless constrained decoding exists in-process)

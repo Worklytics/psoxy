@@ -92,18 +92,35 @@ locals {
     if try(v.enable_remote_resources, false)
   ]) > 0
 
-  needs_gen_metadata_model_upload = length([
-    for k, v in var.api_connectors : k if try(v.enable_gen_metadata, false)
+  # Effective genMetadata backend per API connector (null if genMetadata disabled).
+  # AWS is cloud-only: bedrock (local/Jlama abandoned).
+  api_connector_gen_metadata_backend = {
+    for k, v in var.api_connectors : k => (
+      try(v.enable_gen_metadata, false)
+      ? lower(coalesce(try(v.gen_metadata_backend, null), var.gen_metadata_backend, "bedrock"))
+      : null
+    )
+  }
+
+  gen_metadata_uses_bedrock = length([
+    for k, backend in local.api_connector_gen_metadata_backend : k
+    if backend == "bedrock"
   ]) > 0
 
-  gen_metadata_model_id = coalesce(
-    try(var.general_environment_variables["PSOXY_GEN_MODEL"], null),
-    "tjake/Llama-3.2-1B-Instruct-JQ4"
-  )
-  gen_metadata_archive_name = "${replace(local.gen_metadata_model_id, "/", "__")}.zip"
-
-  # Appended to JAVA_TOOL_OPTIONS when enable_gen_metadata (Jlama / Vector API). See gen-metadata-augment.md.
-  jlama_java_tool_options = "--add-modules=jdk.incubator.vector --enable-preview --enable-native-access=ALL-UNNAMED"
+  bedrock_invoke_iam_statements = [{
+    Sid    = "InvokeBedrockForGenMetadata"
+    Effect = "Allow"
+    Action = [
+      "bedrock:InvokeModel",
+      "bedrock:Converse",
+      "bedrock:InvokeModelWithResponseStream",
+      "bedrock:ConverseStream",
+    ]
+    Resource = [
+      "arn:aws:bedrock:*::foundation-model/*",
+      "arn:aws:bedrock:*:*:inference-profile/*",
+    ]
+  }]
 }
 
 module "psoxy" {
@@ -261,15 +278,18 @@ module "api_connector" {
   side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
   enable_async_processing               = each.value.enable_async_processing
-  memory_size_mb = max(
-    try(each.value.enable_gen_metadata, false) ? coalesce(each.value.memory_size_mb, 4096) : (each.value.enable_async_processing ? 1024 : 512),
-    try(each.value.enable_gen_metadata, false) ? 4096 : 0
-  )
+  memory_size_mb                        = each.value.enable_async_processing ? coalesce(each.value.memory_size_mb, 1024) : coalesce(each.value.memory_size_mb, 512)
 
   todos_as_local_files          = var.todos_as_local_files
   todo_step                     = var.todo_step
   timeout_seconds               = coalesce(try(each.value.timeout_seconds, null), 180)
   allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
+
+  extra_lambda_role_iam_statements = (
+    local.api_connector_gen_metadata_backend[each.key] == "bedrock"
+    ? local.bedrock_invoke_iam_statements
+    : []
+  )
 
   environment_variables = merge(
     {
@@ -283,15 +303,29 @@ module "api_connector" {
     var.api_connector_path_prefix_to_trim != null ? { REQUEST_PATH_PREFIX_TO_TRIM = var.api_connector_path_prefix_to_trim } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
-    try(each.value.enable_gen_metadata, false) ? {
-      ENABLE_GEN_METADATA = "true"
-      JAVA_TOOL_OPTIONS   = trimspace("${lookup(merge(try(each.value.environment_variables, {}), var.general_environment_variables), "JAVA_TOOL_OPTIONS", "")} ${local.jlama_java_tool_options}")
-    } : {},
+    try(each.value.enable_gen_metadata, false) ? merge(
+      {
+        ENABLE_GEN_METADATA = "true"
+        PSOXY_GEN_BACKEND   = local.api_connector_gen_metadata_backend[each.key]
+      },
+      try(var.general_environment_variables["PSOXY_GEN_MODEL"], null) == null ? {
+        PSOXY_GEN_MODEL = "anthropic.claude-3-haiku-20240307-v1:0"
+      } : {},
+    ) : {},
   )
 
-  remote_resource_bucket        = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false) || try(each.value.enable_gen_metadata, false)) ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false) || try(each.value.enable_gen_metadata, false)) ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false) || try(each.value.enable_gen_metadata, false)) ? local.shared_resource_path : null
+  remote_resource_bucket = (
+    local.remote_resources_enabled
+    || try(each.value.enable_remote_resources, false)
+  ) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (
+    local.remote_resources_enabled
+    || try(each.value.enable_remote_resources, false)
+  ) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path = (
+    local.remote_resources_enabled
+    || try(each.value.enable_remote_resources, false)
+  ) ? local.shared_resource_path : null
 }
 
 

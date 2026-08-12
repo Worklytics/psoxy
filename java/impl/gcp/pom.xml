@@ -116,6 +116,12 @@
             <artifactId>google-cloud-kms</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-vertex-ai-gemini</artifactId>
+            <version>${dependency.langchain4j-beta.version}</version>
+        </dependency>
+
 
         <!-- JUnit Jupiter API for writing tests -->
         <dependency>
@@ -336,6 +342,25 @@
                         </executions>
                     </plugin>
 
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>gen-metadata-cloud-integration</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>**/VertexGenMetadataCloudIntegrationTest.java</include>
+                            </includes>
+                            <systemPropertyVariables>
+                                <psoxy.genMetadata.cloudIntegration>true</psoxy.genMetadata.cloudIntegration>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>

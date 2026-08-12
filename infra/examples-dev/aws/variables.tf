@@ -261,6 +261,7 @@ variable "custom_api_connectors" {
     enable_async_processing = optional(bool, false)
     enable_remote_resources = optional(bool, false)
     enable_gen_metadata     = optional(bool, false)
+    gen_metadata_backend    = optional(string)
     memory_size_mb          = optional(number)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
@@ -530,6 +531,24 @@ variable "todos_as_local_files" {
   type        = bool
   description = "whether to render TODOs as flat files"
   default     = true
+}
+
+variable "gen_metadata_backend" {
+  type        = string
+  description = "Default genMetadata backend for enable_gen_metadata connectors: \"bedrock\" only. Default bedrock."
+  default     = "bedrock"
+}
+
+variable "gen_metadata_daily_cost_limit_usd" {
+  type        = number
+  description = "Daily Bedrock spend cap (USD) for genMetadata budget + IAM Deny action. Set 0 to disable. Auto-deny requires gen_metadata_budget_alert_emails."
+  default     = 20
+}
+
+variable "gen_metadata_budget_alert_emails" {
+  type        = list(string)
+  description = "Emails for genMetadata Bedrock budget notifications (required for APPLY_IAM_POLICY auto-deny)."
+  default     = []
 }
 
 

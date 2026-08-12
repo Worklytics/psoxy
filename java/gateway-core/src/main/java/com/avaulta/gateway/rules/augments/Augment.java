@@ -23,7 +23,7 @@ import java.util.TreeMap;
  * <p>Augments run <b>before</b> transforms, so transforms still see original field values.
  * The output is placed in a sibling property named {@code +{sourceProperty}:{augmentFunction}}.
  *
- * @see <a href="file:///docs/development/augments.md">Augments Design Doc</a>
+ * @see <a href="file:///docs/development/alpha-features/augments.md">Augments Design Doc</a>
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
@@ -239,7 +239,8 @@ public abstract class Augment {
     }
 
     /**
-     * BETA: Generates structured metadata via LangChain4j (Jlama local; Bedrock/Vertex planned).
+     * BETA: Generates structured metadata via cloud LLM (Bedrock / Vertex) with constrained
+     * classify (enum) or extract (JSON schema) modes.
      * Requires {@link #outputSchema} and {@link #prompt}; model/backend selection is deployment config.
      */
     @SuperBuilder(toBuilder = true)

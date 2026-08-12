@@ -195,6 +195,7 @@ variable "api_connectors" {
     enable_async_processing = optional(bool, false)
     enable_remote_resources = optional(bool, false)
     enable_gen_metadata     = optional(bool, false)
+    gen_metadata_backend    = optional(string) # "vertex" (GCP); host default applies when null
     available_memory_mb     = optional(number)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
@@ -503,5 +504,35 @@ variable "api_connector_external_lb_host" {
     condition     = var.api_connector_external_lb_host == null || try(length(trimspace(var.api_connector_external_lb_host)) > 0, false)
     error_message = "api_connector_external_lb_host must be null or a non-empty hostname/IP."
   }
+}
+
+variable "gen_metadata_backend" {
+  type        = string
+  description = "Default genMetadata backend for API connectors with enable_gen_metadata when not set per connector. On GCP: \"vertex\" only. Default vertex."
+  default     = "vertex"
+
+  validation {
+    condition     = var.gen_metadata_backend == "vertex"
+    error_message = "gen_metadata_backend must be \"vertex\" on gcp-host (Bedrock is AWS-only; local/Jlama is no longer supported)."
+  }
+}
+
+variable "gen_metadata_daily_cost_limit_usd" {
+  type        = number
+  description = "Nominal daily Vertex spend target (USD) for genMetadata. Used to size a monthly Cloud Billing budget (~daily × 30). Set to 0 to disable budget alerts. GCP has no daily billing budget; alerts are monthly only."
+  default     = 20
+}
+
+variable "gen_metadata_budget_alert_emails" {
+  type        = list(string)
+  description = "Email addresses for genMetadata Vertex billing budget notifications."
+  default     = []
+}
+
+variable "billing_account_id" {
+  type        = string
+  description = "GCP billing account ID (e.g. 01ABCD-XXXXXX-XXXXXX) required to create a Vertex genMetadata billing budget. If null when Vertex genMetadata is enabled, budget is skipped and a TODO output is emitted."
+  default     = null
+  nullable    = true
 }
 

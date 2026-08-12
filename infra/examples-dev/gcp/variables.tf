@@ -256,6 +256,7 @@ variable "custom_api_connectors" {
     enable_async_processing = optional(bool, false)
     enable_remote_resources = optional(bool, false)
     enable_gen_metadata     = optional(bool, false)
+    gen_metadata_backend    = optional(string)
     available_memory_mb     = optional(number)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
@@ -536,4 +537,29 @@ variable "connector_settings" {
   type        = map(string)
   default     = {}
   description = "Connector-specific settings."
+}
+
+variable "gen_metadata_backend" {
+  type        = string
+  description = "Default genMetadata backend for enable_gen_metadata connectors: \"vertex\" only. Default vertex."
+  default     = "vertex"
+}
+
+variable "gen_metadata_daily_cost_limit_usd" {
+  type        = number
+  description = "Nominal daily Vertex spend target (USD); sizes monthly billing budget as daily × 30. Set 0 to disable."
+  default     = 20
+}
+
+variable "gen_metadata_budget_alert_emails" {
+  type        = list(string)
+  description = "Emails for genMetadata Vertex monthly billing budget notifications."
+  default     = []
+}
+
+variable "billing_account_id" {
+  type        = string
+  description = "GCP billing account ID for Vertex genMetadata monthly budget. If null, budget is skipped (see module TODO output)."
+  default     = null
+  nullable    = true
 }

@@ -7,9 +7,12 @@ import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Deployment configuration for {@link com.avaulta.gateway.rules.augments.GenMetadataBackend}.
+ *
+ * <p>Cloud-only: {@code bedrock} (AWS) or {@code vertex} (GCP). Local/Jlama is not supported.
  */
 @Value
 @Builder
@@ -17,15 +20,16 @@ public class GenMetadataConfig {
 
     public static final int DEFAULT_MAX_ATTEMPTS = 2;
 
-    public static final String BACKEND_LOCAL = "local";
     public static final String BACKEND_BEDROCK = "bedrock";
     public static final String BACKEND_VERTEX = "vertex";
 
-    /**
-     * Default Jlama model (HuggingFace {@code owner/name}); pre-quantized builds from
-     * <a href="https://huggingface.co/tjake">tjake</a> on Hugging Face.
-     */
-    public static final String DEFAULT_MODEL = "tjake/Llama-3.2-1B-Instruct-JQ4";
+    private static final Set<String> SUPPORTED_BACKENDS = Set.of(BACKEND_BEDROCK, BACKEND_VERTEX);
+
+    /** Default Bedrock model id when {@code PSOXY_GEN_MODEL} is unset. */
+    public static final String DEFAULT_BEDROCK_MODEL = "anthropic.claude-3-haiku-20240307-v1:0";
+
+    /** Default Vertex Gemini model id when {@code PSOXY_GEN_MODEL} is unset. */
+    public static final String DEFAULT_VERTEX_MODEL = "gemini-2.0-flash-001";
 
     String backend;
     String modelId;
@@ -39,12 +43,11 @@ public class GenMetadataConfig {
     public static GenMetadataConfig from(ConfigService configService) {
         String backend = configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_GEN_BACKEND)
             .filter(StringUtils::isNotBlank)
-            .orElse(BACKEND_LOCAL)
-            .trim()
-            .toLowerCase();
+            .map(s -> s.trim().toLowerCase())
+            .orElse(BACKEND_BEDROCK);
         String model = configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_GEN_MODEL)
             .filter(StringUtils::isNotBlank)
-            .orElse(DEFAULT_MODEL)
+            .orElseGet(() -> defaultModelForBackend(backend))
             .trim();
         int timeout = configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_GEN_TIMEOUT_SECONDS)
             .flatMap(GenMetadataConfig::parsePositiveInt)
@@ -68,6 +71,17 @@ public class GenMetadataConfig {
             .build();
     }
 
+    static String defaultModelForBackend(String backend) {
+        if (BACKEND_VERTEX.equalsIgnoreCase(backend)) {
+            return DEFAULT_VERTEX_MODEL;
+        }
+        return DEFAULT_BEDROCK_MODEL;
+    }
+
+    public boolean isSupportedCloudBackend() {
+        return backend != null && SUPPORTED_BACKENDS.contains(backend.toLowerCase());
+    }
+
     private static Optional<Integer> parsePositiveInt(String raw) {
         try {
             int v = Integer.parseInt(raw.trim());
@@ -75,20 +89,5 @@ public class GenMetadataConfig {
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
-    }
-
-    /**
-     * Optional zip archive in remote resources containing a Jlama SafeTensors model directory
-     * ({@code config.json} at the root of the archive or in a single top-level folder).
-     */
-    public String localModelArchivePath() {
-        return "llm/" + localModelCacheDirName() + ".zip";
-    }
-
-    /**
-     * Directory name under the Jlama model cache for this {@link #modelId}.
-     */
-    public String localModelCacheDirName() {
-        return modelId.replace("/", "__");
     }
 }

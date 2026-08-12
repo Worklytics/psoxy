@@ -44,6 +44,7 @@ import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend;
 import co.worklytics.psoxy.impl.AugmentProcessor;
 import co.worklytics.psoxy.impl.gen.GenMetadataChatModelFactory;
+import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import co.worklytics.psoxy.impl.gen.GenMetadataPromptBudget;
 import co.worklytics.psoxy.impl.gen.LangChain4jGenMetadataBackend;
@@ -52,15 +53,23 @@ import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.Multibinds;
 import lombok.extern.java.Log;
 
 /**
  * provides implementations for platform-independent dependencies of 'core' module
  */
 @Log
-@Module
+@Module(includes = PsoxyModule.GenMetadataBindings.class)
 public class PsoxyModule {
 
+
+    @Module
+    public abstract static class GenMetadataBindings {
+        /** Cloud providers (Bedrock / Vertex) are contributed by platform modules via {@code @IntoSet}. */
+        @Multibinds
+        abstract Set<GenMetadataChatModelProvider> chatModelProviders();
+    }
 
     @Provides
     @Singleton
@@ -392,8 +401,8 @@ public class PsoxyModule {
     }
 
     /**
-     * Wires genMetadata backend. Model weights are resolved via {@code @Named("ForGenMetadata")}
-     * {@link ResourceService} from {@code ResourceServiceBindingsModule}.
+     * Wires genMetadata backend when a {@link GenMetadataChatModelProvider} supports the configured
+     * cloud backend (Bedrock / Vertex contributed by platform modules).
      */
     @Provides
     @Singleton
@@ -403,7 +412,7 @@ public class PsoxyModule {
             GenMetadataPromptBudget promptBudget,
             GenMetadataChatModelFactory chatModelFactory) {
         GenMetadataConfig config = GenMetadataConfig.from(configService);
-        if (GenMetadataConfig.BACKEND_LOCAL.equalsIgnoreCase(config.getBackend())) {
+        if (chatModelFactory.supports(config)) {
             return new LangChain4jGenMetadataBackend(config, objectMapper, promptBudget, chatModelFactory);
         }
         return new UnavailableGenMetadataBackend();

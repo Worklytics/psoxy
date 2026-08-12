@@ -173,6 +173,9 @@ module "psoxy" {
   todo_step                            = local.max_auth_todo_step
   todos_as_local_files                 = var.todos_as_local_files
   enable_remote_resources              = true
+  gen_metadata_backend                 = var.gen_metadata_backend
+  gen_metadata_daily_cost_limit_usd    = var.gen_metadata_daily_cost_limit_usd
+  gen_metadata_budget_alert_emails     = var.gen_metadata_budget_alert_emails
 
   #  vpc_config = {
   #    vpc_id             = aws_default_vpc.default.id
@@ -273,10 +276,9 @@ output "todos_3" {
 }
 
 output "todos_4" {
-  description = "Remote resource uploads (OpenNLP, genMetadata LLM) after deploy, in markdown format."
+  description = "Remote resource uploads (OpenNLP) after deploy, in markdown format."
   value = var.todos_as_outputs ? join("\n\n", compact([
     module.psoxy.remote_resource_opennlp_todo,
-    module.psoxy.remote_resource_gen_metadata_todo,
   ])) : null
 }
 
@@ -285,13 +287,6 @@ resource "local_file" "todo_4_upload_opennlp_models" {
 
   filename = "TODO 4 - upload OpenNLP models.md"
   content  = module.psoxy.remote_resource_opennlp_todo
-}
-
-resource "local_file" "todo_4_upload_gen_metadata_model" {
-  count = var.todos_as_local_files && module.psoxy.remote_resource_gen_metadata_todo != null ? 1 : 0
-
-  filename = "TODO 4 - upload genMetadata LLM model.md"
-  content  = module.psoxy.remote_resource_gen_metadata_todo
 }
 
 # although should be sensitive such that Terraform won't echo it to command line or expose it, leave

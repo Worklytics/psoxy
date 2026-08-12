@@ -148,18 +148,22 @@ module "psoxy" {
   external_api_alb = var.external_api_alb
   # Or BYO ALB (mutually exclusive with external_api_alb):
   # api_connector_external_lb_host = "proxy.example.com"
-  custom_bulk_connector_rules     = var.custom_bulk_connector_rules
-  custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
-  lookup_tables                   = var.lookup_tables
-  custom_artifacts_bucket_name    = var.custom_artifacts_bucket_name
-  custom_side_outputs             = var.custom_side_outputs
-  todos_as_local_files            = var.todos_as_local_files
-  todo_step                       = local.max_auth_todo_step
-  enable_remote_resources         = true
-  bucket_force_destroy            = var.bucket_force_destroy
-  tf_gcp_principal_email          = var.gcp_terraform_sa_account_email
-  provision_project_level_iam     = var.provision_project_level_iam
-  bucket_access_logs_destination  = var.bucket_access_logs_destination
+  custom_bulk_connector_rules       = var.custom_bulk_connector_rules
+  custom_bulk_connector_arguments   = var.custom_bulk_connector_arguments
+  lookup_tables                     = var.lookup_tables
+  custom_artifacts_bucket_name      = var.custom_artifacts_bucket_name
+  custom_side_outputs               = var.custom_side_outputs
+  todos_as_local_files              = var.todos_as_local_files
+  todo_step                         = local.max_auth_todo_step
+  enable_remote_resources           = true
+  gen_metadata_backend              = var.gen_metadata_backend
+  gen_metadata_daily_cost_limit_usd = var.gen_metadata_daily_cost_limit_usd
+  gen_metadata_budget_alert_emails  = var.gen_metadata_budget_alert_emails
+  billing_account_id                = var.billing_account_id
+  bucket_force_destroy              = var.bucket_force_destroy
+  tf_gcp_principal_email            = var.gcp_terraform_sa_account_email
+  provision_project_level_iam       = var.provision_project_level_iam
+  bucket_access_logs_destination    = var.bucket_access_logs_destination
 }
 
 locals {
@@ -275,10 +279,10 @@ output "todos_3" {
 }
 
 output "todos_4" {
-  description = "Remote resource uploads (OpenNLP, genMetadata LLM) after deploy, in markdown format."
+  description = "Remote resource uploads (OpenNLP) and related post-deploy TODOs, in markdown format."
   value = var.todos_as_outputs ? join("\n\n", compact([
     module.psoxy.remote_resource_opennlp_todo,
-    module.psoxy.remote_resource_gen_metadata_todo,
+    module.psoxy.gen_metadata_vertex_budget_todo,
   ])) : null
 }
 
@@ -289,11 +293,11 @@ resource "local_file" "todo_4_upload_opennlp_models" {
   content  = module.psoxy.remote_resource_opennlp_todo
 }
 
-resource "local_file" "todo_4_upload_gen_metadata_model" {
-  count = var.todos_as_local_files && module.psoxy.remote_resource_gen_metadata_todo != null ? 1 : 0
+resource "local_file" "todo_4_gen_metadata_vertex_budget" {
+  count = var.todos_as_local_files && module.psoxy.gen_metadata_vertex_budget_todo != null ? 1 : 0
 
-  filename = "TODO 4 - upload genMetadata LLM model.md"
-  content  = module.psoxy.remote_resource_gen_metadata_todo
+  filename = "TODO 4 - configure Vertex genMetadata billing budget.md"
+  content  = module.psoxy.gen_metadata_vertex_budget_todo
 }
 
 # although should be sensitive such that Terraform won't echo it to command line or expose it, leave

@@ -67,7 +67,7 @@ public class RecordRules implements BulkDataRules {
     /**
      * Augments to compute and inject as synthetic sibling properties, run before transforms.
      *
-     * @see <a href="file:///docs/development/augments.md">Augments Design Doc</a>
+     * @see <a href="file:///docs/development/alpha-features/augments.md">Augments Design Doc</a>
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Singular

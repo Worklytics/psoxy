@@ -1,4 +1,4 @@
-# Markdown TODOs for uploading remote resource assets (OpenNLP, genMetadata LLM archives).
+# Markdown TODOs for uploading remote resource assets (OpenNLP).
 # Rendered as outputs only; upload is performed outside Terraform via tools/*.sh scripts.
 
 locals {
@@ -7,10 +7,6 @@ locals {
   opennlp_connector_ids = join(", ", [
     for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) : k
     if try(v.enable_remote_resources, false)
-  ])
-
-  gen_metadata_connector_ids = join(", ", [
-    for k, v in var.api_connectors : k if try(v.enable_gen_metadata, false)
   ])
 }
 
@@ -34,30 +30,8 @@ output "remote_resource_opennlp_todo" {
   ) : null
 }
 
+# Local/Jlama genMetadata (llm/*.zip) abandoned; cloud-only Vertex. Kept null for callers that still reference this output.
 output "remote_resource_gen_metadata_todo" {
-  description = "TODO (markdown) for uploading genMetadata LLM model archive when any API connector has enable_gen_metadata."
-  value = local.needs_gen_metadata_model_upload ? trimspace(<<-EOT
-	## Upload genMetadata LLM model archive (BETA)
-
-	API connectors with `enable_gen_metadata`: ${local.gen_metadata_connector_ids}
-
-	Production deployments should load Jlama weights from the remote resources bucket instead of downloading from HuggingFace at runtime.
-
-	Expected object key: `${local.shared_resource_path}llm/${local.gen_metadata_archive_name}` (from `PSOXY_GEN_MODEL=${local.gen_metadata_model_id}`).
-
-	From the **psoxy repository root**, download the HuggingFace model, zip it, and upload to the artifacts bucket in one step:
-
-	```bash
-	./tools/fetch-gen-metadata-model.sh ${local.remote_resource_gcs_prefix} ${local.gen_metadata_model_id}
-	```
-
-	That command uses:
-	- **Destination:** `${local.remote_resource_gcs_prefix}` (this deployment's artifacts bucket + shared resource prefix)
-	- **Model:** `${local.gen_metadata_model_id}` (override with a second argument or `PSOXY_GEN_MODEL`)
-
-	Requires `zip`, [HuggingFace CLI](https://huggingface.co/docs/huggingface_hub/en/guides/cli) (`pip install huggingface_hub`), and `gsutil` with upload access. To use a local SafeTensors directory instead of downloading: add `--from-dir /path/to/model-dir` before the `gs://` URI.
-
-	See [gen-metadata-augment.md](https://github.com/worklytics/psoxy/blob/main/docs/development/gen-metadata-augment.md).
-	EOT
-  ) : null
+  description = "Deprecated: always null. Local/Jlama genMetadata model upload is no longer supported (use Vertex)."
+  value       = null
 }

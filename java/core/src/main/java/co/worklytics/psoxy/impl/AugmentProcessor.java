@@ -34,7 +34,7 @@ import java.util.logging.Level;
  * <p>NOTE: this class must be thread-safe. A single instance may be shared across
  * concurrent requests. Compiled JsonPaths are cached in a ConcurrentHashMap.
  *
- * @see <a href="file:///docs/development/augments.md">Augments Design Doc</a>
+ * @see <a href="file:///docs/development/alpha-features/augments.md">Augments Design Doc</a>
  */
 @Log
 public class AugmentProcessor {

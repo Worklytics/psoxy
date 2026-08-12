@@ -139,13 +139,13 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      */
     SOURCE,
 
-    /** BETA: generative backend for genMetadata augment (`local`, `bedrock`, `vertex`). */
+    /** BETA: generative backend for genMetadata augment (`bedrock` or `vertex`). */
     PSOXY_GEN_BACKEND,
 
-    /** BETA: Jlama HuggingFace model id or logical id for `{SHARED_RESOURCE_PATH}/llm/{id}.zip`. */
+    /** BETA: cloud model id (Bedrock model id or Vertex Gemini model name). */
     PSOXY_GEN_MODEL,
 
-    /** BETA: max seconds for a single genMetadata {@code chat()} call (and model-load wait). */
+    /** BETA: max seconds for a single genMetadata {@code chat()} call. */
     PSOXY_GEN_TIMEOUT_SECONDS,
 
     /** BETA: max source characters passed into genMetadata prompts. */
@@ -161,8 +161,7 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     PSOXY_GEN_META_RETRIES,
 
     /**
-     * BETA: set when Terraform {@code enable_gen_metadata} is used; documents that deployment
-     * is sized for local generative augments.
+     * BETA: set when Terraform {@code enable_gen_metadata} is used (cloud Bedrock/Vertex genMetadata).
      */
     ENABLE_GEN_METADATA,
 

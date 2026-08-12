@@ -17,7 +17,7 @@ resolved using a path prefix that mirrors the existing `PATH_TO_INSTANCE_CONFIG`
    The instance path defaults to `PATH_TO_INSTANCE_CONFIG`, so resources are co-located with
    instance configuration by default.
 2. **Shared resources** — loaded from `{SHARED_RESOURCE_PATH}/` within the bucket. This path is
-   for assets shared across all connectors (e.g., NLP models, LLM weights).
+   for assets shared across all connectors (e.g., NLP models).
 
 The resource service acts as a **failover** after local environment and config service lookups.
 For example, if the `RULES` config property is not found in environment variables or the config/parameter store,
@@ -29,7 +29,7 @@ mounted locally.
 
 ## Terraform Configuration
 
-Remote resources are **opt-in**. You can enable them at the host level with `enable_remote_resources = true` on `aws-host` or `gcp-host`, and/or per connector with `enable_remote_resources` on individual `api_connectors`, `bulk_connectors`, or `webhook_collectors` entries. API connectors with `enable_gen_metadata = true` also get remote bucket access (for `llm/*.zip` model archives).
+Remote resources are **opt-in**. You can enable them at the host level with `enable_remote_resources = true` on `aws-host` or `gcp-host`, and/or per connector with `enable_remote_resources` on individual `api_connectors`, `bulk_connectors`, or `webhook_collectors` entries. (genMetadata uses cloud backends — Bedrock on AWS, Vertex on GCP — and does not require remote bucket access for model archives.)
 
 When enabled, the host module uses the artifacts bucket — either one you provide
 (`artifacts_bucket_name` / `custom_artifacts_bucket_name`), one already provisioned for a local
@@ -159,32 +159,9 @@ aws s3 cp en-sent.bin s3://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/openn
 gsutil cp en-sent.bin gs://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/opennlp/en-sent.bin
 ```
 
-### LLM model archives (genMetadata BETA)
-Upload a **zip** of a Jlama SafeTensors model directory (must include `config.json`) for the **genMetadata** augment to `{SHARED_RESOURCE_PATH}/llm/` in the bucket. The archive name is derived from `PSOXY_GEN_MODEL` (default `tjake/Llama-3.2-1B-Instruct-JQ4`): slashes become `__`, with a `.zip` suffix — e.g. `llm/tjake__Llama-3.2-1B-Instruct-JQ4.zip`. Set per-connector `enable_gen_metadata = true` on `api_connectors` (which also enables remote resource loading for that connector). See [gen-metadata-augment.md](../development/gen-metadata-augment.md) for HuggingFace ids, cloud backends, and ops detail (cloud inference does not use `llm/` archives).
+### LLM model archives (genMetadata) — abandoned
 
-**Helper script** (download from HuggingFace, zip, upload):
-
-```bash
-# AWS — PREFIX is your SHARED_RESOURCE_PATH within the bucket (trailing slash optional)
-./tools/fetch-gen-metadata-model.sh s3://REMOTE_RESOURCE_BUCKET/PREFIX/
-
-# GCP — optional MODEL_ID overrides PSOXY_GEN_MODEL / default
-./tools/fetch-gen-metadata-model.sh gs://REMOTE_RESOURCE_BUCKET/PREFIX/ tjake/Llama-3.2-1B-Instruct-JQ4
-
-# Use an existing local SafeTensors directory instead of downloading
-./tools/fetch-gen-metadata-model.sh --from-dir /path/to/model-dir s3://REMOTE_RESOURCE_BUCKET/PREFIX/
-```
-
-**Manual upload:**
-
-```bash
-cd /path/to/model-dir && zip -r ../tjake__Llama-3.2-1B-Instruct-JQ4.zip .
-aws s3 cp ../tjake__Llama-3.2-1B-Instruct-JQ4.zip \
-  s3://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/llm/tjake__Llama-3.2-1B-Instruct-JQ4.zip
-
-gsutil cp ../tjake__Llama-3.2-1B-Instruct-JQ4.zip \
-  gs://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/llm/tjake__Llama-3.2-1B-Instruct-JQ4.zip
-```
+Local/Jlama genMetadata (zipped SafeTensors under `{SHARED_RESOURCE_PATH}/llm/`) is no longer supported. genMetadata is **cloud-only**: Bedrock on AWS, Vertex AI on GCP. Do not upload `llm/*.zip` archives; set `enable_gen_metadata = true` and use the host default backend (`bedrock` / `vertex`). See [gen-metadata-augment.md](../development/alpha-features/gen-metadata-augment.md).
 
 ## Uploading Resources
 

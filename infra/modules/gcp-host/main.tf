@@ -93,18 +93,20 @@ locals {
     if try(v.enable_remote_resources, false)
   ]) > 0
 
-  needs_gen_metadata_model_upload = length([
-    for k, v in var.api_connectors : k if try(v.enable_gen_metadata, false)
+  # Effective genMetadata backend per API connector (null if genMetadata disabled).
+  # GCP is cloud-only: vertex (local/Jlama abandoned).
+  api_connector_gen_metadata_backend = {
+    for k, v in var.api_connectors : k => (
+      try(v.enable_gen_metadata, false)
+      ? lower(coalesce(try(v.gen_metadata_backend, null), var.gen_metadata_backend, "vertex"))
+      : null
+    )
+  }
+
+  gen_metadata_uses_vertex = length([
+    for k, backend in local.api_connector_gen_metadata_backend : k
+    if backend == "vertex"
   ]) > 0
-
-  gen_metadata_model_id = coalesce(
-    try(var.general_environment_variables["PSOXY_GEN_MODEL"], null),
-    "tjake/Llama-3.2-1B-Instruct-JQ4"
-  )
-  gen_metadata_archive_name = "${replace(local.gen_metadata_model_id, "/", "__")}.zip"
-
-  # Appended to JAVA_TOOL_OPTIONS when enable_gen_metadata (Jlama / Vector API). See gen-metadata-augment.md.
-  jlama_java_tool_options = "--add-modules=jdk.incubator.vector --enable-preview --enable-native-access=ALL-UNNAMED"
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -337,10 +339,7 @@ module "api_connector" {
   allowed_data_access_ip_blocks         = var.allowed_data_access_ip_blocks
   instance_concurrency                  = var.api_connector_instance_concurrency
   max_instance_count                    = var.max_instances_per_api_connector
-  available_memory_mb = max(
-    try(each.value.enable_gen_metadata, false) ? coalesce(each.value.available_memory_mb, 4096) : 1024,
-    try(each.value.enable_gen_metadata, false) ? 4096 : 0
-  )
+  available_memory_mb                   = coalesce(each.value.available_memory_mb, 1024)
   timeout_seconds                       = coalesce(try(each.value.timeout_seconds, null), 180)
   ingress_settings                      = local.api_connector_external_lb_enabled ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
   external_lb_base_url                  = local.api_connector_external_lb_base_url
@@ -360,15 +359,32 @@ module "api_connector" {
     var.api_connector_path_prefix_to_trim != null ? { REQUEST_PATH_PREFIX_TO_TRIM = var.api_connector_path_prefix_to_trim } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
-    try(each.value.enable_gen_metadata, false) ? {
-      ENABLE_GEN_METADATA = "true"
-      JAVA_TOOL_OPTIONS   = trimspace("${lookup(merge(try(each.value.environment_variables, {}), var.general_environment_variables), "JAVA_TOOL_OPTIONS", "")} ${local.jlama_java_tool_options}")
-    } : {},
+    try(each.value.enable_gen_metadata, false) ? merge(
+      {
+        ENABLE_GEN_METADATA = "true"
+        PSOXY_GEN_BACKEND   = local.api_connector_gen_metadata_backend[each.key]
+        # Same project/region as the Cloud Function deployment (Vertex is GCP-only).
+        GOOGLE_CLOUD_PROJECT = var.gcp_project_id
+        GOOGLE_CLOUD_REGION  = var.gcp_region
+      },
+      try(var.general_environment_variables["PSOXY_GEN_MODEL"], null) == null ? {
+        PSOXY_GEN_MODEL = "gemini-2.0-flash-001"
+      } : {},
+    ) : {},
   )
 
-  remote_resource_bucket        = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false) || try(each.value.enable_gen_metadata, false)) ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false) || try(each.value.enable_gen_metadata, false)) ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false) || try(each.value.enable_gen_metadata, false)) ? local.shared_resource_path : null
+  remote_resource_bucket = (
+    local.remote_resources_enabled
+    || try(each.value.enable_remote_resources, false)
+  ) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (
+    local.remote_resources_enabled
+    || try(each.value.enable_remote_resources, false)
+  ) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path = (
+    local.remote_resources_enabled
+    || try(each.value.enable_remote_resources, false)
+  ) ? local.shared_resource_path : null
 
   secret_bindings = merge(
     local.secrets_bound_as_env_vars[each.key],
@@ -386,13 +402,13 @@ module "external_api_alb" {
 
   source = "../gcp-external-api-alb"
 
-  gcp_project_id               = var.gcp_project_id
-  gcp_region                   = var.gcp_region
-  environment_id_prefix        = local.environment_id_prefix
-  global_address_id            = google_compute_global_address.api_connector_alb[0].id
-  global_address_ip            = google_compute_global_address.api_connector_alb[0].address
-  api_connector_function_names = local.api_connector_function_names
-  domain                       = try(var.external_api_alb.domain, null)
+  gcp_project_id                = var.gcp_project_id
+  gcp_region                    = var.gcp_region
+  environment_id_prefix         = local.environment_id_prefix
+  global_address_id             = google_compute_global_address.api_connector_alb[0].id
+  global_address_ip             = google_compute_global_address.api_connector_alb[0].address
+  api_connector_function_names  = local.api_connector_function_names
+  domain                        = try(var.external_api_alb.domain, null)
   allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
 
   depends_on = [module.api_connector]

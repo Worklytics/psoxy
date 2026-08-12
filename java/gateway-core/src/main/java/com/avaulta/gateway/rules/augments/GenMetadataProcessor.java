@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -104,7 +105,7 @@ public class GenMetadataProcessor {
             log.info("genMetadata backend returned non-string type: "
                 + raw.getClass().getSimpleName());
         }
-        Map<?, ?> parsed = parseModelJson(raw);
+        Map<?, ?> parsed = parseModelJson(raw, outputSchema);
         if (parsed == null) {
             log.warning("genMetadata backend returned unparseable output");
             return null;
@@ -145,6 +146,10 @@ public class GenMetadataProcessor {
     }
 
     Map<?, ?> parseModelJson(Object raw) {
+        return parseModelJson(raw, null);
+    }
+
+    Map<?, ?> parseModelJson(Object raw, JsonSchemaFilter outputSchema) {
         if (raw == null) {
             return null;
         }
@@ -152,6 +157,15 @@ public class GenMetadataProcessor {
             return toSortedMap(map);
         }
         if (raw instanceof String response) {
+            Optional<GenMetadataSchemaSupport.ClassifyShape> classify =
+                GenMetadataSchemaSupport.classifyShape(outputSchema);
+            if (classify.isPresent()) {
+                Optional<Map<String, Object>> wrapped =
+                    GenMetadataSchemaSupport.wrapClassifyLabel(response, classify.get());
+                if (wrapped.isPresent()) {
+                    return new TreeMap<>(wrapped.get());
+                }
+            }
             String json = extractJsonObject(response);
             if (json == null) {
                 return null;

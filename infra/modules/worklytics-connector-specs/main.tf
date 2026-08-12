@@ -918,6 +918,7 @@ EOT
       ],
       reserved_concurrent_executions : null # 1
       enable_side_output : false
+      enable_gen_metadata : true
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/v2/users",
@@ -926,6 +927,7 @@ EOT
         "/v2/users/{USER_ID}/recordings",
         "/v2/meetings/{MEETING_ID}",
         "/v2/meetings/{MEETING_ID}/meeting_summary",
+        "/v2/meetings/{MEETING_ID}/transcript",
         "/v2/past_meetings/{MEETING_ID}",
         "/v2/past_meetings/{MEETING_ID}/instances",
         "/v2/past_meetings/{MEETING_ID}/participants",
@@ -1552,6 +1554,7 @@ locals {
       {
         enable_remote_resources = try(v.enable_remote_resources, false)
         enable_gen_metadata     = try(v.enable_gen_metadata, false)
+        gen_metadata_backend    = try(v.gen_metadata_backend, null)
       },
       try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
     )
@@ -1564,6 +1567,7 @@ locals {
       {
         enable_remote_resources = try(v.enable_remote_resources, false)
         enable_gen_metadata     = try(v.enable_gen_metadata, false)
+        gen_metadata_backend    = try(v.gen_metadata_backend, null)
       },
       try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
     )
@@ -1581,6 +1585,7 @@ locals {
       {
         enable_remote_resources = try(v.enable_remote_resources, false)
         enable_gen_metadata     = try(v.enable_gen_metadata, false)
+        gen_metadata_backend    = try(v.gen_metadata_backend, null)
       },
       try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
     )

@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Truncates genMetadata input so prompts fit local model context alongside reserved output tokens.
+ * Truncates genMetadata input so prompts fit model context alongside reserved output tokens.
  */
 @Singleton
 public class GenMetadataPromptBudget {
@@ -29,8 +29,11 @@ public class GenMetadataPromptBudget {
                                int maxInputChars, int contextLength, int maxOutputTokens) {
         String schemaJson = schemaJson(outputSchema);
         int contextChars = contextCharsBudget(contextLength, maxOutputTokens);
+        int systemLen = Math.max(
+            GenMetadataPromptBuilder.SYSTEM_CLASSIFY.length(),
+            GenMetadataPromptBuilder.SYSTEM_EXTRACT.length());
         int overheadChars = charEstimate(
-            GenMetadataPromptBuilder.SYSTEM_PROMPT.length()
+            systemLen
                 + taskPrompt.length()
                 + schemaJson.length()
                 + PROMPT_OVERHEAD_TOKENS * CHARS_PER_TOKEN_ESTIMATE);

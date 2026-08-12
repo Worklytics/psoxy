@@ -206,6 +206,7 @@ variable "api_connectors" {
     enable_async_processing = optional(bool, false)
     enable_remote_resources = optional(bool, false)
     enable_gen_metadata     = optional(bool, false)
+    gen_metadata_backend    = optional(string) # "bedrock" (AWS); host default applies when null
     memory_size_mb          = optional(number)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
@@ -490,3 +491,26 @@ variable "enable_remote_resources" {
   default     = false
 }
 
+
+variable "gen_metadata_backend" {
+  type        = string
+  description = "Default genMetadata backend for API connectors with enable_gen_metadata when not set per connector. On AWS: \"bedrock\" only. Default bedrock."
+  default     = "bedrock"
+
+  validation {
+    condition     = var.gen_metadata_backend == "bedrock"
+    error_message = "gen_metadata_backend must be \"bedrock\" on aws-host (Vertex is GCP-only; local/Jlama is no longer supported)."
+  }
+}
+
+variable "gen_metadata_daily_cost_limit_usd" {
+  type        = number
+  description = "Daily Bedrock spend cap (USD) for genMetadata. Provisions an AWS Budget that applies an IAM Deny on Bedrock invoke when exceeded. Set to 0 to disable."
+  default     = 20
+}
+
+variable "gen_metadata_budget_alert_emails" {
+  type        = list(string)
+  description = "Email addresses for genMetadata Bedrock budget notifications."
+  default     = []
+}
