@@ -24,6 +24,7 @@ NOTE: if you're connecting to Google Workspace as a data source, you'll also nee
 
 ### IAM Permissions
 - a GCP (Google) user or Service Account with permissions to provision Service Accounts, Secrets, Storage Buckets, Cloud Run Functions, KMS Keys, Pub/Sub Topics/Subscriptions, and enable APIs within that project. eg:
+  - [Artifact Registry Editor](https://cloud.google.com/iam/docs/roles-permissions/artifactregistry#artifactregistry.editor) - Cloud Functions Gen 2 container images are stored in Artifact Registry; Terraform provisions the Docker repository. (`roles/artifactregistry.repoAdmin` does not include `repositories.create`.)
   - [Cloud Functions Developer](https://docs.cloud.google.com/iam/docs/roles-permissions/cloudfunctions#cloudfunctions.developer) - proxy instances are deployed as GCP cloud functions
   - [Cloud KMS Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/cloudkms#cloudkms.admin) - webhook authentication keys are provisioned as KMS asymmetric signing keys. this is only required for Webhook collection mode.
   - [Cloud Run Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/run#run.admin) - cloud function deployment requires Cloud Run Admin role
@@ -36,6 +37,11 @@ NOTE: if you're connecting to Google Workspace as a data source, you'll also nee
   - [Service Account Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountAdmin) - admin Service Accounts that personify Cloud Functions or are used as Google Workspace API connections
   - [Service Usage Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/serviceusage#serviceusage.serviceUsageAdmin) - you will need to enable various GCP APIs
   - [Pub/Sub Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/pubsub#pubsub.admin) - webhook messages are queued in Pub/Sub topics and subscriptions for batch processing; also used for Async API mode requests.
+
+Additional roles beyond the above (see [`psoxy-constants`](../../infra/modules/psoxy-constants) outputs for bootstrap examples):
+
+- **External Application Load Balancer (beta)** — if `external_api_alb` is set on `gcp-host` (not needed for `api_connector_external_lb_host` / BYO ALB): [Compute Network Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.networkAdmin), [Compute Security Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.securityAdmin), and [Certificate Manager Editor](https://cloud.google.com/iam/docs/roles-permissions/certificatemanager#certificatemanager.editor) when using managed TLS (`external_api_alb.domain`). See [GCP External ALB](../development/gcp-external-alb.md#iam-permissions-terraform-provisioner).
+- **VPC egress** — if Terraform creates the VPC, subnet, or NAT: [Compute Network Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.networkAdmin) (and possibly [VPC Access Admin](https://cloud.google.com/iam/docs/roles-permissions/vpcaccess#vpcaccess.admin) for legacy Serverless VPC Access connectors). See [VPC configuration](./vpc.md).
 
 NOTE: the above are the least-privileged predefined GCP roles; depending on your use-cases for the proxy, you can likely create a less-privileged [custom GCP IAM role](https://cloud.google.com/iam/docs/creating-custom-roles) that will suffice. 
 
@@ -54,7 +60,8 @@ NOTE: the above are the least-privileged predefined GCP roles; depending on your
   - [Pub/Sub API](https://console.cloud.google.com/apis/library/pubsub.googleapis.com) (`pubsub.googleapis.com`)
   - [Secret Manager API](https://console.cloud.google.com/apis/library/secretmanager.googleapis.com) (`secretmanager.googleapis.com`)
   - [Storage API](https://console.cloud.google.com/apis/library/storage-api.googleapis.com) (`storage-api.googleapis.com`)
-  - [VPC Accesss API](https://console.cloud.google/com/apis/library/vpcaccess.googleapis.com) (`vpcaccess.googleapis.com`), if relying on our provisioning a Serverless VPC Connector
+  - [VPC Access API](https://console.cloud.google.com/apis/library/vpcaccess.googleapis.com) (`vpcaccess.googleapis.com`), if relying on our provisioning a Serverless VPC Connector
+  - [Certificate Manager API](https://console.cloud.google.com/apis/library/certificatemanager.googleapis.com) (`certificatemanager.googleapis.com`), if using `external_api_alb` with a managed TLS domain
 
 ### Terraform State Backend
 

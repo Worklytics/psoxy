@@ -43,7 +43,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'zulu'
           server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
           cache: 'maven'

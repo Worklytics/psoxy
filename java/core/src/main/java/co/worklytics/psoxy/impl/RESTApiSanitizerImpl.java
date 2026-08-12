@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -54,6 +55,7 @@ import com.jayway.jsonpath.JsonPath;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.RESTApiSanitizer;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
+import co.worklytics.psoxy.gateway.InboundRequestPathNormalizer;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.URLUtils;
 import co.worklytics.psoxy.utils.email.EmailAddressParser;
@@ -121,6 +123,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     PathTemplateUtils pathTemplateUtils;
     @Inject
     ApiModeConfig apiModeConfig;
+    @Inject
+    InboundRequestPathNormalizer inboundRequestPathNormalizer;
     @Inject
     SanitizerUtils sanitizerUtils;
     @Inject
@@ -365,8 +369,14 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     boolean allowedQueryParams(Endpoint endpoint, List<Pair<String, String>> queryParams) {
         boolean matchesAllowed = endpoint.getAllowedQueryParamsOptional()
-                .map(allowedParams -> allowedParams.containsAll(
-                        queryParams.stream().map(Pair::getKey).collect(Collectors.toList())))
+                .map(allowedParams -> {
+                    var allowedLower = allowedParams.stream()
+                            .map(p -> p.toLowerCase(Locale.ROOT))
+                            .collect(Collectors.toSet());
+                    return queryParams.stream()
+                            .map(Pair::getKey)
+                            .allMatch(key -> allowedLower.contains(key.toLowerCase(Locale.ROOT)));
+                })
                 .orElse(true);
 
         return matchesAllowed
@@ -413,20 +423,24 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         return targetHostPath;
     }
 
+    /**
+     * Strips the configured target-host path prefix, then normalizes inbound routing segments
+     * ({@link ApiModeConfig.ApiModeConfigProperty#REQUEST_PATH_PREFIX_TO_TRIM}, function name)
+     * so the result can be matched against endpoint rules.
+     */
     @VisibleForTesting
-    String stripTargetHostPath(String path) {
-        if (StringUtils.isBlank(getTargetHostPath())) {
-            return path;
-        } else {
-            return path.replaceFirst("^" + getTargetHostPath(), "");
+    String pathForRuleMatching(String path) {
+        if (StringUtils.isNotBlank(getTargetHostPath())) {
+            path = path.replaceFirst("^" + Pattern.quote(getTargetHostPath()), "");
         }
+        return inboundRequestPathNormalizer.normalize(path);
     }
 
     @VisibleForTesting
     Predicate<Map.Entry<Endpoint, Pattern>> getHasPathTemplateMatchingUrl(URL url) {
         return (entry) -> {
             if (entry.getKey().getPathTemplate() != null) {
-                Matcher matcher = entry.getValue().matcher(stripTargetHostPath(url.getPath()));
+                Matcher matcher = entry.getValue().matcher(pathForRuleMatching(url.getPath()));
                 if (matcher.matches()) {
                     // this should NOT match on empty path segments; eg "/foo//bar" should not match
                     // "/foo/{param}/bar"
@@ -475,7 +489,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @VisibleForTesting
     Optional<Pair<Pattern, Endpoint>> getEndpoint(String httpMethod, URL url) {
-        String relativeUrl = stripTargetHostPath(URLUtils.relativeURL(url));
+        String relativeUrl = pathForRuleMatching(URLUtils.relativeURL(url));
 
         Predicate<Map.Entry<Endpoint, Pattern>> hasPathRegexMatchingUrl =
                 getHasPathRegexMatchingUrl(relativeUrl);

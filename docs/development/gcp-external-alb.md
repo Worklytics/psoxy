@@ -1,20 +1,20 @@
-# GCP External ALB + Cloud Armor (TLS + IP allowlist)
+# GCP External Application Load Balancer (ALB) + Cloud Armor (TLS + optional IP allowlist)
 
-> **Status**: Beta — composition pattern only; not a first-class module we commit to maintaining in this form
-> **Last Updated**: 2026-07-21
+> **Status**: **Beta** — provisioned by `gcp-host` when `external_api_alb` is set (or BYO via `api_connector_external_lb_host`). Interfaces and resource shapes may change in a future release.
+> **Last Updated**: 2026-07-30
 
 ## Motivation
 
-Some customers need Worklytics to reach API connectors over the **public internet** from **static egress IPs** that the customer allowlists, while optionally using VPC egress (Direct VPC + Cloud NAT) for outbound calls to data sources.
+Some customers need Worklytics to reach API connectors over the **public internet**, optionally from **static egress IPs** that the customer allowlists, while optionally using VPC egress (Direct VPC + Cloud NAT) for outbound calls to data sources.
 
-This is **not** Private Service Connect / a regional internal load balancer (ILB). An internal ILB is for VPC-private consumers. Worklytics dialing in from the public internet needs a **global external Application Load Balancer** (`EXTERNAL_MANAGED`).
+This is **not** Private Service Connect / a regional internal load balancer (ILB). An internal ILB is for VPC-private consumers. Worklytics dialing in from the public internet needs a **global external Application Load Balancer (ALB)** (`EXTERNAL_MANAGED`).
 
 ## Connectivity options (summary)
 
 | Architecture | Ingress | TLS | IP restriction | VPC required? |
 |---|---|---|---|---|
 | Default | `*.run.app` | Google-managed | App-layer only (`allowed_data_access_ip_blocks`) | No |
-| **External ALB + Cloud Armor** (this doc) | Global external ALB | Managed domain **or** self-signed PoC | Cloud Armor + app-layer | No (egress VPC optional) |
+| **External Application Load Balancer (ALB)** (this doc) | Global external ALB | Managed domain **or** self-signed PoC | Optional Cloud Armor + app-layer | No (egress VPC optional) |
 | mTLS | External ALB | Mutual TLS | Cloud Armor optional | No |
 | PSC | Internal ILB + service attachment | Private | Inherent | Yes |
 
@@ -22,60 +22,106 @@ See also [GCP Private Service Connect and connectivity options](gcp-private-serv
 
 **Do not** use a regional internal LB for Worklytics static-IP egress over the internet.
 
-## Current approach (v0.6.8): customer composition
+## Current approach: `gcp-host` first-class option
 
-Psoxy does **not** provision the ALB inside `gcp-host`. Customers (or the example template) own ALB/Cloud Armor Terraform in root `external-api-alb.tf`, then tell the modules the LB host.
-
-1. Enable and adapt [`infra/examples-dev/gcp/external-api-alb.tf`](../../infra/examples-dev/gcp/external-api-alb.tf) (syncs to `psoxy-example-gcp`).
-2. Set `allowed_data_access_ip_blocks` to Worklytics egress IPs (same list for Cloud Armor and the proxy).
-3. In `main.tf`, wire the ALB host into `module.psoxy` (uncomment one of):
+Set `external_api_alb` on `gcp-host` (example root passes `var.external_api_alb`):
 
 ```hcl
-# api_connector_external_lb_host = local.api_connector_external_lb_host  # when using external-api-alb.tf
-# api_connector_external_lb_host = "proxy.example.com"                 # customer-provisioned ALB host/IP
+# terraform.tfvars — self-signed PoC on reserved global IP
+external_api_alb = {}
+
+# or managed TLS
+external_api_alb = {
+  domain = "proxy.example.com"
+}
 ```
 
-When `api_connector_external_lb_host` is non-null, `gcp-host`:
+Leave `external_api_alb = null` (default) to expose API connectors via their direct Cloud Functions / Cloud Run URLs (`*.run.app`), without an external Application Load Balancer.
+
+Optionally set `allowed_data_access_ip_blocks` to Worklytics egress IPs (same list for Cloud Armor and the proxy). Leave `null` for open ingress through the ALB (PoC / rely on IAM + app auth). An empty list is invalid.
+
+### IAM permissions (Terraform provisioner)
+
+These apply when **`external_api_alb` is set** and Terraform provisions the ALB (not when you use `api_connector_external_lb_host` for a customer-owned load balancer).
+
+Grant the Terraform runner the following predefined roles on the host project, or an equivalent custom role built from the permission list in [`psoxy-constants`](../../infra/modules/psoxy-constants) (`required_gcp_roles_to_use_external_api_alb` / `required_gcp_permissions_to_use_external_api_alb`):
+
+| Role | Why |
+|---|---|
+| [Compute Network Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.networkAdmin) (`roles/compute.networkAdmin`) | Reserved global IP (`compute.globalAddresses.*`), serverless NEGs, backend services, URL map, HTTPS proxy, global forwarding rule |
+| [Compute Security Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.securityAdmin) (`roles/compute.securityAdmin`) | Cloud Armor security policies (when `allowed_data_access_ip_blocks` is set); self-signed `google_compute_ssl_certificate` for PoC TLS |
+| [Certificate Manager Editor](https://cloud.google.com/iam/docs/roles-permissions/certificatemanager#certificatemanager.editor) (`roles/certificatemanager.editor`) | Google-managed TLS when `external_api_alb.domain` is set (Certificate Manager certificate + map) |
+
+Common `403` errors during `terraform apply` if these are missing:
+
+```
+Error: Error creating GlobalAddress: googleapi: Error 403: Required 'compute.globalAddresses.create' permission ...
+```
+
+→ grant **Compute Network Admin** (or include `compute.globalAddresses.create` in a custom role).
+
+```
+Error: Error creating SslCertificate: googleapi: Error 403: Required 'compute.sslCertificates.create' permission ...
+```
+
+→ grant **Compute Security Admin** (or include `compute.sslCertificates.create` in a custom role).
+
+When using managed TLS (`domain` set), failures on `google_certificate_manager_*` resources require **Certificate Manager Editor** (or the `certificatemanager.*` permissions listed in `required_gcp_permissions_to_use_external_api_alb`).
+
+Terraform also enables `certificatemanager.googleapis.com` when `domain` is set; ensure [Compute Engine API](https://console.cloud.google.com/apis/library/compute.googleapis.com) (`compute.googleapis.com`) is enabled (listed in [GCP getting started](../gcp/getting-started.md#apis)).
+
+### Bring-your-own Application Load Balancer (ALB)
+
+If you already provision an external Application Load Balancer yourself, do **not** set `external_api_alb`. Instead pass:
+
+```hcl
+api_connector_external_lb_host = "proxy.example.com"
+```
+
+These two inputs are mutually exclusive.
+
+When an external LB host is effective (provisioned or BYO), `gcp-host`:
 
 - Sets each API connector’s Cloud Functions `ingress_settings` to `ALLOW_INTERNAL_AND_GCLB` (required for external ALB → Cloud Functions; **not** `ALLOW_INTERNAL_ONLY`, which is for PSC).
 - Overrides public `endpoint_url` to `https://<host>/<function-name>/` (with `ALLOW_INTERNAL_AND_GCLB`, that is the internet-reachable path).
-- Passes `external_lb_base_url = https://<host>` into connectors for test-script / TODO generation (deprecated plumbing; prefer lifting tests higher later).
+- Passes `external_lb_base_url = https://<host>` into connectors for test-script / TODO generation.
 - Leaves Pub/Sub push endpoints on the Cloud Function `*.run.app` URI.
 - Leaves bulk connectors unchanged.
 
 Worklytics `"Psoxy Base URL"` follows `endpoint_url` via the existing connection module wiring.
 
-### Resource inventory (root composition)
+### What gets provisioned
 
-From the commented example / internal PoCs:
+Implemented by `infra/modules/gcp-external-api-alb` (invoked from `gcp-host`):
 
-- `google_compute_global_address`
-- `google_compute_security_policy` + `google_compute_security_policy_rule` (allow `allowed_data_access_ip_blocks`, default deny)
-- Per connector: serverless NEG + `EXTERNAL_MANAGED` backend service with `security_policy`
+- `google_compute_global_address` (reserved in `gcp-host` so connector URLs can use the IP without a module cycle)
+- **When `allowed_data_access_ip_blocks` is non-null:** Cloud Armor security policy + allow/deny rules. When the list is `null`, no policy is attached — all source IPs may reach the ALB.
+- Per connector: serverless NEG + `EXTERNAL_MANAGED` backend service
 - URL map: path rules `/<function-name>` and `/<function-name>/*`
 - TLS: Certificate Manager (domain) **or** Terraform `tls_*` + `google_compute_ssl_certificate` (PoC on global IP)
 - `google_compute_global_forwarding_rule` on `:443`
 
 Path routing relies on the proxy stripping the function-name prefix via `K_SERVICE` in `CloudFunctionRequest.getPath()`.
 
-### Dual IP allowlist
+Useful output from `gcp-host`: `external_api_alb` (object with `host`, `ip_address`, `todo_dns_setup`, `self_signed_ca_cert`; null when unused). The example root keeps that output commented out — uncomment if you need it.
 
-`allowed_data_access_ip_blocks` does double duty:
+### IP Allowlist Enforcement
 
-1. **Cloud Armor** (network) — customer attaches the same CIDRs in `external-api-alb.tf`.
-2. **Psoxy app check** — still set on connectors (covers direct `*.run.app` bypass until ingress is locked down).
+When `external_api_alb` is enabled, GCP-hosted proxy instances can **also** enforce IP allowlists at the infrastructure level by provisioning Cloud Armor rules from `allowed_data_access_ip_blocks` (in addition to the application-layer check on connectors, which covers direct `*.run.app` bypass until ingress is locked down).
+
+When `allowed_data_access_ip_blocks` is `null`, neither layer restricts by source IP (the ALB remains open at the network layer).
 
 ### Testing
 
-Generated test scripts use the ALB URL when the host is set. For self-signed PoC (IP host), scripts add `--allow-insecure-tls`. Prefer `--cacert` with the PEM from `external_alb_self_signed_ca_cert` when available. Non-`*.run.app` URLs also need `-f gcp`. See [Psoxy test tool](../guides/psoxy-test-tool.md).
+Generated test scripts use the ALB URL when an external LB base URL is set (provisioned via `external_api_alb` or BYO via `api_connector_external_lb_host`). For self-signed PoC (IP host), scripts add `--allow-insecure-tls`. Prefer `--cacert` with the PEM from `external_api_alb.self_signed_ca_cert` when available. Non-`*.run.app` URLs also need `-f gcp`. See [Psoxy test tool](../guides/psoxy-test-tool.md).
 
-Your caller IP must be in the Cloud Armor allowlist (and usually in `allowed_data_access_ip_blocks`) for local health checks through the ALB.
+When Cloud Armor allowlisting is enabled, your caller IP must be in `allowed_data_access_ip_blocks` for local health checks through the ALB.
 
 ## Troubleshooting
 
 ### TLS errors (`ECONNRESET`, "socket disconnected before secure TLS connection was established")
 
-These errors during `./test-*.sh` or `cli-call.js` are **usually not** a self-signed certificate problem when you already pass `--allow-insecure-tls` (or `--cacert` with the PEM from `external_alb_self_signed_ca_cert`). That flag disables certificate verification; a cert trust failure would look different.
+These errors during `./test-*.sh` or `cli-call.js` are **usually not** a self-signed certificate problem when you already pass `--allow-insecure-tls` (or `--cacert` with the PEM from `external_api_alb.self_signed_ca_cert`). That flag disables certificate verification; a cert trust failure would look different.
 
 More common causes:
 
@@ -87,15 +133,15 @@ curl -vk https://<alb-ip>/<cloud-function-name>/
 
 You should complete TLS even if the HTTP status is 404 or 403.
 
-2. **Wrong host** — PoC self-signed certs are issued for the **reserved global IP** (`terraform output external_alb_ip_address`), not a hostname, unless you switched to managed TLS with `api_proxy_domain`.
+2. **Wrong host** — PoC self-signed certs are issued for the **reserved global IP** (`terraform output -json external_api_alb` → `ip_address`), not a hostname, unless you set `external_api_alb.domain`.
 
 If curl completes TLS but `psoxy-test` does not, compare Node version and retry after the ALB finishes propagating.
 
 ### `403 Forbidden` (minimal HTML page: `<title>403</title>403 Forbidden`)
 
-This response is almost always **Cloud Armor** denying your **source IP** before the request reaches Cloud Run. It is not an IAM or self-signed TLS issue.
+This response is almost always **Cloud Armor** denying your **source IP** before the request reaches Cloud Run. It is not an IAM or self-signed TLS issue. If `allowed_data_access_ip_blocks` is `null`, Cloud Armor rules are not provisioned — a HTML 403 from Armor should not occur for IP reasons.
 
-`allowed_data_access_ip_blocks` is enforced in two places when the ALB composition is enabled:
+`allowed_data_access_ip_blocks` is enforced in two places when the list is non-null:
 
 | Layer | Where | Symptom if blocked |
 |---|---|---|
@@ -138,23 +184,15 @@ gcloud logging read 'resource.type="http_load_balancer"' \
   --format='table(httpRequest.remoteIp,httpRequest.status,httpRequest.requestUrl)'
 ```
 
-5. **Re-apply after changing the allowlist** — if you edit `terraform.tfvars` but still see the old CIDRs in step 2, run `terraform apply`. The example `external-api-alb.tf` uses separate `google_compute_security_policy_rule` resources so `src_ip_ranges` updates are applied reliably; inline `rule` blocks on `google_compute_security_policy` are known to miss in-place IP changes in some provider versions.
+5. **Re-apply after changing the allowlist** — if you edit `terraform.tfvars` but still see the old CIDRs in step 2, run `terraform apply`. The module uses separate `google_compute_security_policy_rule` resources so `src_ip_ranges` updates are applied reliably; inline `rule` blocks on `google_compute_security_policy` are known to miss in-place IP changes in some provider versions.
 
 **Quick fix for local testing:** add both your current IPv4 `/32` and IPv6 `/128` to `allowed_data_access_ip_blocks`, apply, then re-run the test script.
 
 Without a GCP identity token, requests through the ALB may return **404** instead of 403 (ingress masking). Generated test scripts and `cli-call.js -f gcp` obtain a token via `gcloud auth print-identity-token`; ensure you are authenticated before testing.
 
-## Future work: provision ALB inside `gcp-host`
+## Migrating from root `external-api-alb.tf` (pre–first-class)
 
-Fold ALB + Cloud Armor provisioning into `gcp-host` (or a submodule it invokes) so customers set a high-level flag/object instead of copying ~300 lines of root Terraform. Left out of 0.6.8 on purpose; composition + `api_connector_external_lb_host` is the interim contract.
-
-Possible future shape (illustrative only):
-
-```hcl
-external_api_alb = {
-  domain = optional(string) # null => self-signed PoC on reserved IP
-}
-```
+Older betas composed ALB resources in the example root. Those resources now live under `module.psoxy` (`google_compute_global_address.api_connector_alb` and `module.external_api_alb`). If you applied the root composition, either destroy the old root ALB resources and re-apply with `external_api_alb = {}`, or `terraform state mv` addresses into the new module paths before apply.
 
 ## Non-goals (this path)
 

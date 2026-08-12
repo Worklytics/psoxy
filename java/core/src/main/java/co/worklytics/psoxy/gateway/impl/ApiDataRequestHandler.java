@@ -70,10 +70,12 @@ import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.InboundRequestPathNormalizer;
 import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.TargetOverrideRequestResolver;
 import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
 import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
@@ -102,6 +104,8 @@ public class ApiDataRequestHandler {
 
     @Inject
     ApiModeConfig apiModeConfig;
+    @Inject
+    InboundRequestPathNormalizer inboundRequestPathNormalizer;
     @Inject
     EnvVarsConfigService envVarsConfigService;
     @Inject
@@ -151,6 +155,8 @@ public class ApiDataRequestHandler {
     ProxyConstants proxyConstants;
     @Inject
     NetworkSecurityUtils networkSecurityUtils;
+    @Inject
+    TargetOverrideRequestResolver targetOverrideRequestResolver;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -245,7 +251,18 @@ public class ApiDataRequestHandler {
                     .build();
         }
 
-
+        // Apply X-Psoxy-TargetPath / X-Psoxy-TargetQuery overrides (validated untrusted input)
+        try {
+            requestToProxy = targetOverrideRequestResolver.applyOverrides(requestToProxy);
+        } catch (IllegalArgumentException e) {
+            log.warning("Invalid target override header: " + e.getMessage());
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_BAD_REQUEST)
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                            ErrorCauses.INVALID_REQUEST.name())
+                    .body(e.getMessage())
+                    .build();
+        }
 
         RequestUrls requestUrls;
         try {
@@ -873,7 +890,7 @@ public class ApiDataRequestHandler {
         // directly to avoid re-encoding already-encoded path segments in the request.
         URL hostURL = new URIBuilder(targetBase).build().toURL();
         String hostPlusPath = StringUtils.stripEnd(hostURL.toString(), "/") + "/"
-                + StringUtils.stripStart(request.getPath(), "/");
+                + StringUtils.stripStart(inboundRequestPathNormalizer.normalize(request.getPath()), "/");
         String targetURLString = hostPlusPath;
         if (StringUtils.isNotBlank(request.getQuery().orElse(null))) {
             targetURLString = hostPlusPath + "?" + request.getQuery().get();

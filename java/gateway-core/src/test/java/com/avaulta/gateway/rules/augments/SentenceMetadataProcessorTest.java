@@ -20,7 +20,7 @@ class SentenceMetadataProcessorTest {
 
     private static final String MODELS_MISSING_MESSAGE =
         "OpenNLP models not on classpath (expected at /opennlp/en-sent.bin). "
-            + "Run 'mvn test' in java/gateway-core to download them automatically, "
+            + "Run 'mvn test -DskipOpenNlpModelDownload=false' in java/gateway-core to download them, "
             + "or run tools/fetch-opennlp-models.sh manually.";
 
     @Test

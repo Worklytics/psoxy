@@ -74,3 +74,17 @@ output "next_todo_step" {
     [var.todo_step]
   )...)
 }
+
+output "external_api_alb" {
+  description = <<-EOT
+    **beta** External Application Load Balancer (ALB) details when provisioned via external_api_alb or when a BYO host is set via api_connector_external_lb_host; null otherwise.
+    Fields: host, ip_address (reserved IP when gcp-host provisions the ALB), todo_dns_setup (managed TLS), self_signed_ca_cert (PoC PEM).
+  EOT
+  value = local.api_connector_external_lb_host == null ? null : {
+    host                = local.api_connector_external_lb_host
+    ip_address          = try(google_compute_global_address.api_connector_alb[0].address, null)
+    todo_dns_setup      = try(module.external_api_alb[0].todo_dns_setup, null)
+    self_signed_ca_cert = try(module.external_api_alb[0].self_signed_ca_cert, null)
+  }
+  sensitive = true
+}

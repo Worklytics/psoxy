@@ -17,9 +17,9 @@
     ]
   },
   "overrides": {
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.3.0",
     "@tootallnate/once": "^3.0.1",
-    "brace-expansion": "^2.0.3",
+    "brace-expansion": "^5.0.9",
     "fast-xml-parser": "^5.7.0"
   }
 }

@@ -1,0 +1,7 @@
+name: "Psoxy CodeQL config"
+
+# Lombok @Getter/@Setter routinely generate overriding methods without a source-level
+# @Override; this query is high noise / low value for this codebase.
+query-filters:
+  - exclude:
+      id: java/missing-override-annotation
