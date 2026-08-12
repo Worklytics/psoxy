@@ -3,12 +3,14 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.io.IOException;
 import java.sql.Date;
 import java.time.Clock;
 import java.time.Instant;
@@ -28,6 +30,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.http.ByteArrayContent;
+import com.google.api.client.http.HttpContent;
+import com.google.api.client.testing.http.MockHttpTransport;
+import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.auth.oauth2.AccessToken;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
@@ -232,6 +238,74 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
 
         assertSame(cachedToken, tokenRefreshHandler.refreshAccessToken());
     }
+
+    @SneakyThrows
+    @Test
+    public void exchangeRefreshTokenForAccessToken_logsAndThrowsOn401() {
+        Instant now = Instant.parse("2025-01-01T00:00:00Z");
+        String errorBody = "{\n"
+            + "  \"error\": \"invalid_client\",\n"
+            + "  \"error_description\": \"AADSTS7000215: Invalid client secret provided. Trace ID: abc Correlation ID: def\",\n"
+            + "  \"error_codes\": [7000215],\n"
+            + "  \"correlation_id\": \"def\"\n"
+            + "}";
+
+        MockHttpTransport transport = new MockHttpTransport.Builder()
+            .setLowLevelHttpResponse(new MockLowLevelHttpResponse()
+                .setStatusCode(401)
+                .setReasonPhrase("Unauthorized")
+                .addHeader("x-ms-request-id", "ms-req-1")
+                .setContentType("application/json")
+                .setContent(errorBody))
+            .build();
+
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
+        strategy.config = MockModules.provideMock(ConfigService.class);
+        strategy.randomNumberGenerator = this.randomNumberGenerator;
+        strategy.setCachedToken(null);
+        when(strategy.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
+            .thenReturn(Optional.of("false"));
+
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl handler =
+            new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        handler.config = MockModules.provideMock(ConfigService.class);
+        handler.secretStore = MockModules.provideMock(SecretStore.class);
+        handler.envVarsConfigService = MockModules.provideMock(EnvVarsConfigService.class);
+        handler.sourceAuthStrategy = strategy;
+        handler.clock = Clock.fixed(now, ZoneOffset.UTC);
+        handler.httpRequestFactory = transport.createRequestFactory();
+        handler.payloadBuilder = new OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder() {
+            @Override
+            public String getGrantType() {
+                return "client_credentials";
+            }
+
+            @Override
+            public HttpContent buildPayload() {
+                return new ByteArrayContent("application/x-www-form-urlencoded",
+                    "grant_type=client_credentials".getBytes());
+            }
+
+            @Override
+            public Optional<String> getTokenRequestDebugSummary() {
+                return Optional.of("credentialsFlow=CLIENT_SECRET, clientId=test-client");
+            }
+        };
+
+        when(handler.config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT))
+            .thenReturn("https://login.microsoftonline.com/tenant/oauth2/v2.0/token");
+        when(handler.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
+            .thenReturn(Optional.of("test-client"));
+        when(handler.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE))
+            .thenReturn(Optional.of("client_credentials"));
+
+        IOException thrown = assertThrows(IOException.class, handler::refreshAccessToken);
+
+        assertTrue(thrown.getMessage().contains("401"));
+        assertTrue(thrown.getMessage().contains("AADSTS7000215"));
+        assertTrue(thrown.getMessage().contains("login.microsoftonline.com"));
+    }
+
 
     @SneakyThrows
     @Test

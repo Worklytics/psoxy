@@ -221,7 +221,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 accessToken = getRefreshHandler().refreshAccessToken();
                 this.setCachedToken(accessToken);
             } catch (IOException e) {
-                log.log(Level.WARNING, "Failed to proactively refresh token", e);
+                // something like "Error getting access token for service account: 401 Unauthorized POST
+                // https://oauth2.googleapis.com/token," or login.microsoftonline.com/.../token
+                log.log(Level.WARNING, "Failed to proactively refresh token: " + e.getMessage(), e);
             }
         }
 
@@ -337,6 +339,18 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         default URI getEndpoint(String baseEndpoint) {
             return URI.create(baseEndpoint);
+        }
+
+        /**
+         * Non-secret request context for diagnosing token-endpoint failures (client id, scope,
+         * federated identity ids, JWT header/payload claims without signature, etc.).
+         *
+         * <p>May perform extra work (e.g. mint another assertion) — call only on error paths.
+         *
+         * @return human-readable summary, or empty if nothing useful beyond grant type
+         */
+        default Optional<String> getTokenRequestDebugSummary() {
+            return Optional.empty();
         }
     }
 
@@ -523,8 +537,24 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         private CanonicalOAuthAccessTokenResponseDto exchangeRefreshTokenForAccessToken()
                 throws IOException {
-            URI refreshEndpoint = payloadBuilder.getEndpoint(
-                    config.getConfigPropertyOrError(ConfigProperty.REFRESH_ENDPOINT));
+            String configuredEndpoint =
+                    config.getConfigPropertyOrError(ConfigProperty.REFRESH_ENDPOINT);
+            URI refreshEndpoint = payloadBuilder.getEndpoint(configuredEndpoint);
+
+            String clientId = config.getConfigPropertyAsOptional(ConfigProperty.CLIENT_ID)
+                    .orElseGet(() -> secretStore.getConfigPropertyAsOptional(ConfigProperty.CLIENT_ID)
+                            .orElse("(unset)"));
+            String grantTypeConfig = config.getConfigPropertyAsOptional(ConfigProperty.GRANT_TYPE)
+                    .orElse("(unset)");
+
+            log.log(Level.INFO,
+                    "OAuth token request starting: endpoint={0}, configuredGrantType={1}, payloadGrantType={2}, clientId={3}",
+                    new Object[] {
+                            refreshEndpoint,
+                            grantTypeConfig,
+                            payloadBuilder.getGrantType(),
+                            clientId
+                    });
 
             HttpRequest tokenRequest = httpRequestFactory.buildPostRequest(
                     new GenericUrl(refreshEndpoint), payloadBuilder.buildPayload());
@@ -532,9 +562,70 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             // modify any header if needed
             payloadBuilder.addHeaders(tokenRequest.getHeaders());
 
-            HttpResponse response = tokenRequest.execute();
+            // Capture error bodies ourselves so we can log Entra error JSON (error_description,
+            // correlation_id, etc.) instead of relying on HttpResponseException's truncated message.
+            tokenRequest.setThrowExceptionOnExecuteError(false);
+
+            HttpResponse response;
+            try {
+                response = tokenRequest.execute();
+            } catch (IOException e) {
+                log.log(Level.SEVERE,
+                        "OAuth token request failed before a response was received: endpoint="
+                                + refreshEndpoint + ", clientId=" + clientId + ", payloadGrantType="
+                                + payloadBuilder.getGrantType() + ", cause=" + e.getMessage(),
+                        e);
+                logTokenRequestBuilderDebugSummary();
+                throw e;
+            }
+
+            int statusCode = response.getStatusCode();
+            if (statusCode < 200 || statusCode >= 300) {
+                String responseBody;
+                try {
+                    responseBody = response.parseAsString();
+                } catch (IOException e) {
+                    responseBody = "(failed to read error body: " + e.getMessage() + ")";
+                }
+
+                String bodyForLog = AuthUtils.nullSafeTrim(responseBody);
+                String headersForLog = AuthUtils.describeHeadersForLogging(response.getHeaders());
+
+                log.log(Level.SEVERE,
+                        "OAuth token request failed: status={0}, endpoint={1}, configuredGrantType={2}, payloadGrantType={3}, clientId={4}, responseHeaders=[{5}], responseBody={6}",
+                        new Object[] {
+                                statusCode,
+                                refreshEndpoint,
+                                grantTypeConfig,
+                                payloadBuilder.getGrantType(),
+                                clientId,
+                                headersForLog,
+                                bodyForLog
+                        });
+                logTokenRequestBuilderDebugSummary();
+
+                if (statusCode == 401) {
+                    log.log(Level.SEVERE,
+                            "OAuth token endpoint returned 401 Unauthorized. For Microsoft Entra, check client_id vs Application (client) ID, tenant id in REFRESH_ENDPOINT, federated credential subject/audience match, certificate thumbprint (x5t), and admin consent. Response body above usually includes AADSTS error codes.");
+                }
+
+                throw new IOException("OAuth token request failed: " + statusCode + " "
+                        + response.getStatusMessage() + " POST " + refreshEndpoint + " body="
+                        + bodyForLog);
+            }
 
             return tokenResponseParser.parseTokenResponse(response);
+        }
+
+        private void logTokenRequestBuilderDebugSummary() {
+            try {
+                payloadBuilder.getTokenRequestDebugSummary().ifPresent(summary -> log.log(Level.SEVERE,
+                        "OAuth token request builder debug: " + summary));
+            } catch (RuntimeException e) {
+                log.log(Level.WARNING,
+                        "Failed to collect OAuth token request builder debug summary: " + e.getMessage(),
+                        e);
+            }
         }
 
         /**

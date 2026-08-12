@@ -61,18 +61,44 @@ public class GCPWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
     }
 
     @Override
+    protected void appendFederatedIdentityDebugSummary(StringBuilder summary) {
+        getConfig().getConfigPropertyAsOptional(ConfigProperty.AUDIENCE)
+            .ifPresent(v -> summary.append(", gcpIdTokenAudience=").append(v));
+    }
+
+    @Override
     @SneakyThrows
     protected String getClientAssertion() {
+        String audience = getConfig().getConfigPropertyOrError(ConfigProperty.AUDIENCE);
+
         URIBuilder uriBuilder = new URIBuilder();
         // This URL is internal to GCP
         uriBuilder.setScheme("http");
         uriBuilder.setHost("metadata.google.internal");
         uriBuilder.setPath("computeMetadata/v1/instance/service-accounts/default/identity");
-        uriBuilder.setParameter("audience", getConfig().getConfigPropertyOrError(ConfigProperty.AUDIENCE));
+        uriBuilder.setParameter("audience", audience);
+
+        log.info("Requesting GCP metadata identity token for MSFT federated credential: audience=" + audience);
 
         HttpURLConnection httpUrlConnection = (HttpURLConnection) uriBuilder.build().toURL().openConnection();
         httpUrlConnection.setRequestMethod("GET");
         httpUrlConnection.setRequestProperty("Metadata-Flavor", "Google ");
+
+        int status = httpUrlConnection.getResponseCode();
+        if (status < 200 || status >= 300) {
+            String errorBody = "";
+            try (InputStream errorStream = httpUrlConnection.getErrorStream()) {
+                if (errorStream != null) {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(errorStream))) {
+                        errorBody = reader.lines().collect(Collectors.joining("\n"));
+                    }
+                }
+            }
+            log.severe("GCP metadata identity token request failed: status=" + status
+                + ", audience=" + audience + ", body=" + errorBody);
+            throw new java.io.IOException("GCP metadata identity token request failed: status="
+                + status + " audience=" + audience + " body=" + errorBody);
+        }
 
         StringBuilder content = new StringBuilder();
 

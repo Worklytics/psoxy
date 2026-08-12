@@ -198,6 +198,8 @@ public class ClientCredentialsGrantTokenRequestBuilder
         configuredValue = StringUtils.replaceChars(configuredValue, ":", "");
 
         header.setX509Thumbprint(encodeKeyId(configuredValue));
+        log.log(Level.FINE, "JWT client assertion x5t thumbprint set from PRIVATE_KEY_ID (hexLength={0})",
+            configuredValue.length());
     }
 
     private Map<String, String> buildClientSecretPayload() {
@@ -364,6 +366,41 @@ public class ClientCredentialsGrantTokenRequestBuilder
         return errors;
     }
 
+
+    @Override
+    public Optional<String> getTokenRequestDebugSummary() {
+        CredentialFlowType flow = getCredentialsType();
+        String clientId = getClientId();
+        Optional<String> scope = config.getConfigPropertyAsOptional(ConfigProperty.TOKEN_SCOPE);
+        Optional<String> refreshEndpoint = config.getConfigPropertyAsOptional(
+            OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
+
+        StringBuilder summary = new StringBuilder();
+        summary.append("credentialsFlow=").append(flow);
+        summary.append(", clientId=").append(clientId);
+        refreshEndpoint.ifPresent(e -> summary.append(", refreshEndpoint=").append(e));
+        scope.ifPresent(s -> summary.append(", tokenScope=").append(s));
+
+        if (flow == CredentialFlowType.JWT_ASSERTION) {
+            try {
+                String configuredKeyId = secretStore.getConfigPropertyOrError(ConfigProperty.PRIVATE_KEY_ID);
+                summary.append(", privateKeyIdRawLength=").append(StringUtils.length(configuredKeyId));
+                // Rebuild assertion solely for claim logging (new jti/iat; signature not logged)
+                String audience = refreshEndpoint.orElse("(unset-refresh-endpoint)");
+                String assertion = buildJwtAssertion(clientId, audience);
+                summary.append(", clientAssertion=").append(AuthUtils.describeJwtForLogging(assertion));
+            } catch (Exception e) {
+                summary.append(", clientAssertionError=").append(e.getMessage());
+            }
+        } else {
+            summary.append(", clientSecretConfigured=")
+                .append(secretStore.getConfigPropertyAsOptional(ConfigProperty.CLIENT_SECRET)
+                    .map(StringUtils::isNotBlank)
+                    .orElse(false));
+        }
+
+        return Optional.of(summary.toString());
+    }
 
     private CredentialFlowType getCredentialsType() {
         return config.getConfigPropertyAsOptional(ConfigProperty.CREDENTIALS_FLOW)

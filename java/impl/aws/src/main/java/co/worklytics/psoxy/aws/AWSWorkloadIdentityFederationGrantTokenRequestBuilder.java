@@ -60,15 +60,43 @@ public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
     }
 
     @Override
+    protected void appendFederatedIdentityDebugSummary(StringBuilder summary) {
+        getConfig().getConfigPropertyAsOptional(ConfigProperty.IDENTITY_POOL_ID)
+            .ifPresent(v -> summary.append(", identityPoolId=").append(v));
+        getConfig().getConfigPropertyAsOptional(ConfigProperty.IDENTITY_ID)
+            .ifPresent(v -> summary.append(", identityId=").append(v));
+        getConfig().getConfigPropertyAsOptional(ConfigProperty.DEVELOPER_NAME_ID)
+            .ifPresent(v -> summary.append(", developerNameId=").append(v));
+    }
+
+    @Override
     @SneakyThrows
     protected String getClientAssertion() {
-        GetOpenIdTokenForDeveloperIdentityResponse response = cognitoIdentityClient
+        String identityId = getConfig().getConfigPropertyOrError(ConfigProperty.IDENTITY_ID);
+        String identityPoolId = getConfig().getConfigPropertyOrError(ConfigProperty.IDENTITY_POOL_ID);
+        String developerNameId = getConfig().getConfigPropertyOrError(ConfigProperty.DEVELOPER_NAME_ID);
+        String clientId = getConfig().getConfigPropertyOrError(WorkloadIdentityFederationGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID);
+
+        log.info("Requesting Cognito OpenID token for MSFT federated credential: identityPoolId="
+            + identityPoolId + ", identityId=" + identityId + ", developerNameId=" + developerNameId
+            + ", loginValue(clientId)=" + clientId);
+
+        GetOpenIdTokenForDeveloperIdentityResponse response;
+        try {
+            response = cognitoIdentityClient
                 .getOpenIdTokenForDeveloperIdentity(GetOpenIdTokenForDeveloperIdentityRequest.builder()
-                        .identityId(getConfig().getConfigPropertyOrError(ConfigProperty.IDENTITY_ID))
-                        .identityPoolId(getConfig().getConfigPropertyOrError(ConfigProperty.IDENTITY_POOL_ID))
-                        .logins(Collections.singletonMap(getConfig().getConfigPropertyOrError(ConfigProperty.DEVELOPER_NAME_ID),
-                                getConfig().getConfigPropertyOrError(WorkloadIdentityFederationGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID)))
+                        .identityId(identityId)
+                        .identityPoolId(identityPoolId)
+                        .logins(Collections.singletonMap(developerNameId, clientId))
                         .build());
+        } catch (RuntimeException e) {
+            log.log(java.util.logging.Level.SEVERE,
+                "Failed to get Cognito OpenID token for MSFT client_assertion: identityPoolId="
+                    + identityPoolId + ", identityId=" + identityId + ", developerNameId="
+                    + developerNameId + ", cause=" + e.getMessage(),
+                e);
+            throw e;
+        }
 
         return response.token();
     }

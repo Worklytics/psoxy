@@ -416,11 +416,15 @@ public class ApiDataRequestHandler {
             builder.body("Failed to parse request; review logs");
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     ErrorCauses.CONNECTION_SETUP.name());
-            log.log(Level.WARNING, e.getMessage(), e);
             // something like "Error getting access token for service account: 401 Unauthorized POST
-            // https://oauth2.googleapis.com/token,"
-            log.log(Level.WARNING,
-                    "Confirm OAUTH_SCOPES environment variable matches scopes granted in data source");
+            // https://oauth2.googleapis.com/token," or login.microsoftonline.com/.../oauth2/v2.0/token
+            boolean tokenExchangeFailure = isOAuthTokenExchangeFailure(e);
+            Level logLevel = tokenExchangeFailure ? Level.SEVERE : Level.WARNING;
+            log.log(logLevel, e.getMessage(), e);
+            if (tokenExchangeFailure) {
+                log.log(logLevel,
+                        "OAuth token exchange failed while setting up source connection. For Google Workspace, confirm OAUTH_SCOPES matches scopes granted via domain-wide delegation. For Microsoft 365, confirm Entra app client_id, tenant id in REFRESH_ENDPOINT, federated credential / certificate, and admin consent; see token-endpoint response body in prior log lines.");
+            }
             return builder.build();
         } catch (co.worklytics.psoxy.gateway.TransientConfigException e) {
             // Config store was temporarily unreachable (e.g. credential rotation, AWS hiccup).
@@ -1151,6 +1155,29 @@ public class ApiDataRequestHandler {
 
     private boolean isSocketTimeoutException(Throwable throwable) {
         return findSocketTimeoutException(throwable) != null;
+    }
+
+    /**
+     * Whether an IOException while building the outbound source request looks like an OAuth token
+     * endpoint failure (Google or Microsoft Entra). Those should be logged at SEVERE so they show
+     * up clearly when debugging customer auth.
+     */
+    @VisibleForTesting
+    static boolean isOAuthTokenExchangeFailure(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause != null) {
+            String message = cause.getMessage();
+            if (message != null) {
+                String lower = message.toLowerCase(Locale.ROOT);
+                if (lower.contains("oauth2.googleapis.com/token")
+                        || lower.contains("login.microsoftonline.com")
+                        || lower.contains("oauth token request failed")) {
+                    return true;
+                }
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 
     private SocketTimeoutException findSocketTimeoutException(Throwable throwable) {

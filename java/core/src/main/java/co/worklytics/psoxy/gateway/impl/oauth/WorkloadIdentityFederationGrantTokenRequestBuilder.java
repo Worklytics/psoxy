@@ -9,6 +9,7 @@ import lombok.SneakyThrows;
 
 import javax.inject.Inject;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -95,6 +96,36 @@ public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
         data.put(PARAM_CLIENT_ID, oauthClientId);
 
         return new UrlEncodedContent(data);
+    }
+
+    @Override
+    public Optional<String> getTokenRequestDebugSummary() {
+        StringBuilder summary = new StringBuilder();
+        summary.append("grantType=").append(getGrantType());
+        config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID)
+            .ifPresent(id -> summary.append(", clientId=").append(id));
+        config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT)
+            .ifPresent(e -> summary.append(", refreshEndpoint=").append(e));
+        config.getConfigPropertyAsOptional(ConfigProperty.TOKEN_SCOPE)
+            .ifPresent(s -> summary.append(", tokenScope=").append(s));
+        appendFederatedIdentityDebugSummary(summary);
+
+        try {
+            String assertion = getClientAssertion();
+            summary.append(", clientAssertion=").append(AuthUtils.describeJwtForLogging(assertion));
+        } catch (Exception e) {
+            summary.append(", clientAssertionError=").append(e.getMessage());
+        }
+
+        return Optional.of(summary.toString());
+    }
+
+    /**
+     * Host-platform identity details (Cognito ids, GCP audience, etc.) useful when Entra rejects
+     * a federated credential assertion.
+     */
+    protected void appendFederatedIdentityDebugSummary(StringBuilder summary) {
+        // default: none
     }
 
     protected abstract String getClientAssertion();
