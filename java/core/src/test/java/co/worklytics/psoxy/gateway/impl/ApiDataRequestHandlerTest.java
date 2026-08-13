@@ -908,6 +908,9 @@ class ApiDataRequestHandlerTest {
     void asyncModeDisablesRedirectFollowingByDefault() {
         setup("gmail", "google.apis.com");
 
+        when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.FOLLOW_REDIRECTS)))
+            .thenReturn(Optional.empty());
+
         ApiDataRequestHandler spy = spy(handler);
 
         HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
