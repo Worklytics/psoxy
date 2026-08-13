@@ -20,7 +20,8 @@ output "artifacts_bucket_id" {
 }
 
 output "api_connector_instances" {
-  value = local.api_instances
+  description = "API connector instances. endpoint_url is the public proxy base URL (ALB https://<host>/<function-name>/ when an external load balancer is enabled; otherwise the Cloud Function URI)."
+  value       = local.api_instances
 }
 
 output "bulk_connector_instances" {
@@ -49,8 +50,11 @@ output "lookup_output_buckets" {
 }
 
 output "todos" {
-  description = "List of todo steps to complete, in markdown format."
-  value       = values(module.api_connector)[*].todo
+  description = "List of todo steps to complete, in markdown format. Includes ALB DNS setup (when managed TLS is enabled) followed by per-connector test TODOs; those TODOs use ALB endpoint URLs when an external load balancer is enabled."
+  value = concat(
+    local.alb_dns_todo != null ? [local.alb_dns_todo] : [],
+    values(module.api_connector)[*].todo
+  )
 }
 
 output "setup_todos" {

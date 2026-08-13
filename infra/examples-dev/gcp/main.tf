@@ -187,7 +187,7 @@ module "connection_in_worklytics" {
   todos_as_local_files = var.todos_as_local_files
 
   settings_to_provide = merge(
-    # Source API case
+    # Source API case — endpoint_url is the ALB URL when external_api_alb / api_connector_external_lb_host is set
     try({
       "Psoxy Base URL" = each.value.endpoint_url
     }, {}),
