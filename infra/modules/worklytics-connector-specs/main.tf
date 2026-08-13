@@ -783,7 +783,12 @@ EOT
         "admin.analytics:read",
       ]
       enable_async_processing : true
-      environment_variables : {}
+      environment_variables : {
+        # Slack Analytics issues redirects that must be intercepted manually by the proxy
+        # in async mode; disable automatic redirect following so the 3xx Location URL is fetched
+        # by the async redirect-handling block rather than transparently by the HTTP client.
+        FOLLOW_REDIRECTS : "FALSE"
+      }
       secured_variables : [
         {
           name : "ACCESS_TOKEN"
