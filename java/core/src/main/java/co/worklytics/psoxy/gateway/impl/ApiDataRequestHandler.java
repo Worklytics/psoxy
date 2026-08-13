@@ -394,9 +394,12 @@ public class ApiDataRequestHandler {
             populateHeadersFromSource(requestToSourceApi, requestToProxy, requestUrls.getTarget());
 
             // setup request
+            // In async mode, default to NOT following redirects so connectors that return 3xx
+            // Location URLs (e.g. Slack Analytics, ChatGPT) can intercept and fetch the presigned
+            // URL without forwarding OAuth Authorization headers to the redirect target.
             boolean followRedirects = config.getConfigPropertyAsOptional(ProxyConfigProperty.FOLLOW_REDIRECTS)
                     .map(Boolean::parseBoolean)
-                    .orElse(true);
+                    .orElse(!processingContext.getAsync());
 
             requestToSourceApi
                     .setThrowExceptionOnExecuteError(false)
