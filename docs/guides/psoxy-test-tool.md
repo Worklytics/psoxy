@@ -129,6 +129,21 @@ node cli-call.js -u https://us-central1-acme.cloudfunctions.net -d zoom
 
 Notice how the URL changes, and any other option the Psoxy may need doesn't.
 
+### Zoom: finding a meeting that has a summary
+
+`GET /v2/meetings/{meetingId}/meeting_summary` requires a past meeting instance UUID where Zoom AI Companion actually produced a meeting summary. Numeric IDs from `GET /v2/users/{userId}/meetings` are scheduled meetings and usually return `Invalid meeting id`.
+
+`find-zoom-meeting-summary.js` (in `tools/psoxy-test/`, next to `cli-call.js`) walks users → past meetings → instances until `has_meeting_summary` is true, then fetches the summary. Pass the Zoom function **base URL** (no API path) and the same flags you use with `cli-call.js` / `test-zoom.sh`:
+
+```shell
+# GCP (including external ALB)
+node find-zoom-meeting-summary.js -u https://us-central1-acme.cloudfunctions.net/psoxy-zoom -f gcp --allow-insecure-tls
+# AWS
+node find-zoom-meeting-summary.js -u https://acme.lambda-url.us-east-1.on.aws -r <ROLE>
+```
+
+Useful flags: `--lookback-days 180` (report meetings are searched in 30-day windows), `--max-users 5`. See [Zoom example API calls](../sources/zoom/example-api-calls.md).
+
 ## Psoxy Logs: AWS
 Assuming that you've successfully deployed the Psoxy to AWS, you can inspect the logs by running the following command:
 
