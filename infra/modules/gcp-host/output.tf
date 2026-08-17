@@ -52,7 +52,7 @@ output "lookup_output_buckets" {
 output "todos" {
   description = "List of todo steps to complete, in markdown format. Includes ALB DNS setup (when managed TLS is enabled) followed by per-connector test TODOs; those TODOs use ALB endpoint URLs when an external load balancer is enabled."
   value = concat(
-    local.alb_dns_todo != null ? [local.alb_dns_todo] : [],
+    local.alb_managed_tls ? [local.alb_dns_todo] : [],
     values(module.api_connector)[*].todo
   )
 }

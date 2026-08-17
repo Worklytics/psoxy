@@ -369,18 +369,22 @@ module "external_api_alb" {
 }
 
 locals {
-  alb_dns_setup_body = try(module.external_api_alb[0].todo_dns_setup, null)
-  alb_dns_todo       = local.alb_dns_setup_body == null ? null : <<-EOT
+  # Known at plan (input only). Do not gate count/concat on the TODO body: that string
+  # interpolates the reserved IP, which is unknown until apply and makes count fail on Terraform <1.12.
+  alb_managed_tls      = try(var.external_api_alb.domain, null) != null
+  alb_dns_setup_body   = try(module.external_api_alb[0].todo_dns_setup, null)
+  alb_dns_todo_content = <<-EOT
 ## Configure DNS for the API connector load balancer
 
-Proxy endpoint URLs in the test and Worklytics connection TODOs use `https://${local.api_connector_external_lb_host}/<function-name>/`. Create the DNS record below so that hostname resolves before testing or connecting Worklytics.
+Proxy endpoint URLs in the test and Worklytics connection TODOs use `https://${local.api_connector_external_lb_host != null ? local.api_connector_external_lb_host : ""}/<function-name>/`. Create the DNS record below so that hostname resolves before testing or connecting Worklytics.
 
-${local.alb_dns_setup_body}
+${local.alb_dns_setup_body != null ? local.alb_dns_setup_body : ""}
 EOT
+  alb_dns_todo         = local.alb_managed_tls ? local.alb_dns_todo_content : null
 }
 
 resource "local_file" "todo_alb_dns_setup" {
-  count = var.todos_as_local_files && local.alb_dns_todo != null ? 1 : 0
+  count = var.todos_as_local_files && local.alb_managed_tls ? 1 : 0
 
   filename = "TODO ${var.todo_step} - configure DNS for API connector load balancer.md"
   content  = local.alb_dns_todo
