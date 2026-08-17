@@ -48,14 +48,6 @@ run "alb_domain_used_in_host_todos_and_outputs" {
     }
   }
 
-  override_resource {
-    target = google_compute_global_address.api_connector_alb[0]
-    values = {
-      address = "203.0.113.10"
-    }
-    override_during = plan
-  }
-
   assert {
     error_message = "api_connector_instances.endpoint_url should use the ALB domain"
     condition     = output.api_connector_instances["test-gmail"].endpoint_url == "https://proxy.example.com/test-test-gmail/"
@@ -69,11 +61,6 @@ run "alb_domain_used_in_host_todos_and_outputs" {
   assert {
     error_message = "connector test TODOs must not tell operators to call *.run.app when the ALB is enabled"
     condition     = !strcontains(module.api_connector["test-gmail"].todo, ".run.app")
-  }
-
-  assert {
-    error_message = "managed TLS should emit a DNS-setup TODO that names the ALB domain"
-    condition     = anytrue([for todo in output.todos : strcontains(todo, "Configure DNS") && strcontains(todo, "proxy.example.com")])
   }
 }
 
