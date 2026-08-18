@@ -135,7 +135,7 @@ locals {
           # "iam:ListVirtualMFADevices",
           "iam:ListPolicyTags", # required if using default_tags
           "iam:ListRoleTags",   # required if using default_tags
-          "iam:PassRole", # seems required to attach roles to Lambda functions
+          "iam:PassRole",       # seems required to attach roles to Lambda functions
           # "iam:PutGroupPolicy",
           "iam:PutRolePermissionsBoundary",
           "iam:PutRolePolicy",
