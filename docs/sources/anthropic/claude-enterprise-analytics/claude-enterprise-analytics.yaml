@@ -134,9 +134,8 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[*].actor['user_id','email_address']"
-          - "$.data[*].resolved_by['user_id','email_address']"
-          - "$.data[*].spend_summary.actor['user_id','email_address']"
+          - "$..user_id"
+          - "$..email_address"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -155,9 +154,8 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.actor['user_id','email_address']"
-          - "$.resolved_by['user_id','email_address']"
-          - "$.spend_summary.actor['user_id','email_address']"
+          - "$..user_id"
+          - "$..email_address"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       $ref: "#/definitions/SpendLimitIncreaseRequest"
@@ -173,7 +171,8 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[*].actor['user_id','email_address']"
+          - "$..user_id"
+          - "$..email_address"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -192,7 +191,8 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.actor['user_id','email_address']"
+          - "$..user_id"
+          - "$..email_address"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       $ref: "#/definitions/SpendLimitEffectiveEntry"
