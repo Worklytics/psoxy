@@ -14,8 +14,8 @@ Changes to be including in future/planned release notes will be added here.
 - `allowedQueryParams` rule checks are now case-insensitive (e.g., `$top` and `$TOP` are treated as equivalent).
 - `codex-enterprise-analytics` new connector in **beta**; imports per-user daily Codex usage (threads, turns, credits, token counts, per-client/per-model breakdowns, code attribution) from OpenAI's Codex Enterprise Analytics API; see [docs/sources/codex-enterprise-analytics/README.md](docs/sources/codex-enterprise-analytics/README.md)
 - Dependencies: update Java libraries within current majors (notably Dagger 2.60, AWS SDK 2.52, Google Cloud libraries BOM 26.86, JUnit 5.14, OpenNLP 2.5.11, BouncyCastle 1.85, google-http-client 1.47) and Maven plugins; update npm tooling deps / security overrides for `psoxy-test`, `schema-tool`, and `js-reference` (brace-expansion 5.0.9, ip-address 10.5.0, js-yaml 4.3.1).
+- `claude-enterprise-analytics`: add support for Claude Spend Limits API endpoints. Existing connections must recreate the API key with the new `read:spend_limits` scope (scopes are fixed at key creation and cannot be changed later).
 - `slack-analytics`: set `FOLLOW_REDIRECTS=FALSE` so async 3xx Location URLs are intercepted by the proxy rather than followed by the HTTP client (terraform plan may show that env var change).
-- `claude-enterprise-analytics`: adding support for Claude Spent API for Claude Enterprise Analytics connector. For existing connections a new key needs to be generated with the new scopes as they are fixed on creation time, and they cannot be modified after that.
 
 ## [0.6.8](https://github.com/Worklytics/psoxy/releases/tag/v0.6.8)
 - `gcp`: optional external Application Load Balancer in front of API connector deployments via root `external-api-alb.tf` composition (superseded in 0.6.9 by first-class `external_api_alb` on `gcp-host`).
