@@ -273,12 +273,8 @@ locals {
     google_compute_global_address.api_connector_alb[0].address
   )
   api_connector_external_lb_enabled = local.api_connector_external_lb_host != null
-  # Shared LB base (no per-connector path); gcp-proxy-api appends /<function-name>
+  # Shared LB base (no per-connector path); gcp-proxy-api appends /<function-name> for TODOs and endpoint_url
   api_connector_external_lb_base_url = local.api_connector_external_lb_enabled ? "https://${local.api_connector_external_lb_host}" : null
-  api_connector_external_endpoint_urls = local.api_connector_external_lb_enabled ? {
-    for k, function_name in local.api_connector_function_names :
-    k => "${local.api_connector_external_lb_base_url}/${function_name}/"
-  } : {}
 }
 
 module "api_connector" {
@@ -360,16 +356,38 @@ module "external_api_alb" {
 
   source = "../gcp-external-api-alb"
 
-  gcp_project_id               = var.gcp_project_id
-  gcp_region                   = var.gcp_region
-  environment_id_prefix        = local.environment_id_prefix
-  global_address_id            = google_compute_global_address.api_connector_alb[0].id
-  global_address_ip            = google_compute_global_address.api_connector_alb[0].address
-  api_connector_function_names = local.api_connector_function_names
-  domain                       = try(var.external_api_alb.domain, null)
+  gcp_project_id                = var.gcp_project_id
+  gcp_region                    = var.gcp_region
+  environment_id_prefix         = local.environment_id_prefix
+  global_address_id             = google_compute_global_address.api_connector_alb[0].id
+  global_address_ip             = google_compute_global_address.api_connector_alb[0].address
+  api_connector_function_names  = local.api_connector_function_names
+  domain                        = try(var.external_api_alb.domain, null)
   allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
 
   depends_on = [module.api_connector]
+}
+
+locals {
+  # Known at plan (input only). Do not gate count/concat on the TODO body: that string
+  # interpolates the reserved IP, which is unknown until apply and makes count fail on Terraform <1.12.
+  alb_managed_tls      = try(var.external_api_alb.domain, null) != null
+  alb_dns_setup_body   = try(module.external_api_alb[0].todo_dns_setup, null)
+  alb_dns_todo_content = <<-EOT
+## Configure DNS for the API connector load balancer
+
+Proxy endpoint URLs in the test and Worklytics connection TODOs use `https://${local.api_connector_external_lb_host != null ? local.api_connector_external_lb_host : ""}/<function-name>/`. Create the DNS record below so that hostname resolves before testing or connecting Worklytics.
+
+${local.alb_dns_setup_body != null ? local.alb_dns_setup_body : ""}
+EOT
+  alb_dns_todo         = local.alb_managed_tls ? local.alb_dns_todo_content : null
+}
+
+resource "local_file" "todo_alb_dns_setup" {
+  count = var.todos_as_local_files && local.alb_managed_tls ? 1 : 0
+
+  filename = "TODO ${var.todo_step} - configure DNS for API connector load balancer.md"
+  content  = local.alb_dns_todo
 }
 
 # END API CONNECTORS
@@ -651,9 +669,10 @@ locals {
       instance,
       var.api_connectors[instance.instance_id],
       {
-        # With external LB: only ALB path is reachable from the internet (ALLOW_INTERNAL_AND_GCLB).
-        # Without: Cloud Function URI for direct invocation.
-        endpoint_url = try(local.api_connector_external_endpoint_urls[instance.instance_id], instance.cloud_function_url)
+        # Public URL from gcp-proxy-api: ALB https://<host>/<function-name>/ when an external LB
+        # is enabled (domain, reserved IP, or BYO host); otherwise the Cloud Function URI.
+        # Keep this last so Worklytics TODOs / outputs cannot pick up cloud_function_url instead.
+        endpoint_url = instance.endpoint_url
       }
     )
   }
