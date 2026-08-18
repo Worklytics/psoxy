@@ -1,0 +1,21 @@
+{
+  "scope":{
+    "type":"user",
+    "user_id":"user_abc123"
+  },
+  "actor":{
+    "type":"user_actor",
+    "user_id":"t~Wd2U4lmivWESn4fNgZWtjnW3j4TXciQNif50hO_QMVM",
+    "email_address":"t~knxWE5tapsutcz6pLWSC3wfb5t34lCrXNZsKnhwyVXk@example.com",
+    "deleted":false
+  },
+  "amount":"50000",
+  "currency":"USD",
+  "period":"monthly",
+  "source":{
+    "type":"seat_tier",
+    "seat_tier":"enterprise_standard"
+  },
+  "spend_limit_id":"spl_01XyZaBcDeFgHiJkLmNoPq",
+  "period_to_date_spend":"31402.5"
+}
