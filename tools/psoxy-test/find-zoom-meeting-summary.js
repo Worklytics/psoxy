@@ -199,7 +199,7 @@ async function main() {
         meetingsById.set(String(meeting.id), meeting);
       }
     } else {
-      logger.info(`  list previous_meetings skipped (${previous.status})`);
+      logger.verbose(`  list previous_meetings skipped (${previous.status})`);
     }
 
     for (const { from, to } of windows) {
@@ -208,7 +208,7 @@ async function main() {
         extraParams: { from, to },
       });
       if (!report.ok) {
-        logger.info(`  report ${from}..${to} skipped (${report.status})`);
+        logger.verbose(`  report ${from}..${to} skipped (${report.status})`);
         continue;
       }
       for (const meeting of report.items) {
@@ -221,7 +221,7 @@ async function main() {
     for (const [meetingId, meeting] of meetingsById) {
       const instancesResult = await call(`/v2/past_meetings/${encodeURIComponent(meetingId)}/instances`);
       if (instancesResult.status !== 200) {
-        logger.info(`  meeting ${meetingId} instances skipped (${instancesResult.status}: ${instancesResult.data?.message || 'error'})`);
+        logger.verbose(`  meeting ${meetingId} instances skipped (${instancesResult.status}: ${instancesResult.data?.message || 'error'})`);
         continue;
       }
 
@@ -240,15 +240,17 @@ async function main() {
         const encodedUuid = encodeZoomUuid(uuid);
         const details = await call(`/v2/past_meetings/${encodedUuid}`);
         if (details.status !== 200) {
-          logger.info(`    instance ${uuid} details skipped (${details.status}: ${details.data?.message || 'error'})`);
+          logger.verbose(`    instance ${uuid} details skipped (${details.status}: ${details.data?.message || 'error'})`);
           continue;
         }
 
         const hasSummary = details.data?.has_meeting_summary === true;
-        logger.info(`    ${uuid} has_meeting_summary=${hasSummary}`);
         if (!hasSummary) {
+          logger.verbose(`    ${uuid} has_meeting_summary=false`);
           continue;
         }
+
+        logger.info(`    ${uuid} has_meeting_summary=true`);
 
         const summary = await call(`/v2/meetings/${encodedUuid}/meeting_summary`);
         console.log(JSON.stringify({

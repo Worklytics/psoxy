@@ -71,11 +71,11 @@ node tools/psoxy-test/find-zoom-meeting-summary.js -u [your_psoxy_url] -f gcp --
 node tools/psoxy-test/find-zoom-meeting-summary.js -u [your_psoxy_url] -r arn:aws:iam::PROJECT_ID:role/ROLE_NAME
 ```
 
-Once you have an instance UUID (`[zoom_meeting_uuid]`), you can also call:
+If you don't want to use the script and already have an instance UUID (`[zoom_meeting_uuid]`), you can check with:
 
 ```shell
 node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/v2/past_meetings/[zoom_meeting_uuid]
 node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/v2/meetings/[zoom_meeting_uuid]/meeting_summary
 ```
 
-If the UUID starts with `/` or contains `//`, [double-encode](https://developers.zoom.us/docs/api/rest/using-zoom-apis/#meeting-id-and-uuid) it in the path. Smart Recording summaries in the Zoom UI are a different feature; this endpoint only returns AI Companion **meeting** summaries.
+If the UUID starts with `/` or contains `//`, [double-encode](https://developers.zoom.us/docs/api/using-zoom-apis/#meeting-id-and-uuid) it in the path. Smart Recording summaries in the Zoom UI are a different feature; this endpoint only returns AI Companion **meeting** summaries.
