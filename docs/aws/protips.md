@@ -40,6 +40,8 @@ provider "aws" {
 }
 ```
 
+**IAM note:** with `default_tags`, the Terraform AWS provider lists and applies tags on resources it manages (Lambda, CloudWatch Log Groups, S3 objects such as the proxy JAR when building from source, SSM, KMS, SQS, IAM roles/policies, etc.). Your provisioner role must allow the corresponding tag APIs (`*:TagResource` / `*:ListTags*` / `s3:PutObjectTagging`, and so on). The least-privileged policy from `psoxy-constants` (`aws_least_privileged_policy`) includes these; if you maintain a custom provisioner policy, keep its tagging actions in sync when you enable `default_tags`.
+
 ## Extensibility
 
 To support extensibility, our Terraform examples/modules output the IDs/names of the major resources they create, so that you can compose them with other Terraform resources.
@@ -184,7 +186,7 @@ For organizations that don't allow use of AWS Managed Policies, you can use the 
 
 YMMV, but we exposed a minimal IAM policy for provisioning in the `psoxy-constants` module, which you attach to your desired role to ensure it has sufficient permissions to provision the proxy.
 
-NOTE: using features beyond the default set, such as AWS API Gateway, VPC, or Secrets Manager, may require some additional permissions beyond what is provided in the least-privileged policy.
+NOTE: using features beyond the default set, such as AWS API Gateway, VPC, or Secrets Manager, may require some additional permissions beyond what is provided in the least-privileged policy. Using provider `default_tags` requires tagging permissions for the resources Terraform manages; those are already included in this policy (see [Tagging ALL infra](#tagging-all-infra-created-by-your-terraform-configuration)).
 
 ```hcl
 module "psoxy_constants" {
