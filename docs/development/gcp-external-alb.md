@@ -1,7 +1,7 @@
 # GCP External Application Load Balancer (ALB) + Cloud Armor (TLS + optional IP allowlist)
 
 > **Status**: **Beta** — provisioned by `gcp-host` when `external_api_alb` is set (or BYO via `api_connector_external_lb_host`). Interfaces and resource shapes may change in a future release.
-> **Last Updated**: 2026-07-30
+> **Last Updated**: 2026-08-12
 
 ## Motivation
 
@@ -83,12 +83,11 @@ These two inputs are mutually exclusive.
 When an external LB host is effective (provisioned or BYO), `gcp-host`:
 
 - Sets each API connector’s Cloud Functions `ingress_settings` to `ALLOW_INTERNAL_AND_GCLB` (required for external ALB → Cloud Functions; **not** `ALLOW_INTERNAL_ONLY`, which is for PSC).
-- Overrides public `endpoint_url` to `https://<host>/<function-name>/` (with `ALLOW_INTERNAL_AND_GCLB`, that is the internet-reachable path).
-- Passes `external_lb_base_url = https://<host>` into connectors for test-script / TODO generation.
+- Sets each connector’s public `endpoint_url` to `https://<host>/<function-name>/` (with `ALLOW_INTERNAL_AND_GCLB`, that is the internet-reachable path). Test TODOs, generated test scripts, terraform outputs, and Worklytics `"Psoxy Base URL"` all use this URL — not the Cloud Function `*.run.app` URI.
+- Passes `external_lb_base_url = https://<host>` into connectors so those TODOs / scripts are generated from the same host.
+- When `external_api_alb.domain` is set, emits a DNS-setup TODO (`TODO N - configure DNS for API connector load balancer.md`) so the hostname in those endpoint URLs can resolve.
 - Leaves Pub/Sub push endpoints on the Cloud Function `*.run.app` URI.
 - Leaves bulk connectors unchanged.
-
-Worklytics `"Psoxy Base URL"` follows `endpoint_url` via the existing connection module wiring.
 
 ### What gets provisioned
 

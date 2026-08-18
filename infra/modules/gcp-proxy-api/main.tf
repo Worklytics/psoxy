@@ -581,12 +581,18 @@ output "cloud_function_name" {
 }
 
 output "cloud_function_url" {
-  value = local.cloud_function_url
+  description = "Direct Cloud Function / Cloud Run URI (*.run.app). Pub/Sub push and internal callers use this; internet clients should use endpoint_url when an external ALB is enabled."
+  value       = local.cloud_function_url
 }
 
 output "proxy_endpoint_url" {
-  description = "Public URL used for tests / TODOs (per-connector path on external_lb_base_url when set, otherwise Cloud Function URI)."
+  description = "Public URL used for tests / TODOs (per-connector path on external_lb_base_url when set, otherwise Cloud Function URI). No trailing slash."
   value       = local.proxy_endpoint_url
+}
+
+output "endpoint_url" {
+  description = "Public proxy base URL with trailing slash (ALB https://<host>/<function-name>/ when external_lb_base_url is set, otherwise the Cloud Function URI). Use this in Worklytics connection TODOs and terraform outputs."
+  value       = "${local.proxy_endpoint_url}/"
 }
 
 output "proxy_kind" {
