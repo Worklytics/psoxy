@@ -7,6 +7,7 @@ Changes to be including in future/planned release notes will be added here.
 
 ## [Unreleased]
 - `aws`/`gcp`: fix Terraform plan failure when `enable_remote_resources = true` but no artifacts bucket exists (e.g. with a prebuilt `deployment_bundle`). When remote resources are enabled, an artifacts bucket is now provisioned if one is not already created or provided via `artifacts_bucket_name` / `custom_artifacts_bucket_name`.
+- `Claude Spent API`: adding support for Claude Spent API for Claude Enterprise Analytics connector. For existing connections a new key needs to be added with the new scopes as they are fixed on creation time and they cannot be modified after that.
 
 ## [0.6.5](https://github.com/Worklytics/psoxy/releases/tag/v0.6.5)
 - added `claude-enterprise-analytics` connector in **beta**; imports per-user daily activity, token usage, and cost data from the [Claude Enterprise Analytics API](https://support.claude.com/en/articles/13703965-claude-enterprise-analytics-api-reference-guide); see [docs/sources/anthropic/claude-enterprise-analytics/README.md](docs/sources/anthropic/claude-enterprise-analytics/README.md)
