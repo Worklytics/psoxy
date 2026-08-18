@@ -19,14 +19,14 @@
   },
   "homepage": "https://github.com/Worklytics/psoxy#readme",
   "dependencies": {
-    "@aws-sdk/client-cloudwatch-logs": "^3.1098.0",
-    "@aws-sdk/client-kms": "^3.1098.0",
-    "@aws-sdk/client-s3": "^3.1098.0",
-    "@aws-sdk/credential-providers": "^3.1098.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.1108.0",
+    "@aws-sdk/client-kms": "^3.1108.0",
+    "@aws-sdk/client-s3": "^3.1108.0",
+    "@aws-sdk/credential-providers": "^3.1108.0",
     "@google-cloud/kms": "^5.7.0",
-    "@google-cloud/logging": "^11.3.0",
+    "@google-cloud/logging": "^11.4.0",
     "@google-cloud/scheduler": "^5.4.0",
-    "@google-cloud/storage": "^7.21.0",
+    "@google-cloud/storage": "^7.22.0",
     "@stdlib/assert-is-gzip-buffer": "^0.2.3",
     "aws4": "^1.13.2",
     "chalk": "^5.6.2",
@@ -44,11 +44,11 @@
     ]
   },
   "overrides": {
-    "js-yaml": "^4.3.0",
+    "js-yaml": "^4.3.1",
     "tar": "^7.5.22",
     "@tootallnate/once": "^3.0.1",
     "brace-expansion": "^5.0.9",
-    "fast-xml-parser": "^5.7.0",
+    "fast-xml-parser": "^5.10.1",
     "uuid": "^11.1.1",
     "glob": "^13.0.6"
   }
