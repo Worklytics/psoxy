@@ -139,9 +139,8 @@ EOT
       enable_async_processing : true
       enable_side_output : false
       environment_variables : {
-        # ChatGPT Enterprise's API issues redirects that must be intercepted manually by the proxy
-        # in async mode; disable automatic redirect following so the 3xx Location URL is fetched
-        # by the async redirect-handling block rather than transparently by the HTTP client.
+        # Opt out of the default (follow 3xx). ChatGPT issues Location URLs that the async
+        # intercept path should GET without source auth; do not change the global default.
         FOLLOW_REDIRECTS : "FALSE"
       }
       example_api_calls_user_to_impersonate : null
@@ -783,7 +782,11 @@ EOT
         "admin.analytics:read",
       ]
       enable_async_processing : true
-      environment_variables : {}
+      environment_variables : {
+        # Opt out of the default (follow 3xx). Slack Analytics issues Location URLs that the
+        # async intercept path should GET without source auth; do not change the global default.
+        FOLLOW_REDIRECTS : "FALSE"
+      }
       secured_variables : [
         {
           name : "ACCESS_TOKEN"

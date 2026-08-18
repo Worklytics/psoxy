@@ -908,6 +908,9 @@ class ApiDataRequestHandlerTest {
     void handleShouldFollowRedirectManuallyInAsyncMode() {
         setup("gmail", "google.apis.com");
 
+        when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.FOLLOW_REDIRECTS)))
+            .thenReturn(Optional.of("false"));
+
         ApiDataRequestHandler spy = spy(handler);
 
         String locationUrl = "https://pre-signed.example.com/data.json";
