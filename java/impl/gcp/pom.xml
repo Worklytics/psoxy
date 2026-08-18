@@ -189,7 +189,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>${plugin.shade.version}</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -246,7 +246,7 @@
             <!-- builds deployment directory containing only 'uber' JAR for deployment as GCP cloud function -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>${plugin.resources.version}</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -271,7 +271,7 @@
             <plugin>
                 <groupId>org.cyclonedx</groupId>
                 <artifactId>cyclonedx-maven-plugin</artifactId>
-                <version>2.8.2</version>
+                <version>${plugin.cyclonedx.version}</version>
                 <executions>
                     <execution>
                         <phase>verify</phase>
@@ -303,7 +303,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>license-maven-plugin</artifactId>
-                        <version>2.5.0</version>
+                        <version>${plugin.license.version}</version>
                         <executions>
                             <execution>
                                 <id>download-dependency-licenses</id>

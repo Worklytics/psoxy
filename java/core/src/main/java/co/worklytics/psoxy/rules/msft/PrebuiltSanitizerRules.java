@@ -10,16 +10,19 @@ import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PrebuiltSanitizerRules {
+
+    // required by Graph API for `$filter`/`$search`/`$count` "advanced query" support on directory listings
+    static final Set<String> CONSISTENCY_LEVEL_HEADER = Set.of("ConsistencyLevel");
 
     static final Transform.Tokenize TOKENIZE_ODATA_LINKS = Transform.Tokenize.builder()
         .jsonPath("$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']")
@@ -86,18 +89,21 @@ public class PrebuiltSanitizerRules {
     );
     static final Endpoint ENTRA_ID_USERS = Endpoint.builder()
         .pathRegex(ENTRA_ID_REGEX_USERS)
-        .allowedQueryParams(List.of("$top", "$select", "$skiptoken", "$orderBy", "$count"))
+        .allowedQueryParams(List.of("$top", "$select", "$skiptoken", "$orderBy", "$count", "$filter"))
+        .allowedRequestHeaders(CONSISTENCY_LEVEL_HEADER)
         .transforms(USER_TRANSFORMS)
         .build();
 
     static final Endpoint ENTRA_ID_USERS_NO_APP_IDS = Endpoint.builder()
         .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO)
-        .allowedQueryParams(List.of("$top", "$select", "$skiptoken", "$orderBy", "$count"))
+        .allowedQueryParams(List.of("$top", "$select", "$skiptoken", "$orderBy", "$count", "$filter"))
+        .allowedRequestHeaders(CONSISTENCY_LEVEL_HEADER)
         .transforms(USER_TRANSFORMS)
         .build();
 
     static final Endpoint ENTRA_ID_GROUPS = Endpoint.builder()
         .pathRegex("^/v1.0/groups/?[^/]*")
+        .allowedRequestHeaders(CONSISTENCY_LEVEL_HEADER)
         .transform(PSEUDONYMIZE_PROXY_ADDRESSES)
         .transform(Transform.Redact.builder()
             .jsonPath("$..owners")
@@ -124,6 +130,7 @@ public class PrebuiltSanitizerRules {
     static final Endpoint ENTRA_ID_GROUP_MEMBERS = Endpoint.builder()
         .pathRegex(ENTRA_ID_REGEX_GROUP_MEMBERS)
         .allowedQueryParams(List.of("$top", "$select", "$skiptoken", "$orderBy", "$count"))
+        .allowedRequestHeaders(CONSISTENCY_LEVEL_HEADER)
         .transforms(USER_TRANSFORMS)
         .build();
 
@@ -191,6 +198,7 @@ public class PrebuiltSanitizerRules {
             .build(),
         Endpoint.builder()
             .pathRegex(OUTLOOK_MAIL_PATH_REGEX_SENT_MESSAGES)
+            .allowedRequestHeaders(CONSISTENCY_LEVEL_HEADER)
             .transform(Transform.Redact.builder()
                 .jsonPath("$..subject")
                 .jsonPath("$..body")
@@ -231,6 +239,7 @@ public class PrebuiltSanitizerRules {
             .build(),
         Endpoint.builder()
             .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/mailFolders(/SentItems|\\('SentItems'\\))/messages.*")
+            .allowedRequestHeaders(CONSISTENCY_LEVEL_HEADER)
             .transform(Transform.Redact.builder()
                 .jsonPath("$..subject")
                 .jsonPath("$..body")
@@ -465,6 +474,7 @@ public class PrebuiltSanitizerRules {
     static final Endpoint MS_TEAMS_USERS_CHATS = Endpoint.builder()
         .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS)
         .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$expand"))
+        .allowedRequestHeaders(CONSISTENCY_LEVEL_HEADER)
         .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
         .transform(MS_TEAMS_TEAMS_REDACT)
         .build();
@@ -584,6 +594,7 @@ public class PrebuiltSanitizerRules {
                 .build())))
         .endpoint(Endpoint.builder()
             .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/chats(\\?.*)?")
+            .allowedRequestHeaders(CONSISTENCY_LEVEL_HEADER)
             .transforms(Arrays.asList(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE,
                 // id of the chat may contain MSFT user GUIDS
                 Transform.Tokenize.builder()
@@ -776,6 +787,8 @@ public class PrebuiltSanitizerRules {
         .withAdditionalEndpoints(ENTRA_ID_USERS_NO_APP_IDS)
         .withTransformByEndpoint(ENTRA_ID_REGEX_USERS_BY_PSEUDO, ENTRA_ID_USERS_NO_APP_IDS_TRANSFORM_RULE);
 
+    static final RESTRules ONE_DRIVE = Rules2.load("sources/microsoft-365/msft-onedrive/msft-onedrive.yaml");
+    static final RESTRules ONE_DRIVE_NO_APP_IDS = Rules2.load("sources/microsoft-365/msft-onedrive/msft-onedrive_no-app-ids.yaml");
 
     public static final Map<String, RESTRules> MSFT_DEFAULT_RULES_MAP =
         ImmutableMap.<String, RESTRules>builder()
@@ -791,6 +804,8 @@ public class PrebuiltSanitizerRules {
             .put("msft-teams" + ConfigRulesModule.NO_APP_IDS_SUFFIX, MS_TEAMS_NO_USER_ID)
             .put("msft-copilot", MS_COPILOT)
             .put("msft-copilot" + ConfigRulesModule.NO_APP_IDS_SUFFIX, MS_COPILOT_NO_USER_ID)
+            .put("msft-onedrive", ONE_DRIVE)
+            .put("msft-onedrive" + ConfigRulesModule.NO_APP_IDS_SUFFIX, ONE_DRIVE_NO_APP_IDS)
             .build();
 
     private static Endpoint getMailboxSettings(String path) {
