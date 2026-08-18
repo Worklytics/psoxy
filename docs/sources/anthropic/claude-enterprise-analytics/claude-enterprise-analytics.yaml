@@ -122,6 +122,80 @@ endpoints:
             $ref: "#/definitions/UserActivity"
         next_page:
           type: "string"
+  - pathTemplate: "/v1/organizations/spend_limit_increase_requests"
+    allowedQueryParams:
+      - "page"
+      - "limit"
+      - "status[]"
+      - "actor_ids[]"
+    allowedRequestHeaders:
+      - "anthropic-version"
+      - "content-type"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].actor['user_id','email_address']"
+          - "$.data[*].resolved_by['user_id','email_address']"
+          - "$.data[*].spend_summary.actor['user_id','email_address']"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/SpendLimitIncreaseRequest"
+        next_page:
+          type: "string"
+  - pathTemplate: "/v1/organizations/spend_limit_increase_requests/{spendLimitIncreaseRequestId}"
+    allowedQueryParams: []
+    allowedRequestHeaders:
+      - "anthropic-version"
+      - "content-type"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.actor['user_id','email_address']"
+          - "$.resolved_by['user_id','email_address']"
+          - "$.spend_summary.actor['user_id','email_address']"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      $ref: "#/definitions/SpendLimitIncreaseRequest"
+  - pathTemplate: "/v1/organizations/spend_limits/effective"
+    allowedQueryParams:
+      - "page"
+      - "limit"
+      - "period[]"
+      - "user_ids[]"
+    allowedRequestHeaders:
+      - "anthropic-version"
+      - "content-type"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].actor['user_id','email_address']"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/SpendLimitEffectiveEntry"
+        next_page:
+          type: "string"
+  - pathTemplate: "/v1/organizations/spend_limits/{spendLimitId}"
+    allowedQueryParams: []
+    allowedRequestHeaders:
+      - "anthropic-version"
+      - "content-type"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.actor['user_id','email_address']"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      $ref: "#/definitions/SpendLimitEffectiveEntry"
 definitions:
   AnalyticsActor:
     type: "object"
@@ -303,11 +377,80 @@ definitions:
         type: "integer"
       skills_used_count:
         type: "integer"
+  Scope:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+      user_id:
+        type: "string"
   ServerToolUse:
     type: "object"
     properties:
       web_search_requests:
         type: "integer"
+  Source:
+    type: "object"
+    properties:
+      seat_tier:
+        type: "string"
+      service:
+        type: "string"
+      type:
+        type: "string"
+      user_id:
+        type: "string"
+  SpendLimitActor:
+    type: "object"
+    properties:
+      deleted:
+        type: "boolean"
+      email_address:
+        type: "string"
+      type:
+        type: "string"
+      user_id:
+        type: "string"
+  SpendLimitEffectiveEntry:
+    type: "object"
+    properties:
+      actor:
+        $ref: "#/definitions/SpendLimitActor"
+      amount:
+        type: "string"
+      currency:
+        type: "string"
+      period:
+        type: "string"
+      period_to_date_spend:
+        type: "string"
+      scope:
+        $ref: "#/definitions/Scope"
+      source:
+        $ref: "#/definitions/Source"
+      spend_limit_id:
+        type: "string"
+  SpendLimitIncreaseRequest:
+    type: "object"
+    properties:
+      actor:
+        $ref: "#/definitions/SpendLimitActor"
+      created_at:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      period:
+        type: "string"
+      resolved_at:
+        type: "string"
+        format: "date-time"
+      resolved_by:
+        $ref: "#/definitions/SpendLimitActor"
+      spend_summary:
+        $ref: "#/definitions/SpendLimitEffectiveEntry"
+      status:
+        type: "string"
   ToolAction:
     type: "object"
     properties:
