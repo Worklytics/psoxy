@@ -394,6 +394,17 @@ public class ApiDataRequestHandler {
             populateHeadersFromSource(requestToSourceApi, requestToProxy, requestUrls.getTarget());
 
             // setup request
+            // Default is true (follow 3xx), including in async mode — do not change this to
+            // depend on processingContext.getAsync(). Following redirects is expected HTTP-client
+            // behavior. Connectors whose APIs issue 3xx Location URLs that the async intercept
+            // path should fetch (ChatGPT, Slack Analytics) set FOLLOW_REDIRECTS=FALSE themselves.
+            //
+            // Forwarding Authorization to a 3xx Location is acceptable: the Location is chosen by
+            // the source API we already authenticated to, not an untrusted host. Stripping auth
+            // on the follow-up request is only needed when the Location is a presigned download
+            // URL that would reject an extra Authorization header; those connectors opt out via
+            // FOLLOW_REDIRECTS=FALSE, and the async redirect block then GETs the Location without
+            // source auth.
             boolean followRedirects = config.getConfigPropertyAsOptional(ProxyConfigProperty.FOLLOW_REDIRECTS)
                     .map(Boolean::parseBoolean)
                     .orElse(true);
@@ -525,9 +536,11 @@ public class ApiDataRequestHandler {
         }
 
 
-        // In async mode, treat a 3xx response with a Location header as success by fetching content
-        // from the Location URL (e.g., source returns 307 pointing to a pre-signed file download).
-        // Only applies to safe methods (GET/HEAD) — 307/308 with POST would require replaying the body.
+        // In async mode, if the HTTP client did not follow a 3xx (FOLLOW_REDIRECTS=FALSE on this
+        // connector), treat a Location header as the content URL and GET it without source auth.
+        // That is the right fetch for presigned download URLs; it is not a general rule that every
+        // 3xx Location is presigned. Only applies to safe methods (GET/HEAD) — 307/308 with POST
+        // would require replaying the body.
         if (processingContext.getAsync()
                 && isRedirectFamily(sourceApiResponse.getStatusCode())
                 && sourceApiResponse.getHeaders().getLocation() != null
