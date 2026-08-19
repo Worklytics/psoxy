@@ -250,6 +250,14 @@ EOT
         {
           method : "GET"
           path : "/v1/organizations/analytics/user_cost_report?starting_at=${formatdate("YYYY-MM-DD", local.example_api_calls_sample_interval_start)}&ending_at=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/spend_limits/effective?limit=20"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/spend_limit_increase_requests?limit=50"
         }
       ],
       external_token_todo : templatefile("${path.module}/docs/claude/claude_enterprise_analytics_instructions.tftpl", {
