@@ -698,6 +698,8 @@ locals {
 }
 
 # script to test ALL connectors
+# Use test_script_filename (computed local in each connector module), not test_script — that
+# output interpolates local_file, and a content replace then deletes the file just written.
 resource "local_file" "test_all_script" {
   count = var.todos_as_local_files ? 1 : 0
 
@@ -708,19 +710,19 @@ resource "local_file" "test_all_script" {
 
 echo "Testing API Connectors ..."
 
-%{for test_script in values(module.api_connector)[*].test_script~}
+%{for test_script in values(module.api_connector)[*].test_script_filename~}
 ./${test_script}
 %{endfor}
 
 echo "Testing Bulk Connectors ..."
 
-%{for test_script in values(module.bulk_connector)[*].test_script~}
+%{for test_script in values(module.bulk_connector)[*].test_script_filename~}
 ./${test_script}
 %{endfor}
 
 echo "Testing Webhook Collectors ..."
 
-%{for test_script in values(module.webhook_collector)[*].test_script~}
+%{for test_script in values(module.webhook_collector)[*].test_script_filename~}
 ./${test_script}
 %{endfor}
 EOF
