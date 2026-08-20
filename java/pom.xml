@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>0.6.9</revision>
+        <revision>0.6.10</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.46</dependency.lombok.version>
         <dependency.dagger.version>2.60.1</dependency.dagger.version>
