@@ -75,7 +75,7 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 
-        <!-- json schema validator-->
+        <!-- json schema validator; 3.x uses Jackson 3 (tools.jackson), which coexists with our Jackson 2 -->
         <dependency>
             <groupId>com.networknt</groupId>
             <artifactId>json-schema-validator</artifactId>
