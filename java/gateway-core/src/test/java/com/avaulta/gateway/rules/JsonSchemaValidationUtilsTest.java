@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JsonSchemaValidationUtilsTest {
 
@@ -19,8 +18,7 @@ public class JsonSchemaValidationUtilsTest {
 
         @BeforeEach
         void setUp() {
-                ObjectMapper objectMapper = new ObjectMapper();
-                validationUtils = new JsonSchemaValidationUtils(objectMapper);
+                validationUtils = new JsonSchemaValidationUtils();
 
                 // Create the test schema with representative subset
                 testSchema = createTestSchema();
