@@ -547,7 +547,7 @@ EOT
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
-  filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
+  filename        = local.test_script_filename
   file_permission = "755"
   content = templatefile("${path.module}/test_script.tftpl", {
     proxy_endpoint_url        = local.proxy_endpoint_url,
@@ -598,6 +598,11 @@ output "endpoint_url" {
 output "proxy_kind" {
   value       = "rest"
   description = "The kind of proxy instance this is."
+}
+
+# Name only; do not interpolate local_file.test_script (content replace then deletes the file).
+output "test_script_filename" {
+  value = local.test_script_filename
 }
 
 output "test_script" {

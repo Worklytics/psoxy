@@ -315,7 +315,8 @@ locals {
 
 
   # id that is unique for connector, within the environment (eg, files with this token in name, but otherwise equivalent, will not conflict)
-  local_file_id = trimprefix(local.instance_id, var.environment_id_prefix)
+  local_file_id        = trimprefix(local.instance_id, var.environment_id_prefix)
+  test_script_filename = "test-${local.local_file_id}.sh"
 
   # whether this connector needs set up
   need_setup = var.instructions_template != null
@@ -381,7 +382,7 @@ resource "local_file" "todo_test_gcp_psoxy_bulk" {
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
-  filename        = "test-${local.local_file_id}.sh"
+  filename        = local.test_script_filename
   file_permission = "755"
   content         = <<EOT
 #!/bin/bash
@@ -476,6 +477,10 @@ output "example_files" {
 output "proxy_kind" {
   value       = "bulk"
   description = "The kind of proxy instance this is."
+}
+
+output "test_script_filename" {
+  value = local.test_script_filename
 }
 
 output "test_script" {
