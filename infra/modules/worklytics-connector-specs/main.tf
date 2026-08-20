@@ -6,6 +6,14 @@ locals {
   msft_teams_example_call_guid               = try(var.msft_365_connector_settings["msft_teams_example_call_guid"], var.msft_teams_example_call_guid)
   msft_teams_example_call_record_guid        = try(var.msft_365_connector_settings["msft_teams_example_call_record_guid"], var.msft_teams_example_call_record_guid)
   msft_teams_example_online_meeting_join_url = try(var.msft_365_connector_settings["msft_teams_example_online_meeting_join_url"], var.msft_teams_example_online_meeting_join_url)
+
+  # example ids used to build msft-onedrive's example_api_calls; populate via
+  # msft_365_connector_settings (e.g. `{ msft_onedrive_example_drive_id = "b!abc123..." }`) once you
+  # have real values (from a `GET /v1.0/users/{userId}/drives` or `.../groups/{groupId}/drives`
+  # response, and a `driveItem.id` from that drive's `delta` feed, respectively).
+  example_msft_group_guid        = try(var.msft_365_connector_settings["example_msft_group_guid"], "{EXAMPLE_MSFT_GROUP_GUID}")
+  msft_onedrive_example_drive_id = try(var.msft_365_connector_settings["msft_onedrive_example_drive_id"], "{EXAMPLE_MSFT_ONEDRIVE_DRIVE_ID}")
+  msft_onedrive_example_item_id  = try(var.msft_365_connector_settings["msft_onedrive_example_item_id"], "{EXAMPLE_MSFT_ONEDRIVE_ITEM_ID}")
 }
 
 # TODO: arguably it does make sense to have these in yaml, and read them from there; bc YAML gives
@@ -131,9 +139,8 @@ EOT
       enable_async_processing : true
       enable_side_output : false
       environment_variables : {
-        # ChatGPT Enterprise's API issues redirects that must be intercepted manually by the proxy
-        # in async mode; disable automatic redirect following so the 3xx Location URL is fetched
-        # by the async redirect-handling block rather than transparently by the HTTP client.
+        # Opt out of the default (follow 3xx). ChatGPT issues Location URLs that the async
+        # intercept path should GET without source auth; do not change the global default.
         FOLLOW_REDIRECTS : "FALSE"
       }
       example_api_calls_user_to_impersonate : null
@@ -145,6 +152,35 @@ EOT
       external_token_todo : templatefile("${path.module}/docs/chatgpt/enterprise/instructions.tftpl", {
         workspace_id                = local.chat_gpt_enterprise_example_workspace_id,
         path_to_instance_parameters = "PSOXY_CHATGPT_ENTERPRISE_"
+      })
+    }
+    codex-enterprise-analytics = {
+      source_kind : "codex-enterprise-analytics",
+      availability : "beta",
+      enable_by_default : false,
+      worklytics_connector_id : "codex-enterprise-analytics-psoxy"
+      display_name : "Codex Enterprise Analytics"
+      worklytics_connector_name : "Codex Enterprise Analytics via Psoxy"
+      target_host : "api.chatgpt.com"
+      source_auth_strategy : "oauth2_access_token"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN" # OpenAI calls this a 'Platform API key', but it's actually an access token
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      settings_to_provide = {
+        "Workspace Id" = local.chat_gpt_enterprise_example_workspace_id
+      }
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/v1/analytics/codex/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/usage?start_time=${time_static.deployment.unix - 86400 * 30}&end_time=${time_static.deployment.unix}",
+      ]
+      external_token_todo : templatefile("${path.module}/docs/chatgpt/codex-enterprise-analytics/instructions.tftpl", {
+        workspace_id                = local.chat_gpt_enterprise_example_workspace_id,
+        path_to_instance_parameters = "PSOXY_CODEX_ENTERPRISE_ANALYTICS_"
       })
     }
     claude = {
@@ -214,6 +250,14 @@ EOT
         {
           method : "GET"
           path : "/v1/organizations/analytics/user_cost_report?starting_at=${formatdate("YYYY-MM-DD", local.example_api_calls_sample_interval_start)}&ending_at=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/spend_limits/effective?limit=20"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/spend_limit_increase_requests?limit=50"
         }
       ],
       external_token_todo : templatefile("${path.module}/docs/claude/claude_enterprise_analytics_instructions.tftpl", {
@@ -746,7 +790,11 @@ EOT
         "admin.analytics:read",
       ]
       enable_async_processing : true
-      environment_variables : {}
+      environment_variables : {
+        # Opt out of the default (follow 3xx). Slack Analytics issues Location URLs that the
+        # async intercept path should GET without source auth; do not change the global default.
+        FOLLOW_REDIRECTS : "FALSE"
+      }
       secured_variables : [
         {
           name : "ACCESS_TOKEN"
@@ -808,7 +856,7 @@ EOT
     }
     windsurf = {
       source_kind : "windsurf"
-      availability : "alpha",
+      availability : "deprecated",
       enable_by_default : false
       worklytics_connector_id : "windsurf-psoxy"
       display_name : "Windsurf",
@@ -885,7 +933,6 @@ EOT
       example_api_calls : [
         "/v2/users",
         "/v2/users/{USER_ID}/meetings",
-        "/v2/users/{USER_ID}/settings",
         "/v2/users/{USER_ID}/recordings",
         "/v2/meetings/{MEETING_ID}",
         "/v2/meetings/{MEETING_ID}/meeting_summary",

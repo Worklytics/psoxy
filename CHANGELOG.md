@@ -5,8 +5,42 @@ in each release's notes.
 
 Changes to be including in future/planned release notes will be added here.
 
-## [Unreleased]
+## [0.6.9](https://github.com/Worklytics/psoxy/releases/tag/v0.6.9)
+
+- `aws`: least-privileged provisioner policy (`psoxy-constants` `aws_least_privileged_policy`) adds tagging permissions needed when provider `default_tags` is set — notably `logs:ListTagsForResource` / `logs:TagResource` / `logs:UntagResource` (current CloudWatch Logs tagging APIs), `s3:PutObjectTagging` (proxy JAR upload when building from source), `lambda:ListTags` / `lambda:TagResource` / `lambda:UntagResource`, and IAM `ListRoleTags` / `ListPolicyTags`. Docs call out the requirement.
+- `gcp`: **beta** first-class optional external Application Load Balancer (ALB) via `external_api_alb` on `gcp-host` (replaces the prior root `external-api-alb.tf` composition). Cloud Armor IP rules apply only when `allowed_data_access_ip_blocks` is non-null. BYO ALB remains available via `api_connector_external_lb_host`. If you applied the old root composition, destroy those root ALB resources (or `terraform state mv` into the new module addresses) before upgrading. Enabling the ALB may add `hashicorp/tls` to your root provider lockfile (self-signed PoC path).
+- `msft-onedrive`: adding support for a new **beta** connector for fetching Microsoft OneDrive data from users and groups via Microsoft Graph API. See [docs/sources/microsoft-365/msft-onedrive/README.md](docs/sources/microsoft-365/msft-onedrive/README.md) for details.
+- `gcp`: add troubleshooting guidance for common deploy failures (permission prerequisites, org-policy networking constraints).
+- `allowedQueryParams` rule checks are now case-insensitive (e.g., `$top` and `$TOP` are treated as equivalent).
+- `codex-enterprise-analytics` new connector in **beta**; imports per-user daily Codex usage (threads, turns, credits, token counts, per-client/per-model breakdowns, code attribution) from OpenAI's Codex Enterprise Analytics API; see [docs/sources/codex-enterprise-analytics/README.md](docs/sources/codex-enterprise-analytics/README.md)
+- Dependencies: update Java libraries within current majors (notably Dagger 2.60, AWS SDK 2.52, Google Cloud libraries BOM 26.86, JUnit 5.14, OpenNLP 2.5.11, BouncyCastle 1.85, google-http-client 1.47) and Maven plugins; update npm tooling deps / security overrides for `psoxy-test`, `schema-tool`, and `js-reference` (brace-expansion 5.0.9, ip-address 10.5.0, js-yaml 4.3.1).
+- `claude-enterprise-analytics`: add support for Claude Spend Limits API endpoints. Existing connections must recreate the API key with the new `read:spend_limits` scope (scopes are fixed at key creation and cannot be changed later).
+- `slack-analytics`: set `FOLLOW_REDIRECTS=FALSE` so async 3xx Location URLs are intercepted by the proxy rather than followed by the HTTP client (terraform plan may show that env var change).
+
+## [0.6.8](https://github.com/Worklytics/psoxy/releases/tag/v0.6.8)
+- `gcp`: optional external Application Load Balancer in front of API connector deployments via root `external-api-alb.tf` composition (superseded in 0.6.9 by first-class `external_api_alb` on `gcp-host`).
+- `zoom`: default rules updated.
+- Anthropic connectors (`claude`, `claude-enterprise-analytics`): rules updated.
+- Google Workspace connector docs: document GCP APIs and DWD scope strings.
+- example-repo publish scripts: keep LF line endings for WSL shebang compatibility.
+
+## [0.6.7](https://github.com/Worklytics/psoxy/releases/tag/v0.6.7)
+- bulk: support JSONL input format.
+- `claude-code` / `sales-for-copilot`: **beta** bulk connector support for AI tool usage data.
+- `gcp`: skip Google Workspace provisioning when not configured.
 - `aws`/`gcp`: fix Terraform plan failure when `enable_remote_resources = true` but no artifacts bucket exists (e.g. with a prebuilt `deployment_bundle`). When remote resources are enabled, an artifacts bucket is now provisioned if one is not already created or provided via `artifacts_bucket_name` / `custom_artifacts_bucket_name`.
+- `msft-onedrive`: adding support for a new connector for fetching Microsoft OneDrive data from users and groups via Microsoft Graph API. See [docs](docs/sources/microsoft-365/msft-onedrive/README.md) for details.
+- `zoom`: meeting-related endpoints that take a meeting UUID (`/v2/meetings/...`, `/v2/past_meetings/...`, `/v2/report/meetings/.../participants`) now use `pathRegex` instead of `pathTemplate`, so requests with a single unencoded `/` in the meeting ID are allowed, while encoded `/` (`%2F`) and `//` (`%2F%2F`) continue to work. Path templates cannot match an unencoded embedded `/`. **Anyone who has customized Zoom rules should apply the same `pathRegex` change** (see [`docs/sources/zoom/zoom.yaml`](docs/sources/zoom/zoom.yaml)).
+- fix duplicate query parameters from API Gateway 1.0 payloads.
+- fix possible null body in side outputs.
+- `gcp`: bulk connector memory controls.
+- secret reads: handle transient failures when fetching secrets.
+
+## [0.6.6](https://github.com/Worklytics/psoxy/releases/tag/v0.6.6)
+- `gcp`: reduce apparent Terraform drift on repeat applies.
+- `gcp`: VPC troubleshooting documentation and related Terraform style fixes.
+- `chatgpt-enterprise`: fix logs sanitization regression from rules update.
+
 
 ## [0.6.5](https://github.com/Worklytics/psoxy/releases/tag/v0.6.5)
 - added `claude-enterprise-analytics` connector in **beta**; imports per-user daily activity, token usage, and cost data from the [Claude Enterprise Analytics API](https://support.claude.com/en/articles/13703965-claude-enterprise-analytics-api-reference-guide); see [docs/sources/anthropic/claude-enterprise-analytics/README.md](docs/sources/anthropic/claude-enterprise-analytics/README.md)
@@ -46,7 +80,10 @@ Changes to be including in future/planned release notes will be added here.
 
 **BREAKING / UPGRADE NOTES:**
 - `aws`: Minimum `hashicorp/aws` provider version is now `~> 6.0`. When upgrading, users must update the version constraint under `terraform { required_providers { ... } }` for `hashicorp/aws` to this version or later, and run `terraform init -upgrade` to apply.
-- `gcp`: Minimum `hashicorp/google` provider version is now `~> 7.0`. When upgrading, users must update the version constraint under `terraform { required_providers { ... } }` for `hashicorp/google` to this version or later, and run `terraform init -upgrade` to apply.
+- `gcp`:
+  - Minimum `hashicorp/google` provider version is now `~> 7.0`. When upgrading, users must update the version constraint under `terraform { required_providers { ... } }` for `hashicorp/google` to this version or later, and run `terraform init -upgrade` to apply. Our GCP example sets `version = "~> 7.0"` in root `main.tf`.
+  - `default_labels` is no longer passed into Psoxy modules. Set it on the root `provider "google"` block instead (see `infra/examples-dev/gcp/main.tf`). Provider 7.x applies `default_labels` to supported resources automatically; remove any `default_labels` arguments from module calls when upgrading from 0.5.x.
+  - Terraform provisions a Docker repository in Artifact Registry for Cloud Functions Gen 2. Your deployer needs **Artifact Registry Editor** (`roles/artifactregistry.editor`) — the least-privileged predefined role that includes `artifactregistry.repositories.create`. (`roles/artifactregistry.repoAdmin` manages artifacts in existing repositories but cannot create them; `roles/artifactregistry.admin` also works but grants additional permissions such as `repositories.setIamPolicy`.) Custom roles built from `required_gcp_perms_to_provision_host` need `create`, `update`, `get`, and `list`; `repositories.delete` is only required for `terraform destroy` and is included in `required_gcp_permissions_to_host` instead. See [docs/gcp/getting-started.md](docs/gcp/getting-started.md).
 - `azuread`: Recommended upgrade of target `hashicorp/azuread` provider to `~> 3.0` (or later). When upgrading, users are recommended to update the version constraint under `terraform { required_providers { ... } }` for `hashicorp/azuread` and run `terraform init -upgrade` to apply.
 - DEPRECATION: Top-level connector specific Terraform variables (e.g., `salesforce_domain`, `gong_instance_subdomain`, `github_enterprise_server_host`) have been deprecated. These should now be passed through the new `connector_settings` map variable.
 

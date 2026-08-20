@@ -133,7 +133,9 @@ locals {
           # "iam:ListUserPolicies",
           # "iam:ListUsers",
           # "iam:ListVirtualMFADevices",
-          "iam:PassRole", # seems required to attach roles to Lambda functions
+          "iam:ListPolicyTags", # required if using default_tags
+          "iam:ListRoleTags",   # required if using default_tags
+          "iam:PassRole",       # seems required to attach roles to Lambda functions
           # "iam:PutGroupPolicy",
           "iam:PutRolePermissionsBoundary",
           "iam:PutRolePolicy",
@@ -270,7 +272,9 @@ locals {
           # "s3:PutInventoryConfiguration",
           "s3:PutLifecycleConfiguration",
           # "s3:PutMetricsConfiguration",
-          "s3:PutObject"
+          "s3:PutObject",
+          "s3:PutObjectTagging",        # required if using default_tags (e.g. proxy JAR upload when building from source)
+          "s3:PutObjectVersionTagging", # required if using default_tags with versioned buckets
         ]
         Resource = [
           "arn:aws:s3::${local.account_id_resource_pattern}:${module.env_id.id}*",
@@ -296,12 +300,19 @@ locals {
           # "logs:DeleteSubscriptionFilter",
           "logs:PutResourcePolicy",
           "logs:DeleteResourcePolicy",
+          # Legacy LogGroup-suffixed tagging APIs (kept for older AWS provider versions)
           "logs:ListTagsLogGroup",
           "logs:TagLogGroup",
-          "logs:UntagLogGroup"
+          "logs:UntagLogGroup",
+          # Current tagging APIs used by hashicorp/aws (required if using default_tags)
+          "logs:ListTagsForResource",
+          "logs:TagResource",
+          "logs:UntagResource",
         ],
         Resource : [
           "arn:aws:logs:*:${local.account_id_resource_pattern}:log-group:/aws/lambda/${module.env_id.id}*",
+          # API Gateway / webhook collector access log groups are named with the deployment id prefix
+          "arn:aws:logs:*:${local.account_id_resource_pattern}:log-group:${module.env_id.id}*",
           # seems how needed for initial log groups; uses 'logs:DescribeLogGroups' to enumerate streams, it seems
           "arn:aws:logs:*:${local.account_id_resource_pattern}:log-group::log-stream*",
         ]
@@ -370,7 +381,9 @@ locals {
           "lambda:DeleteEventSourceMapping",
           "lambda:DeleteFunctionEventInvokeConfig",
           "lambda:DeleteFunctionConcurrency",
-          "lambda:TagResource", # required if using default_tags
+          "lambda:ListTags",      # required if using default_tags
+          "lambda:TagResource",   # required if using default_tags
+          "lambda:UntagResource", # required if using default_tags
 
           # can drop these if using API gateway stuff
           "lambda:GetFunctionUrlConfig",
@@ -529,6 +542,10 @@ locals {
       display_name    = "Compute Viewer",
       description_url = "https://docs.cloud.google.com/iam/docs/roles-permissions/compute#compute.viewer"
     },
+    "roles/artifactregistry.editor" = {
+      display_name    = "Artifact Registry Editor",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/artifactregistry#artifactregistry.editor"
+    },
   }, local.required_gcp_roles_to_provision_webhook_collectors)
 
   required_gcp_perms_to_provision_host = concat([
@@ -608,10 +625,12 @@ locals {
     "run.services.setIamPolicy",
     "run.services.update",
 
-    # Artifact Registry
+    # Artifact Registry (create + update for initial apply; delete only needed for terraform destroy)
     "artifactregistry.locations.get",
+    "artifactregistry.repositories.create",
     "artifactregistry.repositories.get",
     "artifactregistry.repositories.list",
+    "artifactregistry.repositories.update",
 
     # Compute Engine (read-only for metadata access)
     "compute.projects.get",
@@ -644,6 +663,90 @@ locals {
       description_url = "https://cloud.google.com/iam/docs/roles-permissions/vpcaccess#vpcaccess.admin"
     }
   }
+
+  # When gcp-host provisions external_api_alb (global external ALB + optional Cloud Armor).
+  # Not required when using api_connector_external_lb_host (customer-owned ALB).
+  required_gcp_roles_to_use_external_api_alb = {
+    "roles/compute.networkAdmin" = {
+      display_name    = "Compute Network Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/compute#compute.networkAdmin"
+    },
+    "roles/compute.securityAdmin" = {
+      display_name    = "Compute Security Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/compute#compute.securityAdmin"
+    },
+    # only when external_api_alb.domain is set (Google-managed TLS); omit for self-signed PoC
+    "roles/certificatemanager.editor" = {
+      display_name    = "Certificate Manager Editor",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/certificatemanager#certificatemanager.editor"
+    },
+  }
+
+  # Permissions to provision external_api_alb via gcp-host / gcp-external-api-alb.
+  # Subset suitable for a custom IAM role; see required_gcp_roles_to_use_external_api_alb for predefined roles.
+  required_gcp_perms_to_use_external_api_alb = [
+    # Global external Application Load Balancer (Compute Engine API)
+    "compute.globalAddresses.create",
+    "compute.globalAddresses.delete",
+    "compute.globalAddresses.get",
+    "compute.globalAddresses.list",
+    "compute.globalAddresses.use",
+    "compute.regionNetworkEndpointGroups.create",
+    "compute.regionNetworkEndpointGroups.delete",
+    "compute.regionNetworkEndpointGroups.get",
+    "compute.regionNetworkEndpointGroups.list",
+    "compute.backendServices.create",
+    "compute.backendServices.delete",
+    "compute.backendServices.get",
+    "compute.backendServices.list",
+    "compute.backendServices.update",
+    "compute.backendServices.setSecurityPolicy",
+    "compute.urlMaps.create",
+    "compute.urlMaps.delete",
+    "compute.urlMaps.get",
+    "compute.urlMaps.list",
+    "compute.urlMaps.update",
+    "compute.targetHttpsProxies.create",
+    "compute.targetHttpsProxies.delete",
+    "compute.targetHttpsProxies.get",
+    "compute.targetHttpsProxies.list",
+    "compute.targetHttpsProxies.update",
+    "compute.globalForwardingRules.create",
+    "compute.globalForwardingRules.delete",
+    "compute.globalForwardingRules.get",
+    "compute.globalForwardingRules.list",
+    "compute.globalForwardingRules.setTarget",
+    "compute.globalForwardingRules.use",
+
+    # Cloud Armor (when allowed_data_access_ip_blocks is set)
+    "compute.securityPolicies.create",
+    "compute.securityPolicies.delete",
+    "compute.securityPolicies.get",
+    "compute.securityPolicies.list",
+    "compute.securityPolicies.update",
+    "compute.securityPolicies.use",
+
+    # Self-signed TLS PoC (external_api_alb without domain)
+    "compute.sslCertificates.create",
+    "compute.sslCertificates.delete",
+    "compute.sslCertificates.get",
+    "compute.sslCertificates.list",
+
+    # Google-managed TLS (external_api_alb.domain)
+    "certificatemanager.certificates.create",
+    "certificatemanager.certificates.delete",
+    "certificatemanager.certificates.get",
+    "certificatemanager.certificates.list",
+    "certificatemanager.certificateMaps.create",
+    "certificatemanager.certificateMaps.delete",
+    "certificatemanager.certificateMaps.get",
+    "certificatemanager.certificateMaps.list",
+    "certificatemanager.certificateMaps.use",
+    "certificatemanager.certificateMapEntries.create",
+    "certificatemanager.certificateMapEntries.delete",
+    "certificatemanager.certificateMapEntries.get",
+    "certificatemanager.certificateMapEntries.list",
+  ]
 
   # TODO: add list of permissions, which customer could use to create custom role as alternative
   min_gcp_permissions_to_host = toset([
@@ -724,10 +827,13 @@ locals {
     "run.services.setIamPolicy",
     "run.services.update",
 
-    # Artifact Registry
+    # Artifact Registry (create + update for initial apply; delete only needed for terraform destroy)
     "artifactregistry.locations.get",
+    "artifactregistry.repositories.create",
+    "artifactregistry.repositories.delete",
     "artifactregistry.repositories.get",
     "artifactregistry.repositories.list",
+    "artifactregistry.repositories.update",
 
     # Pub/Sub
     "pubsub.subscriptions.create",

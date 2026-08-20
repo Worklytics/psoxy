@@ -42,6 +42,21 @@ If you're running the Terraform examples in a different location from where you 
     node cli-call.js -u https://acme.lambda-url.us-east-1.on.aws/v2/users -r arn:aws:iam::310635719553:role/PsoxyApiCaller
     ```
 
+### Zoom meeting summaries
+
+`GET /v2/meetings/{meetingId}/meeting_summary` only works for a **past meeting instance** that generated a Zoom AI Companion meeting summary. Generated `test-zoom.sh` examples use a `{MEETING_ID}` placeholder; passing a numeric id from `GET /v2/users/{userId}/meetings` (scheduled meetings) typically returns Zoom error `300` / `Invalid meeting id`.
+
+`tools/psoxy-test/find-zoom-meeting-summary.js` uses the same HTTP helpers as `cli-call.js` to walk users → past meetings → instances until `has_meeting_summary` is true, then calls the summary endpoint. Pass the Zoom function **base URL** (no API path) plus the same flags as `test-zoom.sh`:
+
+```shell
+# GCP (including external ALB)
+node tools/psoxy-test/find-zoom-meeting-summary.js -u https://us-central1-acme.cloudfunctions.net/psoxy-zoom -f gcp
+# AWS
+node tools/psoxy-test/find-zoom-meeting-summary.js -u https://acme.lambda-url.us-east-1.on.aws -r arn:aws:iam::310635719553:role/PsoxyApiCaller
+```
+
+See [Zoom example API calls](../sources/zoom/example-api-calls.md) and the [Psoxy test tool](psoxy-test-tool.md) for details.
+
 ### Testing Deployments made without Terraform
 
 If you used and approach other than Terraform, or did not directly use our Terraform examples, you may not have the testing examples or the test tool installed on your machine.

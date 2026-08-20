@@ -7,6 +7,9 @@ endpoints:
       - "$skiptoken"
       - "$orderBy"
       - "$count"
+      - "$filter"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:
@@ -49,6 +52,8 @@ endpoints:
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:
@@ -85,6 +90,8 @@ endpoints:
       - "$skiptoken"
       - "$orderBy"
       - "$count"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:

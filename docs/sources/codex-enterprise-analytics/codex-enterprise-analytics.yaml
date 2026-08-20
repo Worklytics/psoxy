@@ -1,0 +1,140 @@
+---
+endpoints:
+- pathTemplate: "/v1/analytics/codex/workspaces/{workspaceId}/usage"
+  allowedQueryParams:
+  - "start_time"
+  - "end_time"
+  - "limit"
+  - "page"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.data[*].user_id"
+    - "$.data[*].actor['user_id','email']"
+    encoding: "URL_SAFE_TOKEN"
+  responseSchema:
+    type: "object"
+    properties:
+      object:
+        type: "string"
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/UsageRow"
+      has_more:
+        type: "boolean"
+      next_page:
+        type: "string"
+definitions:
+  AccountUserActor:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      type:
+        type: "string"
+      user_id:
+        type: "string"
+  ClientUsage:
+    type: "object"
+    properties:
+      cached_text_input_tokens:
+        type: "integer"
+      client_id:
+        type: "string"
+      credits:
+        type: "number"
+      text_output_tokens:
+        type: "integer"
+      text_total_tokens:
+        type: "integer"
+      threads:
+        type: "integer"
+      turns:
+        type: "integer"
+      uncached_text_input_tokens:
+        type: "integer"
+  CodeAttributionMetrics:
+    type: "object"
+    properties:
+      commits:
+        $ref: "#/definitions/CommitAttribution"
+      lines_of_code:
+        $ref: "#/definitions/LinesOfCodeAttribution"
+  CommitAttribution:
+    type: "object"
+    properties:
+      with_codex_contribution:
+        type: "integer"
+      with_codex_contribution_percentage:
+        type: "number"
+  LinesOfCodeAttribution:
+    type: "object"
+    properties:
+      added:
+        type: "integer"
+      committed:
+        type: "integer"
+      committed_percentage:
+        type: "number"
+      removed:
+        type: "integer"
+  ModelUsage:
+    type: "object"
+    properties:
+      cached_text_input_tokens:
+        type: "integer"
+      credits:
+        type: "number"
+      model:
+        type: "string"
+      speed:
+        type: "string"
+      text_output_tokens:
+        type: "integer"
+      text_total_tokens:
+        type: "integer"
+      uncached_text_input_tokens:
+        type: "integer"
+  Usage:
+    type: "object"
+    properties:
+      cached_text_input_tokens:
+        type: "integer"
+      credits:
+        type: "number"
+      text_output_tokens:
+        type: "integer"
+      text_total_tokens:
+        type: "integer"
+      threads:
+        type: "integer"
+      turns:
+        type: "integer"
+      uncached_text_input_tokens:
+        type: "integer"
+  UsageRow:
+    type: "object"
+    properties:
+      actor:
+        $ref: "#/definitions/AccountUserActor"
+      clients:
+        type: "array"
+        items:
+          $ref: "#/definitions/ClientUsage"
+      code_attribution:
+        $ref: "#/definitions/CodeAttributionMetrics"
+      end_time:
+        type: "integer"
+      models:
+        type: "array"
+        items:
+          $ref: "#/definitions/ModelUsage"
+      object:
+        type: "string"
+      start_time:
+        type: "integer"
+      totals:
+        $ref: "#/definitions/Usage"
+      user_id:
+        type: "string"

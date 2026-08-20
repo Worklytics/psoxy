@@ -52,7 +52,23 @@ public class ClaudeEnterpriseAnalyticsTests extends JavaRulesTestBaseCase {
             // /user_cost_report — page 2+ (cursor pagination; has_more=false in example so next_page is null)
             InvocationExample.of("https://api.anthropic.com/v1/organizations/analytics/user_cost_report?starting_at=2026-06-01&ending_at=2026-06-08&page=cursor_page_2", "user_cost_report.json"),
             // /user_cost_report — with optional filter params
-            InvocationExample.of("https://api.anthropic.com/v1/organizations/analytics/user_cost_report?starting_at=2026-06-01&ending_at=2026-06-08&products[]=claude&order=asc&order_by=amount", "user_cost_report.json")
+            InvocationExample.of("https://api.anthropic.com/v1/organizations/analytics/user_cost_report?starting_at=2026-06-01&ending_at=2026-06-08&products[]=claude&order=asc&order_by=amount", "user_cost_report.json"),
+
+            // /spend_limits/effective — page 1
+            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limits/effective?limit=20", "spend_limits_effective.json"),
+            // /spend_limits/effective — page 2+ (cursor pagination)
+            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limits/effective?limit=20&page=cursor_token_jkl", "spend_limits_effective.json"),
+            // /spend_limits/effective — always requested with all three periods
+            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limits/effective?period[]=daily&period[]=weekly&period[]=monthly&limit=20", "spend_limits_effective.json"),
+            // /spend_limits/{spend_limit_id} — single-record lookup, not called by the ingestion job but allow-listed
+            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limits/spl_01XyZaBcDeFgHiJkLmNoPq", "spend_limit_effective_single.json"),
+
+            // /spend_limit_increase_requests — page 1
+            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limit_increase_requests?status[]=pending&limit=50", "spend_limit_increase_requests.json"),
+            // /spend_limit_increase_requests — page 2+ (cursor pagination; no next_page in example so null)
+            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limit_increase_requests?limit=50&page=cursor_page_2", "spend_limit_increase_requests.json"),
+            // /spend_limit_increase_requests/{spend_limit_increase_request_id} — single-record lookup, not called by the ingestion job but allow-listed
+            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limit_increase_requests/slir_01AbCdEfGhIjKlMnOpQrSt", "spend_limit_increase_request_single.json")
         );
     }
 }

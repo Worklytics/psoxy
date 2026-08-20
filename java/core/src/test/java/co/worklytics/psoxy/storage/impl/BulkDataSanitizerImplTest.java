@@ -100,6 +100,7 @@ public class BulkDataSanitizerImplTest {
         TestModules.ForApiModeConfig.class,
         TestModules.ForFixedClock.class,
         TestModules.ForFixedUUID.class,
+        MockModules.ForHostEnvironment.class,
         MockModules.ForConfigService.class,
         MockModules.ForSecretStore.class,
         ForPlaceholderRules.class,

@@ -44,6 +44,9 @@ class ApiModeConfigTest {
                 if (property == ApiModeConfig.ApiModeConfigProperty.REQUEST_TIMEOUT_SECONDS) {
                     return Optional.of("240");
                 }
+                if (property == ApiModeConfig.ApiModeConfigProperty.REQUEST_PATH_PREFIX_TO_TRIM) {
+                    return Optional.of("/v1/");
+                }
                 return Optional.empty();
             }
         };
@@ -54,6 +57,7 @@ class ApiModeConfigTest {
         assertEquals("oauth", config.getSourceAuthStrategyIdentifier().orElseThrow());
         assertEquals(ApiModeConfig.TlsVersions.TLSv1_2, config.getTlsVersion());
         assertEquals("s3://bucket/async", config.getAsyncOutputDestination().orElseThrow());
+        assertEquals("/v1/", config.getRequestPathPrefixToTrim().orElseThrow());
         assertEquals(240, config.getRequestTimeoutSeconds());
         assertEquals(210_000, config.getSourceApiReadTimeoutMs());
     }

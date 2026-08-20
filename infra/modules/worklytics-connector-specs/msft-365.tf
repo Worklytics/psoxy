@@ -102,6 +102,37 @@ locals {
         "/v1.0/groups/{GROUP_ID}/members"
       ]
     },
+    "msft-onedrive" : {
+      source_kind : "msft-onedrive"
+      availability : "beta",
+      enable_by_default : false,
+      worklytics_connector_id : "msft-onedrive-psoxy",
+      display_name : "Microsoft OneDrive"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
+      required_oauth2_permission_scopes : []
+      required_app_roles : [
+        # least-privilege permission for enumerating users'/groups' drives and reading the
+        # driveItem delta and activities feeds this connector calls.
+        "Files.Read.All",
+        # to enumerate the users/groups whose OneDrives are polled; this connector also requires
+        # a separate Microsoft Entra ID connection to be configured.
+        "User.Read.All",
+        "Group.Read.All",
+      ]
+      environment_variables : local.msft_365_environment_variables
+      external_todo : null
+      enable_side_output : false
+      example_api_calls : [
+        "/v1.0/users",
+        "/v1.0/groups",
+        "/v1.0/users/${local.example_msft_user_guid}/drives",
+        "/v1.0/groups/${local.example_msft_group_guid}/drives",
+        "/v1.0/drives/${local.msft_onedrive_example_drive_id}/root/delta",
+        "/v1.0/drives/${local.msft_onedrive_example_drive_id}/items/${local.msft_onedrive_example_item_id}/activities",
+        "/v1.0/drives/${local.msft_onedrive_example_drive_id}/activities",
+      ]
+    },
     "msft-teams" : {
       source_kind : "msft-teams"
       availability : "ga",
