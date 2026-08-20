@@ -17,7 +17,7 @@
         <dependency.jackson.version>2.22.1</dependency.jackson.version>
         <dependency.apache-commons-lang3.version>3.20.0</dependency.apache-commons-lang3.version>
         <dependency.apache-commons-csv.version>1.14.1</dependency.apache-commons-csv.version>
-        <dependency.guava.version>33.6.0-jre</dependency.guava.version>
+        <dependency.guava.version>33.7.0-jre</dependency.guava.version>
         <dependency.commons-io.version>2.22.0</dependency.commons-io.version>
         <dependency.commons-net.version>3.13.0</dependency.commons-net.version>
         <dependency.apache-httpcore.version>5.4.3</dependency.apache-httpcore.version>
