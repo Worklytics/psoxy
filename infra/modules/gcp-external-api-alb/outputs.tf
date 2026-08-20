@@ -22,7 +22,6 @@ output "todo_dns_setup" {
 }
 
 output "self_signed_ca_cert" {
-  description = "Self-signed server certificate (PEM). Trust with psoxy-test --cacert, or use --allow-insecure-tls for quick PoC checks."
+  description = "Self-signed server certificate PEM (public cert, not the private key). Trust with psoxy-test --cacert, or use --allow-insecure-tls for quick PoC checks."
   value       = try(tls_self_signed_cert.api_proxy[0].cert_pem, null)
-  sensitive   = true
 }
