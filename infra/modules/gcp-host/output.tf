@@ -85,5 +85,4 @@ output "external_api_alb" {
     todo_dns_setup      = try(module.external_api_alb[0].todo_dns_setup, null)
     self_signed_ca_cert = try(module.external_api_alb[0].self_signed_ca_cert, null)
   }
-  sensitive = true
 }
