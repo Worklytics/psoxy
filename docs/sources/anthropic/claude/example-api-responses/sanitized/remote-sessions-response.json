@@ -1,0 +1,35 @@
+{
+  "data":[
+    {
+      "id":"cse_01A0000000000000000001",
+      "organization_uuid":"00000000-0000-0000-0000-000000000000",
+      "agent_id":null,
+      "user":{
+        "id":"t~_2Kjfd0YkU-cOB-9pRhn9HJ0jIQfatmMmhDMtUsN6BE",
+        "email_address":"t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com"
+      },
+      "started_by_user":null,
+      "status":"active",
+      "created_at":"2026-01-02T03:04:05.000000Z",
+      "updated_at":"2026-01-02T03:04:05.000000Z",
+      "product_surface":"cowork_remote",
+      "claude_project_id":"claude_proj_01Nm7PqRsTuVwXyZaBcDeFgH"
+    },
+    {
+      "id":"cse_01A0000000000000000002",
+      "organization_uuid":"00000000-0000-0000-0000-000000000000",
+      "agent_id":"agent_01SvYKoWVRVHoEbwESNvzYdR",
+      "user":null,
+      "started_by_user":{
+        "id":"t~jKM-CaMiqY6bEt5D95tRBB7o1c5rdWPsRoS4cJDvjdQ",
+        "email_address":"t~kQ722c0ydyagstrsf2u6mjLp14ZidbEkX2-WNEZcwtQ@example.com"
+      },
+      "status":"pending",
+      "created_at":"2026-01-03T10:00:00.000000Z",
+      "updated_at":"2026-01-03T10:05:00.000000Z",
+      "product_surface":"cowork_remote",
+      "claude_project_id":null
+    }
+  ],
+  "next_page":"page_AAE..."
+}
