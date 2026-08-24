@@ -29,12 +29,11 @@ See the [Microsoft 365 Authorization](../README.md#authorization) section of the
 
 | API Endpoint                     | Example Response                                                                           | Sanitized Example Response                                                                     |
 |----------------------------------|--------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| `/v1.0/me/mailFolders/SentItems/messages` | [original/Messages_SentItems_v1.0.json](example-api-responses/original/Messages_SentItems_v1.0.json) | [sanitized/Messages_SentItems_v1.0.json](example-api-responses/sanitized/Messages_SentItems_v1.0.json) |
-| `/v1.0/me/messages/{messageId}`      | [original/Message_v1.0.json](example-api-responses/original/Message_v1.0.json)                 | [sanitized/Message_v1.0.json](example-api-responses/sanitized/Message_v1.0.json)                   |
-| `/v1.0/me/mailboxSettings` | [original/MailboxSettings_v1.0.json](example-api-responses/original/MailboxSettings_v1.0.json) | [sanitized/MailboxSettings_v1.0.json](example-api-responses/sanitized/MailboxSettings_v1.0.json) |
+| `/v1.0/users/{userId}/mailFolders/SentItems/messages` | [original/Messages_SentItems_v1.0.json](example-api-responses/original/Messages_SentItems_v1.0.json) | [sanitized/Messages_SentItems_v1.0.json](example-api-responses/sanitized/Messages_SentItems_v1.0.json) |
+| `/v1.0/users/{userId}/messages/{messageId}`      | [original/Message_v1.0.json](example-api-responses/original/Message_v1.0.json)                 | [sanitized/Message_v1.0.json](example-api-responses/sanitized/Message_v1.0.json)                   |
+| `/v1.0/users/{userId}/mailboxSettings` | [original/MailboxSettings_v1.0.json](example-api-responses/original/MailboxSettings_v1.0.json) | [sanitized/MailboxSettings_v1.0.json](example-api-responses/sanitized/MailboxSettings_v1.0.json) |
 
-Assuming proxy is auth'd as an application, you'll have to replace `me` with your MSFT ID or
-`UserPrincipalName` (often your email address).
+`{userId}` is an Entra user id (GUID) from `GET /v1.0/users`. Application-only auth does not allow `/v1.0/me/...`; use `/v1.0/users/{userId}/...`. `{messageId}` is a mail message id from `GET /v1.0/users/{userId}/mailFolders/SentItems/messages`. `{groupId}` (on `GET /v1.0/groups/{groupId}/members`) is a group id from `GET /v1.0/groups`.
 
 See more examples in the `docs/sources/microsoft-365/msft-teams/example-api-responses` folder
 of the [Psoxy repository](https://github.com/Worklytics/psoxy).

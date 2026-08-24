@@ -30,6 +30,8 @@ This connector uses API token authentication. See the [Atlassian Organization Ad
 | `/admin/v1/orgs/{orgId}/events-stream`                   | Stream organization audit events             | `read:events:admin`      |
 | `/admin/v2/orgs/{orgId}/directories/{directoryId}/users` | Retrieve users from organization directories | `read:directories:admin` |
 
+`{orgId}` is your Atlassian organization id (`connector_settings.atlassian_organization_id`). `{directoryId}` is a directory id, or `-` for all directories (Atlassian wildcard).
+
 ## Example API Responses
 
 See the `example-api-responses/original/` directory for sample API responses from each endpoint.

@@ -20,6 +20,7 @@ Due to these limitations on the availability and terms of the Discovery API, **W
 ## Examples
 
 - [Example Rules](discovery.yaml)
+- [Example API calls](example-api-calls.md) for validating proxy behavior
 - Example Data : [original/discovery-conversations-history.json](example-api-responses/original/discovery-conversations-history.json) |
   [sanitized/discovery-conversations-history.json](example-api-responses/sanitized/discovery-conversations-history.json)
 

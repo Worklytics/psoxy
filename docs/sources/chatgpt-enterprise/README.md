@@ -35,5 +35,11 @@ Do not select the owner's personal organization.
 - Example Data : [original/sample_log_message.json](example-api-responses/original/sample_log_message.json) |
   [sanitized/sample_log_message.json](example-api-responses/sanitized/sample_log_message.json)
 
+Example API call path parameters (camelCase, matching the source `pathTemplate`):
+
+- `{workspaceId}`: your ChatGPT Enterprise workspace id (Worklytics "Workspace Id" / `connector_settings.chat_gpt_enterprise_example_workspace_id`).
+- `{conversationId}`: a conversation id from `GET /v1/compliance/workspaces/{workspaceId}/conversations`.
+- `{logFileId}`: a log file id from `GET /v1/compliance/workspaces/{workspaceId}/logs`.
+
 See more examples in the `docs/sources/chatgpt-enterprise/example-api-responses` folder
 of the [Psoxy repository](https://github.com/Worklytics/psoxy).

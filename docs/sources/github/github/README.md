@@ -1,5 +1,7 @@
 # GitHub
 
+**Connector ID:** `github`
+
 Availability: **GA**
 
 ## Authentication workflow
@@ -12,6 +14,17 @@ The connector uses a GitHub App to authenticate and access the data. You must pr
 - Example Data:
   - [original/user.json](example-api-responses/original/user.json) |
     [sanitized/user.json](example-api-responses/sanitized/user.json)
+
+Example API call path parameters (camelCase, matching the source `pathTemplate`):
+
+- `{org}` / `{owner}`: `github_organization`.
+- `{repo}`: `github_example_repository`.
+- `{installationId}`: `github_installation_id`.
+- `{teamSlug}`: a team slug from `GET /orgs/{org}/teams`.
+- `{issueNumber}` / `{pullNumber}`: numbers from `GET .../issues` and `GET .../pulls`.
+- `{ref}` / `{commitSha}`: from `GET .../commits`.
+- `{commentId}` / `{reviewId}`: from the matching comments/reviews lists.
+- `{username}`: **must** be a reversible-pseudonym token (`p~` + ≥43 base64url chars) of a `login` from `GET /orgs/{org}/members`. A raw GitHub login is blocked. GraphQL is `POST /graphql`.
 
 ## GitHub Enterprise: Steps to Connect
 

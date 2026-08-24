@@ -34,3 +34,5 @@ that for definitive information.
 
 3. Copy the value of the token in `PSOXY_JIRA_SERVER_ACCESS_TOKEN` variable as part of AWS System
    Manager Parameter Store / GCP Cloud Secrets.
+
+Example API call path parameters: `{issueId}` is a Jira issue key or id (`connector_settings.jira_example_issue_id`), e.g. `ETV-12`. `{apiVersion}` in the rules is `2` or `latest` (both are allowed).

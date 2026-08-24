@@ -28,44 +28,44 @@ variable "msft_tenant_id" {
 
 variable "example_msft_user_guid" {
   type        = string
-  description = "[DEPRECATED - use map instead] example MSFT user guid (uuid) for test API calls (OPTIONAL)"
-  default     = "{EXAMPLE_MSFT_USER_GUID}"
+  description = "[DEPRECATED - use map instead] example MSFT user id (GUID) for test API calls; fills `{userId}` (OPTIONAL)"
+  default     = "{userId}"
 }
 
 variable "msft_teams_example_team_guid" {
   type        = string
-  description = "[DEPRECATED - use map instead] example of MSFT Id (GUID) of a Teams Team for test API calls (OPTIONAL)"
-  default     = "{EXAMPLE_MSFT_TEAMS_TEAM_GUID}"
+  description = "[DEPRECATED - use map instead] example MSFT Teams team id (GUID) for test API calls; fills `{teamId}` (OPTIONAL)"
+  default     = "{teamId}"
 }
 
 variable "msft_teams_example_channel_guid" {
   type        = string
-  description = "[DEPRECATED - use map instead] example of MSFT Id (GUID) of a Teams Channel for test API calls (OPTIONAL)"
-  default     = "{EXAMPLE_MSFT_TEAMS_CHANNEL_GUID}"
+  description = "[DEPRECATED - use map instead] example MSFT Teams channel id (GUID) for test API calls; fills `{channelId}` (OPTIONAL)"
+  default     = "{channelId}"
 }
 
 variable "msft_teams_example_chat_guid" {
   type        = string
-  description = "[DEPRECATED - use map instead] example of MSFT Id (GUID) of a Teams Chat for test API calls (OPTIONAL)"
-  default     = "{EXAMPLE_MSFT_TEAMS_CHAT_GUID}"
+  description = "[DEPRECATED - use map instead] example MSFT Teams chat id (GUID) for test API calls; fills `{chatId}` (OPTIONAL)"
+  default     = "{chatId}"
 }
 
 variable "msft_teams_example_call_guid" {
   type        = string
-  description = "[DEPRECATED - use map instead] example of MSFT Id (GUID) of a Teams Call for test API calls (OPTIONAL)"
-  default     = "{EXAMPLE_MSFT_TEAMS_CALL_GUID}"
+  description = "[DEPRECATED - use map instead] example MSFT Teams call id (GUID) for test API calls; fills `{callId}` (OPTIONAL)"
+  default     = "{callId}"
 }
 
 variable "msft_teams_example_call_record_guid" {
   type        = string
-  description = "[DEPRECATED - use map instead] example of MSFT Id (GUID) of a Teams Call Record for test API calls (OPTIONAL)"
-  default     = "{EXAMPLE_MSFT_TEAMS_CALL_RECORD_GUID}"
+  description = "[DEPRECATED - use map instead] example MSFT Teams call-record id (GUID) for test API calls; fills `{callRecordId}` (OPTIONAL)"
+  default     = "{callRecordId}"
 }
 
 variable "msft_teams_example_online_meeting_join_url" {
   type        = string
-  description = "[DEPRECATED - use map instead] example of an URL to join into an OnlineMeeting for test API calls (OPTIONAL)"
-  default     = "{EXAMPLE_MSFT_TEAMS_ONLINE_MEETING_URL}"
+  description = "[DEPRECATED - use map instead] example Teams online-meeting join URL for test API calls; used as the JoinWebUrl filter value (OPTIONAL)"
+  default     = "{joinWebUrl}"
 }
 
 variable "msft_owners_email" {

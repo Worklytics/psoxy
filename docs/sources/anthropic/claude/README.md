@@ -16,6 +16,8 @@ Our Claude data connector uses the [Compliance API](https://platform.claude.com/
 | `GET /v1/compliance/organizations` | Organizations metadata | `read:compliance_org_data` |
 | `GET /v1/compliance/organizations/{organizationUuid}/users` | User accounts in the organization | `read:compliance_user_data` |
 
+`{organizationUuid}` is an organization id from `GET /v1/compliance/organizations`. `{chatId}` is a chat id from `GET /v1/compliance/apps/chats`.
+
 ## Steps to Connect
 
 See [Anthropic's documentation](https://platform.claude.com/docs/en/manage-claude/compliance-api-access) for the latest, but as of early 2026 the following is required:

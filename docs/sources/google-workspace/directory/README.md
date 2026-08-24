@@ -36,6 +36,8 @@ Enable the following API in the GCP project where you provision the OAuth client
   - [original/user.json](example-api-responses/original/user.json) |
     [sanitized/user.json](example-api-responses/sanitized/user.json)
 
+Example API call path parameters: `{accountId}` is a Directory user email or user id from `GET .../users`. `{groupId}` is a group email or group id from `GET .../groups`. `{orgUnitPath}` is an org-unit path from `GET .../orgunits` (for example `Engineering`). `{customerId}` in the rules is `my_customer` in the generated examples.
+
 See more examples in the `docs/sources/google-workspace/gdrive/example-api-responses` folder
 of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
