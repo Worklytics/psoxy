@@ -27,6 +27,7 @@ locals {
       ]
       environment_variables : {}
       enable_side_output : false
+      # `{accountId}` in the rules is `primary` (calendar) or `me` (settings / calendarList) here.
       example_api_calls : [
         "/calendar/v3/calendars/primary",
         "/calendar/v3/users/me/settings",

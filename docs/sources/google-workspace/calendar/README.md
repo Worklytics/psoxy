@@ -34,7 +34,7 @@ Enable the following API in the GCP project where you provision the OAuth client
   - [original/events.json](example-api-responses/original/events.json) |
     [sanitized/events.json](example-api-responses/sanitized/events.json)
 
-Example API call path parameters: `{eventId}` is a Calendar event id from `GET /calendar/v3/calendars/primary/events` for the impersonated user.
+Example API call path parameters: `{eventId}` is a Calendar event id from `GET /calendar/v3/calendars/primary/events` for the impersonated user. `{accountId}` in the rules is `primary` (calendar) or `me` (settings / calendarList) in the generated examples; it can also be a calendar id or user email.
 
 
 ---

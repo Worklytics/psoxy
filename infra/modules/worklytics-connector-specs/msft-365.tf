@@ -98,6 +98,8 @@ locals {
         "/v1.0/users?\\$select=id,mail,otherMails",
         "/v1.0/users/${local.example_msft_user_guid}/mailboxSettings",
         "/v1.0/users/${local.example_msft_user_guid}/mailFolders/SentItems/messages",
+        # `{messageId}` is a mail message id from GET .../mailFolders/SentItems/messages.
+        "/v1.0/users/${local.example_msft_user_guid}/messages/{messageId}",
         "/v1.0/groups",
         "/v1.0/groups/{groupId}/members"
       ]
