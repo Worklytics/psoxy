@@ -37,7 +37,7 @@
         <plugin.resources.version>3.5.0</plugin.resources.version>
         <plugin.jar.version>3.5.1</plugin.jar.version>
         <plugin.exec.version>3.6.3</plugin.exec.version>
-        <plugin.cyclonedx.version>2.9.2</plugin.cyclonedx.version>
+        <plugin.cyclonedx.version>2.9.3</plugin.cyclonedx.version>
         <plugin.license.version>2.7.1</plugin.license.version>
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
