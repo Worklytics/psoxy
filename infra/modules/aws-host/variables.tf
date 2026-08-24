@@ -183,6 +183,13 @@ variable "general_environment_variables" {
   default     = {}
 }
 
+variable "api_connector_path_prefix_to_trim" {
+  type        = string
+  description = "If set, passed as REQUEST_PATH_PREFIX_TO_TRIM on all API connectors. Stripped from inbound request paths before the function-name segment (e.g. `/v1/` when routing is `/<prefix>/<function-name>/...`)."
+  default     = null
+  nullable    = true
+}
+
 variable "new_relic_account_id" {
   type        = string
   description = "**beta** New Relic account ID to enable New Relic instrumentation."

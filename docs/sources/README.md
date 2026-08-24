@@ -16,6 +16,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `claude`                   | [Claude](anthropic/claude/README.md)                                        | API  | BETA         |
 | `claude-enterprise-analytics` | [Claude Enterprise Analytics](anthropic/claude-enterprise-analytics/README.md) | API  | BETA         |
 | `claude-code`              | [Claude Code](anthropic/claude-code/README.md)                              | API  | BETA         |
+| `codex-enterprise-analytics` | [Codex Enterprise Analytics](codex-enterprise-analytics/README.md)        | API  | BETA         |
 | `confluence-cloud`         | [Confluence Cloud](atlassian/confluence/README.md)                          | API  | BETA         |
 | `cursor`                   | [Cursor](cursor/README.md)                                                  | API  | BETA         |
 | `dropbox-business`         | [Dropbox Business](dropbox-business/README.md)                              | API  | DEPRECATED   |
@@ -51,7 +52,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `slack-ai-analytics-bulk`  | [Slack AI Analytics Bulk](slack/slack-ai-bulk/README.md)                    | Bulk | ALPHA        |
 | `slack-discovery-api`      | [Slack via Discovery API](slack/slack-discovery-api/README.md)              | API  | GA           |
 | `survey`                   | [Survey](survey/README.md)                                                  | Bulk | GA           |
-| `windsurf`                 | [Windsurf](windsurf/README.md)                                              | API  | ALPHA        |
+| `windsurf`                 | [Windsurf](windsurf/README.md)                                              | API  | DEPRECATED   |
 | `workdata-generic`         | [Workdata Generic](workdata-generic/README.md)                              | Bulk | BETA         |
 | `zoom`                     | [Zoom](zoom/README.md)                                                      | API  | GA           |
 

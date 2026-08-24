@@ -25,6 +25,16 @@ output "required_gcp_roles_to_use_vpc" {
   description = "The GCP roles required to use a VPC to host Psoxy in GCP. Needed UNLESS you're merely using an existing VPC, subnetwork, and connector."
 }
 
+output "required_gcp_roles_to_use_external_api_alb" {
+  value       = local.required_gcp_roles_to_use_external_api_alb
+  description = "The GCP roles required when gcp-host provisions external_api_alb (global external ALB + optional Cloud Armor). Not needed for api_connector_external_lb_host (BYO ALB)."
+}
+
+output "required_gcp_permissions_to_use_external_api_alb" {
+  value       = local.required_gcp_perms_to_use_external_api_alb
+  description = "The GCP permissions required when gcp-host provisions external_api_alb. Subset of permissions in required_gcp_roles_to_use_external_api_alb, suitable for creating a custom IAM role."
+}
+
 output "required_gcp_roles_to_provision_google_workspace_source" {
   value       = local.required_gcp_roles_to_provision_google_workspace_source
   description = "The GCP roles required to provision OAuth Client(s) needed to use Google Workspace as a data source via Psoxy"

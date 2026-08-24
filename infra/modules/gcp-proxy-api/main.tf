@@ -547,7 +547,7 @@ EOT
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
-  filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
+  filename        = local.test_script_filename
   file_permission = "755"
   content = templatefile("${path.module}/test_script.tftpl", {
     proxy_endpoint_url        = local.proxy_endpoint_url,
@@ -581,17 +581,28 @@ output "cloud_function_name" {
 }
 
 output "cloud_function_url" {
-  value = local.cloud_function_url
+  description = "Direct Cloud Function / Cloud Run URI (*.run.app). Pub/Sub push and internal callers use this; internet clients should use endpoint_url when an external ALB is enabled."
+  value       = local.cloud_function_url
 }
 
 output "proxy_endpoint_url" {
-  description = "Public URL used for tests / TODOs (per-connector path on external_lb_base_url when set, otherwise Cloud Function URI)."
+  description = "Public URL used for tests / TODOs (per-connector path on external_lb_base_url when set, otherwise Cloud Function URI). No trailing slash."
   value       = local.proxy_endpoint_url
+}
+
+output "endpoint_url" {
+  description = "Public proxy base URL with trailing slash (ALB https://<host>/<function-name>/ when external_lb_base_url is set, otherwise the Cloud Function URI). Use this in Worklytics connection TODOs and terraform outputs."
+  value       = "${local.proxy_endpoint_url}/"
 }
 
 output "proxy_kind" {
   value       = "rest"
   description = "The kind of proxy instance this is."
+}
+
+# Name only; do not interpolate local_file.test_script (content replace then deletes the file).
+output "test_script_filename" {
+  value = local.test_script_filename
 }
 
 output "test_script" {

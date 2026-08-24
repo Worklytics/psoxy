@@ -47,18 +47,18 @@ node cli-call.js -u https://us-central1-acme.cloudfunctions.net/outlook-cal/v1.0
 
 #### External ALB URLs (beta)
 
-When API connectors are fronted by a customer-composed external ALB, test URLs look like `https://<domain-or-ip>/<function-name>/...` rather than `*.run.app`. Use:
+When API connectors are fronted by an external Application Load Balancer (ALB), test URLs look like `https://<domain-or-ip>/<function-name>/...` rather than `*.run.app`. Use:
 
 - `-f gcp` so the tool treats the host as a GCP-hosted deployment (required when the hostname is not `*.run.app` / `*.cloudfunctions.net`)
-- `--allow-insecure-tls` for PoC self-signed certs on a reserved global IP, **or** `--cacert <path>` to trust the PEM from Terraform output `external_alb_self_signed_ca_cert`
+- `--allow-insecure-tls` for PoC self-signed certs on a reserved global IP, **or** `--cacert <path>` to trust the PEM from Terraform output `external_api_alb.self_signed_ca_cert`
 
 ```shell
 node cli-call.js -u https://203.0.113.10/myenv-outlook-cal/ -f gcp --allow-insecure-tls --health-check
 ```
 
-Generated test scripts from Terraform add these flags when `api_connector_external_lb_host` is set. Your client IP must be allowlisted in Cloud Armor / `allowed_data_access_ip_blocks` to reach the ALB. See [GCP External ALB + Cloud Armor](../development/gcp-external-alb.md).
+Generated test scripts from Terraform add these flags when an external LB base URL is set (`external_api_alb` on `gcp-host`, or BYO `api_connector_external_lb_host`). When `allowed_data_access_ip_blocks` is set, your client IP must be allowlisted (Cloud Armor + app layer) to reach the ALB. See [GCP External Application Load Balancer (ALB) + Cloud Armor](../development/gcp-external-alb.md).
 
-**Common errors when testing through an external ALB:**
+**Common errors when testing through an external Application Load Balancer (ALB):**
 
 | Symptom | Likely cause | What to check |
 |---|---|---|
@@ -128,6 +128,21 @@ node cli-call.js -u https://us-central1-acme.cloudfunctions.net -d zoom
 ```
 
 Notice how the URL changes, and any other option the Psoxy may need doesn't.
+
+### Zoom: finding a meeting that has a summary
+
+`GET /v2/meetings/{meetingId}/meeting_summary` requires a past meeting instance UUID where Zoom AI Companion actually produced a meeting summary. Numeric IDs from `GET /v2/users/{userId}/meetings` are scheduled meetings and usually return `Invalid meeting id`.
+
+`find-zoom-meeting-summary.js` (in `tools/psoxy-test/`, next to `cli-call.js`) walks users → past meetings → instances until `has_meeting_summary` is true, then fetches the summary. Pass the Zoom function **base URL** (no API path) and the same flags you use with `cli-call.js` / `test-zoom.sh`:
+
+```shell
+# GCP (including external ALB)
+node find-zoom-meeting-summary.js -u https://us-central1-acme.cloudfunctions.net/psoxy-zoom -f gcp --allow-insecure-tls
+# AWS
+node find-zoom-meeting-summary.js -u https://acme.lambda-url.us-east-1.on.aws -r <ROLE>
+```
+
+Useful flags: `--lookback-days 180` (report meetings are searched in 30-day windows), `--max-users 5`. See [Zoom example API calls](../sources/zoom/example-api-calls.md).
 
 ## Psoxy Logs: AWS
 Assuming that you've successfully deployed the Psoxy to AWS, you can inspect the logs by running the following command:

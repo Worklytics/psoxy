@@ -70,5 +70,6 @@
         }
       }
     }
-  ]
+  ],
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/drives/b!abc123/root/delta(token=1230919asd190410jlka)"
 }

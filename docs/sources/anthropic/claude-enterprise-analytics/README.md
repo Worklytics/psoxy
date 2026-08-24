@@ -4,7 +4,9 @@
 
 **Availability:** Beta
 
-Our Claude Enterprise Analytics data connector uses the [Enterprise Analytics API](https://support.claude.com/en/articles/13703965-claude-enterprise-analytics-api-reference-guide) (Enterprise plan only) to import per-user usage metrics across all Claude surfaces — chat, Claude Code, Office add-ins, and Cowork — into Worklytics.
+Our Claude Enterprise Analytics data connector uses the [Enterprise Analytics API](https://support.claude.com/en/articles/13703965-claude-enterprise-analytics-api-reference-guide) (Enterprise plan only) to import per-user usage metrics across all Claude surfaces — chat, Claude Code, Office add-ins, and Cowork — into Worklytics. It also imports per-member spend limit data from the [Spend Limits API](https://platform.claude.com/docs/en/manage-claude/spend-limits-api), which shares the same Enterprise key and is likewise Enterprise-only.
+
+**Proxy version:** the Spend Limits endpoints below are allow-listed starting in proxy version `0.6.9`.
 
 ## Data Collected
 
@@ -14,6 +16,12 @@ Our Claude Enterprise Analytics data connector uses the [Enterprise Analytics AP
 | `GET /v1/organizations/analytics/apps/chat/projects` | Per-project chat stats: creator identity, distinct user count, conversation count, message count | `read:analytics` |
 | `GET /v1/organizations/analytics/user_usage_report` | Aggregated token consumption per user: uncached input, cache creation, cache read, output, total tokens, web search requests, request count | `read:analytics` |
 | `GET /v1/organizations/analytics/user_cost_report` | Aggregated cost breakdown per user: amount, list amount, currency, request count | `read:analytics` |
+| `GET /v1/organizations/spend_limits/effective` | Per-member effective spend limit, its source (user override, seat tier, group, or org default), and period-to-date spend | `read:spend_limits` |
+| `GET /v1/organizations/spend_limits/{spend_limit_id}` | Single spend-limit record lookup by id (same shape as one row of `/effective`) | `read:spend_limits` |
+| `GET /v1/organizations/spend_limit_increase_requests` | A member's request for a higher spend limit and how it was resolved (pending/approved/denied) | `read:spend_limits` |
+| `GET /v1/organizations/spend_limit_increase_requests/{spend_limit_increase_request_id}` | Single increase-request record lookup by id | `read:spend_limits` |
+
+Only `GET` endpoints are allow-listed. Setting/clearing a spend limit override and approving/denying an increase request (`POST`/`DELETE`) are admin actions, not data reporting, and are intentionally not proxied.
 
 ### Privacy
 
@@ -42,3 +50,7 @@ See the [Claude Enterprise Analytics API Reference](https://support.claude.com/e
   - [apps_chat_projects.json](example-api-responses/original/apps_chat_projects.json) | [sanitized](example-api-responses/sanitized/apps_chat_projects.json)
   - [user_usage_report.json](example-api-responses/original/user_usage_report.json) | [sanitized](example-api-responses/sanitized/user_usage_report.json)
   - [user_cost_report.json](example-api-responses/original/user_cost_report.json) | [sanitized](example-api-responses/sanitized/user_cost_report.json)
+  - [spend_limits_effective.json](example-api-responses/original/spend_limits_effective.json) | [sanitized](example-api-responses/sanitized/spend_limits_effective.json)
+  - [spend_limit_effective_single.json](example-api-responses/original/spend_limit_effective_single.json) | [sanitized](example-api-responses/sanitized/spend_limit_effective_single.json)
+  - [spend_limit_increase_requests.json](example-api-responses/original/spend_limit_increase_requests.json) | [sanitized](example-api-responses/sanitized/spend_limit_increase_requests.json)
+  - [spend_limit_increase_request_single.json](example-api-responses/original/spend_limit_increase_request_single.json) | [sanitized](example-api-responses/sanitized/spend_limit_increase_request_single.json)

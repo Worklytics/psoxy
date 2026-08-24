@@ -468,11 +468,12 @@ resource "google_cloud_scheduler_job" "trigger_batch_processing" {
 }
 
 locals {
-  proxy_endpoint_url  = google_cloudfunctions2_function.function.service_config[0].uri
-  command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
-  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js"
-  signing_key_id      = var.provision_auth_key == null ? null : google_kms_crypto_key.webhook_auth_key[0].id
-  command_test_logs   = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions2_function.function.project}\" -f \"${google_cloudfunctions2_function.function.name}\""
+  proxy_endpoint_url   = google_cloudfunctions2_function.function.service_config[0].uri
+  command_npm_install  = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
+  command_cli_call     = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js"
+  signing_key_id       = var.provision_auth_key == null ? null : google_kms_crypto_key.webhook_auth_key[0].id
+  command_test_logs    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions2_function.function.project}\" -f \"${google_cloudfunctions2_function.function.name}\""
+  test_script_filename = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
 }
 
 locals {
@@ -534,7 +535,7 @@ EOT
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
-  filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
+  filename        = local.test_script_filename
   file_permission = "755"
   content = templatefile("${path.module}/test_script.tftpl", {
     collector_endpoint_url = local.proxy_endpoint_url,
@@ -575,6 +576,10 @@ output "cloud_function_url" {
 output "proxy_kind" {
   value       = "webhook-collector"
   description = "The kind of proxy instance this is."
+}
+
+output "test_script_filename" {
+  value = local.test_script_filename
 }
 
 output "test_script" {

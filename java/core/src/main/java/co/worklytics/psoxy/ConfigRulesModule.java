@@ -99,9 +99,9 @@ public class ConfigRulesModule {
         String rulesKey = source + rulesIdSuffix;
 
         log.warning(String.format(
-            "No RULES found configured explicitly; falling back to prebuilt Java rules for SOURCE=%s. "
+            "No RULES found configured explicitly; falling back to prebuilt Java rules for SOURCE=%s (rulesKey=%s). "
                 + "This fallback will be removed in v0.7; rules must be explicitly configured.",
-            rulesKey));
+            source, rulesKey));
 
         RESTRules regularDefaults = PrebuiltSanitizerRules.DEFAULTS.get(source);
 

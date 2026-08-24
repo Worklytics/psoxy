@@ -48,6 +48,7 @@ class SanitizerUtilsTest {
         MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
             RESTApiSanitizerImplTest.ForConfigService.class,
+            MockModules.ForHostEnvironment.class,
             MockModules.ForSecretStore.class,
             // TestModules.ForSecretStore.class,
         })

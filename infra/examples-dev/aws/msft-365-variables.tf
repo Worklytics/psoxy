@@ -63,4 +63,24 @@ variable "msft_365_connector_settings" {
   type        = map(any)
   description = "Map of configuration settings specifically for MSFT 365 connectors (e.g. test GUIDs, custom paths). Supported keys: example_msft_user_guid, example_msft_group_guid, msft_teams_example_team_guid, msft_teams_example_channel_guid, msft_teams_example_chat_guid, msft_teams_example_call_guid, msft_teams_example_call_record_guid, msft_teams_example_online_meeting_join_url, msft_onedrive_example_drive_id, msft_onedrive_example_item_id. Note that provider-controlling parameters (like msft_tenant_id or existing app IDs) remain top-level variables."
   default     = {}
+
+  validation {
+    condition = length(setsubtract(
+      toset(keys(var.msft_365_connector_settings)),
+      toset([
+        "example_msft_user_guid",
+        "example_msft_group_guid",
+        "msft_teams_example_team_guid",
+        "msft_teams_example_channel_guid",
+        "msft_teams_example_chat_guid",
+        "msft_teams_example_call_guid",
+        "msft_teams_example_call_record_guid",
+        "msft_teams_example_online_meeting_join_url",
+        "msft_onedrive_example_drive_id",
+        "msft_onedrive_example_item_id",
+      ])
+    )) == 0
+
+    error_message = "msft_365_connector_settings contains unsupported keys. Supported keys are: example_msft_user_guid, example_msft_group_guid, msft_teams_example_team_guid, msft_teams_example_channel_guid, msft_teams_example_chat_guid, msft_teams_example_call_guid, msft_teams_example_call_record_guid, msft_teams_example_online_meeting_join_url, msft_onedrive_example_drive_id, and msft_onedrive_example_item_id."
+  }
 }

@@ -259,6 +259,7 @@ module "api_connector" {
       )
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     },
+    var.api_connector_path_prefix_to_trim != null ? { REQUEST_PATH_PREFIX_TO_TRIM = var.api_connector_path_prefix_to_trim } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
   )
