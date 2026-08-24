@@ -759,7 +759,7 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2 MS_COPILOT_NO_USER_ID = Rules2.builder()
         .endpoint(Endpoint.builder()
-            .pathRegex("^/beta/copilot/users/(/p~[a-zA-Z0-9_-]+?)?[^/]*/interactionHistory/getAllEnterpriseInteractions(\\?.*)?")
+            .pathRegex("^/beta/copilot/users/(p~[a-zA-Z0-9_-]+?)?[^/]*/interactionHistory/getAllEnterpriseInteractions(\\?.*)?")
             .transforms(Arrays.asList(MS_COPILOT_PSEUDONYMIZE,
                 // id of the chat may contain MSFT user GUIDS
                 Transform.Tokenize.builder()
