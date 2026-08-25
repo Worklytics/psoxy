@@ -18,7 +18,7 @@ of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 Before running the example, you have to populate the following variables in terraform:
 
 - `salesforce_domain`. This is the [domain](https://help.salesforce.com/s/articleView?id=sf.faq_domain_name_what.htm&type=5) your instance is using.
-- `salesforce_example_account_id`: An Account Id (`{accountId}`) used only in example test calls (`GET .../composite/sobjects/Account?ids={accountId}` and `POST /services/data/v64.0/composite`).
+- `salesforce_example_account_id`: An Account Id (`{ANY ACCOUNT ID}`) used only in example test calls (`GET .../composite/sobjects/Account?ids={ANY ACCOUNT ID}` and `POST /services/data/v64.0/composite`).
 
 1. Create a [Salesforce external application](https://help.salesforce.com/s/articleView?id=xcloud.create_a_local_external_client_app.htm&type=5):
     - Ensure "Enable OAuth" is checked

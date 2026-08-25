@@ -17,7 +17,7 @@ Do not select the owner's personal organization.
 
 **Note on Message Authorship:** The specific encoding of `bot` vs `user` messages in the compliance API is currently undocumented by OpenAI. Psoxy rule datasets support the observed `author.type` field and the earlier best-guess `author.role` field for conditional filtering algorithms.
 
-**Note on legacy `conversations` endpoints:** OpenAI has deprecated the synchronous `/conversations` and `/conversations/{conversationId}/messages` compliance API paths in favor of the `/logs` API (see [Example Rules](chatgpt-enterprise.yaml)). Those legacy paths are scheduled to be closed around **June 6, 2026**. Psoxy rules intentionally still allow them so existing deployments can migrate on their own schedule; new integrations should use the `/logs` endpoints only.
+**Note on legacy `conversations` endpoints:** OpenAI has deprecated the synchronous `/conversations` and `/conversations/{CONVERSATION_ID}/messages` compliance API paths in favor of the `/logs` API (see [Example Rules](chatgpt-enterprise.yaml)). Those legacy paths are scheduled to be closed around **June 6, 2026**. Psoxy rules intentionally still allow them so existing deployments can migrate on their own schedule; new integrations should use the `/logs` endpoints only.
 
 ## Instructions to Connect
 
@@ -35,11 +35,11 @@ Do not select the owner's personal organization.
 - Example Data : [original/sample_log_message.json](example-api-responses/original/sample_log_message.json) |
   [sanitized/sample_log_message.json](example-api-responses/sanitized/sample_log_message.json)
 
-Example API call path parameters (camelCase, matching the source `pathTemplate`):
+Example API call path parameters (uppercase placeholders in generated test calls):
 
-- `{workspaceId}`: your ChatGPT Enterprise workspace id (Worklytics "Workspace Id" / `connector_settings.chat_gpt_enterprise_example_workspace_id`).
-- `{conversationId}`: a conversation id from `GET /v1/compliance/workspaces/{workspaceId}/conversations`.
-- `{logFileId}`: a log file id from `GET /v1/compliance/workspaces/{workspaceId}/logs`.
+- `{WORKSPACE_ID}`: your ChatGPT Enterprise workspace id (Worklytics "Workspace Id" / `connector_settings.chat_gpt_enterprise_example_workspace_id`).
+- `{CONVERSATION_ID}`: a conversation id from `GET /v1/compliance/workspaces/{WORKSPACE_ID}/conversations`.
+- `{LOG_FILE_ID}`: a log file id from `GET /v1/compliance/workspaces/{WORKSPACE_ID}/logs`.
 
 See more examples in the `docs/sources/chatgpt-enterprise/example-api-responses` folder
 of the [Psoxy repository](https://github.com/Worklytics/psoxy).

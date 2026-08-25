@@ -4,9 +4,9 @@ Example commands (\*) that you can use to validate proxy behavior against the Sl
 
 Path / query parameters:
 
-- `{teamId}`: a workspace/team id from `GET /api/discovery.enterprise.info` (`.enterprise.teams[].id`).
-- `{channelId}`: a channel id from `GET /api/discovery.conversations.list` (`.channels[].id`).
-- `{userId}`: a user id from `GET /api/discovery.users.list` (`.users[].id`); required by `discovery.user.conversations`.
+- `{WORKSPACE_ID}`: a workspace/team id from `GET /api/discovery.enterprise.info` (`.enterprise.teams[].id`).
+- `{CHANNEL_ID}`: a channel id from `GET /api/discovery.conversations.list` (`.channels[].id`).
+- `{USER_ID}`: a user id from `GET /api/discovery.users.list` (`.users[].id`); required by `discovery.user.conversations`.
 
 `discovery.conversations.info` allows only `channel`, `team`, and `offset` — do not pass `limit`.
 
@@ -35,7 +35,7 @@ node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.users.list?i
 ### Read conversations for a user
 
 ```shell
-node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.user.conversations?user={userId}&limit=10
+node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.user.conversations?user={USER_ID}&limit=10
 ```
 
 ### Read Conversations in Workspace (any kind, public and private)
@@ -46,10 +46,10 @@ node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.user.convers
 node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.enterprise.info?limit=1
 ```
 
-2. Get conversation details of that workspace (replace `{teamId}` with the corresponding value):
+2. Get conversation details of that workspace (replace `{WORKSPACE_ID}` with the corresponding value):
 
 ```shell
-node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversations.list?team={teamId}&limit=10
+node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversations.list?team={WORKSPACE_ID}&limit=10
 ```
 
 ### Read Messages in Workspace Channel
@@ -57,7 +57,7 @@ node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversation
 1. Get a channel ID (accessor path in response `.channels[0].id`):
 
 ```shell
-node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversations.list?team={teamId}&limit=10
+node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversations.list?team={WORKSPACE_ID}&limit=10
 ```
 
 2. Get DM information (no workspace):
@@ -69,25 +69,25 @@ node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversation
 3. Read messages for a workspace channel:
 
 ```shell
-node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversations.history?reactions=1&team={teamId}&channel={channelId}&limit=10
+node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversations.history?reactions=1&team={WORKSPACE_ID}&channel={CHANNEL_ID}&limit=10
 ```
 
 4. Omit the workspace ID if the channel is a DM:
 
 ```shell
-node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversations.history?channel={channelId}&limit=10
+node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversations.history?channel={CHANNEL_ID}&limit=10
 ```
 
 ### Workspace Channel Info
 
 ```shell
-node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversations.info?team={teamId}&channel={channelId}
+node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversations.info?team={WORKSPACE_ID}&channel={CHANNEL_ID}
 ```
 
 Omit the workspace ID if the channel is a DM:
 
 ```shell
-node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversations.info?channel={channelId}
+node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.conversations.info?channel={CHANNEL_ID}
 ```
 
 ### Recent Workspace Conversations

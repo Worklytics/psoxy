@@ -26,13 +26,13 @@ See the [Microsoft 365 Authorization](../README.md#authorization) section of the
 
 | API Endpoint | Example Response                                                             | Sanitized Example Response |
 | --- |------------------------------------------------------------------------------| --- |
-| `/v1.0/groups/{groupId}/members` | [original/group-members.json](example-api-responses/original/group-members.json) | [sanitized/group-members.json](example-api-responses/sanitized/group-members.json) |
+| `/v1.0/groups/{GROUP_ID}/members` | [original/group-members.json](example-api-responses/original/group-members.json) | [sanitized/group-members.json](example-api-responses/sanitized/group-members.json) |
 | `/v1.0/users` | [original/users.json](example-api-responses/original/users.json)             | [sanitized/users.json](example-api-responses/sanitized/users.json) |
-| `/v1.0/users/{userId}` | [original/user.json](example-api-responses/original/user.json)              | [sanitized/user.json](example-api-responses/sanitized/user.json) |
+| `/v1.0/users/{EXAMPLE_MSFT_USER_GUID}` | [original/user.json](example-api-responses/original/user.json)              | [sanitized/user.json](example-api-responses/sanitized/user.json) |
 | `/v1.0/groups` | [original/groups.json](example-api-responses/original/groups.json)          | [sanitized/groups.json](example-api-responses/sanitized/groups.json) |
 
 
-`{userId}` is an Entra user id (GUID) from `GET /v1.0/users`. `{groupId}` is a group id from `GET /v1.0/groups`. Application-only auth should use `/v1.0/users/{userId}`, not `/v1.0/me`.
+`{EXAMPLE_MSFT_USER_GUID}` is an Entra user id (GUID) from `GET /v1.0/users`. `{GROUP_ID}` is a group id from `GET /v1.0/groups`. Application-only auth should use `/v1.0/users/{EXAMPLE_MSFT_USER_GUID}`, not `/v1.0/me`.
 
 See more examples in the `docs/sources/microsoft-365/entra-id/example-api-responses` folder
 of the [Psoxy repository](https://github.com/Worklytics/psoxy).

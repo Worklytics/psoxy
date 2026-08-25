@@ -12,11 +12,11 @@ Our Claude data connector uses the [Compliance API](https://platform.claude.com/
 |---|---|---|
 | `GET /v1/compliance/activities` | Audit log of actions taken by users in Claude (chat created, file uploaded, etc.) | `read:compliance_activities` |
 | `GET /v1/compliance/apps/chats` | Chat conversations, including metadata about the user and project | `read:compliance_user_data` |
-| `GET /v1/compliance/apps/chats/{chatId}/messages` | Individual messages within a chat (message text is hashed) | `read:compliance_user_data` |
+| `GET /v1/compliance/apps/chats/{CHAT_ID}/messages` | Individual messages within a chat (message text is hashed) | `read:compliance_user_data` |
 | `GET /v1/compliance/organizations` | Organizations metadata | `read:compliance_org_data` |
-| `GET /v1/compliance/organizations/{organizationUuid}/users` | User accounts in the organization | `read:compliance_user_data` |
+| `GET /v1/compliance/organizations/{ORGANIZATION_UUID}/users` | User accounts in the organization | `read:compliance_user_data` |
 
-`{organizationUuid}` is an organization id from `GET /v1/compliance/organizations`. `{chatId}` is a chat id from `GET /v1/compliance/apps/chats`.
+`{ORGANIZATION_UUID}` is an organization id from `GET /v1/compliance/organizations`. `{CHAT_ID}` is a chat id from `GET /v1/compliance/apps/chats`.
 
 ## Steps to Connect
 

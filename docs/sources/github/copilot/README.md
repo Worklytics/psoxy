@@ -15,12 +15,12 @@ The connector uses a GitHub App to authenticate and access the data. You must pr
   - [original/user.json](example-api-responses/original/user.json) |
     [sanitized/user.json](example-api-responses/sanitized/user.json)
 
-Example API call path parameters (camelCase, matching the source `pathTemplate`):
+Example API call path parameters (uppercase placeholders in generated test calls):
 
-- `{org}`: `github_organization`.
-- `{teamSlug}`: a team slug from `GET /orgs/{org}/teams`.
-- `{installationId}`: `github_copilot_installation_id`.
-- `{username}`: **must** be a reversible-pseudonym token (`p~` + ≥43 base64url chars) of a `login` from `GET /orgs/{org}/members`. GraphQL is `POST /graphql`.
+- `{ORG}`: `github_organization`.
+- `{TEAM_SLUG}`: a team slug from `GET /orgs/{ORG}/teams`.
+- `{INSTALLATION_ID}`: `github_copilot_installation_id`.
+- `{USERNAME}`: **must** be a reversible-pseudonym token (`p~` + ≥43 base64url chars) of a `login` from `GET /orgs/{ORG}/members`. GraphQL is `POST /graphql`.
 
 ## GitHub Copilot: Steps to connect
 

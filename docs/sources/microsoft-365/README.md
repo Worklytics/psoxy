@@ -55,7 +55,7 @@ To enable sandboxing:
 
 ### Example API Calls
 
-Each connector's Terraform-generated setup instructions include a list of example API calls you can use to test your connection once it's deployed. Some of these calls include path segments (a user GUID, a Teams team/channel/chat id, a OneDrive group/drive/item id, etc.) that Terraform cannot enumerate on its own — by default these are left as camelCase placeholders matching the source `pathTemplate` (e.g. `{userId}`, `{teamId}`, `{driveId}`) for you to substitute by hand.
+Each connector's Terraform-generated setup instructions include a list of example API calls you can use to test your connection once it's deployed. Some of these calls include path segments (a user GUID, a Teams team/channel/chat id, a OneDrive group/drive/item id, etc.) that Terraform cannot enumerate on its own — by default these are left as uppercase placeholders (e.g. `{EXAMPLE_MSFT_USER_GUID}`) for you to substitute by hand.
 
 If you'd rather have real, directly-runnable example calls generated, provide real values for these via the `msft_365_connector_settings` Terraform variable (a map), e.g. in your `terraform.tfvars`:
 

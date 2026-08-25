@@ -32,12 +32,12 @@ See the [Microsoft 365 Authorization](../README.md#authorization) section of the
 
 | API Endpoint                     | Example Response                                                                           | Sanitized Example Response                                                                     |
 |----------------------------------|--------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| `/v1.0/users/{userId}/events`                | [original/Events_v1.0.json](example-api-responses/original/Events_v1.0.json)               | [sanitized/Events_v1.0.json](example-api-responses/sanitized/Events_v1.0.json)                 |
-| `/v1.0/users/{userId}/events/{eventId}`      | [original/Event_v1.0.json](example-api-responses/original/Event_v1.0.json)                 | [sanitized/Event_v1.0.json](example-api-responses/sanitized/Event_v1.0.json)                   |
-| `/v1.0/users/{userId}/calendar/calendarView` | [original/CalendarView_v1.0.json](example-api-responses/original/CalendarView_v1.0.json) | [sanitized/CalendarView_v1.0.json](example-api-responses/sanitized/CalendarView_v1.0.json) |
-| `/v1.0/users/{userId}/calendar/events`       | [original/CalendarEvents_v1.0.json](example-api-responses/original/CalendarEvents_v1.0.json) | [sanitized/CalendarEvents_v1.0.json](example-api-responses/sanitized/CalendarEvents_v1.0.json) |
+| `/v1.0/users/{EXAMPLE_MSFT_USER_GUID}/events`                | [original/Events_v1.0.json](example-api-responses/original/Events_v1.0.json)               | [sanitized/Events_v1.0.json](example-api-responses/sanitized/Events_v1.0.json)                 |
+| `/v1.0/users/{EXAMPLE_MSFT_USER_GUID}/events/{EVENT_ID}`      | [original/Event_v1.0.json](example-api-responses/original/Event_v1.0.json)                 | [sanitized/Event_v1.0.json](example-api-responses/sanitized/Event_v1.0.json)                   |
+| `/v1.0/users/{EXAMPLE_MSFT_USER_GUID}/calendar/calendarView` | [original/CalendarView_v1.0.json](example-api-responses/original/CalendarView_v1.0.json) | [sanitized/CalendarView_v1.0.json](example-api-responses/sanitized/CalendarView_v1.0.json) |
+| `/v1.0/users/{EXAMPLE_MSFT_USER_GUID}/calendar/events`       | [original/CalendarEvents_v1.0.json](example-api-responses/original/CalendarEvents_v1.0.json) | [sanitized/CalendarEvents_v1.0.json](example-api-responses/sanitized/CalendarEvents_v1.0.json) |
 
-`{userId}` is an Entra user id (GUID) from `GET /v1.0/users`. Application-only auth does not allow `/v1.0/me/...`; use `/v1.0/users/{userId}/...`. `{eventId}` is a calendar event id from `GET /v1.0/users/{userId}/events`. `{groupId}` (on `GET /v1.0/groups/{groupId}/members`) is a group id from `GET /v1.0/groups`.
+`{EXAMPLE_MSFT_USER_GUID}` is an Entra user id (GUID) from `GET /v1.0/users`. Application-only auth does not allow `/v1.0/me/...`; use `/v1.0/users/{EXAMPLE_MSFT_USER_GUID}/...`. `{EVENT_ID}` is a calendar event id from `GET /v1.0/users/{EXAMPLE_MSFT_USER_GUID}/events`. `{GROUP_ID}` (on `GET /v1.0/groups/{GROUP_ID}/members`) is a group id from `GET /v1.0/groups`.
 
 See more examples in the `docs/sources/microsoft-365/msft-teams/example-api-responses` folder
 of the [Psoxy repository](https://github.com/Worklytics/psoxy).

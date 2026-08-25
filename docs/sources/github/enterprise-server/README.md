@@ -15,17 +15,17 @@ The connector uses a GitHub App to authenticate and access the data. You must ge
   - [original/user.json](example-api-responses/original/user.json) |
     [sanitized/user.json](example-api-responses/sanitized/user.json)
 
-Example API call path parameters (camelCase, matching the source `pathTemplate`):
+Example API call path parameters (uppercase placeholders in generated test calls):
 
-- `{enterpriseServerVersion}`: `github_enterprise_server_version` (default `v3`).
-- `{org}` / `{owner}`: first value in `github_organization`.
-- `{repo}`: `github_example_repository`.
-- `{installationId}`: `github_installation_id`.
-- `{teamSlug}`: a team slug from `GET .../orgs/{org}/teams`.
-- `{issueNumber}` / `{pullNumber}`: numbers from issues/pulls lists.
-- `{ref}` / `{commitSha}`: from `GET .../commits`.
-- `{commentId}` / `{reviewId}`: from the matching comments/reviews lists.
-- `{username}`: **must** be a reversible-pseudonym token (`p~` + ≥43 base64url chars) of a `login` from `GET .../orgs/{org}/members`. GraphQL is `POST /api/graphql`.
+- `{ENTERPRISE_SERVER_VERSION}`: `github_enterprise_server_version` (default `v3`).
+- `{ORG}` / `{OWNER}`: first value in `github_organization`.
+- `{REPO}`: `github_example_repository`.
+- `{INSTALLATION_ID}`: `github_installation_id`.
+- `{TEAM_SLUG}`: a team slug from `GET .../orgs/{ORG}/teams`.
+- `{ISSUE_NUMBER}` / `{PULL_NUMBER}`: numbers from issues/pulls lists.
+- `{REF}` / `{COMMIT_SHA}`: from `GET .../commits`.
+- `{COMMENT_ID}` / `{REVIEW_ID}`: from the matching comments/reviews lists.
+- `{USERNAME}`: **must** be a reversible-pseudonym token (`p~` + ≥43 base64url chars) of a `login` from `GET .../orgs/{ORG}/members`. GraphQL is `POST /api/graphql`.
 
 ## GitHub Enterprise Server: Steps to connect
 

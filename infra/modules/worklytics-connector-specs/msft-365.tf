@@ -34,7 +34,7 @@ locals {
       "/v1.0/users",
       "/v1.0/users/${local.example_msft_user_guid}",
       "/v1.0/groups",
-      "/v1.0/groups/{groupId}/members"
+      "/v1.0/groups/{GROUP_ID}/members"
     ]
   }
 
@@ -72,7 +72,7 @@ locals {
         "/v1.0/users/${local.example_msft_user_guid}/calendarView?startDateTime=${timeadd(var.example_api_calls_sample_date, "-4320h")}&endDateTime=${var.example_api_calls_sample_date}",
         "/v1.0/users/${local.example_msft_user_guid}/mailboxSettings",
         "/v1.0/groups",
-        "/v1.0/groups/{groupId}/members"
+        "/v1.0/groups/{GROUP_ID}/members"
       ]
     },
     "outlook-mail" : {
@@ -98,10 +98,10 @@ locals {
         "/v1.0/users?\\$select=id,mail,otherMails",
         "/v1.0/users/${local.example_msft_user_guid}/mailboxSettings",
         "/v1.0/users/${local.example_msft_user_guid}/mailFolders/SentItems/messages",
-        # `{messageId}` is a mail message id from GET .../mailFolders/SentItems/messages.
-        "/v1.0/users/${local.example_msft_user_guid}/messages/{messageId}",
+        # `{MESSAGE_ID}` is a mail message id from GET .../mailFolders/SentItems/messages.
+        "/v1.0/users/${local.example_msft_user_guid}/messages/{MESSAGE_ID}",
         "/v1.0/groups",
-        "/v1.0/groups/{groupId}/members"
+        "/v1.0/groups/{GROUP_ID}/members"
       ]
     },
     "msft-onedrive" : {
@@ -156,7 +156,7 @@ locals {
       ],
       environment_variables : local.msft_365_environment_variables
       enable_side_output : false
-      # `{userId}`/`{teamId}`/`{channelId}`/`{chatId}`/`{callId}` are Entra/Teams GUIDs from the list calls above (or msft_365_connector_settings). `{joinWebUrl}` is an online-meeting join URL used as the JoinWebUrl filter. `{meetingId}` is an onlineMeeting id from GET .../onlineMeetings. `{reportId}` is an attendance report id from GET .../attendanceReports. `{callRecordId}` must be a call-record GUID (the allow-list regex requires UUID form).
+      # `{EXAMPLE_MSFT_USER_GUID}`/`{EXAMPLE_MSFT_TEAMS_TEAM_GUID}`/`{EXAMPLE_MSFT_TEAMS_CHANNEL_GUID}`/`{EXAMPLE_MSFT_TEAMS_CHAT_GUID}`/`{EXAMPLE_MSFT_TEAMS_CALL_GUID}` are Entra/Teams GUIDs from the list calls above (or msft_365_connector_settings). `{EXAMPLE_MSFT_TEAMS_ONLINE_MEETING_URL}` is an online-meeting join URL used as the JoinWebUrl filter. `{MEETING_ID}` is an onlineMeeting id from GET .../onlineMeetings. `{REPORT_ID}` is an attendance report id from GET .../attendanceReports. `{EXAMPLE_MSFT_TEAMS_CALL_RECORD_GUID}` must be a call-record GUID (the allow-list regex requires UUID form).
       example_api_calls : [
         "/v1.0/teams",
         "/v1.0/teams/${local.msft_teams_example_team_guid}/allChannels",
@@ -171,8 +171,8 @@ locals {
         "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(var.example_api_calls_sample_date, "-2160h"))},toDateTime=${urlencode(var.example_api_calls_sample_date)})",
         "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(var.example_api_calls_sample_date, "-2160h"))},toDateTime=${urlencode(var.example_api_calls_sample_date)})",
         "/v1.0/users/${local.example_msft_user_guid}/onlineMeetings?\\$filter=JoinWebUrl eq '${local.msft_teams_example_online_meeting_join_url}'",
-        "/v1.0/users/${local.example_msft_user_guid}/onlineMeetings/{meetingId}/attendanceReports",
-        "/v1.0/users/${local.example_msft_user_guid}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
+        "/v1.0/users/${local.example_msft_user_guid}/onlineMeetings/{MEETING_ID}/attendanceReports",
+        "/v1.0/users/${local.example_msft_user_guid}/onlineMeetings/{MEETING_ID}/attendanceReports/{REPORT_ID}"
       ]
       external_todo : <<EOT
 To enable the connector, you need to allow permissions on the application created for reading OnlineMeetings. You will need Powershell for this.

@@ -17,13 +17,13 @@ Our Claude Enterprise Analytics data connector uses the [Enterprise Analytics AP
 | `GET /v1/organizations/analytics/user_usage_report` | Aggregated token consumption per user: uncached input, cache creation, cache read, output, total tokens, web search requests, request count | `read:analytics` |
 | `GET /v1/organizations/analytics/user_cost_report` | Aggregated cost breakdown per user: amount, list amount, currency, request count | `read:analytics` |
 | `GET /v1/organizations/spend_limits/effective` | Per-member effective spend limit, its source (user override, seat tier, group, or org default), and period-to-date spend | `read:spend_limits` |
-| `GET /v1/organizations/spend_limits/{spendLimitId}` | Single spend-limit record lookup by id (same shape as one row of `/effective`) | `read:spend_limits` |
+| `GET /v1/organizations/spend_limits/{SPEND_LIMIT_ID}` | Single spend-limit record lookup by id (same shape as one row of `/effective`) | `read:spend_limits` |
 | `GET /v1/organizations/spend_limit_increase_requests` | A member's request for a higher spend limit and how it was resolved (pending/approved/denied) | `read:spend_limits` |
-| `GET /v1/organizations/spend_limit_increase_requests/{spendLimitIncreaseRequestId}` | Single increase-request record lookup by id | `read:spend_limits` |
+| `GET /v1/organizations/spend_limit_increase_requests/{SPEND_LIMIT_INCREASE_REQUEST_ID}` | Single increase-request record lookup by id | `read:spend_limits` |
 
 Only `GET` endpoints are allow-listed. Setting/clearing a spend limit override and approving/denying an increase request (`POST`/`DELETE`) are admin actions, not data reporting, and are intentionally not proxied.
 
-`{spendLimitId}` is a spend-limit id from `GET /v1/organizations/spend_limits/effective`. `{spendLimitIncreaseRequestId}` is an increase-request id from `GET /v1/organizations/spend_limit_increase_requests`.
+`{SPEND_LIMIT_ID}` is a spend-limit id from `GET /v1/organizations/spend_limits/effective`. `{SPEND_LIMIT_INCREASE_REQUEST_ID}` is an increase-request id from `GET /v1/organizations/spend_limit_increase_requests`.
 
 ### Privacy
 

@@ -32,7 +32,7 @@ Enable the following API in the GCP project where you provision the OAuth client
   - [v3-original/files.json](example-api-responses/v3-original/files.json) |
       [v3-sanitized/files.json](example-api-responses/v3-sanitized/files.json)
 
-Example API call path parameters: `{fileId}` is a Drive file id from `GET /drive/v3/files` for the impersonated user.
+Example API call path parameters: `{FILE_ID}` is a Drive file id from `GET /drive/v3/files` for the impersonated user.
 
 See more examples in the `docs/sources/google-workspace/gdrive/example-api-responses` folder
 of the [Psoxy repository](https://github.com/Worklytics/psoxy).

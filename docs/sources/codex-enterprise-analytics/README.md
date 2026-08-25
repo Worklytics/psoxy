@@ -13,9 +13,9 @@ time-ordered pages using cursor-based pagination.
 
 | Endpoint | Description | Per-user? |
 |---|---|---|
-| `GET /v1/analytics/codex/workspaces/{workspaceId}/usage` | Per-user daily Codex usage: threads, turns, credits, token counts, per-client and per-model breakdowns, and code attribution (lines of code / commits with a Codex contribution). | Yes |
+| `GET /v1/analytics/codex/workspaces/{WORKSPACE_ID}/usage` | Per-user daily Codex usage: threads, turns, credits, token counts, per-client and per-model breakdowns, and code attribution (lines of code / commits with a Codex contribution). | Yes |
 
-`{workspaceId}` is your ChatGPT Enterprise workspace id (Worklytics "Workspace Id" / `connector_settings.chat_gpt_enterprise_example_workspace_id`). Query params `start_time` and `end_time` are unix timestamps.
+`{WORKSPACE_ID}` is your ChatGPT Enterprise workspace id (Worklytics "Workspace Id" / `connector_settings.chat_gpt_enterprise_example_workspace_id`). Query params `start_time` and `end_time` are unix timestamps.
 
 OpenAI's API also exposes `code_reviews` and `code_review_responses` endpoints, but both only
 report workspace-level daily totals with no per-user breakdown (no `user_id`/`actor` field, and no

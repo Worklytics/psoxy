@@ -4,7 +4,7 @@ Example commands (\*) that you can use to validate proxy behavior against the Sl
 
 Path / query parameters:
 
-- `{channelId}`: a Slack channel id from `GET /api/admin.analytics.getFile?type=public_channel&metadata_only=true` (or any public channel id your token can read). Required by `admin.analytics.messages.metadata` and `admin.analytics.messages.activity`.
+- `{CHANNEL_ID}`: a Slack channel id from `GET /api/admin.analytics.getFile?type=public_channel&metadata_only=true` (or any public channel id your token can read). Required by `admin.analytics.messages.metadata` and `admin.analytics.messages.activity`.
 
 For AWS, change the role to assume with one with sufficient permissions to call the proxy (`-r` flag). Example:
 
@@ -28,16 +28,16 @@ node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/admin.analytics.getFil
 node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/admin.analytics.getFile?type=public_channel&metadata_only=true
 ```
 
-Pull a channel id (`{channelId}`) from that metadata file, then:
+Pull a channel id (`{CHANNEL_ID}`) from that metadata file, then:
 
 ### Message metadata for a channel
 
 ```shell
-node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/admin.analytics.messages.metadata?channel={channelId}&limit=100
+node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/admin.analytics.messages.metadata?channel={CHANNEL_ID}&limit=100
 ```
 
 ### Message activity for a channel
 
 ```shell
-node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/admin.analytics.messages.activity?channel={channelId}&limit=50
+node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/admin.analytics.messages.activity?channel={CHANNEL_ID}&limit=50
 ```

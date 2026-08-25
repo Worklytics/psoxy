@@ -28,11 +28,11 @@ See the [Microsoft 365 Authentication](../README.md#authentication) section of t
 
 | API Endpoint                                                               | Example Response                                                                                                      | Sanitized Example Response                                                                      |
 |----------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
-| `/beta/copilot/users/{userId}/interactionHistory/getAllEnterpriseInteractions` | [original/response_beta.json](example-api-responses/original/response_beta.json)                                      | [sanitized/response.json](example-api-responses/sanitized/response_beta.json)                   |
-| `/beta/copilot/users/{userId}/interactionHistory/getAllEnterpriseInteractions` | [original/response_with_team_meeting_beta_.json](example-api-responses/original/response_with_team_meeting_beta.json) | [sanitized/response.json](example-api-responses/sanitized/response_with_team_meeting_beta.json) |
+| `/beta/copilot/users/{EXAMPLE_MSFT_USER_GUID}/interactionHistory/getAllEnterpriseInteractions` | [original/response_beta.json](example-api-responses/original/response_beta.json)                                      | [sanitized/response.json](example-api-responses/sanitized/response_beta.json)                   |
+| `/beta/copilot/users/{EXAMPLE_MSFT_USER_GUID}/interactionHistory/getAllEnterpriseInteractions` | [original/response_with_team_meeting_beta_.json](example-api-responses/original/response_with_team_meeting_beta.json) | [sanitized/response.json](example-api-responses/sanitized/response_with_team_meeting_beta.json) |
 |
 
-`{userId}` is an Entra user id (GUID) from `GET /v1.0/users`.
+`{EXAMPLE_MSFT_USER_GUID}` is an Entra user id (GUID) from `GET /v1.0/users`.
 
 See more examples in the `docs/sources/microsoft-365/msft-copilot/example-api-responses` folder
 of the [Psoxy repository](https://github.com/Worklytics/psoxy).

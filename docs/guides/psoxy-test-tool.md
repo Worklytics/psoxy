@@ -131,7 +131,7 @@ Notice how the URL changes, and any other option the Psoxy may need doesn't.
 
 ### Zoom: finding a meeting that has a summary
 
-`GET /v2/meetings/{meetingId}/meeting_summary` requires a past meeting instance UUID where Zoom AI Companion actually produced a meeting summary. Numeric IDs from `GET /v2/users/{userId}/meetings` are scheduled meetings and usually return `Invalid meeting id`.
+`GET /v2/meetings/{MEETING_ID}/meeting_summary` requires a past meeting instance UUID where Zoom AI Companion actually produced a meeting summary. Numeric IDs from `GET /v2/users/{USER_ID}/meetings` are scheduled meetings and usually return `Invalid meeting id`.
 
 `find-zoom-meeting-summary.js` (in `tools/psoxy-test/`, next to `cli-call.js`) walks users → past meetings → instances until `has_meeting_summary` is true, then fetches the summary. Pass the Zoom function **base URL** (no API path) and the same flags you use with `cli-call.js` / `test-zoom.sh`:
 

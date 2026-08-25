@@ -53,7 +53,7 @@ the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 ### Populating example API calls with real IDs
 
-By default, the `{groupId}`/`{driveId}`/`{itemId}` segments of this connector's example test calls (generated as part of your Terraform deployment) are left as placeholders, since Terraform has no way to enumerate real values from your tenant. To have real, directly-runnable example calls generated instead, set the following keys in the `msft_365_connector_settings` Terraform variable:
+By default, the `{EXAMPLE_MSFT_GROUP_GUID}`/`{EXAMPLE_MSFT_ONEDRIVE_DRIVE_ID}`/`{EXAMPLE_MSFT_ONEDRIVE_ITEM_ID}` segments of this connector's example test calls (generated as part of your Terraform deployment) are left as placeholders, since Terraform has no way to enumerate real values from your tenant. To have real, directly-runnable example calls generated instead, set the following keys in the `msft_365_connector_settings` Terraform variable:
 
 | Key                              | Value                                                                                                    |
 |------------------------------------|--------------------------------------------------------------------------------------------------------|
@@ -69,7 +69,7 @@ msft_365_connector_settings = {
   msft_onedrive_example_item_id  = "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K"
 }
 ```
-(`example_msft_user_guid` — used for the `/v1.0/users/{userId}/drives` example call — is shared across all Microsoft 365 connectors; see the [Microsoft 365 README](../README.md).)
+(`example_msft_user_guid` — used for the `/v1.0/users/{EXAMPLE_MSFT_USER_GUID}/drives` example call — is shared across all Microsoft 365 connectors; see the [Microsoft 365 README](../README.md).)
 
 ## Example Rules
 
