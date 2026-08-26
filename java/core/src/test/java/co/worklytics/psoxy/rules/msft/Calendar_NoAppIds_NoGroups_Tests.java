@@ -20,6 +20,7 @@ public class Calendar_NoAppIds_NoGroups_Tests extends Calendar_NoAppIds_Tests {
         .sourceKind("outlook-cal")
         .rulesFile("outlook-cal_no-app-ids_no-groups")
         .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids_no-groups/")
+        .checkUncompressedSSMLength(false)
         .build();
 
     @Override

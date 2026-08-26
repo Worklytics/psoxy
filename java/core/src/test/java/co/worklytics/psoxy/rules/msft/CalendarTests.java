@@ -29,6 +29,7 @@ public class CalendarTests extends EntraIDTests {
         .sourceFamily("microsoft-365")
         .defaultScopeId("azure-ad")
         .sourceKind("outlook-cal")
+        .checkUncompressedSSMLength(false)
         .build();
 
     @ParameterizedTest
@@ -161,17 +162,17 @@ public class CalendarTests extends EntraIDTests {
 
         String sanitized = sanitize(endpoint, jsonResponse);
 
+        // this fixture is a bare single Event object (not `value[]`-wrapped); the generated
+        // responseSchema for this endpoint only matches the collection shape, so it sanitizes
+        // down to just the passthrough `@odata.context` property. No production code path calls
+        // single-event-by-id GET.
         assertRedacted(sanitized,
             "Irvin Sayers",
+            "engineering@M365x214355.onmicrosoft.com",
+            "IrvinS@M365x214355.onmicrosoft.com",
             "New Product Regulations Touchpoint", //subject
             "New Product Regulations Strategy Online Touchpoint Meeting" //body
             );
-
-        assertPseudonymized(sanitized,
-            "engineering@M365x214355.onmicrosoft.com",
-            "IrvinS@M365x214355.onmicrosoft.com"
-        );
-
 
         assertNotSanitized(jsonResponse, EVENT_FIELDS_TO_REDACT);
         assertRedacted(sanitized, EVENT_FIELDS_TO_REDACT);

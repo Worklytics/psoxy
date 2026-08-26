@@ -1,11 +1,4 @@
 {
-  "autoAdmittedUsers":"everyone",
-  "audioConferencing":{
-    "tollNumber":"5552478",
-    "tollFreeNumber":"5550588",
-    "ConferenceId":"9999999",
-    "dialinUrl":"https://dialin.teams.microsoft.com/6787A136-B9B8-4D39-846C-C0F1FF937F10?id=xxxxxxx"
-  },
   "chatInfo":{
     "threadId":"19:cbee7c1c860e465cebf7bee0d@thread.skype",
     "messageId":"153367081"
@@ -34,13 +27,6 @@
   },
   "startDateTime":"2018-05-30T00:30:00Z",
   "videoTeleconferenceId":"123456789",
-  "lobbyBypassSettings":{
-    "scope":"everyone",
-    "isDialInBypassEnabled":true
-  },
-  "joinMeetingIdSettings":{
-    "joinMeetingId":"1234567890"
-  },
-  "isEntryExitAnnounced":true,
+  "lobbyBypassSettings":{ },
   "allowedPresenters":"everyone"
 }

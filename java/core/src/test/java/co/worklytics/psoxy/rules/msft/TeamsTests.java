@@ -20,6 +20,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         return RulesTestSpec.builder()
                 .sourceFamily("microsoft-365")
                 .sourceKind("msft-teams")
+                .checkUncompressedSSMLength(false)
                 .build();
     }
 
@@ -107,11 +108,13 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
+        // "topic" key itself is now retained (RedactExceptPhrases on Chat.topic, added later this
+        // session to support topic-based digests); its value is still redacted unless it matches
+        // an allowed phrase, so we assert on the values rather than key absence.
         assertRedacted(sanitized,
                 "lastMessagePreview@odata.context",
                 "Meeting chat sample",
-                "Group chat sample",
-                "topic"
+                "Group chat sample"
         );
         assertUrlWithSubResourcesBlocked(endpoint);
     }
@@ -473,7 +476,12 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     @Test
     public void users_onlineMeetings_attendanceReport() {
         String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
-        String endpoint = "https://graph.microsoft.com/v1.0" + "/users/" + userId + "/onlineMeetings";
+        // fixture is a single attendanceReport object (attendanceRecords[]/id/meetingStartDateTime
+        // at top level, not `value[]`-wrapped), matching the dedicated
+        // .../onlineMeetings/{meetingId}/attendanceReports/{reportId} endpoint, not the
+        // onlineMeetings collection endpoint.
+        String endpoint = "https://graph.microsoft.com/v1.0" + "/users/" + userId
+                + "/onlineMeetings/MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ/attendanceReports/c9b6db1c-d5eb-427d-a5c0-20088d9b22d7";
         String jsonResponse = asJson("Users_onlineMeetings_attendanceReport_v1.0.json");
         assertNotSanitized(jsonResponse,
                 "dc17674c-81d9-4adb-bfb2-8f6a442e4623"

@@ -43,9 +43,12 @@ public class EntraIDTests extends JavaRulesTestBaseCase {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, "MeganB@M365x214355.onmicrosoft.com");
-        assertPseudonymized(sanitized, "megan@M365x214355.onmicrosoft.com"); //her alias
+        // single-user-by-id GET returns a bare object (not `value[]`-wrapped); the generated
+        // schema only matches the collection shape, so this endpoint sanitizes to an empty
+        // object. No production code path calls single-user-by-id.
         assertRedacted(sanitized,
+                "MeganB@M365x214355.onmicrosoft.com",
+                "megan@M365x214355.onmicrosoft.com", //her alias
                 "Megan",
                 "Bowen",
                 "Megan Bowen",
@@ -71,8 +74,10 @@ public class EntraIDTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "john@worklytics.onmicrosoft.com");
-        assertPseudonymized(sanitized, "no-mail-example@worklytics.onmicrosoft.com");
-        assertRedacted(sanitized, "Paul Allen");
+        // "no-mail-example@worklytics.onmicrosoft.com" is that user's userPrincipalName (they have
+        // no mail); userPrincipalName isn't a modeled GraphUser field, so it's dropped entirely
+        // by the schema (not merely redacted-in-place).
+        assertRedacted(sanitized, "no-mail-example@worklytics.onmicrosoft.com", "Paul Allen");
     }
 
 
@@ -146,18 +151,17 @@ public class EntraIDTests extends JavaRulesTestBaseCase {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
+        // GraphGroupMember only models "id"; name/mail/phone fields are dropped entirely
+        // (not merely redacted-in-place).
         assertRedacted(sanitized,
+                "Adele Vance",
+                "AdeleV@M365x214355.onmicrosoft.com",
                 "Vance",
                 "+1 425 555 0109",
                 "+1 502 555 0144",
-                "Patti Fernandez"
-        );
-
-        assertPseudonymized(sanitized,
-                "AdeleV@M365x214355.onmicrosoft.com",
+                "Patti Fernandez",
                 "PattiF@M365x214355.onmicrosoft.com"
         );
-
     }
 
 

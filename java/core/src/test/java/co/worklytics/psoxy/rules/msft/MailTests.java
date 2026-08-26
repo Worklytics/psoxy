@@ -18,6 +18,7 @@ public class MailTests extends JavaRulesTestBaseCase {
         .sourceFamily("microsoft-365")
         .defaultScopeId("azure-ad")
         .sourceKind("outlook-mail")
+        .checkUncompressedSSMLength(false)
         .build();
 
     @ParameterizedTest

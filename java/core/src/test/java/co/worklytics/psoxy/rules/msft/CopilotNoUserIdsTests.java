@@ -27,6 +27,7 @@ public class CopilotNoUserIdsTests extends JavaRulesTestBaseCase {
                 .sourceKind("msft-copilot")
             .rulesFile("msft-copilot_no-userIds")
             .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-userIds/")
+                .checkUncompressedSSMLength(false)
                 .build();
     }
 

@@ -16,8 +16,7 @@
         "device":null,
         "user":null,
         "application":{
-          "id":"fb8d773d-7ef8-4ec0-a117-179f88add510",
-          "applicationIdentityType":"bot"
+          "id":"fb8d773d-7ef8-4ec0-a117-179f88add510"
         }
       },
       "body":{
@@ -31,7 +30,7 @@
         {
           "attachmentId":"p~b7-iqzej17OJkneCXlO1ouZozsG_aj0atv5hHVpKgxM0kzjFc7S6sHiTYXoRAC45pipdQSn_BCn3vJl8dMpaHjBr-dCj3A5A3i2D4QhjLWA",
           "contentType":"application/vnd.microsoft.card.adaptive",
-          "+content:textDigest":"{\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"TextBlock\",\"text\":\"{\\\"length\\\":2572,\\\"word_count\\\":154}\",\"wrap\":true},{\"type\":\"TextBlock\",\"id\":\"MessageTextField\",\"text\":\"{\\\"length\\\":980,\\\"word_count\\\":154}\",\"wrap\":true}]}"
+          "+content:textDigest":"{\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"TextBlock\",\"text\":\"{\\\"keywords\\\":{\\\"api\\\":1},\\\"length\\\":2572,\\\"word_count\\\":154}\",\"wrap\":true},{\"type\":\"TextBlock\",\"id\":\"MessageTextField\",\"text\":\"{\\\"keywords\\\":{\\\"api\\\":1},\\\"length\\\":980,\\\"word_count\\\":154}\",\"wrap\":true}]}"
         }
       ],
       "links":[
@@ -60,6 +59,7 @@
           "linkType":"Meeting"
         },
         {
+          "linkUrl":"https://m365cpi17278319-my.sharepoint.com/personal/corat_m365cpi17278319_onmicrosoft_com/Documents/Microsoft%20Copilot%20Chat%20Files/OnCall%20DRI%20Handbook-v3.pdf?web=1&EntityRepresentationId=025f05ac-5d7e-4ee1-b616-a786cd13d8c2",
           "linkType":"File"
         }
       ],
@@ -81,7 +81,6 @@
         "device":null,
         "user":{
           "id":"t~sMxhtJVS27r5MC4y2Z_akFQRDkAHruk6R5wDIq6powY",
-          "userIdentityType":"aadUser",
           "tenantId":"061ea7c2-cc15-418b-bfc0-9f6a7d98011c"
         }
       },

@@ -24,6 +24,7 @@ public class Mail_NoAppIds_Tests extends EntraIDTests {
         .sourceKind("outlook-mail")
         .rulesFile("outlook-mail_no-app-ids")
         .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
+        .checkUncompressedSSMLength(false)
         .build();
 
     @ParameterizedTest

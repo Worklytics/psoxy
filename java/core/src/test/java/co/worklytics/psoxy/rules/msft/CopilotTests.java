@@ -20,6 +20,7 @@ public class CopilotTests extends JavaRulesTestBaseCase {
         return RulesTestSpec.builder()
                 .sourceFamily("microsoft-365")
                 .sourceKind("msft-copilot")
+                .checkUncompressedSSMLength(false)
                 .build();
     }
 

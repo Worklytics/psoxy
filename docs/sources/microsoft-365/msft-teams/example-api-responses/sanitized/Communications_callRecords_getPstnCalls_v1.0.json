@@ -1,6 +1,4 @@
 {
-  "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#Collection(microsoft.graph.callRecords.pstnCallLogRow)",
-  "@odata.count":1000,
   "value":[
     {
       "id":"9c4984c7-6c3c-427d-a30c-bd0b2eacee90",

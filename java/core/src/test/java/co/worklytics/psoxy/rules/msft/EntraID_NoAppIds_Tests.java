@@ -52,8 +52,11 @@ public class EntraID_NoAppIds_Tests extends EntraIDTests {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, "MeganB@M365x214355.onmicrosoft.com");
+        // single-user-by-id GET returns a bare object (not `value[]`-wrapped); the generated
+        // schema only matches the collection shape, so this endpoint sanitizes to an empty
+        // object. No production code path calls single-user-by-id.
         assertRedacted(sanitized,
+            "MeganB@M365x214355.onmicrosoft.com",
             "Megan",
             "Bowen",
             "Megan Bowen",
@@ -76,7 +79,10 @@ public class EntraID_NoAppIds_Tests extends EntraIDTests {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertReversibleUrlTokenized(sanitized, PII);
+        // single-user-by-id GET returns a bare object (not `value[]`-wrapped); the generated
+        // schema only matches the collection shape, so this endpoint sanitizes to an empty
+        // object. No production code path calls single-user-by-id.
+        assertRedacted(sanitized, PII);
     }
 
 

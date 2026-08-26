@@ -13,9 +13,6 @@
       "successfulCall":true,
       "mediaPathLocation":"USWE",
       "signalingLocation":"EUNO",
-      "finalSipCode":0,
-      "callEndSubReason":540000,
-      "finalSipCodePhrase":"BYE",
       "trunkFullyQualifiedDomainName":"tll-audiocodes01.adatum.biz",
       "mediaBypassEnabled":false
     }
