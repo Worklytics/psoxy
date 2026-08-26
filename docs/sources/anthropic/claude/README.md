@@ -13,10 +13,14 @@ Our Claude data connector uses the [Compliance API](https://platform.claude.com/
 | `GET /v1/compliance/activities` | Audit log of actions taken by users in Claude (chat created, file uploaded, etc.) | `read:compliance_activities` |
 | `GET /v1/compliance/apps/chats` | Chat conversations, including metadata about the user and project | `read:compliance_user_data` |
 | `GET /v1/compliance/apps/chats/{CHAT_ID}/messages` | Individual messages within a chat (message text is hashed) | `read:compliance_user_data` |
+| `GET /v1/compliance/apps/sessions/local` | Local sessions (Claude Code / Cowork in Claude Desktop) metadata | `read:compliance_user_data` |
+| `GET /v1/compliance/apps/sessions/local/{LOCAL_SESSION_ID}/messages` | Individual messages within a local session (message text is hashed) | `read:compliance_user_data` |
+| `GET /v1/compliance/apps/sessions/remote` | Remote sessions (Cowork running in an Anthropic-managed cloud environment) metadata | `read:compliance_user_data` |
+| `GET /v1/compliance/apps/sessions/remote/{CLAUDE_REMOTE_SESSION_ID}/messages` | Individual messages within a remote session (message text is hashed) | `read:compliance_user_data` |
 | `GET /v1/compliance/organizations` | Organizations metadata | `read:compliance_org_data` |
 | `GET /v1/compliance/organizations/{ORGANIZATION_UUID}/users` | User accounts in the organization | `read:compliance_user_data` |
 
-`{ORGANIZATION_UUID}` is an organization id from `GET /v1/compliance/organizations`. `{CHAT_ID}` is a chat id from `GET /v1/compliance/apps/chats`.
+`{ORGANIZATION_UUID}` is an organization id from `GET /v1/compliance/organizations`. `{CHAT_ID}` is a chat id from `GET /v1/compliance/apps/chats`. `{LOCAL_SESSION_ID}` is a local session id from `GET /v1/compliance/apps/sessions/local`. `{CLAUDE_REMOTE_SESSION_ID}` is a remote session id from `GET /v1/compliance/apps/sessions/remote`.
 
 ## Steps to Connect
 
@@ -36,4 +40,8 @@ See [Anthropic's documentation](https://platform.claude.com/docs/en/manage-claud
   - [activities-response.json](example-api-responses/original/activities-response.json) | [sanitized](example-api-responses/sanitized/activities-response.json)
   - [chats-response.json](example-api-responses/original/chats-response.json) | [sanitized](example-api-responses/sanitized/chats-response.json)
   - [chat-messages-response.json](example-api-responses/original/chat-messages-response.json) | [sanitized](example-api-responses/sanitized/chat-messages-response.json)
+  - [local-sessions-response.json](example-api-responses/original/local-sessions-response.json) | [sanitized](example-api-responses/sanitized/local-sessions-response.json)
+  - [local-session-messages-response.json](example-api-responses/original/local-session-messages-response.json) | [sanitized](example-api-responses/sanitized/local-session-messages-response.json)
+  - [remote-sessions-response.json](example-api-responses/original/remote-sessions-response.json) | [sanitized](example-api-responses/sanitized/remote-sessions-response.json)
+  - [remote-session-messages-response.json](example-api-responses/original/remote-session-messages-response.json) | [sanitized](example-api-responses/sanitized/remote-session-messages-response.json)
   - [organization-users-response.json](example-api-responses/original/organization-users-response.json) | [sanitized](example-api-responses/sanitized/organization-users-response.json)

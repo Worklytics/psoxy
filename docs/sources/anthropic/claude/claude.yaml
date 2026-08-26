@@ -524,6 +524,391 @@ endpoints:
           format: "date-time"
         user:
           $ref: "#/definitions/User"
+  - pathTemplate: "/v1/compliance/apps/sessions/local"
+    allowedQueryParams:
+      - "created_at.gte"
+      - "created_at.lt"
+      - "limit"
+      - "page"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].user['email_address','id']"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/Session"
+        error:
+          $ref: "#/definitions/ErrorResponse"
+        first_id:
+          type: "string"
+        has_more:
+          type: "boolean"
+        last_id:
+          type: "string"
+        next_page:
+          type: "string"
+  - pathTemplate: "/v1/compliance/apps/sessions/local/{localSessionId}/messages"
+    allowedQueryParams:
+      - "limit"
+      - "order"
+      - "page"
+      - "tool_result_max_bytes"
+      - "tool_use_input_max_bytes"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.session.user['email_address','id']"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$.data[*].content[*].text"
+          - "$.data[*].content[*].input"
+          - "$.data[*].content[*].content[*].text"
+        keywords:
+          - "generate image"
+          - "create image"
+          - "draw image"
+          - "make image"
+          - "design image"
+          - "picture of"
+          - "illustration of"
+          - "visual of"
+          - "render"
+          - "generate graphic"
+          - "create graphic"
+          - "dall-e"
+          - "dalle"
+          - "draw"
+          - "python"
+          - "javascript"
+          - "typescript"
+          - "java"
+          - "sql"
+          - "code"
+          - "function"
+          - "debug"
+          - "api"
+          - "html"
+          - "react"
+          - "bash"
+          - "css"
+          - "docker"
+          - "ruby"
+          - "golang"
+          - "kotlin"
+          - "php"
+          - "node"
+          - "angular"
+          - "vue"
+          - "swift"
+          - "npm"
+          - "github"
+          - "git"
+          - "implement"
+          - "bug"
+          - "deploy"
+          - "script"
+          - "class"
+          - "method"
+          - "array"
+          - "exception"
+          - "refactor"
+          - "compile"
+          - "callback"
+          - "const"
+          - "async"
+          - "await"
+          - "pull request"
+          - "code review"
+          - "unit test"
+          - "stack trace"
+          - "error"
+          - "what is"
+          - "what are"
+          - "how does"
+          - "explain"
+          - "difference between"
+          - "compared"
+          - "how do"
+          - "how to"
+          - "explain how"
+          - "explain why"
+          - "explain what"
+          - "why does"
+          - "why is"
+          - "best practices"
+          - "compared to"
+          - "brainstorm"
+          - "alternatives"
+          - "versus"
+          - "tradeoffs"
+          - "outline"
+          - "nda"
+          - "write"
+          - "draft"
+          - "compose"
+          - "email"
+          - "rewrite"
+          - "proofread"
+          - "blog"
+          - "article"
+          - "e-mail"
+          - "mail"
+          - "redline"
+          - "review"
+          - "summarise"
+          - "summary"
+          - "translate to"
+          - "report"
+          - "proposal"
+          - "presentation"
+          - "slides"
+          - "brief"
+          - "newsletter"
+          - "contract"
+          - "financials"
+          - "accounting"
+          - "payroll"
+          - "breakeven"
+          - "cashflow"
+          - "nps"
+          - "data analysis"
+          - "analyze"
+          - "pivot"
+          - "chart"
+          - "tableau"
+          - "summarize"
+          - "pivot table"
+          - "bar chart"
+          - "line chart"
+          - "pie chart"
+          - "vlookup"
+          - "snowflake"
+          - "memo"
+          - "deck"
+          - "craft"
+          - "design"
+          - "linkedin"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/SessionMessage"
+        error:
+          $ref: "#/definitions/ErrorResponse"
+        first_id:
+          type: "string"
+        has_more:
+          type: "boolean"
+        last_id:
+          type: "string"
+        next_page:
+          type: "string"
+        session:
+          $ref: "#/definitions/Session"
+  - pathTemplate: "/v1/compliance/apps/sessions/remote"
+    allowedQueryParams:
+      - "created_at.gt"
+      - "created_at.gte"
+      - "created_at.lt"
+      - "created_at.lte"
+      - "limit"
+      - "organization_ids[]"
+      - "page"
+      - "user_ids[]"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].user['email_address','id']"
+          - "$.data[*].started_by_user['email_address','id']"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/Session"
+        error:
+          $ref: "#/definitions/ErrorResponse"
+        first_id:
+          type: "string"
+        has_more:
+          type: "boolean"
+        last_id:
+          type: "string"
+        next_page:
+          type: "string"
+  - pathTemplate: "/v1/compliance/apps/sessions/remote/{claudeRemoteSessionId}/messages"
+    allowedQueryParams:
+      - "limit"
+      - "order"
+      - "page"
+      - "tool_result_max_bytes"
+      - "tool_use_input_max_bytes"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.session.user['email_address','id']"
+          - "$.session.started_by_user['email_address','id']"
+          - "$.data[*].sent_by_user_id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$.data[*].content[*].text"
+          - "$.data[*].content[*].input"
+          - "$.data[*].content[*].content[*].text"
+        keywords:
+          - "generate image"
+          - "create image"
+          - "draw image"
+          - "make image"
+          - "design image"
+          - "picture of"
+          - "illustration of"
+          - "visual of"
+          - "render"
+          - "generate graphic"
+          - "create graphic"
+          - "dall-e"
+          - "dalle"
+          - "draw"
+          - "python"
+          - "javascript"
+          - "typescript"
+          - "java"
+          - "sql"
+          - "code"
+          - "function"
+          - "debug"
+          - "api"
+          - "html"
+          - "react"
+          - "bash"
+          - "css"
+          - "docker"
+          - "ruby"
+          - "golang"
+          - "kotlin"
+          - "php"
+          - "node"
+          - "angular"
+          - "vue"
+          - "swift"
+          - "npm"
+          - "github"
+          - "git"
+          - "implement"
+          - "bug"
+          - "deploy"
+          - "script"
+          - "class"
+          - "method"
+          - "array"
+          - "exception"
+          - "refactor"
+          - "compile"
+          - "callback"
+          - "const"
+          - "async"
+          - "await"
+          - "pull request"
+          - "code review"
+          - "unit test"
+          - "stack trace"
+          - "error"
+          - "what is"
+          - "what are"
+          - "how does"
+          - "explain"
+          - "difference between"
+          - "compared"
+          - "how do"
+          - "how to"
+          - "explain how"
+          - "explain why"
+          - "explain what"
+          - "why does"
+          - "why is"
+          - "best practices"
+          - "compared to"
+          - "brainstorm"
+          - "alternatives"
+          - "versus"
+          - "tradeoffs"
+          - "outline"
+          - "nda"
+          - "write"
+          - "draft"
+          - "compose"
+          - "email"
+          - "rewrite"
+          - "proofread"
+          - "blog"
+          - "article"
+          - "e-mail"
+          - "mail"
+          - "redline"
+          - "review"
+          - "summarise"
+          - "summary"
+          - "translate to"
+          - "report"
+          - "proposal"
+          - "presentation"
+          - "slides"
+          - "brief"
+          - "newsletter"
+          - "contract"
+          - "financials"
+          - "accounting"
+          - "payroll"
+          - "breakeven"
+          - "cashflow"
+          - "nps"
+          - "data analysis"
+          - "analyze"
+          - "pivot"
+          - "chart"
+          - "tableau"
+          - "summarize"
+          - "pivot table"
+          - "bar chart"
+          - "line chart"
+          - "pie chart"
+          - "vlookup"
+          - "snowflake"
+          - "memo"
+          - "deck"
+          - "craft"
+          - "design"
+          - "linkedin"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/SessionMessage"
+        error:
+          $ref: "#/definitions/ErrorResponse"
+        first_id:
+          type: "string"
+        has_more:
+          type: "boolean"
+        last_id:
+          type: "string"
+        next_page:
+          type: "string"
+        session:
+          $ref: "#/definitions/Session"
   - pathTemplate: "/v1/compliance/organizations"
     allowedQueryParams: []
     responseSchema:
@@ -810,6 +1195,96 @@ definitions:
       type:
         type: "string"
       uuid:
+        type: "string"
+  Provenance:
+    type: "object"
+    properties:
+      reason:
+        type: "string"
+      type:
+        type: "string"
+  Session:
+    type: "object"
+    properties:
+      agent_id:
+        type: "string"
+      claude_project_id:
+        type: "string"
+      created_at:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      organization_uuid:
+        type: "string"
+      product_surface:
+        type: "string"
+      sourceId:
+        type: "string"
+      started_by_user:
+        $ref: "#/definitions/User"
+      status:
+        type: "string"
+      type:
+        type: "string"
+      updated_at:
+        type: "string"
+        format: "date-time"
+      user:
+        $ref: "#/definitions/User"
+      workspace_id:
+        type: "string"
+  SessionContentBlock:
+    type: "object"
+    properties:
+      content:
+        type: "array"
+        items:
+          $ref: "#/definitions/TextItem"
+      id:
+        type: "string"
+      input:
+        type: "string"
+      is_error:
+        type: "boolean"
+      name:
+        type: "string"
+      text:
+        type: "string"
+      tool_use_id:
+        type: "string"
+      truncated:
+        type: "boolean"
+      type:
+        type: "string"
+  SessionMessage:
+    type: "object"
+    properties:
+      content:
+        type: "array"
+        items:
+          $ref: "#/definitions/SessionContentBlock"
+      content_unavailable:
+        type: "boolean"
+      created_at:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      provenance:
+        $ref: "#/definitions/Provenance"
+      role:
+        type: "string"
+      sent_by_user_id:
+        type: "string"
+      type:
+        type: "string"
+  TextItem:
+    type: "object"
+    properties:
+      text:
+        type: "string"
+      type:
         type: "string"
   User:
     type: "object"

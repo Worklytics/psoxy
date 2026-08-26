@@ -229,6 +229,8 @@ EOT
           value_managed_by_tf : false
         }
       ]
+      # `{ORGANIZATION_UUID}` from GET .../organizations. `{CHAT_ID}` from GET .../apps/chats.
+      # `{LOCAL_SESSION_ID}` from GET .../apps/sessions/local. `{CLAUDE_REMOTE_SESSION_ID}` from GET .../apps/sessions/remote.
       example_api_requests : [
         {
           method : "GET"
@@ -253,6 +255,26 @@ EOT
         {
           method : "GET"
           path : "/v1/compliance/apps/chats/{CHAT_ID}/messages"
+          headers : local.anthropic_api_headers
+        },
+        {
+          method : "GET"
+          path : "/v1/compliance/apps/sessions/local"
+          headers : local.anthropic_api_headers
+        },
+        {
+          method : "GET"
+          path : "/v1/compliance/apps/sessions/local/{LOCAL_SESSION_ID}/messages"
+          headers : local.anthropic_api_headers
+        },
+        {
+          method : "GET"
+          path : "/v1/compliance/apps/sessions/remote"
+          headers : local.anthropic_api_headers
+        },
+        {
+          method : "GET"
+          path : "/v1/compliance/apps/sessions/remote/{CLAUDE_REMOTE_SESSION_ID}/messages"
           headers : local.anthropic_api_headers
         }
       ],
