@@ -36,7 +36,7 @@ See the [Microsoft 365 Authorization](../README.md#authorization) section of the
 Assuming proxy is auth'd as an application, you'll have to replace `me` with your MSFT ID or
 `UserPrincipalName` (often your email address).
 
-See more examples in the `docs/sources/microsoft-365/msft-teams/example-api-responses` folder
+See more examples in the `docs/sources/microsoft-365/outlook-mail/example-api-responses` folder
 of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 ## Examples
