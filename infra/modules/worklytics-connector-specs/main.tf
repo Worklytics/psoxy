@@ -210,6 +210,16 @@ EOT
           method : "GET"
           path : "/v1/compliance/activities"
           headers : local.anthropic_api_headers
+        },
+        {
+          method : "GET"
+          path : "/v1/compliance/apps/sessions/local"
+          headers : local.anthropic_api_headers
+        },
+        {
+          method : "GET"
+          path : "/v1/compliance/apps/sessions/remote"
+          headers : local.anthropic_api_headers
         }
       ],
       external_token_todo : templatefile("${path.module}/docs/claude/claude_instructions.tftpl", {
