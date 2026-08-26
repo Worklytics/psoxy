@@ -192,7 +192,7 @@ definitions:
         type: "string"
       scheduledEndDateTime:
         $ref: "#/definitions/DateTimeTimeZone"
-      scheduledEndStartTime:
+      scheduledStartDateTime:
         $ref: "#/definitions/DateTimeTimeZone"
       status:
         type: "string"
@@ -207,6 +207,20 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/IdentitySet"
+  CustomTimeZone:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+        constant: "#microsoft.graph.customTimeZone"
+      bias:
+        type: "integer"
+      daylightOffset:
+        $ref: "#/definitions/Offset"
+      name:
+        type: "string"
+      standardOffset:
+        $ref: "#/definitions/Offset"
   DateTimeTimeZone:
     type: "object"
     properties:
@@ -467,6 +481,21 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/IdentitySet"
+  Offset:
+    type: "object"
+    properties:
+      dayOccurrence:
+        type: "integer"
+      dayOfWeek:
+        type: "string"
+      daylightBias:
+        type: "integer"
+      month:
+        type: "integer"
+      time:
+        type: "string"
+      year:
+        type: "integer"
   Package:
     type: "object"
     properties:
@@ -574,3 +603,6 @@ definitions:
       startTime:
         type: "string"
         format: "time"
+      timeZone:
+        anyOf:
+        - $ref: "#/definitions/CustomTimeZone"
