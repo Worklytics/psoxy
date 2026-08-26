@@ -5,6 +5,9 @@ in each release's notes.
 
 Changes to be including in future/planned release notes will be added here.
 
+## [0.6.10](https://github.com/Worklytics/psoxy/releases/tag/v0.6.10)
+- `claude`: add support for the Compliance API's local and remote sessions endpoints (`GET /v1/compliance/apps/sessions/local`, `GET /v1/compliance/apps/sessions/remote`, and their `.../messages` endpoints), covering Claude Code and Cowork (local and remote) session/message data alongside existing chat/activity coverage. See [docs/sources/anthropic/claude/README.md](docs/sources/anthropic/claude/README.md).
+
 ## [0.6.9](https://github.com/Worklytics/psoxy/releases/tag/v0.6.9)
 
 - `aws`: least-privileged provisioner policy (`psoxy-constants` `aws_least_privileged_policy`) adds tagging permissions needed when provider `default_tags` is set — notably `logs:ListTagsForResource` / `logs:TagResource` / `logs:UntagResource` (current CloudWatch Logs tagging APIs), `s3:PutObjectTagging` (proxy JAR upload when building from source), `lambda:ListTags` / `lambda:TagResource` / `lambda:UntagResource`, and IAM `ListRoleTags` / `ListPolicyTags`. Docs call out the requirement.
