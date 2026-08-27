@@ -180,10 +180,10 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
         String jsonResponse = asJson("Communications_callRecords_" + "v1.0" + ".json");
 
         String sanitized = sanitize(endpoint, jsonResponse);
-        // this fixture is the `value[]`-wrapped "List callRecords" shape; the generated
-        // responseSchema for this pathRegex only models the bare single-record shape (see
-        // CallRecordResponse.java: "No production code issues the List call"), so it sanitizes
-        // down to an empty object.
+        // this fixture is the `value[]`-wrapped "List callRecords" shape, handled by
+        // GetCallRecordsResponse.java; organizer/organizer_v2 (user- and phone-identity variants)
+        // are pseudonymized, not merely dropped.
+        assertPseudonymized(sanitized, "821809f5-0000-0000-0000-3b5136c0e777", "+5564981205182");
         assertRedacted(sanitized,
                 "821809f5-0000-0000-0000-3b5136c0e777",
                 "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#communications/callRecords(sessions(segments()))/$entity",

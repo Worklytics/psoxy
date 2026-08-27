@@ -300,10 +300,12 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
+        // base variant does not pseudonymize ids (same convention as user.id elsewhere on this
+        // endpoint); "+5564981205182" is a phone-identity's id (organizer_v2.identity.phone.id),
+        // consistent with that convention once organizer_v2 is modeled.
         assertRedacted(sanitized,
                 "Abbie Wilkins",
                 "Owen Franklin",
-                "+5564981205182",
                 "machineName_",
                 "Default input device",
                 "Microphone (Microsoft Virtual Audio Device (Simple) (WDM))"

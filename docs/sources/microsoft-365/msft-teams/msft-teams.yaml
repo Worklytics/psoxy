@@ -468,10 +468,16 @@ endpoints:
           type: "string"
       organizer:
         $ref: "#/definitions/IdentitySet"
+      organizer_v2:
+        $ref: "#/definitions/Organizer"
       participants:
         type: "array"
         items:
           $ref: "#/definitions/IdentitySet"
+      participants_v2:
+        type: "array"
+        items:
+          $ref: "#/definitions/Participant"
       sessions:
         type: "array"
         items:
@@ -681,10 +687,16 @@ definitions:
           type: "string"
       organizer:
         $ref: "#/definitions/IdentitySet"
+      organizer_v2:
+        $ref: "#/definitions/Organizer"
       participants:
         type: "array"
         items:
           $ref: "#/definitions/IdentitySet"
+      participants_v2:
+        type: "array"
+        items:
+          $ref: "#/definitions/Participant"
       sessions:
         type: "array"
         items:
@@ -1346,6 +1358,13 @@ definitions:
         type: "string"
       year:
         type: "integer"
+  Organizer:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      identity:
+        $ref: "#/definitions/IdentitySet"
   PSTNCall:
     type: "object"
     properties:
@@ -1389,6 +1408,13 @@ definitions:
         type: "string"
       userId:
         type: "string"
+  Participant:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      identity:
+        $ref: "#/definitions/IdentitySet"
   ParticipantInfo:
     type: "object"
     properties:
