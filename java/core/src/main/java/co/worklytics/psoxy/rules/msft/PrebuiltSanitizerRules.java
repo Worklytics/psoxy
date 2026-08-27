@@ -37,7 +37,7 @@ public class PrebuiltSanitizerRules {
     static final Rules2 OUTLOOK_MAIL_NO_APP_IDS_NO_GROUPS = Rules2.load("sources/microsoft-365/outlook-mail/outlook-mail_no-app-ids_no-groups.yaml");
 
     static final Rules2 MS_TEAMS = Rules2.load("sources/microsoft-365/msft-teams/msft-teams.yaml");
-    static final Rules2 MS_TEAMS_NO_USER_ID = Rules2.load("sources/microsoft-365/msft-teams/msft-teams_no-userIds.yaml");
+    static final Rules2 MS_TEAMS_NO_APP_IDS = Rules2.load("sources/microsoft-365/msft-teams/msft-teams_no-app-ids.yaml");
 
     static final Rules2 MS_COPILOT = Rules2.load("sources/microsoft-365/msft-copilot/msft-copilot.yaml");
     static final Rules2 MS_COPILOT_NO_APP_IDS = Rules2.load("sources/microsoft-365/msft-copilot/msft-copilot_no-app-ids.yaml");
@@ -56,7 +56,7 @@ public class PrebuiltSanitizerRules {
             .put("outlook-mail" + ConfigRulesModule.NO_APP_IDS_SUFFIX, OUTLOOK_MAIL_NO_APP_IDS)
             .put("outlook-mail" + ConfigRulesModule.NO_APP_IDS_SUFFIX + "-no-groups", OUTLOOK_MAIL_NO_APP_IDS_NO_GROUPS)
             .put("msft-teams", MS_TEAMS)
-            .put("msft-teams" + ConfigRulesModule.NO_APP_IDS_SUFFIX, MS_TEAMS_NO_USER_ID)
+            .put("msft-teams" + ConfigRulesModule.NO_APP_IDS_SUFFIX, MS_TEAMS_NO_APP_IDS)
             .put("msft-copilot", MS_COPILOT)
             .put("msft-copilot" + ConfigRulesModule.NO_APP_IDS_SUFFIX, MS_COPILOT_NO_APP_IDS)
             .put("msft-onedrive", ONE_DRIVE)

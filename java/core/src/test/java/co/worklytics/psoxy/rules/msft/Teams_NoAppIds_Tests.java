@@ -15,10 +15,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Stream;
 
-public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
+public class Teams_NoAppIds_Tests extends JavaRulesTestBaseCase {
 
     @Getter
-    final Rules2 rulesUnderTest = PrebuiltSanitizerRules.MS_TEAMS_NO_USER_ID;
+    final Rules2 rulesUnderTest = PrebuiltSanitizerRules.MS_TEAMS_NO_APP_IDS;
 
 
     @Override
@@ -26,8 +26,8 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
         return RulesTestSpec.builder()
                 .sourceFamily("microsoft-365")
                 .sourceKind("msft-teams")
-                .rulesFile("msft-teams_no-userIds")
-                .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-userIds/")
+                .rulesFile("msft-teams_no-app-ids")
+                .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
                 .checkUncompressedSSMLength(false)
                 .build();
     }
