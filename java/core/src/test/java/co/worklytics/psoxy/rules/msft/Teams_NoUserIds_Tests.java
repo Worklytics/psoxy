@@ -174,7 +174,7 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
     }
 
     @Test
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_LIST_REGEX)
     public void communications_callRecords() {
         String endpoint = "https://graph.microsoft.com/" + "v1.0" + "/communications/callRecords";
         String jsonResponse = asJson("Communications_callRecords_" + "v1.0" + ".json");
@@ -349,15 +349,12 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
                 InvocationExample.of(baseEndpoint + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92", "Communications_calls_" + "v1.0" + ".json"),
                 // /communications/calls/{id} - with all allowed query params
                 InvocationExample.of(baseEndpoint + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92?$select=id,state&$top=1&$expand=participants", "Communications_calls_" + "v1.0" + ".json"),
-                // NOTE: /communications/callRecords' pathRegex's `queryParameters` capture group
-                // (see PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
-                // only allows [a-zA-z0-9\s$=?()] in the full matched path+query string - no `&`, so
-                // it cannot match more than one query param at a time despite declaring
-                // allowedQueryParams: [$select, $expand, $filter]. Not fixed here (production
-                // rule/regex change, out of scope for this test-coverage pass) - flagging as a real
-                // bug rather than adding a kitchen-sink example that would never match.
                 InvocationExample.of(baseEndpoint + "/communications/callRecords?$expand=sessions($expand=segments)", "Communications_callRecords_" + "v1.0" + ".json"),
+                // /communications/callRecords - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/communications/callRecords?$select=id&$expand=sessions($expand=segments)&$filter=startDateTime%20ge%202020-01-01", "Communications_callRecords_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$expand=sessions($expand=segments)", "Communications_callRecord_" + "v1.0" + ".json"),
+                // /communications/callRecords/{id} - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$select=id&$expand=sessions($expand=segments)&$filter=startDateTime%20ge%202020-01-01", "Communications_callRecord_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getDirectRoutingCalls_" + "v1.0" + ".json"),
                 // getDirectRoutingCalls - with all allowed query params
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)?$skip=10", "Communications_callRecords_getDirectRoutingCalls_" + "v1.0" + ".json"),

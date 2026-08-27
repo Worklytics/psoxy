@@ -217,8 +217,32 @@ endpoints:
         type: "array"
         items:
           $ref: "#/definitions/ChatMessage"
-- pathRegex: "^/v1.0/communications/callRecords(/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?))?(?<queryParameters>[a-zA-z0-9\\\
-    s\\$\\=\\?\\(\\)]*)"
+- pathRegex: "^/v1.0/communications/callRecords(\\?.*)?$"
+  allowedQueryParams:
+  - "$select"
+  - "$expand"
+  - "$filter"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$..user.id"
+    - "$..userId"
+    encoding: "URL_SAFE_TOKEN"
+  responseSchema:
+    type: "object"
+    properties:
+      '@microsoft.graph.hasMoreData':
+        type: "boolean"
+      '@odata.deltaLink':
+        type: "string"
+      '@odata.nextLink':
+        type: "string"
+      value:
+        type: "array"
+        items:
+          $ref: "#/definitions/CallRecord"
+- pathRegex: "^/v1.0/communications/callRecords/[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?(\\\
+    ?.*)?$"
   allowedQueryParams:
   - "$select"
   - "$expand"
@@ -671,6 +695,40 @@ definitions:
     properties:
       participant:
         $ref: "#/definitions/IdentitySet"
+  CallRecord:
+    type: "object"
+    properties:
+      endDateTime:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      joinWebUrl:
+        type: "string"
+      lastModifiedDateTime:
+        type: "string"
+        format: "date-time"
+      modalities:
+        type: "array"
+        items:
+          type: "string"
+      organizer:
+        $ref: "#/definitions/IdentitySet"
+      participants:
+        type: "array"
+        items:
+          $ref: "#/definitions/IdentitySet"
+      sessions:
+        type: "array"
+        items:
+          $ref: "#/definitions/Session"
+      startDateTime:
+        type: "string"
+        format: "date-time"
+      type:
+        type: "string"
+      version:
+        type: "integer"
   CallRecording:
     type: "object"
     properties:

@@ -17,7 +17,8 @@ public class PrebuiltSanitizerRules {
     static final String MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA = "/v1.0/teams/{teamId}/channels/{channelId}/messages/delta";
     static final String MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES = "/v1.0/chats/{chatId}/messages";
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS = "/v1.0/communications/calls/{callId}";
-    static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX = "^/v1.0/communications/callRecords(/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?))?(?<queryParameters>[a-zA-z0-9\\s\\$\\=\\?\\(\\)]*)";
+    static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX = "^/v1.0/communications/callRecords/[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?(\\?.*)?$";
+    static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_LIST_REGEX = "^/v1.0/communications/callRecords(\\?.*)?$";
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS = "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})";
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS = "/v1.0/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})";
     static final String MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS = "/v1.0/users/{userId}/onlineMeetings";

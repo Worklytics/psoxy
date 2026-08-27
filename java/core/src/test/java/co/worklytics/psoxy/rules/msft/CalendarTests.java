@@ -147,8 +147,9 @@ public class CalendarTests extends EntraIDTests {
     @ParameterizedTest
     @ValueSource(strings = {"v1.0"})
     void event(String apiVersion) {
+        String eventId = "AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAENAAAiIsqMbYjsT5e-T7KzowPTAAAa_WKzAAA=";
         String endpoint = "https://graph.microsoft.com/" + apiVersion +
-            "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events";
+            "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events/" + eventId;
 
         String jsonResponse = asJson("Event_" + apiVersion + ".json");
 
@@ -162,10 +163,10 @@ public class CalendarTests extends EntraIDTests {
 
         String sanitized = sanitize(endpoint, jsonResponse);
 
-        // this fixture is a bare single Event object (not `value[]`-wrapped); the generated
-        // responseSchema for this endpoint only matches the collection shape, so it sanitizes
-        // down to just the passthrough `@odata.context` property. No production code path calls
-        // single-event-by-id GET.
+        // a bare single Event object (not `value[]`-wrapped) -- handled by GetEventResponse,
+        // whose pathRegex is disjoint from the collection endpoint's.
+        assertPseudonymized(sanitized, "engineering@M365x214355.onmicrosoft.com");
+        assertPseudonymized(sanitized, "IrvinS@M365x214355.onmicrosoft.com");
         assertRedacted(sanitized,
             "Irvin Sayers",
             "engineering@M365x214355.onmicrosoft.com",

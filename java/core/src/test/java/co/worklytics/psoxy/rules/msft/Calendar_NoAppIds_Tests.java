@@ -126,8 +126,9 @@ public class Calendar_NoAppIds_Tests extends EntraIDTests {
 
     @Test
     void event() {
+        String eventId = "AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAENAAAiIsqMbYjsT5e-T7KzowPTAAAa_WKzAAA=";
         String endpoint = "https://graph.microsoft.com/" + "v1.0" +
-                "/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/events";
+                "/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/events/" + eventId;
 
         String jsonResponse = asJson("Event_" + "v1.0" + ".json");
 
@@ -141,10 +142,10 @@ public class Calendar_NoAppIds_Tests extends EntraIDTests {
 
         String sanitized = sanitize(endpoint, jsonResponse);
 
-        // this fixture is a bare single Event object (not `value[]`-wrapped); the generated
-        // responseSchema for this endpoint only matches the collection shape, so it sanitizes
-        // down to just the passthrough `@odata.context` property. No production code path calls
-        // single-event-by-id GET.
+        // a bare single Event object (not `value[]`-wrapped) -- handled by GetEventResponse,
+        // whose pathRegex is disjoint from the collection endpoint's.
+        assertPseudonymized(sanitized, "engineering@M365x214355.onmicrosoft.com");
+        assertPseudonymized(sanitized, "IrvinS@M365x214355.onmicrosoft.com");
         assertRedacted(sanitized,
                 "Irvin Sayers",
                 "engineering@M365x214355.onmicrosoft.com",
