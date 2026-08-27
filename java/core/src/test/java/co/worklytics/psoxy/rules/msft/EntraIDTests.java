@@ -168,8 +168,14 @@ public class EntraIDTests extends JavaRulesTestBaseCase {
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
                 InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$count=true", "group-members.json"),
+                // groups/{id}/members - with all allowed query params
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$top=50&$select=id&$skiptoken=abcXYZ123&$orderBy=id&$count=true", "group-members.json"),
                 InvocationExample.of("https://graph.microsoft.com/v1.0/users/12398123012312", "user.json"),
-                InvocationExample.of("https://graph.microsoft.com/v1.0/users", "users.json")
+                // users/{id} - with all allowed query params
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/12398123012312?$select=id,mail", "user.json"),
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users", "users.json"),
+                // users - with all allowed query params
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users?$top=50&$select=id,mail&$skiptoken=abcXYZ123&$orderBy=id&$count=true&$filter=startswith(userPrincipalName,'a')", "users.json")
         );
     }
 }

@@ -56,7 +56,12 @@ public class CopilotTests extends JavaRulesTestBaseCase {
                 InvocationExample.of(baseEndpoint + "/copilot/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/interactionHistory/getAllEnterpriseInteractions",
                     "response_" + apiVersion + ".json"),
             InvocationExample.of(baseEndpoint + "/copilot/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/interactionHistory/getAllEnterpriseInteractions",
-                "response_with_team_meeting_" + apiVersion + ".json")
+                "response_with_team_meeting_" + apiVersion + ".json"),
+            // interactionHistory - with all allowed query params
+            InvocationExample.of(baseEndpoint + "/copilot/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/interactionHistory/getAllEnterpriseInteractions?$filter=createdDateTime%20ge%202020-01-01T00:00:00Z",
+                "response_" + apiVersion + ".json"),
+            // /v1.0/users/{id} - with all allowed query params
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5?$select=id,mail", "user.json")
         );
     }
 }

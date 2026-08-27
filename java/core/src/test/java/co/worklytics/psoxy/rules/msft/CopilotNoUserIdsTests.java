@@ -76,7 +76,12 @@ public class CopilotNoUserIdsTests extends JavaRulesTestBaseCase {
                 InvocationExample.of(baseEndpoint + "/copilot/users/" + SAMPLE_USER_ID + "/interactionHistory/getAllEnterpriseInteractions",
                     "response_" + apiVersion + ".json"),
             InvocationExample.of(baseEndpoint + "/copilot/users/" + SAMPLE_USER_ID + "/interactionHistory/getAllEnterpriseInteractions",
-                "response_with_team_meeting_" + apiVersion + ".json")
+                "response_with_team_meeting_" + apiVersion + ".json"),
+            // interactionHistory - with all allowed query params
+            InvocationExample.of(baseEndpoint + "/copilot/users/" + SAMPLE_USER_ID + "/interactionHistory/getAllEnterpriseInteractions?$filter=createdDateTime%20ge%202020-01-01T00:00:00Z",
+                "response_" + apiVersion + ".json"),
+            // /v1.0/users/{id} - with all allowed query params
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/" + SAMPLE_USER_ID + "?$select=id,mail", "user.json")
         );
     }
 }

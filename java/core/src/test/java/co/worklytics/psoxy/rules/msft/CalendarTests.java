@@ -243,7 +243,9 @@ public class CalendarTests extends EntraIDTests {
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events",
                 "Events_v1.0.json"),
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events/asdfasdf",
-                "Event_v1.0.json")
+                "Event_v1.0.json"),
+            // users/{id} - with all allowed query params
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038?$select=id,mail", "user.json")
             );
     }
 }

@@ -136,7 +136,9 @@ public class Mail_NoAppIds_Tests extends EntraIDTests {
         return Stream.of(
                 InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/mailboxSettings", "MailboxSettings_v1.0.json"),
                 InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/messages/AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEJAAAiIsqMbYjsT5e-T7KzowPTAAQSfAIWAAA=", "Message_v1.0.json"),
-                InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/mailFolders('SentItems')/messages?$filter=SentDateTime+gt+2019-12-30T00%3a00%3a00Z+and+SentDateTime+lt+2022-05-16T00%3a00%3a00Z&%24top=10&$skip=10", "Messages_SentItems_v1.0.json")
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/mailFolders('SentItems')/messages?$filter=SentDateTime+gt+2019-12-30T00%3a00%3a00Z+and+SentDateTime+lt+2022-05-16T00%3a00%3a00Z&%24top=10&$skip=10", "Messages_SentItems_v1.0.json"),
+                // users/{id} - with all allowed query params
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug?$select=id,mail", "user.json")
         );
     }
 }
