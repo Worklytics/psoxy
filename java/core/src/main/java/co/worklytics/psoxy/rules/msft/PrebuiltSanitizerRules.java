@@ -40,7 +40,7 @@ public class PrebuiltSanitizerRules {
     static final Rules2 MS_TEAMS_NO_USER_ID = Rules2.load("sources/microsoft-365/msft-teams/msft-teams_no-userIds.yaml");
 
     static final Rules2 MS_COPILOT = Rules2.load("sources/microsoft-365/msft-copilot/msft-copilot.yaml");
-    static final Rules2 MS_COPILOT_NO_USER_ID = Rules2.load("sources/microsoft-365/msft-copilot/msft-copilot_no-userIds.yaml");
+    static final Rules2 MS_COPILOT_NO_APP_IDS = Rules2.load("sources/microsoft-365/msft-copilot/msft-copilot_no-app-ids.yaml");
 
     static final RESTRules ONE_DRIVE = Rules2.load("sources/microsoft-365/msft-onedrive/msft-onedrive.yaml");
     static final RESTRules ONE_DRIVE_NO_APP_IDS = Rules2.load("sources/microsoft-365/msft-onedrive/msft-onedrive_no-app-ids.yaml");
@@ -58,7 +58,7 @@ public class PrebuiltSanitizerRules {
             .put("msft-teams", MS_TEAMS)
             .put("msft-teams" + ConfigRulesModule.NO_APP_IDS_SUFFIX, MS_TEAMS_NO_USER_ID)
             .put("msft-copilot", MS_COPILOT)
-            .put("msft-copilot" + ConfigRulesModule.NO_APP_IDS_SUFFIX, MS_COPILOT_NO_USER_ID)
+            .put("msft-copilot" + ConfigRulesModule.NO_APP_IDS_SUFFIX, MS_COPILOT_NO_APP_IDS)
             .put("msft-onedrive", ONE_DRIVE)
             .put("msft-onedrive" + ConfigRulesModule.NO_APP_IDS_SUFFIX, ONE_DRIVE_NO_APP_IDS)
             .build();

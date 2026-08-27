@@ -48,4 +48,4 @@ a tokenized user id.
 ## Example Rules
 
 - [Example Rules](msft-copilot.yaml)
-- [Example Rules: no User IDs](msft-copilot_no-userIds.yaml)
+- [Example Rules: no App IDs](msft-copilot_no-app-ids.yaml)

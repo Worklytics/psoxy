@@ -14,9 +14,9 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Getter
-public class CopilotNoUserIdsTests extends JavaRulesTestBaseCase {
+public class Copilot_NoAppIds_Tests extends JavaRulesTestBaseCase {
 
-    final Rules2 rulesUnderTest = PrebuiltSanitizerRules.MS_COPILOT_NO_USER_ID;
+    final Rules2 rulesUnderTest = PrebuiltSanitizerRules.MS_COPILOT_NO_APP_IDS;
 
     private final static String SAMPLE_USER_ID = "p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug";
 
@@ -25,8 +25,8 @@ public class CopilotNoUserIdsTests extends JavaRulesTestBaseCase {
         return RulesTestSpec.builder()
                 .sourceFamily("microsoft-365")
                 .sourceKind("msft-copilot")
-            .rulesFile("msft-copilot_no-userIds")
-            .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-userIds/")
+            .rulesFile("msft-copilot_no-app-ids")
+            .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
                 .checkUncompressedSSMLength(false)
                 .build();
     }
