@@ -84,7 +84,9 @@ public class CopilotNoUserIdsTests extends JavaRulesTestBaseCase {
             InvocationExample.of(baseEndpoint + "/copilot/users/" + SAMPLE_USER_ID + "/interactionHistory/getAllEnterpriseInteractions?arbitraryTestParam=shouldBeAllowed",
                 "response_" + apiVersion + ".json"),
             // /v1.0/users/{id} - with all allowed query params
-            InvocationExample.of("https://graph.microsoft.com/v1.0/users/" + SAMPLE_USER_ID + "?$select=id,mail", "user.json")
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/" + SAMPLE_USER_ID + "?$select=id,mail", "user.json"),
+            // /v1.0/users (collection) - with all allowed query params
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users?$top=50&$select=id,mail&$skiptoken=abcXYZ123&$orderBy=id&$count=true&$filter=startswith(userPrincipalName,'a')", "users.json")
         );
     }
 }

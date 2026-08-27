@@ -185,7 +185,11 @@ public class EntraIDTests extends JavaRulesTestBaseCase {
                 // groups - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
                 InvocationExample.of("https://graph.microsoft.com/v1.0/groups?arbitraryTestParam=shouldBeAllowed", "groups.json"),
                 // groups - real shape sent by AzureADGroupInput ($select=id,mail,displayName&$top=<pageSize>)
-                InvocationExample.of("https://graph.microsoft.com/v1.0/groups?$select=id,mail,displayName&$top=100", "groups.json")
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups?$select=id,mail,displayName&$top=100", "groups.json"),
+                // groups pagination - real shape of a page-2 request following @odata.nextLink (no captured
+                // fixture has a real nextLink for this endpoint; $skiptoken is the documented MSFT Graph
+                // continuation param, combined with the same $select/$top shape as the first page above)
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups?$select=id,mail,displayName&$top=100&$skiptoken=abcXYZ123", "groups.json")
         );
     }
 }

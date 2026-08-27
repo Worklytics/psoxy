@@ -63,8 +63,18 @@ public class CopilotTests extends JavaRulesTestBaseCase {
             // interactionHistory - real shape sent by CopilotInteractionFetchStrategy ($top + compound gt-and-lt date-range $filter together)
             InvocationExample.of(baseEndpoint + "/copilot/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/interactionHistory/getAllEnterpriseInteractions?$top=100&$filter=createdDateTime%20gt%202020-01-01T00:00:00Z%20and%20createdDateTime%20lt%202020-06-01T00:00:00Z",
                 "response_" + apiVersion + ".json"),
+            // interactionHistory pagination - real shape of @odata.nextLink from response_beta.json's own
+            // captured response ($filter+$skiptoken together, never tested as this combo before)
+            InvocationExample.of(baseEndpoint + "/copilot/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/interactionHistory/getAllEnterpriseInteractions?$filter=appClass+eq+%27IPM.SkypeTeams.Message.Copilot.BizChat%27&$skiptoken=U2tpcFZhbHVlPTAjTWFpbGJveEZvbGRlcj1NYWlsRm9sZGVycy9UZWFtQ2hhdA%3d%3d",
+                "response_" + apiVersion + ".json"),
+            // interactionHistory pagination - real shape of @odata.nextLink from response_with_team_meeting_beta.json's
+            // own captured response ($skiptoken alone, no $filter)
+            InvocationExample.of(baseEndpoint + "/copilot/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/interactionHistory/getAllEnterpriseInteractions?$skiptoken=U2tpcFZhbHVlPTEwI01haWxib3hGb2xkZXI9TWFpbEZvbGRlcnMvVGVhbXNNZXNzYWdlc0RhdGE%3d",
+                "response_with_team_meeting_" + apiVersion + ".json"),
             // /v1.0/users/{id} - with all allowed query params
-            InvocationExample.of("https://graph.microsoft.com/v1.0/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5?$select=id,mail", "user.json")
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5?$select=id,mail", "user.json"),
+            // /v1.0/users (collection) - with all allowed query params
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users?$top=50&$select=id,mail&$skiptoken=abcXYZ123&$orderBy=id&$count=true&$filter=startswith(userPrincipalName,'a')", "users.json")
         );
     }
 }

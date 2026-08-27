@@ -4,6 +4,7 @@ endpoints:
   allowedQueryParams:
   - "$filter"
   - "$top"
+  - "$skiptoken"
   augments:
   - !<textDigest>
     jsonPaths:
