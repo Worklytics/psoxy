@@ -186,6 +186,7 @@ public class CalendarTests extends EntraIDTests {
             "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/mailboxSettings";
 
         assertUrlAllowed(endpoint);
+        assertUrlWithQueryParamsAllowed(endpoint);
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 
@@ -243,8 +244,20 @@ public class CalendarTests extends EntraIDTests {
             //    "CalendarView_v1.0.json"),
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events",
                 "Events_v1.0.json"),
+            // events - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events?arbitraryTestParam=shouldBeAllowed",
+                "Events_v1.0.json"),
+            // calendarView - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView?arbitraryTestParam=shouldBeAllowed",
+                "CalendarView_v1.0.json"),
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events/asdfasdf",
                 "Event_v1.0.json"),
+            // events/{id} - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events/asdfasdf?arbitraryTestParam=shouldBeAllowed",
+                "Event_v1.0.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315", "group.json"),
+            // groups/{id} - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+            InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315?arbitraryTestParam=shouldBeAllowed", "group.json"),
             // users/{id} - with all allowed query params
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038?$select=id,mail", "user.json")
             );

@@ -161,6 +161,7 @@ public class Calendar_NoAppIds_Tests extends EntraIDTests {
                 "/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/mailboxSettings";
 
         assertUrlAllowed(endpoint);
+        assertUrlWithQueryParamsAllowed(endpoint);
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 
@@ -215,7 +216,16 @@ public class Calendar_NoAppIds_Tests extends EntraIDTests {
                 //    "CalendarView_v1.0.json"),
                 InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/events",
                         "Events_v1.0.json"),
+                // events - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/events?arbitraryTestParam=shouldBeAllowed",
+                        "Events_v1.0.json"),
+                // calendarView - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/calendar/calendarView?arbitraryTestParam=shouldBeAllowed",
+                        "CalendarView_v1.0.json"),
                 InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/events/asdfasdf",
+                        "Event_v1.0.json"),
+                // events/{id} - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/events/asdfasdf?arbitraryTestParam=shouldBeAllowed",
                         "Event_v1.0.json"),
                 // users/{id} - with all allowed query params
                 InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug?$select=id,mail", "user.json")

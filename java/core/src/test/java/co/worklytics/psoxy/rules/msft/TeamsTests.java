@@ -514,6 +514,8 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 InvocationExample.of(baseEndpoint + "/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/chats", "Users_chats_" + apiVersion + ".json"),
                 // /users/{id}/chats - with all allowed query params
                 InvocationExample.of(baseEndpoint + "/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/chats?$select=id,topic&$top=50&$skiptoken=abcXYZ123&$filter=chatType%20eq%20'group'&$orderby=lastUpdatedDateTime&$expand=members", "Users_chats_" + apiVersion + ".json"),
+                // /users/{id}/chats - real shape sent by FetchTeamsItemsJob ($top=50, $expand=lastMessagePreview, nested-paren $filter with property-path segments)
+                InvocationExample.of(baseEndpoint + "/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/chats?$top=50&$expand=lastMessagePreview&$filter=tenantId%20ne%20null%20and%20(onlineMeetingInfo/joinWebUrl%20ne%20null%20or%20(lastMessagePreview/createdDateTime%20gt%202020-01-01T00:00:00Z))", "Users_chats_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages", "Teams_channels_messages_" + apiVersion + ".json"),
                 // /teams/{id}/channels/{id}/messages - with all allowed query params
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages?$select=id,body&$top=50&$skiptoken=abcXYZ123&$expand=replies", "Teams_channels_messages_" + apiVersion + ".json"),
@@ -527,6 +529,8 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 InvocationExample.of(baseEndpoint + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages", "Chats_messages_" + apiVersion + ".json"),
                 // /chats/{id}/messages - with all allowed query params
                 InvocationExample.of(baseEndpoint + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages?$select=id,body&$top=50&$skiptoken=abcXYZ123&$filter=lastModifiedDateTime%20gt%202015-01-01T00:00:00Z&$orderby=lastModifiedDateTime&$count=true&$expand=replies&$format=json&$search=test&$skip=10", "Chats_messages_" + apiVersion + ".json"),
+                // /chats/{id}/messages - real shape sent by MessageFetchStrategy (compound gt-and-lt date-range $filter, no other params)
+                InvocationExample.of(baseEndpoint + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages?$filter=lastModifiedDateTime%20gt%202015-01-01T00:00:00Z%20and%20lastModifiedDateTime%20lt%202015-06-01T00:00:00Z", "Chats_messages_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92", "Communications_calls_" + apiVersion + ".json"),
                 // /communications/calls/{id} - with all allowed query params
                 InvocationExample.of(baseEndpoint + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92?$select=id,state&$top=1&$expand=participants", "Communications_calls_" + apiVersion + ".json"),

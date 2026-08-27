@@ -139,7 +139,10 @@ public class EntraID_NoAppIds_Tests extends EntraIDTests {
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~12398123012312", "user.json"),
             InvocationExample.of("https://graph.microsoft.com/v1.0/users", "users.json"),
             // users - with all allowed query params
-            InvocationExample.of("https://graph.microsoft.com/v1.0/users?$top=50&$select=id,mail&$skiptoken=abcXYZ123&$orderBy=id&$count=true&$filter=startswith(userPrincipalName,'a')", "users.json")
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users?$top=50&$select=id,mail&$skiptoken=abcXYZ123&$orderBy=id&$count=true&$filter=startswith(userPrincipalName,'a')", "users.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315", "group.json"),
+            // groups/{id} - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+            InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315?arbitraryTestParam=shouldBeAllowed", "group.json")
         );
     }
 }

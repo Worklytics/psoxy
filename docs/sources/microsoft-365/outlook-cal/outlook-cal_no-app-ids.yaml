@@ -395,7 +395,7 @@ endpoints:
         type: "string"
       workItemId:
         type: "string"
-- pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailboxSettings"
+- pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailboxSettings(\\?.*)?$"
   transforms:
   - !<redact>
     jsonPaths:

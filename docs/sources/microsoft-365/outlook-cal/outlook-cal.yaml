@@ -127,7 +127,7 @@ endpoints:
         type: "array"
         items:
           $ref: "#/definitions/GraphUser"
-- pathRegex: "^/v1.0/users/?[^/]*/mailboxSettings"
+- pathRegex: "^/v1.0/users/?[^/]*/mailboxSettings(\\?.*)?$"
   transforms:
   - !<redact>
     jsonPaths:

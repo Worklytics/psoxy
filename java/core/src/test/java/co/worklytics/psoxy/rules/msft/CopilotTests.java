@@ -60,6 +60,9 @@ public class CopilotTests extends JavaRulesTestBaseCase {
             // interactionHistory - with all allowed query params
             InvocationExample.of(baseEndpoint + "/copilot/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/interactionHistory/getAllEnterpriseInteractions?$filter=createdDateTime%20ge%202020-01-01T00:00:00Z",
                 "response_" + apiVersion + ".json"),
+            // interactionHistory - real shape sent by CopilotInteractionFetchStrategy ($top + compound gt-and-lt date-range $filter together)
+            InvocationExample.of(baseEndpoint + "/copilot/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/interactionHistory/getAllEnterpriseInteractions?$top=100&$filter=createdDateTime%20gt%202020-01-01T00:00:00Z%20and%20createdDateTime%20lt%202020-06-01T00:00:00Z",
+                "response_" + apiVersion + ".json"),
             // /v1.0/users/{id} - with all allowed query params
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5?$select=id,mail", "user.json")
         );

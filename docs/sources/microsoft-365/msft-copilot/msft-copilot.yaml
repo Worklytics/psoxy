@@ -3,6 +3,7 @@ endpoints:
 - pathTemplate: "/beta/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions"
   allowedQueryParams:
   - "$filter"
+  - "$top"
   augments:
   - !<textDigest>
     jsonPaths:

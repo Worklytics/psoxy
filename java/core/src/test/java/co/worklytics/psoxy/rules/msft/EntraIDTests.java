@@ -170,12 +170,22 @@ public class EntraIDTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$count=true", "group-members.json"),
                 // groups/{id}/members - with all allowed query params
                 InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$top=50&$select=id&$skiptoken=abcXYZ123&$orderBy=id&$count=true", "group-members.json"),
+                // groups/{id}/members/{oDataType} - real shape sent by GroupMemberInput (oDataType path segment + $top=500&$select=id&$count=true)
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members/microsoft.graph.user?$top=500&$select=id&$count=true", "group-members.json"),
                 InvocationExample.of("https://graph.microsoft.com/v1.0/users/12398123012312", "user.json"),
                 // users/{id} - with all allowed query params
                 InvocationExample.of("https://graph.microsoft.com/v1.0/users/12398123012312?$select=id,mail", "user.json"),
                 InvocationExample.of("https://graph.microsoft.com/v1.0/users", "users.json"),
                 // users - with all allowed query params
-                InvocationExample.of("https://graph.microsoft.com/v1.0/users?$top=50&$select=id,mail&$skiptoken=abcXYZ123&$orderBy=id&$count=true&$filter=startswith(userPrincipalName,'a')", "users.json")
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users?$top=50&$select=id,mail&$skiptoken=abcXYZ123&$orderBy=id&$count=true&$filter=startswith(userPrincipalName,'a')", "users.json"),
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315", "group.json"),
+                // groups/{id} - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315?arbitraryTestParam=shouldBeAllowed", "group.json"),
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups", "groups.json"),
+                // groups - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups?arbitraryTestParam=shouldBeAllowed", "groups.json"),
+                // groups - real shape sent by AzureADGroupInput ($select=id,mail,displayName&$top=<pageSize>)
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups?$select=id,mail,displayName&$top=100", "groups.json")
         );
     }
 }

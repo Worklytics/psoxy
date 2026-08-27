@@ -208,7 +208,7 @@ endpoints:
         type: "array"
         items:
           $ref: "#/definitions/Message"
-- pathRegex: "^/v1.0/users/[^/]*/mailboxSettings"
+- pathRegex: "^/v1.0/users/[^/]*/mailboxSettings(\\?.*)?$"
   responseSchema:
     type: "object"
     properties:
