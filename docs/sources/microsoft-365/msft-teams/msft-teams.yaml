@@ -460,7 +460,7 @@ endpoints:
         type: "string"
       version:
         type: "integer"
-- pathRegex: "^/v1.0/users/?[^/]*"
+- pathRegex: "^/v1.0/users/?(\\?.*)?$"
   allowedQueryParams:
   - "$top"
   - "$select"
@@ -501,6 +501,57 @@ endpoints:
         type: "array"
         items:
           $ref: "#/definitions/GraphUser"
+- pathRegex: "^/v1.0/users/[^/?]+(\\?.*)?$"
+  allowedQueryParams:
+  - "$select"
+  allowedRequestHeaders:
+  - "ConsistencyLevel"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$..employeeId"
+    - "$..userPrincipalName"
+    - "$..imAddresses[*]"
+    - "$..mail"
+    - "$..otherMails[*]"
+    - "$..onPremisesSamAccountName"
+    - "$..onPremisesUserPrincipalName"
+    - "$..onPremisesDistinguishedName"
+    - "$..onPremisesImmutableId"
+    - "$..identities[*].issuerAssignedId"
+    encoding: "URL_SAFE_TOKEN"
+  - !<pseudonymizeRegexMatches>
+    jsonPaths:
+    - "$..proxyAddresses[*]"
+    regex: "(?i)^smtp:(.*)$"
+  responseSchema:
+    type: "object"
+    properties:
+      accountEnabled:
+        type: "boolean"
+      employeeId:
+        type: "string"
+      hireDate:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      isResourceAccount:
+        type: "boolean"
+      mail:
+        type: "string"
+      mailboxSettings:
+        $ref: "#/definitions/MailboxSettings"
+      otherMails:
+        type: "array"
+        items:
+          type: "string"
+      proxyAddresses:
+        type: "array"
+        items:
+          type: "string"
+      userType:
+        type: "string"
 definitions:
   Added:
     type: "object"
