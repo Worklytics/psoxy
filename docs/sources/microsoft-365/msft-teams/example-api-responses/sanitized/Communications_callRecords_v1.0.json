@@ -45,11 +45,7 @@
       "organizer_v2":{
         "id":"+5564981205182",
         "identity":{
-          "user":null,
-          "phone":{
-            "id":"+5564981205182",
-            "tenantId":null
-          }
+          "user":null
         }
       }
     }

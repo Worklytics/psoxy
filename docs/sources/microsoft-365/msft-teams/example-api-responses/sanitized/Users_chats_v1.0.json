@@ -17,26 +17,18 @@
         "createdDateTime":"2024-04-01T10:08:07.452Z",
         "messageType":"unknownFutureValue",
         "from":null,
+        "body":{
+          "contentType":"html",
+          "content":"<systemEventMessage/>"
+        },
         "eventDetail":{
-          "@odata.type":"",
-          "visibleHistoryStartDateTime":"2024-04-01T10:08:06.302Z",
-          "members":[
-            {
-              "id":"7b622a03-ca9d-4506-9aae-2d691f26cd27",
-              "userIdentityType":"aadUser",
-              "tenantId":"2ae41f0c-acca-40f1-9c63-49475ff38512"
-            },
-            {
-              "id":"48d31887-5fad-4d73-a9f5-3c356e68a038",
-              "userIdentityType":"aadUser",
-              "tenantId":"dcd219dd-bc68-4b9b-bf0b-4a33a796be35"
-            }
-          ],
+          "@odata.type":"#microsoft.graph.membersAddedEventMessageDetail",
           "initiator":{
             "application":null,
             "device":null,
             "user":{
               "id":"7b622a03-ca9d-4506-9aae-2d691f26cd27",
+              "userIdentityType":"aadUser",
               "tenantId":"2ae41f0c-acca-40f1-9c63-49475ff38512"
             }
           }

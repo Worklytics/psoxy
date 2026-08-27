@@ -4,9 +4,11 @@
     {
       "id":"1616965872395",
       "replyToId":null,
+      "etag":"1616965872395",
       "messageType":"message",
       "createdDateTime":"2021-03-28T21:11:12.395Z",
       "lastModifiedDateTime":"2021-03-28T21:11:12.395Z",
+      "lastEditedDateTime":null,
       "deletedDateTime":null,
       "chatId":null,
       "importance":"normal",
@@ -16,7 +18,15 @@
         "application":null,
         "device":null,
         "user":{
-          "id":"8ea0e38b-efb3-4757-924a-5f94061cf8c2"
+          "id":"8ea0e38b-efb3-4757-924a-5f94061cf8c2",
+          "userIdentityType":"aadUser"
+        }
+      },
+      "body":{
+        "contentType":"html",
+        "+content:textDigest":{
+          "length":38,
+          "word_count":5
         }
       },
       "channelIdentity":{
@@ -31,7 +41,8 @@
             "device":null,
             "conversation":null,
             "user":{
-              "id":"ef1c916a-3135-4417-ba27-8eb7bd084193"
+              "id":"ef1c916a-3135-4417-ba27-8eb7bd084193",
+              "userIdentityType":"aadUser"
             }
           }
         }
@@ -41,9 +52,11 @@
     {
       "id":"1616963377068",
       "replyToId":null,
+      "etag":"1616963377068",
       "messageType":"message",
       "createdDateTime":"2021-03-28T20:29:37.068Z",
       "lastModifiedDateTime":"2021-03-28T20:29:37.068Z",
+      "lastEditedDateTime":null,
       "deletedDateTime":null,
       "chatId":null,
       "importance":"normal",
@@ -53,7 +66,15 @@
         "application":null,
         "device":null,
         "user":{
-          "id":"8ea0e38b-efb3-4757-924a-5f94061cf8c2"
+          "id":"8ea0e38b-efb3-4757-924a-5f94061cf8c2",
+          "userIdentityType":"aadUser"
+        }
+      },
+      "body":{
+        "contentType":"html",
+        "+content:textDigest":{
+          "length":1040,
+          "word_count":13
         }
       },
       "channelIdentity":{
@@ -66,14 +87,23 @@
     {
       "id":"1616883610266",
       "replyToId":null,
+      "etag":"1616883610266",
       "messageType":"unknownFutureValue",
       "createdDateTime":"2021-03-28T03:50:10.266Z",
       "lastModifiedDateTime":"2021-03-28T03:50:10.266Z",
+      "lastEditedDateTime":null,
       "deletedDateTime":null,
       "chatId":null,
       "importance":"normal",
       "locale":"en-us",
       "from":null,
+      "body":{
+        "contentType":"html",
+        "+content:textDigest":{
+          "length":21,
+          "word_count":1
+        }
+      },
       "channelIdentity":{
         "teamId":"fbe2bf47-16c8-47cf-b4a5-4b9b187c508b",
         "channelId":"19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2"
@@ -81,13 +111,13 @@
       "mentions":[ ],
       "reactions":[ ],
       "eventDetail":{
-        "@odata.type":"",
-        "teamId":"fbe2bf47-16c8-47cf-b4a5-4b9b187c508b",
+        "@odata.type":"#microsoft.graph.teamDescriptionUpdatedEventMessageDetail",
         "initiator":{
           "application":null,
           "device":null,
           "user":{
-            "id":"1fb8890f-423e-4154-8fbf-db6809bc8756"
+            "id":"1fb8890f-423e-4154-8fbf-db6809bc8756",
+            "userIdentityType":"aadUser"
           }
         }
       }

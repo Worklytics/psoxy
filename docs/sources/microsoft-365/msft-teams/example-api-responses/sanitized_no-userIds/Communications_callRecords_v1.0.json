@@ -45,11 +45,7 @@
       "organizer_v2":{
         "id":"t~6H69wr8oy_BY0VqG_KZNlLKl-4g86kOAK37vAuGrbUw",
         "identity":{
-          "user":null,
-          "phone":{
-            "id":"t~6H69wr8oy_BY0VqG_KZNlLKl-4g86kOAK37vAuGrbUw",
-            "tenantId":null
-          }
+          "user":null
         }
       }
     }

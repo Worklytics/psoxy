@@ -3,9 +3,11 @@
   "value":[
     {
       "replyToId":null,
+      "etag":"1606515483514",
       "messageType":"message",
       "createdDateTime":"2020-11-27T22:18:03.514Z",
       "lastModifiedDateTime":"2020-11-27T22:18:03.514Z",
+      "lastEditedDateTime":null,
       "deletedDateTime":null,
       "chatId":null,
       "importance":"normal",
@@ -18,7 +20,15 @@
         "conversation":null,
         "user":{
           "id":"8ea0e38b-efb3-4757-924a-5f94061cf8c2",
+          "userIdentityType":"aadUser",
           "tenantId":"e61ef81e-8bd8-476a-92e8-4a62f8426fca"
+        }
+      },
+      "body":{
+        "contentType":"text",
+        "+content:textDigest":{
+          "length":4,
+          "word_count":1
         }
       },
       "channelIdentity":{
@@ -30,9 +40,11 @@
     },
     {
       "replyToId":null,
+      "etag":"1606691795113",
       "messageType":"message",
       "createdDateTime":"2020-11-29T23:16:35.113Z",
       "lastModifiedDateTime":"2020-11-29T23:16:35.113Z",
+      "lastEditedDateTime":null,
       "deletedDateTime":null,
       "chatId":null,
       "importance":"normal",
@@ -45,7 +57,15 @@
         "conversation":null,
         "user":{
           "id":"8ea0e38b-efb3-4757-924a-5f94061cf8c2",
+          "userIdentityType":"aadUser",
           "tenantId":"e61ef81e-8bd8-476a-92e8-4a62f8426fca"
+        }
+      },
+      "body":{
+        "contentType":"text",
+        "+content:textDigest":{
+          "length":39,
+          "word_count":5
         }
       },
       "channelIdentity":{

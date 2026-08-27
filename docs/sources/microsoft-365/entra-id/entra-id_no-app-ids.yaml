@@ -209,7 +209,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.customTimeZone"
       bias:
         type: "integer"
       daylightOffset:

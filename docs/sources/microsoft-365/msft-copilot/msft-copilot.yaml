@@ -270,6 +270,9 @@ endpoints:
     jsonPaths:
     - "$..body.content"
     - "$..attachments[*].content"
+  - !<redact>
+    jsonPaths:
+    - "$..links[?(@.linkType=='File')].linkUrl"
   responseSchema:
     type: "object"
     properties:
@@ -473,7 +476,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.customTimeZone"
       bias:
         type: "integer"
       daylightOffset:
@@ -523,11 +525,15 @@ definitions:
   Identity:
     type: "object"
     properties:
+      applicationIdentityType:
+        type: "string"
       email:
         type: "string"
       id:
         type: "string"
       tenantId:
+        type: "string"
+      userIdentityType:
         type: "string"
   IdentitySet:
     type: "object"
@@ -547,8 +553,6 @@ definitions:
       guest:
         $ref: "#/definitions/Identity"
       onPremises:
-        $ref: "#/definitions/Identity"
-      phone:
         $ref: "#/definitions/Identity"
       user:
         $ref: "#/definitions/Identity"
@@ -605,6 +609,8 @@ definitions:
   TeamWorkConversationIdentity:
     type: "object"
     properties:
+      applicationIdentityType:
+        type: "string"
       conversationIdentityType:
         type: "string"
       email:
@@ -612,6 +618,8 @@ definitions:
       id:
         type: "string"
       tenantId:
+        type: "string"
+      userIdentityType:
         type: "string"
   WorkingHours:
     type: "object"

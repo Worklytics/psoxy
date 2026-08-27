@@ -4,9 +4,11 @@
     {
       "id":"1616964509832",
       "replyToId":null,
+      "etag":"1616964509832",
       "messageType":"message",
       "createdDateTime":"2021-03-28T20:48:29.832Z",
       "lastModifiedDateTime":"2021-03-28T20:48:29.832Z",
+      "lastEditedDateTime":null,
       "deletedDateTime":null,
       "chatId":"19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
       "importance":"normal",
@@ -17,7 +19,15 @@
         "application":null,
         "device":null,
         "user":{
-          "id":"8ea0e38b-efb3-4757-924a-5f94061cf8c2"
+          "id":"8ea0e38b-efb3-4757-924a-5f94061cf8c2",
+          "userIdentityType":"aadUser"
+        }
+      },
+      "body":{
+        "contentType":"text",
+        "+content:textDigest":{
+          "length":11,
+          "word_count":2
         }
       },
       "mentions":[ ],
@@ -26,9 +36,11 @@
     {
       "id":"1615971548136",
       "replyToId":null,
+      "etag":"1615971548136",
       "messageType":"message",
       "createdDateTime":"2021-03-17T08:59:08.136Z",
       "lastModifiedDateTime":"2021-03-17T08:59:08.136Z",
+      "lastEditedDateTime":null,
       "deletedDateTime":null,
       "chatId":"19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
       "importance":"normal",
@@ -39,7 +51,15 @@
         "application":null,
         "device":null,
         "user":{
-          "id":"8ea0e38b-efb3-4757-924a-5f94061cf8c2"
+          "id":"8ea0e38b-efb3-4757-924a-5f94061cf8c2",
+          "userIdentityType":"aadUser"
+        }
+      },
+      "body":{
+        "contentType":"html",
+        "+content:textDigest":{
+          "length":466,
+          "word_count":7
         }
       },
       "mentions":[ ],
@@ -48,25 +68,34 @@
     {
       "id":"1615943825123",
       "replyToId":null,
+      "etag":"1615943825123",
       "messageType":"unknownFutureValue",
       "createdDateTime":"2021-03-1706:47:05.123Z",
       "lastModifiedDateTime":"2021-03-1706:47:05.123Z",
+      "lastEditedDateTime":null,
       "deletedDateTime":null,
       "chatId":"19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
       "importance":"normal",
       "locale":"en-us",
       "channelIdentity":null,
       "from":null,
+      "body":{
+        "contentType":"html",
+        "+content:textDigest":{
+          "length":21,
+          "word_count":1
+        }
+      },
       "mentions":[ ],
       "reactions":[ ],
       "eventDetail":{
-        "@odata.type":"",
-        "chatId":"19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
+        "@odata.type":"#microsoft.graph.chatRenamedEventMessageDetail",
         "initiator":{
           "application":null,
           "device":null,
           "user":{
-            "id":"1fb8890f-423e-4154-8fbf-db6809bc8756"
+            "id":"1fb8890f-423e-4154-8fbf-db6809bc8756",
+            "userIdentityType":"aadUser"
           }
         }
       }

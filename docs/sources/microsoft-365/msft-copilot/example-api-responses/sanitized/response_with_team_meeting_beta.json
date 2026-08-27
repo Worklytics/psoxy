@@ -20,7 +20,8 @@
         "device":null,
         "user":null,
         "application":{
-          "id":"fb8d773d-7ef8-4ec0-a117-179f88add510"
+          "id":"fb8d773d-7ef8-4ec0-a117-179f88add510",
+          "applicationIdentityType":"bot"
         }
       },
       "body":{

@@ -17,26 +17,18 @@
         "createdDateTime":"2024-04-01T10:08:07.452Z",
         "messageType":"unknownFutureValue",
         "from":null,
+        "body":{
+          "contentType":"html",
+          "content":"<systemEventMessage/>"
+        },
         "eventDetail":{
-          "@odata.type":"",
-          "visibleHistoryStartDateTime":"2024-04-01T10:08:06.302Z",
-          "members":[
-            {
-              "id":"p~JDdzmC4v95Omi06Uc27e7piLn8bF6IPQYGrTbjfMCGDopvJMBmt6M7AImJblqjUy1NY6C4hiGYZA_VSyceEm10K_q9ISWhkoOc4Fkb6XCU4",
-              "userIdentityType":"aadUser",
-              "tenantId":"2ae41f0c-acca-40f1-9c63-49475ff38512"
-            },
-            {
-              "id":"p~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpDRcddGnKI4QDKyjQI9KtjJZDb8FZ27UE_toS68FyWz7Y22fnQYLP91SHJGVwQiN3E",
-              "userIdentityType":"aadUser",
-              "tenantId":"dcd219dd-bc68-4b9b-bf0b-4a33a796be35"
-            }
-          ],
+          "@odata.type":"#microsoft.graph.membersAddedEventMessageDetail",
           "initiator":{
             "application":null,
             "device":null,
             "user":{
               "id":"p~xgqyprd3J3FmtC81rkOKFgSc34g-oIAA2M3S9J1mXJH38VXCR30GVwjLkriorHSF_nL9Z51Y4fZABqo8iimkCRqqaMRZ2yDY8G1AnwUBlQE",
+              "userIdentityType":"aadUser",
               "tenantId":"2ae41f0c-acca-40f1-9c63-49475ff38512"
             }
           }

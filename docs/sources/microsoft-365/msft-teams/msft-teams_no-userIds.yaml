@@ -73,6 +73,8 @@ endpoints:
         type: "string"
       meetingInfo:
         $ref: "#/definitions/MeetingInfo"
+      myParticipantId:
+        type: "string"
       requestModalities:
         type: "array"
         items:
@@ -140,12 +142,19 @@ endpoints:
   - "$top"
   - "$skiptoken"
   - "$expand"
+  augments:
+  - !<textDigest>
+    jsonPaths:
+    - "$..body.content"
   transforms:
   - !<pseudonymize>
     jsonPaths:
     - "$..user.id"
     - "$..userId"
     encoding: "URL_SAFE_TOKEN"
+  - !<redact>
+    jsonPaths:
+    - "$..body.content"
   responseSchema:
     type: "object"
     properties:
@@ -167,12 +176,19 @@ endpoints:
   - "$expand"
   - "$deltatoken"
   - "$filter"
+  augments:
+  - !<textDigest>
+    jsonPaths:
+    - "$..body.content"
   transforms:
   - !<pseudonymize>
     jsonPaths:
     - "$..user.id"
     - "$..userId"
     encoding: "URL_SAFE_TOKEN"
+  - !<redact>
+    jsonPaths:
+    - "$..body.content"
   responseSchema:
     type: "object"
     properties:
@@ -187,6 +203,10 @@ endpoints:
         items:
           $ref: "#/definitions/ChatMessage"
 - pathRegex: "^/v1.0/chats/(/p~[a-zA-Z0-9_-]+?)?[^/]*/messages(\\?.*)?"
+  augments:
+  - !<textDigest>
+    jsonPaths:
+    - "$..body.content"
   transforms:
   - !<pseudonymize>
     jsonPaths:
@@ -204,6 +224,9 @@ endpoints:
     jsonPaths:
     - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
     regex: "^https://graph.microsoft.com/v1.0/chats/(.*)/messages(\\?.*).*$"
+  - !<redact>
+    jsonPaths:
+    - "$..body.content"
   responseSchema:
     type: "object"
     properties:
@@ -628,7 +651,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.channelAddedEventMessageDetail"
       channelId:
         type: "string"
       dataType:
@@ -640,7 +662,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.teamArchivedEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -689,7 +710,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.callEndedEventMessageDetail"
       callDuration:
         type: "string"
       callEventType:
@@ -754,7 +774,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.callRecordingEventMessageDetail"
       callId:
         type: "string"
       callRecordingDuration:
@@ -772,7 +791,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.callStartedEventMessageDetail"
       callEventType:
         type: "string"
       callId:
@@ -786,7 +804,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.callTranscriptEventMessageDetail"
       callId:
         type: "string"
       callTranscriptICalUid:
@@ -889,6 +906,8 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/ChatMessageAttachment"
+      body:
+        $ref: "#/definitions/MessageBody"
       channelIdentity:
         $ref: "#/definitions/ChannelIdentity"
       chatId:
@@ -899,6 +918,8 @@ definitions:
       deletedDateTime:
         type: "string"
         format: "date-time"
+      etag:
+        type: "string"
       eventDetail:
         anyOf:
         - $ref: "#/definitions/CallEnded"
@@ -937,6 +958,9 @@ definitions:
         type: "string"
       importance:
         type: "string"
+      lastEditedDateTime:
+        type: "string"
+        format: "date-time"
       lastModifiedDateTime:
         type: "string"
         format: "date-time"
@@ -947,6 +971,8 @@ definitions:
         items:
           $ref: "#/definitions/ChatMessageMention"
       messageType:
+        type: "string"
+      nextVersion:
         type: "string"
       reactions:
         type: "array"
@@ -995,7 +1021,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.chatRenamedEventMessageDetail"
       chatId:
         type: "string"
       dataType:
@@ -1015,7 +1040,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.conversationMemberRoleUpdatedEventMessageDetail"
       conversationMemberRoles:
         type: "array"
         items:
@@ -1031,7 +1055,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.teamCreatedEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1043,7 +1066,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.customTimeZone"
       bias:
         type: "integer"
       daylightOffset:
@@ -1067,7 +1089,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.channelDeletedEventMessageDetail"
       channelId:
         type: "string"
       dataType:
@@ -1079,7 +1100,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.membersDeletedEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1093,7 +1113,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.channelDescriptionUpdatedEventMessageDetail"
       channelId:
         type: "string"
       dataType:
@@ -1105,7 +1124,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.teamDescriptionUpdatedEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1185,11 +1203,15 @@ definitions:
   Identity:
     type: "object"
     properties:
+      applicationIdentityType:
+        type: "string"
       email:
         type: "string"
       id:
         type: "string"
       tenantId:
+        type: "string"
+      userIdentityType:
         type: "string"
   IdentitySet:
     type: "object"
@@ -1210,8 +1232,6 @@ definitions:
         $ref: "#/definitions/Identity"
       onPremises:
         $ref: "#/definitions/Identity"
-      phone:
-        $ref: "#/definitions/Identity"
       user:
         $ref: "#/definitions/Identity"
   Installed:
@@ -1219,7 +1239,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.teamsAppInstalledEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1231,7 +1250,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.membersJoinedEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1245,7 +1263,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.teamJoiningDisabledEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1257,7 +1274,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.teamJoiningEnabledEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1269,7 +1285,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.membersLeftEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1358,7 +1373,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.meetingPolicyUpdatedEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1372,7 +1386,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.membersAddedEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1384,6 +1397,13 @@ definitions:
       visibleHistoryStartDateTime:
         type: "string"
         format: "date-time"
+  MessageBody:
+    type: "object"
+    properties:
+      content:
+        type: "string"
+      contentType:
+        type: "string"
   Offset:
     type: "object"
     properties:
@@ -1474,7 +1494,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.messagePinnedEventMessageDetail"
       dataType:
         type: "string"
       eventDateTime:
@@ -1487,7 +1506,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.teamsAppRemovedEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1499,7 +1517,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.channelRenamedEventMessageDetail"
       channelId:
         type: "string"
       dataType:
@@ -1511,7 +1528,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.teamRenamedEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1546,7 +1562,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.channelSetAsFavoriteByDefaultEventMessageDetail"
       channelId:
         type: "string"
       dataType:
@@ -1558,7 +1573,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.tabUpdatedEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1601,7 +1615,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.teamUnarchivedEventMessageDetail"
       dataType:
         type: "string"
       initiator:
@@ -1613,7 +1626,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.messageUnpinnedEventMessageDetail"
       dataType:
         type: "string"
       eventDateTime:
@@ -1626,7 +1638,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.channelUnsetAsFavoriteByDefaultEventMessageDetail"
       channelId:
         type: "string"
       dataType:
@@ -1638,7 +1649,6 @@ definitions:
     properties:
       '@odata.type':
         type: "string"
-        constant: "#microsoft.graph.teamsAppUpgradedEventMessageDetail"
       dataType:
         type: "string"
       initiator:
