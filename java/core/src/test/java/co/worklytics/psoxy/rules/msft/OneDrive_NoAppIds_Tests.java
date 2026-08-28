@@ -51,18 +51,13 @@ public class OneDrive_NoAppIds_Tests extends JavaRulesTestBaseCase {
             InvocationExample.of(baseEndpoint + "/groups/" + groupId + "/drives?$select=id,driveType,system&$skiptoken=abcXYZ123&$top=999&$orderby=id&$expand=root", "list_groups_drives.json"),
             // /v1.0/drives/{driveId}/root/delta - no query params, and with all allowed query params
             InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/root/delta", "get_drive_delta.json"),
+            // real pagination continuation shape confirmed via live testing against the Graph API
+            // (a "?token=..." query param, matching MSFT's own docs example)
             InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/root/delta?token=abcXYZ123&", "get_drive_delta.json"),
-            // KNOWN BUG, not fixed here: get_drive_delta.json's own real @odata.nextLink embeds the
-            // continuation token as an OData function-call path segment ("/root/delta(token=...)"),
-            // NOT a "?token=..." query param like the example above. The endpoint's pathTemplate
-            // ("/v1.0/drives/{driveId}/root/delta") requires an exact match and doesn't account for
-            // that suffix, so a real page-2 request for OneDrive delta is rejected outright by this
-            // rule. Confirmed via RESTApiSanitizerImpl throwing IllegalStateException ("should not
-            // have been retrieved") when this exact real nextLink shape is exercised. Needs a
-            // pathTemplate/pathRegex fix (out of scope for this test-coverage pass -- different
-            // matching mechanism than the well-understood "(\?.*)?$" query-string-suffix bug fixed
-            // elsewhere this session, deliberately not attempted here without more confidence).
-            // /v1.0/drives/{driveId}/items/{itemId}/activities - no query params allowed by rules
+            // the OTHER real continuation shape, from this fixture's own captured @odata.nextLink
+            // (an OData function-call path segment -- rules must accept both)
+            InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/root/delta(token=1230919asd190410jlka)", "get_drive_delta.json"),
+
             InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/items/" + itemId + "/activities", "list_itemActivity.json"),
             InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/items/" + itemId + "/activities?$expand=driveItem", "list_itemActivity.json"),
             InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/items/" + itemId + "/activities?$skiptoken=some_token", "list_itemActivity.json"),
