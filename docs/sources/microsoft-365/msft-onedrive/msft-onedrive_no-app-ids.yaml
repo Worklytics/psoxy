@@ -46,7 +46,7 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/ItemActivity"
-  - pathTemplate: "/v1.0/drives/{driveId}/root/delta"
+  - pathRegex: "^/v1\\.0/drives/[^/]+/root/delta(\\(token=[^)]*\\))?(\\?.*)?$"
     allowedQueryParams:
       - "token"
       - "$select"
