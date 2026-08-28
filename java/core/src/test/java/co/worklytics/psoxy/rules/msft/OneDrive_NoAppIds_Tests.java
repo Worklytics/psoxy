@@ -41,11 +41,14 @@ public class OneDrive_NoAppIds_Tests extends JavaRulesTestBaseCase {
             InvocationExample.of(baseEndpoint + "/groups", "groups.json"),
             InvocationExample.of(baseEndpoint + "/groups?$top=999&$select=id,mail&$skiptoken=abcXYZ123&$orderby=id&$count=true", "groups.json"),
             // /v1.0/users/{userId}/drives - no query params, and with all allowed query params
-            InvocationExample.of(baseEndpoint + "/users/" + userId + "/drives", "list_drives.json"),
-            InvocationExample.of(baseEndpoint + "/users/" + userId + "/drives?$select=id,driveType,system&$skiptoken=abcXYZ123&$top=999&$orderby=id&$expand=root", "list_drives.json"),
+            // (fixture's @odata.nextLink embeds the raw, un-pseudonymized AAD user id that Graph
+            // resolves the path to; it must be re-tokenized so a client following the link isn't
+            // blocked by pathParameterSchemas requiring a reversible-pseudonym userId)
+            InvocationExample.of(baseEndpoint + "/users/" + userId + "/drives", "list_user_drives.json"),
+            InvocationExample.of(baseEndpoint + "/users/" + userId + "/drives?$select=id,driveType,system&$skiptoken=abcXYZ123&$top=999&$orderby=id&$expand=root", "list_user_drives.json"),
             // /v1.0/groups/{groupId}/drives - no query params, and with all allowed query params
-            InvocationExample.of(baseEndpoint + "/groups/" + groupId + "/drives", "list_drives.json"),
-            InvocationExample.of(baseEndpoint + "/groups/" + groupId + "/drives?$select=id,driveType,system&$skiptoken=abcXYZ123&$top=999&$orderby=id&$expand=root", "list_drives.json"),
+            InvocationExample.of(baseEndpoint + "/groups/" + groupId + "/drives", "list_groups_drives.json"),
+            InvocationExample.of(baseEndpoint + "/groups/" + groupId + "/drives?$select=id,driveType,system&$skiptoken=abcXYZ123&$top=999&$orderby=id&$expand=root", "list_groups_drives.json"),
             // /v1.0/drives/{driveId}/root/delta - no query params, and with all allowed query params
             InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/root/delta", "get_drive_delta.json"),
             // real pagination continuation shape confirmed via live testing against the Graph API
