@@ -1,197 +1,197 @@
 ---
 endpoints:
-- pathRegex: "^/v1.0/groups/?(\\?.*)?$"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..mail"
-    includeOriginal: true
-    encoding: "JSON"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/GraphGroup"
-- pathRegex: "^/v1.0/groups/[^/?]+(\\?.*)?$"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..mail"
-    includeOriginal: true
-    encoding: "JSON"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      id:
-        type: "string"
-      mail:
-        type: "string"
-- pathRegex: "^/v1.0/groups/[^/]*/members.*"
-  allowedQueryParams:
-  - "$top"
-  - "$select"
-  - "$skiptoken"
-  - "$orderBy"
-  - "$count"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..employeeId"
-    - "$..userPrincipalName"
-    - "$..imAddresses[*]"
-    - "$..mail"
-    - "$..otherMails[*]"
-    - "$..onPremisesSamAccountName"
-    - "$..onPremisesUserPrincipalName"
-    - "$..onPremisesDistinguishedName"
-    - "$..onPremisesImmutableId"
-    - "$..identities[*].issuerAssignedId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..id"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/GraphGroupMember"
-- pathRegex: "^/v1.0/users(\\?.*)?$"
-  allowedQueryParams:
-  - "$top"
-  - "$select"
-  - "$skiptoken"
-  - "$orderBy"
-  - "$count"
-  - "$filter"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..employeeId"
-    - "$..userPrincipalName"
-    - "$..imAddresses[*]"
-    - "$..mail"
-    - "$..otherMails[*]"
-    - "$..onPremisesSamAccountName"
-    - "$..onPremisesUserPrincipalName"
-    - "$..onPremisesDistinguishedName"
-    - "$..onPremisesImmutableId"
-    - "$..identities[*].issuerAssignedId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..id"
-    includeReversible: true
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/GraphUser"
-- pathRegex: "^/v1.0/users/p~[a-zA-Z0-9_-]+(\\?.*)?$"
-  allowedQueryParams:
-  - "$select"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..employeeId"
-    - "$..userPrincipalName"
-    - "$..imAddresses[*]"
-    - "$..mail"
-    - "$..otherMails[*]"
-    - "$..onPremisesSamAccountName"
-    - "$..onPremisesUserPrincipalName"
-    - "$..onPremisesDistinguishedName"
-    - "$..onPremisesImmutableId"
-    - "$..identities[*].issuerAssignedId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..id"
-    includeReversible: true
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      accountEnabled:
-        type: "boolean"
-      employeeId:
-        type: "string"
-      hireDate:
-        type: "string"
-        format: "date-time"
-      id:
-        type: "string"
-      isResourceAccount:
-        type: "boolean"
-      mail:
-        type: "string"
-      mailboxSettings:
-        $ref: "#/definitions/MailboxSettings"
-      otherMails:
-        type: "array"
-        items:
+  - pathRegex: "^/v1.0/groups/?(\\?.*)?$"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..mail"
+        includeOriginal: true
+        encoding: "JSON"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
           type: "string"
-      proxyAddresses:
-        type: "array"
-        items:
+        '@odata.nextLink':
           type: "string"
-      userType:
-        type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/GraphGroup"
+  - pathRegex: "^/v1.0/groups/[^/?]+(\\?.*)?$"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..mail"
+        includeOriginal: true
+        encoding: "JSON"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        mail:
+          type: "string"
+  - pathRegex: "^/v1.0/groups/[^/]*/members.*"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/GraphGroupMember"
+  - pathRegex: "^/v1.0/users(\\?.*)?$"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+      - "$filter"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/GraphUser"
+  - pathRegex: "^/v1.0/users/p~[a-zA-Z0-9_-]+(\\?.*)?$"
+    allowedQueryParams:
+      - "$select"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        accountEnabled:
+          type: "boolean"
+        employeeId:
+          type: "string"
+        hireDate:
+          type: "string"
+          format: "date-time"
+        id:
+          type: "string"
+        isResourceAccount:
+          type: "boolean"
+        mail:
+          type: "string"
+        mailboxSettings:
+          $ref: "#/definitions/MailboxSettings"
+        otherMails:
+          type: "array"
+          items:
+            type: "string"
+        proxyAddresses:
+          type: "array"
+          items:
+            type: "string"
+        userType:
+          type: "string"
 definitions:
   AutomaticRepliesSettings:
     type: "object"
@@ -325,4 +325,4 @@ definitions:
         format: "time"
       timeZone:
         anyOf:
-        - $ref: "#/definitions/CustomTimeZone"
+          - $ref: "#/definitions/CustomTimeZone"

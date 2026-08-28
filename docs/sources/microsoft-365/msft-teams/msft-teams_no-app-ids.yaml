@@ -1,650 +1,650 @@
 ---
 endpoints:
-- pathTemplate: "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})"
-  allowedQueryParams:
-  - "$skip"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/DirectRoutingCall"
-- pathTemplate: "/v1.0/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})"
-  allowedQueryParams:
-  - "$skip"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<tokenize>
-    jsonPaths:
-    - "$..callId"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/PSTNCall"
-- pathTemplate: "/v1.0/communications/calls/{callId}"
-  allowedQueryParams:
-  - "$select"
-  - "$top"
-  - "$expand"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      callChainId:
-        type: "string"
-      chatInfo:
-        $ref: "#/definitions/ChatInfo"
-      direction:
-        type: "string"
-      id:
-        type: "string"
-      mediaState:
-        type: "string"
-      meetingInfo:
-        $ref: "#/definitions/MeetingInfo"
-      myParticipantId:
-        type: "string"
-      requestModalities:
-        type: "array"
-        items:
+  - pathTemplate: "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})"
+    allowedQueryParams:
+      - "$skip"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
           type: "string"
-      source:
-        $ref: "#/definitions/ParticipantInfo"
-      state:
-        type: "string"
-      targets:
-        type: "array"
-        items:
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/DirectRoutingCall"
+  - pathTemplate: "/v1.0/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})"
+    allowedQueryParams:
+      - "$skip"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$..callId"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/PSTNCall"
+  - pathTemplate: "/v1.0/communications/calls/{callId}"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$expand"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        callChainId:
+          type: "string"
+        chatInfo:
+          $ref: "#/definitions/ChatInfo"
+        direction:
+          type: "string"
+        id:
+          type: "string"
+        mediaState:
+          type: "string"
+        meetingInfo:
+          $ref: "#/definitions/MeetingInfo"
+        myParticipantId:
+          type: "string"
+        requestModalities:
+          type: "array"
+          items:
+            type: "string"
+        source:
           $ref: "#/definitions/ParticipantInfo"
-- pathTemplate: "/v1.0/teams"
-  allowedQueryParams:
-  - "$select"
-  - "$top"
-  - "$skiptoken"
-  - "$filter"
-  - "$count"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/Team"
-- pathTemplate: "/v1.0/teams/{teamId}/allChannels"
-  allowedQueryParams:
-  - "$select"
-  - "$filter"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/Channel"
-- pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages"
-  allowedQueryParams:
-  - "$select"
-  - "$top"
-  - "$skiptoken"
-  - "$expand"
-  augments:
-  - !<textDigest>
-    jsonPaths:
-    - "$..body.content"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<redact>
-    jsonPaths:
-    - "$..body.content"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/ChatMessage"
-- pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages/delta"
-  allowedQueryParams:
-  - "$select"
-  - "$top"
-  - "$skiptoken"
-  - "$expand"
-  - "$deltatoken"
-  - "$filter"
-  augments:
-  - !<textDigest>
-    jsonPaths:
-    - "$..body.content"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<redact>
-    jsonPaths:
-    - "$..body.content"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/ChatMessage"
-- pathRegex: "^/v1.0/chats/(/p~[a-zA-Z0-9_-]+?)?[^/]*/messages(\\?.*)?"
-  augments:
-  - !<textDigest>
-    jsonPaths:
-    - "$..body.content"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..emailAddress"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<tokenize>
-    jsonPaths:
-    - "$..chatId"
-  - !<tokenize>
-    jsonPaths:
-    - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
-    regex: "^https://graph.microsoft.com/v1.0/chats/(.*)/messages(\\?.*).*$"
-  - !<redact>
-    jsonPaths:
-    - "$..body.content"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/ChatMessage"
-- pathRegex: "^/v1.0/communications/callRecords(\\?.*)?$"
-  allowedQueryParams:
-  - "$select"
-  - "$expand"
-  - "$filter"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    - "$..guest.id"
-    - "$..phone.id"
-    - "$..organizer_v2.id"
-    - "$..participants_v2[*].id"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/CallRecord"
-- pathRegex: "^/v1.0/communications/callRecords/[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?(\\\
+        state:
+          type: "string"
+        targets:
+          type: "array"
+          items:
+            $ref: "#/definitions/ParticipantInfo"
+  - pathTemplate: "/v1.0/teams"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$count"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/Team"
+  - pathTemplate: "/v1.0/teams/{teamId}/allChannels"
+    allowedQueryParams:
+      - "$select"
+      - "$filter"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/Channel"
+  - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$expand"
+    augments:
+      - !<textDigest>
+        jsonPaths:
+          - "$..body.content"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..body.content"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/ChatMessage"
+  - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages/delta"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$expand"
+      - "$deltatoken"
+      - "$filter"
+    augments:
+      - !<textDigest>
+        jsonPaths:
+          - "$..body.content"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..body.content"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/ChatMessage"
+  - pathRegex: "^/v1.0/chats/(/p~[a-zA-Z0-9_-]+?)?[^/]*/messages(\\?.*)?"
+    augments:
+      - !<textDigest>
+        jsonPaths:
+          - "$..body.content"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$..chatId"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/chats/(.*)/messages(\\?.*).*$"
+      - !<redact>
+        jsonPaths:
+          - "$..body.content"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/ChatMessage"
+  - pathRegex: "^/v1.0/communications/callRecords(\\?.*)?$"
+    allowedQueryParams:
+      - "$select"
+      - "$expand"
+      - "$filter"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+          - "$..guest.id"
+          - "$..phone.id"
+          - "$..organizer_v2.id"
+          - "$..participants_v2[*].id"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/CallRecord"
+  - pathRegex: "^/v1.0/communications/callRecords/[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?(\\\
     ?.*)?$"
-  allowedQueryParams:
-  - "$select"
-  - "$expand"
-  - "$filter"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    - "$..guest.id"
-    - "$..phone.id"
-    - "$..organizer_v2.id"
-    - "$..participants_v2[*].id"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      endDateTime:
-        type: "string"
-        format: "date-time"
-      id:
-        type: "string"
-      joinWebUrl:
-        type: "string"
-      lastModifiedDateTime:
-        type: "string"
-        format: "date-time"
-      modalities:
-        type: "array"
-        items:
+    allowedQueryParams:
+      - "$select"
+      - "$expand"
+      - "$filter"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+          - "$..guest.id"
+          - "$..phone.id"
+          - "$..organizer_v2.id"
+          - "$..participants_v2[*].id"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        endDateTime:
           type: "string"
-      organizer:
-        $ref: "#/definitions/IdentitySet"
-      organizer_v2:
-        $ref: "#/definitions/Organizer"
-      participants:
-        type: "array"
-        items:
+          format: "date-time"
+        id:
+          type: "string"
+        joinWebUrl:
+          type: "string"
+        lastModifiedDateTime:
+          type: "string"
+          format: "date-time"
+        modalities:
+          type: "array"
+          items:
+            type: "string"
+        organizer:
           $ref: "#/definitions/IdentitySet"
-      participants_v2:
-        type: "array"
-        items:
-          $ref: "#/definitions/Participant"
-      sessions:
-        type: "array"
-        items:
-          $ref: "#/definitions/Session"
-      startDateTime:
-        type: "string"
-        format: "date-time"
-      type:
-        type: "string"
-      version:
-        type: "integer"
-- pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/chats(\\?.*)?"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..emailAddress"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<tokenize>
-    jsonPaths:
-    - "$..id"
-  - !<tokenize>
-    jsonPaths:
-    - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
-    regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
-  - !<redactExceptPhrases>
-    jsonPaths:
-    - "$..topic"
-    allowedPhrases:
-    - "Focus Time"
-    - "Focus"
-    - "No Meetings"
-    - "No Meeting"
-    - "no mtg"
-    - "Prep"
-    - "OOO"
-    - "Out of Office"
-    - "Out of the Office"
-    - "call"
-    - "brainstorm"
-    - "brainstorming"
-    - "brain storm"
-    - "check in"
-    - "check-in"
-    - "checkin"
-    - "coffee"
-    - "food"
-    - "happy hour"
-    - "lunch"
-    - "office hours"
-    - "onsite"
-    - "on-site"
-    - "social"
-    - "stand up"
-    - "stand-up"
-    - "standup"
-    - "team building"
-    - "teambuilding"
-    - "daily"
-    - "bi-weekly"
-    - "biweekly"
-    - "weekly"
-    - "monthly"
-    - "quarterly"
-    - "1:1"
-    - "1-on-1"
-    - "one-on-one"
-    - "all-hands"
-    - "all hands"
-    - "allhands"
-    - "team meeting"
-    - "decision making"
-    - "decision"
-    - "hand off"
-    - "hand-off"
-    - "handoff"
-    - "handover"
-    - "information sharing"
-    - "problem solving"
-    - "retro"
-    - "review"
-    - "sprint"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/Chat"
-- pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/onlineMeetings(\\?.*)?"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..emailAddress"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..identity.id"
-    encoding: "URL_SAFE_TOKEN"
-  - !<tokenize>
-    jsonPaths:
-    - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
-    regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
-  responseSchema:
-    type: "object"
-    properties:
-      allowAttendeeToEnableCamera:
-        type: "boolean"
-      allowAttendeeToEnableMic:
-        type: "boolean"
-      allowMeetingChat:
-        type: "string"
-      allowParticipantsToChangeName:
-        type: "boolean"
-      allowTeamworkReactions:
-        type: "boolean"
-      allowedPresenters:
-        type: "string"
-      chatInfo:
-        $ref: "#/definitions/ChatInfo"
-      creationDateTime:
-        type: "string"
-        format: "date-time"
-      endDateTime:
-        type: "string"
-        format: "date-time"
-      id:
-        type: "string"
-      joinWebUrl:
-        type: "string"
-      lobbyBypassSettings:
-        $ref: "#/definitions/LobbyBypassSettings"
-      participants:
-        $ref: "#/definitions/MeetingParticipant"
-      shareMeetingChatHistoryDefault:
-        type: "string"
-      startDateTime:
-        type: "string"
-        format: "date-time"
-      videoTeleconferenceId:
-        type: "string"
-      watermarkProtection:
-        $ref: "#/definitions/WatermarkProtection"
-- pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/onlineMeetings/[a-zA-Z0-9_-]+/attendanceReports(\\\
-    ?.*)?"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..emailAddress"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..identity.id"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<tokenize>
-    jsonPaths:
-    - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
-    regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/MeetingAttendanceReport"
-- pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/onlineMeetings/[a-zA-Z0-9_-]+/attendanceReports/[a-zA-Z0-9_-]+(\\\
-    ?.*)?"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..emailAddress"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..identity.id"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..userId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<tokenize>
-    jsonPaths:
-    - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
-    regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
-  responseSchema:
-    type: "object"
-    properties:
-      attendanceRecords:
-        type: "array"
-        items:
-          $ref: "#/definitions/AttendanceReport"
-      id:
-        type: "string"
-      meetingEndDateTime:
-        type: "string"
-        format: "date-time"
-      meetingStartDateTime:
-        type: "string"
-        format: "date-time"
-      totalParticipantCount:
-        type: "integer"
-- pathRegex: "^/v1.0/users(\\?.*)?$"
-  allowedQueryParams:
-  - "$top"
-  - "$select"
-  - "$skiptoken"
-  - "$orderBy"
-  - "$count"
-  - "$filter"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..employeeId"
-    - "$..userPrincipalName"
-    - "$..imAddresses[*]"
-    - "$..mail"
-    - "$..otherMails[*]"
-    - "$..onPremisesSamAccountName"
-    - "$..onPremisesUserPrincipalName"
-    - "$..onPremisesDistinguishedName"
-    - "$..onPremisesImmutableId"
-    - "$..identities[*].issuerAssignedId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..id"
-    includeReversible: true
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/GraphUser"
-- pathRegex: "^/v1.0/users/p~[a-zA-Z0-9_-]+(\\?.*)?$"
-  allowedQueryParams:
-  - "$select"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..employeeId"
-    - "$..userPrincipalName"
-    - "$..imAddresses[*]"
-    - "$..mail"
-    - "$..otherMails[*]"
-    - "$..onPremisesSamAccountName"
-    - "$..onPremisesUserPrincipalName"
-    - "$..onPremisesDistinguishedName"
-    - "$..onPremisesImmutableId"
-    - "$..identities[*].issuerAssignedId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..id"
-    includeReversible: true
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      accountEnabled:
-        type: "boolean"
-      employeeId:
-        type: "string"
-      hireDate:
-        type: "string"
-        format: "date-time"
-      id:
-        type: "string"
-      isResourceAccount:
-        type: "boolean"
-      mail:
-        type: "string"
-      mailboxSettings:
-        $ref: "#/definitions/MailboxSettings"
-      otherMails:
-        type: "array"
-        items:
+        organizer_v2:
+          $ref: "#/definitions/Organizer"
+        participants:
+          type: "array"
+          items:
+            $ref: "#/definitions/IdentitySet"
+        participants_v2:
+          type: "array"
+          items:
+            $ref: "#/definitions/Participant"
+        sessions:
+          type: "array"
+          items:
+            $ref: "#/definitions/Session"
+        startDateTime:
           type: "string"
-      proxyAddresses:
-        type: "array"
-        items:
+          format: "date-time"
+        type:
           type: "string"
-      userType:
-        type: "string"
+        version:
+          type: "integer"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/chats(\\?.*)?"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$..id"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+      - !<redactExceptPhrases>
+        jsonPaths:
+          - "$..topic"
+        allowedPhrases:
+          - "Focus Time"
+          - "Focus"
+          - "No Meetings"
+          - "No Meeting"
+          - "no mtg"
+          - "Prep"
+          - "OOO"
+          - "Out of Office"
+          - "Out of the Office"
+          - "call"
+          - "brainstorm"
+          - "brainstorming"
+          - "brain storm"
+          - "check in"
+          - "check-in"
+          - "checkin"
+          - "coffee"
+          - "food"
+          - "happy hour"
+          - "lunch"
+          - "office hours"
+          - "onsite"
+          - "on-site"
+          - "social"
+          - "stand up"
+          - "stand-up"
+          - "standup"
+          - "team building"
+          - "teambuilding"
+          - "daily"
+          - "bi-weekly"
+          - "biweekly"
+          - "weekly"
+          - "monthly"
+          - "quarterly"
+          - "1:1"
+          - "1-on-1"
+          - "one-on-one"
+          - "all-hands"
+          - "all hands"
+          - "allhands"
+          - "team meeting"
+          - "decision making"
+          - "decision"
+          - "hand off"
+          - "hand-off"
+          - "handoff"
+          - "handover"
+          - "information sharing"
+          - "problem solving"
+          - "retro"
+          - "review"
+          - "sprint"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/Chat"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/onlineMeetings(\\?.*)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..identity.id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+    responseSchema:
+      type: "object"
+      properties:
+        allowAttendeeToEnableCamera:
+          type: "boolean"
+        allowAttendeeToEnableMic:
+          type: "boolean"
+        allowMeetingChat:
+          type: "string"
+        allowParticipantsToChangeName:
+          type: "boolean"
+        allowTeamworkReactions:
+          type: "boolean"
+        allowedPresenters:
+          type: "string"
+        chatInfo:
+          $ref: "#/definitions/ChatInfo"
+        creationDateTime:
+          type: "string"
+          format: "date-time"
+        endDateTime:
+          type: "string"
+          format: "date-time"
+        id:
+          type: "string"
+        joinWebUrl:
+          type: "string"
+        lobbyBypassSettings:
+          $ref: "#/definitions/LobbyBypassSettings"
+        participants:
+          $ref: "#/definitions/MeetingParticipant"
+        shareMeetingChatHistoryDefault:
+          type: "string"
+        startDateTime:
+          type: "string"
+          format: "date-time"
+        videoTeleconferenceId:
+          type: "string"
+        watermarkProtection:
+          $ref: "#/definitions/WatermarkProtection"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/onlineMeetings/[a-zA-Z0-9_-]+/attendanceReports(\\\
+    ?.*)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..identity.id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/MeetingAttendanceReport"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/onlineMeetings/[a-zA-Z0-9_-]+/attendanceReports/[a-zA-Z0-9_-]+(\\\
+    ?.*)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..identity.id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+    responseSchema:
+      type: "object"
+      properties:
+        attendanceRecords:
+          type: "array"
+          items:
+            $ref: "#/definitions/AttendanceReport"
+        id:
+          type: "string"
+        meetingEndDateTime:
+          type: "string"
+          format: "date-time"
+        meetingStartDateTime:
+          type: "string"
+          format: "date-time"
+        totalParticipantCount:
+          type: "integer"
+  - pathRegex: "^/v1.0/users(\\?.*)?$"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+      - "$filter"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/GraphUser"
+  - pathRegex: "^/v1.0/users/p~[a-zA-Z0-9_-]+(\\?.*)?$"
+    allowedQueryParams:
+      - "$select"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        accountEnabled:
+          type: "boolean"
+        employeeId:
+          type: "string"
+        hireDate:
+          type: "string"
+          format: "date-time"
+        id:
+          type: "string"
+        isResourceAccount:
+          type: "boolean"
+        mail:
+          type: "string"
+        mailboxSettings:
+          $ref: "#/definitions/MailboxSettings"
+        otherMails:
+          type: "array"
+          items:
+            type: "string"
+        proxyAddresses:
+          type: "array"
+          items:
+            type: "string"
+        userType:
+          type: "string"
 definitions:
   Added:
     type: "object"
@@ -922,36 +922,36 @@ definitions:
         type: "string"
       eventDetail:
         anyOf:
-        - $ref: "#/definitions/CallEnded"
-        - $ref: "#/definitions/CallRecording"
-        - $ref: "#/definitions/CallStarted"
-        - $ref: "#/definitions/CallTranscript"
-        - $ref: "#/definitions/Added"
-        - $ref: "#/definitions/Deleted"
-        - $ref: "#/definitions/DescriptionUpdated"
-        - $ref: "#/definitions/Renamed"
-        - $ref: "#/definitions/SetAsFavoriteByDefault"
-        - $ref: "#/definitions/UnsetAsFavoriteByDefault"
-        - $ref: "#/definitions/ChatRename"
-        - $ref: "#/definitions/ConversationMemberRoleUpdated"
-        - $ref: "#/definitions/MeetingPolicyUpdated"
-        - $ref: "#/definitions/MembersAdded"
-        - $ref: "#/definitions/Deleted_1"
-        - $ref: "#/definitions/Joined"
-        - $ref: "#/definitions/Left"
-        - $ref: "#/definitions/Pinned"
-        - $ref: "#/definitions/Unpinned"
-        - $ref: "#/definitions/TabUpdated"
-        - $ref: "#/definitions/Archived"
-        - $ref: "#/definitions/Created"
-        - $ref: "#/definitions/DescriptionUpdated_1"
-        - $ref: "#/definitions/JoiningDisabled"
-        - $ref: "#/definitions/JoiningEnabled"
-        - $ref: "#/definitions/Renamed_1"
-        - $ref: "#/definitions/Unarchived"
-        - $ref: "#/definitions/Installed"
-        - $ref: "#/definitions/Removed"
-        - $ref: "#/definitions/Upgraded"
+          - $ref: "#/definitions/CallEnded"
+          - $ref: "#/definitions/CallRecording"
+          - $ref: "#/definitions/CallStarted"
+          - $ref: "#/definitions/CallTranscript"
+          - $ref: "#/definitions/Added"
+          - $ref: "#/definitions/Deleted"
+          - $ref: "#/definitions/DescriptionUpdated"
+          - $ref: "#/definitions/Renamed"
+          - $ref: "#/definitions/SetAsFavoriteByDefault"
+          - $ref: "#/definitions/UnsetAsFavoriteByDefault"
+          - $ref: "#/definitions/ChatRename"
+          - $ref: "#/definitions/ConversationMemberRoleUpdated"
+          - $ref: "#/definitions/MeetingPolicyUpdated"
+          - $ref: "#/definitions/MembersAdded"
+          - $ref: "#/definitions/Deleted_1"
+          - $ref: "#/definitions/Joined"
+          - $ref: "#/definitions/Left"
+          - $ref: "#/definitions/Pinned"
+          - $ref: "#/definitions/Unpinned"
+          - $ref: "#/definitions/TabUpdated"
+          - $ref: "#/definitions/Archived"
+          - $ref: "#/definitions/Created"
+          - $ref: "#/definitions/DescriptionUpdated_1"
+          - $ref: "#/definitions/JoiningDisabled"
+          - $ref: "#/definitions/JoiningEnabled"
+          - $ref: "#/definitions/Renamed_1"
+          - $ref: "#/definitions/Unarchived"
+          - $ref: "#/definitions/Installed"
+          - $ref: "#/definitions/Removed"
+          - $ref: "#/definitions/Upgraded"
       from:
         $ref: "#/definitions/IdentitySet"
       id:
@@ -1677,4 +1677,4 @@ definitions:
         format: "time"
       timeZone:
         anyOf:
-        - $ref: "#/definitions/CustomTimeZone"
+          - $ref: "#/definitions/CustomTimeZone"

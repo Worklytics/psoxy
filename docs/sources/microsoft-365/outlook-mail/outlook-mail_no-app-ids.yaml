@@ -1,370 +1,370 @@
 ---
 endpoints:
-- pathRegex: "^/v1.0/groups/?(\\?.*)?$"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..mail"
-    includeOriginal: true
-    encoding: "JSON"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/GraphGroup"
-- pathRegex: "^/v1.0/groups/[^/?]+(\\?.*)?$"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..mail"
-    includeOriginal: true
-    encoding: "JSON"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      id:
-        type: "string"
-      mail:
-        type: "string"
-- pathRegex: "^/v1.0/groups/[^/]*/members.*"
-  allowedQueryParams:
-  - "$top"
-  - "$select"
-  - "$skiptoken"
-  - "$orderBy"
-  - "$count"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..employeeId"
-    - "$..userPrincipalName"
-    - "$..imAddresses[*]"
-    - "$..mail"
-    - "$..otherMails[*]"
-    - "$..onPremisesSamAccountName"
-    - "$..onPremisesUserPrincipalName"
-    - "$..onPremisesDistinguishedName"
-    - "$..onPremisesImmutableId"
-    - "$..identities[*].issuerAssignedId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..id"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/GraphGroupMember"
-- pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailFolders(/SentItems|\\('SentItems'\\\
+  - pathRegex: "^/v1.0/groups/?(\\?.*)?$"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..mail"
+        includeOriginal: true
+        encoding: "JSON"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/GraphGroup"
+  - pathRegex: "^/v1.0/groups/[^/?]+(\\?.*)?$"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..mail"
+        includeOriginal: true
+        encoding: "JSON"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        mail:
+          type: "string"
+  - pathRegex: "^/v1.0/groups/[^/]*/members.*"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/GraphGroupMember"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailFolders(/SentItems|\\('SentItems'\\\
     ))/messages.*"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  augments:
-  - !<textDigest>
-    jsonPaths:
-    - "$..body.content"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..emailAddress.address"
-    encoding: "URL_SAFE_TOKEN"
-  - !<tokenize>
-    jsonPaths:
-    - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
-    regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
-  - !<redact>
-    jsonPaths:
-    - "$..body.content"
-  - !<redact>
-    jsonPaths:
-    - "$..['@odata.context']"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.context':
-        type: "string"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/Message"
-- pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailboxSettings(\\?.*)?$"
-  transforms:
-  - !<redact>
-    jsonPaths:
-    - "$..['@odata.context']"
-  responseSchema:
-    type: "object"
-    properties:
-      '@odata.context':
-        type: "string"
-      archiveFolder:
-        type: "string"
-      automaticRepliesSetting:
-        $ref: "#/definitions/AutomaticRepliesSettings"
-      dateFormat:
-        type: "string"
-      delegateMeetingMessageDeliveryOptions:
-        type: "string"
-      language:
-        $ref: "#/definitions/LocaleInfo"
-      timeFormat:
-        type: "string"
-      timeZone:
-        type: "string"
-      userPurpose:
-        type: "string"
-      workingHours:
-        $ref: "#/definitions/WorkingHours"
-- pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/messages/[^/]*"
-  augments:
-  - !<textDigest>
-    jsonPaths:
-    - "$..body.content"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..emailAddress.address"
-    encoding: "URL_SAFE_TOKEN"
-  - !<tokenize>
-    jsonPaths:
-    - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
-    regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
-  - !<redact>
-    jsonPaths:
-    - "$..body.content"
-  - !<redact>
-    jsonPaths:
-    - "$..['@odata.context']"
-  responseSchema:
-    type: "object"
-    properties:
-      '@odata.context':
-        type: "string"
-      '@odata.etag':
-        type: "string"
-      attachments:
-        type: "array"
-        items:
-          $ref: "#/definitions/Attachment"
-      bccRecipients:
-        type: "array"
-        items:
-          $ref: "#/definitions/Recipient"
-      body:
-        $ref: "#/definitions/ItemBody"
-      categories:
-        type: "array"
-        items:
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    augments:
+      - !<textDigest>
+        jsonPaths:
+          - "$..body.content"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress.address"
+        encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+      - !<redact>
+        jsonPaths:
+          - "$..body.content"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.context':
           type: "string"
-      ccRecipients:
-        type: "array"
-        items:
-          $ref: "#/definitions/Recipient"
-      changeKey:
-        type: "string"
-      conversationId:
-        type: "string"
-      conversationIndex:
-        type: "string"
-      createdDateTime:
-        type: "string"
-        format: "date-time"
-      flag:
-        $ref: "#/definitions/FlagStatus"
-      from:
-        $ref: "#/definitions/Recipient"
-      hasAttachments:
-        type: "boolean"
-      id:
-        type: "string"
-      importance:
-        type: "string"
-      inferenceClassification:
-        type: "string"
-      internetMessageId:
-        type: "string"
-      isDeliveryReceiptRequested:
-        type: "boolean"
-      isDraft:
-        type: "boolean"
-      isRead:
-        type: "boolean"
-      isReadReceiptRequested:
-        type: "boolean"
-      lastModifiedDateTime:
-        type: "string"
-        format: "date-time"
-      mentionsPreview:
-        $ref: "#/definitions/MentionsPreview"
-      parentFolderId:
-        type: "string"
-      receivedDateTime:
-        type: "string"
-        format: "date-time"
-      replyTo:
-        type: "array"
-        items:
-          $ref: "#/definitions/Recipient"
-      sender:
-        $ref: "#/definitions/Recipient"
-      sentDateTime:
-        type: "string"
-        format: "date-time"
-      toRecipients:
-        type: "array"
-        items:
-          $ref: "#/definitions/Recipient"
-      unsubscribeData:
-        type: "array"
-        items:
+        '@odata.deltaLink':
           type: "string"
-      unsubscribeEnabled:
-        type: "boolean"
-      webLink:
-        type: "string"
-- pathRegex: "^/v1.0/users(\\?.*)?$"
-  allowedQueryParams:
-  - "$top"
-  - "$select"
-  - "$skiptoken"
-  - "$orderBy"
-  - "$count"
-  - "$filter"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..employeeId"
-    - "$..userPrincipalName"
-    - "$..imAddresses[*]"
-    - "$..mail"
-    - "$..otherMails[*]"
-    - "$..onPremisesSamAccountName"
-    - "$..onPremisesUserPrincipalName"
-    - "$..onPremisesDistinguishedName"
-    - "$..onPremisesImmutableId"
-    - "$..identities[*].issuerAssignedId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..id"
-    includeReversible: true
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/GraphUser"
-- pathRegex: "^/v1.0/users/p~[a-zA-Z0-9_-]+(\\?.*)?$"
-  allowedQueryParams:
-  - "$select"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..employeeId"
-    - "$..userPrincipalName"
-    - "$..imAddresses[*]"
-    - "$..mail"
-    - "$..otherMails[*]"
-    - "$..onPremisesSamAccountName"
-    - "$..onPremisesUserPrincipalName"
-    - "$..onPremisesDistinguishedName"
-    - "$..onPremisesImmutableId"
-    - "$..identities[*].issuerAssignedId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..id"
-    includeReversible: true
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      accountEnabled:
-        type: "boolean"
-      employeeId:
-        type: "string"
-      hireDate:
-        type: "string"
-        format: "date-time"
-      id:
-        type: "string"
-      isResourceAccount:
-        type: "boolean"
-      mail:
-        type: "string"
-      mailboxSettings:
-        $ref: "#/definitions/MailboxSettings"
-      otherMails:
-        type: "array"
-        items:
+        '@odata.nextLink':
           type: "string"
-      proxyAddresses:
-        type: "array"
-        items:
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/Message"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailboxSettings(\\?.*)?$"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+    responseSchema:
+      type: "object"
+      properties:
+        '@odata.context':
           type: "string"
-      userType:
-        type: "string"
+        archiveFolder:
+          type: "string"
+        automaticRepliesSetting:
+          $ref: "#/definitions/AutomaticRepliesSettings"
+        dateFormat:
+          type: "string"
+        delegateMeetingMessageDeliveryOptions:
+          type: "string"
+        language:
+          $ref: "#/definitions/LocaleInfo"
+        timeFormat:
+          type: "string"
+        timeZone:
+          type: "string"
+        userPurpose:
+          type: "string"
+        workingHours:
+          $ref: "#/definitions/WorkingHours"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/messages/[^/]*"
+    augments:
+      - !<textDigest>
+        jsonPaths:
+          - "$..body.content"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress.address"
+        encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+      - !<redact>
+        jsonPaths:
+          - "$..body.content"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+    responseSchema:
+      type: "object"
+      properties:
+        '@odata.context':
+          type: "string"
+        '@odata.etag':
+          type: "string"
+        attachments:
+          type: "array"
+          items:
+            $ref: "#/definitions/Attachment"
+        bccRecipients:
+          type: "array"
+          items:
+            $ref: "#/definitions/Recipient"
+        body:
+          $ref: "#/definitions/ItemBody"
+        categories:
+          type: "array"
+          items:
+            type: "string"
+        ccRecipients:
+          type: "array"
+          items:
+            $ref: "#/definitions/Recipient"
+        changeKey:
+          type: "string"
+        conversationId:
+          type: "string"
+        conversationIndex:
+          type: "string"
+        createdDateTime:
+          type: "string"
+          format: "date-time"
+        flag:
+          $ref: "#/definitions/FlagStatus"
+        from:
+          $ref: "#/definitions/Recipient"
+        hasAttachments:
+          type: "boolean"
+        id:
+          type: "string"
+        importance:
+          type: "string"
+        inferenceClassification:
+          type: "string"
+        internetMessageId:
+          type: "string"
+        isDeliveryReceiptRequested:
+          type: "boolean"
+        isDraft:
+          type: "boolean"
+        isRead:
+          type: "boolean"
+        isReadReceiptRequested:
+          type: "boolean"
+        lastModifiedDateTime:
+          type: "string"
+          format: "date-time"
+        mentionsPreview:
+          $ref: "#/definitions/MentionsPreview"
+        parentFolderId:
+          type: "string"
+        receivedDateTime:
+          type: "string"
+          format: "date-time"
+        replyTo:
+          type: "array"
+          items:
+            $ref: "#/definitions/Recipient"
+        sender:
+          $ref: "#/definitions/Recipient"
+        sentDateTime:
+          type: "string"
+          format: "date-time"
+        toRecipients:
+          type: "array"
+          items:
+            $ref: "#/definitions/Recipient"
+        unsubscribeData:
+          type: "array"
+          items:
+            type: "string"
+        unsubscribeEnabled:
+          type: "boolean"
+        webLink:
+          type: "string"
+  - pathRegex: "^/v1.0/users(\\?.*)?$"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+      - "$filter"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/GraphUser"
+  - pathRegex: "^/v1.0/users/p~[a-zA-Z0-9_-]+(\\?.*)?$"
+    allowedQueryParams:
+      - "$select"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        accountEnabled:
+          type: "boolean"
+        employeeId:
+          type: "string"
+        hireDate:
+          type: "string"
+          format: "date-time"
+        id:
+          type: "string"
+        isResourceAccount:
+          type: "boolean"
+        mail:
+          type: "string"
+        mailboxSettings:
+          $ref: "#/definitions/MailboxSettings"
+        otherMails:
+          type: "array"
+          items:
+            type: "string"
+        proxyAddresses:
+          type: "array"
+          items:
+            type: "string"
+        userType:
+          type: "string"
 definitions:
   Attachment:
     type: "object"
@@ -623,4 +623,4 @@ definitions:
         format: "time"
       timeZone:
         anyOf:
-        - $ref: "#/definitions/CustomTimeZone"
+          - $ref: "#/definitions/CustomTimeZone"

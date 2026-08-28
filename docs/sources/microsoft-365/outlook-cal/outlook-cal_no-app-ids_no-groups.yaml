@@ -1,440 +1,440 @@
 ---
 endpoints:
-- pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/(((calendars/[^/]*/)?events(\\\
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/(((calendars/[^/]*/)?events(\\\
     ?.*)?)|(calendar/calendarView(?)[^/]*))"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..emailAddress.address"
-    encoding: "URL_SAFE_TOKEN"
-  - !<tokenize>
-    jsonPaths:
-    - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
-    regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
-  - !<redact>
-    jsonPaths:
-    - "$..['@odata.context']"
-  - !<redact>
-    jsonPaths:
-    - "$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']"
-  - !<filterTokenByRegex>
-    jsonPaths:
-    - "$..body.content"
-    - "$..bodyPreview"
-    delimiter: "\\s+"
-    filters:
-    - "https://[^.]+\\.zoom\\.us/.*"
-  - !<redactRegexMatches>
-    jsonPaths:
-    - "$..location.uniqueId"
-    - "$..locations[*].uniqueId"
-    - "$..location.displayName"
-    - "$..locations[*].displayName"
-    - "$..location.locationUri"
-    - "$..locations[*].locationUri"
-    - "$..onlineMeeting.joinUrl"
-    - "$..onlineMeetingUrl"
-    - "$..body.content"
-    - "$..bodyPreview"
-    redactions:
-    - "(?i)pwd=[^&]*"
-  - !<redactExceptPhrases>
-    jsonPaths:
-    - "$..subject"
-    allowedPhrases:
-    - "Focus Time"
-    - "Focus"
-    - "No Meetings"
-    - "No Meeting"
-    - "no mtg"
-    - "Prep"
-    - "OOO"
-    - "Out of Office"
-    - "Out of the Office"
-    - "call"
-    - "brainstorm"
-    - "brainstorming"
-    - "brain storm"
-    - "check in"
-    - "check-in"
-    - "checkin"
-    - "coffee"
-    - "food"
-    - "happy hour"
-    - "lunch"
-    - "office hours"
-    - "onsite"
-    - "on-site"
-    - "social"
-    - "stand up"
-    - "stand-up"
-    - "standup"
-    - "team building"
-    - "teambuilding"
-    - "daily"
-    - "bi-weekly"
-    - "biweekly"
-    - "weekly"
-    - "monthly"
-    - "quarterly"
-    - "1:1"
-    - "1-on-1"
-    - "one-on-one"
-    - "all-hands"
-    - "all hands"
-    - "allhands"
-    - "team meeting"
-    - "decision making"
-    - "decision"
-    - "hand off"
-    - "hand-off"
-    - "handoff"
-    - "handover"
-    - "information sharing"
-    - "problem solving"
-    - "retro"
-    - "review"
-    - "sprint"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.context':
-        type: "string"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/Event"
-- pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/events/[^/?]+(\\?.*)?$"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..emailAddress.address"
-    encoding: "URL_SAFE_TOKEN"
-  - !<tokenize>
-    jsonPaths:
-    - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
-    regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
-  - !<redact>
-    jsonPaths:
-    - "$..['@odata.context']"
-  - !<redact>
-    jsonPaths:
-    - "$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']"
-  - !<filterTokenByRegex>
-    jsonPaths:
-    - "$..body.content"
-    - "$..bodyPreview"
-    delimiter: "\\s+"
-    filters:
-    - "https://[^.]+\\.zoom\\.us/.*"
-  - !<redactRegexMatches>
-    jsonPaths:
-    - "$..location.uniqueId"
-    - "$..locations[*].uniqueId"
-    - "$..location.displayName"
-    - "$..locations[*].displayName"
-    - "$..location.locationUri"
-    - "$..locations[*].locationUri"
-    - "$..onlineMeeting.joinUrl"
-    - "$..onlineMeetingUrl"
-    - "$..body.content"
-    - "$..bodyPreview"
-    redactions:
-    - "(?i)pwd=[^&]*"
-  - !<redactExceptPhrases>
-    jsonPaths:
-    - "$..subject"
-    allowedPhrases:
-    - "Focus Time"
-    - "Focus"
-    - "No Meetings"
-    - "No Meeting"
-    - "no mtg"
-    - "Prep"
-    - "OOO"
-    - "Out of Office"
-    - "Out of the Office"
-    - "call"
-    - "brainstorm"
-    - "brainstorming"
-    - "brain storm"
-    - "check in"
-    - "check-in"
-    - "checkin"
-    - "coffee"
-    - "food"
-    - "happy hour"
-    - "lunch"
-    - "office hours"
-    - "onsite"
-    - "on-site"
-    - "social"
-    - "stand up"
-    - "stand-up"
-    - "standup"
-    - "team building"
-    - "teambuilding"
-    - "daily"
-    - "bi-weekly"
-    - "biweekly"
-    - "weekly"
-    - "monthly"
-    - "quarterly"
-    - "1:1"
-    - "1-on-1"
-    - "one-on-one"
-    - "all-hands"
-    - "all hands"
-    - "allhands"
-    - "team meeting"
-    - "decision making"
-    - "decision"
-    - "hand off"
-    - "hand-off"
-    - "handoff"
-    - "handover"
-    - "information sharing"
-    - "problem solving"
-    - "retro"
-    - "review"
-    - "sprint"
-  responseSchema:
-    type: "object"
-    properties:
-      '@odata.etag':
-        type: "string"
-      attachments:
-        type: "array"
-        items:
-          $ref: "#/definitions/Attachment"
-      attendees:
-        type: "array"
-        items:
-          $ref: "#/definitions/Attendee"
-      body:
-        $ref: "#/definitions/ItemBody"
-      bodyPreview:
-        type: "string"
-      calendar:
-        $ref: "#/definitions/Calendar"
-      calendar@odata.associationLink:
-        type: "string"
-      calendar@odata.navigationLink:
-        type: "string"
-      categories:
-        type: "array"
-        items:
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress.address"
+        encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']"
+      - !<filterTokenByRegex>
+        jsonPaths:
+          - "$..body.content"
+          - "$..bodyPreview"
+        delimiter: "\\s+"
+        filters:
+          - "https://[^.]+\\.zoom\\.us/.*"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$..location.uniqueId"
+          - "$..locations[*].uniqueId"
+          - "$..location.displayName"
+          - "$..locations[*].displayName"
+          - "$..location.locationUri"
+          - "$..locations[*].locationUri"
+          - "$..onlineMeeting.joinUrl"
+          - "$..onlineMeetingUrl"
+          - "$..body.content"
+          - "$..bodyPreview"
+        redactions:
+          - "(?i)pwd=[^&]*"
+      - !<redactExceptPhrases>
+        jsonPaths:
+          - "$..subject"
+        allowedPhrases:
+          - "Focus Time"
+          - "Focus"
+          - "No Meetings"
+          - "No Meeting"
+          - "no mtg"
+          - "Prep"
+          - "OOO"
+          - "Out of Office"
+          - "Out of the Office"
+          - "call"
+          - "brainstorm"
+          - "brainstorming"
+          - "brain storm"
+          - "check in"
+          - "check-in"
+          - "checkin"
+          - "coffee"
+          - "food"
+          - "happy hour"
+          - "lunch"
+          - "office hours"
+          - "onsite"
+          - "on-site"
+          - "social"
+          - "stand up"
+          - "stand-up"
+          - "standup"
+          - "team building"
+          - "teambuilding"
+          - "daily"
+          - "bi-weekly"
+          - "biweekly"
+          - "weekly"
+          - "monthly"
+          - "quarterly"
+          - "1:1"
+          - "1-on-1"
+          - "one-on-one"
+          - "all-hands"
+          - "all hands"
+          - "allhands"
+          - "team meeting"
+          - "decision making"
+          - "decision"
+          - "hand off"
+          - "hand-off"
+          - "handoff"
+          - "handover"
+          - "information sharing"
+          - "problem solving"
+          - "retro"
+          - "review"
+          - "sprint"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.context':
           type: "string"
-      changeKey:
-        type: "string"
-      createdDateTime:
-        type: "string"
-        format: "date-time"
-      end:
-        $ref: "#/definitions/DateTimeTimeZone"
-      hasAttachments:
-        type: "boolean"
-      hideAttendees:
-        type: "boolean"
-      iCalUId:
-        type: "string"
-      id:
-        type: "string"
-      importance:
-        type: "string"
-      isAllDay:
-        type: "boolean"
-      isCancelled:
-        type: "boolean"
-      isDraft:
-        type: "boolean"
-      isOnlineMeeting:
-        type: "boolean"
-      isOrganizer:
-        type: "boolean"
-      lastModifiedDateTime:
-        type: "string"
-        format: "date-time"
-      location:
-        $ref: "#/definitions/Location"
-      locations:
-        type: "array"
-        items:
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/Event"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/events/[^/?]+(\\?.*)?$"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress.address"
+        encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']"
+      - !<filterTokenByRegex>
+        jsonPaths:
+          - "$..body.content"
+          - "$..bodyPreview"
+        delimiter: "\\s+"
+        filters:
+          - "https://[^.]+\\.zoom\\.us/.*"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$..location.uniqueId"
+          - "$..locations[*].uniqueId"
+          - "$..location.displayName"
+          - "$..locations[*].displayName"
+          - "$..location.locationUri"
+          - "$..locations[*].locationUri"
+          - "$..onlineMeeting.joinUrl"
+          - "$..onlineMeetingUrl"
+          - "$..body.content"
+          - "$..bodyPreview"
+        redactions:
+          - "(?i)pwd=[^&]*"
+      - !<redactExceptPhrases>
+        jsonPaths:
+          - "$..subject"
+        allowedPhrases:
+          - "Focus Time"
+          - "Focus"
+          - "No Meetings"
+          - "No Meeting"
+          - "no mtg"
+          - "Prep"
+          - "OOO"
+          - "Out of Office"
+          - "Out of the Office"
+          - "call"
+          - "brainstorm"
+          - "brainstorming"
+          - "brain storm"
+          - "check in"
+          - "check-in"
+          - "checkin"
+          - "coffee"
+          - "food"
+          - "happy hour"
+          - "lunch"
+          - "office hours"
+          - "onsite"
+          - "on-site"
+          - "social"
+          - "stand up"
+          - "stand-up"
+          - "standup"
+          - "team building"
+          - "teambuilding"
+          - "daily"
+          - "bi-weekly"
+          - "biweekly"
+          - "weekly"
+          - "monthly"
+          - "quarterly"
+          - "1:1"
+          - "1-on-1"
+          - "one-on-one"
+          - "all-hands"
+          - "all hands"
+          - "allhands"
+          - "team meeting"
+          - "decision making"
+          - "decision"
+          - "hand off"
+          - "hand-off"
+          - "handoff"
+          - "handover"
+          - "information sharing"
+          - "problem solving"
+          - "retro"
+          - "review"
+          - "sprint"
+    responseSchema:
+      type: "object"
+      properties:
+        '@odata.etag':
+          type: "string"
+        attachments:
+          type: "array"
+          items:
+            $ref: "#/definitions/Attachment"
+        attendees:
+          type: "array"
+          items:
+            $ref: "#/definitions/Attendee"
+        body:
+          $ref: "#/definitions/ItemBody"
+        bodyPreview:
+          type: "string"
+        calendar:
+          $ref: "#/definitions/Calendar"
+        calendar@odata.associationLink:
+          type: "string"
+        calendar@odata.navigationLink:
+          type: "string"
+        categories:
+          type: "array"
+          items:
+            type: "string"
+        changeKey:
+          type: "string"
+        createdDateTime:
+          type: "string"
+          format: "date-time"
+        end:
+          $ref: "#/definitions/DateTimeTimeZone"
+        hasAttachments:
+          type: "boolean"
+        hideAttendees:
+          type: "boolean"
+        iCalUId:
+          type: "string"
+        id:
+          type: "string"
+        importance:
+          type: "string"
+        isAllDay:
+          type: "boolean"
+        isCancelled:
+          type: "boolean"
+        isDraft:
+          type: "boolean"
+        isOnlineMeeting:
+          type: "boolean"
+        isOrganizer:
+          type: "boolean"
+        lastModifiedDateTime:
+          type: "string"
+          format: "date-time"
+        location:
           $ref: "#/definitions/Location"
-      occurrenceId:
-        type: "string"
-      onlineMeeting:
-        $ref: "#/definitions/OnlineMeetingInfo"
-      onlineMeetingProvider:
-        type: "string"
-      onlineMeetingUrl:
-        type: "string"
-      organizer:
-        $ref: "#/definitions/Recipient"
-      originalEndTimeZone:
-        type: "string"
-      originalStartTimeZone:
-        type: "string"
-      recurrence:
-        $ref: "#/definitions/PatternedRecurrence"
-      responseRequested:
-        type: "boolean"
-      responseStatus:
-        $ref: "#/definitions/ResponseStatus"
-      sensitivity:
-        type: "string"
-      seriesMasterId:
-        type: "string"
-      showAs:
-        type: "string"
-      start:
-        $ref: "#/definitions/DateTimeTimeZone"
-      subject:
-        type: "string"
-      type:
-        type: "string"
-      uid:
-        type: "string"
-      webLink:
-        type: "string"
-      workItemId:
-        type: "string"
-- pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailboxSettings(\\?.*)?$"
-  transforms:
-  - !<redact>
-    jsonPaths:
-    - "$..['@odata.context']"
-  responseSchema:
-    type: "object"
-    properties:
-      '@odata.context':
-        type: "string"
-      archiveFolder:
-        type: "string"
-      automaticRepliesSetting:
-        $ref: "#/definitions/AutomaticRepliesSettings"
-      dateFormat:
-        type: "string"
-      delegateMeetingMessageDeliveryOptions:
-        type: "string"
-      language:
-        $ref: "#/definitions/LocaleInfo"
-      timeFormat:
-        type: "string"
-      timeZone:
-        type: "string"
-      userPurpose:
-        type: "string"
-      workingHours:
-        $ref: "#/definitions/WorkingHours"
-- pathRegex: "^/v1.0/users(\\?.*)?$"
-  allowedQueryParams:
-  - "$top"
-  - "$select"
-  - "$skiptoken"
-  - "$orderBy"
-  - "$count"
-  - "$filter"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..employeeId"
-    - "$..userPrincipalName"
-    - "$..imAddresses[*]"
-    - "$..mail"
-    - "$..otherMails[*]"
-    - "$..onPremisesSamAccountName"
-    - "$..onPremisesUserPrincipalName"
-    - "$..onPremisesDistinguishedName"
-    - "$..onPremisesImmutableId"
-    - "$..identities[*].issuerAssignedId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..id"
-    includeReversible: true
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/GraphUser"
-- pathRegex: "^/v1.0/users/p~[a-zA-Z0-9_-]+(\\?.*)?$"
-  allowedQueryParams:
-  - "$select"
-  allowedRequestHeaders:
-  - "ConsistencyLevel"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..employeeId"
-    - "$..userPrincipalName"
-    - "$..imAddresses[*]"
-    - "$..mail"
-    - "$..otherMails[*]"
-    - "$..onPremisesSamAccountName"
-    - "$..onPremisesUserPrincipalName"
-    - "$..onPremisesDistinguishedName"
-    - "$..onPremisesImmutableId"
-    - "$..identities[*].issuerAssignedId"
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..id"
-    includeReversible: true
-    encoding: "URL_SAFE_TOKEN"
-  - !<pseudonymizeRegexMatches>
-    jsonPaths:
-    - "$..proxyAddresses[*]"
-    regex: "(?i)^smtp:(.*)$"
-  responseSchema:
-    type: "object"
-    properties:
-      accountEnabled:
-        type: "boolean"
-      employeeId:
-        type: "string"
-      hireDate:
-        type: "string"
-        format: "date-time"
-      id:
-        type: "string"
-      isResourceAccount:
-        type: "boolean"
-      mail:
-        type: "string"
-      mailboxSettings:
-        $ref: "#/definitions/MailboxSettings"
-      otherMails:
-        type: "array"
-        items:
+        locations:
+          type: "array"
+          items:
+            $ref: "#/definitions/Location"
+        occurrenceId:
           type: "string"
-      proxyAddresses:
-        type: "array"
-        items:
+        onlineMeeting:
+          $ref: "#/definitions/OnlineMeetingInfo"
+        onlineMeetingProvider:
           type: "string"
-      userType:
-        type: "string"
+        onlineMeetingUrl:
+          type: "string"
+        organizer:
+          $ref: "#/definitions/Recipient"
+        originalEndTimeZone:
+          type: "string"
+        originalStartTimeZone:
+          type: "string"
+        recurrence:
+          $ref: "#/definitions/PatternedRecurrence"
+        responseRequested:
+          type: "boolean"
+        responseStatus:
+          $ref: "#/definitions/ResponseStatus"
+        sensitivity:
+          type: "string"
+        seriesMasterId:
+          type: "string"
+        showAs:
+          type: "string"
+        start:
+          $ref: "#/definitions/DateTimeTimeZone"
+        subject:
+          type: "string"
+        type:
+          type: "string"
+        uid:
+          type: "string"
+        webLink:
+          type: "string"
+        workItemId:
+          type: "string"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailboxSettings(\\?.*)?$"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+    responseSchema:
+      type: "object"
+      properties:
+        '@odata.context':
+          type: "string"
+        archiveFolder:
+          type: "string"
+        automaticRepliesSetting:
+          $ref: "#/definitions/AutomaticRepliesSettings"
+        dateFormat:
+          type: "string"
+        delegateMeetingMessageDeliveryOptions:
+          type: "string"
+        language:
+          $ref: "#/definitions/LocaleInfo"
+        timeFormat:
+          type: "string"
+        timeZone:
+          type: "string"
+        userPurpose:
+          type: "string"
+        workingHours:
+          $ref: "#/definitions/WorkingHours"
+  - pathRegex: "^/v1.0/users(\\?.*)?$"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+      - "$filter"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/GraphUser"
+  - pathRegex: "^/v1.0/users/p~[a-zA-Z0-9_-]+(\\?.*)?$"
+    allowedQueryParams:
+      - "$select"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        accountEnabled:
+          type: "boolean"
+        employeeId:
+          type: "string"
+        hireDate:
+          type: "string"
+          format: "date-time"
+        id:
+          type: "string"
+        isResourceAccount:
+          type: "boolean"
+        mail:
+          type: "string"
+        mailboxSettings:
+          $ref: "#/definitions/MailboxSettings"
+        otherMails:
+          type: "array"
+          items:
+            type: "string"
+        proxyAddresses:
+          type: "array"
+          items:
+            type: "string"
+        userType:
+          type: "string"
 definitions:
   Attachment:
     type: "object"
@@ -769,4 +769,4 @@ definitions:
         format: "time"
       timeZone:
         anyOf:
-        - $ref: "#/definitions/CustomTimeZone"
+          - $ref: "#/definitions/CustomTimeZone"
