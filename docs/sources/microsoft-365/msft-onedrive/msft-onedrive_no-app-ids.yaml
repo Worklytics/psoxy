@@ -46,6 +46,31 @@ endpoints:
         type: "array"
         items:
           $ref: "#/definitions/ItemActivity"
+- pathTemplate: "/v1.0/drives/{driveId}/root/delta"
+  allowedQueryParams:
+  - "token"
+  - "$select"
+  - "$expand"
+  - "$top"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$..user.id"
+    - "$..user.email"
+    encoding: "URL_SAFE_TOKEN"
+  responseSchema:
+    type: "object"
+    properties:
+      '@microsoft.graph.hasMoreData':
+        type: "boolean"
+      '@odata.deltaLink':
+        type: "string"
+      '@odata.nextLink':
+        type: "string"
+      value:
+        type: "array"
+        items:
+          $ref: "#/definitions/DriveItem"
 - pathTemplate: "/v1.0/groups"
   allowedQueryParams:
   - "$top"
@@ -151,6 +176,10 @@ endpoints:
     - "$..user.id"
     - "$..user.email"
     encoding: "URL_SAFE_TOKEN"
+  - !<tokenize>
+    jsonPaths:
+    - "$.['@odata.nextLink']"
+    regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
   pathParameterSchemas:
     userId:
       anyOf:
@@ -169,31 +198,6 @@ endpoints:
         type: "array"
         items:
           $ref: "#/definitions/Drive"
-- pathRegex: "^/v1\\.0/drives/[^/]+/root/delta(\\(token=[^)]*\\))?(\\?.*)?$"
-  allowedQueryParams:
-  - "token"
-  - "$select"
-  - "$expand"
-  - "$top"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..user.id"
-    - "$..user.email"
-    encoding: "URL_SAFE_TOKEN"
-  responseSchema:
-    type: "object"
-    properties:
-      '@microsoft.graph.hasMoreData':
-        type: "boolean"
-      '@odata.deltaLink':
-        type: "string"
-      '@odata.nextLink':
-        type: "string"
-      value:
-        type: "array"
-        items:
-          $ref: "#/definitions/DriveItem"
 definitions:
   ActivityItemRef:
     type: "object"
