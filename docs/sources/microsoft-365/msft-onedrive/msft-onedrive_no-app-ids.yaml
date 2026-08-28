@@ -46,31 +46,6 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/ItemActivity"
-  - pathRegex: "^/v1\\.0/drives/[^/]+/root/delta(\\(token=[^)]*\\))?(\\?.*)?$"
-    allowedQueryParams:
-      - "token"
-      - "$select"
-      - "$expand"
-      - "$top"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..user.id"
-          - "$..user.email"
-        encoding: "URL_SAFE_TOKEN"
-    responseSchema:
-      type: "object"
-      properties:
-        '@microsoft.graph.hasMoreData':
-          type: "boolean"
-        '@odata.deltaLink':
-          type: "string"
-        '@odata.nextLink':
-          type: "string"
-        value:
-          type: "array"
-          items:
-            $ref: "#/definitions/DriveItem"
   - pathTemplate: "/v1.0/groups"
     allowedQueryParams:
       - "$top"
@@ -180,6 +155,10 @@ endpoints:
         jsonPaths:
           - "$.['@odata.nextLink']"
         regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
     pathParameterSchemas:
       userId:
         anyOf:
@@ -198,6 +177,31 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/Drive"
+  - pathRegex: "^/v1\\.0/drives/[^/]+/root/delta(\\(token=[^)]*\\))?(\\?.*)?$"
+    allowedQueryParams:
+      - "token"
+      - "$select"
+      - "$expand"
+      - "$top"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..user.email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/DriveItem"
 definitions:
   ActivityItemRef:
     type: "object"
@@ -211,7 +215,7 @@ definitions:
         type: "string"
       scheduledEndDateTime:
         $ref: "#/definitions/DateTimeTimeZone"
-      scheduledEndStartTime:
+      scheduledStartDateTime:
         $ref: "#/definitions/DateTimeTimeZone"
       status:
         type: "string"
@@ -226,6 +230,19 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/IdentitySet"
+  CustomTimeZone:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      bias:
+        type: "integer"
+      daylightOffset:
+        $ref: "#/definitions/Offset"
+      name:
+        type: "string"
+      standardOffset:
+        $ref: "#/definitions/Offset"
   DateTimeTimeZone:
     type: "object"
     properties:
@@ -238,7 +255,7 @@ definitions:
         type: "string"
   DeletedFacet:
     type: "object"
-    properties: {}
+    properties: { }
   DocumentActivityDetail:
     type: "object"
     properties:
@@ -365,11 +382,15 @@ definitions:
   Identity:
     type: "object"
     properties:
+      applicationIdentityType:
+        type: "string"
       email:
         type: "string"
       id:
         type: "string"
       tenantId:
+        type: "string"
+      userIdentityType:
         type: "string"
   IdentitySet:
     type: "object"
@@ -390,13 +411,11 @@ definitions:
         $ref: "#/definitions/Identity"
       onPremises:
         $ref: "#/definitions/Identity"
-      phone:
-        $ref: "#/definitions/Identity"
       user:
         $ref: "#/definitions/Identity"
   ItemAction:
     type: "object"
-    properties: {}
+    properties: { }
   ItemActionSet:
     type: "object"
     properties:
@@ -478,7 +497,7 @@ definitions:
         $ref: "#/definitions/WorkingHours"
   MalwareFacet:
     type: "object"
-    properties: {}
+    properties: { }
   MentionAction:
     type: "object"
     properties:
@@ -486,6 +505,21 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/IdentitySet"
+  Offset:
+    type: "object"
+    properties:
+      dayOccurrence:
+        type: "integer"
+      dayOfWeek:
+        type: "string"
+      daylightBias:
+        type: "integer"
+      month:
+        type: "integer"
+      time:
+        type: "string"
+      year:
+        type: "integer"
   Package:
     type: "object"
     properties:
@@ -536,7 +570,7 @@ definitions:
         type: "string"
   RootFacet:
     type: "object"
-    properties: {}
+    properties: { }
   ShareAction:
     type: "object"
     properties:
@@ -574,7 +608,7 @@ definitions:
         type: "string"
   SystemFacet:
     type: "object"
-    properties: {}
+    properties: { }
   VersionAction:
     type: "object"
     properties:
@@ -593,3 +627,6 @@ definitions:
       startTime:
         type: "string"
         format: "time"
+      timeZone:
+        anyOf:
+          - $ref: "#/definitions/CustomTimeZone"

@@ -20,6 +20,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         return RulesTestSpec.builder()
                 .sourceFamily("microsoft-365")
                 .sourceKind("msft-teams")
+                .checkUncompressedSSMLength(false)
                 .build();
     }
 
@@ -107,11 +108,13 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
+        // "topic" key itself is now retained (RedactExceptPhrases on Chat.topic, added later this
+        // session to support topic-based digests); its value is still redacted unless it matches
+        // an allowed phrase, so we assert on the values rather than key absence.
         assertRedacted(sanitized,
                 "lastMessagePreview@odata.context",
                 "Meeting chat sample",
-                "Group chat sample",
-                "topic"
+                "Group chat sample"
         );
         assertUrlWithSubResourcesBlocked(endpoint);
     }
@@ -283,7 +286,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @Test
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_LIST_REGEX)
     public void communications_callRecords() {
         String apiVersion = "v1.0";
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/communications/callRecords";
@@ -297,10 +300,12 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
+        // base variant does not pseudonymize ids (same convention as user.id elsewhere on this
+        // endpoint); "+5564981205182" is a phone-identity's id (organizer_v2.identity.phone.id),
+        // consistent with that convention once organizer_v2 is modeled.
         assertRedacted(sanitized,
                 "Abbie Wilkins",
                 "Owen Franklin",
-                "+5564981205182",
                 "machineName_",
                 "Default input device",
                 "Microphone (Microsoft Virtual Audio Device (Simple) (WDM))"
@@ -473,7 +478,12 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     @Test
     public void users_onlineMeetings_attendanceReport() {
         String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
-        String endpoint = "https://graph.microsoft.com/v1.0" + "/users/" + userId + "/onlineMeetings";
+        // fixture is a single attendanceReport object (attendanceRecords[]/id/meetingStartDateTime
+        // at top level, not `value[]`-wrapped), matching the dedicated
+        // .../onlineMeetings/{meetingId}/attendanceReports/{reportId} endpoint, not the
+        // onlineMeetings collection endpoint.
+        String endpoint = "https://graph.microsoft.com/v1.0" + "/users/" + userId
+                + "/onlineMeetings/MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ/attendanceReports/c9b6db1c-d5eb-427d-a5c0-20088d9b22d7";
         String jsonResponse = asJson("Users_onlineMeetings_attendanceReport_v1.0.json");
         assertNotSanitized(jsonResponse,
                 "dc17674c-81d9-4adb-bfb2-8f6a442e4623"
@@ -496,24 +506,60 @@ public class TeamsTests extends JavaRulesTestBaseCase {
 
         return Stream.of(
                 InvocationExample.of(baseEndpoint + "/teams", "Teams_" + apiVersion + ".json"),
+                // /teams - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/teams?$select=id,displayName&$top=50&$skiptoken=abcXYZ123&$filter=startswith(displayName,'C')&$count=true", "Teams_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/893075dd-2487-4122-925f-022c42e20265/allChannels", "Teams_allChannels_" + apiVersion + ".json"),
+                // /teams/{id}/allChannels - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/teams/893075dd-2487-4122-925f-022c42e20265/allChannels?$select=id,displayName&$filter=membershipType%20eq%20'standard'", "Teams_allChannels_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/chats", "Users_chats_" + apiVersion + ".json"),
+                // /users/{id}/chats - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/chats?$select=id,topic&$top=50&$skiptoken=abcXYZ123&$filter=chatType%20eq%20'group'&$orderby=lastUpdatedDateTime&$expand=members", "Users_chats_" + apiVersion + ".json"),
+                // /users/{id}/chats - real shape sent by FetchTeamsItemsJob ($top=50, $expand=lastMessagePreview, nested-paren $filter with property-path segments)
+                InvocationExample.of(baseEndpoint + "/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/chats?$top=50&$expand=lastMessagePreview&$filter=tenantId%20ne%20null%20and%20(onlineMeetingInfo/joinWebUrl%20ne%20null%20or%20(lastMessagePreview/createdDateTime%20gt%202020-01-01T00:00:00Z))", "Users_chats_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages", "Teams_channels_messages_" + apiVersion + ".json"),
+                // /teams/{id}/channels/{id}/messages - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages?$select=id,body&$top=50&$skiptoken=abcXYZ123&$expand=replies", "Teams_channels_messages_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta", "Teams_channels_messages_delta_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta?$deltatoken=someToken", "Teams_channels_messages_delta_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta?$skiptoken=someToken", "Teams_channels_messages_delta_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:3f545ef23b56445ea4ce75d4bae8a5e0@thread.tacv2/messages/delta?$filter=lastModifiedDateTime%20gt%202015-01-01T00:00:00Z&$expand=replies", "Teams_channels_messages_delta_" + apiVersion + ".json"),
+                // /teams/{id}/channels/{id}/messages/delta - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta?$select=id,body&$top=50&$skiptoken=abcXYZ123&$expand=replies&$deltatoken=someToken&$filter=lastModifiedDateTime%20gt%202015-01-01T00:00:00Z", "Teams_channels_messages_delta_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages", "Chats_messages_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages", "Chats_messages_" + apiVersion + ".json"),
+                // /chats/{id}/messages - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages?$select=id,body&$top=50&$skiptoken=abcXYZ123&$filter=lastModifiedDateTime%20gt%202015-01-01T00:00:00Z&$orderby=lastModifiedDateTime&$count=true&$expand=replies&$format=json&$search=test&$skip=10", "Chats_messages_" + apiVersion + ".json"),
+                // /chats/{id}/messages - real shape sent by MessageFetchStrategy (compound gt-and-lt date-range $filter, no other params)
+                InvocationExample.of(baseEndpoint + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages?$filter=lastModifiedDateTime%20gt%202015-01-01T00:00:00Z%20and%20lastModifiedDateTime%20lt%202015-06-01T00:00:00Z", "Chats_messages_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92", "Communications_calls_" + apiVersion + ".json"),
+                // /communications/calls/{id} - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92?$select=id,state&$top=1&$expand=participants", "Communications_calls_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords?$expand=sessions($expand=segments)", "Communications_callRecords_" + apiVersion + ".json"),
+                // /communications/callRecords - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/communications/callRecords?$select=id&$expand=sessions($expand=segments)&$filter=startDateTime%20ge%202020-01-01", "Communications_callRecords_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$expand=sessions($expand=segments)", "Communications_callRecord_" + apiVersion + ".json"),
+                // /communications/callRecords/{id} - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$select=id&$expand=sessions($expand=segments)&$filter=startDateTime%20ge%202020-01-01", "Communications_callRecord_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getDirectRoutingCalls_" + apiVersion + ".json"),
+                // getDirectRoutingCalls - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)?$skip=10", "Communications_callRecords_getDirectRoutingCalls_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getPstnCalls_" + apiVersion + ".json"),
+                // getPstnCalls - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)?$skip=10", "Communications_callRecords_getPstnCalls_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/users", "Users_" + apiVersion + ".json"),
+                // /users - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/users?$top=50&$select=id,mail&$skiptoken=abcXYZ123&$orderBy=id&$count=true&$filter=startswith(userPrincipalName,'a')", "Users_" + apiVersion + ".json"),
+                // /users/{id} - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622?$select=id,mail", "user.json"),
                 InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings", "Users_onlineMeetings_" + apiVersion + ".json"),
+                // /users/{id}/onlineMeetings - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings?$select=id,subject&$top=50&$skiptoken=abcXYZ123&$filter=startDateTime%20ge%202020-01-01T00:00:00Z&$orderby=startDateTime&$count=true&$expand=attendanceReports&$format=json&$search=test&$skip=10", "Users_onlineMeetings_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings/MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ/attendanceReports", "Users_onlineMeetings_attendanceReports_" + apiVersion + ".json"),
-                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings/MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ/attendanceReports/c9b6db1c-d5eb-427d-a5c0-20088d9b22d7?$expand=attendanceRecords", "Users_onlineMeetings_attendanceReport_" + apiVersion + ".json")
+                // .../onlineMeetings/{id}/attendanceReports - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings/MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ/attendanceReports?$select=id&$top=50&$skiptoken=abcXYZ123&$filter=totalParticipantCount%20gt%200&$orderby=id&$count=true&$expand=attendanceRecords&$format=json&$search=test&$skip=10", "Users_onlineMeetings_attendanceReports_" + apiVersion + ".json"),
+                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings/MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ/attendanceReports/c9b6db1c-d5eb-427d-a5c0-20088d9b22d7?$expand=attendanceRecords", "Users_onlineMeetings_attendanceReport_" + apiVersion + ".json"),
+                // .../attendanceReports/{id} - with all allowed query params
+                InvocationExample.of(baseEndpoint + "/users/dc17674c-81d9-4adb-bfb2-8f6a442e4622/onlineMeetings/MSpkYzE3Njc0Yy04MWQ5LTRhZGItYmZ/attendanceReports/c9b6db1c-d5eb-427d-a5c0-20088d9b22d7?$select=id&$top=50&$skiptoken=abcXYZ123&$filter=totalParticipantCount%20gt%200&$orderby=id&$count=true&$expand=attendanceRecords&$format=json&$search=test&$skip=10", "Users_onlineMeetings_attendanceReport_" + apiVersion + ".json")
         );
     }
 }

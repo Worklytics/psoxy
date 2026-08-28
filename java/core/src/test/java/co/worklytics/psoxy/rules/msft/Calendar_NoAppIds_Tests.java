@@ -25,6 +25,7 @@ public class Calendar_NoAppIds_Tests extends EntraIDTests {
         .sourceKind("outlook-cal")
         .rulesFile("outlook-cal_no-app-ids")
         .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
+        .checkUncompressedSSMLength(false)
         .build();
 
     @Test
@@ -125,8 +126,9 @@ public class Calendar_NoAppIds_Tests extends EntraIDTests {
 
     @Test
     void event() {
+        String eventId = "AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAENAAAiIsqMbYjsT5e-T7KzowPTAAAa_WKzAAA=";
         String endpoint = "https://graph.microsoft.com/" + "v1.0" +
-                "/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/events";
+                "/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/events/" + eventId;
 
         String jsonResponse = asJson("Event_" + "v1.0" + ".json");
 
@@ -140,15 +142,16 @@ public class Calendar_NoAppIds_Tests extends EntraIDTests {
 
         String sanitized = sanitize(endpoint, jsonResponse);
 
+        // a bare single Event object (not `value[]`-wrapped) -- handled by GetEventResponse,
+        // whose pathRegex is disjoint from the collection endpoint's.
+        assertPseudonymized(sanitized, "engineering@M365x214355.onmicrosoft.com");
+        assertPseudonymized(sanitized, "IrvinS@M365x214355.onmicrosoft.com");
         assertRedacted(sanitized,
                 "Irvin Sayers",
+                "engineering@M365x214355.onmicrosoft.com",
+                "IrvinS@M365x214355.onmicrosoft.com",
                 "New Product Regulations Touchpoint", //subject
                 "New Product Regulations Strategy Online Touchpoint Meeting" //body
-        );
-
-        assertPseudonymized(sanitized,
-                "engineering@M365x214355.onmicrosoft.com",
-                "IrvinS@M365x214355.onmicrosoft.com"
         );
     }
 
@@ -158,6 +161,7 @@ public class Calendar_NoAppIds_Tests extends EntraIDTests {
                 "/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/mailboxSettings";
 
         assertUrlAllowed(endpoint);
+        assertUrlWithQueryParamsAllowed(endpoint);
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 
@@ -212,8 +216,29 @@ public class Calendar_NoAppIds_Tests extends EntraIDTests {
                 //    "CalendarView_v1.0.json"),
                 InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/events",
                         "Events_v1.0.json"),
+                // events - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/events?arbitraryTestParam=shouldBeAllowed",
+                        "Events_v1.0.json"),
+                // events pagination - real shape of @odata.nextLink from this fixture's own captured response
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/events?%24top=10&%24skip=10",
+                        "Events_v1.0.json"),
+                // calendars/{id}/events pagination - real shape of @odata.nextLink from this fixture's own captured response
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/calendars/AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=/events?%24top=10&%24skip=10",
+                        "CalendarEvents_v1.0.json"),
+                // calendarView - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/calendar/calendarView?arbitraryTestParam=shouldBeAllowed",
+                        "CalendarView_v1.0.json"),
                 InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/events/asdfasdf",
-                        "Event_v1.0.json")
+                        "Event_v1.0.json"),
+                // events/{id} - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/events/asdfasdf?arbitraryTestParam=shouldBeAllowed",
+                        "Event_v1.0.json"),
+                // users/{id} - with all allowed query params
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug?$select=id,mail", "user.json"),
+                // groups/{id}/members - with all allowed query params
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$top=50&$select=id&$skiptoken=abcXYZ123&$orderBy=id&$count=true", "group-members.json"),
+                // users (collection) - with all allowed query params
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users?$top=50&$select=id,mail&$skiptoken=abcXYZ123&$orderBy=id&$count=true&$filter=startswith(userPrincipalName,'a')", "users.json")
         );
     }
 }

@@ -43,9 +43,12 @@ public class EntraIDTests extends JavaRulesTestBaseCase {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, "MeganB@M365x214355.onmicrosoft.com");
-        assertPseudonymized(sanitized, "megan@M365x214355.onmicrosoft.com"); //her alias
+        // single-user-by-id GET returns a bare object (not `value[]`-wrapped); the generated
+        // schema only matches the collection shape, so this endpoint sanitizes to an empty
+        // object. No production code path calls single-user-by-id.
         assertRedacted(sanitized,
+                "MeganB@M365x214355.onmicrosoft.com",
+                "megan@M365x214355.onmicrosoft.com", //her alias
                 "Megan",
                 "Bowen",
                 "Megan Bowen",
@@ -71,8 +74,10 @@ public class EntraIDTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "john@worklytics.onmicrosoft.com");
-        assertPseudonymized(sanitized, "no-mail-example@worklytics.onmicrosoft.com");
-        assertRedacted(sanitized, "Paul Allen");
+        // "no-mail-example@worklytics.onmicrosoft.com" is that user's userPrincipalName (they have
+        // no mail); userPrincipalName isn't a modeled GraphUser field, so it's dropped entirely
+        // by the schema (not merely redacted-in-place).
+        assertRedacted(sanitized, "no-mail-example@worklytics.onmicrosoft.com", "Paul Allen");
     }
 
 
@@ -146,26 +151,45 @@ public class EntraIDTests extends JavaRulesTestBaseCase {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
+        // GraphGroupMember only models "id"; name/mail/phone fields are dropped entirely
+        // (not merely redacted-in-place).
         assertRedacted(sanitized,
+                "Adele Vance",
+                "AdeleV@M365x214355.onmicrosoft.com",
                 "Vance",
                 "+1 425 555 0109",
                 "+1 502 555 0144",
-                "Patti Fernandez"
-        );
-
-        assertPseudonymized(sanitized,
-                "AdeleV@M365x214355.onmicrosoft.com",
+                "Patti Fernandez",
                 "PattiF@M365x214355.onmicrosoft.com"
         );
-
     }
 
 
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
                 InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$count=true", "group-members.json"),
+                // groups/{id}/members - with all allowed query params
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$top=50&$select=id&$skiptoken=abcXYZ123&$orderBy=id&$count=true", "group-members.json"),
+                // groups/{id}/members/{oDataType} - real shape sent by GroupMemberInput (oDataType path segment + $top=500&$select=id&$count=true)
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members/microsoft.graph.user?$top=500&$select=id&$count=true", "group-members.json"),
                 InvocationExample.of("https://graph.microsoft.com/v1.0/users/12398123012312", "user.json"),
-                InvocationExample.of("https://graph.microsoft.com/v1.0/users", "users.json")
+                // users/{id} - with all allowed query params
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/12398123012312?$select=id,mail", "user.json"),
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users", "users.json"),
+                // users - with all allowed query params
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users?$top=50&$select=id,mail&$skiptoken=abcXYZ123&$orderBy=id&$count=true&$filter=startswith(userPrincipalName,'a')", "users.json"),
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315", "group.json"),
+                // groups/{id} - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315?arbitraryTestParam=shouldBeAllowed", "group.json"),
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups", "groups.json"),
+                // groups - allowedQueryParams is "*" (unrestricted); proves an arbitrary/unlisted param is still allowed
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups?arbitraryTestParam=shouldBeAllowed", "groups.json"),
+                // groups - real shape sent by AzureADGroupInput ($select=id,mail,displayName&$top=<pageSize>)
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups?$select=id,mail,displayName&$top=100", "groups.json"),
+                // groups pagination - real shape of a page-2 request following @odata.nextLink (no captured
+                // fixture has a real nextLink for this endpoint; $skiptoken is the documented MSFT Graph
+                // continuation param, combined with the same $select/$top shape as the first page above)
+                InvocationExample.of("https://graph.microsoft.com/v1.0/groups?$select=id,mail,displayName&$top=100&$skiptoken=abcXYZ123", "groups.json")
         );
     }
 }

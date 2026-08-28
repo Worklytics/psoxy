@@ -1,5 +1,4 @@
 {
-  "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#communications/callRecords",
   "value":[
     {
       "id":"3cf3bbc8-b21d-4f2e-bfd0-b13603ae6c65",
@@ -18,6 +17,7 @@
         }
       },
       "organizer_v2":{
+        "id":"821809f5-0000-0000-0000-3b5136c0e777",
         "identity":{
           "user":{
             "id":"821809f5-0000-0000-0000-3b5136c0e777",
@@ -43,10 +43,9 @@
         }
       },
       "organizer_v2":{
+        "id":"+5564981205182",
         "identity":{
-          "user":null,
-          "acsUser":null,
-          "spoolUser":null
+          "user":null
         }
       }
     }

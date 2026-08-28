@@ -19,6 +19,13 @@
   "isDraft":false,
   "webLink":"https://outlook.office365.com/owa/?ItemID=AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e%2FT7KzowPTAAAAAAEJAAAiIsqMbYjsT5e%2FT7KzowPTAAQSfAIWAAA%3D&exvsurl=1&viewmodel=ReadMessageItem",
   "inferenceClassification":"focused",
+  "body":{
+    "contentType":"html",
+    "+content:textDigest":{
+      "length":5908,
+      "word_count":294
+    }
+  },
   "sender":{
     "emailAddress":{
       "address":"t~aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg@M365x214355.onmicrosoft.com"

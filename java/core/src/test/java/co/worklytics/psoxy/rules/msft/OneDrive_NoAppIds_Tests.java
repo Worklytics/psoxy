@@ -57,7 +57,7 @@ public class OneDrive_NoAppIds_Tests extends JavaRulesTestBaseCase {
             // the OTHER real continuation shape, from this fixture's own captured @odata.nextLink
             // (an OData function-call path segment -- rules must accept both)
             InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/root/delta(token=1230919asd190410jlka)", "get_drive_delta.json"),
-            // /v1.0/drives/{driveId}/items/{itemId}/activities - no query params allowed by rules
+
             InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/items/" + itemId + "/activities", "list_itemActivity.json"),
             InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/items/" + itemId + "/activities?$expand=driveItem", "list_itemActivity.json"),
             InvocationExample.of(baseEndpoint + "/drives/" + driveId + "/items/" + itemId + "/activities?$skiptoken=some_token", "list_itemActivity.json"),

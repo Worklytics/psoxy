@@ -1,5 +1,126 @@
 ---
 endpoints:
+  - pathTemplate: "/v1.0/chats/{chatId}/messages"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    augments:
+      - !<textDigest>
+        jsonPaths:
+          - "$..body.content"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..body.content"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/ChatMessage"
+  - pathTemplate: "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})"
+    allowedQueryParams:
+      - "$skip"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/DirectRoutingCall"
+  - pathTemplate: "/v1.0/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})"
+    allowedQueryParams:
+      - "$skip"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$..callId"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/PSTNCall"
+  - pathTemplate: "/v1.0/communications/calls/{callId}"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$expand"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        callChainId:
+          type: "string"
+        chatInfo:
+          $ref: "#/definitions/ChatInfo"
+        direction:
+          type: "string"
+        id:
+          type: "string"
+        mediaState:
+          type: "string"
+        meetingInfo:
+          $ref: "#/definitions/MeetingInfo"
+        myParticipantId:
+          type: "string"
+        requestModalities:
+          type: "array"
+          items:
+            type: "string"
+        source:
+          $ref: "#/definitions/ParticipantInfo"
+        state:
+          type: "string"
+        targets:
+          type: "array"
+          items:
+            $ref: "#/definitions/ParticipantInfo"
   - pathTemplate: "/v1.0/teams"
     allowedQueryParams:
       - "$select"
@@ -12,10 +133,19 @@ endpoints:
         jsonPaths:
           - "$..emailAddress"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$..displayName"
-          - "$..description"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/Team"
   - pathTemplate: "/v1.0/teams/{teamId}/allChannels"
     allowedQueryParams:
       - "$select"
@@ -25,10 +155,83 @@ endpoints:
         jsonPaths:
           - "$..emailAddress"
         encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/Channel"
+  - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$expand"
+    augments:
+      - !<textDigest>
+        jsonPaths:
+          - "$..body.content"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$..displayName"
-          - "$..description"
+          - "$..body.content"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/ChatMessage"
+  - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages/delta"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$expand"
+      - "$deltatoken"
+      - "$filter"
+    augments:
+      - !<textDigest>
+        jsonPaths:
+          - "$..body.content"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..body.content"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/ChatMessage"
   - pathTemplate: "/v1.0/users/{userId}/chats"
     allowedQueryParams:
       - "$select"
@@ -44,158 +247,76 @@ endpoints:
         jsonPaths:
           - "$..emailAddress"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$..displayName"
-          - "$..description"
-      - !<redact>
+      - !<redactExceptPhrases>
         jsonPaths:
           - "$..topic"
-          - "$..['lastMessagePreview@odata.context']"
-      - !<redact>
-        jsonPaths:
-          - "$..user.displayName"
-          - "$..body.content"
-          - "$..attachments"
-          - "$..mentions[*].mentionText"
-          - "$..eventDetail.teamDescription"
-          - "$..eventDetail.chatDisplayName"
-  - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages"
-    allowedQueryParams:
-      - "$select"
-      - "$top"
-      - "$skiptoken"
-      - "$expand"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..emailAddress"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$..user.displayName"
-          - "$..body.content"
-          - "$..attachments"
-          - "$..mentions[*].mentionText"
-          - "$..eventDetail.teamDescription"
-          - "$..eventDetail.chatDisplayName"
-  - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages/delta"
-    allowedQueryParams:
-      - "$select"
-      - "$top"
-      - "$skiptoken"
-      - "$expand"
-      - "$deltatoken"
-      - "$filter"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..emailAddress"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$..user.displayName"
-          - "$..body.content"
-          - "$..attachments"
-          - "$..mentions[*].mentionText"
-          - "$..eventDetail.teamDescription"
-          - "$..eventDetail.chatDisplayName"
-  - pathTemplate: "/v1.0/chats/{chatId}/messages"
-    allowedQueryParams:
-      - "$select"
-      - "$top"
-      - "$skiptoken"
-      - "$filter"
-      - "$orderby"
-      - "$count"
-      - "$expand"
-      - "$format"
-      - "$search"
-      - "$skip"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..emailAddress"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$..user.displayName"
-          - "$..body.content"
-          - "$..attachments"
-          - "$..mentions[*].mentionText"
-          - "$..eventDetail.teamDescription"
-          - "$..eventDetail.chatDisplayName"
-  - pathTemplate: "/v1.0/communications/calls/{callId}"
-    allowedQueryParams:
-      - "$select"
-      - "$top"
-      - "$expand"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..emailAddress"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$..displayName"
-  - pathRegex: "^/v1.0/communications/callRecords(/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?))?(?<queryParameters>[a-zA-z0-9\\\
-    s\\$\\=\\?\\(\\)]*)"
-    allowedQueryParams:
-      - "$select"
-      - "$expand"
-      - "$filter"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..emailAddress"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$..user.displayName"
-          - "$..reflexiveIPAddress"
-          - "$..relayIPAddress"
-          - "$..ipAddress"
-          - "$..subnet"
-          - "$..macAddress"
-          - "$..caller.name"
-          - "$..callee.name"
-          - "$..captureDeviceName"
-          - "$..renderDeviceName"
-          - "$..organizer_v2.id"
-          - "$..participants_v2[*].id"
-          - "$..phone"
-          - "$..['organizer_v2@odata.context']"
-  - pathTemplate: "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})"
-    allowedQueryParams:
-      - "$skip"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..emailAddress"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$..value[*].userPrincipalName"
-          - "$..value[*].userDisplayName"
-          - "$..value[*].callerNumber"
-          - "$..value[*].calleeNumber"
-  - pathTemplate: "/v1.0/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})"
-    allowedQueryParams:
-      - "$skip"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..emailAddress"
-        encoding: "URL_SAFE_TOKEN"
-      - !<tokenize>
-        jsonPaths:
-          - "$..callId"
-      - !<redact>
-        jsonPaths:
-          - "$..value[*].userPrincipalName"
-          - "$..value[*].userDisplayName"
-          - "$..value[*].callerNumber"
-          - "$..value[*].calleeNumber"
+        allowedPhrases:
+          - "Focus Time"
+          - "Focus"
+          - "No Meetings"
+          - "No Meeting"
+          - "no mtg"
+          - "Prep"
+          - "OOO"
+          - "Out of Office"
+          - "Out of the Office"
+          - "call"
+          - "brainstorm"
+          - "brainstorming"
+          - "brain storm"
+          - "check in"
+          - "check-in"
+          - "checkin"
+          - "coffee"
+          - "food"
+          - "happy hour"
+          - "lunch"
+          - "office hours"
+          - "onsite"
+          - "on-site"
+          - "social"
+          - "stand up"
+          - "stand-up"
+          - "standup"
+          - "team building"
+          - "teambuilding"
+          - "daily"
+          - "bi-weekly"
+          - "biweekly"
+          - "weekly"
+          - "monthly"
+          - "quarterly"
+          - "1:1"
+          - "1-on-1"
+          - "one-on-one"
+          - "all-hands"
+          - "all hands"
+          - "allhands"
+          - "team meeting"
+          - "decision making"
+          - "decision"
+          - "hand off"
+          - "hand-off"
+          - "handoff"
+          - "handover"
+          - "information sharing"
+          - "problem solving"
+          - "retro"
+          - "review"
+          - "sprint"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/Chat"
   - pathTemplate: "/v1.0/users/{userId}/onlineMeetings"
     allowedQueryParams:
       - "$select"
@@ -209,21 +330,50 @@ endpoints:
       - "$search"
       - "$skip"
     transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$..displayName"
-          - "$..subject"
-          - "$..joinInformation"
-          - "$..joinMeetingIdSettings.isPasscodeRequired"
-          - "$..joinMeetingIdSettings.passcode"
-          - "$..upn"
+    responseSchema:
+      type: "object"
+      properties:
+        allowAttendeeToEnableCamera:
+          type: "boolean"
+        allowAttendeeToEnableMic:
+          type: "boolean"
+        allowMeetingChat:
+          type: "string"
+        allowParticipantsToChangeName:
+          type: "boolean"
+        allowTeamworkReactions:
+          type: "boolean"
+        allowedPresenters:
+          type: "string"
+        chatInfo:
+          $ref: "#/definitions/ChatInfo"
+        creationDateTime:
+          type: "string"
+          format: "date-time"
+        endDateTime:
+          type: "string"
+          format: "date-time"
+        id:
+          type: "string"
+        joinWebUrl:
+          type: "string"
+        lobbyBypassSettings:
+          $ref: "#/definitions/LobbyBypassSettings"
+        participants:
+          $ref: "#/definitions/MeetingParticipant"
+        shareMeetingChatHistoryDefault:
+          type: "string"
+        startDateTime:
+          type: "string"
+          format: "date-time"
+        videoTeleconferenceId:
+          type: "string"
+        watermarkProtection:
+          $ref: "#/definitions/WatermarkProtection"
   - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
     allowedQueryParams:
       - "$select"
@@ -237,21 +387,23 @@ endpoints:
       - "$search"
       - "$skip"
     transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$..displayName"
-          - "$..subject"
-          - "$..joinInformation"
-          - "$..joinMeetingIdSettings.isPasscodeRequired"
-          - "$..joinMeetingIdSettings.passcode"
-          - "$..upn"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/MeetingAttendanceReport"
   - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
     allowedQueryParams:
       - "$select"
@@ -265,22 +417,102 @@ endpoints:
       - "$search"
       - "$skip"
     transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
+    responseSchema:
+      type: "object"
+      properties:
+        attendanceRecords:
+          type: "array"
+          items:
+            $ref: "#/definitions/AttendanceReport"
+        id:
+          type: "string"
+        meetingEndDateTime:
+          type: "string"
+          format: "date-time"
+        meetingStartDateTime:
+          type: "string"
+          format: "date-time"
+        totalParticipantCount:
+          type: "integer"
+  - pathRegex: "^/v1.0/communications/callRecords(\\?.*)?$"
+    allowedQueryParams:
+      - "$select"
+      - "$expand"
+      - "$filter"
+    transforms:
+      - !<pseudonymize>
         jsonPaths:
-          - "$..displayName"
-          - "$..subject"
-          - "$..joinInformation"
-          - "$..joinMeetingIdSettings.isPasscodeRequired"
-          - "$..joinMeetingIdSettings.passcode"
-          - "$..upn"
-  - pathRegex: "^/v1.0/users/?[^/]*"
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/CallRecord"
+  - pathRegex: "^/v1.0/communications/callRecords/[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?(\\\
+    ?.*)?$"
+    allowedQueryParams:
+      - "$select"
+      - "$expand"
+      - "$filter"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        endDateTime:
+          type: "string"
+          format: "date-time"
+        id:
+          type: "string"
+        joinWebUrl:
+          type: "string"
+        lastModifiedDateTime:
+          type: "string"
+          format: "date-time"
+        modalities:
+          type: "array"
+          items:
+            type: "string"
+        organizer:
+          $ref: "#/definitions/IdentitySet"
+        organizer_v2:
+          $ref: "#/definitions/Organizer"
+        participants:
+          type: "array"
+          items:
+            $ref: "#/definitions/IdentitySet"
+        participants_v2:
+          type: "array"
+          items:
+            $ref: "#/definitions/Participant"
+        sessions:
+          type: "array"
+          items:
+            $ref: "#/definitions/Session"
+        startDateTime:
+          type: "string"
+          format: "date-time"
+        type:
+          type: "string"
+        version:
+          type: "integer"
+  - pathRegex: "^/v1.0/users/?(\\?.*)?$"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -291,28 +523,6 @@ endpoints:
     allowedRequestHeaders:
       - "ConsistencyLevel"
     transforms:
-      - !<pseudonymizeRegexMatches>
-        jsonPaths:
-          - "$..proxyAddresses[*]"
-        regex: "(?i)^smtp:(.*)$"
-      - !<redact>
-        jsonPaths:
-          - "$..displayName"
-          - "$..aboutMe"
-          - "$..mySite"
-          - "$..preferredName"
-          - "$..givenName"
-          - "$..surname"
-          - "$..jobTitle"
-          - "$..mailNickname"
-          - "$..responsibilities"
-          - "$..skills"
-          - "$..faxNumber"
-          - "$..mobilePhone"
-          - "$..businessPhones[*]"
-          - "$..onPremisesExtensionAttributes"
-          - "$..onPremisesSecurityIdentifier"
-          - "$..securityIdentifier"
       - !<pseudonymize>
         jsonPaths:
           - "$..employeeId"
@@ -326,3 +536,1104 @@ endpoints:
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
         encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/GraphUser"
+  - pathRegex: "^/v1.0/users/[^/?]+(\\?.*)?$"
+    allowedQueryParams:
+      - "$select"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+    responseSchema:
+      type: "object"
+      properties:
+        accountEnabled:
+          type: "boolean"
+        employeeId:
+          type: "string"
+        hireDate:
+          type: "string"
+          format: "date-time"
+        id:
+          type: "string"
+        isResourceAccount:
+          type: "boolean"
+        mail:
+          type: "string"
+        mailboxSettings:
+          $ref: "#/definitions/MailboxSettings"
+        otherMails:
+          type: "array"
+          items:
+            type: "string"
+        proxyAddresses:
+          type: "array"
+          items:
+            type: "string"
+        userType:
+          type: "string"
+definitions:
+  Added:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      channelId:
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+  Archived:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      teamId:
+        type: "string"
+  AttendanceInterval:
+    type: "object"
+    properties:
+      durationInSeconds:
+        type: "integer"
+      joinDateTime:
+        type: "string"
+        format: "date-time"
+      leaveDateTime:
+        type: "string"
+        format: "date-time"
+  AttendanceReport:
+    type: "object"
+    properties:
+      attendanceIntervals:
+        type: "array"
+        items:
+          $ref: "#/definitions/AttendanceInterval"
+      emailAddress:
+        type: "string"
+      identity:
+        $ref: "#/definitions/Identity"
+      role:
+        type: "string"
+      totalAttendanceInSeconds:
+        type: "integer"
+  AutomaticRepliesSettings:
+    type: "object"
+    properties:
+      externalAudience:
+        type: "string"
+      scheduledEndDateTime:
+        $ref: "#/definitions/DateTimeTimeZone"
+      scheduledStartDateTime:
+        $ref: "#/definitions/DateTimeTimeZone"
+      status:
+        type: "string"
+  CallEnded:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      callDuration:
+        type: "string"
+      callEventType:
+        type: "string"
+      callId:
+        type: "string"
+      callParticipants:
+        type: "array"
+        items:
+          $ref: "#/definitions/CallParticipantInfo"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+  CallParticipantInfo:
+    type: "object"
+    properties:
+      participant:
+        $ref: "#/definitions/IdentitySet"
+  CallRecord:
+    type: "object"
+    properties:
+      endDateTime:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      joinWebUrl:
+        type: "string"
+      lastModifiedDateTime:
+        type: "string"
+        format: "date-time"
+      modalities:
+        type: "array"
+        items:
+          type: "string"
+      organizer:
+        $ref: "#/definitions/IdentitySet"
+      organizer_v2:
+        $ref: "#/definitions/Organizer"
+      participants:
+        type: "array"
+        items:
+          $ref: "#/definitions/IdentitySet"
+      participants_v2:
+        type: "array"
+        items:
+          $ref: "#/definitions/Participant"
+      sessions:
+        type: "array"
+        items:
+          $ref: "#/definitions/Session"
+      startDateTime:
+        type: "string"
+        format: "date-time"
+      type:
+        type: "string"
+      version:
+        type: "integer"
+  CallRecording:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      callId:
+        type: "string"
+      callRecordingDuration:
+        type: "string"
+      callRecordingStatus:
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      meetingOrganizer:
+        $ref: "#/definitions/IdentitySet"
+  CallStarted:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      callEventType:
+        type: "string"
+      callId:
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+  CallTranscript:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      callId:
+        type: "string"
+      callTranscriptICalUid:
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      meetingOrganizer:
+        $ref: "#/definitions/IdentitySet"
+  CallerInfo:
+    type: "object"
+    properties:
+      identity:
+        $ref: "#/definitions/IdentitySet"
+  Channel:
+    type: "object"
+    properties:
+      archived:
+        type: "boolean"
+      createdDateTime:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      isFavoriteByDefault:
+        type: "boolean"
+      membershipType:
+        type: "string"
+      sourceId:
+        type: "string"
+      summary:
+        $ref: "#/definitions/ChannelSummary"
+      teamId:
+        type: "string"
+      tenantId:
+        type: "string"
+      webUrl:
+        type: "string"
+      workItemId:
+        type: "string"
+  ChannelIdentity:
+    type: "object"
+    properties:
+      channelId:
+        type: "string"
+      teamId:
+        type: "string"
+  ChannelSummary:
+    type: "object"
+    properties:
+      guestsCount:
+        type: "integer"
+      hasMembersFromOtherTenants:
+        type: "boolean"
+      membersCount:
+        type: "integer"
+      ownersCount:
+        type: "integer"
+  Chat:
+    type: "object"
+    properties:
+      chatType:
+        type: "string"
+      chatViewpoint:
+        $ref: "#/definitions/ChatViewpoint"
+      createdDateTime:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      lastMessagePreview:
+        $ref: "#/definitions/ChatMessage"
+      lastUpdatedDateTime:
+        type: "string"
+        format: "date-time"
+      onlineMeetingInfo:
+        $ref: "#/definitions/TeamworkOnlineMeetingInfo"
+      sourceId:
+        type: "string"
+      tenantId:
+        type: "string"
+      topic:
+        type: "string"
+      webUrl:
+        type: "string"
+  ChatInfo:
+    type: "object"
+    properties:
+      messageId:
+        type: "string"
+      replyChainMessageId:
+        type: "string"
+      threadId:
+        type: "string"
+  ChatMessage:
+    type: "object"
+    properties:
+      attachmentList:
+        type: "array"
+        items:
+          $ref: "#/definitions/ChatMessageAttachment"
+      body:
+        $ref: "#/definitions/MessageBody"
+      channelIdentity:
+        $ref: "#/definitions/ChannelIdentity"
+      chatId:
+        type: "string"
+      createdDateTime:
+        type: "string"
+        format: "date-time"
+      deletedDateTime:
+        type: "string"
+        format: "date-time"
+      etag:
+        type: "string"
+      eventDetail:
+        anyOf:
+          - $ref: "#/definitions/CallEnded"
+          - $ref: "#/definitions/CallRecording"
+          - $ref: "#/definitions/CallStarted"
+          - $ref: "#/definitions/CallTranscript"
+          - $ref: "#/definitions/Added"
+          - $ref: "#/definitions/Deleted"
+          - $ref: "#/definitions/DescriptionUpdated"
+          - $ref: "#/definitions/Renamed"
+          - $ref: "#/definitions/SetAsFavoriteByDefault"
+          - $ref: "#/definitions/UnsetAsFavoriteByDefault"
+          - $ref: "#/definitions/ChatRename"
+          - $ref: "#/definitions/ConversationMemberRoleUpdated"
+          - $ref: "#/definitions/MeetingPolicyUpdated"
+          - $ref: "#/definitions/MembersAdded"
+          - $ref: "#/definitions/Deleted_1"
+          - $ref: "#/definitions/Joined"
+          - $ref: "#/definitions/Left"
+          - $ref: "#/definitions/Pinned"
+          - $ref: "#/definitions/Unpinned"
+          - $ref: "#/definitions/TabUpdated"
+          - $ref: "#/definitions/Archived"
+          - $ref: "#/definitions/Created"
+          - $ref: "#/definitions/DescriptionUpdated_1"
+          - $ref: "#/definitions/JoiningDisabled"
+          - $ref: "#/definitions/JoiningEnabled"
+          - $ref: "#/definitions/Renamed_1"
+          - $ref: "#/definitions/Unarchived"
+          - $ref: "#/definitions/Installed"
+          - $ref: "#/definitions/Removed"
+          - $ref: "#/definitions/Upgraded"
+      from:
+        $ref: "#/definitions/IdentitySet"
+      id:
+        type: "string"
+      importance:
+        type: "string"
+      lastEditedDateTime:
+        type: "string"
+        format: "date-time"
+      lastModifiedDateTime:
+        type: "string"
+        format: "date-time"
+      locale:
+        type: "string"
+      mentions:
+        type: "array"
+        items:
+          $ref: "#/definitions/ChatMessageMention"
+      messageType:
+        type: "string"
+      nextVersion:
+        type: "string"
+      reactions:
+        type: "array"
+        items:
+          $ref: "#/definitions/ChatMessageReaction"
+      replies:
+        type: "array"
+        items:
+          $ref: "#/definitions/ChatMessage"
+      replyToId:
+        type: "string"
+  ChatMessageAttachment:
+    type: "object"
+    properties:
+      content:
+        type: "string"
+      contentType:
+        type: "string"
+      contentUrl:
+        type: "string"
+      id:
+        type: "string"
+      name:
+        type: "string"
+      thumbnailUrl:
+        type: "string"
+  ChatMessageMention:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      mentioned:
+        $ref: "#/definitions/IdentitySet"
+  ChatMessageReaction:
+    type: "object"
+    properties:
+      createdDateTime:
+        type: "string"
+        format: "date-time"
+      reactionType:
+        type: "string"
+      user:
+        $ref: "#/definitions/IdentitySet"
+  ChatRename:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      chatId:
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+  ChatViewpoint:
+    type: "object"
+    properties:
+      isHidden:
+        type: "boolean"
+      lastMessageReadDateTime:
+        type: "string"
+        format: "date-time"
+  ConversationMemberRoleUpdated:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      conversationMemberRoles:
+        type: "array"
+        items:
+          type: "string"
+      conversationMemberUser:
+        $ref: "#/definitions/TeamWorkUserIdentity"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+  Created:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      teamId:
+        type: "string"
+  CustomTimeZone:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      bias:
+        type: "integer"
+      daylightOffset:
+        $ref: "#/definitions/Offset"
+      name:
+        type: "string"
+      standardOffset:
+        $ref: "#/definitions/Offset"
+  DateTimeTimeZone:
+    type: "object"
+    properties:
+      dateTime:
+        type: "string"
+        format: "date-time"
+      timeZone:
+        type: "string"
+      timeZoneIANA:
+        type: "string"
+  Deleted:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      channelId:
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+  Deleted_1:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      members:
+        type: "array"
+        items:
+          $ref: "#/definitions/TeamWorkUserIdentity"
+  DescriptionUpdated:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      channelId:
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+  DescriptionUpdated_1:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      teamId:
+        type: "string"
+  DirectRoutingCall:
+    type: "object"
+    properties:
+      callType:
+        type: "string"
+      correlationId:
+        type: "string"
+      duration:
+        type: "integer"
+      endDateTime:
+        type: "string"
+        format: "date-time"
+      failureDateTime:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      inviteDateTime:
+        type: "string"
+        format: "date-time"
+      mediaBypassEnabled:
+        type: "boolean"
+      mediaPathLocation:
+        type: "string"
+      signalingLocation:
+        type: "string"
+      startDateTime:
+        type: "string"
+        format: "date-time"
+      successfulCall:
+        type: "boolean"
+      trunkFullyQualifiedDomainName:
+        type: "string"
+      userId:
+        type: "string"
+  FailureInfo:
+    type: "object"
+    properties:
+      reason:
+        type: "string"
+      stage:
+        type: "string"
+  GraphUser:
+    type: "object"
+    properties:
+      accountEnabled:
+        type: "boolean"
+      employeeId:
+        type: "string"
+      hireDate:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      isResourceAccount:
+        type: "boolean"
+      mail:
+        type: "string"
+      mailboxSettings:
+        $ref: "#/definitions/MailboxSettings"
+      otherMails:
+        type: "array"
+        items:
+          type: "string"
+      proxyAddresses:
+        type: "array"
+        items:
+          type: "string"
+      userType:
+        type: "string"
+  Identity:
+    type: "object"
+    properties:
+      applicationIdentityType:
+        type: "string"
+      email:
+        type: "string"
+      id:
+        type: "string"
+      tenantId:
+        type: "string"
+      userIdentityType:
+        type: "string"
+  IdentitySet:
+    type: "object"
+    properties:
+      application:
+        $ref: "#/definitions/Identity"
+      applicationInstance:
+        $ref: "#/definitions/Identity"
+      conversation:
+        $ref: "#/definitions/Identity"
+      conversationIdentityType:
+        $ref: "#/definitions/Identity"
+      device:
+        $ref: "#/definitions/Identity"
+      encrypted:
+        $ref: "#/definitions/Identity"
+      guest:
+        $ref: "#/definitions/Identity"
+      onPremises:
+        $ref: "#/definitions/Identity"
+      user:
+        $ref: "#/definitions/Identity"
+  Installed:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      teamsAppId:
+        type: "string"
+  Joined:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      members:
+        type: "array"
+        items:
+          $ref: "#/definitions/TeamWorkUserIdentity"
+  JoiningDisabled:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      teamId:
+        type: "string"
+  JoiningEnabled:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      teamId:
+        type: "string"
+  Left:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      members:
+        type: "array"
+        items:
+          $ref: "#/definitions/TeamWorkUserIdentity"
+  LobbyBypassSettings:
+    type: "object"
+    properties:
+      lobbyBypassDuration:
+        type: "integer"
+      lobbyBypassEnabled:
+        type: "boolean"
+  LocaleInfo:
+    type: "object"
+    properties:
+      displayName:
+        type: "string"
+      locale:
+        type: "string"
+  MailboxSettings:
+    type: "object"
+    properties:
+      archiveFolder:
+        type: "string"
+      automaticRepliesSetting:
+        $ref: "#/definitions/AutomaticRepliesSettings"
+      dateFormat:
+        type: "string"
+      delegateMeetingMessageDeliveryOptions:
+        type: "string"
+      language:
+        $ref: "#/definitions/LocaleInfo"
+      timeFormat:
+        type: "string"
+      timeZone:
+        type: "string"
+      userPurpose:
+        type: "string"
+      workingHours:
+        $ref: "#/definitions/WorkingHours"
+  MeetingAttendanceReport:
+    type: "object"
+    properties:
+      attendanceRecords:
+        type: "array"
+        items:
+          $ref: "#/definitions/AttendanceReport"
+      id:
+        type: "string"
+      meetingEndDateTime:
+        type: "string"
+        format: "date-time"
+      meetingStartDateTime:
+        type: "string"
+        format: "date-time"
+      totalParticipantCount:
+        type: "integer"
+  MeetingInfo:
+    type: "object"
+    properties:
+      allowConversationWithoutHost:
+        type: "boolean"
+      organizer:
+        $ref: "#/definitions/IdentitySet"
+  MeetingParticipant:
+    type: "object"
+    properties:
+      attendees:
+        type: "array"
+        items:
+          $ref: "#/definitions/MeetingParticipantInfo"
+      organizer:
+        $ref: "#/definitions/MeetingParticipantInfo"
+  MeetingParticipantInfo:
+    type: "object"
+    properties:
+      identity:
+        $ref: "#/definitions/IdentitySet"
+      role:
+        type: "string"
+  MeetingPolicyUpdated:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      meetingChatEnabled:
+        type: "boolean"
+      meetingChatId:
+        type: "string"
+  MembersAdded:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      members:
+        type: "array"
+        items:
+          $ref: "#/definitions/TeamWorkUserIdentity"
+      visibleHistoryStartDateTime:
+        type: "string"
+        format: "date-time"
+  MessageBody:
+    type: "object"
+    properties:
+      content:
+        type: "string"
+      contentType:
+        type: "string"
+  Offset:
+    type: "object"
+    properties:
+      dayOccurrence:
+        type: "integer"
+      dayOfWeek:
+        type: "string"
+      daylightBias:
+        type: "integer"
+      month:
+        type: "integer"
+      time:
+        type: "string"
+      year:
+        type: "integer"
+  Organizer:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      identity:
+        $ref: "#/definitions/IdentitySet"
+  PSTNCall:
+    type: "object"
+    properties:
+      callDurationSource:
+        type: "string"
+      callId:
+        type: "string"
+      callType:
+        type: "string"
+      charge:
+        type: "number"
+      conferenceId:
+        type: "string"
+      connectionCharge:
+        type: "number"
+      currency:
+        type: "string"
+      destinationContext:
+        type: "string"
+      destinationName:
+        type: "string"
+      duration:
+        type: "integer"
+      endDateTime:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      inventoryType:
+        type: "string"
+      licenseCapability:
+        type: "string"
+      operator:
+        type: "string"
+      startDateTime:
+        type: "string"
+        format: "date-time"
+      tenantCountryCode:
+        type: "string"
+      usageCountryCode:
+        type: "string"
+      userId:
+        type: "string"
+  Participant:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      identity:
+        $ref: "#/definitions/IdentitySet"
+  ParticipantInfo:
+    type: "object"
+    properties:
+      countryCode:
+        type: "string"
+      endpointType:
+        type: "string"
+      identity:
+        $ref: "#/definitions/IdentitySet"
+      participantId:
+        type: "string"
+      region:
+        type: "string"
+  Pinned:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      eventDateTime:
+        type: "string"
+        format: "date-time"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+  Removed:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      teamsAppId:
+        type: "string"
+  Renamed:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      channelId:
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+  Renamed_1:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      teamId:
+        type: "string"
+  Session:
+    type: "object"
+    properties:
+      callee:
+        $ref: "#/definitions/CallerInfo"
+      caller:
+        $ref: "#/definitions/CallerInfo"
+      endDateTime:
+        type: "string"
+        format: "date-time"
+      failureInfo:
+        $ref: "#/definitions/FailureInfo"
+      id:
+        type: "string"
+      isTest:
+        type: "boolean"
+      modalities:
+        type: "array"
+        items:
+          type: "string"
+      startDateTime:
+        type: "string"
+        format: "date-time"
+  SetAsFavoriteByDefault:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      channelId:
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+  TabUpdated:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      tabId:
+        type: "string"
+  Team:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      internalId:
+        type: "string"
+      isArchived:
+        type: "boolean"
+      sourceId:
+        type: "string"
+      visibility:
+        type: "string"
+  TeamWorkUserIdentity:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      tenantId:
+        type: "string"
+      userIdentityType:
+        type: "string"
+  TeamworkOnlineMeetingInfo:
+    type: "object"
+    properties:
+      calendarEventId:
+        type: "string"
+      joinWebUrl:
+        type: "string"
+      organizer:
+        $ref: "#/definitions/TeamWorkUserIdentity"
+  Unarchived:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      teamId:
+        type: "string"
+  Unpinned:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      eventDateTime:
+        type: "string"
+        format: "date-time"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+  UnsetAsFavoriteByDefault:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      channelId:
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+  Upgraded:
+    type: "object"
+    properties:
+      '@odata.type':
+        type: "string"
+      dataType:
+        type: "string"
+      initiator:
+        $ref: "#/definitions/IdentitySet"
+      teamsAppId:
+        type: "string"
+  WatermarkProtection:
+    type: "object"
+    properties:
+      enabledForContentSharing:
+        type: "boolean"
+      enabledForVideo:
+        type: "boolean"
+  WorkingHours:
+    type: "object"
+    properties:
+      daysOfWeek:
+        type: "array"
+        items:
+          type: "string"
+      endTime:
+        type: "string"
+        format: "time"
+      startTime:
+        type: "string"
+        format: "time"
+      timeZone:
+        anyOf:
+          - $ref: "#/definitions/CustomTimeZone"
