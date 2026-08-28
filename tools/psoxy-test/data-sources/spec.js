@@ -330,11 +330,13 @@ export default {
   },
   'msft-copilot': {
     name: 'Microsoft Copilot',
+    pageSizeParam: '$top',
+    nextLinkAccessor: '@odata.nextLink',
     endpoints: [
       {
         name: 'Users',
         path: '/v1.0/users',
-        params: { $select: 'id,mail,otherMails', $top: 1 },
+        params: { $select: 'id,mail,otherMails' },
         pagination: true,
         refs: [
           {
@@ -347,24 +349,23 @@ export default {
       {
         name: 'Interaction History',
         path: '/beta/copilot/users/[user_id]/interactionHistory/getAllEnterpriseInteractions',
-        params: { $top: 1 },
         pagination: true,
       },
     ],
   },
   'msft-entra-id': {
     name: 'Entra ID',
+    pageSizeParam: '$top',
+    nextLinkAccessor: '@odata.nextLink',
     endpoints: [
       {
         name: 'Users',
         path: '/v1.0/users',
-        params: { $top: 1 },
         pagination: true,
       },
       {
         name: 'Groups',
         path: '/v1.0/groups',
-        params: { $top: 1 },
         pagination: true,
         refs: [
           {
@@ -377,18 +378,19 @@ export default {
       {
         name: 'Group Members',
         path: '/v1.0/groups/[group_id]/members',
-        params: { $top: 1 },
         pagination: true,
       },
     ],
   },
   'msft-onedrive': {
     name: 'Microsoft OneDrive',
+    pageSizeParam: '$top',
+    nextLinkAccessor: '@odata.nextLink',
     endpoints: [
       {
         name: 'Users',
         path: '/v1.0/users',
-        params: { $select: 'id,mail,otherMails', $top: 1 },
+        params: { $select: 'id,mail,otherMails' },
         pagination: true,
         refs: [
           {
@@ -401,7 +403,6 @@ export default {
       {
         name: 'Groups',
         path: '/v1.0/groups',
-        params: { $top: 1 },
         pagination: true,
         refs: [
           {
@@ -414,7 +415,6 @@ export default {
       {
         name: 'User Drives',
         path: '/v1.0/users/[user_id]/drives',
-        params: { $top: 1 },
         pagination: true,
         refs: [
           {
@@ -437,13 +437,11 @@ export default {
       {
         name: 'Group Drives',
         path: '/v1.0/groups/[group_id]/drives',
-        params: { $top: 1 },
         pagination: true,
       },
       {
         name: 'Drive Delta',
         path: '/v1.0/drives/[drive_id]/root/delta',
-        params: { $top: 1 },
         pagination: true,
         refs: [
           {
@@ -469,20 +467,17 @@ export default {
   },
   'msft-teams': {
     name: 'Microsoft Teams',
+    pageSizeParam: '$top',
+    nextLinkAccessor: '@odata.nextLink',
     endpoints: [
       {
         name: 'Users',
         path: '/v1.0/users',
-        params: { $select: 'id,mail,otherMails', $top: 1 },
+        params: { $select: 'id,mail,otherMails' },
         pagination: true,
         refs: [
           {
             name: 'User Chats',
-            accessor: 'value[0].id',
-            pathReplacement: '[user_id]',
-          },
-          {
-            name: 'User Online Meetings',
             accessor: 'value[0].id',
             pathReplacement: '[user_id]',
           },
@@ -491,19 +486,11 @@ export default {
       {
         name: 'User Chats',
         path: '/v1.0/users/[user_id]/chats',
-        params: { $top: 1 },
-        pagination: true,
-      },
-      {
-        name: 'User Online Meetings',
-        path: '/v1.0/users/[user_id]/onlineMeetings',
-        params: { $top: 1 },
         pagination: true,
       },
       {
         name: 'Teams',
         path: '/v1.0/teams',
-        params: { $top: 1 },
         pagination: true,
         refs: [
           {
@@ -534,18 +521,19 @@ export default {
       {
         name: 'Channel Messages',
         path: '/v1.0/teams/[team_id]/channels/[channel_id]/messages',
-        params: { $top: 1 },
         pagination: true,
       },
     ],
   },
   'outlook-cal': {
     name: 'Outlook Calendar',
+    pageSizeParam: '$top',
+    nextLinkAccessor: '@odata.nextLink',
     endpoints: [
       {
         name: 'Users',
         path: '/v1.0/users',
-        params: { $select: 'id,mail,otherMails', $top: 1 },
+        params: { $select: 'id,mail,otherMails' },
         pagination: true,
         refs: [
           {
@@ -558,13 +546,11 @@ export default {
       {
         name: 'Events',
         path: '/v1.0/users/[user_id]/events',
-        params: { $top: 1 },
         pagination: true,
       },
       {
         name: 'Groups',
         path: '/v1.0/groups',
-        params: { $top: 1 },
         pagination: true,
         refs: [
           {
@@ -577,18 +563,19 @@ export default {
       {
         name: 'Group Members',
         path: '/v1.0/groups/[group_id]/members',
-        params: { $top: 1 },
         pagination: true,
       },
     ],
   },
   'outlook-mail': {
     name: 'Outlook Mail',
+    pageSizeParam: '$top',
+    nextLinkAccessor: '@odata.nextLink',
     endpoints: [
       {
         name: 'Users',
         path: '/v1.0/users',
-        params: { $select: 'id,mail,otherMails', $top: 1 },
+        params: { $select: 'id,mail,otherMails' },
         pagination: true,
         refs: [
           {
@@ -606,7 +593,6 @@ export default {
       {
         name: 'Groups',
         path: '/v1.0/groups',
-        params: { $top: 1 },
         pagination: true,
         refs: [
           {
@@ -619,7 +605,6 @@ export default {
       {
         name: 'Group Members',
         path: '/v1.0/groups/[group_id]/members',
-        params: { $top: 1 },
         pagination: true,
       },
       {
@@ -629,7 +614,6 @@ export default {
       {
         name: 'Messages Sent',
         path: '/v1.0/users/[user_id]/mailFolders/SentItems/messages',
-        params: { $top: 1 },
         pagination: true,
       }
     ],

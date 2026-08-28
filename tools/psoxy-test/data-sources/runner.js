@@ -6,8 +6,7 @@ import { transformSpecWithResponse } from '../lib/utils.js';
 import getLogger from '../lib/logger.js';
 
 const DEFAULT_MAX_PAGES = 3;
-// Microsoft Graph pagination cursor; endpoints opt-in via `pagination: true` in spec.js
-const NEXT_LINK_ACCESSOR = '@odata.nextLink';
+const DEFAULT_PAGE_SIZE = 1;
 
 /**
  * A `@odata.nextLink` is an *absolute* graph.microsoft.com URL. To keep
@@ -24,14 +23,41 @@ function nextLinkToProxyUrl(nextLink, baseUrl) {
 }
 
 /**
+ * Merge the `value` arrays of every fetched page into a single object, so an
+ * accessor like `value[0].id` still resolves even when an early page comes
+ * back with an empty `value` but a valid `@odata.nextLink` (a known OData
+ * paging quirk) - otherwise refs chaining would only ever look at page 1.
+ *
+ * @param {Object[]} pages - results from psoxyTestCall, one per page
+ * @returns {Object}
+ */
+function mergePagesForRefs(pages) {
+  if (pages.length <= 1) {
+    return pages[0]?.data;
+  }
+  return pages.reduce((merged, page) => {
+    const value = page?.data?.value;
+    if (Array.isArray(value)) {
+      merged.value = (merged.value || []).concat(value);
+    }
+    return merged;
+  }, { ...pages[0]?.data });
+}
+
+/**
  * Run multiple psoxy test calls depending on options.dataSource spec
  *
  * @param {Object} options - see `../psoxy-test-call.js`
- * @param {number} [options.maxPages] - max pages to follow for endpoints with `pagination: true` (default 3)
+ * @param {boolean} [options.paginate] - opt-in: for endpoints with `pagination: true`, add
+ *   `$top` and follow `@odata.nextLink`. Off by default - endpoints run as a single call.
+ * @param {number} [options.pageSize] - with `paginate`, page size ($top) requested per call (default 1)
+ * @param {number} [options.maxPages] - with `paginate`, max pages to follow per endpoint (default 3)
  * @returns {Object}
  */
 async function callDataSourceEndpoints(options) {
   const logger = getLogger(options.verbose);
+  const paginate = !!options.paginate;
+  const pageSize = options.pageSize ?? DEFAULT_PAGE_SIZE;
   const maxPages = options.maxPages ?? DEFAULT_MAX_PAGES;
 
   const dataSourceSpec = spec[options.dataSource];
@@ -39,16 +65,28 @@ async function callDataSourceEndpoints(options) {
     throw new Error(`Unknown data source: ${options.dataSource}`);
   }
 
+  // Pagination mechanics (page-size query param, next-page cursor field) vary per API
+  // family, so they're declared on the data source itself, not assumed by the runner.
+  const pageSizeParam = dataSourceSpec.pageSizeParam;
+  const nextLinkAccessor = dataSourceSpec.nextLinkAccessor;
+
   const results = {};
 
   for (const endpoint of dataSourceSpec.endpoints) {
+    const shouldPaginate = paginate && !!endpoint.pagination;
+
+    const params = { ...endpoint.params };
+    if (shouldPaginate && pageSizeParam) {
+      params[pageSizeParam] = pageSize;
+    }
+
     let paramsString = '';
-    if (endpoint.params) {
-      const params = new URLSearchParams();
-      for (const [key, value] of Object.entries(endpoint.params)) {
-        params.append(key, value);
+    if (Object.keys(params).length > 0) {
+      const urlParams = new URLSearchParams();
+      for (const [key, value] of Object.entries(params)) {
+        urlParams.append(key, value);
       }
-      paramsString = `?${params.toString()}`;
+      paramsString = `?${urlParams.toString()}`;
     }
 
     const url = options.url + endpoint.path + paramsString;
@@ -63,26 +101,25 @@ async function callDataSourceEndpoints(options) {
       pages.push(pageResult);
       pageCount++;
 
-      const nextLink = endpoint.pagination
-        ? _.get(pageResult.data, NEXT_LINK_ACCESSOR)
+      const nextLink = (shouldPaginate && nextLinkAccessor)
+        ? _.get(pageResult.data, nextLinkAccessor)
         : undefined;
       currentUrl = nextLink ? nextLinkToProxyUrl(nextLink, options.url) : undefined;
 
       if (nextLink) {
         if (pageCount < maxPages) {
-          logger.info(`${chalk.blue(dataSourceSpec.name)}, ${endpoint.name} endpoint -> following ${NEXT_LINK_ACCESSOR} (page ${pageCount + 1}/${maxPages})`);
+          logger.info(`${chalk.blue(dataSourceSpec.name)}, ${endpoint.name} endpoint -> following ${nextLinkAccessor} (page ${pageCount + 1}/${maxPages})`);
         } else {
-          logger.info(`${chalk.blue(dataSourceSpec.name)}, ${endpoint.name} endpoint -> ${NEXT_LINK_ACCESSOR} present but max pages (${maxPages}) reached, stopping`);
+          logger.info(`${chalk.blue(dataSourceSpec.name)}, ${endpoint.name} endpoint -> ${nextLinkAccessor} present but max pages (${maxPages}) reached, stopping`);
         }
       }
     } while (currentUrl && pageCount < maxPages);
 
-    // refs chaining always keys off the first page's data
     const result = pages[0];
     results[endpoint.name] = pages.length > 1 ? { ...result, pages } : result;
 
     if (endpoint.refs) {
-      transformSpecWithResponse(endpoint.name, result.data, dataSourceSpec);
+      transformSpecWithResponse(endpoint.name, mergePagesForRefs(pages), dataSourceSpec);
     }
   }
 

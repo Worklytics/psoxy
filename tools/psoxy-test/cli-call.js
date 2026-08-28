@@ -48,7 +48,9 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     .option('--verify-collection <bucket>', 'Verify that the posted data appears in the specified bucket (GCS/S3)')
     .option('--scheduler-job <name>', 'GCP: Cloud Scheduler job name to trigger batch processing')
     .option('--concurrency <n>', 'Fire N concurrent copies of the request (max 5) to test instance concurrency', parseInt)
-    .option('--max-pages <n>', 'With -d: max pages to follow for endpoints that opt into pagination (Graph API @odata.nextLink)', parseInt, 3)
+    .option('--paginate', 'With -d: enable pagination for endpoints that support it (adds $top and follows Graph API @odata.nextLink); off by default', false)
+    .option('--page-size <n>', 'With -d --paginate: page size ($top) requested per call', parseInt, 1)
+    .option('--max-pages <n>', 'With -d --paginate: max pages to follow per endpoint', parseInt, 3)
     .addOption(new Option('-d, --data-source <name>',
       'Data source to test all available endpoints').choices([
         //TODO: pull this list from terraform console or something??
