@@ -74,30 +74,6 @@ export default {
       }
     ],
   },
-  'azure-ad': {
-    name: 'Azure Directory',
-    endpoints: [
-      {
-        name: 'Users',
-        path: '/v1.0/users',
-      },
-      {
-        name: 'Groups',
-        path: '/v1.0/groups',
-        refs: [
-          {
-            name: 'Group Members',
-            accessor: 'value[0].id',
-            pathReplacement: '[group_id]',
-          },
-        ],
-      },
-      {
-        name: 'Group Members',
-        path: '/v1.0/groups/[group_id]/members',
-      },
-    ],
-  },
   'dropbox-business': {
     name: 'Dropbox Business',
     endpoints: [
@@ -352,13 +328,225 @@ export default {
       },
     ],
   },
+  'msft-copilot': {
+    name: 'Microsoft Copilot',
+    endpoints: [
+      {
+        name: 'Users',
+        path: '/v1.0/users',
+        params: { $select: 'id,mail,otherMails', $top: 1 },
+        pagination: true,
+        refs: [
+          {
+            name: 'Interaction History',
+            accessor: 'value[0].id',
+            pathReplacement: '[user_id]',
+          },
+        ],
+      },
+      {
+        name: 'Interaction History',
+        path: '/beta/copilot/users/[user_id]/interactionHistory/getAllEnterpriseInteractions',
+        params: { $top: 1 },
+        pagination: true,
+      },
+    ],
+  },
+  'msft-entra-id': {
+    name: 'Entra ID',
+    endpoints: [
+      {
+        name: 'Users',
+        path: '/v1.0/users',
+        params: { $top: 1 },
+        pagination: true,
+      },
+      {
+        name: 'Groups',
+        path: '/v1.0/groups',
+        params: { $top: 1 },
+        pagination: true,
+        refs: [
+          {
+            name: 'Group Members',
+            accessor: 'value[0].id',
+            pathReplacement: '[group_id]',
+          },
+        ],
+      },
+      {
+        name: 'Group Members',
+        path: '/v1.0/groups/[group_id]/members',
+        params: { $top: 1 },
+        pagination: true,
+      },
+    ],
+  },
+  'msft-onedrive': {
+    name: 'Microsoft OneDrive',
+    endpoints: [
+      {
+        name: 'Users',
+        path: '/v1.0/users',
+        params: { $select: 'id,mail,otherMails', $top: 1 },
+        pagination: true,
+        refs: [
+          {
+            name: 'User Drives',
+            accessor: 'value[0].id',
+            pathReplacement: '[user_id]',
+          },
+        ],
+      },
+      {
+        name: 'Groups',
+        path: '/v1.0/groups',
+        params: { $top: 1 },
+        pagination: true,
+        refs: [
+          {
+            name: 'Group Drives',
+            accessor: 'value[0].id',
+            pathReplacement: '[group_id]',
+          },
+        ],
+      },
+      {
+        name: 'User Drives',
+        path: '/v1.0/users/[user_id]/drives',
+        params: { $top: 1 },
+        pagination: true,
+        refs: [
+          {
+            name: 'Drive Delta',
+            accessor: 'value[0].id',
+            pathReplacement: '[drive_id]',
+          },
+          {
+            name: 'Drive Activities',
+            accessor: 'value[0].id',
+            pathReplacement: '[drive_id]',
+          },
+          {
+            name: 'Item Activities',
+            accessor: 'value[0].id',
+            pathReplacement: '[drive_id]',
+          },
+        ],
+      },
+      {
+        name: 'Group Drives',
+        path: '/v1.0/groups/[group_id]/drives',
+        params: { $top: 1 },
+        pagination: true,
+      },
+      {
+        name: 'Drive Delta',
+        path: '/v1.0/drives/[drive_id]/root/delta',
+        params: { $top: 1 },
+        pagination: true,
+        refs: [
+          {
+            name: 'Item Activities',
+            accessor: 'value[0].id',
+            pathReplacement: '[item_id]',
+          },
+        ],
+      },
+      {
+        name: 'Drive Activities',
+        path: '/v1.0/drives/[drive_id]/activities',
+        // rules only allow $expand/$skiptoken here, not $top
+        pagination: true,
+      },
+      {
+        name: 'Item Activities',
+        path: '/v1.0/drives/[drive_id]/items/[item_id]/activities',
+        // rules only allow $expand/$skiptoken here, not $top
+        pagination: true,
+      },
+    ],
+  },
+  'msft-teams': {
+    name: 'Microsoft Teams',
+    endpoints: [
+      {
+        name: 'Users',
+        path: '/v1.0/users',
+        params: { $select: 'id,mail,otherMails', $top: 1 },
+        pagination: true,
+        refs: [
+          {
+            name: 'User Chats',
+            accessor: 'value[0].id',
+            pathReplacement: '[user_id]',
+          },
+          {
+            name: 'User Online Meetings',
+            accessor: 'value[0].id',
+            pathReplacement: '[user_id]',
+          },
+        ],
+      },
+      {
+        name: 'User Chats',
+        path: '/v1.0/users/[user_id]/chats',
+        params: { $top: 1 },
+        pagination: true,
+      },
+      {
+        name: 'User Online Meetings',
+        path: '/v1.0/users/[user_id]/onlineMeetings',
+        params: { $top: 1 },
+        pagination: true,
+      },
+      {
+        name: 'Teams',
+        path: '/v1.0/teams',
+        params: { $top: 1 },
+        pagination: true,
+        refs: [
+          {
+            name: 'Teams Channels',
+            accessor: 'value[0].id',
+            pathReplacement: '[team_id]',
+          },
+          {
+            name: 'Channel Messages',
+            accessor: 'value[0].id',
+            pathReplacement: '[team_id]',
+          },
+        ],
+      },
+      {
+        name: 'Teams Channels',
+        path: '/v1.0/teams/[team_id]/allChannels',
+        // rules only allow $select/$filter here, not $top
+        pagination: true,
+        refs: [
+          {
+            name: 'Channel Messages',
+            accessor: 'value[0].id',
+            pathReplacement: '[channel_id]',
+          },
+        ],
+      },
+      {
+        name: 'Channel Messages',
+        path: '/v1.0/teams/[team_id]/channels/[channel_id]/messages',
+        params: { $top: 1 },
+        pagination: true,
+      },
+    ],
+  },
   'outlook-cal': {
     name: 'Outlook Calendar',
     endpoints: [
       {
         name: 'Users',
         path: '/v1.0/users',
-        params: { $select: 'id,mail,otherMails' },
+        params: { $select: 'id,mail,otherMails', $top: 1 },
+        pagination: true,
         refs: [
           {
             name: 'Events',
@@ -370,10 +558,14 @@ export default {
       {
         name: 'Events',
         path: '/v1.0/users/[user_id]/events',
+        params: { $top: 1 },
+        pagination: true,
       },
       {
         name: 'Groups',
-        path: '/beta/groups',
+        path: '/v1.0/groups',
+        params: { $top: 1 },
+        pagination: true,
         refs: [
           {
             name: 'Group Members',
@@ -384,7 +576,9 @@ export default {
       },
       {
         name: 'Group Members',
-        path: '/beta/groups/[group_id]/members',
+        path: '/v1.0/groups/[group_id]/members',
+        params: { $top: 1 },
+        pagination: true,
       },
     ],
   },
@@ -393,8 +587,9 @@ export default {
     endpoints: [
       {
         name: 'Users',
-        path: '/beta/users',
-        params: { $select: 'id,mail,otherMails' },
+        path: '/v1.0/users',
+        params: { $select: 'id,mail,otherMails', $top: 1 },
+        pagination: true,
         refs: [
           {
             name: 'Mailbox Settings',
@@ -410,7 +605,9 @@ export default {
       },
       {
         name: 'Groups',
-        path: '/beta/groups',
+        path: '/v1.0/groups',
+        params: { $top: 1 },
+        pagination: true,
         refs: [
           {
             name: 'Group Members',
@@ -421,15 +618,19 @@ export default {
       },
       {
         name: 'Group Members',
-        path: '/beta/groups/[group_id]/members',
+        path: '/v1.0/groups/[group_id]/members',
+        params: { $top: 1 },
+        pagination: true,
       },
       {
         name: 'Mailbox Settings',
-        path: '/beta/users/[user_id]/mailboxSettings',
+        path: '/v1.0/users/[user_id]/mailboxSettings',
       },
       {
         name: 'Messages Sent',
-        path: '/beta/users/[user_id]/mailFolders/SentItems/messages',
+        path: '/v1.0/users/[user_id]/mailFolders/SentItems/messages',
+        params: { $top: 1 },
+        pagination: true,
       }
     ],
   },

@@ -129,6 +129,16 @@ node cli-call.js -u https://us-central1-acme.cloudfunctions.net -d zoom
 
 Notice how the URL changes, and any other option the Psoxy may need doesn't.
 
+#### Pagination (Microsoft Graph data sources)
+
+Collection-returning endpoints for all Microsoft Graph data sources (`azure-ad`, `outlook-cal`, `outlook-mail`, `msft-teams`, `msft-copilot`, `msft-onedrive`) are marked in the spec (`data-sources/spec.js`) with `pagination: true`. For those, the initial call includes `$top=1` (page size of 1) and, if the response contains an `@odata.nextLink`, the runner automatically follows it — rewriting the Graph `https://graph.microsoft.com/...` cursor URL to the equivalent path/query on your Psoxy deploy, so pagination is still exercised through the proxy rather than calling Graph directly. Single-resource endpoints (e.g. `outlook-mail`'s `Mailbox Settings`) are left unpaginated since Graph doesn't page those.
+
+By default up to 3 pages are followed per endpoint; override with `--max-pages <n>`:
+
+```shell
+node cli-call.js -u https://acme.lambda-url.us-east-1.on.aws -r <ROLE> -d msft-teams --max-pages 5
+```
+
 ### Zoom: finding a meeting that has a summary
 
 `GET /v2/meetings/{meetingId}/meeting_summary` requires a past meeting instance UUID where Zoom AI Companion actually produced a meeting summary. Numeric IDs from `GET /v2/users/{userId}/meetings` are scheduled meetings and usually return `Invalid meeting id`.
