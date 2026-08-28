@@ -176,6 +176,10 @@ endpoints:
           - "$..user.id"
           - "$..user.email"
         encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
     pathParameterSchemas:
       userId:
         anyOf:
