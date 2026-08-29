@@ -23,7 +23,7 @@ public class Calendar_NoAppIds_Tests extends EntraIDTests {
         .sourceFamily("microsoft-365")
         .defaultScopeId("azure-ad")
         .sourceKind("outlook-cal")
-        .rulesFile("outlook-cal_no-app-ids")
+        .rulesFile("outlook-cal")
         .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
         .build();
 

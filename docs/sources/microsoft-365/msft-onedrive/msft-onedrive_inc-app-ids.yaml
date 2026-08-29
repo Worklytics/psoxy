@@ -7,7 +7,6 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.id"
           - "$..user.email"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
@@ -30,7 +29,6 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.id"
           - "$..user.email"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
@@ -55,7 +53,6 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.id"
           - "$..user.email"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
@@ -76,10 +73,8 @@ endpoints:
       - "$top"
       - "$select"
       - "$skiptoken"
-      - "$orderby"
+      - "$orderBy"
       - "$count"
-    allowedRequestHeaders:
-      - "ConsistencyLevel"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -103,12 +98,11 @@ endpoints:
       - "$select"
       - "$skiptoken"
       - "$top"
-      - "$orderby"
+      - "$orderBy"
       - "$expand"
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.id"
           - "$..user.email"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
@@ -129,7 +123,7 @@ endpoints:
       - "$top"
       - "$select"
       - "$skiptoken"
-      - "$orderby"
+      - "$orderBy"
       - "$count"
       - "$filter"
     allowedRequestHeaders:
@@ -140,11 +134,6 @@ endpoints:
           - "$..employeeId"
           - "$..mail"
           - "$..otherMails[*]"
-        encoding: "URL_SAFE_TOKEN"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..id"
-        includeReversible: true
         encoding: "URL_SAFE_TOKEN"
       - !<pseudonymizeRegexMatches>
         jsonPaths:
@@ -168,19 +157,13 @@ endpoints:
       - "$select"
       - "$skiptoken"
       - "$top"
-      - "$orderby"
+      - "$orderBy"
       - "$expand"
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.id"
           - "$..user.email"
         encoding: "URL_SAFE_TOKEN"
-    pathParameterSchemas:
-      userId:
-        anyOf:
-          - type: "string"
-            format: "reversible-pseudonym"
     responseSchema:
       type: "object"
       properties:

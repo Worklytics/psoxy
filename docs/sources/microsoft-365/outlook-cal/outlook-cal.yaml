@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathRegex: "^/v1.0/users/?[^/]*"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -45,6 +45,11 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
         encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/v1.0/groups/?[^/]*"
     allowedRequestHeaders:
@@ -119,7 +124,11 @@ endpoints:
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
         encoding: "URL_SAFE_TOKEN"
-  - pathRegex: "^/v1.0/users/?[^/]*/mailboxSettings"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        encoding: "URL_SAFE_TOKEN"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailboxSettings"
     transforms:
       - !<redact>
         jsonPaths:
@@ -128,7 +137,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"
-  - pathRegex: "^/v1.0/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
     transforms:
       - !<redactExceptPhrases>
         jsonPaths:
@@ -226,3 +235,13 @@ endpoints:
         delimiter: "\\s+"
         filters:
           - "https://[^.]+\\.zoom\\.us/.*"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']"

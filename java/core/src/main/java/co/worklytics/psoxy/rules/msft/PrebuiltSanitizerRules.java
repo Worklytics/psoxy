@@ -759,7 +759,7 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2 MS_COPILOT_NO_USER_ID = Rules2.builder()
         .endpoint(Endpoint.builder()
-            .pathRegex("^/beta/copilot/users/(/p~[a-zA-Z0-9_-]+?)?[^/]*/interactionHistory/getAllEnterpriseInteractions(\\?.*)?")
+            .pathRegex("^/beta/copilot/users/(p~[a-zA-Z0-9_-]+?)?[^/]*/interactionHistory/getAllEnterpriseInteractions(\\?.*)?")
             .transforms(Arrays.asList(MS_COPILOT_PSEUDONYMIZE,
                 // id of the chat may contain MSFT user GUIDS
                 Transform.Tokenize.builder()
@@ -787,8 +787,8 @@ public class PrebuiltSanitizerRules {
         .withAdditionalEndpoints(ENTRA_ID_USERS_NO_APP_IDS)
         .withTransformByEndpoint(ENTRA_ID_REGEX_USERS_BY_PSEUDO, ENTRA_ID_USERS_NO_APP_IDS_TRANSFORM_RULE);
 
-    static final RESTRules ONE_DRIVE = Rules2.load("sources/microsoft-365/msft-onedrive/msft-onedrive.yaml");
-    static final RESTRules ONE_DRIVE_NO_APP_IDS = Rules2.load("sources/microsoft-365/msft-onedrive/msft-onedrive_no-app-ids.yaml");
+    static final RESTRules ONE_DRIVE = Rules2.load("sources/microsoft-365/msft-onedrive/msft-onedrive_inc-app-ids.yaml");
+    static final RESTRules ONE_DRIVE_NO_APP_IDS = Rules2.load("sources/microsoft-365/msft-onedrive/msft-onedrive.yaml");
 
     public static final Map<String, RESTRules> MSFT_DEFAULT_RULES_MAP =
         ImmutableMap.<String, RESTRules>builder()

@@ -25,7 +25,7 @@ public class CopilotNoUserIdsTests extends JavaRulesTestBaseCase {
         return RulesTestSpec.builder()
                 .sourceFamily("microsoft-365")
                 .sourceKind("msft-copilot")
-            .rulesFile("msft-copilot_no-userIds")
+            .rulesFile("msft-copilot")
             .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-userIds/")
                 .build();
     }

@@ -4,9 +4,15 @@
 
 **Availability:** Beta
 
-Connect Microsoft OneDrive data to Worklytics, enabling analysis of collaboration and work happening in files stored in OneDrive (personal drives) and SharePoint document libraries (group drives). Enumerates the real drive(s) owned by each user/group (a group's SharePoint team site can have more than one document library, not just a single default drive), then uses the Microsoft Graph `delta` feed to identify created/edited/deleted files and folders in each drive, and per-file activity history to identify real edit/share/delete/move/rename/restore/comment/mention events.
+Connect Microsoft OneDrive data to Worklytics, enabling analysis of collaboration and work
+happening in files stored in OneDrive (personal drives) and SharePoint document libraries (group
+drives). Enumerates the real drive(s) owned by each user/group (a group's SharePoint team site can
+have more than one document library, not just a single default drive), then uses the Microsoft
+Graph `delta` feed to identify created/edited/deleted files and folders in each drive, and per-file
+activity history to identify real edit/share/delete/move/rename/restore/comment/mention events.
 
-Please review the [Microsoft 365 README](../README.md) for general information applicable to all Microsoft 365 connectors.
+Please review the [Microsoft 365 README](../README.md) for general information applicable to
+all Microsoft 365 connectors.
 
 ## Endpoints Used
 
@@ -20,7 +26,8 @@ Please review the [Microsoft 365 README](../README.md) for general information a
 | `GET /v1.0/drives/{driveId}/items/{itemId}/activities`           | Per-file recent activity (create/edit/delete/move/rename/restore/share/comment/mention, by whom, and when). |
 | `GET /v1.0/drives/{driveId}/activities`                          | Drive-wide recent activity feed (same shape as the per-file activity feed, but not scoped to a single item). |
 
-**Known limitation:** SharePoint site drives (`/v1.0/sites/{siteId}/...`) are not yet enumerated by this connector; only users' and groups' drives are covered.
+**Known limitation:** SharePoint site drives (`/v1.0/sites/{siteId}/...`) are not yet enumerated by
+this connector; only users' and groups' drives are covered.
 
 ## Required Scopes
 
@@ -53,7 +60,10 @@ the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 ### Populating example API calls with real IDs
 
-By default, the `{groupId}`/`{driveId}`/`{itemId}` segments of this connector's example test calls (generated as part of your Terraform deployment) are left as placeholders, since Terraform has no way to enumerate real values from your tenant. To have real, directly-runnable example calls generated instead, set the following keys in the `msft_365_connector_settings` Terraform variable:
+By default, the `{groupId}`/`{driveId}`/`{itemId}` segments of this connector's example test calls
+(generated as part of your Terraform deployment) are left as placeholders, since Terraform has no
+way to enumerate real values from your tenant. To have real, directly-runnable example calls
+generated instead, set the following keys in the `msft_365_connector_settings` Terraform variable:
 
 | Key                              | Value                                                                                                    |
 |------------------------------------|--------------------------------------------------------------------------------------------------------|
@@ -69,9 +79,10 @@ msft_365_connector_settings = {
   msft_onedrive_example_item_id  = "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K"
 }
 ```
-(`example_msft_user_guid` — used for the `/v1.0/users/{userId}/drives` example call — is shared across all Microsoft 365 connectors; see the [Microsoft 365 README](../README.md).)
+(`example_msft_user_guid` — used for the `/v1.0/users/{userId}/drives` example call — is shared
+across all Microsoft 365 connectors; see the [Microsoft 365 README](../README.md).)
 
 ## Example Rules
 
 - [Example Rules](msft-onedrive.yaml)
-- [Example Rules: no App IDs](msft-onedrive_no-app-ids.yaml)
+- [Example Rules: including App IDs](msft-onedrive_inc-app-ids.yaml)

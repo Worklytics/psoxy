@@ -7,6 +7,10 @@ Changes to be including in future/planned release notes will be added here.
 
 ## [0.6.10](https://github.com/Worklytics/psoxy/releases/tag/v0.6.10)
 - `claude`: add support for the Compliance API's local and remote sessions endpoints (`GET /v1/compliance/apps/sessions/local`, `GET /v1/compliance/apps/sessions/remote`, and their `.../messages` endpoints), covering Claude Code and Cowork (local and remote) session/message data alongside existing chat/activity coverage. See [docs/sources/anthropic/claude/README.md](docs/sources/anthropic/claude/README.md).
+- `worklytics-connector-specs`: connector specs now explicitly reference their sanitization rules YAML files via `rules_file`. Host modules (`aws-host`/`gcp-host`) resolve file paths and provision rules; connector specs pass paths through rather than pre-resolving file content. Bulk connectors `badge`, `hris`, and `metrics` now use YAML rules files instead of inline Terraform `rules`.
+- `msft-*`: Microsoft 365 connector rules YAML files renamed so the default (pseudonymizing) rules are the canonical `*.yaml` files; variants that include app/user IDs in the clear are now named `*_inc-app-ids.yaml` (e.g. `entra-id_inc-app-ids.yaml`). Terraform provisions the default pseudonymizing rules. Customers who set `pseudonymize_app_ids = false` (default is `true`) and need rules that pass app IDs in the clear should point `custom_api_connector_rules` at the `*_inc-app-ids.yaml` files.
+- proxy: log a warning when falling back to prebuilt Java rules because no `RULES` were configured explicitly. This fallback will be removed in v0.7; rules must be explicitly configured.
+- `aws-host`/`gcp-host`: `api_connectors` now accept a `rules` property (YAML rules content string) for hosted deployments that provide rules inline, deprecating `rules_raw` (TODO: remove in v0.7). `rules_file` remains the preferred path for self-hosted deployments with access to the rules YAML on disk.
 
 ## [0.6.9](https://github.com/Worklytics/psoxy/releases/tag/v0.6.9)
 

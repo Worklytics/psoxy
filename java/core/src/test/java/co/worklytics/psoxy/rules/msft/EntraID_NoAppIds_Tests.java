@@ -20,7 +20,7 @@ public class EntraID_NoAppIds_Tests extends EntraIDTests {
         .sourceFamily("microsoft-365")
         .defaultScopeId("azure-ad")
         .sourceKind("entra-id")
-        .rulesFile("entra-id_no-app-ids")
+        .rulesFile("entra-id")
         .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
         .build();
 

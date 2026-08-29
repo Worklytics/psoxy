@@ -96,11 +96,17 @@ public class ConfigRulesModule {
                     ProxyConfigProperty.SOURCE.name(), ProxyConfigProperty.RULES.name())));
 
         String rulesIdSuffix = pseudonymizeAppIds ? NO_APP_IDS_SUFFIX : "";
+        String rulesKey = source + rulesIdSuffix;
+
+        log.warning(String.format(
+            "No RULES found configured explicitly; falling back to prebuilt Java rules for SOURCE=%s (rulesKey=%s). "
+                + "This fallback will be removed in v0.7; rules must be explicitly configured.",
+            source, rulesKey));
 
         RESTRules regularDefaults = PrebuiltSanitizerRules.DEFAULTS.get(source);
 
         //ok to fallback to regular rules, bc for many sources the 'NO_APP_IDS' variant doesn't
         // really matter
-        return Optional.ofNullable(PrebuiltSanitizerRules.DEFAULTS.getOrDefault(source + rulesIdSuffix, regularDefaults));
+        return Optional.ofNullable(PrebuiltSanitizerRules.DEFAULTS.getOrDefault(rulesKey, regularDefaults));
     }
 }

@@ -78,6 +78,7 @@ locals {
   oauth_long_access_connectors = {
     asana = {
       source_kind : "asana",
+      rules_file : "docs/sources/asana/asana.yaml",
       availability : "ga",
       enable_by_default : false,
       worklytics_connector_id : "asana-psoxy"
@@ -117,6 +118,7 @@ EOT
     }
     chatgpt-enterprise = {
       source_kind : "chatgpt-enterprise",
+      rules_file : "docs/sources/chatgpt-enterprise/chatgpt-enterprise.yaml",
       availability : "beta",
       enable_by_default : false,
       worklytics_connector_id : "chatgpt-enterprise-psoxy"
@@ -185,6 +187,7 @@ EOT
     }
     claude = {
       source_kind : "claude"
+      rules_file : "docs/sources/anthropic/claude/claude.yaml",
       availability : "beta",
       enable_by_default : false
       worklytics_connector_id : "claude-psoxy"
@@ -229,6 +232,7 @@ EOT
     }
     claude-enterprise-analytics = {
       source_kind : "claude-enterprise-analytics"
+      rules_file : "docs/sources/anthropic/claude-enterprise-analytics/claude-enterprise-analytics.yaml",
       availability : "beta",
       enable_by_default : false
       worklytics_connector_id : "claude-enterprise-analytics-psoxy"
@@ -276,6 +280,7 @@ EOT
     }
     claude-code = {
       source_kind : "claude-code"
+      rules_file : "docs/sources/anthropic/claude-code/claude-code.yaml",
       availability : "beta",
       enable_by_default : false
       worklytics_connector_id : "claude-code-psoxy"
@@ -310,6 +315,7 @@ EOT
     }
     cursor = {
       source_kind : "cursor",
+      rules_file : "docs/sources/cursor/cursor.yaml",
       availability : "beta",
       enable_by_default : false,
       worklytics_connector_id : "cursor-psoxy"
@@ -353,6 +359,7 @@ EOT
     }
     glean = {
       source_kind : "glean",
+      rules_file : "docs/sources/glean/glean.yaml",
       availability : "beta",
       enable_by_default : false,
       worklytics_connector_id : "glean-psoxy"
@@ -404,6 +411,7 @@ EOT
     }
     github = {
       source_kind : "github",
+      rules_file : "docs/sources/github/github/github.yaml",
       availability : "ga",
       enable_by_default : false,
       worklytics_connector_id : "github-enterprise-psoxy"
@@ -464,6 +472,7 @@ EOT
     }
     github-copilot = {
       source_kind : "github-copilot",
+      rules_file : "docs/sources/github/copilot/github-copilot.yaml",
       availability : "alpha",
       enable_by_default : false,
       worklytics_connector_id : "github-copilot-psoxy"
@@ -518,6 +527,7 @@ EOT
     }
     github-enterprise-server = {
       source_kind : "github-enterprise-server",
+      rules_file : "docs/sources/github/enterprise-server/github-enterprise-server.yaml",
       availability : "ga",
       enable_by_default : false
       worklytics_connector_id : "github-enterprise-server-psoxy"
@@ -580,6 +590,7 @@ EOT
     }
     github-non-enterprise = {
       source_kind : "github-non-enterprise",
+      rules_file : "docs/sources/github/github-non-enterprise/github-non-enterprise.yaml",
       availability : "ga",
       enable_by_default : false
       worklytics_connector_id : "github-free-team-psoxy"
@@ -636,6 +647,7 @@ EOT
     }
     gong-metrics = {
       source_kind : "gong-metrics",
+      rules_file : "docs/sources/gong/gong-metrics/gong-metrics.yaml",
       availability : "beta",
       enable_by_default : false,
       worklytics_connector_id : "gong-metrics-psoxy"
@@ -698,6 +710,7 @@ EOT
     }
     salesforce = {
       source_kind : "salesforce",
+      rules_file : "docs/sources/salesforce/salesforce.yaml",
       availability : "ga",
       enable_by_default : false
       worklytics_connector_id : "salesforce-psoxy"
@@ -789,6 +802,7 @@ EOT
     # https://api.slack.com/methods/admin.analytics.getFile
     slack-analytics = {
       source_kind : "slack-analytics",
+      rules_file : "docs/sources/slack/slack-analytics/slack-analytics.yaml",
       availability : "alpha",
       enable_by_default : false
       worklytics_connector_id : "slack-analytics-psoxy"
@@ -829,6 +843,7 @@ EOT
     }
     slack-discovery-api = {
       source_kind : "slack"
+      rules_file : "docs/sources/slack/slack-discovery-api/discovery.yaml",
       availability : "ga",
       enable_by_default : false,
       worklytics_connector_id : "slack-discovery-api-psoxy",
@@ -866,6 +881,7 @@ EOT
     }
     windsurf = {
       source_kind : "windsurf"
+      rules_file : "docs/sources/windsurf/windsurf.yaml",
       availability : "deprecated",
       enable_by_default : false
       worklytics_connector_id : "windsurf-psoxy"
@@ -894,6 +910,7 @@ EOT
     }
     zoom = {
       source_kind : "zoom"
+      rules_file : "docs/sources/zoom/zoom.yaml",
       availability : "ga",
       enable_by_default : false
       worklytics_connector_id : "zoom-psoxy"
@@ -1011,6 +1028,7 @@ EOT
     },
     dropbox-business = {
       source_kind : "dropbox-business"
+      rules_file : "docs/sources/dropbox-business/dropbox-business.yaml",
       availability : "deprecated",
       enable_by_default : false
       worklytics_connector_id : "dropbox-business-log-psoxy"
@@ -1107,6 +1125,7 @@ EOT
     },
     confluence-cloud = {
       source_kind : "confluence"
+      rules_file : "docs/sources/atlassian/confluence/confluence.yaml",
       availability : "beta"
       enable_by_default : false
       worklytics_connector_id : "confluence-cloud-psoxy"
@@ -1170,6 +1189,7 @@ EOT
     }
     jira-server = {
       source_kind : "jira-server"
+      rules_file : "docs/sources/atlassian/jira/jira-server.yaml",
       availability : "ga",
       enable_by_default : false
       worklytics_connector_id : "jira-server-psoxy"
@@ -1202,6 +1222,7 @@ EOT
     }
     jira-cloud = {
       source_kind : "jira-cloud"
+      rules_file : "docs/sources/atlassian/jira/jira-cloud.yaml",
       availability : "ga"
       enable_by_default : false
       worklytics_connector_id : "jira-cloud-psoxy"
@@ -1261,6 +1282,7 @@ EOT
     }
     atlassian-organization = {
       source_kind : "atlassian-organization"
+      rules_file : "docs/sources/atlassian/organization/organization.yaml",
       availability : "beta"
       enable_by_default : false
       worklytics_connector_id : "atlassian-organization-psoxy"
@@ -1374,17 +1396,11 @@ EOT
   bulk_connectors = {
     "badge" = {
       source_kind               = "badge"
+      rules_file                = "docs/sources/badge/badge.yaml"
       availability              = "ga"
       enable_by_default         = false
       worklytics_connector_id   = "bulk-import-psoxy",
       worklytics_connector_name = "Bulk Data Import via Psoxy"
-      rules = {
-        columnsToRedact = []
-        columnsToPseudonymize = [
-          "EMPLOYEE_ID", # primary key
-          # "employee_email", # if exists
-        ]
-      }
       settings_to_provide = {
         "Parser" = "badge"
       }
@@ -1410,21 +1426,11 @@ EOT
     }
     "hris" = {
       source_kind               = "hris"
+      rules_file                = "docs/sources/hris/csv.yaml"
       availability              = "ga"
       enable_by_default         = true
       worklytics_connector_id   = "hris-import-psoxy"
       worklytics_connector_name = "HRIS Data Import via Psoxy"
-      rules = {
-        columnsToRedact = []
-        columnsToPseudonymize = [
-          "EMPLOYEE_ID",    # primary key
-          "EMPLOYEE_EMAIL", # for linking to other data sources
-          "MANAGER_ID",     # should match to employee_id
-        ]
-        columnsToPseudonymizeIfPresent = [
-          "MANAGER_EMAIL"
-        ]
-      }
       settings_to_provide = {
         "Parser" = "EMPLOYEE_SNAPSHOT"
       }
@@ -1432,16 +1438,11 @@ EOT
     }
     "metrics" = {
       source_kind               = "metrics"
+      rules_file                = "docs/sources/metrics/metrics.yaml"
       availability              = "beta"
       enable_by_default         = false
       worklytics_connector_id   = "metrics-import-psoxy",
       worklytics_connector_name = "Metrics via Psoxy"
-      rules = {
-        columnsToPseudonymizeIfPresent = [
-          "EMPLOYEE_ID",
-          "EMPLOYEE_EMAIL",
-        ]
-      }
       settings_to_provide = {
       }
       example_file = "docs/sources/metrics/metrics-example.csv"
@@ -1558,46 +1559,14 @@ EOT
 # computed values filtered by enabled connectors
 locals {
 
-  # helper to compute rules_raw from a connector map entry
-  # reads file content if rules_file is set and base_dir is available
-  _resolve_rules_raw = {
-    for k, v in local.all_default_connectors :
-    k => try(v.rules_file, null) != null && var.base_dir != null ? file("${var.base_dir}${v.rules_file}") : null
-  }
-
   # backwards-compatible for v0.4.x; remove in v0.5.x
   google_workspace_sources_backwards = { for k, v in local.google_workspace_sources :
-    k => merge(v,
-      { example_calls : try(v.example_api_calls, []) },
-      try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
-    )
+    k => merge(v, { example_calls : try(v.example_api_calls, []) })
   }
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
   msft_365_connectors_backwards = { for k, v in local.msft_365_connectors :
-    k => merge(v,
-      { example_calls : try(v.example_api_calls, []) },
-      try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
-    )
-  }
-
-  oauth_long_access_connectors_with_rules_raw = { for k, v in local.oauth_long_access_connectors :
-    k => merge(v,
-      try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
-    )
-  }
-
-  oauth_long_access_connectors_backwards_with_rules_raw = { for k, v in local.oauth_long_access_connectors :
-    k => merge(v,
-      { example_calls : try(v.example_api_calls, []) },
-      try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
-    )
-  }
-
-  bulk_connectors_with_rules_raw = { for k, v in local.bulk_connectors :
-    k => merge(v,
-      try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
-    )
+    k => merge(v, { example_calls : try(v.example_api_calls, []) })
   }
 
   enabled_google_workspace_connectors = {
@@ -1606,7 +1575,7 @@ locals {
   enabled_msft_365_connectors = {
     for k, v in local.msft_365_connectors_backwards : k => v if contains(var.enabled_connectors, k) && length(try(var.msft_tenant_id, "")) > 0
   }
-  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors_backwards_with_rules_raw : k => v if contains(var.enabled_connectors, k) }
+  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors_backwards : k => v if contains(var.enabled_connectors, k) }
 
   enabled_oauth_long_access_connectors_todos = { for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
@@ -1623,7 +1592,7 @@ locals {
   ]))
 
   enabled_bulk_connectors = {
-    for k, v in local.bulk_connectors_with_rules_raw : k => v if contains(var.enabled_connectors, k)
+    for k, v in local.bulk_connectors : k => v if contains(var.enabled_connectors, k)
   }
 
   enabled_lockable_oauth_secrets_to_create = distinct(flatten([

@@ -29,6 +29,7 @@ public class CalendarTests extends EntraIDTests {
         .sourceFamily("microsoft-365")
         .defaultScopeId("azure-ad")
         .sourceKind("outlook-cal")
+        .rulesFile("outlook-cal_inc-app-ids")
         .build();
 
     @ParameterizedTest
