@@ -55,7 +55,7 @@ else
   printf "${SUCCESS}java/pom.xml revision matches %s.${NC}\n" "$RELEASE_NUMBER"
 fi
 
-STALE_RC_REFS="$(git grep -n 'ref=rc-v' -- 'infra/' 'java/' 'tools/' 2>/dev/null || true)"
+STALE_RC_REFS="$(git grep -n 'ref=rc-v' -- 'infra/' 'java/' 'tools/' ':!tools/release/' 2>/dev/null || true)"
 if [ -n "$STALE_RC_REFS" ]; then
   printf "${ERR}Found stale module refs to an rc-v* tag:${NC}\n%s\n" "$STALE_RC_REFS"
   FAIL=1
