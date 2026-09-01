@@ -44,7 +44,7 @@ endpoints:
         type: "array"
         items:
           $ref: "#/definitions/ItemActivity"
-- pathRegex: "^/v1\\.0/drives/[^/]+/root/delta(\\(token=[^)]*\\))?(\\?.*)?$"
+- pathTemplate: "/v1.0/drives/{driveId}/root/delta"
   allowedQueryParams:
   - "token"
   - "$select"
@@ -55,6 +55,34 @@ endpoints:
     jsonPaths:
     - "$..user.email"
     encoding: "URL_SAFE_TOKEN"
+  responseSchema:
+    type: "object"
+    properties:
+      '@microsoft.graph.hasMoreData':
+        type: "boolean"
+      '@odata.deltaLink':
+        type: "string"
+      '@odata.nextLink':
+        type: "string"
+      value:
+        type: "array"
+        items:
+          $ref: "#/definitions/DriveItem"
+# OData function-call continuation shape for /root/delta, eg "/root/delta(token=abc123)"
+- pathTemplate: "/v1.0/drives/{driveId}/root/{deltaExpression}"
+  allowedQueryParams:
+  - "token"
+  - "$select"
+  - "$expand"
+  - "$top"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$..user.email"
+    encoding: "URL_SAFE_TOKEN"
+  pathParameterSchemas:
+    deltaExpression:
+      pattern: "^delta\\(token=[^)]+\\)$"
   responseSchema:
     type: "object"
     properties:
