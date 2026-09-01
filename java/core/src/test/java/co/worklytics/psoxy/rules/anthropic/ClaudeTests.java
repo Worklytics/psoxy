@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules.anthropic;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
 import lombok.Getter;
+import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
@@ -40,6 +41,8 @@ public class ClaudeTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats?project_ids[]=proj_1&user_ids[]=user_1&created_at.gte=2024-01-01T00:00:00Z&updated_at.lte=2024-12-31T00:00:00Z", "chats-response.json"),
             InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats?created_at.gt=2024-01-01T00:00:00Z&created_at.lt=2024-12-31T00:00:00Z", "chats-response.json"),
             InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats?updated_at.gte=2024-01-01T00:00:00Z&updated_at.gt=2024-01-01T00:00:00Z", "chats-response.json"),
+            // org-wide incremental-by-update-time discovery: order_by=updated_at, no user_ids[] (see deprecation notice on this endpoint)
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats?order_by=updated_at&updated_at.gte=2024-01-01T00:00:00Z&updated_at.lt=2024-01-02T00:00:00Z&after_id=chat_123", "chats-response.json"),
 
             // Chat Messages endpoint
             InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/chats/chat_abc123/messages", "chat-messages-response.json"),
@@ -65,6 +68,9 @@ public class ClaudeTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/sessions/local?created_at.gte=2024-01-01T00:00:00Z", "local-sessions-response.json"),
             InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/sessions/local?created_at.lt=2024-12-31T00:00:00Z", "local-sessions-response.json"),
             InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/sessions/local?created_at.gte=2024-01-01T00:00:00Z&created_at.lt=2024-12-31T00:00:00Z&limit=50", "local-sessions-response.json"),
+            // poll for sessions active since a previous pass
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/sessions/local?updated_at.gte=2024-06-01T00:00:00Z", "local-sessions-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/sessions/local?created_at.gte=2024-01-01T00:00:00Z&created_at.lt=2024-12-31T00:00:00Z&updated_at.gte=2024-06-01T00:00:00Z", "local-sessions-response.json"),
 
             // Local Session Messages endpoint
             InvocationExample.of("https://api.anthropic.com/v1/compliance/apps/sessions/local/clls_abc123/messages", "local-session-messages-response.json"),
@@ -93,11 +99,50 @@ public class ClaudeTests extends JavaRulesTestBaseCase {
 
             // Organizations endpoint
             InvocationExample.of("https://api.anthropic.com/v1/compliance/organizations", "organizations-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/organizations?limit=1000", "organizations-response.json"),
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/organizations?page=page_abc123&limit=100", "organizations-response.json"),
 
             // Organization Users endpoint
             InvocationExample.of("https://api.anthropic.com/v1/compliance/organizations/org_uuid_123/users", "organization-users-response.json"),
             InvocationExample.of("https://api.anthropic.com/v1/compliance/organizations/org_uuid_123/users?page=2&limit=100", "organization-users-response.json"),
             InvocationExample.of("https://api.anthropic.com/v1/compliance/organizations/org_uuid_123/users?page=3&limit=50", "organization-users-response.json")
         );
+    }
+
+    // getExamples() above only exercises response-body sanitization for these params; these
+    // assert the query-param allowlist itself actually gates the request (RESTApiSanitizerImpl,
+    // via allowedQueryParams on each endpoint in claude.yaml).
+
+    @Test
+    void chats_orderByQueryParam_allowed() {
+        // required alongside updated_at.* for org-wide incremental-by-update-time polling
+        // (user_ids[] + updated_at.* is deprecated -- see the endpoint's allowedQueryParams)
+        assertUrlAllowed("https://api.anthropic.com/v1/compliance/apps/chats?order_by=updated_at");
+    }
+
+    @Test
+    void chats_unrecognizedQueryParam_blocked() {
+        assertUrlBlocked("https://api.anthropic.com/v1/compliance/apps/chats?not_a_real_param=1");
+    }
+
+    @Test
+    void localSessions_updatedAtGteQueryParam_allowed() {
+        assertUrlAllowed("https://api.anthropic.com/v1/compliance/apps/sessions/local?updated_at.gte=2024-01-01T00:00:00Z");
+    }
+
+    @Test
+    void localSessions_unrecognizedQueryParam_blocked() {
+        assertUrlBlocked("https://api.anthropic.com/v1/compliance/apps/sessions/local?not_a_real_param=1");
+    }
+
+    @Test
+    void organizations_limitAndPageQueryParams_allowed() {
+        assertUrlAllowed("https://api.anthropic.com/v1/compliance/organizations?limit=100&page=page_abc123");
+    }
+
+    @Test
+    void organizations_unrecognizedQueryParam_blocked() {
+        // was allowedQueryParams: [] (nothing allowed at all) before limit/page were added
+        assertUrlBlocked("https://api.anthropic.com/v1/compliance/organizations?not_a_real_param=1");
     }
 }
