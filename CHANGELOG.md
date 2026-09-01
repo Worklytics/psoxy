@@ -5,7 +5,8 @@ in each release's notes.
 
 Changes to be including in future/planned release notes will be added here.
 
-## [0.6.10](https://github.com/Worklytics/psoxy/releases/tag/v0.6.10)
+## [0.7.0](https://github.com/Worklytics/psoxy/releases/tag/v0.7.0)
+- **Breaking (`gdrive`):** required OAuth scope changes from `drive.metadata.readonly` to `drive.readonly`. Google's Drive API `revisions.list` returns incomplete (often empty) revision histories for Docs/Sheets/Slides under metadata-only scopes; Google has confirmed this is intended, permanent behavior and recommends `drive.readonly` for complete histories. Existing deployments must update both the proxy `OAUTH_SCOPES` (Terraform apply from this release does this) **and** the Domain-wide Delegation grant in the Google Workspace Admin console. See [gdrive README](docs/sources/google-workspace/gdrive/README.md).
 - `claude`: add support for the Compliance API's local and remote sessions endpoints (`GET /v1/compliance/apps/sessions/local`, `GET /v1/compliance/apps/sessions/remote`, and their `.../messages` endpoints), covering Claude Code and Cowork (local and remote) session/message data alongside existing chat/activity coverage. See [docs/sources/anthropic/claude/README.md](docs/sources/anthropic/claude/README.md).
 
 ## [0.6.9](https://github.com/Worklytics/psoxy/releases/tag/v0.6.9)

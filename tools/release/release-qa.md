@@ -6,7 +6,7 @@ This supplements [releases.md](../../docs/development/releases.md) and automates
 
 ## Prerequisites
 
-- Branch `rc-vX.Y.Z` with release refs updated to `vX.Y.Z` (via `./tools/release/prep.sh`)
+- Branch `rc-vX.Y.Z` with release refs updated to `vX.Y.Z` (via `./tools/release/prep.sh`). The git branch name may differ from the release tag (e.g. branch `rc-v0.4.16` while shipping `v0.5.0`); pass `--rc-branch` / the second arg to the scripts in that case.
 - CLI auth: `aws`, `gcloud` (+ application-default credentials), and `az` when `msft_tenant_id` is set in tfvars
 - `gh` authenticated (for PR steps)
 - `terraform` in PATH
@@ -47,6 +47,8 @@ If refs are not updated yet:
 
 ```shell
 ./tools/release/prep.sh rc-vX.Y.Z vX.Y.Z
+# or, if the RC branch version does not match the tag:
+# ./tools/release/prep.sh rc-v0.4.16 v0.5.0
 ```
 
 Then:
@@ -149,7 +151,7 @@ Posts a comment with both summaries and checks off test-plan items in the PR bod
 | Apply auth errors | `./az-auth`, `aws sso login`, `gcloud auth application-default login` |
 | `missingConfigProperties` in health check | Unconfigured secrets; note in summary, not a proxy bug |
 | `msft-teams` 401 while `azure-ad` works | Azure Graph permissions/consent |
-| `rc-to-main.sh` branch error | `git checkout rc-vX.Y.Z` |
+| `rc-to-main.sh` branch error | Checkout the RC branch first (`rc-v*` even if its version does not match the tag), or pass it as the second argument |
 
 ## Scripts
 

@@ -1,6 +1,12 @@
 #!/bin/bash
 
 # Usage ./tools/release/prep.sh <current-release> <next-release>
+#
+# current-release / next-release are the strings substituted in module refs,
+# pom revision, and JAVA_SOURCE_CODE_VERSION. They need not match the git
+# branch name. A major bump can keep the existing rc branch, e.g.:
+#   ./tools/release/prep.sh rc-v0.4.16 v0.5.0
+# while still on branch rc-v0.4.16.
 
 COLORSCHEME_SH="$(dirname "$0")/../set-term-colorscheme.sh"
 if [ -f "$COLORSCHEME_SH" ]; then
@@ -8,6 +14,10 @@ if [ -f "$COLORSCHEME_SH" ]; then
 else
     ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
 fi
+
+RC_BRANCH_SH="$(dirname "$0")/lib/rc-branch.sh"
+# shellcheck source=lib/rc-branch.sh
+source "$RC_BRANCH_SH"
 
 CURRENT_RELEASE=$1
 NEXT_RELEASE=$2
@@ -44,9 +54,10 @@ if [ ! -f "java/pom.xml" ]; then
   exit 1
 fi
 
+CURRENT_BRANCH=$(git branch --show-current)
+
 if [ "$IS_RC" -eq 1 ]; then
   printf "Preparing release candidate ${SUCCESS}${NEXT_RELEASE}${NC} ...\n"
-  CURRENT_BRANCH=$(git branch --show-current)
 
   # check if current branch is clean
   if [ -n "$(git status --porcelain)" ]; then
@@ -60,8 +71,10 @@ if [ "$IS_RC" -eq 1 ]; then
   fi
 
   git checkout -b "$NEXT_RELEASE"
+  CURRENT_BRANCH="$NEXT_RELEASE"
 else
   printf "Preparing release ${SUCCESS}${NEXT_RELEASE}${NC} ...\n"
+  warn_if_rc_release_mismatch "$CURRENT_BRANCH" "$NEXT_RELEASE"
 fi
 
 CURRENT_RELEASE_PATTERN=$(echo $CURRENT_RELEASE | sed 's/\./\\\./g')
@@ -132,7 +145,10 @@ echo    # Move to a new line
 case "$REPLY" in
   [yY][eE][sS]|[yY])
     git commit -m "$COMMIT_MESSAGE"
-    git push origin "$NEXT_RELEASE"
+    git push origin "$CURRENT_BRANCH"
+    if [ "$CURRENT_BRANCH" != "$NEXT_RELEASE" ]; then
+      printf "${INFO}Pushed branch ${CURRENT_BRANCH} (release refs are ${NEXT_RELEASE}; RC branch name kept).${NC}\n"
+    fi
     ;;
   *)
     echo "Changes not committed. Exiting."
@@ -162,7 +178,7 @@ else
   echo    # Move to a new line
   case "$REPLY" in
     [yY][eE][sS]|[yY])
-      ./tools/release/rc-to-main.sh "$NEXT_RELEASE"
+      ./tools/release/rc-to-main.sh "$NEXT_RELEASE" "$CURRENT_BRANCH"
       ;;
     *)
       echo "No PR opened."
