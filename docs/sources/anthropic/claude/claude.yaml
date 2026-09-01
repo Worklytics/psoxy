@@ -182,6 +182,7 @@ endpoints:
       - "updated_at.lte"
       - "updated_at.lt"
       - "before_id"
+      - "order_by"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -530,6 +531,7 @@ endpoints:
       - "created_at.lt"
       - "limit"
       - "page"
+      - "updated_at.gte"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -910,7 +912,9 @@ endpoints:
         session:
           $ref: "#/definitions/Session"
   - pathTemplate: "/v1/compliance/organizations"
-    allowedQueryParams: []
+    allowedQueryParams:
+      - "limit"
+      - "page"
     responseSchema:
       type: "object"
       properties:
