@@ -71,6 +71,35 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/DriveItem"
+  # OData function-call continuation shape for /root/delta, eg "/root/delta(token=abc123)"
+  - pathTemplate: "/v1.0/drives/{driveId}/root/{deltaExpression}"
+    allowedQueryParams:
+      - "token"
+      - "$select"
+      - "$expand"
+      - "$top"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..user.email"
+        encoding: "URL_SAFE_TOKEN"
+    pathParameterSchemas:
+      deltaExpression:
+        pattern: "^delta\\(token=[^)]+\\)$"
+    responseSchema:
+      type: "object"
+      properties:
+        '@microsoft.graph.hasMoreData':
+          type: "boolean"
+        '@odata.deltaLink':
+          type: "string"
+        '@odata.nextLink':
+          type: "string"
+        value:
+          type: "array"
+          items:
+            $ref: "#/definitions/DriveItem"
   - pathTemplate: "/v1.0/groups"
     allowedQueryParams:
       - "$top"
@@ -176,6 +205,10 @@ endpoints:
           - "$..user.id"
           - "$..user.email"
         encoding: "URL_SAFE_TOKEN"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
     pathParameterSchemas:
       userId:
         anyOf:
