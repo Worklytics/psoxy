@@ -245,7 +245,6 @@ output "artifacts_bucket_id" {
 # output "external_api_alb" {
 #   description = "**beta** External Application Load Balancer (ALB) details from gcp-host (host, ip_address, todo_dns_setup, self_signed_ca_cert)."
 #   value       = module.psoxy.external_api_alb
-#   sensitive   = true
 # }
 
 output "todos_1" {

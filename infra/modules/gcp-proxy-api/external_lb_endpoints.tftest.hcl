@@ -50,3 +50,17 @@ run "alb_domain_used_in_todos_and_outputs" {
     condition     = strcontains(output.todo, "https://proxy.example.com/dev-test-instance") && !strcontains(output.todo, ".run.app")
   }
 }
+
+run "test_script_output_does_not_require_local_file" {
+  command = plan
+
+  variables {
+    external_lb_base_url = "https://proxy.example.com"
+    todos_as_local_files = true
+  }
+
+  assert {
+    error_message = "test_script must be the filename local (not local_file.filename) so content replace cannot delete the written file"
+    condition     = output.test_script == output.test_script_filename && output.test_script == "test-test-instance.sh"
+  }
+}
