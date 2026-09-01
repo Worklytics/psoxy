@@ -14,6 +14,7 @@ Within those, the `google-workspace.tf` and `google-workspace-variables.tf` file
 - [calendar](calendar/README.md) (Google Calendar&trade;)
 - [directory](directory/README.md) (Google Workspace&trade; Directory)
 - [gdrive](gdrive/README.md) (Google Drive&trade;)
+- [gdrive-log](gdrive-log/README.md) (Google Drive&trade; Audit Log)
 - [gemini-in-workspace-apps](gemini-in-workspace-apps/README.md)
 - [gemini-usage-bulk](gemini-usage-bulk/README.md)
 - [gmail](gmail/README.md) (Gmail&trade;)
@@ -30,6 +31,7 @@ Each connector page includes the full comma-separated OAuth scope string to past
 | [google-chat](google-chat/README.md) | `google-chat` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
 | [directory](directory/README.md) | `gdirectory` | `admin.googleapis.com` | `admin.directory.user.readonly` `admin.directory.domain.readonly` `admin.directory.group.readonly` `admin.directory.orgunit.readonly` |
 | [gdrive](gdrive/README.md) | `gdrive` | `drive.googleapis.com` | `drive.metadata.readonly` |
+| [gdrive-log](gdrive-log/README.md) | `gdrive-log` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
 | [gmail](gmail/README.md) | `gmail` | `gmail.googleapis.com` | `gmail.metadata` |
 | [meet](meet/README.md) | `google-meet` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
 | [gemini-in-workspace-apps](gemini-in-workspace-apps/README.md) | `gemini-in-workspace-apps` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
@@ -86,7 +88,7 @@ Assign the account a sufficiently privileged role. At minimum, the role must gra
 | **Groups** → Read | Yes | Directory group membership |
 | **Organizational Units** → Read | Optional | Org-unit segmentation |
 | **Domain Management** | Optional | List of internal domains |
-| **Reports** | Only if using [Google Chat](google-chat/README.md), [Google Meet](meet/README.md), or other audit-log connectors | Audit / usage reports |
+| **Reports** | Only if using [Google Chat](google-chat/README.md), [Google Meet](meet/README.md), [Google Drive Audit Log](gdrive-log/README.md), or other audit-log connectors | Audit / usage reports |
 
 All of the above are found under **Admin settings privileges** in the Custom Role editor. Google reorganized administrator privileges in 2025; expand each category and enable only the **Read** sub-action where available. See Google's [privilege definitions](https://knowledge.workspace.google.com/admin/users/administrator-privilege-definitions) for the full list.
 

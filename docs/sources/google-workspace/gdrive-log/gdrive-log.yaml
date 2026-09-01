@@ -1,0 +1,16 @@
+---
+endpoints:
+  - pathTemplate: "/admin/reports/v1/activity/users/all/applications/drive"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+          - "$.items[*].events[*].parameters[?(@.name in ['owner','target_user','new_owner','delegating_principal'])].value"
+        encoding: "URL_SAFE_TOKEN"
+      - !<hashIp>
+        jsonPaths:
+          - "$.items[*].ipAddress"
+          - "$.items[*].events[*].parameters[?(@.name == 'ip_address')].value"
+      - !<redact>
+        jsonPaths:
+          - "$.items[*].events[*].parameters[?(!(@.name =~ /^owner|target_user|new_owner|delegating_principal|actor_is_collaborator_account|billable|primary_event|doc_id|doc_type|is_encrypted|originating_app_id|owner_is_shared_drive|owner_shared_drive_id|shared_drive_id|visibility|visibility_change|old_visibility|added_role|removed_role|requested_role|destination_folder_id|source_folder_id|copy_type|new_owner_is_shared_drive|new_owner_shared_drive_id|target_domain|membership_change_type|ip_address$/i))]"

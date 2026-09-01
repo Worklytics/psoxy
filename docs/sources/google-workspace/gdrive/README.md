@@ -7,6 +7,8 @@
 Please review the [Google Workspace&trade; README](../README.md) for general information applicable to
 all Google Workspace connectors.
 
+This connector uses the Drive files API. For Drive events from the Workspace audit log, see [`gdrive-log`](../gdrive-log/README.md).
+
 ## Required OAuth Scopes
 
 - `drive.metadata.readonly`
