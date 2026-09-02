@@ -8,6 +8,7 @@ endpoints:
       - "organization_ids[]"
       - "actor_ids[]"
       - "activity_types[]"
+      - "exclude_activity_types[]"
       - "created_at.gte"
       - "created_at.gt"
       - "created_at.lte"

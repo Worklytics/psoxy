@@ -31,6 +31,8 @@ public class ClaudeTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.anthropic.com/v1/compliance/activities?before_id=act_456&limit=50", "activities-response.json"),
             InvocationExample.of("https://api.anthropic.com/v1/compliance/activities?organization_ids[]=org_1&actor_ids[]=user_1&created_at.gte=2024-01-01T00:00:00Z", "activities-response.json"),
             InvocationExample.of("https://api.anthropic.com/v1/compliance/activities?activity_types[]=claude_chat_created&created_at.gt=2024-01-01T00:00:00Z&created_at.lte=2024-12-31T00:00:00Z", "activities-response.json"),
+            // mutually exclusive with activity_types[]
+            InvocationExample.of("https://api.anthropic.com/v1/compliance/activities?exclude_activity_types[]=claude_user_role_changed&limit=50", "activities-response.json"),
             InvocationExample.of("https://api.anthropic.com/v1/compliance/activities?created_at.gte=2024-01-01T00:00:00Z&created_at.lt=2024-12-31T00:00:00Z", "activities-response.json"),
 
             // Apps Chats endpoint
@@ -112,6 +114,16 @@ public class ClaudeTests extends JavaRulesTestBaseCase {
     // getExamples() above only exercises response-body sanitization for these params; these
     // assert the query-param allowlist itself actually gates the request (RESTApiSanitizerImpl,
     // via allowedQueryParams on each endpoint in claude.yaml).
+
+    @Test
+    void activities_excludeActivityTypesQueryParam_allowed() {
+        assertUrlAllowed("https://api.anthropic.com/v1/compliance/activities?exclude_activity_types[]=claude_user_role_changed");
+    }
+
+    @Test
+    void activities_unrecognizedQueryParam_blocked() {
+        assertUrlBlocked("https://api.anthropic.com/v1/compliance/activities?not_a_real_param=1");
+    }
 
     @Test
     void chats_orderByQueryParam_allowed() {
