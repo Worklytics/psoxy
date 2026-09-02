@@ -10,7 +10,7 @@
  *
  * Example (same flags as generated test-msft-onedrive.sh):
  *   node find-msft-onedrive-example-values.js \
- *     -u https://35.190.95.41/psoxy-dev-erik-msft-onedrive \
+ *     -u https://203.0.113.10/psoxy-example-msft-onedrive \
  *     -f gcp --allow-insecure-tls
  */
 import { Command, Option } from 'commander';

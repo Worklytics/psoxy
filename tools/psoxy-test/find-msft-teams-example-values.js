@@ -17,7 +17,7 @@
  *
  * Example (same flags as generated test-msft-teams.sh):
  *   node find-msft-teams-example-values.js \
- *     -u https://35.190.95.41/psoxy-dev-erik-msft-teams \
+ *     -u https://203.0.113.10/psoxy-example-msft-teams \
  *     -f gcp --allow-insecure-tls
  */
 import { Command, Option } from 'commander';
