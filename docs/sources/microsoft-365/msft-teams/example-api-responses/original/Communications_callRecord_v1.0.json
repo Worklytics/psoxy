@@ -13,7 +13,8 @@
     "user": {
       "id": "821809f5-0000-0000-0000-3b5136c0e777",
       "displayName": "Abbie Wilkins",
-      "tenantId": "dc368399-474c-4d40-900c-6265431fd81f"
+      "tenantId": "dc368399-474c-4d40-900c-6265431fd81f",
+      "userPrincipalName": "AbbieW@contoso.com"
     }
   },
   "participants": [
@@ -21,14 +22,51 @@
       "user": {
         "id": "821809f5-0000-0000-0000-3b5136c0e777",
         "displayName": "Abbie Wilkins",
-        "tenantId": "dc368399-474c-4d40-900c-6265431fd81f"
+        "tenantId": "dc368399-474c-4d40-900c-6265431fd81f",
+        "userPrincipalName": "AbbieW@contoso.com"
       }
     },
     {
       "user": {
         "id": "f69e2c00-0000-0000-0000-185e5f5f5d8a",
         "displayName": "Owen Franklin",
-        "tenantId": "dc368399-474c-4d40-900c-6265431fd81f"
+        "tenantId": "dc368399-474c-4d40-900c-6265431fd81f",
+        "userPrincipalName": "OwenF@contoso.com"
+      }
+    }
+  ],
+  "organizer_v2": {
+    "id": "821809f5-0000-0000-0000-3b5136c0e777",
+    "identity": {
+      "user": {
+        "id": "821809f5-0000-0000-0000-3b5136c0e777",
+        "displayName": "Abbie Wilkins",
+        "tenantId": "dc368399-474c-4d40-900c-6265431fd81f",
+        "userPrincipalName": "AbbieW@contoso.com"
+      }
+    }
+  },
+  "participants_v2": [
+    {
+      "id": "821809f5-0000-0000-0000-3b5136c0e777",
+      "identity": {
+        "user": {
+          "id": "821809f5-0000-0000-0000-3b5136c0e777",
+          "displayName": "Abbie Wilkins",
+          "tenantId": "dc368399-474c-4d40-900c-6265431fd81f",
+          "userPrincipalName": "AbbieW@contoso.com"
+        }
+      }
+    },
+    {
+      "id": "f69e2c00-0000-0000-0000-185e5f5f5d8a",
+      "identity": {
+        "user": {
+          "id": "f69e2c00-0000-0000-0000-185e5f5f5d8a",
+          "displayName": "Owen Franklin",
+          "tenantId": "dc368399-474c-4d40-900c-6265431fd81f",
+          "userPrincipalName": "OwenF@contoso.com"
+        }
       }
     }
   ],

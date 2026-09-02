@@ -149,6 +149,10 @@ endpoints:
         jsonPaths:
           - "$..emailAddress"
         encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.userPrincipalName"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..user.displayName"

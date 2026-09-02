@@ -484,7 +484,8 @@ output "test_script_filename" {
 }
 
 output "test_script" {
-  value = try(local_file.test_script[0].filename, null)
+  # Do not interpolate local_file.test_script (content replace then deletes the file).
+  value = var.todos_as_local_files ? local.test_script_filename : null
 }
 
 output "todo" {

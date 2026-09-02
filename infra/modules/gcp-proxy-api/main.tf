@@ -471,6 +471,18 @@ locals {
 
   test_script_filename = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   default_header_flags = length(local.example_api_get_requests_for_script) > 0 ? local.example_api_get_requests_for_script[0].header_flags : ""
+  # Keep content on a local so outputs/other files never interpolate local_file.test_script
+  # (that dependency causes a content replace to delete the file just written).
+  test_script = templatefile("${path.module}/test_script.tftpl", {
+    proxy_endpoint_url        = local.proxy_endpoint_url,
+    function_name             = var.instance_id,
+    impersonation_param       = local.impersonation_param,
+    command_cli_call          = local.command_cli_call,
+    default_header_flags      = local.default_header_flags,
+    example_api_get_requests  = local.example_api_get_requests_for_script,
+    example_api_post_requests = local.example_api_post_requests_for_script,
+    enable_async_processing   = var.enable_async_processing
+  })
 
   # Generate test calls from all example requests
   command_test_calls = [for request in local.all_example_api_requests :
@@ -549,16 +561,7 @@ resource "local_file" "test_script" {
 
   filename        = local.test_script_filename
   file_permission = "755"
-  content = templatefile("${path.module}/test_script.tftpl", {
-    proxy_endpoint_url        = local.proxy_endpoint_url,
-    function_name             = var.instance_id,
-    impersonation_param       = local.impersonation_param,
-    command_cli_call          = local.command_cli_call,
-    default_header_flags      = local.default_header_flags,
-    example_api_get_requests  = local.example_api_get_requests_for_script,
-    example_api_post_requests = local.example_api_post_requests_for_script,
-    enable_async_processing   = var.enable_async_processing
-  })
+  content         = local.test_script
 }
 
 resource "local_file" "review" {
@@ -606,7 +609,12 @@ output "test_script_filename" {
 }
 
 output "test_script" {
-  value = try(local_file.test_script[0].filename, null)
+  # Do not interpolate local_file.test_script (content replace then deletes the file).
+  value = var.todos_as_local_files ? local.test_script_filename : null
+}
+
+output "test_script_content" {
+  value = local.test_script
 }
 
 output "async_output_bucket_id" {

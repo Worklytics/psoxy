@@ -85,6 +85,7 @@ import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
 import co.worklytics.psoxy.utils.GzipedContentHttpRequestInitializer;
+import co.worklytics.psoxy.utils.LogSanitizationUtils;
 import co.worklytics.psoxy.utils.URLUtils;
 import dagger.Lazy;
 import lombok.AllArgsConstructor;
@@ -633,12 +634,17 @@ public class ApiDataRequestHandler {
 
                 }
             } else {
-                // write error, which shouldn't contain PII, directly
-                log.log(Level.WARNING, "Source API Error " + original.getContentAsString());
+                // source API error bodies aren't validated against a schema, so we can't rely on
+                // RESTApiSanitizer (schema-driven) to strip PII from them; instead, redact
+                // patterns commonly used as PII (emails, GUIDs used as user ids by some source
+                // APIs, eg MSFT Graph) on a best-effort basis before logging or returning it
+                String redactedError =
+                        LogSanitizationUtils.redactPotentialPii(original.getContentAsString());
+                log.log(Level.WARNING, "Source API Error " + redactedError);
 
                 builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                         ErrorCauses.API_ERROR.name());
-                proxyResponseContent = original.getContentAsString();
+                proxyResponseContent = redactedError;
 
                 // q: in async case, perhaps we should write the error to the async output, too, for
                 // clarity??? could do it with metadata indicating the error to the caller, so it
