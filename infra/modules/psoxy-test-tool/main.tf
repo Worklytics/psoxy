@@ -3,9 +3,14 @@ locals {
   test_tool_directory = "${var.path_to_tools}/psoxy-test"
 }
 
-# installs test tool to your machine
-# (no affect if no NPM, or if test tool not at expected location)
+# installs test tool into this checkout (tools/psoxy-test/node_modules)
+# (no effect if no NPM, or if test tool not at expected location)
 # conditional, as we don't want to depend on test tool
+#
+# local-exec is recorded in Terraform state. With a remote backend shared across
+# git worktrees, a successful install on another checkout will skip this resource
+# even when this worktree has no node_modules. examples-dev ./apply also runs
+# tools/install-test-tool.sh against the current checkout to cover that.
 resource "null_resource" "install_test_tool" {
   count = fileexists("${var.path_to_tools}/install-test-tool.sh") ? 1 : 0
 
