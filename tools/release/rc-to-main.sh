@@ -1,8 +1,10 @@
 #!/bin/bash
 
 # script to create PR to merge rc- branch to main
-
-# Usage ./tools/release/rc-to-main.sh <release>
+#
+# Usage ./tools/release/rc-to-main.sh <release> [rc-branch]
+# rc-branch defaults to the current branch when it is named rc-vX.Y.Z, even if
+# that version does not match <release> (e.g. rc-v0.4.16 while releasing v0.5.0).
 
 COLORSCHEME_SH="$(dirname "$0")/../set-term-colorscheme.sh"
 if [ -f "$COLORSCHEME_SH" ]; then
@@ -11,31 +13,33 @@ else
     ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
 fi
 
+RC_BRANCH_SH="$(dirname "$0")/lib/rc-branch.sh"
+# shellcheck source=lib/rc-branch.sh
+source "$RC_BRANCH_SH"
+
 RELEASE=$1
 
 if [ -z "$RELEASE" ]; then
   printf "${ERR}Release version not specified. Exiting.${NC}\n"
-  printf "Usage: ${INFO}./tools/release/rc-to-main.sh <release>${NC}\n"
+  printf "Usage: ${INFO}./tools/release/rc-to-main.sh <release> [rc-branch]${NC}\n"
   exit 1;
 fi
 
 # Get the current git branch
 current_branch=$(git symbolic-ref --short HEAD)
 
-# Expected branch
-expected_branch="rc-$RELEASE"
+RC_BRANCH="$(resolve_rc_branch "$RELEASE" "${2:-}")"
+warn_if_rc_release_mismatch "$RC_BRANCH" "$RELEASE"
 
-# Check if the current branch is the expected branch
-if [ "$current_branch" != "$expected_branch" ]; then
-  # If not, print an error message and exit with a non-zero status
-  printf "${ERR}Error: Current git branch $current_branch is not the expected release candidate: $expected_branch.${NC}"
+if [ "$current_branch" != "$RC_BRANCH" ]; then
+  printf "${ERR}Error: Current git branch $current_branch is not the expected release candidate: $RC_BRANCH.${NC}\n"
   exit 1
 fi
 
-printf "Ensuring ${INFO}${expected_branch}${NC} up to date with all changes from origin ...\n"
+printf "Ensuring ${INFO}${RC_BRANCH}${NC} up to date with all changes from origin ...\n"
 git fetch origin
-if [[ $(git log "${expected_branch}..origin/${expected_branch}" --oneline) ]]; then
-    printf "${ERR}Error: ${expected_branch} and origin/${expected_branch} are not in sync!${NC}\n"
+if [[ $(git log "${RC_BRANCH}..origin/${RC_BRANCH}" --oneline) ]]; then
+    printf "${ERR}Error: ${RC_BRANCH} and origin/${RC_BRANCH} are not in sync!${NC}\n"
     exit 1
 fi
 

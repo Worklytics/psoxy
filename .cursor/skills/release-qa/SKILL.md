@@ -9,17 +9,18 @@ description: |
 
 # Release QA
 
-End-to-end release QA for the Psoxy repo on an `rc-vX.Y.Z` branch that has been prepared for release (`./tools/release/prep.sh rc-vX.Y.Z vX.Y.Z`).
+End-to-end release QA for the Psoxy repo on an `rc-vX.Y.Z` branch that has been prepared for release (`./tools/release/prep.sh rc-vX.Y.Z vX.Y.Z`). The RC branch name may differ from the release tag.
 
 ## Prerequisites
 
 - On branch `rc-vX.Y.Z` with release refs already updated to `vX.Y.Z`
+  (the git branch version may differ from the tag; pass `--rc-branch` if needed)
 - Authenticated: `aws`, `gcloud` (+ ADC), and `az` (if `msft_tenant_id` in tfvars)
 - `gh` CLI authenticated
 - `terraform` available in PATH
 - Repo root as working directory unless noted
 
-Derive `RELEASE` from the branch (`rc-v0.6.6` → `v0.6.6`) or accept it from the user.
+Derive `RELEASE` from the branch (`rc-v0.6.6` → `v0.6.6`) or accept it from the user. If the user specifies a tag that does not match the RC branch version, keep the current `rc-v*` branch and pass it through as `--rc-branch`.
 
 ## Workflow checklist
 

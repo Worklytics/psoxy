@@ -83,7 +83,7 @@ locals {
       source_auth_strategy : "gcp_service_account_key"
       target_host : "www.googleapis.com"
       oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/drive.metadata.readonly"
+        "https://www.googleapis.com/auth/drive.readonly"
       ],
       environment_variables : {}
       enable_side_output : false
