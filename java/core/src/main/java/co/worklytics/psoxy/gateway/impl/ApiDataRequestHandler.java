@@ -426,8 +426,8 @@ public class ApiDataRequestHandler {
 
             log.log(Level.WARNING, e.getMessage(), e);
 
-            if (isSourceAuthTokenFailure(e)) {
-                // Google SA key / DWD, MSFT WIF, etc. — not a malformed inbound request
+            if (sourceAuthStrategy.isSourceAuthFailure(e)) {
+                // token exchange / credential refresh failed — not a malformed inbound request
                 log.log(Level.WARNING,
                         "Confirm OAUTH_SCOPES environment variable matches scopes granted in data source");
                 builder.statusCode(HttpStatus.SC_UNAUTHORIZED);
@@ -1175,29 +1175,6 @@ public class ApiDataRequestHandler {
 
     private boolean isSocketTimeoutException(Throwable throwable) {
         return findSocketTimeoutException(throwable) != null;
-    }
-
-    /**
-     * True when outbound source-auth failed while obtaining an access token (e.g. Google service
-     * account JWT exchange 401), as opposed to a malformed inbound request.
-     */
-    @VisibleForTesting
-    static boolean isSourceAuthTokenFailure(IOException e) {
-        Throwable cause = e;
-        while (cause != null) {
-            // GoogleAuthException is package-private in google-auth-library
-            if ("com.google.auth.oauth2.GoogleAuthException".equals(cause.getClass().getName())) {
-                return true;
-            }
-            cause = cause.getCause();
-        }
-        String message = e.getMessage();
-        if (message == null) {
-            return false;
-        }
-        String lower = message.toLowerCase(Locale.ROOT);
-        return lower.contains("access token")
-                || lower.contains("oauth2.googleapis.com/token");
     }
 
     @VisibleForTesting

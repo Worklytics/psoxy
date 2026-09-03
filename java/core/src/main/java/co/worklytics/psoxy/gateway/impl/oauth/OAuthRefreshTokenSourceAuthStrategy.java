@@ -19,6 +19,7 @@ import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpResponseException;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
@@ -47,6 +48,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -229,6 +231,29 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
            .setRefreshHandler(getRefreshHandler())
            .setAccessToken(accessToken)
            .build();
+    }
+
+    @Override
+    public boolean isSourceAuthFailure(IOException e) {
+        Throwable cause = e;
+        while (cause != null) {
+            if (cause instanceof HttpResponseException) {
+                // token-endpoint exchange (refresh/client-credentials/WIF) failed
+                return true;
+            }
+            String message = cause.getMessage();
+            if (message != null) {
+                String lower = message.toLowerCase(Locale.ROOT);
+                if (lower.contains("invalid_grant")
+                        || lower.contains("invalid_client")
+                        || lower.contains("unauthorized_client")
+                        || lower.contains("invalid_token")) {
+                    return true;
+                }
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 
     boolean useSharedToken() {

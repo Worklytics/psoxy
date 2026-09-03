@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
@@ -73,10 +74,36 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
         .build(CacheLoader.from(this::buildImpersonatedCredentials));
 
 
+    /**
+     * google-auth-library type thrown on JWT/token-exchange failure; package-private, so we
+     * match by class name rather than {@code instanceof}.
+     */
+    private static final String GOOGLE_AUTH_EXCEPTION_CLASS = "com.google.auth.oauth2.GoogleAuthException";
+
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonate) {
         return userToImpersonate.map(credentialsCache::getUnchecked)
             .orElseGet(this::getBaseCredentials);
+    }
+
+    @Override
+    public boolean isSourceAuthFailure(IOException e) {
+        Throwable cause = e;
+        while (cause != null) {
+            if (GOOGLE_AUTH_EXCEPTION_CLASS.equals(cause.getClass().getName())) {
+                return true;
+            }
+            String message = cause.getMessage();
+            if (message != null) {
+                String lower = message.toLowerCase(Locale.ROOT);
+                if (lower.contains("access token")
+                    || lower.contains("oauth2.googleapis.com/token")) {
+                    return true;
+                }
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 
     @Override
