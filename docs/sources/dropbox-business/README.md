@@ -11,7 +11,7 @@ The Dropbox Business connector through Psoxy requires a Dropbox Application crea
 - `events.read`: event listing
 - `groups.read`: group listing
 
-All allow-listed Dropbox Business endpoints are **POST** (not GET). Example test calls use `POST /2/team/members/list_v2`, `POST /2/team/groups/members/list` (not `/2/team/groups/list`), `POST /2/team_log/get_events`, `POST /2/files/list_folder`, and `POST /2/files/list_revisions`. Pagination continuations (`.../continue`) share the same rules as the parent endpoints.
+All allow-listed Dropbox Business endpoints are **POST** (not GET). Example test calls use `POST /2/team/members/list_v2`, `POST /2/team/groups/members/list` (not `/2/team/groups/list`), `POST /2/team_log/get_events`, `POST /2/files/list_folder`, and `POST /2/files/list_revisions`. `{FILE_PATH}` in the `list_revisions` example must be a **file** path from `POST /2/files/list_folder` (`path_display` of an entry with `".tag": "file"`); `/` is the root folder and will fail. Pagination continuations (`.../continue`) share the same rules as the parent endpoints.
 
 1. Go to [https://www.dropbox.com/apps](https://www.dropbox.com/apps) and Build an App.
 2. Then go to [https://www.dropbox.com/developers](https://www.dropbox.com/developers) to enter the `App Console` to configure your app.

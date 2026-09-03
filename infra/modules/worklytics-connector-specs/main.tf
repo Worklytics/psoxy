@@ -1231,6 +1231,7 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       # Dropbox Business endpoints are POST. `/2/team/groups/list` is NOT allowed; use `/2/team/groups/members/list`.
+      # `{FILE_PATH}`: a file path from POST /2/files/list_folder (`.entries[].path_display` where `.entries[]..tag` is `file`). Required by list_revisions; `/` is a folder and will fail.
       example_api_requests : [
         {
           method       = "POST"
@@ -1263,7 +1264,7 @@ EOT
           path         = "/2/files/list_revisions"
           content_type = "application/json"
           body = jsonencode({
-            path = "/"
+            path = "{FILE_PATH}"
           })
         },
       ]
@@ -1548,7 +1549,7 @@ EOT
       example_api_calls_user_to_impersonate : null
       # `{GROUP_ID}`: a GitLab group id from GET /api/v4/groups (connector_settings.gitlab_example_group_id).
       # `{PROJECT_ID}`: a GitLab project id from GET /api/v4/projects (connector_settings.gitlab_example_project_id).
-      # `{NAMESPACE_ID}`: a namespace id from GET /api/v4/namespaces/{NAMESPACE_ID} (often same as group id).
+      # `{NAMESPACE_ID}`: same as `{GROUP_ID}` for group namespaces (`GET /api/v4/groups` `.id`, or `GET /api/v4/projects` `.namespace.id`). `/api/v4/namespaces` list is not allow-listed.
       # `{ISSUE_ID}`: a global issue id from GET /api/v4/projects/{PROJECT_ID}/issues (`.id`, not `.iid`).
       # `{MERGE_REQUEST_ID}`: a global MR id from GET /api/v4/projects/{PROJECT_ID}/merge_requests (`.id`, not `.iid`).
       # `{ISSUE_IID}`/`{MERGE_REQUEST_IID}`: project-scoped iids from those same list responses.

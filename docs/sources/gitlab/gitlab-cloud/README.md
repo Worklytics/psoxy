@@ -33,7 +33,7 @@ The following scope is required:
 Example API call path parameters (uppercase placeholders in generated test calls; the rules use `{id}` for several of these segments):
 
 - `{GROUP_ID}`: a GitLab group id from `GET /api/v4/groups` (`connector_settings.gitlab_example_group_id`).
-- `{NAMESPACE_ID}`: a namespace id from `GET /api/v4/namespaces/{NAMESPACE_ID}` (often the same as `{GROUP_ID}`).
+- `{NAMESPACE_ID}`: use `{GROUP_ID}` for group namespaces (from `GET /api/v4/groups` `.id`, or `GET /api/v4/projects` `.namespace.id`). `/api/v4/namespaces` list is not allow-listed; generated examples reuse `gitlab_example_group_id`.
 - `{PROJECT_ID}`: a GitLab project id from `GET /api/v4/projects` (`connector_settings.gitlab_example_project_id`).
 - `{ISSUE_ID}` / `{MERGE_REQUEST_ID}`: **global** issue/MR ids from project list responses (`.id`, not `.iid`).
 - `{ISSUE_IID}` / `{MERGE_REQUEST_IID}`: project-scoped iids from those same list responses.
