@@ -1,4 +1,5 @@
 {
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/groups/6257b47d-9e87-418b-9ac2-031f09397de7/drives?$top=1&$skiptoken=aWQ9OUZCRjU2OUEtN0UwOC00RDFELTlFREMtMkY3ODg3MTUzNjY3",
   "value":[
     {
       "id":"b!-RIj2DuyvEyV1T4NlOaMHk8XkS_I8MdFlUCq1BlcjgmhRfAj3-Z8RY2VpuvV_tpd",

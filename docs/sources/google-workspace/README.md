@@ -30,7 +30,7 @@ Each connector page includes the full comma-separated OAuth scope string to past
 | [calendar](calendar/README.md) | `gcal` | `calendar-json.googleapis.com` | `calendar.readonly` |
 | [google-chat](google-chat/README.md) | `google-chat` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
 | [directory](directory/README.md) | `gdirectory` | `admin.googleapis.com` | `admin.directory.user.readonly` `admin.directory.domain.readonly` `admin.directory.group.readonly` `admin.directory.orgunit.readonly` |
-| [gdrive](gdrive/README.md) | `gdrive` | `drive.googleapis.com` | `drive.metadata.readonly` |
+| [gdrive](gdrive/README.md) | `gdrive` | `drive.googleapis.com` | `drive.readonly` (v0.7.0+; see [gdrive README](gdrive/README.md#scope-change-in-v070-action-required)) |
 | [gdrive-log](gdrive-log/README.md) | `gdrive-log` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
 | [gmail](gmail/README.md) | `gmail` | `gmail.googleapis.com` | `gmail.metadata` |
 | [meet](meet/README.md) | `google-meet` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
@@ -46,8 +46,10 @@ When granting Domain-wide Delegation in the Google Workspace Admin console, past
 If you share a **single OAuth client** across multiple connectors (see [Provisioning API clients without Terraform](#provisioning-api-clients-without-terraform)), enable the union of all required GCP APIs and grant the superset of OAuth scopes:
 
 ```
-https://www.googleapis.com/auth/calendar.readonly,https://www.googleapis.com/auth/admin.directory.user.readonly,https://www.googleapis.com/auth/admin.directory.domain.readonly,https://www.googleapis.com/auth/admin.directory.group.readonly,https://www.googleapis.com/auth/admin.directory.orgunit.readonly,https://www.googleapis.com/auth/drive.metadata.readonly,https://www.googleapis.com/auth/gmail.metadata,https://www.googleapis.com/auth/admin.reports.audit.readonly
+https://www.googleapis.com/auth/calendar.readonly,https://www.googleapis.com/auth/admin.directory.user.readonly,https://www.googleapis.com/auth/admin.directory.domain.readonly,https://www.googleapis.com/auth/admin.directory.group.readonly,https://www.googleapis.com/auth/admin.directory.orgunit.readonly,https://www.googleapis.com/auth/drive.readonly,https://www.googleapis.com/auth/gmail.metadata,https://www.googleapis.com/auth/admin.reports.audit.readonly
 ```
+
+As of v0.7.0 the gdrive connector requires `drive.readonly` instead of `drive.metadata.readonly`. If you already granted this shared string, update the Domain-wide Delegation grant (see [gdrive README](gdrive/README.md#scope-change-in-v070-action-required)).
 
 Required GCP APIs for the single shared OAuth client:
 

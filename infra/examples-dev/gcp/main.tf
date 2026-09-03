@@ -34,7 +34,7 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.6.10"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.7.1"
 
   base_dir                                 = var.psoxy_base_dir
   enabled_connectors                       = var.enabled_connectors
@@ -108,7 +108,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=rc-v0.6.10"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=rc-v0.7.1"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
@@ -176,7 +176,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=rc-v0.6.10"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=rc-v0.7.1"
 
   host_platform_id     = local.host_platform_id
   proxy_instance_id    = each.key
@@ -245,7 +245,6 @@ output "artifacts_bucket_id" {
 # output "external_api_alb" {
 #   description = "**beta** External Application Load Balancer (ALB) details from gcp-host (host, ip_address, todo_dns_setup, self_signed_ca_cert)."
 #   value       = module.psoxy.external_api_alb
-#   sensitive   = true
 # }
 
 output "todos_1" {
