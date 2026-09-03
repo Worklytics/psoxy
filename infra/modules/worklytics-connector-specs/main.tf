@@ -1231,7 +1231,7 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       # Dropbox Business endpoints are POST. `/2/team/groups/list` is NOT allowed; use `/2/team/groups/members/list`.
-      # `{FILE_PATH}`: a file path from POST /2/files/list_folder (`.entries[].path_display` where `.entries[]..tag` is `file`). Required by list_revisions; `/` is a folder and will fail.
+      # `{FILE_PATH}`: a file path from POST /2/files/list_folder (`path_display` of an entry with `".tag": "file"`). Required by list_revisions; `/` is a folder and will fail.
       example_api_requests : [
         {
           method       = "POST"
