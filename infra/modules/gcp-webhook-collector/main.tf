@@ -474,6 +474,17 @@ locals {
   signing_key_id       = var.provision_auth_key == null ? null : google_kms_crypto_key.webhook_auth_key[0].id
   command_test_logs    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions2_function.function.project}\" -f \"${google_cloudfunctions2_function.function.name}\""
   test_script_filename = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
+  test_script = templatefile("${path.module}/test_script.tftpl", {
+    collector_endpoint_url = local.proxy_endpoint_url,
+    function_name          = var.instance_id,
+    command_cli_call       = local.command_cli_call,
+    signing_key_id         = local.signing_key_id,
+    example_payload        = coalesce(var.example_payload, "{\"test\": \"data\"}")
+    example_identity       = var.example_identity
+    collection_path        = "/"
+    scheduler_job_name     = google_cloud_scheduler_job.trigger_batch_processing.id
+    bucket_name            = module.sanitized_webhook_output.bucket_name
+  })
 }
 
 locals {
@@ -537,17 +548,7 @@ resource "local_file" "test_script" {
 
   filename        = local.test_script_filename
   file_permission = "755"
-  content = templatefile("${path.module}/test_script.tftpl", {
-    collector_endpoint_url = local.proxy_endpoint_url,
-    function_name          = var.instance_id,
-    command_cli_call       = local.command_cli_call,
-    signing_key_id         = local.signing_key_id,
-    example_payload        = coalesce(var.example_payload, "{\"test\": \"data\"}")
-    example_identity       = var.example_identity
-    collection_path        = "/"
-    scheduler_job_name     = google_cloud_scheduler_job.trigger_batch_processing.id
-    bucket_name            = module.sanitized_webhook_output.bucket_name
-  })
+  content         = local.test_script
 }
 
 resource "local_file" "test_todo" {
@@ -583,7 +584,8 @@ output "test_script_filename" {
 }
 
 output "test_script" {
-  value = try(local_file.test_script[0].filename, null)
+  # Do not interpolate local_file.test_script (content replace then deletes the file).
+  value = var.todos_as_local_files ? local.test_script_filename : null
 }
 
 output "output_sanitized_bucket_id" {

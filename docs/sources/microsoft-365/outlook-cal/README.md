@@ -39,7 +39,7 @@ See the [Microsoft 365 Authorization](../README.md#authorization) section of the
 
 `{EXAMPLE_MSFT_USER_GUID}` is an Entra user id (GUID) from `GET /v1.0/users`. Application-only auth does not allow `/v1.0/me/...`; use `/v1.0/users/{EXAMPLE_MSFT_USER_GUID}/...`. `{EVENT_ID}` is a calendar event id from `GET /v1.0/users/{EXAMPLE_MSFT_USER_GUID}/events`. `{GROUP_ID}` (on `GET /v1.0/groups/{GROUP_ID}/members`) is a group id from `GET /v1.0/groups`.
 
-See more examples in the `docs/sources/microsoft-365/msft-teams/example-api-responses` folder
+See more examples in the `docs/sources/microsoft-365/outlook-cal/example-api-responses` folder
 of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 ## Examples

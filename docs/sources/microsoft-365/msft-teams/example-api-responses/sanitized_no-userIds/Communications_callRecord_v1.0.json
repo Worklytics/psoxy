@@ -11,20 +11,52 @@
   "organizer":{
     "user":{
       "id":"t~_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU",
-      "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
+      "tenantId":"dc368399-474c-4d40-900c-6265431fd81f",
+      "userPrincipalName":"t~DMenrVJ4oR_ItE9uwpbzQg8a03d451YKiTL-RvgvtFQ@contoso.com"
     }
   },
   "participants":[
     {
       "user":{
         "id":"t~_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU",
-        "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
+        "tenantId":"dc368399-474c-4d40-900c-6265431fd81f",
+        "userPrincipalName":"t~DMenrVJ4oR_ItE9uwpbzQg8a03d451YKiTL-RvgvtFQ@contoso.com"
       }
     },
     {
       "user":{
         "id":"t~ejSHHUaRnhvrRPBjmJAxSudeydUkOaOBffHT-nIS1s0",
-        "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
+        "tenantId":"dc368399-474c-4d40-900c-6265431fd81f",
+        "userPrincipalName":"t~HnUckkG8qqo_r7qLTDg6x5qrpljcQNC2W2Dwtcpqrfg@contoso.com"
+      }
+    }
+  ],
+  "organizer_v2":{
+    "identity":{
+      "user":{
+        "id":"t~_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU",
+        "tenantId":"dc368399-474c-4d40-900c-6265431fd81f",
+        "userPrincipalName":"t~DMenrVJ4oR_ItE9uwpbzQg8a03d451YKiTL-RvgvtFQ@contoso.com"
+      }
+    }
+  },
+  "participants_v2":[
+    {
+      "identity":{
+        "user":{
+          "id":"t~_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU",
+          "tenantId":"dc368399-474c-4d40-900c-6265431fd81f",
+          "userPrincipalName":"t~DMenrVJ4oR_ItE9uwpbzQg8a03d451YKiTL-RvgvtFQ@contoso.com"
+        }
+      }
+    },
+    {
+      "identity":{
+        "user":{
+          "id":"t~ejSHHUaRnhvrRPBjmJAxSudeydUkOaOBffHT-nIS1s0",
+          "tenantId":"dc368399-474c-4d40-900c-6265431fd81f",
+          "userPrincipalName":"t~HnUckkG8qqo_r7qLTDg6x5qrpljcQNC2W2Dwtcpqrfg@contoso.com"
+        }
       }
     }
   ],
