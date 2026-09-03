@@ -12,7 +12,7 @@ Path / query parameters:
 
 `discovery.conversations.info` allows only `channel`, `team`, and `offset` — do not pass `limit`.
 
-For AWS, change the role to assume with one with sufficient permissions to call the proxy (`-r` flag). Example:
+For AWS, use the `-r` flag to assume an IAM role that has permission to call the proxy. Example:
 
 ```shell
 node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/discovery.enterprise.info -r arn:aws:iam::PROJECT_ID:role/ROLE_NAME

@@ -9,7 +9,7 @@ Path parameters:
 - `{USER_ID}`: a Zoom user id from `GET /v2/users` (`.users[].id`).
 - `{MEETING_ID}`: a numeric meeting id from `GET /v2/users/{USER_ID}/meetings`, or a past-meeting instance UUID from `GET /v2/past_meetings/{MEETING_ID}/instances` (required for `/meeting_summary`).
 
-For AWS, change the role to assume with one with sufficient permissions to call the proxy (`-r` flag). Example:
+For AWS, use the `-r` flag to assume an IAM role that has permission to call the proxy. Example:
 
 ```shell
 node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/v2/users -r arn:aws:iam::PROJECT_ID:role/ROLE_NAME

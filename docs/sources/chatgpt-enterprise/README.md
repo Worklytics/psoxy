@@ -17,7 +17,7 @@ Do not select the owner's personal organization.
 
 **Note on Message Authorship:** The specific encoding of `bot` vs `user` messages in the compliance API is currently undocumented by OpenAI. Psoxy rule datasets support the observed `author.type` field and the earlier best-guess `author.role` field for conditional filtering algorithms.
 
-**Note on legacy `conversations` endpoints:** OpenAI has deprecated the synchronous `/conversations` and `/conversations/{CONVERSATION_ID}/messages` compliance API paths in favor of the `/logs` API (see [Example Rules](chatgpt-enterprise.yaml)). Those legacy paths are scheduled to be closed around **June 6, 2026**. Psoxy rules intentionally still allow them so existing deployments can migrate on their own schedule; new integrations should use the `/logs` endpoints only.
+**Note on legacy `conversations` endpoints:** OpenAI deprecated the synchronous `/conversations` and `/conversations/{CONVERSATION_ID}/messages` compliance API paths in favor of the `/logs` API (see [Example Rules](chatgpt-enterprise.yaml)). OpenAI reports those stateful routes were **removed on June 5, 2026**; confirm current status in [OpenAI's Compliance Platform documentation](https://help.openai.com/en/articles/9261474). Psoxy rules still allow the legacy paths so already-deployed proxies do not reject leftover traffic; new integrations should use the `/logs` endpoints only.
 
 ## Instructions to Connect
 

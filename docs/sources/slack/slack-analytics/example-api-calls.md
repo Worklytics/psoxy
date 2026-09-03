@@ -8,7 +8,7 @@ Path / query parameters:
 
 - `{CHANNEL_ID}`: a Slack channel id from `GET /api/admin.analytics.getFile?type=public_channel&metadata_only=true` (or any public channel id your token can read). Required by `admin.analytics.messages.metadata` and `admin.analytics.messages.activity`.
 
-For AWS, change the role to assume with one with sufficient permissions to call the proxy (`-r` flag). Example:
+For AWS, use the `-r` flag to assume an IAM role that has permission to call the proxy. Example:
 
 ```shell
 node tools/psoxy-test/cli-call.js -u [your_psoxy_url]/api/admin.analytics.getFile?type=member&date=2024-01-15 -r arn:aws:iam::PROJECT_ID:role/ROLE_NAME
