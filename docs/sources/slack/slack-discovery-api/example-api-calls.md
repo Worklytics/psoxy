@@ -1,5 +1,7 @@
 # API Call Examples for Slack Discovery
 
+**Connector ID:** `slack-discovery-api`
+
 Example commands (\*) that you can use to validate proxy behavior against the Slack Discovery APIs. Follow the steps and change the values to match your configuration when needed.
 
 Path / query parameters:

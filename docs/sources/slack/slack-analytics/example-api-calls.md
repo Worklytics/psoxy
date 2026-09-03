@@ -1,5 +1,7 @@
 # API Call Examples for Slack Analytics
 
+**Connector ID:** `slack-analytics`
+
 Example commands (\*) that you can use to validate proxy behavior against the Slack Admin Analytics APIs. Follow the steps and change the values to match your configuration when needed.
 
 Path / query parameters:

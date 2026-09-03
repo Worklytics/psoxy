@@ -1,5 +1,7 @@
 # API Call Examples for Zoom
 
+**Connector ID:** `zoom`
+
 Example commands (\*) that you can use to validate proxy behavior against the Zoom APIs. Follow the steps and change the values to match your configuration when needed.
 
 Path parameters:
