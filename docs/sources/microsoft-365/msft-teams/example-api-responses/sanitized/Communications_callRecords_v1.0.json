@@ -21,10 +21,22 @@
         "identity":{
           "user":{
             "id":"821809f5-0000-0000-0000-3b5136c0e777",
-            "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
+            "tenantId":"dc368399-474c-4d40-900c-6265431fd81f",
+            "userPrincipalName":"t~DMenrVJ4oR_ItE9uwpbzQg8a03d451YKiTL-RvgvtFQ@contoso.com"
           }
         }
-      }
+      },
+      "participants_v2":[
+        {
+          "identity":{
+            "user":{
+              "id":"821809f5-0000-0000-0000-3b5136c0e777",
+              "tenantId":"dc368399-474c-4d40-900c-6265431fd81f",
+              "userPrincipalName":"t~DMenrVJ4oR_ItE9uwpbzQg8a03d451YKiTL-RvgvtFQ@contoso.com"
+            }
+          }
+        }
+      ]
     },
     {
       "id":"c3ad8c4b-4a87-4ab1-bef0-284d2f40ed9f",

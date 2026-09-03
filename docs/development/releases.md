@@ -17,16 +17,22 @@ From `main`:
 On `rc-`:
 
 ```shell
-git checkout -b  s220-prep-release-v0.4.16
-
 ./tools/release/prep.sh rc-v0.4.16 v0.4.16
+```
 
+The first argument is the string currently in module refs / `JAVA_SOURCE_CODE_VERSION`; the second is what to substitute. They do not have to match the git branch name. A major bump can keep the existing rc branch:
 
+```shell
+# still on branch rc-v0.4.16:
+./tools/release/prep.sh rc-v0.4.16 v0.5.0
+```
+
+Then:
+
+```shell
 cd tools/psoxy-test
 npm audit fix
 git commit -a -m "update deps in psoxy-test"
-
-
 ```
 
 TODO: review versions of terraform, java, node uses in github actions. Ensure we're explicitly using the latest of each, and that we're ALSO testing explicitly for latest-1 version, even if it's not officially supported still.
@@ -38,10 +44,11 @@ QA aws and gcp dev examples before merging. See [release QA runbook](../../tools
 ./tools/release/run-release-qa.sh vX.Y.Z
 ```
 
-Create PR to merge `rc-` to `main`.
+Create PR to merge `rc-` to `main`. The RC branch name may differ from the release tag; `rc-to-main.sh` uses the current `rc-v*` branch when you are on one:
 
 ```shell
 ./tools/release/rc-to-main.sh v0.4.16
+# or explicitly: ./tools/release/rc-to-main.sh v0.5.0 rc-v0.4.16
 ```
 
 

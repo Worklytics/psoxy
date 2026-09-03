@@ -123,21 +123,26 @@ modified_notes=$(gh release view $RELEASE --json body -q '.body' | "$FORMAT_NOTE
 # Update release notes
 gh release edit $RELEASE -n "$modified_notes"
 
-# check if rc branch exists, and offer to delete if so
-rc_branch="rc-$RELEASE"
-if git rev-parse "$rc_branch" >/dev/null 2>&1; then
-  printf "Delete the ${INFO}rc-${RELEASE}${NC} branch?\n"
-  read -p "(Y/n) " -n 1 -r
-  REPLY=${REPLY:-Y}
-  echo    # Move to a new line
-  case "$REPLY" in
-    [yY][eE][sS]|[yY])
-       git branch -d "rc-$RELEASE"
-      ;;
-    *)
-      printf "Skipped deletion of ${INFO}rc-$RELEASE${NC}\n"
-      ;;
-  esac
+# check if any rc-v* branch exists, and offer to delete (name may not match
+# the release tag, e.g. rc-v0.4.16 after shipping v0.5.0)
+rc_branches=$(git branch --list 'rc-v*' | sed 's/^[* ]*//')
+if [ -z "$rc_branches" ]; then
+  printf "No local rc-v* branches to delete.\n"
+else
+  for rc_branch in $rc_branches; do
+    printf "Delete the ${INFO}${rc_branch}${NC} branch?\n"
+    read -p "(Y/n) " -n 1 -r
+    REPLY=${REPLY:-Y}
+    echo    # Move to a new line
+    case "$REPLY" in
+      [yY][eE][sS]|[yY])
+         git branch -d "$rc_branch"
+        ;;
+      *)
+        printf "Skipped deletion of ${INFO}${rc_branch}${NC}\n"
+        ;;
+    esac
+  done
 fi
 
 printf "Opening release ${INFO}${RELEASE}${NC} in browser; review / update notes and then publish as latest ...\n"

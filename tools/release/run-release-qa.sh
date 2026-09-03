@@ -12,6 +12,8 @@
 #   --create-pr                   Run rc-to-main.sh after tests (interactive)
 #   --post-pr-results             Post summaries to PR (requires --pr-number or PR from --create-pr)
 #   --pr-number <N>               PR to update (for --post-pr-results without --create-pr)
+#   --rc-branch <branch>          RC git branch if it does not match rc-<release>
+#                                 (e.g. rc-v0.4.16 while releasing v0.5.0)
 #
 # Examples:
 #   ./tools/release/run-release-qa.sh v0.6.6
@@ -39,9 +41,10 @@ SKIP_TESTS=false
 CREATE_PR=false
 POST_PR_RESULTS=false
 PR_NUMBER=""
+RC_BRANCH_ARG=""
 
 usage() {
-  sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
   exit 1
 }
 
@@ -59,6 +62,10 @@ while [ $# -gt 0 ]; do
     --post-pr-results) POST_PR_RESULTS=true; shift ;;
     --pr-number)
       PR_NUMBER="${2:?--pr-number requires a value}"
+      shift 2
+      ;;
+    --rc-branch)
+      RC_BRANCH_ARG="${2:?--rc-branch requires a branch name}"
       shift 2
       ;;
     v[0-9]*.[0-9]*.[0-9]*)
@@ -82,7 +89,11 @@ if [[ ! "$RELEASE" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   exit 1
 fi
 
-RC_BRANCH="rc-${RELEASE}"
+RC_BRANCH_SH="${SCRIPT_DIR}/lib/rc-branch.sh"
+# shellcheck source=lib/rc-branch.sh
+source "$RC_BRANCH_SH"
+
+RC_BRANCH="$(resolve_rc_branch "$RELEASE" "$RC_BRANCH_ARG")"
 DATE_STAMP="$(date +%Y%m%d)"
 AWS_TEST_LOG=""
 GCP_TEST_LOG=""
@@ -90,11 +101,12 @@ GCP_TEST_LOG=""
 cd "$ROOT"
 
 printf "${INFO}Release QA for %s${NC}\n" "$RELEASE"
+warn_if_rc_release_mismatch "$RC_BRANCH" "$RELEASE"
 printf "Documentation: tools/release/release-qa.md\n\n"
 
 if [ "$SKIP_VERIFY" = false ]; then
   printf "=== Step 1: Verify release refs ===\n"
-  "${QA_DIR}/verify-release-refs.sh" "$RELEASE"
+  "${QA_DIR}/verify-release-refs.sh" "$RELEASE" "$RC_BRANCH"
   printf "\n"
 fi
 
@@ -146,7 +158,7 @@ if [ "$CREATE_PR" = true ]; then
     printf "${WARN}Checking out %s ...${NC}\n" "$RC_BRANCH"
     git checkout "$RC_BRANCH"
   fi
-  PR_OUTPUT="$("${SCRIPT_DIR}/rc-to-main.sh" "$RELEASE" 2>&1 | tee /dev/stderr)"
+  PR_OUTPUT="$("${SCRIPT_DIR}/rc-to-main.sh" "$RELEASE" "$RC_BRANCH" 2>&1 | tee /dev/stderr)"
   if [ -z "$PR_NUMBER" ]; then
     PR_NUMBER="$(echo "$PR_OUTPUT" | sed -n 's|.*/pull/\([0-9]*\).*|\1|p' | head -1)"
   fi
@@ -178,7 +190,7 @@ printf "  GCP summary:  %s\n" "$GCP_SUMMARY"
 if [ "$CREATE_PR" = false ]; then
   printf "\nNext steps:\n"
   printf "  git checkout %s\n" "$RC_BRANCH"
-  printf "  ./tools/release/rc-to-main.sh %s\n" "$RELEASE"
+  printf "  ./tools/release/rc-to-main.sh %s %s\n" "$RELEASE" "$RC_BRANCH"
   printf "  ./tools/release/qa/update-release-pr-results.sh <PR#> \\\n"
   printf "    %s %s %s %s\n" "$AWS_CHECKLIST" "$GCP_CHECKLIST" "$AWS_SUMMARY" "$GCP_SUMMARY"
 fi

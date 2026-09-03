@@ -698,8 +698,9 @@ locals {
 }
 
 # script to test ALL connectors
-# Use test_script_filename (computed local in each connector module), not test_script — that
-# output interpolates local_file, and a content replace then deletes the file just written.
+# Use test_script_filename (computed local in each connector module). Do not interpolate
+# local_file.test_script via module outputs — gcp-host merges those outputs into api_instances,
+# Worklytics TODOs then depend on the file, and a content replace deletes it just after write.
 resource "local_file" "test_all_script" {
   count = var.todos_as_local_files ? 1 : 0
 

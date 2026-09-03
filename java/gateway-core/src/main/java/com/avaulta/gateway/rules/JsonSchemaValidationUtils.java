@@ -6,41 +6,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.net.WWWFormCodec;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.JsonSchema.StringFormat;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.networknt.schema.JsonMetaSchema;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.ValidationMessage;
-import lombok.RequiredArgsConstructor;
+import com.networknt.schema.Error;
+import com.networknt.schema.InputFormat;
+import com.networknt.schema.Schema;
+import com.networknt.schema.SchemaRegistry;
+import com.networknt.schema.dialect.Dialects;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
+import tools.jackson.databind.json.JsonMapper;
 
 @Log
-@RequiredArgsConstructor
 public class JsonSchemaValidationUtils {
 
-    final ObjectMapper objectMapper;
-    private final static JsonMetaSchema metaSchema = JsonMetaSchema.builder(JsonMetaSchema.getV202012())
-            // .format(PatternFormat.of("pseudonym",
-            // "^p~[a-zA-Z0-9_-]{43,}$",
-            // null))
-            .build();
-    final JsonSchemaFactory jsonSchemaFactory = new JsonSchemaFactory.Builder()
-            .defaultMetaSchemaIri(metaSchema.getIri())
-            .metaSchema(metaSchema)
-            .build();
+    /**
+     * 3.x validates Jackson 3 nodes ({@code tools.jackson}), not our Jackson 2
+     * {@code com.fasterxml.jackson} nodes. Use this mapper for in-memory {@code valueToTree}
+     * conversions so we do not serialize to text and parse again.
+     */
+    private static final JsonMapper JACKSON3 = JsonMapper.builder().build();
 
-    private final LoadingCache<com.avaulta.gateway.rules.JsonSchema, JsonSchema> jsonSchemaCache =
+    final SchemaRegistry schemaRegistry = SchemaRegistry.withDialect(Dialects.getDraft202012());
+
+    private final LoadingCache<com.avaulta.gateway.rules.JsonSchema, Schema> jsonSchemaCache =
             CacheBuilder.newBuilder()
                     .maximumSize(100)
                     .build(CacheLoader.from(this::getJsonSchema));
@@ -48,12 +43,8 @@ public class JsonSchemaValidationUtils {
     @SneakyThrows
     public boolean validateJsonBySchema(String jsonString,
             com.avaulta.gateway.rules.JsonSchema schema) {
-        JsonNode deserialized = objectMapper.readTree(jsonString);
-
-
-
-        JsonSchema jsonSchema = jsonSchemaCache.get(schema);
-        Set<ValidationMessage> validationMessages = jsonSchema.validate(deserialized);
+        Schema jsonSchema = jsonSchemaCache.get(schema);
+        List<Error> validationMessages = jsonSchema.validate(jsonString, InputFormat.JSON);
 
         if (!validationMessages.isEmpty()) {
             log.warning("Validation failed for JSON request body: " + validationMessages);
@@ -104,9 +95,8 @@ public class JsonSchemaValidationUtils {
         // parse requestBody into a map of String to String, assuming it's form-urlencoded
         Map<String, String> map = parseFormUrlEncoded(requestBody);
 
-        JsonSchema jsonSchema = jsonSchemaCache.get(schema);
-        Set<ValidationMessage> validationMessages =
-                jsonSchema.validate(objectMapper.valueToTree(map));
+        Schema jsonSchema = jsonSchemaCache.get(schema);
+        List<Error> validationMessages = jsonSchema.validate(JACKSON3.valueToTree(map));
 
         if (!validationMessages.isEmpty()) {
             log.warning(
@@ -139,7 +129,7 @@ public class JsonSchemaValidationUtils {
         return result;
     }
 
-    private JsonSchema getJsonSchema(com.avaulta.gateway.rules.JsonSchema schema) {
+    private Schema getJsonSchema(com.avaulta.gateway.rules.JsonSchema schema) {
 
         // TODO: remove this hack; rewritePseudonymToPattern is terrible hack, due to above attempt
         // to register custom format not working
@@ -149,8 +139,8 @@ public class JsonSchemaValidationUtils {
         // - eg, fill `type: object` if there's a `properties` field, etc.
         // - or,`type:string` if there's a `pattern` or `format` field, etc.
 
-        JsonNode schemaNode = objectMapper.valueToTree(rewritePseudonymToPattern(schema));
-        return jsonSchemaFactory.getSchema(schemaNode);
+        return schemaRegistry.getSchema(
+                JACKSON3.valueToTree(rewritePseudonymToPattern(schema)));
     }
 
     com.avaulta.gateway.rules.JsonSchema rewritePseudonymToPattern(
