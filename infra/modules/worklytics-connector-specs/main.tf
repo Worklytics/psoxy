@@ -91,7 +91,7 @@ locals {
   gitlab_url                    = replace(trimsuffix(local.gitlab_url_raw, "/"), "/^https?:\\/\\//", "")
   gong_instance_subdomain       = trimsuffix(coalesce(var.gong_instance_subdomain, try(var.connector_settings["gong_instance_subdomain"], null), "YOUR_GONG_INSTANCE_SUBDOMAIN"), ".api")
   glean_instance_subdomain      = coalesce(var.glean_instance_subdomain, try(var.connector_settings["glean_instance_subdomain"], null), "YOUR_GLEAN_INSTANCE_SUBDOMAIN")
-  salesforce_example_account_id = coalesce(var.salesforce_example_account_id, try(var.connector_settings["salesforce_example_account_id"], null), "{ANY ACCOUNT ID}")
+  salesforce_example_account_id = coalesce(var.salesforce_example_account_id, try(var.connector_settings["salesforce_example_account_id"], null), "{ANY_ACCOUNT_ID}")
   salesforce_domain             = var.salesforce_domain != "" ? var.salesforce_domain : try(var.connector_settings["salesforce_domain"], "")
 
   oauth_long_access_connectors = {
@@ -886,7 +886,7 @@ EOT
       reserved_concurrent_executions : null
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
-      # `{ANY ACCOUNT ID}`: any Salesforce Account Id (connector_settings.salesforce_example_account_id). Used only for example calls.
+      # `{ANY_ACCOUNT_ID}`: any Salesforce Account Id (connector_settings.salesforce_example_account_id). Used only for example calls.
       example_api_calls : [
         "/services/data/v64.0/sobjects/Account/describe",
         "/services/data/v64.0/sobjects/User/describe",
@@ -917,7 +917,7 @@ EOT
       external_token_todo : <<EOT
   Before running the example, you have to populate the following variables in terraform:
   - `salesforce_domain`. This is the [domain](https://help.salesforce.com/s/articleView?id=sf.faq_domain_name_what.htm&type=5) your instance is using.
-  - `salesforce_example_account_id`: An Account Id (`{ANY ACCOUNT ID}`) used only in example test calls (`GET .../composite/sobjects/Account?ids={ANY ACCOUNT ID}`).
+  - `salesforce_example_account_id`: An Account Id (`{ANY_ACCOUNT_ID}`) used only in example test calls (`GET .../composite/sobjects/Account?ids={ANY_ACCOUNT_ID}`).
 
   1. Create a [Salesforce external application](https://help.salesforce.com/s/articleView?id=xcloud.create_a_local_external_client_app.htm&type=5):
      - Ensure "Enable OAuth" is checked
