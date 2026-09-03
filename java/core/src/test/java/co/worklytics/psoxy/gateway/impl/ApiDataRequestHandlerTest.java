@@ -661,7 +661,7 @@ class ApiDataRequestHandlerTest {
     void sanitizedApiResponseMetadata_includesOnlyProcessedDataFields() {
         Map<String, String> metadata = Map.of(
             ProcessedDataMetadataFields.RULES_SHA.getMetadataKey(), "abc123",
-            ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(), "v0.7.0",
+            ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(), "rc-v0.7.1",
             ApiDataOutputUtils.OutputObjectMetadata.REQUEST_BODY.name(), "base64body",
             ApiDataOutputUtils.OutputObjectMetadata.QUERY_STRING.name(), "foo=bar",
             ApiDataOutputUtils.OutputObjectMetadata.PATH.name(), "users/me"
@@ -672,7 +672,7 @@ class ApiDataRequestHandlerTest {
 
         assertEquals("abc123",
             responseMetadata.get(ProcessedDataMetadataFields.RULES_SHA.getHttpHeader()));
-        assertEquals("v0.7.0",
+        assertEquals("rc-v0.7.1",
             responseMetadata.get(ProcessedDataMetadataFields.PROXY_VERSION.getHttpHeader()));
         assertEquals(2, responseMetadata.size());
         assertFalse(responseMetadata.containsKey(
