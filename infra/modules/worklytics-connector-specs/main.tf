@@ -175,8 +175,8 @@ EOT
       example_api_calls : [
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/users",
-        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations",                         # legacy — may 404
-        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations/{CONVERSATION_ID}/messages", # legacy — may 404
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations",
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations/{CONVERSATION_ID}/messages",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/automations",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/logs",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/logs/{LOG_FILE_ID}",
@@ -524,7 +524,7 @@ EOT
         "/orgs/${local.github_organization}/teams/{TEAM_SLUG}/members",
         "/orgs/${local.github_organization}/audit-log",
         "/organizations/${local.github_installation_id}/audit-log",
-        "/users/p~REPLACE_WITH_REVERSIBLE_PSEUDONYM_OF_MEMBER_LOGIN",
+        "/users/{USERNAME}",
         "/repos/${local.github_organization}/${local.github_example_repository}/branches",
         "/repos/${local.github_organization}/${local.github_example_repository}/events",
         "/repos/${local.github_organization}/${local.github_example_repository}/commits",
@@ -608,7 +608,7 @@ EOT
         "/orgs/${local.github_organization}/audit-log",
         "/orgs/${local.github_organization}/copilot/billing/seats",
         "/organizations/${local.github_copilot_installation_id}/audit-log",
-        "/users/p~REPLACE_WITH_REVERSIBLE_PSEUDONYM_OF_MEMBER_LOGIN",
+        "/users/{USERNAME}",
       ]
       example_api_requests : [
         local.github_graphql_example_request,
@@ -678,7 +678,7 @@ EOT
         "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/teams/{TEAM_SLUG}/members",
         "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/audit-log",
         "/api/${local.github_enterprise_server_version}/organizations/${local.github_installation_id}/audit-log",
-        "/api/${local.github_enterprise_server_version}/users/p~REPLACE_WITH_REVERSIBLE_PSEUDONYM_OF_MEMBER_LOGIN",
+        "/api/${local.github_enterprise_server_version}/users/{USERNAME}",
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/branches",
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/events",
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/commits",
@@ -758,7 +758,7 @@ EOT
         "/orgs/${local.github_organization}/members",
         "/orgs/${local.github_organization}/teams",
         "/orgs/${local.github_organization}/teams/{TEAM_SLUG}/members",
-        "/users/p~REPLACE_WITH_REVERSIBLE_PSEUDONYM_OF_MEMBER_LOGIN",
+        "/users/{USERNAME}",
         "/repos/${local.github_organization}/${local.github_example_repository}/branches",
         "/repos/${local.github_organization}/${local.github_example_repository}/events",
         "/repos/${local.github_organization}/${local.github_example_repository}/commits",
