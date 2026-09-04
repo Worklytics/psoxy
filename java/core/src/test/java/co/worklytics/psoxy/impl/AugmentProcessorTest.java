@@ -44,7 +44,7 @@ class AugmentProcessorTest {
         GenMetadataProcessor genMetadataProcessor =
             new GenMetadataProcessor(new UnavailableGenMetadataBackend(), objectMapper);
         augmentProcessor = new AugmentProcessor(jsonConfiguration,
-            new JsonSchemaValidationUtils(objectMapper),
+            new JsonSchemaValidationUtils(),
             objectMapper,
             new SentenceMetadataProcessor(noModels),
             genMetadataProcessor);

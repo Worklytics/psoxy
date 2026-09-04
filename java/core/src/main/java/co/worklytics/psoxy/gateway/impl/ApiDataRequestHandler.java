@@ -85,6 +85,7 @@ import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
 import co.worklytics.psoxy.utils.GzipedContentHttpRequestInitializer;
+import co.worklytics.psoxy.utils.LogSanitizationUtils;
 import co.worklytics.psoxy.utils.URLUtils;
 import dagger.Lazy;
 import lombok.AllArgsConstructor;
@@ -394,6 +395,17 @@ public class ApiDataRequestHandler {
             populateHeadersFromSource(requestToSourceApi, requestToProxy, requestUrls.getTarget());
 
             // setup request
+            // Default is true (follow 3xx), including in async mode — do not change this to
+            // depend on processingContext.getAsync(). Following redirects is expected HTTP-client
+            // behavior. Connectors whose APIs issue 3xx Location URLs that the async intercept
+            // path should fetch (ChatGPT, Slack Analytics) set FOLLOW_REDIRECTS=FALSE themselves.
+            //
+            // Forwarding Authorization to a 3xx Location is acceptable: the Location is chosen by
+            // the source API we already authenticated to, not an untrusted host. Stripping auth
+            // on the follow-up request is only needed when the Location is a presigned download
+            // URL that would reject an extra Authorization header; those connectors opt out via
+            // FOLLOW_REDIRECTS=FALSE, and the async redirect block then GETs the Location without
+            // source auth.
             boolean followRedirects = config.getConfigPropertyAsOptional(ProxyConfigProperty.FOLLOW_REDIRECTS)
                     .map(Boolean::parseBoolean)
                     .orElse(true);
@@ -411,16 +423,21 @@ public class ApiDataRequestHandler {
             if (isSocketTimeoutException(e)) {
                 return buildConnectTimeoutErrorResponse(builder, e);
             }
-            
-            builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            builder.body("Failed to parse request; review logs");
+
+            log.log(Level.WARNING, e.getMessage(), e);
+
+            if (sourceAuthStrategy.isSourceAuthFailure(e)) {
+                // token exchange / credential refresh failed — not a malformed inbound request
+                log.log(Level.WARNING,
+                        "Confirm OAUTH_SCOPES environment variable matches scopes granted in data source");
+                builder.statusCode(HttpStatus.SC_UNAUTHORIZED);
+                builder.body(buildSourceAuthTokenFailureMessage(e));
+            } else {
+                builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+                builder.body("Failed to parse request; review logs");
+            }
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     ErrorCauses.CONNECTION_SETUP.name());
-            log.log(Level.WARNING, e.getMessage(), e);
-            // something like "Error getting access token for service account: 401 Unauthorized POST
-            // https://oauth2.googleapis.com/token,"
-            log.log(Level.WARNING,
-                    "Confirm OAUTH_SCOPES environment variable matches scopes granted in data source");
             return builder.build();
         } catch (co.worklytics.psoxy.gateway.TransientConfigException e) {
             // Config store was temporarily unreachable (e.g. credential rotation, AWS hiccup).
@@ -525,9 +542,11 @@ public class ApiDataRequestHandler {
         }
 
 
-        // In async mode, treat a 3xx response with a Location header as success by fetching content
-        // from the Location URL (e.g., source returns 307 pointing to a pre-signed file download).
-        // Only applies to safe methods (GET/HEAD) — 307/308 with POST would require replaying the body.
+        // In async mode, if the HTTP client did not follow a 3xx (FOLLOW_REDIRECTS=FALSE on this
+        // connector), treat a Location header as the content URL and GET it without source auth.
+        // That is the right fetch for presigned download URLs; it is not a general rule that every
+        // 3xx Location is presigned. Only applies to safe methods (GET/HEAD) — 307/308 with POST
+        // would require replaying the body.
         if (processingContext.getAsync()
                 && isRedirectFamily(sourceApiResponse.getStatusCode())
                 && sourceApiResponse.getHeaders().getLocation() != null
@@ -624,12 +643,17 @@ public class ApiDataRequestHandler {
 
                 }
             } else {
-                // write error, which shouldn't contain PII, directly
-                log.log(Level.WARNING, "Source API Error " + original.getContentAsString());
+                // source API error bodies aren't validated against a schema, so we can't rely on
+                // RESTApiSanitizer (schema-driven) to strip PII from them; instead, redact
+                // patterns commonly used as PII (emails, GUIDs used as user ids by some source
+                // APIs, eg MSFT Graph) on a best-effort basis before logging or returning it
+                String redactedError =
+                        LogSanitizationUtils.redactPotentialPii(original.getContentAsString());
+                log.log(Level.WARNING, "Source API Error " + redactedError);
 
                 builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                         ErrorCauses.API_ERROR.name());
-                proxyResponseContent = original.getContentAsString();
+                proxyResponseContent = redactedError;
 
                 // q: in async case, perhaps we should write the error to the async output, too, for
                 // clarity??? could do it with metadata indicating the error to the caller, so it
@@ -1155,6 +1179,16 @@ public class ApiDataRequestHandler {
 
     private boolean isSocketTimeoutException(Throwable throwable) {
         return findSocketTimeoutException(throwable) != null;
+    }
+
+    @VisibleForTesting
+    static String buildSourceAuthTokenFailureMessage(IOException e) {
+        String detail = StringUtils.abbreviate(StringUtils.trimToEmpty(e.getMessage()), 500);
+        if (detail.isEmpty()) {
+            return "Failed to obtain access token for data source; review logs";
+        }
+        return "Failed to obtain access token for data source: "
+                + LogSanitizationUtils.redactPotentialPii(detail);
     }
 
     private SocketTimeoutException findSocketTimeoutException(Throwable throwable) {

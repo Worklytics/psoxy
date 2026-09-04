@@ -133,7 +133,9 @@ locals {
           # "iam:ListUserPolicies",
           # "iam:ListUsers",
           # "iam:ListVirtualMFADevices",
-          "iam:PassRole", # seems required to attach roles to Lambda functions
+          "iam:ListPolicyTags", # required if using default_tags
+          "iam:ListRoleTags",   # required if using default_tags
+          "iam:PassRole",       # seems required to attach roles to Lambda functions
           # "iam:PutGroupPolicy",
           "iam:PutRolePermissionsBoundary",
           "iam:PutRolePolicy",
@@ -270,7 +272,9 @@ locals {
           # "s3:PutInventoryConfiguration",
           "s3:PutLifecycleConfiguration",
           # "s3:PutMetricsConfiguration",
-          "s3:PutObject"
+          "s3:PutObject",
+          "s3:PutObjectTagging",        # required if using default_tags (e.g. proxy JAR upload when building from source)
+          "s3:PutObjectVersionTagging", # required if using default_tags with versioned buckets
         ]
         Resource = [
           "arn:aws:s3::${local.account_id_resource_pattern}:${module.env_id.id}*",
@@ -296,12 +300,19 @@ locals {
           # "logs:DeleteSubscriptionFilter",
           "logs:PutResourcePolicy",
           "logs:DeleteResourcePolicy",
+          # Legacy LogGroup-suffixed tagging APIs (kept for older AWS provider versions)
           "logs:ListTagsLogGroup",
           "logs:TagLogGroup",
-          "logs:UntagLogGroup"
+          "logs:UntagLogGroup",
+          # Current tagging APIs used by hashicorp/aws (required if using default_tags)
+          "logs:ListTagsForResource",
+          "logs:TagResource",
+          "logs:UntagResource",
         ],
         Resource : [
           "arn:aws:logs:*:${local.account_id_resource_pattern}:log-group:/aws/lambda/${module.env_id.id}*",
+          # API Gateway / webhook collector access log groups are named with the deployment id prefix
+          "arn:aws:logs:*:${local.account_id_resource_pattern}:log-group:${module.env_id.id}*",
           # seems how needed for initial log groups; uses 'logs:DescribeLogGroups' to enumerate streams, it seems
           "arn:aws:logs:*:${local.account_id_resource_pattern}:log-group::log-stream*",
         ]
@@ -370,7 +381,9 @@ locals {
           "lambda:DeleteEventSourceMapping",
           "lambda:DeleteFunctionEventInvokeConfig",
           "lambda:DeleteFunctionConcurrency",
-          "lambda:TagResource", # required if using default_tags
+          "lambda:ListTags",      # required if using default_tags
+          "lambda:TagResource",   # required if using default_tags
+          "lambda:UntagResource", # required if using default_tags
 
           # can drop these if using API gateway stuff
           "lambda:GetFunctionUrlConfig",

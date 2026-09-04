@@ -18,6 +18,7 @@ Accounts on unpaid plans do not have access to some methods Worklytics use like:
 ## Examples
 
 - [Example Rules](zoom.yaml)
+- [Example API calls](example-api-calls.md) (including how to find a meeting that has an AI Companion summary)
 - Example Data : [original/meeting-details.json](example-api-responses/original/meeting-details.json) | [sanitized/meeting-details](example-api-responses/sanitized/meeting-details.json)
 - Meeting transcript extract PoC (genMetadata): [original/meeting-transcript.json](example-api-responses/original/meeting-transcript.json) — speaking time by `personId` via cloud constrained JSON (`enable_gen_metadata`)
 

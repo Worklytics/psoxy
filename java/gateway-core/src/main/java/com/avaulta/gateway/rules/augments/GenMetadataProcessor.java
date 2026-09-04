@@ -36,7 +36,7 @@ public class GenMetadataProcessor {
         this.objectMapper = objectMapper != null ? objectMapper : new ObjectMapper();
         this.jsonSchemaValidationUtils = jsonSchemaValidationUtils != null
             ? jsonSchemaValidationUtils
-            : new JsonSchemaValidationUtils(this.objectMapper);
+            : new JsonSchemaValidationUtils();
         this.maxInputChars = maxInputChars > 0 ? maxInputChars : DEFAULT_MAX_INPUT_CHARS;
         this.maxAttempts = maxAttempts > 0 ? maxAttempts : DEFAULT_MAX_ATTEMPTS;
     }

@@ -62,7 +62,7 @@ class GenMetadataProcessorTest {
             OBJECT_MAPPER,
             4096,
             2,
-            new JsonSchemaValidationUtils(OBJECT_MAPPER));
+            new JsonSchemaValidationUtils());
 
         @SuppressWarnings("unchecked")
         Map<String, Object> out = (Map<String, Object>) processor.process(
@@ -82,7 +82,7 @@ class GenMetadataProcessorTest {
             OBJECT_MAPPER,
             4096,
             1,
-            new JsonSchemaValidationUtils(OBJECT_MAPPER));
+            new JsonSchemaValidationUtils());
 
         assertThrows(GenMetadataAugmentException.class,
             () -> processor.process("Classify the prompt", schema, "hello"));

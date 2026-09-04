@@ -66,7 +66,7 @@ class WebhookSanitizerAugmentsTest {
         sanitizer.jsonConfiguration = jsonConfiguration;
         com.fasterxml.jackson.databind.ObjectMapper om = objectMapper;
         sanitizer.augmentProcessor = new AugmentProcessor(jsonConfiguration,
-            new JsonSchemaValidationUtils(om),
+            new JsonSchemaValidationUtils(),
             om,
             new com.avaulta.gateway.rules.augments.SentenceMetadataProcessor(path -> java.util.Optional.empty()),
             new com.avaulta.gateway.rules.augments.GenMetadataProcessor(

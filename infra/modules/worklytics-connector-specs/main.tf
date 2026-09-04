@@ -139,9 +139,8 @@ EOT
       enable_async_processing : true
       enable_side_output : false
       environment_variables : {
-        # ChatGPT Enterprise's API issues redirects that must be intercepted manually by the proxy
-        # in async mode; disable automatic redirect following so the 3xx Location URL is fetched
-        # by the async redirect-handling block rather than transparently by the HTTP client.
+        # Opt out of the default (follow 3xx). ChatGPT issues Location URLs that the async
+        # intercept path should GET without source auth; do not change the global default.
         FOLLOW_REDIRECTS : "FALSE"
       }
       example_api_calls_user_to_impersonate : null
@@ -211,6 +210,16 @@ EOT
           method : "GET"
           path : "/v1/compliance/activities"
           headers : local.anthropic_api_headers
+        },
+        {
+          method : "GET"
+          path : "/v1/compliance/apps/sessions/local"
+          headers : local.anthropic_api_headers
+        },
+        {
+          method : "GET"
+          path : "/v1/compliance/apps/sessions/remote"
+          headers : local.anthropic_api_headers
         }
       ],
       external_token_todo : templatefile("${path.module}/docs/claude/claude_instructions.tftpl", {
@@ -251,6 +260,14 @@ EOT
         {
           method : "GET"
           path : "/v1/organizations/analytics/user_cost_report?starting_at=${formatdate("YYYY-MM-DD", local.example_api_calls_sample_interval_start)}&ending_at=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/spend_limits/effective?limit=20"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/spend_limit_increase_requests?limit=50"
         }
       ],
       external_token_todo : templatefile("${path.module}/docs/claude/claude_enterprise_analytics_instructions.tftpl", {
@@ -783,7 +800,11 @@ EOT
         "admin.analytics:read",
       ]
       enable_async_processing : true
-      environment_variables : {}
+      environment_variables : {
+        # Opt out of the default (follow 3xx). Slack Analytics issues Location URLs that the
+        # async intercept path should GET without source auth; do not change the global default.
+        FOLLOW_REDIRECTS : "FALSE"
+      }
       secured_variables : [
         {
           name : "ACCESS_TOKEN"
@@ -923,7 +944,6 @@ EOT
       example_api_calls : [
         "/v2/users",
         "/v2/users/{USER_ID}/meetings",
-        "/v2/users/{USER_ID}/settings",
         "/v2/users/{USER_ID}/recordings",
         "/v2/meetings/{MEETING_ID}",
         "/v2/meetings/{MEETING_ID}/meeting_summary",

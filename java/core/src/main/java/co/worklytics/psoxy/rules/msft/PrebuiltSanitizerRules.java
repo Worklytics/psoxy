@@ -389,6 +389,11 @@ public class PrebuiltSanitizerRules {
         .jsonPath("$..emailAddress")
         .build();
 
+    // Graph callRecords may include UPN on identity.user under organizer_v2 / participants_v2 (and legacy organizer / participants)
+    static final Transform.Pseudonymize MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_PSEUDONYMIZE = Transform.Pseudonymize.builder()
+        .jsonPath("$..user.userPrincipalName")
+        .build();
+
     static final Transform.Redact MS_TEAMS_USERS_CHATS_REDACT = Transform.Redact.builder()
         .jsonPath("$..topic")
         .jsonPath("$..['lastMessagePreview@odata.context']")
@@ -507,6 +512,7 @@ public class PrebuiltSanitizerRules {
         .pathRegex(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
         .allowedQueryParams(List.of("$select", "$expand", "$filter"))
         .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+        .transform(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_PSEUDONYMIZE)
         .build();
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS = Endpoint.builder()
@@ -642,6 +648,7 @@ public class PrebuiltSanitizerRules {
                 .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
                 .build())))
         .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
+            MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_PSEUDONYMIZE,
             MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_REDACT
                 .toBuilder()
                 .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())

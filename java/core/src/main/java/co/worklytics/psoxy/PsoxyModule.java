@@ -366,8 +366,8 @@ public class PsoxyModule {
 
     @Provides
     @Singleton
-    JsonSchemaValidationUtils jsonSchemaValidationUtils(ObjectMapper objectMapper) {
-        return new JsonSchemaValidationUtils(objectMapper);
+    JsonSchemaValidationUtils jsonSchemaValidationUtils() {
+        return new JsonSchemaValidationUtils();
     }
 
     @Provides
