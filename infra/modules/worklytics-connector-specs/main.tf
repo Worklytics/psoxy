@@ -68,10 +68,10 @@ locals {
   gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, try(var.connector_settings["gitlab_example_group_id"], null), "YOUR_GITLAB_GROUP_ID")
   gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, try(var.connector_settings["gitlab_example_project_id"], null), "YOUR_GITLAB_PROJECT_ID")
 
-  # GraphQL example for GitHub connectors. `{ORG}` is github_organization.
-  # `{USERNAME}` on REST `/users/{USERNAME}` MUST be a reversible-pseudonym token (`p~` + ≥43
-  # base64url chars) of a `login` from GET /orgs/{ORG}/members — a raw GitHub login is blocked by
-  # pathParameterSchemas. The placeholder below is format-valid; replace it with a real sanitized login.
+  # Shared GraphQL example for GitHub connectors. GraphQL `variables.org` uses github_first_organization
+  # (first value when github_organization is comma-separated). REST `/users/{USERNAME}` placeholders are
+  # defined on each GitHub connector's example_api_calls block below; `{USERNAME}` MUST be a
+  # reversible-pseudonym token (`p~` + ≥43 base64url chars) of a `login` from GET /orgs/{ORG}/members.
   github_graphql_example_request = {
     method       = "POST"
     path         = "/graphql"
@@ -168,12 +168,15 @@ EOT
       }
       example_api_calls_user_to_impersonate : null
       # `{WORKSPACE_ID}`: ChatGPT Enterprise workspace id (Worklytics "Workspace Id" / connector_settings.chat_gpt_enterprise_example_workspace_id).
-      # `{CONVERSATION_ID}`: a conversation id from GET .../conversations. `{LOG_FILE_ID}`: a log file id from GET .../logs.
+      # `{LOG_FILE_ID}`: a log file id from GET .../logs.
+      # Legacy `/conversations` paths below remain allow-listed for existing deployments, but OpenAI reports
+      # the stateful API was removed on June 5, 2026 — generated test calls may fail; prefer `/logs` for new integrations.
+      # `{CONVERSATION_ID}`: only meaningful if your tenant still serves the legacy conversations API.
       example_api_calls : [
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/users",
-        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations",
-        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations/{CONVERSATION_ID}/messages",
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations",                         # legacy — may 404
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations/{CONVERSATION_ID}/messages", # legacy — may 404
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/automations",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/logs",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/logs/{LOG_FILE_ID}",
