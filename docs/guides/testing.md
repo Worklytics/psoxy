@@ -55,7 +55,7 @@ node tools/psoxy-test/find-zoom-meeting-summary.js -u https://us-central1-acme.c
 node tools/psoxy-test/find-zoom-meeting-summary.js -u https://acme.lambda-url.us-east-1.on.aws -r arn:aws:iam::310635719553:role/PsoxyApiCaller
 ```
 
-See [Zoom example API calls](../sources/zoom/example-api-calls.md) and the [Psoxy test tool](psoxy-test-tool.md) for details.
+See [Zoom example API calls](../sources/zoom/README.md#example-api-calls) and the [Psoxy test tool](psoxy-test-tool.md) for details.
 
 ### Microsoft Teams call records, online meetings, channels, and chats
 

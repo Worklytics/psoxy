@@ -142,7 +142,7 @@ node find-zoom-meeting-summary.js -u https://us-central1-acme.cloudfunctions.net
 node find-zoom-meeting-summary.js -u https://acme.lambda-url.us-east-1.on.aws -r <ROLE>
 ```
 
-Useful flags: `--lookback-days 180` (report meetings are searched in 30-day windows), `--max-users 5`. See [Zoom example API calls](../sources/zoom/example-api-calls.md).
+Useful flags: `--lookback-days 180` (report meetings are searched in 30-day windows), `--max-users 5`. See [Zoom example API calls](../../docs/sources/zoom/README.md#example-api-calls).
 
 ### Microsoft Teams: finding a call record, online meeting, channel, or chat
 
