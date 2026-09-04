@@ -19,6 +19,11 @@
       },
       "ipAddress": "203.0.113.42",
       "ownerDomain": "worklytics.co",
+      "networkInfo": {
+        "ipAsn": [13335],
+        "regionCode": "US",
+        "subdivisionCode": "US-CA"
+      },
       "events": [
         {
           "type": "access",
@@ -27,6 +32,22 @@
             {
               "name": "primary_event",
               "boolValue": true
+            },
+            {
+              "name": "billable",
+              "boolValue": true
+            },
+            {
+              "name": "actor_is_collaborator_account",
+              "boolValue": false
+            },
+            {
+              "name": "is_encrypted",
+              "boolValue": false
+            },
+            {
+              "name": "originating_app_id",
+              "value": "1066455591999"
             },
             {
               "name": "owner_is_shared_drive",
@@ -51,8 +72,45 @@
             {
               "name": "visibility",
               "value": "shared_internally"
+            },
+            {
+              "name": "ip_address",
+              "value": "203.0.113.42"
             }
           ]
+        }
+      ],
+      "resourceDetails": [
+        {
+          "id": "1FakeDriveItemId000000000000000000001",
+          "title": "4242424242.pdf",
+          "type": "DRIVE_ITEM",
+          "relation": "DRIVE_PRIMARY",
+          "appliedLabels": [
+            {
+              "id": "labelIdConfidential",
+              "title": "Confidential",
+              "fieldValues": [
+                {
+                  "id": "fieldOwnerOrg",
+                  "displayName": "Owning team",
+                  "type": "text",
+                  "textValue": "Finance"
+                }
+              ]
+            }
+          ],
+          "ownerDetails": {
+            "ownerType": "USER",
+            "ownerIdentity": [
+              {
+                "userIdentity": {
+                  "id": "0neiluseridxxxxx",
+                  "userEmail": "neil@worklytics.co"
+                }
+              }
+            ]
+          }
         }
       ]
     },
@@ -106,8 +164,20 @@
               "value": "can_edit"
             },
             {
+              "name": "old_visibility",
+              "value": "private"
+            },
+            {
               "name": "visibility",
               "value": "shared_internally"
+            },
+            {
+              "name": "visibility_change",
+              "value": "shared_internally"
+            },
+            {
+              "name": "recipients",
+              "multiValue": ["bob@worklytics.co"]
             }
           ]
         }
@@ -145,6 +215,14 @@
               "value": "Meeting notes"
             },
             {
+              "name": "source_folder_id",
+              "value": "0Baaaaaaaaaaaaaaaaaaaaaa"
+            },
+            {
+              "name": "source_folder_title",
+              "value": "My Drive"
+            },
+            {
               "name": "destination_folder_id",
               "value": "0Bxxxxxxxxxxxxxxxxxxxxx"
             },
@@ -159,6 +237,358 @@
             {
               "name": "doc_type",
               "value": "document"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-12T16:22:08.441Z",
+        "uniqueQualifier": "6127585580824196363",
+        "applicationName": "drive",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem4\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "bob@worklytics.co",
+        "profileId": "100531288453445237356"
+      },
+      "ipAddress": "203.0.113.42",
+      "ownerDomain": "worklytics.co",
+      "events": [
+        {
+          "type": "access",
+          "name": "view",
+          "parameters": [
+            {
+              "name": "primary_event",
+              "boolValue": true
+            },
+            {
+              "name": "doc_id",
+              "value": "1Q3PlanningSheetFakeId00000000000000000001"
+            },
+            {
+              "name": "doc_title",
+              "value": "Q3 planning spreadsheet"
+            },
+            {
+              "name": "doc_type",
+              "value": "spreadsheet"
+            },
+            {
+              "name": "owner",
+              "value": "alice@worklytics.co"
+            },
+            {
+              "name": "visibility",
+              "value": "shared_internally"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-12T16:40:11.002Z",
+        "uniqueQualifier": "6127585580824196364",
+        "applicationName": "drive",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem5\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "alice@worklytics.co",
+        "profileId": "117927411761819390794"
+      },
+      "ipAddress": "203.0.113.42",
+      "ownerDomain": "worklytics.co",
+      "events": [
+        {
+          "type": "access",
+          "name": "download",
+          "parameters": [
+            {
+              "name": "primary_event",
+              "boolValue": true
+            },
+            {
+              "name": "doc_id",
+              "value": "1CustomerListCsvFakeId0000000000000000002"
+            },
+            {
+              "name": "doc_title",
+              "value": "Customer list.csv"
+            },
+            {
+              "name": "doc_type",
+              "value": "msword"
+            },
+            {
+              "name": "owner",
+              "value": "mary@worklytics.co"
+            },
+            {
+              "name": "visibility",
+              "value": "private"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-12T17:05:33.900Z",
+        "uniqueQualifier": "6127585580824196365",
+        "applicationName": "drive",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem6\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "mary@worklytics.co",
+        "profileId": "100531288453445237356"
+      },
+      "ownerDomain": "worklytics.co",
+      "events": [
+        {
+          "type": "access",
+          "name": "rename",
+          "parameters": [
+            {
+              "name": "primary_event",
+              "boolValue": true
+            },
+            {
+              "name": "doc_id",
+              "value": "1BoardDeckFakeId00000000000000000000000003"
+            },
+            {
+              "name": "doc_title",
+              "value": "FY26 compensation model"
+            },
+            {
+              "name": "doc_type",
+              "value": "presentation"
+            },
+            {
+              "name": "old_value",
+              "value": "Draft - compensation"
+            },
+            {
+              "name": "new_value",
+              "value": "FY26 compensation model"
+            },
+            {
+              "name": "owner",
+              "value": "mary@worklytics.co"
+            },
+            {
+              "name": "visibility",
+              "value": "private"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-12T17:18:00.010Z",
+        "uniqueQualifier": "6127585580824196366",
+        "applicationName": "drive",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem7\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "bob@worklytics.co",
+        "profileId": "100531288453445237356"
+      },
+      "ipAddress": "203.0.113.42",
+      "ownerDomain": "worklytics.co",
+      "events": [
+        {
+          "type": "access",
+          "name": "create_comment",
+          "parameters": [
+            {
+              "name": "primary_event",
+              "boolValue": true
+            },
+            {
+              "name": "doc_id",
+              "value": "1DWuYM3ot_sAyEQqOz0xWJ9bVMSYzOmRNeBqbgtSwuK8"
+            },
+            {
+              "name": "doc_title",
+              "value": "Meeting notes"
+            },
+            {
+              "name": "doc_type",
+              "value": "document"
+            },
+            {
+              "name": "owner",
+              "value": "mary@worklytics.co"
+            },
+            {
+              "name": "target_user",
+              "value": "alice@worklytics.co"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-12T17:31:44.777Z",
+        "uniqueQualifier": "6127585580824196367",
+        "applicationName": "drive",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem8\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "alice@worklytics.co",
+        "profileId": "117927411761819390794"
+      },
+      "ownerDomain": "worklytics.co",
+      "events": [
+        {
+          "type": "access",
+          "name": "copy",
+          "parameters": [
+            {
+              "name": "primary_event",
+              "boolValue": true
+            },
+            {
+              "name": "copy_type",
+              "value": "copy"
+            },
+            {
+              "name": "doc_id",
+              "value": "1CopiedDocFakeId00000000000000000000000004"
+            },
+            {
+              "name": "doc_title",
+              "value": "Copy of Meeting notes"
+            },
+            {
+              "name": "doc_type",
+              "value": "document"
+            },
+            {
+              "name": "owner",
+              "value": "alice@worklytics.co"
+            },
+            {
+              "name": "destination_folder_id",
+              "value": "0Byyyyyyyyyyyyyyyyyyyyyyy"
+            },
+            {
+              "name": "destination_folder_title",
+              "value": "Personal drafts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-12T18:02:19.500Z",
+        "uniqueQualifier": "6127585580824196368",
+        "applicationName": "drive",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem9\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "alice@worklytics.co",
+        "profileId": "117927411761819390794"
+      },
+      "ipAddress": "203.0.113.42",
+      "ownerDomain": "worklytics.co",
+      "events": [
+        {
+          "type": "access",
+          "name": "search",
+          "parameters": [
+            {
+              "name": "primary_event",
+              "boolValue": true
+            },
+            {
+              "name": "query_type",
+              "value": "full_text"
+            },
+            {
+              "name": "user_query",
+              "value": "salary review 2024"
+            },
+            {
+              "name": "parsed_query",
+              "value": "salary review 2024"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2021-10-12T18:15:01.000Z",
+        "uniqueQualifier": "6127585580824196369",
+        "applicationName": "drive",
+        "customerId": "C03v4gz0f"
+      },
+      "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem10\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "mary@worklytics.co",
+        "profileId": "100531288453445237356"
+      },
+      "ownerDomain": "worklytics.co",
+      "events": [
+        {
+          "type": "acl_change",
+          "name": "change_owner",
+          "parameters": [
+            {
+              "name": "primary_event",
+              "boolValue": true
+            },
+            {
+              "name": "doc_id",
+              "value": "1DWuYM3ot_sAyEQqOz0xWJ9bVMSYzOmRNeBqbgtSwuK8"
+            },
+            {
+              "name": "doc_title",
+              "value": "Meeting notes"
+            },
+            {
+              "name": "doc_type",
+              "value": "document"
+            },
+            {
+              "name": "owner",
+              "value": "mary@worklytics.co"
+            },
+            {
+              "name": "new_owner",
+              "value": "alice@worklytics.co"
+            },
+            {
+              "name": "new_owner_is_shared_drive",
+              "boolValue": false
             }
           ]
         }

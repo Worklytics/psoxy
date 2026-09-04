@@ -373,16 +373,31 @@ public class PrebuiltSanitizerRules {
                 .pathTemplate("/admin/reports/v1/activity/users/all/applications/drive")
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$..email")
+                            .jsonPath("$..userEmail")
+                            .jsonPath("$..groupEmail")
+                            .jsonPath("$.items[*].actor.profileId")
+                            .jsonPath("$..userIdentity.id")
+                            .jsonPath("$..groupIdentity.id")
                             .jsonPath("$.items[*].events[*].parameters[?(@.name in ['owner','target_user','new_owner','delegating_principal'])].value")
                             .build())
                     .transform(HashIp.builder()
-                            .jsonPath("$.items[*].ipAddress")
+                            // Drive audit events include the actor's client IP, which is often a
+                            // residential/home address. Hash (tokenize as t~...) rather than pass through.
+                            .jsonPath("$..ipAddress")
                             .jsonPath("$.items[*].events[*].parameters[?(@.name == 'ip_address')].value")
+                            .jsonPath("$.items[*].events[*].parameters[?(@.name == 'ip_address')].multiValue[*]")
                             .build())
                     .transform(Transform.Redact.builder()
                             .jsonPath("$.items[*].events[*].parameters[?(!(@.name =~ /^" +
                                     String.join("|", GDRIVE_LOG_EVENT_PARAMETERS_ALLOWED) +
                                     "$/i))]")
+                            // resourceDetails.title / labels / display names are content; user ids
+                            // and emails are handled by the pseudonymize transform above
+                            .jsonPath("$.items[*].resourceDetails[*].title")
+                            .jsonPath("$.items[*].resourceDetails[*]..title")
+                            .jsonPath("$.items[*].resourceDetails[*]..displayName")
+                            .jsonPath("$.items[*].resourceDetails[*].appliedLabels")
+                            .jsonPath("$.items[*].events[*].sensitiveParameters")
                             .build())
                     .build())
             .build();

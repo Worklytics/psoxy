@@ -15,6 +15,8 @@ Relative to [`gdrive`](../gdrive/README.md), this source includes additional act
 
 The tradeoff is lookback. Google retains Drive audit-log events for about **6 months** (180 days). Older activity is not available from the Reports API, even if the files themselves still exist. Historical collaboration that predates that window is better covered by the files API connector.
 
+Activity records can include the actor's client IP, which is often a residential address. Those values are hashed with the `hashIp` transform (emitted as `t~...` tokens), not passed through in the clear.
+
 See Google's [Drive activity report](https://developers.google.com/workspace/admin/reports/v1/guides/manage-audit-drive) and [data retention](https://support.google.com/a/answer/7061566) documentation.
 
 ## Required OAuth Scopes
