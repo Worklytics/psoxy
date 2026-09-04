@@ -23,6 +23,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `gcal`                     | [Google Calendar](google-workspace/calendar/README.md)                      | API  | GA           |
 | `gdirectory`               | [Google Directory](google-workspace/directory/README.md)                    | API  | GA           |
 | `gdrive`                   | [Google Drive](google-workspace/gdrive/README.md)                           | API  | GA           |
+| `gdrive-log`               | [Google Drive Audit Log](google-workspace/gdrive-log/README.md)             | API  | BETA         |
 | `gemini-in-workspace-apps` | [Google Gemini in Workspace Apps](google-workspace/gemini-in-workspace-apps/README.md) | API  | BETA         |
 | `gemini-usage`             | [Gemini Usage](google-workspace/gemini-usage-bulk/README.md)                | Bulk | DEPRECATED   |
 | `github`                   | [GitHub Enterprise](github/github/README.md)                                | API  | GA           |

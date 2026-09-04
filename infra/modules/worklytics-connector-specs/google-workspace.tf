@@ -96,6 +96,27 @@ locals {
       ],
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
     },
+    "gdrive-log" : {
+      source_kind : "gdrive-log",
+      availability : "beta",
+      enable_by_default : false
+      worklytics_connector_id : "gdrive-log-psoxy",
+      display_name : "Google Drive Audit Log"
+      apis_consumed : [
+        "admin.googleapis.com"
+      ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "admin.googleapis.com"
+      oauth_scopes_needed : [
+        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+      ]
+      environment_variables : {}
+      enable_side_output : false
+      example_api_calls : [
+        "/admin/reports/v1/activity/users/all/applications/drive?maxResults=10"
+      ]
+      example_api_calls_user_to_impersonate : local.google_workspace_example_admin
+    },
     "gmail" : {
       source_kind : "gmail",
       availability : "ga",
