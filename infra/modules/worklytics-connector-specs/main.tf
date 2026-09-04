@@ -515,15 +515,13 @@ EOT
       # Path params: `{ORG}`/`{OWNER}` = github_organization; `{REPO}` = github_example_repository;
       # `{TEAM_SLUG}` from GET /orgs/{ORG}/teams; `{ISSUE_NUMBER}`/`{PULL_NUMBER}` from issues/pulls lists;
       # `{REF}`/`{COMMIT_SHA}` from GET .../commits; `{COMMENT_ID}`/`{REVIEW_ID}` from the matching comments/reviews lists;
-      # `{USERNAME}` MUST be a reversible pseudonym (`p~...`) of a `login` from GET /orgs/{ORG}/members;
-      # `{INSTALLATION_ID}` = github_installation_id.
+      # `{USERNAME}` MUST be a reversible pseudonym (`p~...`) of a `login` from GET /orgs/{ORG}/members.
       example_api_calls : [
         "/orgs/${local.github_organization}/repos",
         "/orgs/${local.github_organization}/members",
         "/orgs/${local.github_organization}/teams",
         "/orgs/${local.github_organization}/teams/{TEAM_SLUG}/members",
         "/orgs/${local.github_organization}/audit-log",
-        "/organizations/${local.github_installation_id}/audit-log",
         "/users/{USERNAME}",
         "/repos/${local.github_organization}/${local.github_example_repository}/branches",
         "/repos/${local.github_organization}/${local.github_example_repository}/events",
@@ -599,15 +597,13 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       # Path params: `{ORG}` = github_organization; `{TEAM_SLUG}` from GET /orgs/{ORG}/teams;
-      # `{USERNAME}` MUST be a reversible pseudonym (`p~...`) of a `login` from GET /orgs/{ORG}/members;
-      # `{INSTALLATION_ID}` = github_copilot_installation_id.
+      # `{USERNAME}` MUST be a reversible pseudonym (`p~...`) of a `login` from GET /orgs/{ORG}/members.
       example_api_calls : [
         "/orgs/${local.github_organization}/members",
         "/orgs/${local.github_organization}/teams",
         "/orgs/${local.github_organization}/teams/{TEAM_SLUG}/members",
         "/orgs/${local.github_organization}/audit-log",
         "/orgs/${local.github_organization}/copilot/billing/seats",
-        "/organizations/${local.github_copilot_installation_id}/audit-log",
         "/users/{USERNAME}",
       ]
       example_api_requests : [
@@ -669,15 +665,13 @@ EOT
       # `{ENTERPRISE_SERVER_VERSION}` = github_enterprise_server_version (default v3);
       # `{TEAM_SLUG}` from GET .../orgs/{ORG}/teams; `{ISSUE_NUMBER}`/`{PULL_NUMBER}` from issues/pulls lists;
       # `{REF}`/`{COMMIT_SHA}` from GET .../commits; `{COMMENT_ID}`/`{REVIEW_ID}` from matching comments/reviews lists;
-      # `{USERNAME}` MUST be a reversible pseudonym (`p~...`) of a `login` from GET .../orgs/{ORG}/members;
-      # `{INSTALLATION_ID}` = github_installation_id.
+      # `{USERNAME}` MUST be a reversible pseudonym (`p~...`) of a `login` from GET .../orgs/{ORG}/members.
       example_api_calls : [
         "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/repos",
         "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/members",
         "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/teams",
         "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/teams/{TEAM_SLUG}/members",
         "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/audit-log",
-        "/api/${local.github_enterprise_server_version}/organizations/${local.github_installation_id}/audit-log",
         "/api/${local.github_enterprise_server_version}/users/{USERNAME}",
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/branches",
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/events",

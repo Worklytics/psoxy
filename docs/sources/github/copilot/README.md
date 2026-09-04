@@ -19,7 +19,6 @@ Example API call path parameters (uppercase placeholders in generated test calls
 
 - `{ORG}`: `github_organization`.
 - `{TEAM_SLUG}`: a team slug from `GET /orgs/{ORG}/teams`.
-- `{INSTALLATION_ID}`: `github_copilot_installation_id`.
 - `{USERNAME}`: **must** be a reversible-pseudonym token (`p~` + ≥43 base64url chars) of a `login` from `GET /orgs/{ORG}/members`. GraphQL is `POST /graphql`.
 
 ## GitHub Copilot: Steps to connect

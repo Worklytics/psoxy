@@ -20,7 +20,6 @@ Example API call path parameters (uppercase placeholders in generated test calls
 - `{ENTERPRISE_SERVER_VERSION}`: `github_enterprise_server_version` (default `v3`).
 - `{ORG}` / `{OWNER}`: first value in `github_organization`.
 - `{REPO}`: `github_example_repository`.
-- `{INSTALLATION_ID}`: `github_installation_id`.
 - `{TEAM_SLUG}`: a team slug from `GET .../orgs/{ORG}/teams`.
 - `{ISSUE_NUMBER}` / `{PULL_NUMBER}`: numbers from issues/pulls lists.
 - `{REF}` / `{COMMIT_SHA}`: from `GET .../commits`.

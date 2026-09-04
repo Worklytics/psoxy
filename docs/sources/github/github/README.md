@@ -19,7 +19,6 @@ Example API call path parameters (uppercase placeholders in generated test calls
 
 - `{ORG}` / `{OWNER}`: `github_organization`.
 - `{REPO}`: `github_example_repository`.
-- `{INSTALLATION_ID}`: `github_installation_id`.
 - `{TEAM_SLUG}`: a team slug from `GET /orgs/{ORG}/teams`.
 - `{ISSUE_NUMBER}` / `{PULL_NUMBER}`: numbers from `GET .../issues` and `GET .../pulls`.
 - `{REF}` / `{COMMIT_SHA}`: from `GET .../commits`.
