@@ -1048,4 +1048,69 @@ class ApiDataRequestHandlerTest {
 
         assertEquals(HttpStatus.SC_OK, response.getStatusCode());
     }
+
+    @Test
+    @SneakyThrows
+    void handle_sourceAuthTokenFailure_isUnauthorizedNotInternalParseError() {
+        setup("gmail", "www.googleapis.com");
+        ApiDataRequestHandler spy = spy(handler);
+        when(spy.sourceAuthStrategy.isSourceAuthFailure(any(IOException.class))).thenReturn(true);
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/gmail/v1/users/me/messages");
+        when(request.getQuery()).thenReturn(Optional.empty());
+        when(request.getHeader(any())).thenReturn(Optional.empty());
+        when(request.getClientIp()).thenReturn(Optional.empty());
+        when(request.isHttps()).thenReturn(Optional.of(true));
+
+        HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
+        when(requestFactory.buildRequest(anyString(), any(), any()))
+            .thenThrow(new IOException(
+                "Error getting access token for service account: 401 Unauthorized\nPOST https://oauth2.googleapis.com/token, iss: sa@example.iam.gserviceaccount.com"));
+        doReturn(requestFactory).when(spy).getRequestFactory(any());
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        spy.sanitizer = sanitizer;
+
+        HttpEventResponse response = spy.handle(request,
+            ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
+
+        assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatusCode());
+        assertEquals(ErrorCauses.CONNECTION_SETUP.name(),
+            response.getHeaders().get(ProcessedDataMetadataFields.ERROR.getHttpHeader()));
+        assertTrue(response.getBody().contains("access token"));
+        assertFalse(response.getBody().contains("Failed to parse request"));
+    }
+
+    @Test
+    @SneakyThrows
+    void handle_unclassifiedIoException_isStillParseError() {
+        setup("gmail", "www.googleapis.com");
+        ApiDataRequestHandler spy = spy(handler);
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/gmail/v1/users/me/messages");
+        when(request.getQuery()).thenReturn(Optional.empty());
+        when(request.getHeader(any())).thenReturn(Optional.empty());
+        when(request.getClientIp()).thenReturn(Optional.empty());
+        when(request.isHttps()).thenReturn(Optional.of(true));
+
+        HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
+        when(requestFactory.buildRequest(anyString(), any(), any()))
+            .thenThrow(new IOException("unexpected end of stream"));
+        doReturn(requestFactory).when(spy).getRequestFactory(any());
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        spy.sanitizer = sanitizer;
+
+        HttpEventResponse response = spy.handle(request,
+            ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
+
+        assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertTrue(response.getBody().contains("Failed to parse request"));
+    }
 }
