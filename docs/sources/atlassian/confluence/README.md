@@ -12,6 +12,13 @@ NOTE: These instructions are derived from [worklytics-connector-specs](../../../
 - Example Data : [original/content_search.json](example-api-responses/original/content_search.json) |
   [sanitized/content_search.json](example-api-responses/sanitized/content_search.json)
 
+Example API call path parameters (uppercase placeholders in generated test calls):
+
+- `{CLOUD_ID}`: Confluence Cloud id from `GET /oauth/token/accessible-resources` (`connector_settings.confluence_example_cloud_id`).
+- `{GROUP_ID}`: a group id from `GET .../wiki/rest/api/group`.
+- `{ATTACHMENT_ID}`: an attachment id from content search / v2 APIs (the attachments-versions rule names this path param `{pageId}`; fill it with the attachment id).
+- `{BLOGPOST_ID}` / `{PAGE_ID}` / `{CUSTOM_CONTENT_ID}` / `{COMMENT_ID}`: ids of the corresponding Confluence objects whose versions you want to list. `{version}` in the rules is `v2` in the examples.
+
 See more examples in the `docs/sources/atlassian/confluence/example-api-responses` folder
 of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 

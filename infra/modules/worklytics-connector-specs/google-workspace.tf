@@ -27,11 +27,13 @@ locals {
       ]
       environment_variables : {}
       enable_side_output : false
+      # YAML `{accountId}` is `primary` (calendar) or `me` (settings / calendarList) here.
       example_api_calls : [
         "/calendar/v3/calendars/primary",
         "/calendar/v3/users/me/settings",
         "/calendar/v3/users/me/calendarList",
         "/calendar/v3/calendars/primary/events?maxResults=10",
+        # `{EVENT_ID}` is a Calendar event id from GET .../calendars/primary/events.
         "/calendar/v3/calendars/primary/events/{EVENT_ID}"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
@@ -62,12 +64,14 @@ locals {
       enable_side_output : false
       example_api_calls : [
         "/admin/directory/v1/users?customer=my_customer&maxResults=10",
+        # `{USER_ID}` is a Directory user email or user id from GET .../users (YAML `{accountId}`). `{GROUP_ID}` is a group email or group id from GET .../groups. `{ORG_UNIT_PATH}` is an org-unit path from GET .../orgunits (for example `Engineering`). YAML `{customerId}` is `my_customer` here.
         "/admin/directory/v1/users/{USER_ID}",
         "/admin/directory/v1/groups?customer=my_customer&maxResults=10",
         "/admin/directory/v1/groups/{GROUP_ID}",
         "/admin/directory/v1/groups/{GROUP_ID}/members?maxResults=10",
         "/admin/directory/v1/customer/my_customer/domains",
         "/admin/directory/v1/customer/my_customer/orgunits?maxResults=10",
+        "/admin/directory/v1/customer/my_customer/orgunits/{ORG_UNIT_PATH}",
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
@@ -90,6 +94,7 @@ locals {
       example_api_calls : [
         "/drive/v2/files",
         "/drive/v3/files",
+        # `{FILE_ID}` is a Drive file id from GET /drive/v3/files for the impersonated user.
         "/drive/v3/files/{FILE_ID}",
         "/drive/v3/files/{FILE_ID}/permissions",
         "/drive/v3/files/{FILE_ID}/revisions"
@@ -114,6 +119,7 @@ locals {
       enable_side_output : false
       example_api_calls : [
         "/gmail/v1/users/me/messages?maxResults=5&labelIds=SENT",
+        # YAML `{mailboxId}` is `me` here (the impersonated user). `{MESSAGE_ID}` is a Gmail message id from GET .../messages.
         "/gmail/v1/users/me/messages/{MESSAGE_ID}?format=metadata"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
