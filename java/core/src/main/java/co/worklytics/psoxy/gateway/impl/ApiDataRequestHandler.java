@@ -622,6 +622,10 @@ public class ApiDataRequestHandler {
                         proxyResponseContent = sanitizationResult.getContentAsString();
                         sanitizedApiResponseMetadata(sanitizationResult.getMetadata())
                                 .forEach((header, value) -> builder.header(header, value));
+                        sanitizationResult.getSanitizationWarnings().forEach(warningCode ->
+                            builder.multivaluedHeader(
+                                Pair.of(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
+                                    warningCode)));
                     }
 
 
@@ -687,11 +691,11 @@ public class ApiDataRequestHandler {
         metadata.put(ProcessedDataMetadataFields.PII_SALT_SHA256.getMetadataKey(),
                 healthCheckRequestHandler.piiSaltHash());
 
-        // q: add instance id to the metadata??
         return ProcessedContent.builder()
                 .contentType(originalContent.getContentType())
                 .contentCharset(originalContent.getContentCharset())
                 .metadata(metadata)
+                .sanitizationWarnings(sanitizerForRequest.getLastSanitizationWarnings())
                 .content(sanitized.getBytes(originalContent.getContentCharset()))
                 .build();
     }

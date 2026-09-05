@@ -1,4 +1,3 @@
-
 package com.avaulta.gateway.rules;
 
 import java.nio.charset.StandardCharsets;
@@ -26,6 +25,8 @@ import tools.jackson.databind.json.JsonMapper;
 @Log
 public class JsonSchemaValidationUtils {
 
+    private static final int MAX_LOG_OUTPUT_CHARS = 2000;
+
     /**
      * 3.x validates Jackson 3 nodes ({@code tools.jackson}), not our Jackson 2
      * {@code com.fasterxml.jackson} nodes. Use this mapper for in-memory {@code valueToTree}
@@ -39,6 +40,28 @@ public class JsonSchemaValidationUtils {
             CacheBuilder.newBuilder()
                     .maximumSize(100)
                     .build(CacheLoader.from(this::getJsonSchema));
+
+    private final LoadingCache<JsonSchemaFilter, Schema> jsonSchemaFilterCache =
+            CacheBuilder.newBuilder()
+                    .maximumSize(100)
+                    .build(CacheLoader.from(this::getJsonSchemaFromFilter));
+
+    /**
+     * Validates JSON against an augment {@link JsonSchemaFilter} (genMetadata output gate, etc.).
+     */
+    @SneakyThrows
+    public boolean validateJsonBySchema(String jsonString, JsonSchemaFilter schema) {
+        if (schema == null) {
+            return true;
+        }
+        Schema jsonSchema = jsonSchemaFilterCache.get(schema);
+        List<Error> validationMessages = jsonSchema.validate(jsonString, InputFormat.JSON);
+        if (!validationMessages.isEmpty()) {
+            log.warning("Validation failed for augment output: " + validationMessages
+                + "; output=" + truncateForLog(jsonString));
+        }
+        return validationMessages.isEmpty();
+    }
 
     @SneakyThrows
     public boolean validateJsonBySchema(String jsonString,
@@ -141,6 +164,20 @@ public class JsonSchemaValidationUtils {
 
         return schemaRegistry.getSchema(
                 JACKSON3.valueToTree(rewritePseudonymToPattern(schema)));
+    }
+
+    private Schema getJsonSchemaFromFilter(JsonSchemaFilter schema) {
+        return schemaRegistry.getSchema(JACKSON3.valueToTree(schema));
+    }
+
+    private static String truncateForLog(String value) {
+        if (value == null) {
+            return "null";
+        }
+        if (value.length() <= MAX_LOG_OUTPUT_CHARS) {
+            return value;
+        }
+        return value.substring(0, MAX_LOG_OUTPUT_CHARS) + "... (" + value.length() + " chars total)";
     }
 
     com.avaulta.gateway.rules.JsonSchema rewritePseudonymToPattern(

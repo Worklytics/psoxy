@@ -26,6 +26,7 @@ import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.NoOpResourceService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
+import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import co.worklytics.psoxy.gcp.GcpKmsPublicKeyStoreClient;
 import dagger.Binds;
 import dagger.Module;
@@ -213,5 +214,9 @@ public interface GcpModule {
         @Binds
         @IntoSet
         abstract PublicKeyStoreClient gcpKmsPublicKeyStoreClient(GcpKmsPublicKeyStoreClient impl);
+
+        @Binds
+        @IntoSet
+        abstract GenMetadataChatModelProvider vertexGeminiChatModelProvider(VertexGeminiChatModelProvider impl);
     }
 }

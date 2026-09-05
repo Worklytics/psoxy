@@ -68,13 +68,15 @@ module "worklytics_connectors" {
 # the naming convention of `{source-identifier}.tf`, eg `msft-365.tf`
 # lines below merge results of those files back into single maps of sources
 locals {
-  api_connectors = merge(
-    module.worklytics_connectors.enabled_api_connectors,
-    module.worklytics_connectors_google_workspace.enabled_api_connectors,
-    local.msft_api_connectors_with_auth,
-    var.custom_api_connectors,
-    {}
-  )
+  api_connectors = {
+    for k, v in merge(
+      module.worklytics_connectors.enabled_api_connectors,
+      module.worklytics_connectors_google_workspace.enabled_api_connectors,
+      local.msft_api_connectors_with_auth,
+      var.custom_api_connectors,
+      {}
+    ) : k => merge(v, { enable_remote_resources = try(v.enable_remote_resources, true) })
+  }
 
   custom_bulk_connectors_with_defaults = {
     for k, v in var.custom_bulk_connectors : k => merge({
@@ -84,10 +86,12 @@ locals {
     }, v)
   }
 
-  bulk_connectors = merge(
-    module.worklytics_connectors.enabled_bulk_connectors,
-    local.custom_bulk_connectors_with_defaults,
-  )
+  bulk_connectors = {
+    for k, v in merge(
+      module.worklytics_connectors.enabled_bulk_connectors,
+      local.custom_bulk_connectors_with_defaults,
+    ) : k => merge(v, { enable_remote_resources = try(v.enable_remote_resources, true) })
+  }
 
 
   source_authorization_todos = concat(
@@ -127,7 +131,8 @@ module "psoxy" {
   webhook_collectors = { for k, v in var.webhook_collectors : k => merge(
     v,
     {
-      example_payload = try(file(v.example_payload_file), null)
+      example_payload         = try(file(v.example_payload_file), null)
+      enable_remote_resources = try(v.enable_remote_resources, true)
     }
   ) }
   non_production_connectors      = var.non_production_connectors
@@ -143,18 +148,22 @@ module "psoxy" {
   external_api_alb = var.external_api_alb
   # Or BYO ALB (mutually exclusive with external_api_alb):
   # api_connector_external_lb_host = "proxy.example.com"
-  custom_bulk_connector_rules     = var.custom_bulk_connector_rules
-  custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
-  lookup_tables                   = var.lookup_tables
-  custom_artifacts_bucket_name    = var.custom_artifacts_bucket_name
-  custom_side_outputs             = var.custom_side_outputs
-  todos_as_local_files            = var.todos_as_local_files
-  todo_step                       = local.max_auth_todo_step
-  bucket_force_destroy            = var.bucket_force_destroy
-  tf_gcp_principal_email          = var.gcp_terraform_sa_account_email
-  provision_project_level_iam     = var.provision_project_level_iam
-  bucket_access_logs_destination  = var.bucket_access_logs_destination
-  enable_remote_resources         = true
+  custom_bulk_connector_rules       = var.custom_bulk_connector_rules
+  custom_bulk_connector_arguments   = var.custom_bulk_connector_arguments
+  lookup_tables                     = var.lookup_tables
+  custom_artifacts_bucket_name      = var.custom_artifacts_bucket_name
+  custom_side_outputs               = var.custom_side_outputs
+  todos_as_local_files              = var.todos_as_local_files
+  todo_step                         = local.max_auth_todo_step
+  enable_remote_resources           = true
+  gen_metadata_backend              = var.gen_metadata_backend
+  gen_metadata_daily_cost_limit_usd = var.gen_metadata_daily_cost_limit_usd
+  gen_metadata_budget_alert_emails  = var.gen_metadata_budget_alert_emails
+  billing_account_id                = var.billing_account_id
+  bucket_force_destroy              = var.bucket_force_destroy
+  tf_gcp_principal_email            = var.gcp_terraform_sa_account_email
+  provision_project_level_iam       = var.provision_project_level_iam
+  bucket_access_logs_destination    = var.bucket_access_logs_destination
 }
 
 locals {
@@ -266,6 +275,28 @@ output "todos_2" {
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value       = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics)[*].todo) : null
+}
+
+output "todos_4" {
+  description = "Remote resource uploads (OpenNLP) and related post-deploy TODOs, in markdown format."
+  value = var.todos_as_outputs ? join("\n\n", compact([
+    module.psoxy.remote_resource_opennlp_todo,
+    module.psoxy.gen_metadata_vertex_budget_todo,
+  ])) : null
+}
+
+resource "local_file" "todo_4_upload_opennlp_models" {
+  count = var.todos_as_local_files && module.psoxy.remote_resource_opennlp_todo != null ? 1 : 0
+
+  filename = "TODO 4 - upload OpenNLP models.md"
+  content  = module.psoxy.remote_resource_opennlp_todo
+}
+
+resource "local_file" "todo_4_gen_metadata_vertex_budget" {
+  count = var.todos_as_local_files && module.psoxy.gen_metadata_vertex_budget_todo != null ? 1 : 0
+
+  filename = "TODO 4 - configure Vertex genMetadata billing budget.md"
+  content  = module.psoxy.gen_metadata_vertex_budget_todo
 }
 
 # although should be sensitive such that Terraform won't echo it to command line or expose it, leave
