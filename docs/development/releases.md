@@ -1,6 +1,6 @@
 # Releases
 
-Cut, QA, and local publish are run from the internal `Worklytics/proxy-dev` repo against a psoxy checkout. See `tools/release/README.md` in that repo.
+Cut, QA, and local publish are run from the internal `Worklytics/proxy-dev` repo against a psoxy checkout. This repo only retains the scripts invoked by GitHub Actions (see [tools/release/README.md](../../tools/release/README.md)).
 
 GitHub Actions in **this** repo still publish artifacts when a `v*` tag or `rc-*` branch is pushed:
 
