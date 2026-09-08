@@ -1,10 +1,12 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
@@ -194,6 +196,16 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
 
         assertEquals("123-abc.apps.googleusercontent.com", ((ServiceAccountCredentials) credentials).getClientId());
         assertEquals("http://localhost:8080/token", ((ServiceAccountCredentials) credentials).getTokenServerUri().toString());
+    }
+
+    @org.junit.jupiter.api.Test
+    void isSourceAuthFailure_googleAccessTokenMessage() {
+        GoogleCloudPlatformServiceAccountKeyAuthStrategy strategy =
+            new GoogleCloudPlatformServiceAccountKeyAuthStrategy();
+        assertTrue(strategy.isSourceAuthFailure(new IOException(
+            "Error getting access token for service account: 401 Unauthorized\nPOST https://oauth2.googleapis.com/token, iss: sa@example.iam.gserviceaccount.com")));
+        assertFalse(strategy.isSourceAuthFailure(
+            new IOException("unexpected end of stream")));
     }
 
 }

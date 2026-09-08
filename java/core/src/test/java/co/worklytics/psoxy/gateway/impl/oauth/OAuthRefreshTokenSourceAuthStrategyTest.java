@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.io.IOException;
 import java.sql.Date;
 import java.time.Clock;
 import java.time.Instant;
@@ -28,6 +29,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpResponseException;
 import com.google.auth.oauth2.AccessToken;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
@@ -338,5 +341,23 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
             assertTrue(proactiveGracePeriodSeconds >= strategy.MIN_PROACTIVE_TOKEN_REFRESH.getSeconds());
             assertTrue(proactiveGracePeriodSeconds <= strategy.MAX_PROACTIVE_TOKEN_REFRESH.getSeconds());
         });
+    }
+
+    @Test
+    void isSourceAuthFailure_httpResponseExceptionFromTokenEndpoint() {
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
+        HttpResponseException unauthorized = new HttpResponseException.Builder(
+            401, "Unauthorized", new HttpHeaders()).build();
+        assertTrue(strategy.isSourceAuthFailure(unauthorized));
+        assertTrue(strategy.isSourceAuthFailure(new IOException("token refresh failed", unauthorized)));
+        assertFalse(strategy.isSourceAuthFailure(new IOException("unexpected end of stream")));
+    }
+
+    @Test
+    void isSourceAuthFailure_oauthErrorCodes() {
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
+        assertTrue(strategy.isSourceAuthFailure(new IOException("invalid_grant: refresh token expired")));
+        assertTrue(strategy.isSourceAuthFailure(new IOException("invalid_client")));
+        assertFalse(strategy.isSourceAuthFailure(new IOException("Failed to parse stored access token JSON")));
     }
 }
