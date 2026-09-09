@@ -71,7 +71,7 @@ public class GenMetadataProcessor {
                 if (attempt > 1) {
                     log.info("genMetadata inference retry attempt " + attempt + " of " + maxAttempts);
                 }
-                Map<?, ?> parsed = inferOnce(taskPrompt, outputSchema, inputJson);
+                Object parsed = inferOnce(taskPrompt, outputSchema, inputJson);
                 if (parsed != null && validatesOutputSchema(parsed, outputSchema)) {
                     return parsed;
                 }
@@ -87,7 +87,7 @@ public class GenMetadataProcessor {
         }
     }
 
-    private Map<?, ?> inferOnce(String taskPrompt, JsonSchemaFilter outputSchema, String inputJson)
+    private Object inferOnce(String taskPrompt, JsonSchemaFilter outputSchema, String inputJson)
             throws Exception {
         Instant startedAt = Instant.now();
         long startedNanos = System.nanoTime();
@@ -105,17 +105,21 @@ public class GenMetadataProcessor {
             log.info("genMetadata backend returned non-string type: "
                 + raw.getClass().getSimpleName());
         }
-        Map<?, ?> parsed = parseModelJson(raw, outputSchema);
+        Object parsed = parseModelJson(raw, outputSchema);
         if (parsed == null) {
             log.warning("genMetadata backend returned unparseable output");
             return null;
         }
-        log.info("genMetadata parsed output keys: " + parsed.keySet()
-            + "; value=" + truncateForLog(serializeForLog(parsed)));
+        if (parsed instanceof Map<?, ?> map) {
+            log.info("genMetadata parsed output keys: " + map.keySet()
+                + "; value=" + truncateForLog(serializeForLog(parsed)));
+        } else {
+            log.info("genMetadata parsed output: " + truncateForLog(serializeForLog(parsed)));
+        }
         return parsed;
     }
 
-    private boolean validatesOutputSchema(Map<?, ?> parsed, JsonSchemaFilter outputSchema) {
+    private boolean validatesOutputSchema(Object parsed, JsonSchemaFilter outputSchema) {
         try {
             String json = objectMapper.writeValueAsString(parsed);
             return jsonSchemaValidationUtils.validateJsonBySchema(json, outputSchema);
@@ -145,20 +149,26 @@ public class GenMetadataProcessor {
         }
     }
 
-    Map<?, ?> parseModelJson(Object raw) {
+    Object parseModelJson(Object raw) {
         return parseModelJson(raw, null);
     }
 
-    Map<?, ?> parseModelJson(Object raw, JsonSchemaFilter outputSchema) {
+    Object parseModelJson(Object raw, JsonSchemaFilter outputSchema) {
         if (raw == null) {
             return null;
         }
+        Optional<GenMetadataSchemaSupport.ClassifyShape> classify =
+            GenMetadataSchemaSupport.classifyShape(outputSchema);
         if (raw instanceof Map<?, ?> map) {
+            if (classify.isPresent() && classify.get().isRootString()) {
+                return GenMetadataSchemaSupport.labelFromMap(map, classify.get()).orElse(null);
+            }
             return toSortedMap(map);
         }
         if (raw instanceof String response) {
-            Optional<GenMetadataSchemaSupport.ClassifyShape> classify =
-                GenMetadataSchemaSupport.classifyShape(outputSchema);
+            if (classify.isPresent() && classify.get().isRootString()) {
+                return parseRootStringLabel(response, classify.get());
+            }
 
             // Prefer valid JSON object when present (including after prose / fences).
             String json = extractJsonObject(response);
@@ -191,7 +201,40 @@ public class GenMetadataProcessor {
         return null;
     }
 
-    private String serializeForLog(Map<?, ?> parsed) {
+    private String parseRootStringLabel(String response,
+                                         GenMetadataSchemaSupport.ClassifyShape shape) {
+        String trimmed = stripMarkdownFence(response.trim());
+
+        if (trimmed.startsWith("\"")) {
+            try {
+                String parsed = objectMapper.readValue(trimmed, String.class);
+                Optional<String> label = GenMetadataSchemaSupport.recoverLabel(parsed, shape);
+                if (label.isPresent()) {
+                    return label.get();
+                }
+            } catch (Exception e) {
+                log.log(Level.FINE, "genMetadata string-enum JSON string parse failed", e);
+            }
+        }
+
+        String json = extractJsonObject(trimmed);
+        if (json != null) {
+            try {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> map = objectMapper.readValue(json, Map.class);
+                Optional<String> fromMap = GenMetadataSchemaSupport.labelFromMap(map, shape);
+                if (fromMap.isPresent()) {
+                    return fromMap.get();
+                }
+            } catch (Exception e) {
+                log.log(Level.FINE, "genMetadata string-enum object fallback parse failed", e);
+            }
+        }
+
+        return GenMetadataSchemaSupport.recoverLabel(trimmed, shape).orElse(null);
+    }
+
+    private String serializeForLog(Object parsed) {
         try {
             return objectMapper.writeValueAsString(parsed);
         } catch (Exception e) {

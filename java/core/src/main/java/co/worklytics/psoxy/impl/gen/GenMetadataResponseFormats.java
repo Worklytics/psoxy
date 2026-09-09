@@ -33,13 +33,17 @@ public class GenMetadataResponseFormats {
             GenMetadataSchemaSupport.classifyShape(outputSchema);
         if (classify.isPresent()) {
             GenMetadataSchemaSupport.ClassifyShape shape = classify.get();
-            JsonObjectSchema root = JsonObjectSchema.builder()
-                .addProperty(shape.getPropertyName(), JsonEnumSchema.builder()
+            JsonSchemaElement root = shape.isRootString()
+                ? JsonEnumSchema.builder()
                     .enumValues(shape.getEnumValues())
-                    .build())
-                .required(shape.getPropertyName())
-                .additionalProperties(false)
-                .build();
+                    .build()
+                : JsonObjectSchema.builder()
+                    .addProperty(shape.getPropertyName(), JsonEnumSchema.builder()
+                        .enumValues(shape.getEnumValues())
+                        .build())
+                    .required(shape.getPropertyName())
+                    .additionalProperties(false)
+                    .build();
             return Optional.of(ResponseFormat.builder()
                 .type(ResponseFormatType.JSON)
                 .jsonSchema(JsonSchema.builder()

@@ -30,7 +30,9 @@ public class GenMetadataPromptBudget {
         String schemaJson = schemaJson(outputSchema);
         int contextChars = contextCharsBudget(contextLength, maxOutputTokens);
         int systemLen = Math.max(
-            GenMetadataPromptBuilder.SYSTEM_CLASSIFY.length(),
+            Math.max(
+                GenMetadataPromptBuilder.SYSTEM_CLASSIFY.length(),
+                GenMetadataPromptBuilder.SYSTEM_CLASSIFY_STRING.length()),
             GenMetadataPromptBuilder.SYSTEM_EXTRACT.length());
         int overheadChars = charEstimate(
             systemLen

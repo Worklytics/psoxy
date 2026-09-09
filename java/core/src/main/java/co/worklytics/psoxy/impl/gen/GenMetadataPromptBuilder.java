@@ -23,6 +23,13 @@ class GenMetadataPromptBuilder {
             + "Use only an allowed label as the property value. "
             + "No markdown fences, no prose before or after the JSON.";
 
+    static final String SYSTEM_CLASSIFY_STRING =
+        "You are a data-processing component in a privacy proxy. "
+            + "Respond with exactly one allowed classification label as a JSON string. "
+            + "Example: \"Research and Ideation\". "
+            + "Do not wrap the label in an object or add any other keys. "
+            + "No markdown fences, no prose before or after the string.";
+
     static final String SYSTEM_EXTRACT =
         "You are a data-processing component in a privacy proxy. "
             + "Respond with exactly one JSON object that is an INSTANCE of the task result, "
@@ -33,8 +40,11 @@ class GenMetadataPromptBuilder {
     static List<ChatMessage> toMessages(String taskPrompt, JsonSchemaFilter outputSchema,
                                         String inputData, ObjectMapper objectMapper) {
         if (GenMetadataSchemaSupport.mode(outputSchema) == GenMetadataSchemaSupport.Mode.CLASSIFY) {
+            GenMetadataSchemaSupport.ClassifyShape shape =
+                GenMetadataSchemaSupport.classifyShape(outputSchema).orElseThrow();
+            String system = shape.isRootString() ? SYSTEM_CLASSIFY_STRING : SYSTEM_CLASSIFY;
             return List.of(
-                SystemMessage.from(SYSTEM_CLASSIFY),
+                SystemMessage.from(system),
                 UserMessage.from(classifyUserContent(taskPrompt, outputSchema, inputData))
             );
         }
@@ -48,6 +58,18 @@ class GenMetadataPromptBuilder {
                                       String inputData) {
         GenMetadataSchemaSupport.ClassifyShape shape =
             GenMetadataSchemaSupport.classifyShape(outputSchema).orElseThrow();
+        String labels = String.join("\n", shape.getEnumValues());
+        if (shape.isRootString()) {
+            return """
+                Task: %s
+
+                Return exactly one of these labels as a JSON string (for example "Excluded"):
+                %s
+
+                Input data to process:
+                %s
+                """.formatted(taskPrompt.trim(), labels, inputData);
+        }
         String property = shape.getPropertyName();
         return """
             Task: %s
@@ -60,7 +82,7 @@ class GenMetadataPromptBuilder {
             """.formatted(
             taskPrompt.trim(),
             property,
-            String.join("\n", shape.getEnumValues()),
+            labels,
             inputData);
     }
 
