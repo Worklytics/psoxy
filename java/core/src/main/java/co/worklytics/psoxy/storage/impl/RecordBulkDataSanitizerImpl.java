@@ -141,11 +141,11 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
     RecordWriter createWriter(RecordRules.Format format, Writer writer, OutputStream out) throws IOException {
         switch (format) {
             case CSV:
-                return new CsvRecordWriter(writer);
+                return new CsvRecordWriter(writer, objectMapper);
             case JSON_ARRAY:
                 return new JsonArrayRecordWriter(writer, objectMapper, jsonConfiguration);
             case PARQUET:
-                return new ParquetRecordWriter(out);
+                return new ParquetRecordWriter(out, objectMapper);
             case NDJSON:
             default:
                 return new NdjsonRecordWriter(writer, jsonConfiguration);

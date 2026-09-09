@@ -14,18 +14,25 @@ import org.apache.parquet.schema.LogicalTypeAnnotation;
 import org.apache.parquet.schema.PrimitiveType;
 import org.apache.parquet.schema.Types;
 import blue.strategic.parquet.ParquetWriter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.java.Log;
 
 @Log
 public class ParquetRecordWriter implements RecordWriter {
 
     private final OutputStream outputStream;
+    private final ObjectMapper objectMapper;
     private File tempFile;
     private ParquetWriter<Map<String, Object>> writer;
     private boolean initialized = false;
 
     public ParquetRecordWriter(OutputStream out) {
+        this(out, new ObjectMapper());
+    }
+
+    public ParquetRecordWriter(OutputStream out, ObjectMapper objectMapper) {
         this.outputStream = out;
+        this.objectMapper = objectMapper != null ? objectMapper : new ObjectMapper();
     }
 
     @Override
@@ -134,7 +141,8 @@ public class ParquetRecordWriter implements RecordWriter {
                             valueWriter.write(key, (Boolean) val);
                             break;
                         default:
-                            valueWriter.write(key, String.valueOf(val));
+                            Object cell = RecordCellSerialization.forTabularCell(val, objectMapper);
+                            valueWriter.write(key, cell == null ? null : String.valueOf(cell));
                             break;
                     }
                 }

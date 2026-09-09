@@ -169,6 +169,40 @@ class RecordBulkDataSanitizerImplTest {
         assertTrue(output.contains("\"content\":null"));
     }
 
+    /**
+     * CSV cells must JSON-serialize structured augment outputs (textDigest / genMetadata Maps),
+     * not Java {@code Map#toString()} ({@code {category=...}}).
+     */
+    @SneakyThrows
+    @Test
+    void csv_structuredAugmentOutputAsJson() {
+        this.setUpWithRules("---\n" +
+            "format: \"CSV\"\n" +
+            "augments:\n" +
+            "- !<textDigest>\n" +
+            "  jsonPaths:\n" +
+            "  - \"$.prompt\"\n" +
+            "transforms:\n" +
+            "- redact: \"prompt\"\n");
+
+        String input = "id,prompt\n" +
+            "1,hello world\n" +
+            "2,classify this text\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/prompts.csv"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        assertEquals("id,prompt,+prompt:textDigest\n"
+            + "1,,\"{\"\"length\"\":11,\"\"word_count\"\":2}\"\n"
+            + "2,,\"{\"\"length\"\":18,\"\"word_count\"\":3}\"\n",
+            output);
+        assertTrue(!output.contains("{length="),
+            "must not use Map.toString(); got:\n" + output);
+    }
+
     @Test
     void noTransforms() throws IOException {
         this.setUpWithRules("---\n" +
