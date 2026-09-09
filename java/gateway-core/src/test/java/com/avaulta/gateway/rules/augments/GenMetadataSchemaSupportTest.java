@@ -23,6 +23,16 @@ class GenMetadataSchemaSupportTest {
     }
 
     @Test
+    void classifyShape_detectsRootStringEnum() {
+        JsonSchemaFilter schema = stringEnumSchema();
+        Optional<GenMetadataSchemaSupport.ClassifyShape> shape =
+            GenMetadataSchemaSupport.classifyShape(schema);
+        assertTrue(shape.isPresent());
+        assertTrue(shape.get().isRootString());
+        assertEquals(GenMetadataSchemaSupport.Mode.CLASSIFY, GenMetadataSchemaSupport.mode(schema));
+    }
+
+    @Test
     void classifyShape_rejectsMultiPropertySchemas() {
         JsonSchemaFilter schema = JsonSchemaFilter.builder()
             .type("object")
@@ -74,6 +84,49 @@ class GenMetadataSchemaSupportTest {
                 .build(),
             "write an email");
         assertEquals(Map.of("category", "Research and Ideation"), out);
+    }
+
+    @Test
+    void processor_parsesJsonStringForRootStringEnum() {
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            (prompt, schema, input) -> "\"Research and Ideation\"",
+            new ObjectMapper(),
+            4096);
+        Object out = processor.compute(
+            Augment.GenMetadata.builder()
+                .jsonPath("$..content")
+                .prompt("classify")
+                .outputSchema(stringEnumSchema())
+                .build(),
+            "write an email");
+        assertEquals("Research and Ideation", out);
+    }
+
+    @Test
+    void processor_parsesBareLabelForRootStringEnum() {
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            (prompt, schema, input) -> "Excluded",
+            new ObjectMapper(),
+            4096);
+        Object out = processor.compute(
+            Augment.GenMetadata.builder()
+                .jsonPath("$..content")
+                .prompt("classify")
+                .outputSchema(stringEnumSchema())
+                .build(),
+            "thanks");
+        assertEquals("Excluded", out);
+    }
+
+    private static JsonSchemaFilter stringEnumSchema() {
+        return JsonSchemaFilter.builder()
+            .type("string")
+            .enumValues(List.of(
+                "Email Drafting",
+                "Research and Ideation",
+                "Uncategorized",
+                "Excluded"))
+            .build();
     }
 
     private static JsonSchemaFilter categorySchema() {

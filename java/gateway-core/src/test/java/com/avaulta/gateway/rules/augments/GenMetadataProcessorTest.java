@@ -134,6 +134,20 @@ class GenMetadataProcessorTest {
     }
 
     @Test
+    void parseModelJson_parsesQuotedJsonStringForRootEnum() {
+        JsonSchemaFilter schema = JsonSchemaFilter.builder()
+            .type("string")
+            .enumValues(List.of("Email Drafting", "Excluded", "Uncategorized"))
+            .build();
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            new UnavailableGenMetadataBackend(), OBJECT_MAPPER);
+        assertEquals("Email Drafting",
+            processor.parseModelJson("\"Email Drafting\"", schema));
+        assertEquals("Excluded",
+            processor.parseModelJson("Excluded", schema));
+    }
+
+    @Test
     void process_throwsWhenPromptMissing() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
             new UnavailableGenMetadataBackend(), OBJECT_MAPPER);
