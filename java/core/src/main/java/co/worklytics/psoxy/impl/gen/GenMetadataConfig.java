@@ -36,7 +36,7 @@ public class GenMetadataConfig {
     public static final String DEFAULT_BEDROCK_MODEL = "anthropic.claude-3-haiku-20240307-v1:0";
 
     /** Default Vertex Gemini model id when {@code METADATA_GEN_MODEL} is unset. */
-    public static final String DEFAULT_VERTEX_MODEL = "gemini-3.5-flash";
+    public static final String DEFAULT_VERTEX_MODEL = "gemini-3.5-flash-lite";
 
     /**
      * Default Vertex location when {@code METADATA_GEN_MODEL_REGION} is unset.

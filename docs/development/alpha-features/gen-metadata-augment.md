@@ -122,7 +122,7 @@ No `model`, `backend`, or `maxTokens` in rules — those stay deployment config.
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `METADATA_GEN_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). Java defaults unset backend toward `bedrock`. | `bedrock` \| `vertex` only |
-| `METADATA_GEN_MODEL` | Haiku / `gemini-3.5-flash` defaults | Cloud model id |
+| `METADATA_GEN_MODEL` | Haiku / `gemini-3.5-flash-lite` defaults | Cloud model id |
 | `METADATA_GEN_MODEL_REGION` | Vertex: `global` | Vertex publisher-model **location**. Default `global` (google-genai → `https://aiplatform.googleapis.com`). Ignored on AWS. |
 | `METADATA_GEN_TIMEOUT_SECONDS` | `15` | Per-call timeout |
 | `METADATA_GEN_MAX_INPUT_CHARS` | `4096` | Truncate source (raise carefully for transcripts) |
@@ -130,7 +130,7 @@ No `model`, `backend`, or `maxTokens` in rules — those stay deployment config.
 | `METADATA_GEN_RETRIES` | `2` | Total attempts per augment when parse/schema fails (retry already included) |
 | `ENABLE_GEN_METADATA` | unset | Set by Terraform `enable_gen_metadata = true` |
 
-Vertex project comes from ADC / metadata (`ServiceOptions.getDefaultProjectId()`). Model location is **not** the function region. Default is `METADATA_GEN_MODEL=gemini-3.5-flash` + `METADATA_GEN_MODEL_REGION=global`.
+Vertex project comes from ADC / metadata (`ServiceOptions.getDefaultProjectId()`). Model location is **not** the function region. Default is `METADATA_GEN_MODEL=gemini-3.5-flash-lite` + `METADATA_GEN_MODEL_REGION=global`.
 
 Vertex uses LangChain4j **google-genai** (not the legacy vertex-ai-gemini SDK) and sets `thinkingLevel=MINIMAL`. Gemini 3.5 Flash otherwise defaults to `MEDIUM` thinking, which ate the old 256-token output cap and the 15s timeout (truncated `{"category": "`). Create logs include `thinkingLevel=` and `maxOutputTokens=`.
 
@@ -138,15 +138,13 @@ Vertex uses LangChain4j **google-genai** (not the legacy vertex-ai-gemini SDK) a
 
 Per-row Vertex calls are typically several seconds (network + model). A 100-row bulk file is **sequential** (one augment per row), so wall time ≈ rows × (attempts × latency). Failed parses double cost when retries fire. `thinkingLevel=MINIMAL` is required for full Flash classify; Lite models default closer to minimal thinking but still benefit from the higher max-token default.
 
-For classify throughput, prefer a Flash-Lite id over full Flash:
+Default is Flash-Lite for classify throughput. Override to full Flash when quality matters more than p50 latency:
 
 | Model | Relative speed (approx.) | Notes |
 |-------|--------------------------|-------|
-| `gemini-3.5-flash-lite` | Fastest 3.5-class Lite (~350 tok/s claimed) | Best default for high-volume classify |
+| `gemini-3.5-flash-lite` | Fastest 3.5-class Lite (~350 tok/s claimed) | **Default** — best for high-volume classify |
 | `gemini-2.5-flash-lite` | Slower than 3.5 Flash-Lite | Still fine for cheap/low-latency classify |
-| `gemini-3.5-flash` | Slower / heavier than Lite | Better quality; overkill for enum classify |
-
-Set `METADATA_GEN_MODEL=gemini-3.5-flash-lite` for bulk classify demos. Keep `gemini-3.5-flash` when quality matters more than p50 latency.
+| `gemini-3.5-flash` | Slower / heavier than Lite | Better quality; set `METADATA_GEN_MODEL=gemini-3.5-flash` when needed |
 
 **Removed / abandoned:** `METADATA_GEN_BACKEND=local` / former `PSOXY_GEN_*` names, Jlama, `JAVA_TOOL_OPTIONS` vector flags for genMetadata, remote `llm/*.zip` model archives, 4096 MB memory floor for genMetadata.
 
