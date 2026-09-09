@@ -361,7 +361,10 @@ module "api_connector" {
         METADATA_GEN_BACKEND = local.connector_gen_metadata_backend[each.key]
       },
       try(var.general_environment_variables["METADATA_GEN_MODEL"], null) == null ? {
-        METADATA_GEN_MODEL = "gemini-2.0-flash-001"
+        METADATA_GEN_MODEL = "gemini-3.5-flash"
+      } : {},
+      try(var.general_environment_variables["METADATA_GEN_MODEL_REGION"], null) == null ? {
+        METADATA_GEN_MODEL_REGION = "global"
       } : {},
     ) : {},
   )
@@ -581,7 +584,10 @@ module "bulk_connector" {
         METADATA_GEN_BACKEND = local.connector_gen_metadata_backend[each.key]
       },
       try(var.general_environment_variables["METADATA_GEN_MODEL"], null) == null ? {
-        METADATA_GEN_MODEL = "gemini-2.0-flash-001"
+        METADATA_GEN_MODEL = "gemini-3.5-flash"
+      } : {},
+      try(var.general_environment_variables["METADATA_GEN_MODEL_REGION"], null) == null ? {
+        METADATA_GEN_MODEL_REGION = "global"
       } : {},
     ) : {},
   )

@@ -121,14 +121,15 @@ No `model`, `backend`, or `maxTokens` in rules — those stay deployment config.
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `METADATA_GEN_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). Java defaults unset backend toward `bedrock`. | `bedrock` \| `vertex` only |
-| `METADATA_GEN_MODEL` | Haiku / Gemini Flash defaults | Cloud model id |
+| `METADATA_GEN_MODEL` | Haiku / `gemini-3.5-flash` defaults | Cloud model id |
+| `METADATA_GEN_MODEL_REGION` | Vertex: `global` | Vertex publisher-model location (`global`, `us`, `eu`, or a regional id). Independent of Cloud Function region. Ignored on AWS. |
 | `METADATA_GEN_TIMEOUT_SECONDS` | `15` | Per-call timeout |
 | `METADATA_GEN_MAX_INPUT_CHARS` | `4096` | Truncate source (raise carefully for transcripts) |
 | `METADATA_GEN_MAX_TOKENS` | `256` (classify); consider higher for extract | Max generation tokens |
 | `METADATA_GEN_RETRIES` | `2` | Retries on parse/schema failure (less critical once constraints work) |
 | `ENABLE_GEN_METADATA` | unset | Set by Terraform `enable_gen_metadata = true` |
 
-Vertex uses the **same project/region as the function**: project via ADC / metadata (`ServiceOptions.getDefaultProjectId()`); region via optional `GOOGLE_CLOUD_REGION` / `FUNCTION_REGION`, else Cloud Run metadata (`instance/region` or zone). Terraform does not inject project/region for genMetadata.
+Vertex project comes from ADC / metadata (`ServiceOptions.getDefaultProjectId()`). Model location is **not** the function region: default `gemini-3.5-flash` is served from `global` (also `us` / `eu` multi-region); many single regions (e.g. `us-central1`) return 404. Set `METADATA_GEN_MODEL_REGION` when using a regional-only model.
 
 **Removed / abandoned:** `METADATA_GEN_BACKEND=local` / former `PSOXY_GEN_*` names, Jlama, `JAVA_TOOL_OPTIONS` vector flags for genMetadata, remote `llm/*.zip` model archives, 4096 MB memory floor for genMetadata.
 

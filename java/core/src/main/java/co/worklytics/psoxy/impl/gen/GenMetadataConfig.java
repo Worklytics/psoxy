@@ -29,10 +29,22 @@ public class GenMetadataConfig {
     public static final String DEFAULT_BEDROCK_MODEL = "anthropic.claude-3-haiku-20240307-v1:0";
 
     /** Default Vertex Gemini model id when {@code METADATA_GEN_MODEL} is unset. */
-    public static final String DEFAULT_VERTEX_MODEL = "gemini-2.0-flash-001";
+    public static final String DEFAULT_VERTEX_MODEL = "gemini-3.5-flash";
+
+    /**
+     * Default Vertex location when {@code METADATA_GEN_MODEL_REGION} is unset.
+     * Matches {@link #DEFAULT_VERTEX_MODEL}, which is served from the global (and {@code us}/{@code eu})
+     * endpoints — many single-region locations (e.g. {@code us-central1}) return 404 for this model.
+     */
+    public static final String DEFAULT_VERTEX_MODEL_REGION = "global";
 
     String backend;
     String modelId;
+    /**
+     * Vertex AI location for the publisher model endpoint ({@code global}, {@code us}, regional id, …).
+     * Null when unset / non-Vertex; Vertex provider applies {@link #DEFAULT_VERTEX_MODEL_REGION}.
+     */
+    String modelRegion;
     int timeoutSeconds;
     int maxInputChars;
     int maxTokens;
@@ -49,6 +61,10 @@ public class GenMetadataConfig {
             .filter(StringUtils::isNotBlank)
             .orElseGet(() -> defaultModelForBackend(backend))
             .trim();
+        String modelRegion = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_MODEL_REGION)
+            .filter(StringUtils::isNotBlank)
+            .map(String::trim)
+            .orElseGet(() -> BACKEND_VERTEX.equalsIgnoreCase(backend) ? DEFAULT_VERTEX_MODEL_REGION : null);
         int timeout = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_TIMEOUT_SECONDS)
             .flatMap(GenMetadataConfig::parsePositiveInt)
             .orElse(15);
@@ -64,6 +80,7 @@ public class GenMetadataConfig {
         return GenMetadataConfig.builder()
             .backend(backend)
             .modelId(model)
+            .modelRegion(modelRegion)
             .timeoutSeconds(timeout)
             .maxInputChars(maxInput)
             .maxTokens(maxTokens)

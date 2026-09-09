@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class VertexGeminiChatModelProviderTest {
@@ -13,37 +12,34 @@ class VertexGeminiChatModelProviderTest {
     @Test
     void supports_onlyVertex() {
         VertexGeminiChatModelProvider provider = new VertexGeminiChatModelProvider();
-        assertTrue(provider.supports(config(GenMetadataConfig.BACKEND_VERTEX)));
-        assertFalse(provider.supports(config("local")));
-        assertFalse(provider.supports(config(GenMetadataConfig.BACKEND_BEDROCK)));
+        assertTrue(provider.supports(config(GenMetadataConfig.BACKEND_VERTEX, null)));
+        assertFalse(provider.supports(config("local", null)));
+        assertFalse(provider.supports(config(GenMetadataConfig.BACKEND_BEDROCK, null)));
     }
 
     @Test
-    void resolveLocation_defaultsWhenUnset() {
+    void resolveModelLocation_defaultsToGlobal() {
         VertexGeminiChatModelProvider provider = new VertexGeminiChatModelProvider();
-        // Without region env vars / metadata in the test JVM, expect default.
-        assertEquals("us-central1", provider.resolveLocation());
+        assertEquals(GenMetadataConfig.DEFAULT_VERTEX_MODEL_REGION,
+            provider.resolveModelLocation(config(GenMetadataConfig.BACKEND_VERTEX, null)));
+        assertEquals(GenMetadataConfig.DEFAULT_VERTEX_MODEL_REGION,
+            provider.resolveModelLocation(config(GenMetadataConfig.BACKEND_VERTEX, "  ")));
     }
 
     @Test
-    void regionNameFromMetadataPath_parsesRegionAttr() {
+    void resolveModelLocation_usesConfigOverride() {
+        VertexGeminiChatModelProvider provider = new VertexGeminiChatModelProvider();
+        assertEquals("us",
+            provider.resolveModelLocation(config(GenMetadataConfig.BACKEND_VERTEX, "us")));
         assertEquals("europe-west1",
-            VertexGeminiChatModelProvider.regionNameFromMetadataPath(
-                "projects/123456/regions/europe-west1", "/regions/"));
-        assertNull(VertexGeminiChatModelProvider.regionNameFromMetadataPath(null, "/regions/"));
+            provider.resolveModelLocation(config(GenMetadataConfig.BACKEND_VERTEX, " europe-west1 ")));
     }
 
-    @Test
-    void regionFromZone_stripsZoneSuffix() {
-        assertEquals("us-central1",
-            VertexGeminiChatModelProvider.regionFromZone("projects/123/zones/us-central1-a"));
-        assertNull(VertexGeminiChatModelProvider.regionFromZone(null));
-    }
-
-    private static GenMetadataConfig config(String backend) {
+    private static GenMetadataConfig config(String backend, String modelRegion) {
         return GenMetadataConfig.builder()
             .backend(backend)
             .modelId(GenMetadataConfig.DEFAULT_VERTEX_MODEL)
+            .modelRegion(modelRegion)
             .timeoutSeconds(15)
             .maxInputChars(4096)
             .maxTokens(256)

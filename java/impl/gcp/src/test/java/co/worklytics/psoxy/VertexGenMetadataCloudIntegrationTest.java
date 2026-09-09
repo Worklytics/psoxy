@@ -21,6 +21,7 @@ class VertexGenMetadataCloudIntegrationTest {
         GenMetadataConfig config = GenMetadataConfig.builder()
             .backend(GenMetadataConfig.BACKEND_VERTEX)
             .modelId(GenMetadataConfig.DEFAULT_VERTEX_MODEL)
+            .modelRegion(GenMetadataConfig.DEFAULT_VERTEX_MODEL_REGION)
             .timeoutSeconds(30)
             .maxInputChars(1024)
             .maxTokens(32)

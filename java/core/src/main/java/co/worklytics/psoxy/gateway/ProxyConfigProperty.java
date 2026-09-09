@@ -145,6 +145,12 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     /** BETA: cloud model id (Bedrock model id or Vertex Gemini model name). */
     METADATA_GEN_MODEL,
 
+    /**
+     * BETA: Vertex AI location for the model endpoint (e.g. {@code global}, {@code us},
+     * {@code us-central1}). Independent of where the Cloud Function runs. Ignored on AWS/Bedrock.
+     */
+    METADATA_GEN_MODEL_REGION,
+
     /** BETA: max seconds for a single genMetadata {@code chat()} call. */
     METADATA_GEN_TIMEOUT_SECONDS,
 
