@@ -306,10 +306,10 @@ module "api_connector" {
     try(each.value.enable_gen_metadata, false) ? merge(
       {
         ENABLE_GEN_METADATA = "true"
-        PSOXY_GEN_BACKEND   = local.connector_gen_metadata_backend[each.key]
+        METADATA_GEN_BACKEND = local.connector_gen_metadata_backend[each.key]
       },
-      try(var.general_environment_variables["PSOXY_GEN_MODEL"], null) == null ? {
-        PSOXY_GEN_MODEL = "anthropic.claude-3-haiku-20240307-v1:0"
+      try(var.general_environment_variables["METADATA_GEN_MODEL"], null) == null ? {
+        METADATA_GEN_MODEL = "anthropic.claude-3-haiku-20240307-v1:0"
       } : {},
     ) : {},
   )
@@ -418,10 +418,10 @@ module "bulk_connector" {
     try(each.value.enable_gen_metadata, false) ? merge(
       {
         ENABLE_GEN_METADATA = "true"
-        PSOXY_GEN_BACKEND   = local.connector_gen_metadata_backend[each.key]
+        METADATA_GEN_BACKEND = local.connector_gen_metadata_backend[each.key]
       },
-      try(var.general_environment_variables["PSOXY_GEN_MODEL"], null) == null ? {
-        PSOXY_GEN_MODEL = "anthropic.claude-3-haiku-20240307-v1:0"
+      try(var.general_environment_variables["METADATA_GEN_MODEL"], null) == null ? {
+        METADATA_GEN_MODEL = "anthropic.claude-3-haiku-20240307-v1:0"
       } : {},
     ) : {},
   )

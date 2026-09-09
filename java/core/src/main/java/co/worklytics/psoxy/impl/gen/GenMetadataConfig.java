@@ -25,10 +25,10 @@ public class GenMetadataConfig {
 
     private static final Set<String> SUPPORTED_BACKENDS = Set.of(BACKEND_BEDROCK, BACKEND_VERTEX);
 
-    /** Default Bedrock model id when {@code PSOXY_GEN_MODEL} is unset. */
+    /** Default Bedrock model id when {@code METADATA_GEN_MODEL} is unset. */
     public static final String DEFAULT_BEDROCK_MODEL = "anthropic.claude-3-haiku-20240307-v1:0";
 
-    /** Default Vertex Gemini model id when {@code PSOXY_GEN_MODEL} is unset. */
+    /** Default Vertex Gemini model id when {@code METADATA_GEN_MODEL} is unset. */
     public static final String DEFAULT_VERTEX_MODEL = "gemini-2.0-flash-001";
 
     String backend;
@@ -41,24 +41,24 @@ public class GenMetadataConfig {
     int maxAttempts = DEFAULT_MAX_ATTEMPTS;
 
     public static GenMetadataConfig from(ConfigService configService) {
-        String backend = configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_GEN_BACKEND)
+        String backend = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_BACKEND)
             .filter(StringUtils::isNotBlank)
             .map(s -> s.trim().toLowerCase())
             .orElse(BACKEND_BEDROCK);
-        String model = configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_GEN_MODEL)
+        String model = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_MODEL)
             .filter(StringUtils::isNotBlank)
             .orElseGet(() -> defaultModelForBackend(backend))
             .trim();
-        int timeout = configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_GEN_TIMEOUT_SECONDS)
+        int timeout = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_TIMEOUT_SECONDS)
             .flatMap(GenMetadataConfig::parsePositiveInt)
             .orElse(15);
-        int maxInput = configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_GEN_MAX_INPUT_CHARS)
+        int maxInput = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_MAX_INPUT_CHARS)
             .flatMap(GenMetadataConfig::parsePositiveInt)
             .orElse(4096);
-        int maxTokens = configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_GEN_MAX_TOKENS)
+        int maxTokens = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_MAX_TOKENS)
             .flatMap(GenMetadataConfig::parsePositiveInt)
             .orElse(256);
-        int maxAttempts = configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_GEN_META_RETRIES)
+        int maxAttempts = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_RETRIES)
             .flatMap(GenMetadataConfig::parsePositiveInt)
             .orElse(2);
         return GenMetadataConfig.builder()

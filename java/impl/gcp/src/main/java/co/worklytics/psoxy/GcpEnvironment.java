@@ -150,7 +150,6 @@ public class GcpEnvironment implements HostEnvironment {
     public static final String PUBSUB_DELIVERY_ATTEMPT_HEADER = "X-Goog-Delivery-Attempt";
 
 
-    //q: how can we get the REGION in which the function is running/executing?
-
-
+    // Region is not in the Cloud Run container contract; Vertex genMetadata reads it from
+    // metadata (instance/region or zone) via VertexGeminiChatModelProvider.
 }

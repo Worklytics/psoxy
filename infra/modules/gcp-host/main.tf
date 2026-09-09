@@ -357,14 +357,11 @@ module "api_connector" {
     var.general_environment_variables,
     try(each.value.enable_gen_metadata, false) ? merge(
       {
-        ENABLE_GEN_METADATA = "true"
-        PSOXY_GEN_BACKEND   = local.connector_gen_metadata_backend[each.key]
-        # Same project/region as the Cloud Function deployment (Vertex is GCP-only).
-        GOOGLE_CLOUD_PROJECT = var.gcp_project_id
-        GOOGLE_CLOUD_REGION  = var.gcp_region
+        ENABLE_GEN_METADATA  = "true"
+        METADATA_GEN_BACKEND = local.connector_gen_metadata_backend[each.key]
       },
-      try(var.general_environment_variables["PSOXY_GEN_MODEL"], null) == null ? {
-        PSOXY_GEN_MODEL = "gemini-2.0-flash-001"
+      try(var.general_environment_variables["METADATA_GEN_MODEL"], null) == null ? {
+        METADATA_GEN_MODEL = "gemini-2.0-flash-001"
       } : {},
     ) : {},
   )
@@ -581,12 +578,10 @@ module "bulk_connector" {
     try(each.value.enable_gen_metadata, false) ? merge(
       {
         ENABLE_GEN_METADATA  = "true"
-        PSOXY_GEN_BACKEND    = local.connector_gen_metadata_backend[each.key]
-        GOOGLE_CLOUD_PROJECT = var.gcp_project_id
-        GOOGLE_CLOUD_REGION  = var.gcp_region
+        METADATA_GEN_BACKEND = local.connector_gen_metadata_backend[each.key]
       },
-      try(var.general_environment_variables["PSOXY_GEN_MODEL"], null) == null ? {
-        PSOXY_GEN_MODEL = "gemini-2.0-flash-001"
+      try(var.general_environment_variables["METADATA_GEN_MODEL"], null) == null ? {
+        METADATA_GEN_MODEL = "gemini-2.0-flash-001"
       } : {},
     ) : {},
   )

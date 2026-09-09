@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class VertexGeminiChatModelProviderTest {
@@ -20,8 +21,23 @@ class VertexGeminiChatModelProviderTest {
     @Test
     void resolveLocation_defaultsWhenUnset() {
         VertexGeminiChatModelProvider provider = new VertexGeminiChatModelProvider();
-        // Without FUNCTION_REGION / GOOGLE_CLOUD_REGION in the test JVM, expect default.
+        // Without region env vars / metadata in the test JVM, expect default.
         assertEquals("us-central1", provider.resolveLocation());
+    }
+
+    @Test
+    void regionNameFromMetadataPath_parsesRegionAttr() {
+        assertEquals("europe-west1",
+            VertexGeminiChatModelProvider.regionNameFromMetadataPath(
+                "projects/123456/regions/europe-west1", "/regions/"));
+        assertNull(VertexGeminiChatModelProvider.regionNameFromMetadataPath(null, "/regions/"));
+    }
+
+    @Test
+    void regionFromZone_stripsZoneSuffix() {
+        assertEquals("us-central1",
+            VertexGeminiChatModelProvider.regionFromZone("projects/123/zones/us-central1-a"));
+        assertNull(VertexGeminiChatModelProvider.regionFromZone(null));
     }
 
     private static GenMetadataConfig config(String backend) {

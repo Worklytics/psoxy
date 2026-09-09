@@ -101,7 +101,7 @@ properties:
 **Caveats for transcript-scale inputs:**
 
 - genMetadata still runs **per matched `jsonPath` value** in an API (or bulk) payload — design rules so the source field is the transcript (or a chunk), not an entire multi-hour blob without bounds.
-- Enforce `PSOXY_GEN_MAX_INPUT_CHARS` (and consider higher defaults for extract mode later). Chunking / map-reduce across turns is **out of scope for v1**; if transcripts exceed budget, omit with warning or pre-truncate with an explicit rule.
+- Enforce `METADATA_GEN_MAX_INPUT_CHARS` (and consider higher defaults for extract mode later). Chunking / map-reduce across turns is **out of scope for v1**; if transcripts exceed budget, omit with warning or pre-truncate with an explicit rule.
 - Prefer numeric + id fields over free prose in the schema so constrained decoding stays tight. For Zoom transcript extract, use `personId` (from `users[].user_id`) and pseudonymize `$['+timeline:genMetadata'].speakers[*].personId` in transforms so speaker ids in the augment are not left in cleartext.
 
 Same augment type covers both Copilot classification and Zoom transcript extract analytics; only `prompt` + `outputSchema` change.
@@ -120,17 +120,17 @@ No `model`, `backend`, or `maxTokens` in rules — those stay deployment config.
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `PSOXY_GEN_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). Java defaults unset backend toward `bedrock`. | `bedrock` \| `vertex` only |
-| `PSOXY_GEN_MODEL` | Haiku / Gemini Flash defaults | Cloud model id |
-| `PSOXY_GEN_TIMEOUT_SECONDS` | `15` | Per-call timeout |
-| `PSOXY_GEN_MAX_INPUT_CHARS` | `4096` | Truncate source (raise carefully for transcripts) |
-| `PSOXY_GEN_MAX_TOKENS` | `256` (classify); consider higher for extract | Max generation tokens |
-| `PSOXY_GEN_META_RETRIES` | `2` | Retries on parse/schema failure (less critical once constraints work) |
+| `METADATA_GEN_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). Java defaults unset backend toward `bedrock`. | `bedrock` \| `vertex` only |
+| `METADATA_GEN_MODEL` | Haiku / Gemini Flash defaults | Cloud model id |
+| `METADATA_GEN_TIMEOUT_SECONDS` | `15` | Per-call timeout |
+| `METADATA_GEN_MAX_INPUT_CHARS` | `4096` | Truncate source (raise carefully for transcripts) |
+| `METADATA_GEN_MAX_TOKENS` | `256` (classify); consider higher for extract | Max generation tokens |
+| `METADATA_GEN_RETRIES` | `2` | Retries on parse/schema failure (less critical once constraints work) |
 | `ENABLE_GEN_METADATA` | unset | Set by Terraform `enable_gen_metadata = true` |
 
-Vertex uses the **same project/region as the Psoxy deployment** (`GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_REGION` / `FUNCTION_REGION`). No `PSOXY_GEN_VERTEX_*` properties.
+Vertex uses the **same project/region as the function**: project via ADC / metadata (`ServiceOptions.getDefaultProjectId()`); region via optional `GOOGLE_CLOUD_REGION` / `FUNCTION_REGION`, else Cloud Run metadata (`instance/region` or zone). Terraform does not inject project/region for genMetadata.
 
-**Removed / abandoned:** `PSOXY_GEN_BACKEND=local`, Jlama, `JAVA_TOOL_OPTIONS` vector flags for genMetadata, remote `llm/*.zip` model archives, 4096 MB memory floor for genMetadata.
+**Removed / abandoned:** `METADATA_GEN_BACKEND=local` / former `PSOXY_GEN_*` names, Jlama, `JAVA_TOOL_OPTIONS` vector flags for genMetadata, remote `llm/*.zip` model archives, 4096 MB memory floor for genMetadata.
 
 ## Infrastructure (Terraform)
 
