@@ -62,6 +62,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     private final ObjectMapper objectMapper;
     private final GenMetadataPromptBudget promptBudget;
     private final GenMetadataChatModelFactory chatModelFactory;
+    private final GenMetadataTokenUsageAccumulator tokenUsageAccumulator;
 
     private final ConcurrentHashMap<String, ModelHandle> models = new ConcurrentHashMap<>();
     private final Semaphore cloudConcurrency = new Semaphore(CLOUD_MAX_CONCURRENT);
@@ -70,10 +71,20 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     public LangChain4jGenMetadataBackend(GenMetadataConfig config, ObjectMapper objectMapper,
                                          GenMetadataPromptBudget promptBudget,
                                          GenMetadataChatModelFactory chatModelFactory) {
+        this(config, objectMapper, promptBudget, chatModelFactory, new GenMetadataTokenUsageAccumulator());
+    }
+
+    public LangChain4jGenMetadataBackend(GenMetadataConfig config, ObjectMapper objectMapper,
+                                         GenMetadataPromptBudget promptBudget,
+                                         GenMetadataChatModelFactory chatModelFactory,
+                                         GenMetadataTokenUsageAccumulator tokenUsageAccumulator) {
         this.config = config;
         this.objectMapper = objectMapper;
         this.promptBudget = promptBudget;
         this.chatModelFactory = chatModelFactory;
+        this.tokenUsageAccumulator = tokenUsageAccumulator != null
+            ? tokenUsageAccumulator
+            : new GenMetadataTokenUsageAccumulator();
     }
 
     @Override
@@ -121,6 +132,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             if (response == null || response.aiMessage() == null) {
                 return null;
             }
+            recordTokenUsage(response);
             String text = response.aiMessage().text();
             if (text != null && !text.isBlank()) {
                 log.info("genMetadata raw model response: " + truncateForLog(text));
@@ -190,6 +202,16 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             }
             throw e;
         }
+    }
+
+    private void recordTokenUsage(ChatResponse response) {
+        var usage = response.tokenUsage();
+        if (usage == null && response.metadata() != null) {
+            usage = response.metadata().tokenUsage();
+        }
+        Integer input = usage != null ? usage.inputTokenCount() : null;
+        Integer output = usage != null ? usage.outputTokenCount() : null;
+        tokenUsageAccumulator.record(input, output);
     }
 
     static boolean isAuthOrQuotaFailure(Throwable t) {

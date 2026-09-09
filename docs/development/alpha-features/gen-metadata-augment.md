@@ -180,6 +180,10 @@ GenMetadataProcessor
 - Local/Jlama provider and dependencies removed; cloud providers only.
 - Providers apply constraints on each request (or model builder) from `outputSchema` — prompt builder does not embed full schema JSON for classify mode (optional short hint for extract).
 - Concurrent cloud calls use a semaphore; no model-load locks.
+- **Token usage:** each cloud call accumulates provider `input` / `output` token counts (when returned). At end of each bulk file, totals are logged once (`genMetadata file aggregate …`) and written on the sanitized object using the same `psoxy-*` keys as other bulk metadata:
+  - `psoxy-gen-metadata-input-tokens`
+  - `psoxy-gen-metadata-output-tokens`
+  - `psoxy-gen-metadata-calls`
 
 ## MS Copilot PoC (classify)
 

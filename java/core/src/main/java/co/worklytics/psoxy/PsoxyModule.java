@@ -47,6 +47,7 @@ import co.worklytics.psoxy.impl.gen.GenMetadataChatModelFactory;
 import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import co.worklytics.psoxy.impl.gen.GenMetadataPromptBudget;
+import co.worklytics.psoxy.impl.gen.GenMetadataTokenUsageAccumulator;
 import co.worklytics.psoxy.impl.gen.LangChain4jGenMetadataBackend;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
@@ -410,10 +411,12 @@ public class PsoxyModule {
             ConfigService configService,
             ObjectMapper objectMapper,
             GenMetadataPromptBudget promptBudget,
-            GenMetadataChatModelFactory chatModelFactory) {
+            GenMetadataChatModelFactory chatModelFactory,
+            GenMetadataTokenUsageAccumulator tokenUsageAccumulator) {
         GenMetadataConfig config = GenMetadataConfig.from(configService);
         if (chatModelFactory.supports(config)) {
-            return new LangChain4jGenMetadataBackend(config, objectMapper, promptBudget, chatModelFactory);
+            return new LangChain4jGenMetadataBackend(config, objectMapper, promptBudget,
+                chatModelFactory, tokenUsageAccumulator);
         }
         return new UnavailableGenMetadataBackend();
     }
