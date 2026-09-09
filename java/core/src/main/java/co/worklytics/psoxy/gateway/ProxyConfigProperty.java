@@ -146,8 +146,9 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     METADATA_GEN_MODEL,
 
     /**
-     * BETA: Vertex AI location for the model endpoint (e.g. {@code global}, {@code us},
-     * {@code us-central1}). Independent of where the Cloud Function runs. Ignored on AWS/Bedrock.
+     * BETA: Vertex AI location for the model endpoint (default {@code global}). Independent of
+     * where the Cloud Function runs. Do not set to {@code us}/{@code eu} with the Java Vertex
+     * client ({@code us-aiplatform.googleapis.com} is an invalid hostname). Ignored on AWS/Bedrock.
      */
     METADATA_GEN_MODEL_REGION,
 

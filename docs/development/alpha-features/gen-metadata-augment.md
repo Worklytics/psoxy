@@ -122,14 +122,16 @@ No `model`, `backend`, or `maxTokens` in rules — those stay deployment config.
 |----------|---------|---------|
 | `METADATA_GEN_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). Java defaults unset backend toward `bedrock`. | `bedrock` \| `vertex` only |
 | `METADATA_GEN_MODEL` | Haiku / `gemini-3.5-flash` defaults | Cloud model id |
-| `METADATA_GEN_MODEL_REGION` | Vertex: `global` | Vertex publisher-model location (`global`, `us`, `eu`, or a regional id). Independent of Cloud Function region. Ignored on AWS. |
+| `METADATA_GEN_MODEL_REGION` | Vertex: `global` | Vertex publisher-model **location** (resource path). Default `global`. Do **not** set to `us` / `eu` — the Java client builds `{location}-aiplatform.googleapis.com`, and `us-aiplatform.googleapis.com` is rejected (`Invalid hostname`). Ignored on AWS. |
 | `METADATA_GEN_TIMEOUT_SECONDS` | `15` | Per-call timeout |
 | `METADATA_GEN_MAX_INPUT_CHARS` | `4096` | Truncate source (raise carefully for transcripts) |
 | `METADATA_GEN_MAX_TOKENS` | `256` (classify); consider higher for extract | Max generation tokens |
 | `METADATA_GEN_RETRIES` | `2` | Retries on parse/schema failure (less critical once constraints work) |
 | `ENABLE_GEN_METADATA` | unset | Set by Terraform `enable_gen_metadata = true` |
 
-Vertex project comes from ADC / metadata (`ServiceOptions.getDefaultProjectId()`). Model location is **not** the function region: default `gemini-3.5-flash` is served from `global` (also `us` / `eu` multi-region); many single regions (e.g. `us-central1`) return 404. Set `METADATA_GEN_MODEL_REGION` when using a regional-only model.
+Vertex project comes from ADC / metadata (`ServiceOptions.getDefaultProjectId()`). Model location is **not** the function region. Default is `METADATA_GEN_MODEL=gemini-3.5-flash` + `METADATA_GEN_MODEL_REGION=global`.
+
+When location is `global`, Java sets LangChain4j `apiEndpoint=aiplatform.googleapis.com`. Without that override the SDK builds `global-aiplatform.googleapis.com`, which returns HTML 404 / `UNIMPLEMENTED` for `GenerateContent` ([googleapis/google-cloud-java#11845](https://github.com/googleapis/google-cloud-java/issues/11845)). Create logs include both `location=` and `apiEndpoint=`.
 
 **Removed / abandoned:** `METADATA_GEN_BACKEND=local` / former `PSOXY_GEN_*` names, Jlama, `JAVA_TOOL_OPTIONS` vector flags for genMetadata, remote `llm/*.zip` model archives, 4096 MB memory floor for genMetadata.
 

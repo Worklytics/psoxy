@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class VertexGeminiChatModelProviderTest {
@@ -29,10 +30,21 @@ class VertexGeminiChatModelProviderTest {
     @Test
     void resolveModelLocation_usesConfigOverride() {
         VertexGeminiChatModelProvider provider = new VertexGeminiChatModelProvider();
-        assertEquals("us",
-            provider.resolveModelLocation(config(GenMetadataConfig.BACKEND_VERTEX, "us")));
         assertEquals("europe-west1",
             provider.resolveModelLocation(config(GenMetadataConfig.BACKEND_VERTEX, " europe-west1 ")));
+    }
+
+    @Test
+    void resolveApiEndpoint_overridesForGlobalOnly() {
+        assertEquals(VertexGeminiChatModelProvider.GLOBAL_API_ENDPOINT,
+            VertexGeminiChatModelProvider.resolveApiEndpoint("global"));
+        assertEquals(VertexGeminiChatModelProvider.GLOBAL_API_ENDPOINT,
+            VertexGeminiChatModelProvider.resolveApiEndpoint("GLOBAL"));
+        // Multi-region location strings are not valid for this Java client host pattern;
+        // do not treat them as a supported default — leave SDK host construction alone.
+        assertNull(VertexGeminiChatModelProvider.resolveApiEndpoint("us"));
+        assertNull(VertexGeminiChatModelProvider.resolveApiEndpoint("us-central1"));
+        assertNull(VertexGeminiChatModelProvider.resolveApiEndpoint(null));
     }
 
     private static GenMetadataConfig config(String backend, String modelRegion) {

@@ -33,8 +33,10 @@ public class GenMetadataConfig {
 
     /**
      * Default Vertex location when {@code METADATA_GEN_MODEL_REGION} is unset.
-     * Matches {@link #DEFAULT_VERTEX_MODEL}, which is served from the global (and {@code us}/{@code eu})
-     * endpoints — many single-region locations (e.g. {@code us-central1}) return 404 for this model.
+     * Matches {@link #DEFAULT_VERTEX_MODEL}. Use {@code global} (not {@code us}/{@code eu}): the
+     * Java Vertex client builds {@code {location}-aiplatform.googleapis.com}, and multi-region
+     * location strings are invalid hostnames. For {@code global}, the provider overrides the host
+     * to {@code aiplatform.googleapis.com}.
      */
     public static final String DEFAULT_VERTEX_MODEL_REGION = "global";
 
