@@ -18,8 +18,10 @@ class GenMetadataPromptBuilder {
 
     static final String SYSTEM_CLASSIFY =
         "You are a data-processing component in a privacy proxy. "
-            + "Respond with exactly one allowed category label and nothing else. "
-            + "No JSON, no markdown, no explanation.";
+            + "Respond with exactly one JSON object whose single property is the classification label. "
+            + "Example shape: {\"category\":\"<label>\"}. "
+            + "Use only an allowed label as the property value. "
+            + "No markdown fences, no prose before or after the JSON.";
 
     static final String SYSTEM_EXTRACT =
         "You are a data-processing component in a privacy proxy. "
@@ -46,16 +48,18 @@ class GenMetadataPromptBuilder {
                                       String inputData) {
         GenMetadataSchemaSupport.ClassifyShape shape =
             GenMetadataSchemaSupport.classifyShape(outputSchema).orElseThrow();
+        String property = shape.getPropertyName();
         return """
             Task: %s
 
-            Allowed labels (respond with exactly one, verbatim):
+            Return exactly one JSON object of the form {"%s":"<label>"} where <label> is one of:
             %s
 
             Input data to process:
             %s
             """.formatted(
             taskPrompt.trim(),
+            property,
             String.join("\n", shape.getEnumValues()),
             inputData);
     }

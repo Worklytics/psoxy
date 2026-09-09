@@ -26,7 +26,7 @@ Rules always declare `prompt` + `outputSchema`. The runtime **infers mode** from
 
 | Mode | When | Model output | Proxy normalizes to |
 |------|------|--------------|---------------------|
-| **classify** | Schema is an object with a **single** required string property that has `enum` | Plain enum label (Vertex `text/x.enum`) or tiny constrained JSON object (Bedrock) | `{"<property>":"<label>"}` |
+| **classify** | Schema is an object with a **single** required string property that has `enum` | Constrained JSON object `{"<property>":"<label>"}` (both Vertex and Bedrock) | Same Map after parse / label recovery |
 | **extract** | Any richer object / array schema | Constrained JSON matching the schema | Parsed object/array as-is (after schema gate) |
 
 Downstream always sees JSON under `+…:genMetadata`. The model is not asked to free-form invent JSON.
@@ -46,7 +46,7 @@ flowchart LR
 
 **Use when:** closed vocabulary — Copilot prompt category, ticket type, sentiment bucket, etc.
 
-**Prompt:** task semantics only; **do not** list JSON shape requirements. Enum values live in `outputSchema` (and are pushed into the provider constraint).
+**Prompt (task only):** classification guidance; do not contradict the runtime JSON contract. Enum values live in `outputSchema`.
 
 ```text
 Classify the input into exactly one category.
@@ -54,14 +54,15 @@ Use "Uncategorized" when substantive but unclear.
 Use "Excluded" for greetings, thanks, or prompts too short to classify.
 ```
 
+**Runtime:** system + user messages always ask for `{"<property>":"<enum>"}`. Provider JSON schema constraint matches `outputSchema` (Vertex/Bedrock). Parser accepts clean JSON, fenced JSON, prose-prefixed JSON, bare labels, and (as fallback) an enum embedded in truncated/prose output. Schema mismatch retries (`METADATA_GEN_RETRIES`, default 2 attempts).
+
 **Provider wiring:**
 
 | Platform | Constraint |
 |----------|------------|
-| Vertex | `responseMimeType = text/x.enum` + `responseSchema = { type: STRING, enum: [...] }` → raw label |
-| Bedrock | Converse structured output JSON Schema: one required string property with `enum`, `additionalProperties: false` |
+| Vertex / Bedrock | JSON response format + object schema with one required string `enum` property |
 
-**Java:** if response is a bare string (or quoted string) matching an enum value, wrap to `{ "category": "…" }`. If already a one-key object, validate and pass through.
+**Java:** parse JSON → Map; if needed, wrap a bare/prose enum label to `{ "category": "…" }`, then validate.
 
 ### Mode: extract (structured object / array)
 
@@ -111,7 +112,7 @@ Same augment type covers both Copilot classification and Zoom transcript extract
 | Field | Required | Description |
 |-------|----------|-------------|
 | `jsonPaths` | yes | Source values to process |
-| `prompt` | yes | Task instruction (SHA’d); **no** JSON formatting instructions |
+| `prompt` | yes | Task guidance only (categories, edge cases). Do **not** put conflicting format instructions here — Java always requests a JSON object and applies provider JSON constraints from `outputSchema`. |
 | `outputSchema` | yes | Shape + enums; drives classify vs extract and provider constraints |
 
 No `model`, `backend`, or `maxTokens` in rules — those stay deployment config.
@@ -122,16 +123,30 @@ No `model`, `backend`, or `maxTokens` in rules — those stay deployment config.
 |----------|---------|---------|
 | `METADATA_GEN_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). Java defaults unset backend toward `bedrock`. | `bedrock` \| `vertex` only |
 | `METADATA_GEN_MODEL` | Haiku / `gemini-3.5-flash` defaults | Cloud model id |
-| `METADATA_GEN_MODEL_REGION` | Vertex: `global` | Vertex publisher-model **location** (resource path). Default `global`. Do **not** set to `us` / `eu` — the Java client builds `{location}-aiplatform.googleapis.com`, and `us-aiplatform.googleapis.com` is rejected (`Invalid hostname`). Ignored on AWS. |
+| `METADATA_GEN_MODEL_REGION` | Vertex: `global` | Vertex publisher-model **location**. Default `global` (google-genai → `https://aiplatform.googleapis.com`). Ignored on AWS. |
 | `METADATA_GEN_TIMEOUT_SECONDS` | `15` | Per-call timeout |
 | `METADATA_GEN_MAX_INPUT_CHARS` | `4096` | Truncate source (raise carefully for transcripts) |
-| `METADATA_GEN_MAX_TOKENS` | `256` (classify); consider higher for extract | Max generation tokens |
-| `METADATA_GEN_RETRIES` | `2` | Retries on parse/schema failure (less critical once constraints work) |
+| `METADATA_GEN_MAX_TOKENS` | `1024` | Max generation tokens (Gemini 3.x **thinking shares this budget** with visible JSON; 256 was too tight under default thinking) |
+| `METADATA_GEN_RETRIES` | `2` | Total attempts per augment when parse/schema fails (retry already included) |
 | `ENABLE_GEN_METADATA` | unset | Set by Terraform `enable_gen_metadata = true` |
 
 Vertex project comes from ADC / metadata (`ServiceOptions.getDefaultProjectId()`). Model location is **not** the function region. Default is `METADATA_GEN_MODEL=gemini-3.5-flash` + `METADATA_GEN_MODEL_REGION=global`.
 
-When location is `global`, Java sets LangChain4j `apiEndpoint=aiplatform.googleapis.com`. Without that override the SDK builds `global-aiplatform.googleapis.com`, which returns HTML 404 / `UNIMPLEMENTED` for `GenerateContent` ([googleapis/google-cloud-java#11845](https://github.com/googleapis/google-cloud-java/issues/11845)). Create logs include both `location=` and `apiEndpoint=`.
+Vertex uses LangChain4j **google-genai** (not the legacy vertex-ai-gemini SDK) and sets `thinkingLevel=MINIMAL`. Gemini 3.5 Flash otherwise defaults to `MEDIUM` thinking, which ate the old 256-token output cap and the 15s timeout (truncated `{"category": "`). Create logs include `thinkingLevel=` and `maxOutputTokens=`.
+
+### Latency / model choice
+
+Per-row Vertex calls are typically several seconds (network + model). A 100-row bulk file is **sequential** (one augment per row), so wall time ≈ rows × (attempts × latency). Failed parses double cost when retries fire. `thinkingLevel=MINIMAL` is required for full Flash classify; Lite models default closer to minimal thinking but still benefit from the higher max-token default.
+
+For classify throughput, prefer a Flash-Lite id over full Flash:
+
+| Model | Relative speed (approx.) | Notes |
+|-------|--------------------------|-------|
+| `gemini-3.5-flash-lite` | Fastest 3.5-class Lite (~350 tok/s claimed) | Best default for high-volume classify |
+| `gemini-2.5-flash-lite` | Slower than 3.5 Flash-Lite | Still fine for cheap/low-latency classify |
+| `gemini-3.5-flash` | Slower / heavier than Lite | Better quality; overkill for enum classify |
+
+Set `METADATA_GEN_MODEL=gemini-3.5-flash-lite` for bulk classify demos. Keep `gemini-3.5-flash` when quality matters more than p50 latency.
 
 **Removed / abandoned:** `METADATA_GEN_BACKEND=local` / former `PSOXY_GEN_*` names, Jlama, `JAVA_TOOL_OPTIONS` vector flags for genMetadata, remote `llm/*.zip` model archives, 4096 MB memory floor for genMetadata.
 

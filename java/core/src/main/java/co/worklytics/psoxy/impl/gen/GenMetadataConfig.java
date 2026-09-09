@@ -20,6 +20,13 @@ public class GenMetadataConfig {
 
     public static final int DEFAULT_MAX_ATTEMPTS = 2;
 
+    /**
+     * Default {@code METADATA_GEN_MAX_TOKENS}. Gemini 3.x thinking tokens share this budget with
+     * visible output; 256 was too tight when thinking ran at the model default. With
+     * {@code thinkingLevel=MINIMAL} on Vertex, 1024 still leaves headroom for small JSON.
+     */
+    public static final int DEFAULT_MAX_TOKENS = 1024;
+
     public static final String BACKEND_BEDROCK = "bedrock";
     public static final String BACKEND_VERTEX = "vertex";
 
@@ -33,10 +40,9 @@ public class GenMetadataConfig {
 
     /**
      * Default Vertex location when {@code METADATA_GEN_MODEL_REGION} is unset.
-     * Matches {@link #DEFAULT_VERTEX_MODEL}. Use {@code global} (not {@code us}/{@code eu}): the
-     * Java Vertex client builds {@code {location}-aiplatform.googleapis.com}, and multi-region
-     * location strings are invalid hostnames. For {@code global}, the provider overrides the host
-     * to {@code aiplatform.googleapis.com}.
+     * Matches {@link #DEFAULT_VERTEX_MODEL}. Prefer {@code global}. The google-genai client maps
+     * {@code global} to {@code https://aiplatform.googleapis.com}; multi-region {@code us}/{@code eu}
+     * use regional publisher hosts. Avoid inventing hostnames like {@code us-aiplatform.googleapis.com}.
      */
     public static final String DEFAULT_VERTEX_MODEL_REGION = "global";
 
@@ -75,7 +81,7 @@ public class GenMetadataConfig {
             .orElse(4096);
         int maxTokens = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_MAX_TOKENS)
             .flatMap(GenMetadataConfig::parsePositiveInt)
-            .orElse(256);
+            .orElse(DEFAULT_MAX_TOKENS);
         int maxAttempts = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_RETRIES)
             .flatMap(GenMetadataConfig::parsePositiveInt)
             .orElse(2);

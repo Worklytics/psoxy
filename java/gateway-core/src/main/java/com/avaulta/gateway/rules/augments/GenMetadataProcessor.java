@@ -159,25 +159,34 @@ public class GenMetadataProcessor {
         if (raw instanceof String response) {
             Optional<GenMetadataSchemaSupport.ClassifyShape> classify =
                 GenMetadataSchemaSupport.classifyShape(outputSchema);
+
+            // Prefer valid JSON object when present (including after prose / fences).
+            String json = extractJsonObject(response);
+            if (json != null) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> map = objectMapper.readValue(json, Map.class);
+                    return new TreeMap<>(map);
+                } catch (Exception e) {
+                    log.log(Level.WARNING, "Failed to parse genMetadata JSON response: " + json, e);
+                    // Fall through: incomplete JSON may still contain a usable classify label.
+                }
+            }
+
             if (classify.isPresent()) {
                 Optional<Map<String, Object>> wrapped =
                     GenMetadataSchemaSupport.wrapClassifyLabel(response, classify.get());
                 if (wrapped.isPresent()) {
                     return new TreeMap<>(wrapped.get());
                 }
+                // Truncated JSON / prose with an enum still recoverable.
+                Optional<Map<String, Object>> fromText =
+                    GenMetadataSchemaSupport.findEnumInText(response, classify.get());
+                if (fromText.isPresent()) {
+                    return new TreeMap<>(fromText.get());
+                }
             }
-            String json = extractJsonObject(response);
-            if (json == null) {
-                return null;
-            }
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> map = objectMapper.readValue(json, Map.class);
-                return new TreeMap<>(map);
-            } catch (Exception e) {
-                log.log(Level.WARNING, "Failed to parse genMetadata JSON response: " + json, e);
-                return null;
-            }
+            return null;
         }
         return null;
     }
@@ -200,17 +209,39 @@ public class GenMetadataProcessor {
         return value.substring(0, MAX_LOG_OUTPUT_CHARS) + "... (" + value.length() + " chars total)";
     }
 
+    /**
+     * Pull the outermost JSON object from a model response, ignoring markdown fences and leading
+     * prose (e.g. {@code Here is the JSON requested: {...}}).
+     */
     static String extractJsonObject(String response) {
         if (StringUtils.isBlank(response)) {
             return null;
         }
-        String trimmed = response.trim();
+        String trimmed = stripMarkdownFence(response.trim());
         int start = trimmed.indexOf('{');
         int end = trimmed.lastIndexOf('}');
         if (start >= 0 && end > start) {
             return trimmed.substring(start, end + 1);
         }
-        return trimmed.startsWith("{") ? trimmed : null;
+        // Incomplete object (e.g. truncated mid-generation) — not parseable as JSON.
+        return null;
+    }
+
+    static String stripMarkdownFence(String response) {
+        String trimmed = response.trim();
+        if (!trimmed.startsWith("```")) {
+            return trimmed;
+        }
+        int firstNewline = trimmed.indexOf('\n');
+        if (firstNewline < 0) {
+            return trimmed;
+        }
+        String withoutOpen = trimmed.substring(firstNewline + 1);
+        int closeFence = withoutOpen.lastIndexOf("```");
+        if (closeFence >= 0) {
+            return withoutOpen.substring(0, closeFence).trim();
+        }
+        return withoutOpen.trim();
     }
 
     private TreeMap<String, Object> toSortedMap(Map<?, ?> raw) {

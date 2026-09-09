@@ -49,6 +49,18 @@ class GenMetadataSchemaSupportTest {
     }
 
     @Test
+    void wrapClassifyLabel_recoversEnumFromProse() {
+        GenMetadataSchemaSupport.ClassifyShape shape =
+            GenMetadataSchemaSupport.classifyShape(categorySchema()).orElseThrow();
+        assertEquals(Map.of("category", "Email Drafting"),
+            GenMetadataSchemaSupport.wrapClassifyLabel(
+                "Here is the label: Email Drafting", shape).orElseThrow());
+        assertEquals(Map.of("category", "Research and Ideation"),
+            GenMetadataSchemaSupport.findEnumInText(
+                "{\"category\": \"Research and Ideation", shape).orElseThrow());
+    }
+
+    @Test
     void processor_parsesBareClassifyLabel() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
             (prompt, schema, input) -> "Research and Ideation",

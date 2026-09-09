@@ -147,8 +147,8 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
     /**
      * BETA: Vertex AI location for the model endpoint (default {@code global}). Independent of
-     * where the Cloud Function runs. Do not set to {@code us}/{@code eu} with the Java Vertex
-     * client ({@code us-aiplatform.googleapis.com} is an invalid hostname). Ignored on AWS/Bedrock.
+     * where the Cloud Function runs. Prefer {@code global}; google-genai maps it to
+     * {@code aiplatform.googleapis.com}. Ignored on AWS/Bedrock.
      */
     METADATA_GEN_MODEL_REGION,
 
@@ -158,7 +158,10 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     /** BETA: max source characters passed into genMetadata prompts. */
     METADATA_GEN_MAX_INPUT_CHARS,
 
-    /** BETA: max tokens to generate per genMetadata inference. */
+    /**
+     * BETA: max tokens to generate per genMetadata inference (default {@code 1024}). On Gemini 3.x,
+     * thinking tokens share this budget with visible output.
+     */
     METADATA_GEN_MAX_TOKENS,
 
     /**

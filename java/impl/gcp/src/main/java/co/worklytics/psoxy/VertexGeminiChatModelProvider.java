@@ -4,32 +4,37 @@ import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import com.google.cloud.ServiceOptions;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.vertexai.gemini.VertexAiGeminiChatModel;
+import dev.langchain4j.model.google.genai.GoogleGenAiChatModel;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
+import java.time.Duration;
 
 /**
  * Vertex AI Gemini ChatModel for genMetadata (GCP Cloud Function deployment only).
  *
- * <p>Uses Application Default Credentials. Project via {@link ServiceOptions#getDefaultProjectId()}
- * / metadata. Model location comes from {@link GenMetadataConfig#getModelRegion()}
- * ({@code METADATA_GEN_MODEL_REGION}, default {@code global}) — independent of the Cloud Function
- * region, because publisher models like {@code gemini-3.5-flash} are served from global / multi-region
- * endpoints rather than every single region.
+ * <p>Uses the google-genai LangChain4j adapter (Application Default Credentials). Project via
+ * {@link ServiceOptions#getDefaultProjectId()} / metadata. Model location comes from
+ * {@link GenMetadataConfig#getModelRegion()} ({@code METADATA_GEN_MODEL_REGION}, default
+ * {@code global}) — independent of the Cloud Function region.
  *
- * <p>When location is {@code global}, the SDK must use host {@code aiplatform.googleapis.com}
- * (not {@code global-aiplatform.googleapis.com}); see googleapis/google-cloud-java#11845.
+ * <p>Gemini 3.5 Flash defaults to {@code MEDIUM} thinking, which shares {@code maxOutputTokens}
+ * and often blows the per-call timeout for tiny classify JSON. This provider forces
+ * {@code thinkingLevel=MINIMAL}. Prefer {@code thinking_level} over legacy
+ * {@code thinking_budget} (they must not be set together).
+ *
+ * <p>For {@code location=global}, google-genai uses {@code https://aiplatform.googleapis.com}
+ * (not {@code global-aiplatform.googleapis.com}).
  */
 @Log
 @Singleton
 public class VertexGeminiChatModelProvider implements GenMetadataChatModelProvider {
 
-    /** Correct GenerateContent host for location {@code global}. */
-    static final String GLOBAL_API_ENDPOINT = "aiplatform.googleapis.com";
+    /** Gemini 3.x thinking enum; lowest latency for classify/extract JSON. */
+    static final String THINKING_LEVEL_MINIMAL = "MINIMAL";
 
     @Inject
     public VertexGeminiChatModelProvider() {
@@ -44,25 +49,20 @@ public class VertexGeminiChatModelProvider implements GenMetadataChatModelProvid
     public ChatModel create(GenMetadataConfig config, Path modelCacheDir) {
         String project = resolveProjectId();
         String location = resolveModelLocation(config);
-        String apiEndpointOverride = resolveApiEndpoint(location);
-        String effectiveApiEndpoint = apiEndpointOverride != null
-            ? apiEndpointOverride
-            : location + "-aiplatform.googleapis.com";
         log.info("Creating Vertex Gemini chat model project=" + project
             + " location=" + location
-            + " apiEndpoint=" + effectiveApiEndpoint
-            + " model=" + config.getModelId());
-        VertexAiGeminiChatModel.VertexAiGeminiChatModelBuilder builder = VertexAiGeminiChatModel.builder()
-            .project(project)
+            + " model=" + config.getModelId()
+            + " thinkingLevel=" + THINKING_LEVEL_MINIMAL
+            + " maxOutputTokens=" + config.getMaxTokens());
+        return GoogleGenAiChatModel.builder()
+            .projectId(project)
             .location(location)
             .modelName(config.getModelId())
-            .temperature(0f)
             .maxOutputTokens(config.getMaxTokens())
-            .maxRetries(1);
-        if (apiEndpointOverride != null) {
-            builder.apiEndpoint(apiEndpointOverride);
-        }
-        return builder.build();
+            .thinkingLevel(THINKING_LEVEL_MINIMAL)
+            .timeout(Duration.ofSeconds(config.getTimeoutSeconds()))
+            .maxRetries(1)
+            .build();
     }
 
     String resolveProjectId() {
@@ -90,21 +90,6 @@ public class VertexGeminiChatModelProvider implements GenMetadataChatModelProvid
             return config.getModelRegion().trim();
         }
         return GenMetadataConfig.DEFAULT_VERTEX_MODEL_REGION;
-    }
-
-    /**
-     * Override API host when location is {@code global}. The google-cloud-java VertexAI client
-     * otherwise builds {@code global-aiplatform.googleapis.com}, which returns HTML 404 /
-     * UNIMPLEMENTED for {@code GenerateContent} (googleapis/google-cloud-java#11845).
-     *
-     * @return explicit endpoint host, or {@code null} to use the SDK default
-     *         ({@code {location}-aiplatform.googleapis.com})
-     */
-    static String resolveApiEndpoint(String location) {
-        if (location != null && "global".equalsIgnoreCase(location.trim())) {
-            return GLOBAL_API_ENDPOINT;
-        }
-        return null;
     }
 
     private static String firstNonBlank(String... values) {

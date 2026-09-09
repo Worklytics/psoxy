@@ -64,6 +64,9 @@ public final class GenMetadataSchemaSupport {
 
     /**
      * If {@code raw} is a bare enum label (optionally quoted), wrap as {@code {property: label}}.
+     * Also recovers a label embedded in prose (longest exact enum match), for models that ignore
+     * JSON instructions. Returns empty for strings that look like a JSON object (caller should
+     * parse those normally first).
      */
     public static Optional<Map<String, Object>> wrapClassifyLabel(String raw, ClassifyShape shape) {
         if (StringUtils.isBlank(raw) || shape == null) {
@@ -88,6 +91,34 @@ public final class GenMetadataSchemaSupport {
                 return Optional.of(Map.of(shape.getPropertyName(), allowed));
             }
         }
-        return Optional.empty();
+        return findEnumInText(trimmed, shape);
+    }
+
+    /**
+     * Longest-first exact (case-insensitive) enum match inside free text / truncated JSON.
+     */
+    public static Optional<Map<String, Object>> findEnumInText(String text, ClassifyShape shape) {
+        if (StringUtils.isBlank(text) || shape == null) {
+            return Optional.empty();
+        }
+        String haystack = text.trim();
+        String best = null;
+        for (String allowed : shape.getEnumValues()) {
+            if (StringUtils.isBlank(allowed)) {
+                continue;
+            }
+            if (containsIgnoreCase(haystack, allowed)
+                && (best == null || allowed.length() > best.length())) {
+                best = allowed;
+            }
+        }
+        if (best == null) {
+            return Optional.empty();
+        }
+        return Optional.of(Map.of(shape.getPropertyName(), best));
+    }
+
+    private static boolean containsIgnoreCase(String haystack, String needle) {
+        return StringUtils.containsIgnoreCase(haystack, needle);
     }
 }

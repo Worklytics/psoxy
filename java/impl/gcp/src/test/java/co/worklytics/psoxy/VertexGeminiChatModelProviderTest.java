@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class VertexGeminiChatModelProviderTest {
@@ -35,16 +34,8 @@ class VertexGeminiChatModelProviderTest {
     }
 
     @Test
-    void resolveApiEndpoint_overridesForGlobalOnly() {
-        assertEquals(VertexGeminiChatModelProvider.GLOBAL_API_ENDPOINT,
-            VertexGeminiChatModelProvider.resolveApiEndpoint("global"));
-        assertEquals(VertexGeminiChatModelProvider.GLOBAL_API_ENDPOINT,
-            VertexGeminiChatModelProvider.resolveApiEndpoint("GLOBAL"));
-        // Multi-region location strings are not valid for this Java client host pattern;
-        // do not treat them as a supported default — leave SDK host construction alone.
-        assertNull(VertexGeminiChatModelProvider.resolveApiEndpoint("us"));
-        assertNull(VertexGeminiChatModelProvider.resolveApiEndpoint("us-central1"));
-        assertNull(VertexGeminiChatModelProvider.resolveApiEndpoint(null));
+    void thinkingLevel_isMinimal() {
+        assertEquals("MINIMAL", VertexGeminiChatModelProvider.THINKING_LEVEL_MINIMAL);
     }
 
     private static GenMetadataConfig config(String backend, String modelRegion) {
@@ -54,7 +45,7 @@ class VertexGeminiChatModelProviderTest {
             .modelRegion(modelRegion)
             .timeoutSeconds(15)
             .maxInputChars(4096)
-            .maxTokens(256)
+            .maxTokens(GenMetadataConfig.DEFAULT_MAX_TOKENS)
             .build();
     }
 }

@@ -103,6 +103,37 @@ class GenMetadataProcessorTest {
     }
 
     @Test
+    void parseModelJson_extractsJsonAfterProsePrefix() {
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            new UnavailableGenMetadataBackend(), OBJECT_MAPPER);
+        Object out = processor.parseModelJson(
+            "Here is the JSON requested:\n{\"category\":\"Excluded\"}");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = (Map<String, Object>) out;
+        assertEquals("Excluded", map.get("category"));
+    }
+
+    @Test
+    void parseModelJson_recoversClassifyLabelFromTruncatedJson() {
+        JsonSchemaFilter schema = JsonSchemaFilter.builder()
+            .type("object")
+            .required(List.of("category"))
+            .properties(Map.of(
+                "category", JsonSchemaFilter.builder()
+                    .type("string")
+                    .enumValues(List.of("Email Drafting", "Excluded", "Uncategorized"))
+                    .build()))
+            .build();
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            new UnavailableGenMetadataBackend(), OBJECT_MAPPER);
+        Object out = processor.parseModelJson(
+            "Here is the JSON requested:\n{\"category\": \"Email Drafting", schema);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = (Map<String, Object>) out;
+        assertEquals("Email Drafting", map.get("category"));
+    }
+
+    @Test
     void process_throwsWhenPromptMissing() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
             new UnavailableGenMetadataBackend(), OBJECT_MAPPER);
