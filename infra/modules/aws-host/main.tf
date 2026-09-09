@@ -92,10 +92,10 @@ locals {
     if try(v.enable_remote_resources, false)
   ]) > 0
 
-  # Effective genMetadata backend per API connector (null if genMetadata disabled).
+  # Effective genMetadata backend per connector (null if genMetadata disabled).
   # AWS is cloud-only: bedrock (local/Jlama abandoned).
-  api_connector_gen_metadata_backend = {
-    for k, v in var.api_connectors : k => (
+  connector_gen_metadata_backend = {
+    for k, v in merge(var.api_connectors, var.bulk_connectors) : k => (
       try(v.enable_gen_metadata, false)
       ? lower(coalesce(try(v.gen_metadata_backend, null), var.gen_metadata_backend, "bedrock"))
       : null
@@ -103,7 +103,7 @@ locals {
   }
 
   gen_metadata_uses_bedrock = length([
-    for k, backend in local.api_connector_gen_metadata_backend : k
+    for k, backend in local.connector_gen_metadata_backend : k
     if backend == "bedrock"
   ]) > 0
 
@@ -286,7 +286,7 @@ module "api_connector" {
   allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
 
   extra_lambda_role_iam_statements = (
-    local.api_connector_gen_metadata_backend[each.key] == "bedrock"
+    local.connector_gen_metadata_backend[each.key] == "bedrock"
     ? local.bedrock_invoke_iam_statements
     : []
   )
@@ -306,7 +306,7 @@ module "api_connector" {
     try(each.value.enable_gen_metadata, false) ? merge(
       {
         ENABLE_GEN_METADATA = "true"
-        PSOXY_GEN_BACKEND   = local.api_connector_gen_metadata_backend[each.key]
+        PSOXY_GEN_BACKEND   = local.connector_gen_metadata_backend[each.key]
       },
       try(var.general_environment_variables["PSOXY_GEN_MODEL"], null) == null ? {
         PSOXY_GEN_MODEL = "anthropic.claude-3-haiku-20240307-v1:0"
@@ -398,6 +398,12 @@ module "bulk_connector" {
 
 
 
+  extra_lambda_role_iam_statements = (
+    local.connector_gen_metadata_backend[each.key] == "bedrock"
+    ? local.bedrock_invoke_iam_statements
+    : []
+  )
+
   environment_variables = merge(
     {
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
@@ -408,7 +414,16 @@ module "bulk_connector" {
     try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) != null ? {
       RULES = each.value.rules_raw
     } : {},
-    var.general_environment_variables
+    var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? merge(
+      {
+        ENABLE_GEN_METADATA = "true"
+        PSOXY_GEN_BACKEND   = local.connector_gen_metadata_backend[each.key]
+      },
+      try(var.general_environment_variables["PSOXY_GEN_MODEL"], null) == null ? {
+        PSOXY_GEN_MODEL = "anthropic.claude-3-haiku-20240307-v1:0"
+      } : {},
+    ) : {},
   )
 
   remote_resource_bucket        = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? module.psoxy.artifacts_bucket_name : null

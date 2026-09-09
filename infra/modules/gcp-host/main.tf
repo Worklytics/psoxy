@@ -93,10 +93,10 @@ locals {
     if try(v.enable_remote_resources, false)
   ]) > 0
 
-  # Effective genMetadata backend per API connector (null if genMetadata disabled).
+  # Effective genMetadata backend per connector (null if genMetadata disabled).
   # GCP is cloud-only: vertex (local/Jlama abandoned).
-  api_connector_gen_metadata_backend = {
-    for k, v in var.api_connectors : k => (
+  connector_gen_metadata_backend = {
+    for k, v in merge(var.api_connectors, var.bulk_connectors) : k => (
       try(v.enable_gen_metadata, false)
       ? lower(coalesce(try(v.gen_metadata_backend, null), var.gen_metadata_backend, "vertex"))
       : null
@@ -104,7 +104,7 @@ locals {
   }
 
   gen_metadata_uses_vertex = length([
-    for k, backend in local.api_connector_gen_metadata_backend : k
+    for k, backend in local.connector_gen_metadata_backend : k
     if backend == "vertex"
   ]) > 0
 }
@@ -358,7 +358,7 @@ module "api_connector" {
     try(each.value.enable_gen_metadata, false) ? merge(
       {
         ENABLE_GEN_METADATA = "true"
-        PSOXY_GEN_BACKEND   = local.api_connector_gen_metadata_backend[each.key]
+        PSOXY_GEN_BACKEND   = local.connector_gen_metadata_backend[each.key]
         # Same project/region as the Cloud Function deployment (Vertex is GCP-only).
         GOOGLE_CLOUD_PROJECT = var.gcp_project_id
         GOOGLE_CLOUD_REGION  = var.gcp_region
@@ -578,6 +578,17 @@ module "bulk_connector" {
     },
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? merge(
+      {
+        ENABLE_GEN_METADATA  = "true"
+        PSOXY_GEN_BACKEND    = local.connector_gen_metadata_backend[each.key]
+        GOOGLE_CLOUD_PROJECT = var.gcp_project_id
+        GOOGLE_CLOUD_REGION  = var.gcp_region
+      },
+      try(var.general_environment_variables["PSOXY_GEN_MODEL"], null) == null ? {
+        PSOXY_GEN_MODEL = "gemini-2.0-flash-001"
+      } : {},
+    ) : {},
   )
 
   remote_resource_bucket        = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? module.psoxy.artifacts_bucket_name : null

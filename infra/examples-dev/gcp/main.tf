@@ -157,9 +157,7 @@ module "psoxy" {
   todo_step                         = local.max_auth_todo_step
   enable_remote_resources           = true
   gen_metadata_backend              = var.gen_metadata_backend
-  gen_metadata_daily_cost_limit_usd = var.gen_metadata_daily_cost_limit_usd
-  gen_metadata_budget_alert_emails  = var.gen_metadata_budget_alert_emails
-  billing_account_id                = var.billing_account_id
+  llm_budget                        = var.llm_budget
   bucket_force_destroy              = var.bucket_force_destroy
   tf_gcp_principal_email            = var.gcp_terraform_sa_account_email
   provision_project_level_iam       = var.provision_project_level_iam
@@ -281,7 +279,6 @@ output "todos_4" {
   description = "Remote resource uploads (OpenNLP) and related post-deploy TODOs, in markdown format."
   value = var.todos_as_outputs ? join("\n\n", compact([
     module.psoxy.remote_resource_opennlp_todo,
-    module.psoxy.gen_metadata_vertex_budget_todo,
   ])) : null
 }
 
@@ -290,13 +287,6 @@ resource "local_file" "todo_4_upload_opennlp_models" {
 
   filename = "TODO 4 - upload OpenNLP models.md"
   content  = module.psoxy.remote_resource_opennlp_todo
-}
-
-resource "local_file" "todo_4_gen_metadata_vertex_budget" {
-  count = var.todos_as_local_files && module.psoxy.gen_metadata_vertex_budget_todo != null ? 1 : 0
-
-  filename = "TODO 4 - configure Vertex genMetadata billing budget.md"
-  content  = module.psoxy.gen_metadata_vertex_budget_todo
 }
 
 # although should be sensitive such that Terraform won't echo it to command line or expose it, leave

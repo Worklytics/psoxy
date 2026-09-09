@@ -3,7 +3,7 @@
 check "gen_metadata_backend_gcp_only" {
   assert {
     condition = alltrue([
-      for k, backend in local.api_connector_gen_metadata_backend :
+      for k, backend in local.connector_gen_metadata_backend :
       backend == null || backend == "vertex"
     ])
     error_message = "gcp-host genMetadata backend must be \"vertex\" (local/Jlama abandoned; Bedrock is AWS-only)."
@@ -16,21 +16,26 @@ data "google_project" "gen_metadata" {
 }
 
 locals {
-  gen_metadata_vertex_sa_emails = {
-    for k, backend in local.api_connector_gen_metadata_backend : k => google_service_account.api_connectors[k].email
-    if backend == "vertex"
-  }
+  gen_metadata_vertex_sa_emails = merge(
+    {
+      for k, backend in local.connector_gen_metadata_backend : k => google_service_account.api_connectors[k].email
+      if backend == "vertex" && contains(keys(var.api_connectors), k)
+    },
+    {
+      for k, backend in local.connector_gen_metadata_backend : k => module.bulk_connector[k].instance_sa_email
+      if backend == "vertex" && contains(keys(var.bulk_connectors), k)
+    },
+  )
 
   gen_metadata_budget_enabled = (
     local.gen_metadata_uses_vertex
-    && var.gen_metadata_daily_cost_limit_usd != null
-    && var.gen_metadata_daily_cost_limit_usd > 0
-    && var.billing_account_id != null
-    && length(trimspace(var.billing_account_id)) > 0
+    && var.llm_budget != null
+    && var.llm_budget.daily_cost_limit_usd != null
+    && var.llm_budget.daily_cost_limit_usd > 0
   )
 
   # GCP billing budgets are monthly; approximate daily × 30.
-  gen_metadata_monthly_budget_usd = local.gen_metadata_budget_enabled ? ceil(var.gen_metadata_daily_cost_limit_usd * 30) : null
+  gen_metadata_monthly_budget_usd = local.gen_metadata_budget_enabled ? ceil(var.llm_budget.daily_cost_limit_usd * 30) : null
 }
 
 resource "google_project_service" "aiplatform" {
@@ -62,7 +67,7 @@ resource "google_project_iam_member" "gen_metadata_vertex_user" {
 }
 
 resource "google_monitoring_notification_channel" "gen_metadata_budget_email" {
-  for_each = local.gen_metadata_budget_enabled ? toset(var.gen_metadata_budget_alert_emails) : toset([])
+  for_each = local.gen_metadata_budget_enabled ? toset(var.llm_budget.alert_emails) : toset([])
 
   project      = var.gcp_project_id
   display_name = "genMetadata Vertex budget: ${each.value}"
@@ -75,7 +80,7 @@ resource "google_monitoring_notification_channel" "gen_metadata_budget_email" {
 resource "google_billing_budget" "gen_metadata_vertex_monthly" {
   count = local.gen_metadata_budget_enabled ? 1 : 0
 
-  billing_account = var.billing_account_id
+  billing_account = var.llm_budget.billing_account_id
   display_name    = "${var.environment_name}-gen-metadata-vertex-monthly"
 
   budget_filter {
@@ -102,7 +107,7 @@ resource "google_billing_budget" "gen_metadata_vertex_monthly" {
   }
 
   dynamic "all_updates_rule" {
-    for_each = length(var.gen_metadata_budget_alert_emails) > 0 ? [1] : []
+    for_each = length(var.llm_budget.alert_emails) > 0 ? [1] : []
     content {
       monitoring_notification_channels = [
         for ch in google_monitoring_notification_channel.gen_metadata_budget_email : ch.id
@@ -112,23 +117,4 @@ resource "google_billing_budget" "gen_metadata_vertex_monthly" {
   }
 
   depends_on = [google_project_service.billingbudgets]
-}
-
-output "gen_metadata_vertex_budget_todo" {
-  description = "TODO when Vertex genMetadata is enabled but billing_account_id is unset (budget skipped)."
-  value = (
-    local.gen_metadata_uses_vertex
-    && var.gen_metadata_daily_cost_limit_usd != null
-    && var.gen_metadata_daily_cost_limit_usd > 0
-    && (var.billing_account_id == null || length(trimspace(var.billing_account_id)) == 0)
-    ) ? trimspace(<<-EOT
-	## Configure Vertex genMetadata billing budget
-
-	Vertex genMetadata is enabled, but `billing_account_id` was not set on gcp-host, so no Cloud Billing budget was created.
-
-	Set `billing_account_id` (and optionally `gen_metadata_budget_alert_emails`) and re-apply to provision a monthly Vertex AI budget sized from `gen_metadata_daily_cost_limit_usd` × 30.
-
-	GCP has no daily billing budget; alerts are monthly only. There is no infra IAM auto-deny for Vertex (unlike AWS Bedrock budget actions).
-	EOT
-  ) : null
 }

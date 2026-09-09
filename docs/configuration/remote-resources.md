@@ -159,10 +159,6 @@ aws s3 cp en-sent.bin s3://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/openn
 gsutil cp en-sent.bin gs://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/opennlp/en-sent.bin
 ```
 
-### LLM model archives (genMetadata) — abandoned
-
-Local/Jlama genMetadata (zipped SafeTensors under `{SHARED_RESOURCE_PATH}/llm/`) is no longer supported. genMetadata is **cloud-only**: Bedrock on AWS, Vertex AI on GCP. Do not upload `llm/*.zip` archives; set `enable_gen_metadata = true` and use the host default backend (`bedrock` / `vertex`). See [gen-metadata-augment.md](../development/alpha-features/gen-metadata-augment.md).
-
 ## Uploading Resources
 
 ### AWS

@@ -308,6 +308,8 @@ variable "bulk_connectors" {
     memory_size_mb          = optional(number)
     settings_to_provide     = optional(map(string), {})
     enable_remote_resources = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
+    gen_metadata_backend    = optional(string) # "bedrock" (AWS); host default applies when null
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -494,7 +496,7 @@ variable "enable_remote_resources" {
 
 variable "gen_metadata_backend" {
   type        = string
-  description = "Default genMetadata backend for API connectors with enable_gen_metadata when not set per connector. On AWS: \"bedrock\" only. Default bedrock."
+  description = "Default genMetadata backend for connectors with enable_gen_metadata when not set per connector. On AWS: \"bedrock\" only. Default bedrock."
   default     = "bedrock"
 
   validation {

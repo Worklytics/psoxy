@@ -348,6 +348,8 @@ variable "custom_bulk_connectors" {
     }))
     memory_size_mb          = optional(number, null)
     enable_remote_resources = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
+    gen_metadata_backend    = optional(string)
     settings_to_provide     = optional(map(string), {})
     example_file            = optional(string)
     example_files           = optional(list(string), [])
@@ -356,8 +358,9 @@ variable "custom_bulk_connectors" {
 
   default = {
     #    "custom-survey" = {
-    #      source_kind = "survey"
-    #      rules       = {
+    #      source_kind         = "survey"
+    #      enable_gen_metadata = false
+    #      rules               = {
     #        columnsToRedact       = []
     #        columnsToPseudonymize = [
     #          "employee_id", # primary key

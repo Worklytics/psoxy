@@ -351,6 +351,8 @@ variable "custom_bulk_connectors" {
     available_memory_mb     = optional(number)
     timeout_seconds         = optional(number)
     enable_remote_resources = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
+    gen_metadata_backend    = optional(string)
     rules_file              = optional(string)
     settings_to_provide     = optional(map(string), {})
     example_file            = optional(string)
@@ -360,8 +362,9 @@ variable "custom_bulk_connectors" {
 
   default = {
     #    "custom-survey" = {
-    #      source_kind = "survey"
-    #      rules       = {
+    #      source_kind         = "survey"
+    #      enable_gen_metadata = false
+    #      rules               = {
     #        columnsToRedact       = []
     #        columnsToPseudonymize = [
     #          "employee_id", # primary key
@@ -545,21 +548,20 @@ variable "gen_metadata_backend" {
   default     = "vertex"
 }
 
-variable "gen_metadata_daily_cost_limit_usd" {
-  type        = number
-  description = "Nominal daily Vertex spend target (USD); sizes monthly billing budget as daily × 30. Set 0 to disable."
-  default     = 20
-}
-
-variable "gen_metadata_budget_alert_emails" {
-  type        = list(string)
-  description = "Emails for genMetadata Vertex monthly billing budget notifications."
-  default     = []
-}
-
-variable "billing_account_id" {
-  type        = string
-  description = "GCP billing account ID for Vertex genMetadata monthly budget. If null, budget is skipped (see module TODO output)."
+variable "llm_budget" {
+  type = object({
+    daily_cost_limit_usd = number
+    billing_account_id   = string
+    alert_emails         = list(string)
+  })
+  description = "Optional Vertex genMetadata Cloud Billing budget settings. When null, no budget is created. When set, billing_account_id is required. Monthly budget is sized as daily × 30."
   default     = null
   nullable    = true
+
+  validation {
+    condition = var.llm_budget == null || (
+      try(length(trimspace(var.llm_budget.billing_account_id)) > 0, false)
+    )
+    error_message = "llm_budget.billing_account_id is required when llm_budget is set (needed to create a GCP Cloud Billing budget)."
+  }
 }

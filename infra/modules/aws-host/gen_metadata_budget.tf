@@ -3,7 +3,7 @@
 check "gen_metadata_backend_aws_only" {
   assert {
     condition = alltrue([
-      for k, backend in local.api_connector_gen_metadata_backend :
+      for k, backend in local.connector_gen_metadata_backend :
       backend == null || backend == "bedrock"
     ])
     error_message = "aws-host genMetadata backend must be \"bedrock\" (local/Jlama abandoned; Vertex is GCP-only)."
@@ -24,11 +24,18 @@ locals {
     && length(local.gen_metadata_bedrock_role_names) > 0
   )
 
-  gen_metadata_bedrock_role_names = [
-    for k, backend in local.api_connector_gen_metadata_backend :
-    module.api_connector[k].instance_role_name
-    if backend == "bedrock"
-  ]
+  gen_metadata_bedrock_role_names = concat(
+    [
+      for k, backend in local.connector_gen_metadata_backend :
+      module.api_connector[k].instance_role_name
+      if backend == "bedrock" && contains(keys(var.api_connectors), k)
+    ],
+    [
+      for k, backend in local.connector_gen_metadata_backend :
+      module.bulk_connector[k].instance_role_name
+      if backend == "bedrock" && contains(keys(var.bulk_connectors), k)
+    ],
+  )
 }
 
 resource "aws_iam_policy" "gen_metadata_bedrock_deny" {
