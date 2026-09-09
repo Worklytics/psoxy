@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathRegex: "^/v2/meetings/[^/?]+(?:/(?!meeting_summary)[^/?]+)?(?:[?].*)?$"
+  - pathRegex: "^/v2/meetings/[^/?]+(?:/(?!meeting_summary|transcript)[^/?]+)?(?:[?].*)?$"
     allowedQueryParams:
       - "occurrence_id"
       - "show_previous_occurrences"

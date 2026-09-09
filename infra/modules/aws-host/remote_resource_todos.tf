@@ -2,7 +2,12 @@
 # Rendered as outputs only; upload is performed outside Terraform via tools/*.sh scripts.
 
 locals {
-  remote_resource_s3_prefix = "s3://${module.psoxy.artifacts_bucket_name}/${local.shared_resource_path}"
+  # artifacts_bucket_name can be null in module tests / BYO-artifact setups
+  remote_resource_s3_prefix = (
+    module.psoxy.artifacts_bucket_name == null
+    ? null
+    : "s3://${module.psoxy.artifacts_bucket_name}/${local.shared_resource_path}"
+  )
 
   opennlp_connector_ids = join(", ", [
     for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) : k

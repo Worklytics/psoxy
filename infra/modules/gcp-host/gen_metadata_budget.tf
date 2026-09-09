@@ -27,11 +27,11 @@ locals {
     },
   )
 
+  # try() — Terraform does not short-circuit && when llm_budget is null
   gen_metadata_budget_enabled = (
     local.gen_metadata_uses_vertex
-    && var.llm_budget != null
-    && var.llm_budget.daily_cost_limit_usd != null
-    && var.llm_budget.daily_cost_limit_usd > 0
+    && try(var.llm_budget.daily_cost_limit_usd, null) != null
+    && try(var.llm_budget.daily_cost_limit_usd, 0) > 0
   )
 
   # GCP billing budgets are monthly; approximate daily × 30.
