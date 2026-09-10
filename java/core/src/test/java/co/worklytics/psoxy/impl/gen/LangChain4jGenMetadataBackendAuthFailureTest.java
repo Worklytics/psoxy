@@ -38,7 +38,7 @@ class LangChain4jGenMetadataBackendAuthFailureTest {
     void generate_returnsNullOnAccessDeniedFromCloudModel() {
         GenMetadataConfig config = GenMetadataConfig.builder()
             .backend(GenMetadataConfig.BACKEND_BEDROCK)
-            .modelId("anthropic.claude-3-haiku-20240307-v1:0")
+            .modelId("us.amazon.nova-2-lite-v1:0")
             .timeoutSeconds(5)
             .maxInputChars(1024)
             .maxTokens(64)

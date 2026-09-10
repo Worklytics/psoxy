@@ -33,8 +33,8 @@ public class GenMetadataConfig {
 
     private static final Set<String> SUPPORTED_BACKENDS = Set.of(BACKEND_BEDROCK, BACKEND_VERTEX);
 
-    /** Default Bedrock model id when {@code METADATA_GEN_MODEL} is unset. */
-    public static final String DEFAULT_BEDROCK_MODEL = "anthropic.claude-3-haiku-20240307-v1:0";
+    /** Default Bedrock model id when {@code METADATA_GEN_MODEL} is unset (US cross-region inference profile). */
+    public static final String DEFAULT_BEDROCK_MODEL = "us.amazon.nova-2-lite-v1:0";
 
     /** Default Vertex Gemini model id when {@code METADATA_GEN_MODEL} is unset. */
     public static final String DEFAULT_VERTEX_MODEL = "gemini-3.5-flash-lite";

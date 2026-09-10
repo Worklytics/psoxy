@@ -309,7 +309,7 @@ module "api_connector" {
         METADATA_GEN_BACKEND = local.connector_gen_metadata_backend[each.key]
       },
       try(var.general_environment_variables["METADATA_GEN_MODEL"], null) == null ? {
-        METADATA_GEN_MODEL = "anthropic.claude-3-haiku-20240307-v1:0"
+        METADATA_GEN_MODEL = "us.amazon.nova-2-lite-v1:0"
       } : {},
     ) : {},
   )
@@ -421,7 +421,7 @@ module "bulk_connector" {
         METADATA_GEN_BACKEND = local.connector_gen_metadata_backend[each.key]
       },
       try(var.general_environment_variables["METADATA_GEN_MODEL"], null) == null ? {
-        METADATA_GEN_MODEL = "anthropic.claude-3-haiku-20240307-v1:0"
+        METADATA_GEN_MODEL = "us.amazon.nova-2-lite-v1:0"
       } : {},
     ) : {},
   )

@@ -148,7 +148,7 @@ For APIs that return objects (or arrays of objects) where the classification cor
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `METADATA_GEN_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). Java defaults unset backend toward `bedrock`. | `bedrock` \| `vertex` only |
-| `METADATA_GEN_MODEL` | Haiku / `gemini-3.5-flash-lite` defaults | Cloud model id |
+| `METADATA_GEN_MODEL` | AWS: `us.amazon.nova-2-lite-v1:0` · GCP: `gemini-3.5-flash-lite` | Cloud model id / inference profile. Override per deployment. |
 | `METADATA_GEN_MODEL_REGION` | Vertex: `global` | Vertex publisher-model **location**. Default `global` (google-genai → `https://aiplatform.googleapis.com`). Ignored on AWS. |
 | `METADATA_GEN_TIMEOUT_SECONDS` | `15` | Per-call timeout |
 | `METADATA_GEN_MAX_INPUT_CHARS` | `4096` | Truncate source (raise carefully for transcripts) |
@@ -180,6 +180,9 @@ Default is Flash-Lite for classify throughput. Override to full Flash when quali
 - `enable_gen_metadata = true` on API connectors; host `gen_metadata_backend` defaults to **bedrock** / **vertex**.
 - **Reject** `local` (and cross-cloud) via variable validation / `check` blocks.
 - Cloud memory defaults (no 4GB floor); Bedrock invoke IAM / `roles/aiplatform.user`; no genMetadata remote-resource upload TODOs.
+- **AWS default model:** `us.amazon.nova-2-lite-v1:0` (US cross-region inference profile). Prefer a US Lambda region for that default; override with `METADATA_GEN_MODEL` (e.g. `eu.amazon.nova-2-lite-v1:0` or a Claude model id).
+- **Bedrock model access:** Amazon Nova (AWS first-party) is covered by Bedrock’s simplified access + the invoke/Converse IAM aws-host attaches — no Terraform “enable model” resource and usually no console enablement. Anthropic Claude still needs a one-time account use-case form if you switch `METADATA_GEN_MODEL` to Claude (console or `PutUseCaseForModelAccess`; not automated in our modules). See aws-host output `remote_resource_gen_metadata_todo` when genMetadata is enabled.
+- **Provisioner IAM:** runtime Bedrock invoke is on connector roles. For daily cost-cap / budget-action wiring, grant provisioners `psoxy-constants` → `required_aws_managed_policies_to_provision_gen_metadata` (Budgets). Least-privileged policy includes a `BudgetsForGenMetadata` statement.
 - Cost caps: see below (daily/weekly product requirement).
 
 ### Cost caps — daily / weekly pacing
