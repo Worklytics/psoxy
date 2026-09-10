@@ -73,7 +73,7 @@ class GenMetadataSchemaSupportTest {
     @Test
     void processor_parsesBareClassifyLabel() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            (prompt, schema, input) -> "Research and Ideation",
+            (prompt, schema, input, thinkingLevel) -> "Research and Ideation",
             new ObjectMapper(),
             4096);
         Object out = processor.compute(
@@ -89,7 +89,7 @@ class GenMetadataSchemaSupportTest {
     @Test
     void processor_parsesJsonStringForRootStringEnum() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            (prompt, schema, input) -> "\"Research and Ideation\"",
+            (prompt, schema, input, thinkingLevel) -> "\"Research and Ideation\"",
             new ObjectMapper(),
             4096);
         Object out = processor.compute(
@@ -105,7 +105,7 @@ class GenMetadataSchemaSupportTest {
     @Test
     void processor_parsesBareLabelForRootStringEnum() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            (prompt, schema, input) -> "Excluded",
+            (prompt, schema, input, thinkingLevel) -> "Excluded",
             new ObjectMapper(),
             4096);
         Object out = processor.compute(

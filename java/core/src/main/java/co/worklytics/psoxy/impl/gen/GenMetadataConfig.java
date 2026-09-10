@@ -15,7 +15,7 @@ import java.util.Set;
  * <p>Cloud-only: {@code bedrock} (AWS) or {@code vertex} (GCP). Local/Jlama is not supported.
  */
 @Value
-@Builder
+@Builder(toBuilder = true)
 public class GenMetadataConfig {
 
     public static final int DEFAULT_MAX_ATTEMPTS = 2;
@@ -59,6 +59,12 @@ public class GenMetadataConfig {
     /** Total inference attempts per augment (including the first try). */
     @Builder.Default
     int maxAttempts = DEFAULT_MAX_ATTEMPTS;
+
+    /**
+     * Per-call Vertex Gemini thinking level ({@code MINIMAL}|{@code LOW}|{@code MEDIUM}|{@code HIGH}).
+     * Set from the augment rule when creating a ChatModel; ignored by Bedrock. Null → {@code MINIMAL}.
+     */
+    String thinkingLevel;
 
     public static GenMetadataConfig from(ConfigService configService) {
         String backend = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_BACKEND)

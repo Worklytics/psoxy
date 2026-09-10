@@ -2,6 +2,7 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
+import com.avaulta.gateway.rules.augments.GenMetadataThinkingLevels;
 import com.google.cloud.ServiceOptions;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.google.genai.GoogleGenAiChatModel;
@@ -22,9 +23,9 @@ import java.time.Duration;
  * {@code global}) — independent of the Cloud Function region.
  *
  * <p>Gemini 3.5 Flash defaults to {@code MEDIUM} thinking, which shares {@code maxOutputTokens}
- * and often blows the per-call timeout for tiny classify JSON. This provider forces
- * {@code thinkingLevel=MINIMAL}. Prefer {@code thinking_level} over legacy
- * {@code thinking_budget} (they must not be set together).
+ * and often blows the per-call timeout for tiny classify JSON. Thinking level comes from the
+ * augment rule ({@code thinkingLevel}, default {@code minimal} → {@code MINIMAL}). Prefer
+ * {@code thinking_level} over legacy {@code thinking_budget} (they must not be set together).
  *
  * <p>For {@code location=global}, google-genai uses {@code https://aiplatform.googleapis.com}
  * (not {@code global-aiplatform.googleapis.com}).
@@ -32,9 +33,6 @@ import java.time.Duration;
 @Log
 @Singleton
 public class VertexGeminiChatModelProvider implements GenMetadataChatModelProvider {
-
-    /** Gemini 3.x thinking enum; lowest latency for classify/extract JSON. */
-    static final String THINKING_LEVEL_MINIMAL = "MINIMAL";
 
     @Inject
     public VertexGeminiChatModelProvider() {
@@ -49,17 +47,18 @@ public class VertexGeminiChatModelProvider implements GenMetadataChatModelProvid
     public ChatModel create(GenMetadataConfig config, Path modelCacheDir) {
         String project = resolveProjectId();
         String location = resolveModelLocation(config);
+        String thinkingLevel = GenMetadataThinkingLevels.resolve(config.getThinkingLevel());
         log.info("Creating Vertex Gemini chat model project=" + project
             + " location=" + location
             + " model=" + config.getModelId()
-            + " thinkingLevel=" + THINKING_LEVEL_MINIMAL
+            + " thinkingLevel=" + thinkingLevel
             + " maxOutputTokens=" + config.getMaxTokens());
         return GoogleGenAiChatModel.builder()
             .projectId(project)
             .location(location)
             .modelName(config.getModelId())
             .maxOutputTokens(config.getMaxTokens())
-            .thinkingLevel(THINKING_LEVEL_MINIMAL)
+            .thinkingLevel(thinkingLevel)
             .timeout(Duration.ofSeconds(config.getTimeoutSeconds()))
             .maxRetries(1)
             .build();

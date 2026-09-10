@@ -78,6 +78,6 @@ class LangChain4jGenMetadataBackendAuthFailureTest {
                 .build()))
             .build();
 
-        assertNull(backend.generate("classify", outputSchema, "{\"text\":\"hello\"}"));
+        assertNull(backend.generate("classify", outputSchema, "{\"text\":\"hello\"}", null));
     }
 }

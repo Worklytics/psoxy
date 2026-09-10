@@ -65,7 +65,7 @@ class LangChain4jGenMetadataBackendTokenUsageTest {
                     .build()))
             .build();
 
-        Object result = backend.generate("Classify", schema, "hello");
+        Object result = backend.generate("Classify", schema, "hello", null);
         assertEquals("{\"category\":\"Excluded\"}", result);
 
         GenMetadataTokenUsageAccumulator.Snapshot snap = accumulator.snapshot();

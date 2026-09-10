@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.impl.gen;
 
 import com.avaulta.gateway.rules.augments.GenMetadataBackend;
+import com.avaulta.gateway.rules.augments.GenMetadataThinkingLevels;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.ChatMessage;
@@ -28,8 +29,8 @@ import java.util.logging.Level;
 /**
  * genMetadata inference via LangChain4j {@link ChatModel} (Bedrock or Vertex only).
  *
- * <p>Thread-safety: lazy per-modelId client init via {@link ConcurrentHashMap#computeIfAbsent};
- * concurrent cloud calls limited by semaphore.
+ * <p>Thread-safety: lazy per-{modelId, thinkingLevel} client init via
+ * {@link ConcurrentHashMap#computeIfAbsent}; concurrent cloud calls limited by semaphore.
  */
 @Log
 public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
@@ -88,8 +89,11 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     }
 
     @Override
-    public Object generate(String taskPrompt, JsonSchemaFilter outputSchema, String inputData) {
-        ModelHandle handle = resolveModel();
+    public Object generate(String taskPrompt, JsonSchemaFilter outputSchema, String inputData,
+                           String thinkingLevel) {
+        String resolvedThinkingLevel =
+            GenMetadataThinkingLevels.resolve(thinkingLevel);
+        ModelHandle handle = resolveModel(resolvedThinkingLevel);
         if (!handle.isReady()) {
             return null;
         }
@@ -119,7 +123,8 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             long inferenceStartedNanos = System.nanoTime();
             log.info("genMetadata LLM inference started at " + inferenceStartedAt
                 + " modelId=" + config.getModelId()
-                + " backend=" + config.getBackend());
+                + " backend=" + config.getBackend()
+                + " thinkingLevel=" + resolvedThinkingLevel);
             ChatResponse response;
             try {
                 response = chatWithTimeout(handle.chatModel, messages, responseFormat.orElse(null));
@@ -161,20 +166,25 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         return 8192;
     }
 
-    ModelHandle resolveModel() {
-        return models.computeIfAbsent(config.getModelId(), this::createModelHandle);
+    ModelHandle resolveModel(String thinkingLevel) {
+        String key = config.getModelId() + "|" + thinkingLevel;
+        return models.computeIfAbsent(key, ignored -> createModelHandle(thinkingLevel));
     }
 
-    private ModelHandle createModelHandle(String modelKey) {
+    private ModelHandle createModelHandle(String thinkingLevel) {
         try {
-            ChatModel chatModel = chatModelFactory.create(config, null);
-            log.info("Initialized genMetadata LangChain4j client: " + modelKey
-                + " backend=" + config.getBackend());
+            GenMetadataConfig effective = config.toBuilder()
+                .thinkingLevel(thinkingLevel)
+                .build();
+            ChatModel chatModel = chatModelFactory.create(effective, null);
+            log.info("Initialized genMetadata LangChain4j client: " + config.getModelId()
+                + " backend=" + config.getBackend()
+                + " thinkingLevel=" + thinkingLevel);
             return ModelHandle.ready(chatModel);
         } catch (Exception e) {
             log.log(Level.WARNING,
-                "Failed to initialize genMetadata client '" + modelKey + "' backend="
-                    + config.getBackend(),
+                "Failed to initialize genMetadata client '" + config.getModelId() + "' backend="
+                    + config.getBackend() + " thinkingLevel=" + thinkingLevel,
                 e);
             return ModelHandle.failed(e);
         }

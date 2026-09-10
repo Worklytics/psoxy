@@ -15,7 +15,10 @@ public interface GenMetadataBackend {
      * @param taskPrompt augment rule task prompt
      * @param outputSchema required output schema predicate
      * @param inputData JSON-serialized source value
+     * @param thinkingLevel Gemini thinking level (e.g. {@code MINIMAL}); ignored by Bedrock.
+     *                      May be null/blank — backends treat that as the default ({@code MINIMAL}).
      * @return parsed JSON object (typically a Map), or raw JSON string from the model
      */
-    Object generate(String taskPrompt, JsonSchemaFilter outputSchema, String inputData);
+    Object generate(String taskPrompt, JsonSchemaFilter outputSchema, String inputData,
+                    String thinkingLevel);
 }

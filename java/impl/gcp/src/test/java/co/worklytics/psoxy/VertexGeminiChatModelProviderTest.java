@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
+import com.avaulta.gateway.rules.augments.GenMetadataThinkingLevels;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,8 +35,25 @@ class VertexGeminiChatModelProviderTest {
     }
 
     @Test
-    void thinkingLevel_isMinimal() {
-        assertEquals("MINIMAL", VertexGeminiChatModelProvider.THINKING_LEVEL_MINIMAL);
+    void thinkingLevel_defaultsToMinimalConstant() {
+        assertEquals(GenMetadataThinkingLevels.MINIMAL, GenMetadataThinkingLevels.DEFAULT);
+    }
+
+    @Test
+    void resolveThinkingLevel_fromConfig() {
+        assertEquals(GenMetadataThinkingLevels.MINIMAL,
+            GenMetadataThinkingLevels.resolve(null));
+        assertEquals(GenMetadataThinkingLevels.HIGH,
+            GenMetadataThinkingLevels.resolve(
+                GenMetadataConfig.builder()
+                    .backend(GenMetadataConfig.BACKEND_VERTEX)
+                    .modelId(GenMetadataConfig.DEFAULT_VERTEX_MODEL)
+                    .thinkingLevel("high")
+                    .timeoutSeconds(15)
+                    .maxInputChars(4096)
+                    .maxTokens(GenMetadataConfig.DEFAULT_MAX_TOKENS)
+                    .build()
+                    .getThinkingLevel()));
     }
 
     private static GenMetadataConfig config(String backend, String modelRegion) {

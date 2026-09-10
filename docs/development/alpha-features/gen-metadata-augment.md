@@ -117,6 +117,7 @@ Same augment type covers both Copilot classification and Zoom transcript extract
 | `jsonPaths` | yes | Source values to process. Use `$` / `$[*]` to classify whole objects (→ `+self:genMetadata`); use leaf paths for scalar text (→ `+title:genMetadata`, etc.). |
 | `prompt` | yes | Task guidance only (categories, edge cases). Do **not** put conflicting format instructions here — Java always requests a JSON object and applies provider JSON constraints from `outputSchema`. |
 | `outputSchema` | yes | Shape + enums; drives classify vs extract and provider constraints |
+| `thinkingLevel` | no | Vertex Gemini thinking level: `minimal` (default), `low`, `medium`, or `high`. Case-insensitive. Ignored on Bedrock. |
 
 No `model`, `backend`, or `maxTokens` in rules — those stay deployment config.
 
@@ -129,6 +130,7 @@ For APIs that return objects (or arrays of objects) where the classification cor
   augments:
     - !<genMetadata>
       jsonPaths: ["$[*]"]
+      thinkingLevel: minimal   # optional; default. Use low|medium|high for harder extract tasks
       prompt: |
         Classify this GitHub pull request into exactly one category.
         Use title and body as the primary signal; ignore ids, urls, and user records.
@@ -158,11 +160,11 @@ For APIs that return objects (or arrays of objects) where the classification cor
 
 Vertex project comes from ADC / metadata (`ServiceOptions.getDefaultProjectId()`). Model location is **not** the function region. Default is `METADATA_GEN_MODEL=gemini-3.5-flash-lite` + `METADATA_GEN_MODEL_REGION=global`.
 
-Vertex uses LangChain4j **google-genai** (not the legacy vertex-ai-gemini SDK) and sets `thinkingLevel=MINIMAL`. Gemini 3.5 Flash otherwise defaults to `MEDIUM` thinking, which ate the old 256-token output cap and the 15s timeout (truncated `{"category": "`). Create logs include `thinkingLevel=` and `maxOutputTokens=`.
+Vertex uses LangChain4j **google-genai** (not the legacy vertex-ai-gemini SDK). Thinking level is set from the augment rule field `thinkingLevel` (default `minimal` → API `MINIMAL`). Gemini 3.5 Flash otherwise defaults to `MEDIUM` thinking, which ate the old 256-token output cap and the 15s timeout (truncated `{"category": "`). Create logs include `thinkingLevel=` and `maxOutputTokens=`. Clients are cached per `{modelId, thinkingLevel}` so mixed rule levels share one process safely.
 
 ### Latency / model choice
 
-Per-row Vertex calls are typically several seconds (network + model). A 100-row bulk file is **sequential** (one augment per row), so wall time ≈ rows × (attempts × latency). Failed parses double cost when retries fire. `thinkingLevel=MINIMAL` is required for full Flash classify; Lite models default closer to minimal thinking but still benefit from the higher max-token default.
+Per-row Vertex calls are typically several seconds (network + model). A 100-row bulk file is **sequential** (one augment per row), so wall time ≈ rows × (attempts × latency). Failed parses double cost when retries fire. Prefer `thinkingLevel: minimal` (the default) for classify throughput; raise to `medium`/`high` only when quality needs deeper reasoning (and budget/timeout allow). Lite models default closer to minimal thinking but still benefit from the higher max-token default.
 
 Default is Flash-Lite for classify throughput. Override to full Flash when quality matters more than p50 latency:
 
