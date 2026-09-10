@@ -8,8 +8,7 @@ import com.avaulta.gateway.rules.JsonSchemaFilter;
 public class UnavailableGenMetadataBackend implements GenMetadataBackend {
 
     @Override
-    public Object generate(String taskPrompt, JsonSchemaFilter outputSchema, String inputData,
-                           String thinkingLevel) {
+    public Object generate(String taskPrompt, JsonSchemaFilter outputSchema, String inputData) {
         throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
             "genMetadata backend is not available");
     }

@@ -366,6 +366,9 @@ module "api_connector" {
       try(var.general_environment_variables["METADATA_GEN_MODEL_REGION"], null) == null ? {
         METADATA_GEN_MODEL_REGION = "global"
       } : {},
+      try(var.general_environment_variables["METADATA_GEN_THINKING_LEVEL"], null) == null ? {
+        METADATA_GEN_THINKING_LEVEL = "minimal"
+      } : {},
     ) : {},
   )
 
@@ -588,6 +591,9 @@ module "bulk_connector" {
       } : {},
       try(var.general_environment_variables["METADATA_GEN_MODEL_REGION"], null) == null ? {
         METADATA_GEN_MODEL_REGION = "global"
+      } : {},
+      try(var.general_environment_variables["METADATA_GEN_THINKING_LEVEL"], null) == null ? {
+        METADATA_GEN_THINKING_LEVEL = "minimal"
       } : {},
     ) : {},
   )

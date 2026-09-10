@@ -56,15 +56,10 @@ public class GenMetadataProcessor {
      * Compute genMetadata output for a single augment invocation.
      */
     public Object compute(Augment.GenMetadata augment, Object input) {
-        return process(augment.getPrompt(), augment.getOutputSchema(), input, augment.getThinkingLevel());
+        return process(augment.getPrompt(), augment.getOutputSchema(), input);
     }
 
     public Object process(String taskPrompt, JsonSchemaFilter outputSchema, Object input) {
-        return process(taskPrompt, outputSchema, input, null);
-    }
-
-    public Object process(String taskPrompt, JsonSchemaFilter outputSchema, Object input,
-                          String thinkingLevel) {
         if (StringUtils.isBlank(taskPrompt) || outputSchema == null) {
             throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
                 "genMetadata missing prompt or outputSchema");
@@ -74,13 +69,12 @@ public class GenMetadataProcessor {
             throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
                 "genMetadata input empty or not serializable");
         }
-        String resolvedThinkingLevel = GenMetadataThinkingLevels.resolve(thinkingLevel);
         try {
             for (int attempt = 1; attempt <= maxAttempts; attempt++) {
                 if (attempt > 1) {
                     log.info("genMetadata inference retry attempt " + attempt + " of " + maxAttempts);
                 }
-                Object parsed = inferOnce(taskPrompt, outputSchema, inputJson, resolvedThinkingLevel);
+                Object parsed = inferOnce(taskPrompt, outputSchema, inputJson);
                 if (parsed != null && validatesOutputSchema(parsed, outputSchema)) {
                     return parsed;
                 }
@@ -96,16 +90,14 @@ public class GenMetadataProcessor {
         }
     }
 
-    private Object inferOnce(String taskPrompt, JsonSchemaFilter outputSchema, String inputJson,
-                             String thinkingLevel)
+    private Object inferOnce(String taskPrompt, JsonSchemaFilter outputSchema, String inputJson)
             throws Exception {
         Instant startedAt = Instant.now();
         long startedNanos = System.nanoTime();
-        log.info("genMetadata augment inference call started at " + startedAt
-            + " thinkingLevel=" + thinkingLevel);
+        log.info("genMetadata augment inference call started at " + startedAt);
         Object raw;
         try {
-            raw = backend.generate(taskPrompt, outputSchema, inputJson, thinkingLevel);
+            raw = backend.generate(taskPrompt, outputSchema, inputJson);
         } finally {
             long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedNanos);
             log.info("genMetadata augment inference call completed in " + elapsedMs + "ms");

@@ -426,7 +426,7 @@ class AugmentProcessorTest {
 
     private AugmentProcessor processorWithGenMetadataStub(String label) {
         GenMetadataProcessor genMetadataProcessor = new GenMetadataProcessor(
-            (taskPrompt, outputSchema, inputData, thinkingLevel) -> label,
+            (taskPrompt, outputSchema, inputData) -> label,
             objectMapper,
             4096,
             2,

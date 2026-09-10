@@ -171,6 +171,12 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     METADATA_GEN_RETRIES,
 
     /**
+     * BETA: Vertex Gemini thinking level ({@code minimal}|{@code low}|{@code medium}|{@code high}).
+     * Default {@code minimal}. Ignored on AWS/Bedrock (Claude uses a different extended-thinking API).
+     */
+    METADATA_GEN_THINKING_LEVEL,
+
+    /**
      * BETA: set when Terraform {@code enable_gen_metadata} is used (cloud Bedrock/Vertex genMetadata).
      */
     ENABLE_GEN_METADATA,

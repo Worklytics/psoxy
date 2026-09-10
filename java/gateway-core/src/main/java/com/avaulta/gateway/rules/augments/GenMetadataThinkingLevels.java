@@ -7,10 +7,10 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 /**
- * Gemini thinking-level values for {@link Augment.GenMetadata#getThinkingLevel()}.
+ * Gemini thinking-level values for {@code METADATA_GEN_THINKING_LEVEL} (Vertex only).
  *
- * <p>YAML may use lowercase ({@code minimal}); Vertex expects uppercase ({@code MINIMAL}).
- * Bedrock ignores this setting.
+ * <p>Env/config may use lowercase ({@code minimal}); Vertex expects uppercase ({@code MINIMAL}).
+ * Bedrock ignores this setting (Claude uses a different extended-thinking API).
  */
 public final class GenMetadataThinkingLevels {
 

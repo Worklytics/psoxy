@@ -2,6 +2,7 @@ package co.worklytics.psoxy.impl.gen;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import com.avaulta.gateway.rules.augments.GenMetadataThinkingLevels;
 import lombok.Builder;
 import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
@@ -61,8 +62,8 @@ public class GenMetadataConfig {
     int maxAttempts = DEFAULT_MAX_ATTEMPTS;
 
     /**
-     * Per-call Vertex Gemini thinking level ({@code MINIMAL}|{@code LOW}|{@code MEDIUM}|{@code HIGH}).
-     * Set from the augment rule when creating a ChatModel; ignored by Bedrock. Null → {@code MINIMAL}.
+     * Per-deployment Vertex Gemini thinking level ({@code MINIMAL}|{@code LOW}|{@code MEDIUM}|{@code HIGH}).
+     * From {@code METADATA_GEN_THINKING_LEVEL}; ignored by Bedrock. Null → {@code MINIMAL} at provider.
      */
     String thinkingLevel;
 
@@ -91,6 +92,10 @@ public class GenMetadataConfig {
         int maxAttempts = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_RETRIES)
             .flatMap(GenMetadataConfig::parsePositiveInt)
             .orElse(2);
+        String thinkingLevel = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_THINKING_LEVEL)
+            .filter(StringUtils::isNotBlank)
+            .map(GenMetadataThinkingLevels::resolve)
+            .orElse(GenMetadataThinkingLevels.DEFAULT);
         return GenMetadataConfig.builder()
             .backend(backend)
             .modelId(model)
@@ -99,6 +104,7 @@ public class GenMetadataConfig {
             .maxInputChars(maxInput)
             .maxTokens(maxTokens)
             .maxAttempts(maxAttempts)
+            .thinkingLevel(thinkingLevel)
             .build();
     }
 

@@ -23,8 +23,8 @@ import java.time.Duration;
  * {@code global}) — independent of the Cloud Function region.
  *
  * <p>Gemini 3.5 Flash defaults to {@code MEDIUM} thinking, which shares {@code maxOutputTokens}
- * and often blows the per-call timeout for tiny classify JSON. Thinking level comes from the
- * augment rule ({@code thinkingLevel}, default {@code minimal} → {@code MINIMAL}). Prefer
+ * and often blows the per-call timeout for tiny classify JSON. Thinking level comes from
+ * {@code METADATA_GEN_THINKING_LEVEL} (default {@code minimal} → {@code MINIMAL}). Prefer
  * {@code thinking_level} over legacy {@code thinking_budget} (they must not be set together).
  *
  * <p>For {@code location=global}, google-genai uses {@code https://aiplatform.googleapis.com}

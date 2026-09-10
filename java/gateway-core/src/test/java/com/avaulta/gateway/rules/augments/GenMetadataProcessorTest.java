@@ -3,7 +3,6 @@ package com.avaulta.gateway.rules.augments;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -35,7 +33,7 @@ class GenMetadataProcessorTest {
         JsonSchemaFilter schema = categorySchema();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            (taskPrompt, outputSchema, inputData, thinkingLevel) -> {
+            (taskPrompt, outputSchema, inputData) -> {
                 TreeMap<String, Object> result = new TreeMap<>();
                 result.put("category", "Excluded");
                 return result;
@@ -55,7 +53,7 @@ class GenMetadataProcessorTest {
         AtomicInteger calls = new AtomicInteger();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            (taskPrompt, outputSchema, inputData, thinkingLevel) -> {
+            (taskPrompt, outputSchema, inputData) -> {
                 if (calls.incrementAndGet() == 1) {
                     return """
                         {"type":"object","properties":{"category":{"type":"string"}},"required":["category"]}
@@ -80,7 +78,7 @@ class GenMetadataProcessorTest {
         JsonSchemaFilter schema = categorySchema();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            (taskPrompt, outputSchema, inputData, thinkingLevel) -> """
+            (taskPrompt, outputSchema, inputData) -> """
                 {"type":"object","properties":{"category":{"type":"string"}},"required":["category"]}
                 """,
             OBJECT_MAPPER,
@@ -216,7 +214,7 @@ class GenMetadataProcessorTest {
             .build();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            (taskPrompt, outputSchema, inputData, thinkingLevel) -> {
+            (taskPrompt, outputSchema, inputData) -> {
                 assertTrue(inputData.contains("\"title\""));
                 assertTrue(inputData.contains("Fix NPE"));
                 return "Bugfix";
@@ -234,7 +232,7 @@ class GenMetadataProcessorTest {
         JsonSchemaFilter schema = categorySchema();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            (taskPrompt, outputSchema, inputData, thinkingLevel) -> {
+            (taskPrompt, outputSchema, inputData) -> {
                 assertTrue(inputData.contains("\"body\""));
                 return "{\"category\":\"Excluded\"}";
             },
@@ -247,73 +245,5 @@ class GenMetadataProcessorTest {
         Map<String, Object> out = (Map<String, Object>) processor.process(
             "Classify", schema, Map.of("title", "hi", "body", "thanks"));
         assertEquals("Excluded", out.get("category"));
-    }
-
-    @Test
-    void process_passesThinkingLevelToBackend() {
-        JsonSchemaFilter schema = categorySchema();
-        AtomicReference<String> seenLevel = new AtomicReference<>();
-
-        GenMetadataProcessor processor = new GenMetadataProcessor(
-            (taskPrompt, outputSchema, inputData, thinkingLevel) -> {
-                seenLevel.set(thinkingLevel);
-                TreeMap<String, Object> result = new TreeMap<>();
-                result.put("category", "Excluded");
-                return result;
-            },
-            OBJECT_MAPPER,
-            4096);
-
-        Augment.GenMetadata augment = Augment.GenMetadata.builder()
-            .prompt("Classify")
-            .outputSchema(schema)
-            .thinkingLevel("high")
-            .build();
-
-        processor.compute(augment, "hello");
-        assertEquals(GenMetadataThinkingLevels.HIGH, seenLevel.get());
-    }
-
-    @Test
-    void process_defaultsThinkingLevelToMinimal() {
-        AtomicReference<String> seenLevel = new AtomicReference<>();
-
-        GenMetadataProcessor processor = new GenMetadataProcessor(
-            (taskPrompt, outputSchema, inputData, thinkingLevel) -> {
-                seenLevel.set(thinkingLevel);
-                return "Feature";
-            },
-            OBJECT_MAPPER,
-            4096);
-
-        JsonSchemaFilter schema = JsonSchemaFilter.builder()
-            .type("string")
-            .enumValues(List.of("Feature", "Bugfix"))
-            .build();
-
-        processor.process("Classify", schema, "hello");
-        assertEquals(GenMetadataThinkingLevels.MINIMAL, seenLevel.get());
-    }
-
-    @Test
-    void yaml_deserializesThinkingLevel() throws Exception {
-        ObjectMapper yaml = new ObjectMapper(new YAMLFactory())
-            .findAndRegisterModules();
-        String yamlText = """
-            method: genMetadata
-            jsonPaths:
-              - "$[*]"
-            prompt: Classify
-            thinkingLevel: medium
-            outputSchema:
-              type: string
-              enum:
-                - Feature
-                - Bugfix
-            """;
-        Augment.GenMetadata augment = yaml.readerFor(Augment.GenMetadata.class).readValue(yamlText);
-        assertEquals("medium", augment.getThinkingLevel());
-        assertEquals(GenMetadataThinkingLevels.MEDIUM,
-            GenMetadataThinkingLevels.resolve(augment.getThinkingLevel()));
     }
 }

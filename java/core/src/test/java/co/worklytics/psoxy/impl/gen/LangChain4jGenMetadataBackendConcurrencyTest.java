@@ -69,7 +69,7 @@ class LangChain4jGenMetadataBackendConcurrencyTest {
             pool.submit(() -> {
                 try {
                     start.await();
-                    backend.resolveModel(com.avaulta.gateway.rules.augments.GenMetadataThinkingLevels.MINIMAL);
+                    backend.resolveModel();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } finally {

@@ -258,15 +258,6 @@ public abstract class Augment {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         String prompt;
 
-        /**
-         * Gemini thinking level for Vertex ({@code minimal}|{@code low}|{@code medium}|{@code high}).
-         * Default {@code minimal}. Ignored on Bedrock. YAML may use any case; runtime normalizes to
-         * uppercase API values.
-         */
-        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-        @Builder.Default
-        String thinkingLevel = GenMetadataThinkingLevels.DEFAULT.toLowerCase();
-
         @JsonIgnore
         @Override
         public String getFunctionName() {
