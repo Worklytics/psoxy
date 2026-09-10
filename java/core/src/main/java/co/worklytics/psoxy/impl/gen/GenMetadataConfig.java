@@ -76,6 +76,9 @@ public class GenMetadataConfig {
             .filter(StringUtils::isNotBlank)
             .orElseGet(() -> defaultModelForBackend(backend))
             .trim();
+        if (BACKEND_BEDROCK.equalsIgnoreCase(backend)) {
+            model = normalizeBedrockModelId(model);
+        }
         String modelRegion = configService.getConfigPropertyAsOptional(ProxyConfigProperty.METADATA_GEN_MODEL_REGION)
             .filter(StringUtils::isNotBlank)
             .map(String::trim)
@@ -113,6 +116,22 @@ public class GenMetadataConfig {
             return DEFAULT_VERTEX_MODEL;
         }
         return DEFAULT_BEDROCK_MODEL;
+    }
+
+    /**
+     * Nova foundation-model ids ({@code amazon.nova-…}) cannot be invoked on-demand; Bedrock requires
+     * a cross-region inference profile (e.g. {@code us.amazon.nova-2-lite-v1:0}). Bare Nova ids are
+     * rewritten to the US profile. Ids that already have a geo/global prefix are left unchanged.
+     */
+    static String normalizeBedrockModelId(String modelId) {
+        if (StringUtils.isBlank(modelId)) {
+            return modelId;
+        }
+        String id = modelId.trim();
+        if (id.startsWith("amazon.nova")) {
+            return "us." + id;
+        }
+        return id;
     }
 
     public boolean isSupportedCloudBackend() {

@@ -148,7 +148,7 @@ For APIs that return objects (or arrays of objects) where the classification cor
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `METADATA_GEN_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). Java defaults unset backend toward `bedrock`. | `bedrock` \| `vertex` only |
-| `METADATA_GEN_MODEL` | AWS: `us.amazon.nova-2-lite-v1:0` · GCP: `gemini-3.5-flash-lite` | Cloud model id / inference profile. Override per deployment. |
+| `METADATA_GEN_MODEL` | AWS: `us.amazon.nova-2-lite-v1:0` · GCP: `gemini-3.5-flash-lite` | Cloud model id / **inference profile**. For Nova, use a CRIS id (`us.` / `eu.` / `jp.` / `global.` prefix) — bare `amazon.nova-…` foundation-model ids are rejected by Bedrock (on-demand not supported). If a bare `amazon.nova-…` value is set, Java rewrites it to `us.amazon.nova-…`. |
 | `METADATA_GEN_MODEL_REGION` | Vertex: `global` | Vertex publisher-model **location**. Default `global` (google-genai → `https://aiplatform.googleapis.com`). Ignored on AWS. |
 | `METADATA_GEN_TIMEOUT_SECONDS` | `15` | Per-call timeout |
 | `METADATA_GEN_MAX_INPUT_CHARS` | `4096` | Truncate source (raise carefully for transcripts) |

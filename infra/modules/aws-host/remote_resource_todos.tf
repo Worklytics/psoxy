@@ -51,7 +51,7 @@ output "remote_resource_gen_metadata_todo" {
 
 	### Manual / account steps (not fully automatable in Terraform)
 
-	1. **Amazon Nova (default):** With Bedrock’s simplified model access, AWS first-party Nova models are generally available without a console “enable model” step. If invokes fail with access errors, confirm the account/region is not blocked by an SCP and that Bedrock is usable in that region ([model access](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html)).
+	1. **Amazon Nova (default):** Use a CRIS inference profile id (`us.amazon.nova-2-lite-v1:0`), not the bare foundation-model id (`amazon.nova-2-lite-v1:0`) — on-demand invoke of the bare id returns 400. With Bedrock’s simplified model access, AWS first-party Nova is generally available without a console “enable model” step. If invokes fail with access errors, confirm the account/region is not blocked by an SCP and that Bedrock is usable in that region ([model access](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html)).
 	2. **Anthropic Claude (only if you set `METADATA_GEN_MODEL` to a Claude id):** First-time Anthropic use in the account still requires a one-time use-case form (Bedrock console playground or `PutUseCaseForModelAccess`) — Terraform does not submit that form for you.
 	3. Optional daily spend cap: set `gen_metadata_daily_cost_limit_usd` + `gen_metadata_budget_alert_emails` on aws-host (Budgets + IAM Deny). Provisioners need Budgets permissions — see `psoxy-constants` `required_aws_managed_policies_to_provision_gen_metadata`.
 
