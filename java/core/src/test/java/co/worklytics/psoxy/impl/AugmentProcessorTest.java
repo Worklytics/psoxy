@@ -17,6 +17,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -335,6 +336,9 @@ class AugmentProcessorTest {
     void buildAugmentPropertyName() {
         assertEquals("+content:textDigest",
             AugmentProcessor.buildAugmentPropertyName("content", "textDigest"));
+        assertEquals("+self:genMetadata",
+            AugmentProcessor.buildAugmentPropertyName(
+                AugmentProcessor.OBJECT_LEVEL_SOURCE_PROPERTY, "genMetadata"));
     }
 
     @Test
@@ -411,5 +415,113 @@ class AugmentProcessorTest {
         List<String> warnings = augmentProcessor.applyAugments(List.of(augment), document);
 
         assertTrue(warnings.contains(Warning.AUGMENT_CONFLICT_SKIPPED.asHttpHeaderCode()));
+    }
+
+    private static JsonSchemaFilter stringEnumSchema(String... labels) {
+        return JsonSchemaFilter.builder()
+            .type("string")
+            .enumValues(Arrays.asList(labels))
+            .build();
+    }
+
+    private AugmentProcessor processorWithGenMetadataStub(String label) {
+        GenMetadataProcessor genMetadataProcessor = new GenMetadataProcessor(
+            (taskPrompt, outputSchema, inputData) -> label,
+            objectMapper,
+            4096,
+            2,
+            new JsonSchemaValidationUtils());
+        return new AugmentProcessor(jsonConfiguration,
+            new JsonSchemaValidationUtils(),
+            objectMapper,
+            new SentenceMetadataProcessor(path -> Optional.empty()),
+            genMetadataProcessor);
+    }
+
+    private static Map<String, Object> samplePr(String title, String body) {
+        Map<String, Object> pr = new LinkedHashMap<>();
+        pr.put("title", title);
+        Map<String, Object> user = new LinkedHashMap<>();
+        user.put("login", "alice");
+        user.put("id", 1);
+        pr.put("user", user);
+        pr.put("body", body);
+        return pr;
+    }
+
+    @SneakyThrows
+    @Test
+    void applyAugments_genMetadata_objectLevel_arrayElements() {
+        AugmentProcessor processor = processorWithGenMetadataStub("Feature");
+        Augment.GenMetadata augment = Augment.GenMetadata.builder()
+            .jsonPath("$[*]")
+            .prompt("Classify this pull request")
+            .outputSchema(stringEnumSchema("Feature", "Bugfix", "Uncategorized"))
+            .build();
+
+        Map<String, Object> pr1 = samplePr("Add login", "Implements OAuth");
+        Map<String, Object> pr2 = samplePr("Fix crash", "Null check");
+        List<Map<String, Object>> document = new ArrayList<>(List.of(pr1, pr2));
+
+        List<String> warnings = processor.applyAugments(List.of(augment), document);
+
+        assertTrue(warnings.isEmpty());
+        assertEquals("Feature", pr1.get("+self:genMetadata"));
+        assertEquals("Feature", pr2.get("+self:genMetadata"));
+        assertEquals("Add login", pr1.get("title"));
+        assertEquals("Implements OAuth", pr1.get("body"));
+        assertFalse(pr1.containsKey("+title:genMetadata"));
+    }
+
+    @SneakyThrows
+    @Test
+    void applyAugments_genMetadata_objectLevel_rootObject() {
+        AugmentProcessor processor = processorWithGenMetadataStub("Bugfix");
+        Augment.GenMetadata augment = Augment.GenMetadata.builder()
+            .jsonPath("$")
+            .prompt("Classify this pull request")
+            .outputSchema(stringEnumSchema("Feature", "Bugfix", "Uncategorized"))
+            .build();
+
+        Map<String, Object> document = samplePr("Fix NPE", "Guards null user");
+
+        processor.applyAugments(List.of(augment), document);
+
+        assertEquals("Bugfix", document.get("+self:genMetadata"));
+        assertEquals("Fix NPE", document.get("title"));
+        assertEquals("Guards null user", document.get("body"));
+    }
+
+    @SneakyThrows
+    @Test
+    void applyAugments_genMetadata_scalarPath_stillSiblingNotSelf() {
+        AugmentProcessor processor = processorWithGenMetadataStub("Feature");
+        Augment.GenMetadata augment = Augment.GenMetadata.builder()
+            .jsonPath("$[*].title")
+            .prompt("Classify")
+            .outputSchema(stringEnumSchema("Feature", "Bugfix", "Uncategorized"))
+            .build();
+
+        Map<String, Object> pr1 = samplePr("Add login", "Implements OAuth");
+        List<Map<String, Object>> document = new ArrayList<>(List.of(pr1));
+
+        processor.applyAugments(List.of(augment), document);
+
+        assertEquals("Feature", pr1.get("+title:genMetadata"));
+        assertFalse(pr1.containsKey("+self:genMetadata"));
+    }
+
+    @SneakyThrows
+    @Test
+    void applyAugments_arrayParent_nonMapMatch_noOpsSafely() {
+        Augment.TextDigest augment = Augment.TextDigest.builder()
+            .jsonPath("$[*]")
+            .build();
+
+        List<Object> document = new ArrayList<>(List.of("plain-string", "another"));
+
+        assertDoesNotThrow(() -> augmentProcessor.applyAugments(List.of(augment), document));
+        assertEquals(2, document.size());
+        assertEquals("plain-string", document.get(0));
     }
 }

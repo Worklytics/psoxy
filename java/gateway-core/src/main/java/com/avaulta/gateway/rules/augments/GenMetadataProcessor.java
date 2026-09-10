@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -141,7 +144,10 @@ public class GenMetadataProcessor {
                 String truncated = truncate(text);
                 return objectMapper.writeValueAsString(truncated);
             }
-            String serialized = objectMapper.writeValueAsString(input);
+            Object prepared = input instanceof Map<?, ?> map
+                ? prepareMapForLlm(map)
+                : stripAugmentKeysDeep(input);
+            String serialized = objectMapper.writeValueAsString(prepared);
             return truncateSerialized(serialized);
         } catch (Exception e) {
             log.log(Level.WARNING, "Failed to serialize genMetadata input", e);
@@ -149,6 +155,59 @@ public class GenMetadataProcessor {
         }
     }
 
+    /**
+     * Build LLM corpus from a matched JSON object: strip {@code +}-prefixed augment keys and put
+     * {@code title}/{@code body} first so {@link #maxInputChars} truncation still sees the
+     * classification text when large fields (e.g. GitHub {@code user}) sit between them in
+     * Jackson field order.
+     */
+    private LinkedHashMap<String, Object> prepareMapForLlm(Map<?, ?> map) {
+        LinkedHashMap<String, Object> ordered = new LinkedHashMap<>();
+        putPreferredTextField(ordered, map, "title");
+        putPreferredTextField(ordered, map, "body");
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            if (!(entry.getKey() instanceof String key)) {
+                continue;
+            }
+            if (key.startsWith("+") || "title".equals(key) || "body".equals(key)) {
+                continue;
+            }
+            ordered.put(key, stripAugmentKeysDeep(entry.getValue()));
+        }
+        return ordered;
+    }
+
+    private void putPreferredTextField(LinkedHashMap<String, Object> ordered, Map<?, ?> map,
+                                       String key) {
+        if (!map.containsKey(key)) {
+            return;
+        }
+        ordered.put(key, stripAugmentKeysDeep(map.get(key)));
+    }
+
+    /**
+     * Recursively drop {@code +}-prefixed keys so prior augment output is not sent to the model.
+     */
+    private Object stripAugmentKeysDeep(Object value) {
+        if (value instanceof Map<?, ?> map) {
+            LinkedHashMap<String, Object> cleaned = new LinkedHashMap<>();
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                if (!(entry.getKey() instanceof String key) || key.startsWith("+")) {
+                    continue;
+                }
+                cleaned.put(key, stripAugmentKeysDeep(entry.getValue()));
+            }
+            return cleaned;
+        }
+        if (value instanceof List<?> list) {
+            List<Object> cleaned = new ArrayList<>(list.size());
+            for (Object item : list) {
+                cleaned.add(stripAugmentKeysDeep(item));
+            }
+            return cleaned;
+        }
+        return value;
+    }
     Object parseModelJson(Object raw) {
         return parseModelJson(raw, null);
     }

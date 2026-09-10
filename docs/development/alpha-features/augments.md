@@ -41,6 +41,14 @@ Inspired by OData's `@`-annotation pattern (where metadata about a property `Foo
 +{sourceProperty}:{augmentFunction}
 ```
 
+When a `jsonPath` matches a JSON **object** (Map) — e.g. `$` on a single resource or `$[*]` on an array of objects — the matched object is both the augment corpus and the attachment target. The synthetic property uses the object-level source token `self`:
+
+```
++self:{augmentFunction}
+```
+
+Scalar / leaf matches are unchanged (`$.title` → `+title:genMetadata`, `$..body.content` → `+content:genMetadata`).
+
 When `innerJsonPath` is set and matches nested JSON inside a string field, all inner matches are
 grouped under a single augment property, keyed by normalized inner path suffix:
 
@@ -57,7 +65,7 @@ grouped under a single augment property, keyed by normalized inner path suffix:
 | Token | Meaning |
 |---|---|
 | `+` | Prefix identifying the property as proxy-generated (augmented). |
-| `{sourceProperty}` | The name of the field the augment reads from. |
+| `{sourceProperty}` | The name of the field the augment reads from, or `self` when the matched value is the JSON object itself. |
 | `:` | Separator. |
 | `{augmentFunction}` | The name of the augment function (e.g. `textDigest`). |
 
@@ -84,6 +92,21 @@ Inner map keys use `{innerPathSuffix}` — the normalized concrete path within p
 > - Semantically suggestive of "additive / supplementary."
 >
 > If a future standard emerges (e.g. JSON-LD `@`-keywords), we can evolve the prefix; the `+` makes the contract explicit and easy to migrate.
+
+**Example (object-level).** A GitHub PR list matched by `$[*]` attaches on each PR object:
+
+```jsonc
+[
+  {
+    "title": "Add OAuth",
+    "body": "…",
+    "user": { "login": "alice" },
+    "+self:genMetadata": "Feature"   // augment on the matched object
+  }
+]
+```
+
+The response schema filter still auto-passes `+`-prefixed properties, including `+self:genMetadata`.
 
 ### Conflict Detection
 
@@ -367,6 +390,6 @@ The consumer now sees:
 | `outputSchema` semantics | **Predicate** (pass/fail gate). | Augment implementations should be precise; silent stripping masks bugs. A `filterOutput: true` option can be added later. |
 | Augment timeouts | **Global 30s budget** for all augments per request. | Leaves headroom within the 55s request timeout. Configurable via `PSOXY_AUGMENT_TIMEOUT_SECONDS` env var in a follow-up. Per-augment timeouts deferred until heavier augments exist. |
 | Pre- vs. post-transform | **Pre-transform default.** | Augments need original field values. `preAugmentTransforms` and/or `postAugments` can be added as separate endpoint rule lists later if use-cases arise. |
-| PII in augment inputs | **Deferred.** Not addressed in PoC. | Most current augments (textDigest) operate on content fields and don't need PII stripped first. When a use-case arises (e.g. classifier on a field with inline PII), add `preAugmentTransforms` to rules. |
+| PII in augment inputs | **Deferred.** Not addressed in PoC. | Most current augments (textDigest) operate on content fields and don't need PII stripped first. Object-level genMetadata may send whole API objects (including nested user records) to the LLM — accepted for this PoC; add `preAugmentTransforms` later when PII stripping is required. |
 | Response schema + augments | **Auto-pass `+` properties.** | Since `+` in raw data disables augments (conflict check), any `+` properties post-augment are guaranteed proxy-generated and safe to pass through the schema filter without explicit declaration. |
 | `isJsonEscaped` / `jsonPathToProcessWhenEscaped` | **Ported as `innerJsonPath`.** | When the source value is a JSON string (e.g. Copilot AdaptiveCard `attachment.content`), `innerJsonPath` extracts nested values to augment. Its presence implicitly enables escaped JSON decoding, mirroring the transform option. |

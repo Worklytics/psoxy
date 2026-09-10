@@ -5,12 +5,14 @@ import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -161,5 +163,87 @@ class GenMetadataProcessorTest {
             new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 20);
         String serialized = processor.serializeInput(Map.of("text", "a".repeat(100)));
         assertTrue(serialized.length() <= 20);
+    }
+
+    @Test
+    void serializeInput_mapPutsTitleBodyFirst_survivesTruncation() {
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 80);
+        Map<String, Object> pr = new LinkedHashMap<>();
+        pr.put("id", 42);
+        pr.put("user", Map.of("login", "a".repeat(200)));
+        pr.put("title", "Fix crash");
+        pr.put("body", "Guards null");
+        pr.put("+self:genMetadata", "should-not-appear");
+
+        String serialized = processor.serializeInput(pr);
+
+        assertTrue(serialized.length() <= 80);
+        assertTrue(serialized.contains("Fix crash"), "truncated input should still include title");
+        assertTrue(serialized.contains("\"title\""), serialized);
+        // title/body ordered before large user blob
+        assertTrue(serialized.indexOf("title") < serialized.indexOf("user")
+                || !serialized.contains("user"),
+            "title should appear before user (or user truncated away)");
+        assertFalse(serialized.contains("+self:genMetadata"));
+        assertFalse(serialized.contains("should-not-appear"));
+    }
+
+    @Test
+    void serializeInput_mapIncludesBodyWhenBudgetAllows() {
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 4096);
+        Map<String, Object> pr = new LinkedHashMap<>();
+        pr.put("user", Map.of("login", "alice", "bio", "x".repeat(100)));
+        pr.put("title", "Add feature");
+        pr.put("body", "Implements OAuth flow");
+
+        String serialized = processor.serializeInput(pr);
+
+        assertTrue(serialized.contains("Add feature"));
+        assertTrue(serialized.contains("Implements OAuth flow"));
+        assertTrue(serialized.indexOf("\"title\"") < serialized.indexOf("\"body\""));
+        assertTrue(serialized.indexOf("\"body\"") < serialized.indexOf("\"user\""));
+    }
+
+    @Test
+    void process_classify_acceptsJsonObjectInput_stringEnum() {
+        JsonSchemaFilter schema = JsonSchemaFilter.builder()
+            .type("string")
+            .enumValues(List.of("Feature", "Bugfix", "Uncategorized"))
+            .build();
+
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            (taskPrompt, outputSchema, inputData) -> {
+                assertTrue(inputData.contains("\"title\""));
+                assertTrue(inputData.contains("Fix NPE"));
+                return "Bugfix";
+            },
+            OBJECT_MAPPER,
+            4096);
+
+        Object out = processor.process("Classify", schema,
+            Map.of("title", "Fix NPE", "body", "null guard"));
+        assertEquals("Bugfix", out);
+    }
+
+    @Test
+    void process_classify_acceptsJsonObjectInput_categoryObjectSchema() {
+        JsonSchemaFilter schema = categorySchema();
+
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            (taskPrompt, outputSchema, inputData) -> {
+                assertTrue(inputData.contains("\"body\""));
+                return "{\"category\":\"Excluded\"}";
+            },
+            OBJECT_MAPPER,
+            4096,
+            2,
+            new JsonSchemaValidationUtils());
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> out = (Map<String, Object>) processor.process(
+            "Classify", schema, Map.of("title", "hi", "body", "thanks"));
+        assertEquals("Excluded", out.get("category"));
     }
 }

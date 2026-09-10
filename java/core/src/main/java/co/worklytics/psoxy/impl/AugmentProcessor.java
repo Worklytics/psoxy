@@ -24,9 +24,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 /**
- * Applies augments to a JSON document, adding synthetic sibling properties
- * named {@code +{sourceProperty}:{augmentFunction}}. When {@code innerJsonPath} is used, multiple
- * inner matches are grouped under that property as an object keyed by inner path suffix.
+ * Applies augments to a JSON document, adding synthetic properties named
+ * {@code +{sourceProperty}:{augmentFunction}}.
+ *
+ * <ul>
+ *   <li>Scalar / leaf matches: sibling on the parent Map ({@code +title:genMetadata}).</li>
+ *   <li>Object (Map) matches: attached on the matched object itself ({@code +self:genMetadata}).</li>
+ * </ul>
+ *
+ * <p>When {@code innerJsonPath} is used, multiple inner matches are grouped under that property as
+ * an object keyed by inner path suffix.
  *
  * <p>Processing is intentionally non-fatal: {@link AugmentProcessingException} and other failures
  * omit the augment property and add {@code X-Psoxy-Warning} codes via the returned list.
@@ -44,6 +51,12 @@ public class AugmentProcessor {
 
     /** Separator between source property name and augment function name. */
     public static final String AUGMENT_SEPARATOR = ":";
+
+    /**
+     * Synthetic source-property token for object-level augments (matched value is a Map).
+     * Yields names like {@code +self:genMetadata}.
+     */
+    public static final String OBJECT_LEVEL_SOURCE_PROPERTY = "self";
 
     /** Default config: reads return matched values (used for parent/source lookups). */
     final Configuration jsonConfiguration;
@@ -168,6 +181,25 @@ public class AugmentProcessor {
     @SuppressWarnings("unchecked")
     private void applyAugmentAtConcretePath(Augment augment, Object document, String concretePath)
             throws AugmentProcessingException {
+        Object sourceValue;
+        try {
+            sourceValue = getCompiledPath(concretePath).read(document, jsonConfiguration);
+        } catch (PathNotFoundException e) {
+            return;
+        }
+        if (sourceValue == null) {
+            return;
+        }
+
+        // Object-level: matched value is a Map → use it as both corpus and attachment target.
+        // Paths like `$` / `$[0]` have no leaf field name; sibling insertion would fail on array parents.
+        if (sourceValue instanceof Map<?, ?> sourceMap && !hasInnerJsonPath(augment)) {
+            putAugmentValue(augment, (Map<String, Object>) sourceMap,
+                buildAugmentPropertyName(OBJECT_LEVEL_SOURCE_PROPERTY, augment.getFunctionName()),
+                sourceMap);
+            return;
+        }
+
         String leafFieldName = extractLeafFieldNameFromConcrete(concretePath);
         String parentPath = extractParentFromConcrete(concretePath);
 
@@ -192,13 +224,6 @@ public class AugmentProcessor {
             return;
         }
 
-        Object sourceValue;
-        try {
-            sourceValue = getCompiledPath(concretePath).read(document, jsonConfiguration);
-        } catch (PathNotFoundException e) {
-            return;
-        }
-
         String augmentPropertyName = buildAugmentPropertyName(leafFieldName, augment.getFunctionName());
 
         if (hasInnerJsonPath(augment) && sourceValue instanceof String jsonStr && !jsonStr.isEmpty()) {
@@ -206,7 +231,16 @@ public class AugmentProcessor {
             return;
         }
 
-        Object augmentValue = invokeCompute(augment, sourceValue);
+        putAugmentValue(augment, (Map<String, Object>) parent, augmentPropertyName, sourceValue);
+    }
+
+    /**
+     * Compute, validate, and insert an augment property onto {@code target}.
+     */
+    private void putAugmentValue(Augment augment, Map<String, Object> target,
+                                 String augmentPropertyName, Object computeInput)
+            throws AugmentProcessingException {
+        Object augmentValue = invokeCompute(augment, computeInput);
 
         if (augmentValue == null) {
             if (augment instanceof Augment.GenMetadata) {
@@ -223,7 +257,7 @@ public class AugmentProcessor {
                     + "'");
         }
 
-        ((Map<String, Object>) parent).put(augmentPropertyName, augmentValue);
+        target.put(augmentPropertyName, augmentValue);
     }
 
     private Object invokeCompute(Augment augment, Object input) throws AugmentProcessingException {
@@ -331,7 +365,7 @@ public class AugmentProcessor {
     }
 
     /**
-     * Build augment property name: {@code +content:textDigest}.
+     * Build augment property name: {@code +content:textDigest} or {@code +self:genMetadata}.
      */
     static String buildAugmentPropertyName(String leafFieldName, String functionName) {
         return AUGMENT_PROPERTY_PREFIX + leafFieldName + AUGMENT_SEPARATOR + functionName;

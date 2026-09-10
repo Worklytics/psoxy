@@ -6,7 +6,10 @@
 
 ## Overview
 
-**genMetadata** calls a cloud LLM to derive structured metadata from a source text field and attaches it as a sibling property: `+{sourceProperty}:genMetadata`.
+**genMetadata** calls a cloud LLM to derive structured metadata from a matched source value and attaches it as:
+
+- **Scalar / leaf match** (e.g. `$.title`, `$..body.content`): sibling `+{sourceProperty}:genMetadata` on the parent object.
+- **Object match** (e.g. `$` or `$[*]` when each match is a JSON object): `+self:genMetadata` on that same object; the whole matched Map is the LLM corpus (after stripping any existing `+…` keys).
 
 **Product direction (refined):**
 
@@ -111,11 +114,34 @@ Same augment type covers both Copilot classification and Zoom transcript extract
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `jsonPaths` | yes | Source values to process |
+| `jsonPaths` | yes | Source values to process. Use `$` / `$[*]` to classify whole objects (→ `+self:genMetadata`); use leaf paths for scalar text (→ `+title:genMetadata`, etc.). |
 | `prompt` | yes | Task guidance only (categories, edge cases). Do **not** put conflicting format instructions here — Java always requests a JSON object and applies provider JSON constraints from `outputSchema`. |
 | `outputSchema` | yes | Shape + enums; drives classify vs extract and provider constraints |
 
 No `model`, `backend`, or `maxTokens` in rules — those stay deployment config.
+
+### Object-level corpus (GitHub PR shape)
+
+For APIs that return objects (or arrays of objects) where the classification corpus spans multiple fields (`title` + `body`), match the object itself:
+
+```yaml
+- pathTemplate: "/repos/{owner}/{repo}/pulls"
+  augments:
+    - !<genMetadata>
+      jsonPaths: ["$[*]"]
+      prompt: |
+        Classify this GitHub pull request into exactly one category.
+        Use title and body as the primary signal; ignore ids, urls, and user records.
+      outputSchema:
+        type: string
+        enum: [Feature, Bugfix, Tech Debt, Docs, Infra, Uncategorized]
+  transforms:
+    - redact: ["$[*].title", "$[*].body"]
+```
+
+- One LLM call per matched object (same sequential limit as other augments).
+- Serialization for Maps strips `+…` keys and prefers a stable order with `title` then `body` first, then remaining properties, so `METADATA_GEN_MAX_INPUT_CHARS` truncation still sees the text corpus when a large nested `user` object would otherwise sit between them in Jackson field order.
+- **PII:** object-level matches may send nested user/email fields to the model. There is no `preAugmentTransforms` yet; accepted for this PoC — prefer prompts that tell the model to ignore ids/urls/user records, and redact source fields in `transforms` after augments.
 
 ## Deployment configuration (env)
 

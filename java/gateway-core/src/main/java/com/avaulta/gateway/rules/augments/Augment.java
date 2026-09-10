@@ -21,7 +21,9 @@ import java.util.TreeMap;
  * sibling properties to API response payloads.
  *
  * <p>Augments run <b>before</b> transforms, so transforms still see original field values.
- * The output is placed in a sibling property named {@code +{sourceProperty}:{augmentFunction}}.
+ * The output is placed in a sibling property named {@code +{sourceProperty}:{augmentFunction}},
+ * or on the matched object itself as {@code +self:{augmentFunction}} when the jsonPath matches
+ * a JSON object (Map).
  *
  * @see <a href="file:///docs/development/alpha-features/augments.md">Augments Design Doc</a>
  */
