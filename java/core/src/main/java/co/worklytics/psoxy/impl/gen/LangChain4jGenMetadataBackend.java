@@ -104,8 +104,18 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             config.getMaxTokens());
         List<ChatMessage> messages =
             GenMetadataPromptBuilder.toMessages(taskPrompt, outputSchema, fittedInput, objectMapper);
+        // Bedrock Converse maps ResponseFormat → outputConfig; Amazon Nova (our default) rejects it.
+        // Claude 4.5+ supports native json_schema, but we skip for all Bedrock for now and rely on
+        // prompt + GenMetadataProcessor parse / outputSchema gate.
         Optional<ResponseFormat> responseFormat =
-            GenMetadataResponseFormats.fromOutputSchema(outputSchema);
+            GenMetadataConfig.BACKEND_BEDROCK.equalsIgnoreCase(config.getBackend())
+                ? Optional.empty()
+                : GenMetadataResponseFormats.fromOutputSchema(outputSchema);
+        if (responseFormat.isEmpty()
+            && GenMetadataConfig.BACKEND_BEDROCK.equalsIgnoreCase(config.getBackend())) {
+            log.info("genMetadata Bedrock: omitting ResponseFormat/outputConfig for model "
+                + config.getModelId());
+        }
 
         boolean permitAcquired = false;
         try {

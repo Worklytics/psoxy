@@ -17,7 +17,7 @@
 |----------|--------|
 | Runtime | **Cloud only** — Amazon Bedrock (AWS) or Vertex AI Gemini (GCP) |
 | Local / Jlama | **Abandoned** — no constrained decoding, poor JSON/enum reliability, heavy memory / `llm/*.zip` ops |
-| How structure is enforced | **Provider constrained generation**, not prompt begging |
+| How structure is enforced | **Vertex:** provider constrained JSON. **Bedrock (Nova default):** prompt + parse / `outputSchema` gate — Nova rejects Converse `outputConfig` (LangChain4j maps `ResponseFormat` there). |
 | First shipped shape | **Enum classification** (MS Copilot prompt categories) |
 | Also shipped (PoC) | **Structured extraction** via JSON Schema (Zoom meeting transcript → speaking time by person) |
 
@@ -29,7 +29,7 @@ Rules always declare `prompt` + `outputSchema`. The runtime **infers mode** from
 
 | Mode | When | Model output | Proxy normalizes to |
 |------|------|--------------|---------------------|
-| **classify** | Schema is an object with a **single** required string property that has `enum` | Constrained JSON object `{"<property>":"<label>"}` (both Vertex and Bedrock) | Same Map after parse / label recovery |
+| **classify** | Schema is an object with a **single** required string property that has `enum` | Vertex: constrained JSON object. Bedrock: free-form JSON/label in text | Same Map / string after parse / label recovery |
 | **extract** | Any richer object / array schema | Constrained JSON matching the schema | Parsed object/array as-is (after schema gate) |
 
 Downstream always sees JSON under `+…:genMetadata`. The model is not asked to free-form invent JSON.
@@ -57,13 +57,14 @@ Use "Uncategorized" when substantive but unclear.
 Use "Excluded" for greetings, thanks, or prompts too short to classify.
 ```
 
-**Runtime:** system + user messages always ask for `{"<property>":"<enum>"}`. Provider JSON schema constraint matches `outputSchema` (Vertex/Bedrock). Parser accepts clean JSON, fenced JSON, prose-prefixed JSON, bare labels, and (as fallback) an enum embedded in truncated/prose output. Schema mismatch retries (`METADATA_GEN_RETRIES`, default 2 attempts).
+**Runtime:** system + user messages always ask for `{"<property>":"<enum>"}` (or root string enum). **Vertex** applies provider JSON schema constraints from `outputSchema`. **Bedrock** omits Converse `outputConfig` (Nova rejects it); structure is enforced by prompt + robust parse / label recovery + `outputSchema` gate. Schema mismatch retries (`METADATA_GEN_RETRIES`, default 2 attempts).
 
 **Provider wiring:**
 
 | Platform | Constraint |
 |----------|------------|
-| Vertex / Bedrock | JSON response format + object schema with one required string `enum` property |
+| Vertex | JSON response format + schema from `outputSchema` |
+| Bedrock | No `outputConfig` (Nova unsupported). Prompt + parse; optional future: toolConfig constrained decoding or Claude-only `outputConfig` |
 
 **Java:** parse JSON → Map; if needed, wrap a bare/prose enum label to `{ "category": "…" }`, then validate.
 
@@ -100,7 +101,7 @@ properties:
 | Platform | Constraint |
 |----------|------------|
 | Vertex | `responseMimeType = application/json` + `responseSchema` from `outputSchema` |
-| Bedrock | Converse `outputConfig.textFormat` / `json_schema` from `outputSchema` |
+| Bedrock | Prompt + parse only for Nova (no `outputConfig`). Same parse / `outputSchema` gate as classify |
 
 **Caveats for transcript-scale inputs:**
 
