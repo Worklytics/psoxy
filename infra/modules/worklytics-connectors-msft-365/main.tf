@@ -129,9 +129,9 @@ locals {
 resource "local_file" "todo-with-external-todo" {
   for_each = local.todos_to_populate
 
-  filename = module.msft_365_grants[each.key].filename
+  filename = local.provision_entraid_apps ? module.msft_365_grants[each.key].filename : module.msft_365_grant_to_shared[0].filename
   content = <<EOT
-${module.msft_365_grants[each.key].todo}
+${local.provision_entraid_apps ? module.msft_365_grants[each.key].todo : module.msft_365_grant_to_shared[0].todo}
 ## Setup
 Then, please follow next instructions to complete the setup:
 
