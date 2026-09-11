@@ -9,13 +9,17 @@ Connect Microsoft Teams data to Worklytics, enabling communication analysis and 
 Please review the [Microsoft 365 README](../README.md) for general information applicable to all Microsoft 365 connectors.
 
 ## Required Scopes
+
 - [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
 - [`Team.ReadBasic.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#teamreadbasicall)
 - [`Channel.ReadBasic.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#channelreadbasicall)
-- [`Chat.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#chatreadbasicall)
+- [`Chat.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#chatreadall)
 - [`ChannelMessage.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#channelmessagereadall)
 - [`CallRecords.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#callrecordsreadall)
 - [`OnlineMeetings.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#onlinemeetingsreadall)
+- [`OnlineMeetingArtifact.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#onlinemeetingartifactreadall)
+
+You must also [Configure Access to Online Meetings](#configure-access-to-online-meetings) for your application.
 
 ## Authentication
 
@@ -25,34 +29,34 @@ See the [Microsoft 365 Authentication](../README.md#authentication) section of t
 
 See the [Microsoft 365 Authorization](../README.md#authorization) section of the main README.
 
-### Online Meetings support
+### Configure Access to Online Meetings
 
-Besides of having `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` scope defined in the application, you need to allow a new role and a policy on the application created for reading OnlineMeetings. You will need Powershell for this.
+Besides having `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` scopes defined in the application, you need to allow a new role and a policy on the application created for reading online meetings. You will need [PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell) for this.
 
 Please follow the steps below:
 
 1. Ensure the user you are going to use for running the commands has the "Teams Administrator" role. You can add the role in the [Microsoft 365 Admin Center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users)
 
-**NOTE**: It can be assigned through Entra Id portal in Azure portal OR in [https://admin.microsoft.com/AdminPortal/Home](https://admin.microsoft.com/AdminPortal/Home). It is possible that even login with an admin account in Entra Admin Center the Teams role is not available to assign to any user; if so, please do it through Azure Portal (Entra Id -> Users -> Assign roles)
+**NOTE**: It can be assigned through the Entra ID portal in Azure Portal or in the [Microsoft 365 Admin Center](https://admin.microsoft.com/AdminPortal/Home). Even when logged in with an admin account in Entra admin center, the Teams role may not be available to assign; if so, assign it through Azure Portal (Entra ID → Users → Assign roles).
 
-2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install) module.
-3. Run the following commands in Powershell terminal:
+2. Install the [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install) module.
+3. Run the following command in a PowerShell terminal:
 
 ```shell
 Connect-MicrosoftTeams
 ```
 
-And use the user with the "Teams Administrator" for login it.
+Sign in with the user that has the "Teams Administrator" role.
 
-4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
+4. Follow the steps in [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
 
 - Add a policy for the application created for the connector, providing its `application id`
 - Grant the policy to the whole tenant (NOT to any specific application or user)
 
 **Issues**:
 
-- If you receive "access denied" is because no admin role for Teams has been detected. Please close and reopen the Powershell terminal after assigning the role.
-- Commands have been tested over a Powershell (7.4.0) terminal in Windows, installed from Microsoft Store and with Teams Module (5.8.0). It might not work on a different environment
+- If you receive "access denied", no Teams admin role has been detected. Close and reopen the PowerShell terminal after assigning the role.
+- Commands have been tested on PowerShell 7.4.0 on Windows, installed from the Microsoft Store, with Teams module 5.8.0. They might not work in a different environment.
 
 ## Example Data
 
