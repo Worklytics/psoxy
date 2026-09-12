@@ -4,6 +4,9 @@ endpoints:
     allowedMethods:
       - "POST"
     allowedQueryParams: []
+    allowedRequestHeaders:
+      - "Sforce-Limit-Info"
+      - "Sforce-Query-Options"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -52,6 +55,9 @@ endpoints:
         $ref: "#/definitions/Account"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/query/[^?]+$"
     allowedQueryParams: []
+    allowedRequestHeaders:
+      - "Sforce-Limit-Info"
+      - "Sforce-Query-Options"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -99,6 +105,9 @@ endpoints:
     +)*.*$"
     allowedQueryParams:
       - "q"
+    allowedRequestHeaders:
+      - "Sforce-Limit-Info"
+      - "Sforce-Query-Options"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -133,6 +142,9 @@ endpoints:
     +)*.*$"
     allowedQueryParams:
       - "q"
+    allowedRequestHeaders:
+      - "Sforce-Limit-Info"
+      - "Sforce-Query-Options"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -187,6 +199,9 @@ endpoints:
     +|\\b).*"
     allowedQueryParams:
       - "q"
+    allowedRequestHeaders:
+      - "Sforce-Limit-Info"
+      - "Sforce-Query-Options"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -211,6 +226,9 @@ endpoints:
     +|\\b).*"
     allowedQueryParams:
       - "q"
+    allowedRequestHeaders:
+      - "Sforce-Limit-Info"
+      - "Sforce-Query-Options"
     transforms:
       - !<pseudonymize>
         jsonPaths:
