@@ -30,6 +30,8 @@ Enable the following API in the GCP project where you provision the OAuth client
   - [original/message.json](example-api-responses/original/message.json) |
     [sanitized/message.json](example-api-responses/sanitized/message.json)
 
+Example API call path parameters: YAML `{mailboxId}` is `me` in the generated examples (the impersonated user). `{MESSAGE_ID}` is a Gmail message id from `GET /gmail/v1/users/me/messages`.
+
 
 
 ---
