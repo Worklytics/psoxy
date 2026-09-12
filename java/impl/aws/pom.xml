@@ -133,6 +133,12 @@
             <artifactId>kms</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-bedrock</artifactId>
+            <version>${dependency.langchain4j.version}</version>
+        </dependency>
+
         <!-- New Relic Tracing -->
         <!-- see https://docs.newrelic.com/docs/serverless-function-monitoring/aws-lambda-monitoring/enable-lambda-monitoring/enable-serverless-monitoring-aws-lambda-legacy/ -->
         <dependency>
@@ -334,6 +340,25 @@
                     </plugin>
 
 
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>gen-metadata-cloud-integration</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>**/BedrockGenMetadataCloudIntegrationTest.java</include>
+                            </includes>
+                            <systemPropertyVariables>
+                                <psoxy.genMetadata.cloudIntegration>true</psoxy.genMetadata.cloudIntegration>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>

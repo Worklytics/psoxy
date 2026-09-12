@@ -22,6 +22,7 @@ import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.NoOpResourceService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
+import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -284,7 +285,8 @@ public interface AwsModule {
         @Binds @IntoSet
         abstract PublicKeyStoreClient publicKeyStoreClient(AwsKmsPublicKeyStoreClient awsKmsPublicKeyStoreClient);
 
-
+        @Binds @IntoSet
+        abstract GenMetadataChatModelProvider bedrockChatModelProvider(BedrockChatModelProvider impl);
 
     }
 }

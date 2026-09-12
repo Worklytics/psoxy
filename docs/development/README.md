@@ -18,7 +18,7 @@ This directory contains documentation for developers working on or with Psoxy.
 
 ## Alpha Features
 
-See [alpha-features/](alpha-features/) for documentation on experimental features.
+See [alpha-features/](alpha-features/) for documentation on experimental features (augments, NLP/LLM metadata, email handling).
 
 ## Removed Features
 

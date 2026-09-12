@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import javax.inject.Inject;
@@ -77,6 +78,8 @@ public class GcsFileEventHandler {
             };
 
             Supplier<OutputStream> outputStreamSupplier = () -> {
+                // Token aggregates are not known yet (sanitize runs after the write channel opens).
+                // Base metadata is set here; genMetadata token keys are patched after handle().
                 BlobInfo.Builder blobInfoBuilder = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
                     .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform));
 
@@ -96,6 +99,15 @@ public class GcsFileEventHandler {
             };
 
             storageHandler.handle(request, transform, inputStreamSupplier, outputStreamSupplier);
+
+            // Apply final metadata including genMetadata token aggregates (S3 builds metadata after
+            // sanitize; GCS must open the writer first, so patch after).
+            Map<String, String> finalMetadata =
+                storageHandler.buildObjectMetadata(importBucket, sourceName, transform);
+            storage.update(BlobInfo.newBuilder(
+                    BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
+                .setMetadata(finalMetadata)
+                .build());
         } else {
             log.info("Skipping " + importBucket + "/" + request.getSourceObjectPath() + " because no rules apply");
         }

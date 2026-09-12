@@ -87,6 +87,26 @@ locals {
       try(local.api_connector_rules_raw[k], null) != null ? local.api_connector_rules_raw[k] : null
     )
   }
+
+  needs_opennlp_model_upload = length([
+    for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) : k
+    if try(v.enable_remote_resources, false)
+  ]) > 0
+
+  # Effective genMetadata backend per connector (null if genMetadata disabled).
+  # GCP is cloud-only: vertex (local/Jlama abandoned).
+  connector_gen_metadata_backend = {
+    for k, v in merge(var.api_connectors, var.bulk_connectors) : k => (
+      try(v.enable_gen_metadata, false)
+      ? lower(coalesce(try(v.gen_metadata_backend, null), var.gen_metadata_backend, "vertex"))
+      : null
+    )
+  }
+
+  gen_metadata_uses_vertex = length([
+    for k, backend in local.connector_gen_metadata_backend : k
+    if backend == "vertex"
+  ]) > 0
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -315,6 +335,7 @@ module "api_connector" {
   allowed_data_access_ip_blocks         = var.allowed_data_access_ip_blocks
   instance_concurrency                  = var.api_connector_instance_concurrency
   max_instance_count                    = var.max_instances_per_api_connector
+  available_memory_mb                   = coalesce(each.value.available_memory_mb, 1024)
   timeout_seconds                       = coalesce(try(each.value.timeout_seconds, null), 180)
   ingress_settings                      = local.api_connector_external_lb_enabled ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
   external_lb_base_url                  = local.api_connector_external_lb_base_url
@@ -334,11 +355,35 @@ module "api_connector" {
     var.api_connector_path_prefix_to_trim != null ? { REQUEST_PATH_PREFIX_TO_TRIM = var.api_connector_path_prefix_to_trim } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? merge(
+      {
+        ENABLE_GEN_METADATA  = "true"
+        METADATA_GEN_BACKEND = local.connector_gen_metadata_backend[each.key]
+      },
+      try(var.general_environment_variables["METADATA_GEN_MODEL"], null) == null ? {
+        METADATA_GEN_MODEL = "gemini-3.5-flash-lite"
+      } : {},
+      try(var.general_environment_variables["METADATA_GEN_MODEL_REGION"], null) == null ? {
+        METADATA_GEN_MODEL_REGION = "global"
+      } : {},
+      try(var.general_environment_variables["METADATA_GEN_THINKING_LEVEL"], null) == null ? {
+        METADATA_GEN_THINKING_LEVEL = "minimal"
+      } : {},
+    ) : {},
   )
 
-  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = local.remote_resources_enabled ? local.shared_resource_path : null
+  remote_resource_bucket = (
+    local.remote_resources_enabled
+    || try(each.value.enable_remote_resources, false)
+  ) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (
+    local.remote_resources_enabled
+    || try(each.value.enable_remote_resources, false)
+  ) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path = (
+    local.remote_resources_enabled
+    || try(each.value.enable_remote_resources, false)
+  ) ? local.shared_resource_path : null
 
   secret_bindings = merge(
     local.secrets_bound_as_env_vars[each.key],
@@ -470,9 +515,9 @@ module "webhook_collector" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = local.remote_resources_enabled ? local.shared_resource_path : null
+  remote_resource_bucket        = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? local.shared_resource_path : null
 
   secret_bindings = module.psoxy.secrets
 
@@ -536,11 +581,26 @@ module "bulk_connector" {
     },
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? merge(
+      {
+        ENABLE_GEN_METADATA  = "true"
+        METADATA_GEN_BACKEND = local.connector_gen_metadata_backend[each.key]
+      },
+      try(var.general_environment_variables["METADATA_GEN_MODEL"], null) == null ? {
+        METADATA_GEN_MODEL = "gemini-3.5-flash-lite"
+      } : {},
+      try(var.general_environment_variables["METADATA_GEN_MODEL_REGION"], null) == null ? {
+        METADATA_GEN_MODEL_REGION = "global"
+      } : {},
+      try(var.general_environment_variables["METADATA_GEN_THINKING_LEVEL"], null) == null ? {
+        METADATA_GEN_THINKING_LEVEL = "minimal"
+      } : {},
+    ) : {},
   )
 
-  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = local.remote_resources_enabled ? local.shared_resource_path : null
+  remote_resource_bucket        = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = (local.remote_resources_enabled || try(each.value.enable_remote_resources, false)) ? local.shared_resource_path : null
 
   depends_on = [
     module.psoxy # some of the set-up IAM grants done there, but not EXPLICITLY passed out as outputs and into above as inputs, are required; so make this explicit

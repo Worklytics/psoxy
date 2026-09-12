@@ -181,6 +181,27 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
     @SneakyThrows
     @Test
+    void meeting_transcript() {
+        String jsonString = asJson("meeting-transcript.json");
+
+        Collection<String> PII = Arrays.asList(
+            "alice@example.com",
+            "bob@example.com",
+            "u_alice",
+            "u_bob"
+        );
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized =
+            sanitizer.sanitize("GET", new URL("https://api.zoom.us/v2/meetings/MEETING_ID/transcript"), jsonString);
+
+        assertPseudonymized(sanitized, PII);
+        assertRedacted(sanitized, "Alice Chen", "Bob Smith");
+        // genMetadata may be omitted without a cloud backend in unit tests
+    }
+
+    @SneakyThrows
+    @Test
     void list_past_meeting_instances() {
         String jsonString = asJson("past-meeting-instances.json");
 
@@ -274,6 +295,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.zoom.us/v2/meetings/99460000470?show_previous_occurrences=false&occurrence_id=abcdeg%3D%3D", "meeting-details.json"),
 
             InvocationExample.of("https://api.zoom.us/v2/meetings/MEETING_ID/meeting_summary", "meeting-summary.json"),
+            InvocationExample.of("https://api.zoom.us/v2/meetings/MEETING_ID/transcript", "meeting-transcript.json"),
             InvocationExample.of("https://api.zoom.us/v2/past_meetings/MEETING_ID", "past-meeting-details.json"),
             InvocationExample.of("https://api.zoom.us/v2/past_meetings/MEETING_ID/instances", "past-meeting-instances.json"),
             InvocationExample.of("https://api.zoom.us/v2/past_meetings/MEETING_ID/participants", "past-meeting-participants.json"),

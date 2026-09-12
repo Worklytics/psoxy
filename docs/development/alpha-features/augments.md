@@ -13,7 +13,8 @@ Several use-cases require the proxy to inject *computed metadata* into the API r
 | Text statistics | word count, character length |
 | Keyword frequency | counts of configured keywords |
 | NLP statistics | sentence structure, readability scores |
-| Payload classification | labelling an LLM prompt as "email composition" vs "code generation" |
+| Payload classification | labelling an LLM prompt category via cloud genMetadata (constrained enum) |
+| Structured extraction | meeting transcript → speaking time by person via genMetadata (constrained JSON schema) |
 
 Today the `textDigest` transform **replaces** the source field's value with a nested JSON string containing the computed output (e.g. `{"length":42,"word_count":7}`). This is brittle because:
 
@@ -40,26 +41,36 @@ Inspired by OData's `@`-annotation pattern (where metadata about a property `Foo
 +{sourceProperty}:{augmentFunction}
 ```
 
-When `innerJsonPath` is set and matches nested JSON inside a string field, each inner match is
-augmented in place within the parsed embedded JSON (mirroring the legacy `textDigest` transform
-with `isJsonEscaped`), then the modified structure is re-serialized as a string:
+When a `jsonPath` matches a JSON **object** (Map) — e.g. `$` on a single resource or `$[*]` on an array of objects — the matched object is both the augment corpus and the attachment target. The synthetic property uses the object-level source token `self`:
+
+```
++self:{augmentFunction}
+```
+
+Scalar / leaf matches are unchanged (`$.title` → `+title:genMetadata`, `$..body.content` → `+content:genMetadata`).
+
+When `innerJsonPath` is set and matches nested JSON inside a string field, all inner matches are
+grouped under a single augment property, keyed by normalized inner path suffix:
 
 ```jsonc
 {
   "content": "{ ... escaped AdaptiveCard JSON ... }",
-  "+content:textDigest": "{\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"TextBlock\",\"text\":\"{\\\"length\\\":2572,\\\"word_count\\\":154}\",\"wrap\":true},...]}"
+  "+content:textDigest": {
+    "body[0].text": { "length": 2572, "word_count": 154 },
+    "body[1].text": { "length": 980,  "word_count": 154 }
+  }
 }
 ```
 
 | Token | Meaning |
 |---|---|
 | `+` | Prefix identifying the property as proxy-generated (augmented). |
-| `{sourceProperty}` | The name of the field the augment reads from. |
+| `{sourceProperty}` | The name of the field the augment reads from, or `self` when the matched value is the JSON object itself. |
 | `:` | Separator. |
 | `{augmentFunction}` | The name of the augment function (e.g. `textDigest`). |
 
-For embedded JSON, inner matched fields (e.g. `text`) are replaced with serialized augment output
-and the whole embedded JSON is re-serialized as a string value.
+Inner map keys use `{innerPathSuffix}` — the normalized concrete path within parsed inner JSON
+(e.g. `body[0].text`).
 
 **Example.** For a response containing `body.content`, the augment property produced by the `textDigest` function would be:
 
@@ -81,6 +92,21 @@ and the whole embedded JSON is re-serialized as a string value.
 > - Semantically suggestive of "additive / supplementary."
 >
 > If a future standard emerges (e.g. JSON-LD `@`-keywords), we can evolve the prefix; the `+` makes the contract explicit and easy to migrate.
+
+**Example (object-level).** A GitHub PR list matched by `$[*]` attaches on each PR object:
+
+```jsonc
+[
+  {
+    "title": "Add OAuth",
+    "body": "…",
+    "user": { "login": "alice" },
+    "+self:genMetadata": "Feature"   // augment on the matched object
+  }
+]
+```
+
+The response schema filter still auto-passes `+`-prefixed properties, including `+self:genMetadata`.
 
 ### Conflict Detection
 
@@ -193,7 +219,7 @@ public abstract class Augment {
 
 ### `outputSchema` — Output Validation
 
-Each augment rule carries an optional `outputSchema` property of type `JsonSchemaFilter`. This schema is applied as a **predicate** (not a filter) to the value produced by the augment's `compute()` method:
+Each augment rule may carry an `outputSchema` property of type `JsonSchemaFilter`. This schema is applied as a **predicate** (not a filter) to the value produced by the augment's `compute()` method. **`genMetadata` requires `outputSchema`.** Validation is implemented in `AugmentProcessor` (v0.6.x BETA); failures emit `X-Psoxy-Warning: augment-output-schema-mismatch`.
 
 | Outcome | Action |
 |---|---|
@@ -364,6 +390,6 @@ The consumer now sees:
 | `outputSchema` semantics | **Predicate** (pass/fail gate). | Augment implementations should be precise; silent stripping masks bugs. A `filterOutput: true` option can be added later. |
 | Augment timeouts | **Global 30s budget** for all augments per request. | Leaves headroom within the 55s request timeout. Configurable via `PSOXY_AUGMENT_TIMEOUT_SECONDS` env var in a follow-up. Per-augment timeouts deferred until heavier augments exist. |
 | Pre- vs. post-transform | **Pre-transform default.** | Augments need original field values. `preAugmentTransforms` and/or `postAugments` can be added as separate endpoint rule lists later if use-cases arise. |
-| PII in augment inputs | **Deferred.** Not addressed in PoC. | Most current augments (textDigest) operate on content fields and don't need PII stripped first. When a use-case arises (e.g. classifier on a field with inline PII), add `preAugmentTransforms` to rules. |
+| PII in augment inputs | **Deferred.** Not addressed in PoC. | Most current augments (textDigest) operate on content fields and don't need PII stripped first. Object-level genMetadata may send whole API objects (including nested user records) to the LLM — accepted for this PoC; add `preAugmentTransforms` later when PII stripping is required. |
 | Response schema + augments | **Auto-pass `+` properties.** | Since `+` in raw data disables augments (conflict check), any `+` properties post-augment are guaranteed proxy-generated and safe to pass through the schema filter without explicit declaration. |
 | `isJsonEscaped` / `jsonPathToProcessWhenEscaped` | **Ported as `innerJsonPath`.** | When the source value is a JSON string (e.g. Copilot AdaptiveCard `attachment.content`), `innerJsonPath` extracts nested values to augment. Its presence implicitly enables escaped JSON decoding, mirroring the transform option. |

@@ -208,7 +208,7 @@ public class Endpoint {
 
     /**
      * Augments to compute and inject as synthetic sibling properties, run before transforms.
-     * @see <a href="file:///docs/development/augments.md">Augments Design Doc</a>
+     * @see <a href="file:///docs/development/alpha-features/augments.md">Augments Design Doc</a>
      */
     @Setter
     @JsonInclude(value = JsonInclude.Include.NON_EMPTY)

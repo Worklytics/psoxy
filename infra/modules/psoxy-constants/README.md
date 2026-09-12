@@ -78,3 +78,18 @@ resource "aws_iam_role_policy_attachment" "min_provisioner_policy" {
 }
 ```
 
+### Extra AWS policies when provisioning genMetadata (Bedrock + Budgets)
+
+When `enable_gen_metadata` is used with `gen_metadata_daily_cost_limit_usd` and alert emails (budget auto-Deny), attach:
+
+```hcl
+resource "aws_iam_role_policy_attachment" "gen_metadata_budgets" {
+  for_each = module.psoxy_constants.required_aws_managed_policies_to_provision_gen_metadata
+
+  role       = "{{NAME_OF_YOUR_AWS_PROVISIONER_ROLE}}"
+  policy_arn = each.key
+}
+```
+
+Runtime `bedrock:InvokeModel` / `Converse` is granted to connector Lambda roles by `aws-host` (not the provisioner). Default model is Amazon Nova 2 Lite (`us.amazon.nova-2-lite-v1:0`); no Anthropic use-case form is required for that default.
+
