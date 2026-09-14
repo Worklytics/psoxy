@@ -27,7 +27,7 @@
         <dependency.junit-jupiter.version>6.1.3</dependency.junit-jupiter.version>
         <dependency.mockito-junit-jupiter.version>5.23.0</dependency.mockito-junit-jupiter.version>
         <dependency.json-path.version>3.0.0</dependency.json-path.version>
-        <dependency.opennlp.version>2.5.11</dependency.opennlp.version>
+        <dependency.opennlp.version>2.5.12</dependency.opennlp.version>
         <skipOpenNlpModelDownload>true</skipOpenNlpModelDownload>
         <dependency.bouncycastle.version>1.85</dependency.bouncycastle.version>
         <plugin.surefire.version>3.5.6</plugin.surefire.version>
