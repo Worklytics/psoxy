@@ -5,7 +5,7 @@ output "enabled_api_connectors" {
 
 output "todos" {
   description = "List of TODOS for enabled REST connectors"
-  value       = values(module.msft_365_grants)[*].todo
+  value       = values(local.msft_365_todos)
 }
 
 

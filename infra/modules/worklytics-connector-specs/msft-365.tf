@@ -28,7 +28,7 @@ locals {
       "MailboxSettings.Read"
     ]
     environment_variables : local.msft_365_environment_variables
-    external_todo : null
+    external_token_todo : null
     enable_side_output : false
     example_api_calls : [
       "/v1.0/users",
@@ -63,7 +63,7 @@ locals {
         "User.Read.All"
       ],
       environment_variables : local.msft_365_environment_variables
-      external_todo : null
+      external_token_todo : null
       enable_side_output : false
       example_api_calls : [
         "/v1.0/users",
@@ -91,7 +91,7 @@ locals {
         "User.Read.All"
       ]
       environment_variables : local.msft_365_environment_variables
-      external_todo : null
+      external_token_todo : null
       enable_side_output : false
       example_api_calls : [
         "/v1.0/users",
@@ -121,7 +121,7 @@ locals {
         "Group.Read.All",
       ]
       environment_variables : local.msft_365_environment_variables
-      external_todo : null
+      external_token_todo : null
       enable_side_output : false
       example_api_calls : [
         "/v1.0/users",
@@ -168,37 +168,7 @@ locals {
         "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(var.example_api_calls_sample_date, "-2160h"))},toDateTime=${urlencode(var.example_api_calls_sample_date)})",
         "/v1.0/users/${local.example_msft_user_guid}/onlineMeetings?\\$filter=JoinWebUrl eq '${local.msft_teams_example_online_meeting_join_url}'"
       ]
-      external_todo : <<EOT
-To enable the connector, you need to allow permissions on the application created for reading OnlineMeetings. You will need Powershell for this.
-
-Please follow the steps below:
-1. Ensure the user you are going to use for running the commands has the "Teams Administrator" role. You can add the role in the
-[Microsoft 365 Admin Center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users)
-
-**NOTE**: About the role, can be assigned through Entra Id portal in Azure portal OR in Entra Admin center https://admin.microsoft.com/AdminPortal/Home. It is possible that even login with an admin account in Entra Admin Center the Teams role is not available to assign to any user; if so, please do it through Azure Portal (Entra Id -> Users -> Assign roles)
-
-2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install)  You can use `pwsh` in the terminal
-    enter to PowerShell.
-3. Then, run the following command. It will open a browser window for login to Microsoft Teams. After login, close the browser and return to the terminal.
-   Please choose the user who has the "Teams Administrator" role.
-```shell
-Connect-MicrosoftTeams
-```
-
-4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
-  - Add a policy for the application created for the connector, providing its `application id` (client ID)
-```shell
-New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds "%%entraid.client_id%%" -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
-```
-  - Grant the policy to the whole tenant (NOT to any specific application or user)
-```shell
-Grant-CsApplicationAccessPolicy -PolicyName Teams-Policy-For-Worklytics -Global
-```
-
-**Issues**:
-- If you receive "access denied" is because no admin role for Teams has been detected. Please close and reopen the Powershell terminal after assigning the role.
-- Commands have been tested over a Powershell (7.4.0) terminal in Windows, installed from Microsoft Store and with Teams Module (5.8.0). It might not work on a different environment
-EOT
+      external_token_todo : templatefile("${path.module}/docs/msft-teams/instructions.tftpl", {})
     },
     "msft-copilot" : {
       source_kind : "msft-copilot"
@@ -214,7 +184,7 @@ EOT
         "AiEnterpriseInteraction.Read.All"
       ]
       environment_variables : local.msft_365_environment_variables
-      external_todo : null
+      external_token_todo : null
       enable_side_output : false
       example_api_calls : [
         "/v1.0/users",

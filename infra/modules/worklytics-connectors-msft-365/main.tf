@@ -121,23 +121,37 @@ module "msft_365_grant_to_shared" {
 # NOTE: this OVERWRITES the todo_file created by the entra-grant-all-users module, if there's an
 # external_token_todo to append to that file
 locals {
-  todos_to_populate = { for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :
-    k => v if try(v.external_token_todo != null, false) && var.todos_as_local_files
+  connectors_with_external_todo = { for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :
+    k => v if try(v.external_token_todo != null, false)
   }
+
+  todos_to_populate = { for k, v in local.connectors_with_external_todo :
+    k => v if var.todos_as_local_files
+  }
+
+  # base grant todo text per connector, whether it has its own app (provisioned) or shares one;
+  # enriched with any external (eg msft-teams PowerShell) instructions when present. Used both by
+  # the `todos` output and the local_file resource below, so both stay in sync.
+  msft_365_todos = merge(
+    local.provision_entraid_apps ? { for k, v in module.msft_365_grants : k => v.todo } : {},
+    {
+      for k, v in local.connectors_with_external_todo : k => join("\n", [
+        local.provision_entraid_apps ? module.msft_365_grants[k].todo : module.msft_365_grant_to_shared[0].todo,
+        "## Setup",
+        "Then, please follow next instructions to complete the setup:",
+        "",
+        replace(v.external_token_todo, "%%entraid.client_id%%",
+        try(module.msft_connection[k].connector.client_id, try(data.azuread_application.existing_connector_app[0].client_id, "")))
+      ])
+    }
+  )
 }
 
 resource "local_file" "todo-with-external-todo" {
   for_each = local.todos_to_populate
 
-  filename = module.msft_365_grants[each.key].filename
-  content = <<EOT
-${module.msft_365_grants[each.key].todo}
-## Setup
-Then, please follow next instructions to complete the setup:
-
-${replace(each.value.external_token_todo, "%%entraid.client_id%%",
-try(module.msft_connection[each.key].connector.client_id, data.azuread_application.existing_connector_app[0].client_id))}
-EOT
+  filename = local.provision_entraid_apps ? module.msft_365_grants[each.key].filename : module.msft_365_grant_to_shared[0].filename
+  content  = local.msft_365_todos[each.key]
 }
 
 locals {
