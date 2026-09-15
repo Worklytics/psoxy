@@ -150,7 +150,7 @@ module "psoxy" {
   custom_side_outputs             = var.custom_side_outputs
   todos_as_local_files            = var.todos_as_local_files
   todo_step                       = local.max_auth_todo_step
-  enable_remote_resources         = true
+  enable_remote_resources         = var.enable_remote_resources
   gen_metadata_backend            = var.gen_metadata_backend
   bucket_force_destroy            = var.bucket_force_destroy
   tf_gcp_principal_email          = var.gcp_terraform_sa_account_email

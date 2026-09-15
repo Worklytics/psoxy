@@ -531,6 +531,12 @@ variable "todos_as_local_files" {
   default     = true
 }
 
+variable "enable_remote_resources" {
+  type        = bool
+  description = "**beta** Load rules / OpenNLP models from the artifacts S3 bucket at runtime. Default false; not required for genMetadata (Bedrock). Set true only if rules are too large for SSM / env, or you use sentenceMetadata."
+  default     = false
+}
+
 variable "gen_metadata_backend" {
   type        = string
   description = "Default genMetadata backend for enable_gen_metadata connectors: \"bedrock\" only."

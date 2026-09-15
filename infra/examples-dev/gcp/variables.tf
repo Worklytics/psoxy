@@ -537,6 +537,12 @@ variable "connector_settings" {
   description = "Connector-specific settings."
 }
 
+variable "enable_remote_resources" {
+  type        = bool
+  description = "**beta** Load rules / OpenNLP models from the artifacts GCS bucket at runtime. Default false; not required for genMetadata (Vertex). Set true only if rules are too large for Secret Manager / env, or you use sentenceMetadata."
+  default     = false
+}
+
 variable "gen_metadata_backend" {
   type        = string
   description = "Default genMetadata backend for enable_gen_metadata connectors: \"vertex\" only."
