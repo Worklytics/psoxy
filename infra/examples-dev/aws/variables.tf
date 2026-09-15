@@ -259,6 +259,8 @@ variable "custom_api_connectors" {
     oauth_scopes_needed     = optional(list(string), [])
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
+    gen_metadata_backend    = optional(string)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -289,6 +291,8 @@ variable "custom_api_connectors" {
     #   source_auth_strategy = "bearer"
     #   target_host          = "api.example.com"
     #   example_api_calls    = ["/v1/users"]
+    #   enable_gen_metadata  = true # BETA: !<genMetadata> augments in custom rules (Bedrock)
+    #   rules_file           = "custom-api.yaml"
     #   secured_variables = [
     #     { name = "API_KEY" }
     #   ]
@@ -340,10 +344,12 @@ variable "custom_bulk_connectors" {
         transforms = optional(list(map(string)), [])
       })), {})
     }))
-    memory_size_mb      = optional(number, null)
-    settings_to_provide = optional(map(string), {})
-    example_file        = optional(string)
-    example_files       = optional(list(string), [])
+    memory_size_mb       = optional(number, null)
+    enable_gen_metadata  = optional(bool, false)
+    gen_metadata_backend = optional(string)
+    settings_to_provide  = optional(map(string), {})
+    example_file         = optional(string)
+    example_files        = optional(list(string), [])
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -523,6 +529,12 @@ variable "todos_as_local_files" {
   type        = bool
   description = "whether to render TODOs as flat files"
   default     = true
+}
+
+variable "gen_metadata_backend" {
+  type        = string
+  description = "Default genMetadata backend for enable_gen_metadata connectors: \"bedrock\" only."
+  default     = "bedrock"
 }
 
 

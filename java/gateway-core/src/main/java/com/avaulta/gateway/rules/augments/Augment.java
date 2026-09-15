@@ -21,7 +21,9 @@ import java.util.TreeMap;
  * sibling properties to API response payloads.
  *
  * <p>Augments run <b>before</b> transforms, so transforms still see original field values.
- * The output is placed in a sibling property named {@code +{sourceProperty}:{augmentFunction}}.
+ * The output is placed in a sibling property named {@code +{sourceProperty}:{augmentFunction}},
+ * or on the matched object itself as {@code +self:{augmentFunction}} when the jsonPath matches
+ * a JSON object (Map).
  *
  * @see <a href="file:///docs/development/augments.md">Augments Design Doc</a>
  */
@@ -29,6 +31,7 @@ import java.util.TreeMap;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Augment.TextDigest.class, name = "textDigest"),
     @JsonSubTypes.Type(value = Augment.SentenceMetadata.class, name = "sentenceMetadata"),
+    @JsonSubTypes.Type(value = Augment.GenMetadata.class, name = "genMetadata"),
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
@@ -234,6 +237,78 @@ public abstract class Augment {
                     .forEach(word -> result.add(word.toLowerCase()));
             }
             return Set.copyOf(result);
+        }
+    }
+
+    /**
+     * BETA: Generates structured metadata via cloud LLM (Bedrock / Vertex) with constrained
+     * classify (enum) or extract (JSON schema) modes.
+     * Requires {@link #outputSchema} and {@link #prompt}; model/backend selection is deployment config.
+     */
+    @SuperBuilder(toBuilder = true)
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    public static class GenMetadata extends Augment {
+
+        public static final int DEFAULT_MAX_INPUT_TOKENS = 256;
+
+        /**
+         * Default generation cap. Enough for classify JSON ({@code 100}–{@code 200});
+         * extract / transcripts should set {@link #maxTokens} higher ({@code 500}+).
+         */
+        public static final int DEFAULT_MAX_TOKENS = 200;
+
+        /**
+         * Task instruction passed to the generative backend.
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String prompt;
+
+        /**
+         * Per-augment cap on generated tokens (visible JSON; Gemini thinking shares this
+         * budget). Default {@value #DEFAULT_MAX_TOKENS}. Classify: {@code 100}–{@code 200};
+         * meeting transcripts / rich extract: {@code 500}+.
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        Integer maxTokens;
+
+        /**
+         * Cap on the <em>dynamic</em> source corpus (serialized jsonPath match), in estimated
+         * tokens. The static task {@link #prompt} and schema/labels are not counted.
+         * Default {@value #DEFAULT_MAX_INPUT_TOKENS}. Typical classify: 100; longer extract: 500+.
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        Integer maxInputTokens;
+
+        public int effectiveMaxTokens() {
+            return maxTokens != null && maxTokens > 0
+                ? maxTokens
+                : DEFAULT_MAX_TOKENS;
+        }
+
+        public int effectiveMaxInputTokens() {
+            return maxInputTokens != null && maxInputTokens > 0
+                ? maxInputTokens
+                : DEFAULT_MAX_INPUT_TOKENS;
+        }
+
+        @JsonIgnore
+        @Override
+        public String getFunctionName() {
+            return "genMetadata";
+        }
+
+        @Override
+        public Object compute(Object input) {
+            // Computed at runtime by AugmentProcessor via injected GenMetadataProcessor.
+            return null;
+        }
+
+        @Override
+        protected boolean canEqual(Object other) {
+            return other instanceof GenMetadata;
         }
     }
 }

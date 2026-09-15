@@ -168,6 +168,7 @@ module "psoxy" {
   todo_step                            = local.max_auth_todo_step
   todos_as_local_files                 = var.todos_as_local_files
   enable_remote_resources              = true
+  gen_metadata_backend                 = var.gen_metadata_backend
 
 
   #  vpc_config = {

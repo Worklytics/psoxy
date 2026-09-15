@@ -276,4 +276,25 @@ public class JsonSchemaValidationUtilsTest {
                         validationUtils.validateFormUrlEncodedBySchema(formBody, nonObjectSchema);
                 });
         }
+
+        @Test
+        void testValidateJsonBySchema_Filter_RequiredAndEnum() {
+                JsonSchemaFilter schema = JsonSchemaFilter.builder()
+                                .type("object")
+                                .required(java.util.List.of("category"))
+                                .additionalProperties(false)
+                                .properties(java.util.Map.of("category", JsonSchemaFilter.builder()
+                                                .type("string")
+                                                .enumValues(java.util.List.of("Feature", "Bugfix"))
+                                                .build()))
+                                .build();
+
+                assertTrue(validationUtils.validateJsonBySchema(
+                                "{\"category\":\"Feature\"}", schema));
+                assertFalse(validationUtils.validateJsonBySchema("{}", schema));
+                assertFalse(validationUtils.validateJsonBySchema(
+                                "{\"category\":\"Other\"}", schema));
+                assertFalse(validationUtils.validateJsonBySchema(
+                                "{\"category\":\"Feature\",\"extra\":true}", schema));
+        }
 }
