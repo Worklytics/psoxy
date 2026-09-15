@@ -3,6 +3,7 @@
 > **Status:** Design · Draft
 > **Since:** v0.6.x
 > **Relates to:** `Transform`, `Endpoint`, `Rules2`, `JsonSchemaFilter`
+> **See also:** [genMetadata augment (BETA)](alpha-features/gen-metadata-augment.md)
 
 ## Motivation
 
@@ -151,7 +152,7 @@ List<Augment> augments;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Augment.TextDigest.class, name = "textDigest"),
-    // future: @JsonSubTypes.Type(value = Augment.Classify.class, name = "classify"),
+    @JsonSubTypes.Type(value = Augment.GenMetadata.class, name = "genMetadata"),
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor

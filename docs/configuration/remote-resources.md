@@ -135,9 +135,9 @@ aws s3 cp en-sent.bin s3://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/openn
 gsutil cp en-sent.bin gs://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/opennlp/en-sent.bin
 ```
 
-### LLM Weights (future)
-Smaller language models that fit in memory can be placed in the shared resource path for
-on-the-fly inference within the proxy.
+### genMetadata (BETA)
+
+The `!<genMetadata>` augment uses **Vertex AI** (GCP) or **Amazon Bedrock** (AWS). `enable_gen_metadata` does not set `REMOTE_RESOURCE_BUCKET` / `SHARED_RESOURCE_PATH` and does not load LLM weights from the artifacts bucket. If those env vars appear on Lambdas or Cloud Functions, they come from host `enable_remote_resources = true` (remote rules / OpenNLP). See [gen-metadata-augment.md](../development/alpha-features/gen-metadata-augment.md).
 
 ## Uploading Resources
 

@@ -36,6 +36,9 @@ public class WebhookSanitizerImpl implements WebhookSanitizer {
     @Inject
     Configuration jsonConfiguration;
 
+    @Inject
+    AugmentProcessor augmentProcessor;
+
     final WebhookCollectionRules webhookRules;
 
     Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
@@ -174,10 +177,16 @@ public class WebhookSanitizerImpl implements WebhookSanitizer {
         WebhookCollectionRules.WebhookEndpoint endpoint = webhookRules.getEndpoints().get(0);
 
         String sanitizedContent = new String(request.getBody(), StandardCharsets.UTF_8); //just assume UTF-8, always
-        if (ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
+        if (ObjectUtils.isNotEmpty(endpoint.getAugments())
+            || ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
             Object document = jsonConfiguration.jsonProvider().parse(request.getBody());
-            for (Transform transform : endpoint.getTransforms()) {
-                sanitizerUtils.applyTransform(pseudonymizer, transform, document, compiledTransforms);
+            if (ObjectUtils.isNotEmpty(endpoint.getAugments())) {
+                augmentProcessor.applyAugments(endpoint.getAugments(), document);
+            }
+            if (ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
+                for (Transform transform : endpoint.getTransforms()) {
+                    sanitizerUtils.applyTransform(pseudonymizer, transform, document, compiledTransforms);
+                }
             }
             sanitizedContent = jsonConfiguration.jsonProvider().toJson(document);
         }

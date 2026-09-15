@@ -86,6 +86,36 @@ locals {
 
   # proxy caller role requires direct lambda access if API Gateway v2 is not used and there are API connectors
   caller_requires_direct_lambda_access = !local.use_api_gateway_v2 && length(module.api_connector) > 0
+
+  # Effective genMetadata backend per connector (null if genMetadata disabled).
+  # AWS is cloud-only: bedrock.
+  connector_gen_metadata_backend = {
+    for k, v in merge(var.api_connectors, var.bulk_connectors) : k => (
+      try(v.enable_gen_metadata, false)
+      ? lower(coalesce(try(v.gen_metadata_backend, null), var.gen_metadata_backend, "bedrock"))
+      : null
+    )
+  }
+
+  gen_metadata_uses_bedrock = length([
+    for k, backend in local.connector_gen_metadata_backend : k
+    if backend == "bedrock"
+  ]) > 0
+
+  bedrock_invoke_iam_statements = [{
+    Sid    = "InvokeBedrockForGenMetadata"
+    Effect = "Allow"
+    Action = [
+      "bedrock:InvokeModel",
+      "bedrock:Converse",
+      "bedrock:InvokeModelWithResponseStream",
+      "bedrock:ConverseStream",
+    ]
+    Resource = [
+      "arn:aws:bedrock:*::foundation-model/*",
+      "arn:aws:bedrock:*:*:inference-profile/*",
+    ]
+  }]
 }
 
 module "psoxy" {
@@ -250,6 +280,12 @@ module "api_connector" {
   timeout_seconds               = coalesce(try(each.value.timeout_seconds, null), 180)
   allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
 
+  extra_lambda_role_iam_statements = (
+    local.connector_gen_metadata_backend[each.key] == "bedrock"
+    ? local.bedrock_invoke_iam_statements
+    : []
+  )
+
   environment_variables = merge(
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
@@ -262,6 +298,10 @@ module "api_connector" {
     var.api_connector_path_prefix_to_trim != null ? { REQUEST_PATH_PREFIX_TO_TRIM = var.api_connector_path_prefix_to_trim } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      ENABLE_GEN_METADATA  = "true"
+      GEN_METADATA_BACKEND = local.connector_gen_metadata_backend[each.key]
+    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
@@ -339,6 +379,12 @@ module "bulk_connector" {
 
 
 
+  extra_lambda_role_iam_statements = (
+    local.connector_gen_metadata_backend[each.key] == "bedrock"
+    ? local.bedrock_invoke_iam_statements
+    : []
+  )
+
   environment_variables = merge(
     {
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
@@ -349,7 +395,11 @@ module "bulk_connector" {
     try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) != null ? {
       RULES = each.value.rules_raw
     } : {},
-    var.general_environment_variables
+    var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      ENABLE_GEN_METADATA  = "true"
+      GEN_METADATA_BACKEND = local.connector_gen_metadata_backend[each.key]
+    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null

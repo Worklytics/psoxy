@@ -254,6 +254,8 @@ variable "custom_api_connectors" {
     oauth_scopes_needed     = optional(list(string), [])
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
+    gen_metadata_backend    = optional(string)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -284,6 +286,8 @@ variable "custom_api_connectors" {
     #   source_auth_strategy = "bearer"
     #   target_host          = "api.example.com"
     #   example_api_calls    = ["/v1/users"]
+    #   enable_gen_metadata  = true # BETA: !<genMetadata> augments in custom rules (Vertex)
+    #   rules_file           = "custom-api.yaml"
     #   secured_variables = [
     #     { name = "API_KEY" }
     #   ]
@@ -341,12 +345,14 @@ variable "custom_bulk_connectors" {
         transforms = optional(list(map(string)), [])
       })))
     }))
-    available_memory_mb = optional(number)
-    timeout_seconds     = optional(number)
-    rules_file          = optional(string)
-    settings_to_provide = optional(map(string), {})
-    example_file        = optional(string)
-    example_files       = optional(list(string), [])
+    available_memory_mb  = optional(number)
+    timeout_seconds      = optional(number)
+    enable_gen_metadata  = optional(bool, false)
+    gen_metadata_backend = optional(string)
+    rules_file           = optional(string)
+    settings_to_provide  = optional(map(string), {})
+    example_file         = optional(string)
+    example_files        = optional(list(string), [])
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -529,4 +535,16 @@ variable "connector_settings" {
   type        = map(string)
   default     = {}
   description = "Connector-specific settings."
+}
+
+variable "enable_remote_resources" {
+  type        = bool
+  description = "**beta** Load rules / OpenNLP models from the artifacts GCS bucket at runtime. Default false; not required for genMetadata (Vertex). Set true only if rules are too large for Secret Manager / env, or you use sentenceMetadata."
+  default     = false
+}
+
+variable "gen_metadata_backend" {
+  type        = string
+  description = "Default genMetadata backend for enable_gen_metadata connectors: \"vertex\" only."
+  default     = "vertex"
 }

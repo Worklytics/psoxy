@@ -193,6 +193,8 @@ variable "api_connectors" {
     oauth_scopes_needed     = optional(list(string), [])
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
+    gen_metadata_backend    = optional(string) # "vertex" (GCP); host default applies when null
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -274,6 +276,8 @@ variable "bulk_connectors" {
     settings_to_provide   = optional(map(string), {})
     available_memory_mb   = optional(number)
     timeout_seconds       = optional(number)
+    enable_gen_metadata   = optional(bool, false)
+    gen_metadata_backend  = optional(string) # "vertex" (GCP); host default applies when null
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -497,5 +501,16 @@ variable "api_connector_external_lb_host" {
   validation {
     condition     = var.api_connector_external_lb_host == null || try(length(trimspace(var.api_connector_external_lb_host)) > 0, false)
     error_message = "api_connector_external_lb_host must be null or a non-empty hostname/IP."
+  }
+}
+
+variable "gen_metadata_backend" {
+  type        = string
+  description = "Default genMetadata backend for connectors with enable_gen_metadata when not set per connector. On GCP: \"vertex\" only."
+  default     = "vertex"
+
+  validation {
+    condition     = var.gen_metadata_backend == "vertex"
+    error_message = "gen_metadata_backend must be \"vertex\" on gcp-host (Bedrock is AWS-only)."
   }
 }

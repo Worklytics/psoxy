@@ -87,6 +87,21 @@ locals {
       try(local.api_connector_rules_raw[k], null) != null ? local.api_connector_rules_raw[k] : null
     )
   }
+
+  # Effective genMetadata backend per connector (null if genMetadata disabled).
+  # GCP is cloud-only: vertex.
+  connector_gen_metadata_backend = {
+    for k, v in merge(var.api_connectors, var.bulk_connectors) : k => (
+      try(v.enable_gen_metadata, false)
+      ? lower(coalesce(try(v.gen_metadata_backend, null), var.gen_metadata_backend, "vertex"))
+      : null
+    )
+  }
+
+  gen_metadata_uses_vertex = length([
+    for k, backend in local.connector_gen_metadata_backend : k
+    if backend == "vertex"
+  ]) > 0
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -334,6 +349,10 @@ module "api_connector" {
     var.api_connector_path_prefix_to_trim != null ? { REQUEST_PATH_PREFIX_TO_TRIM = var.api_connector_path_prefix_to_trim } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      ENABLE_GEN_METADATA  = "true"
+      GEN_METADATA_BACKEND = local.connector_gen_metadata_backend[each.key]
+    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
@@ -536,6 +555,10 @@ module "bulk_connector" {
     },
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      ENABLE_GEN_METADATA  = "true"
+      GEN_METADATA_BACKEND = local.connector_gen_metadata_backend[each.key]
+    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
