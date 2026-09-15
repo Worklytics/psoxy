@@ -196,6 +196,23 @@ class StorageHandlerTest {
     }
 
     @Test
+    public void getObjectMetadata_includesGenMetadataTokenAggregates() {
+        handler.genMetadataTokenUsage.reset();
+        handler.genMetadataTokenUsage.record(100, 20);
+        handler.genMetadataTokenUsage.record(50, 10);
+
+        var metadata = handler.buildObjectMetadata("bucket", "/directory/file.csv",
+            handler.buildDefaultTransform());
+
+        assertEquals("150",
+            metadata.get(StorageHandler.BulkMetaData.GEN_METADATA_INPUT_TOKENS.getMetaDataKey()));
+        assertEquals("30",
+            metadata.get(StorageHandler.BulkMetaData.GEN_METADATA_OUTPUT_TOKENS.getMetaDataKey()));
+        assertEquals("2",
+            metadata.get(StorageHandler.BulkMetaData.GEN_METADATA_CALLS.getMetaDataKey()));
+    }
+
+    @Test
     public void hasBeenSanitized() {
         assertFalse(handler.hasBeenSanitized(null));
         assertFalse(handler.hasBeenSanitized(ImmutableMap.of()));

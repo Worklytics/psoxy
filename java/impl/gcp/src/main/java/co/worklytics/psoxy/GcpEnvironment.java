@@ -150,7 +150,5 @@ public class GcpEnvironment implements HostEnvironment {
     public static final String PUBSUB_DELIVERY_ATTEMPT_HEADER = "X-Goog-Delivery-Attempt";
 
 
-    //q: how can we get the REGION in which the function is running/executing?
-
-
+    // Vertex model location is METADATA_GEN_MODEL_REGION (default global), not the function region.
 }

@@ -1112,6 +1112,7 @@ EOT
       ],
       reserved_concurrent_executions : null # 1
       enable_side_output : false
+      enable_gen_metadata : true
       example_api_calls_user_to_impersonate : null
       # `{USER_ID}`: a Zoom user id from GET /v2/users (`.users[].id`).
       # `{MEETING_ID}`: a numeric meeting id from GET /v2/users/{USER_ID}/meetings, or a past-meeting
@@ -1122,6 +1123,7 @@ EOT
         "/v2/users/{USER_ID}/recordings",
         "/v2/meetings/{MEETING_ID}",
         "/v2/meetings/{MEETING_ID}/meeting_summary",
+        "/v2/meetings/{MEETING_ID}/transcript",
         "/v2/past_meetings/{MEETING_ID}",
         "/v2/past_meetings/{MEETING_ID}/instances",
         "/v2/past_meetings/{MEETING_ID}/participants",
@@ -1832,6 +1834,11 @@ locals {
   google_workspace_sources_backwards = { for k, v in local.google_workspace_sources :
     k => merge(v,
       { example_calls : try(v.example_api_calls, []) },
+      {
+        enable_remote_resources = try(v.enable_remote_resources, false)
+        enable_gen_metadata     = try(v.enable_gen_metadata, false)
+        gen_metadata_backend    = try(v.gen_metadata_backend, null)
+      },
       try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
     )
   }
@@ -1840,6 +1847,11 @@ locals {
   msft_365_connectors_backwards = { for k, v in local.msft_365_connectors :
     k => merge(v,
       { example_calls : try(v.example_api_calls, []) },
+      {
+        enable_remote_resources = try(v.enable_remote_resources, false)
+        enable_gen_metadata     = try(v.enable_gen_metadata, false)
+        gen_metadata_backend    = try(v.gen_metadata_backend, null)
+      },
       try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
     )
   }
@@ -1853,12 +1865,18 @@ locals {
   oauth_long_access_connectors_backwards_with_rules_raw = { for k, v in local.oauth_long_access_connectors :
     k => merge(v,
       { example_calls : try(v.example_api_calls, []) },
+      {
+        enable_remote_resources = try(v.enable_remote_resources, false)
+        enable_gen_metadata     = try(v.enable_gen_metadata, false)
+        gen_metadata_backend    = try(v.gen_metadata_backend, null)
+      },
       try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
     )
   }
 
   bulk_connectors_with_rules_raw = { for k, v in local.bulk_connectors :
     k => merge(v,
+      { enable_remote_resources = try(v.enable_remote_resources, false) },
       try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
     )
   }

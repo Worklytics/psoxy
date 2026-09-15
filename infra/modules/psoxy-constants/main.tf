@@ -25,6 +25,15 @@ locals {
     "arn:aws:iam::aws:policy/AmazonCognitoPowerUser" = "AmazonCognitoPowerUser"
   }
 
+  # Extra AWS managed policies for *provisioners* of deployments that use genMetadata
+  # (`enable_gen_metadata` + Bedrock) with daily cost-cap / budget-action wiring.
+  # Runtime invoke IAM is attached to connector Lambda roles by aws-host (not needed here).
+  # Amazon Nova defaults need no separate "model access" managed policy for the provisioner.
+  required_aws_managed_policies_to_provision_gen_metadata = {
+    # Creates aws_budgets_budget + aws_budgets_budget_action that attaches an IAM Deny policy to connector roles.
+    "arn:aws:iam::aws:policy/AWSBudgetsActionsWithAWSResourceControlAccess" = "AWSBudgetsActionsWithAWSResourceControlAccess"
+  }
+
   # TODO: could restrict in future, but this is implicit
   account_id_resource_pattern = "*"
 
@@ -433,6 +442,28 @@ locals {
           "kms:ListAliases"
         ]
         Resource = "arn:aws:kms:*:${local.account_id_resource_pattern}:*" # kms key ids are random UUIDs, so can't use env_id prefix to constrain
+      },
+      {
+        # Optional: only required when aws-host gen_metadata_daily_cost_limit_usd + alert emails
+        # create Budgets + budget actions that attach IAM Deny to connector roles.
+        Sid    = "BudgetsForGenMetadata"
+        Effect = "Allow"
+        Action = [
+          "budgets:ViewBudget",
+          "budgets:ModifyBudget",
+          "budgets:CreateBudgetAction",
+          "budgets:DescribeBudgetAction",
+          "budgets:DescribeBudgetActionsForAccount",
+          "budgets:DescribeBudgetActionsForBudget",
+          "budgets:DescribeBudgetActionHistories",
+          "budgets:ExecuteBudgetAction",
+          "budgets:UpdateBudgetAction",
+          "budgets:DeleteBudgetAction",
+          "budgets:TagResource",
+          "budgets:UntagResource",
+          "budgets:ListTagsForResource",
+        ]
+        Resource = "*"
       }
     ]
   })

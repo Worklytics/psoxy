@@ -1,8 +1,10 @@
 package com.avaulta.gateway.rules;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.transforms.RecordTransform;
 import com.avaulta.gateway.rules.transforms.RecordTransformDeserializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -63,6 +65,15 @@ public class RecordRules implements BulkDataRules {
     List<RecordTransform> transforms;
 
     /**
+     * Augments to compute and inject as synthetic sibling properties, run before transforms.
+     *
+     * @see <a href="file:///docs/development/alpha-features/augments.md">Augments Design Doc</a>
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @Singular
+    List<Augment> augments;
+
+    /**
      * Optional JSON schema allow-list applied to each record after transforms.
      * Properties not declared in the schema (including unknown future event payload fields) are
      * removed from the output. See {@link JsonSchemaFilter}.
@@ -82,6 +93,7 @@ public class RecordRules implements BulkDataRules {
      */
     public RecordRules() {
         this.transforms = Collections.emptyList();
+        this.augments = new ArrayList<>();
     }
 
     //setter to ensure we get a List, even when coming through jackson
@@ -90,6 +102,14 @@ public class RecordRules implements BulkDataRules {
             this.transforms = Collections.emptyList();
         } else {
             this.transforms = transforms;
+        }
+    }
+
+    public void setAugments(List<Augment> augments) {
+        if (augments == null) {
+            this.augments = Collections.emptyList();
+        } else {
+            this.augments = augments;
         }
     }
 

@@ -15,6 +15,11 @@ output "required_aws_managed_policies_to_consume_msft_365_source" {
   description = "The AWS managed policies required to provision infra needed to consume Microsoft 365 as a data source via Psoxy hosted in AWS"
 }
 
+output "required_aws_managed_policies_to_provision_gen_metadata" {
+  value       = local.required_aws_managed_policies_to_provision_gen_metadata
+  description = "Extra AWS managed policies for provisioners when aws-host enables genMetadata with Budgets cost-cap / auto-Deny. Runtime Bedrock invoke is on connector roles (aws-host), not the provisioner. Nova defaults need no separate model-access policy."
+}
+
 output "required_gcp_roles_to_provision_host" {
   value       = local.required_gcp_roles_to_provision_host
   description = "The GCP roles required to provision infrastructure needed to host Psoxy in GCP"
