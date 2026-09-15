@@ -165,7 +165,7 @@ When enabled:
 - **AWS** attaches `bedrock:InvokeModel` / `bedrock:Converse` (including inference profiles) to the connector Lambda role. Java defaults `GEN_METADATA_MODEL` to `us.amazon.nova-2-lite-v1:0` unless overridden. Prefer a US Lambda region for that default. Anthropic Claude still needs a one-time account use-case form if you switch `GEN_METADATA_MODEL` to Claude. See aws-host output `remote_resource_gen_metadata_todo`.
 - **GCP** enables `aiplatform.googleapis.com` and grants `roles/aiplatform.user` to the connector service account. Java defaults `GEN_METADATA_MODEL=gemini-3.5-flash-lite`, `GEN_METADATA_MODEL_REGION=global`, and `GEN_METADATA_THINKING_LEVEL=minimal` unless overridden.
 
-genMetadata does **not** upload `llm/*.zip` or other model archives via remote resources.
+genMetadata does **not** need `enable_remote_resources` or `REMOTE_RESOURCE_BUCKET`. Those are for remote `rules.yaml` / OpenNLP (`sentenceMetadata`). Bedrock and Vertex are invoked in-process; this feature does not upload or load `llm/*.zip`. `examples-dev` still sets `enable_remote_resources = true` independently of genMetadata.
 
 ## Java architecture
 
