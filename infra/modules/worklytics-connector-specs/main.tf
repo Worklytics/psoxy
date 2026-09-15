@@ -9,7 +9,7 @@ locals {
 
   # example ids used to build msft-onedrive's example_api_calls; populate via
   # msft_365_connector_settings (e.g. `{ msft_onedrive_example_drive_id = "b!abc123..." }`) once you
-  # have real values (from a `GET /v1.0/users/{userId}/drives` or `.../groups/{groupId}/drives`
+  # have real values (from a `GET /v1.0/users/{EXAMPLE_MSFT_USER_GUID}/drives` or `.../groups/{EXAMPLE_MSFT_GROUP_GUID}/drives`
   # response, and a `driveItem.id` from that drive's `delta` feed, respectively).
   example_msft_group_guid        = try(var.msft_365_connector_settings["example_msft_group_guid"], "{EXAMPLE_MSFT_GROUP_GUID}")
   msft_onedrive_example_drive_id = try(var.msft_365_connector_settings["msft_onedrive_example_drive_id"], "{EXAMPLE_MSFT_ONEDRIVE_DRIVE_ID}")
@@ -67,12 +67,31 @@ locals {
   github_example_repository                = coalesce(var.github_example_repository, try(var.connector_settings["github_example_repository"], null), "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
   gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, try(var.connector_settings["gitlab_example_group_id"], null), "YOUR_GITLAB_GROUP_ID")
   gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, try(var.connector_settings["gitlab_example_project_id"], null), "YOUR_GITLAB_PROJECT_ID")
+
+  # Shared GraphQL example for GitHub connectors. GraphQL `variables.org` uses github_first_organization
+  # (first value when github_organization is comma-separated). REST `/users/{USERNAME}` placeholders are
+  # defined on each GitHub connector's example_api_calls block below; `{USERNAME}` MUST be a
+  # reversible-pseudonym token (`p~` + ≥43 base64url chars) of a `login` from GET /orgs/{ORG}/members.
+  github_graphql_example_request = {
+    method       = "POST"
+    path         = "/graphql"
+    content_type = "application/json"
+    body = jsonencode({
+      query = "query($org: String!) { organization(login: $org) { membersWithRole(first: 10) { edges { node { login email } } } } }"
+      variables = {
+        org = local.github_first_organization
+      }
+    })
+  }
+  github_enterprise_server_graphql_example_request = merge(local.github_graphql_example_request, {
+    path = "/api/graphql"
+  })
   # Normalize gitlab_url by stripping protocol prefix (https:// or http://) and trailing slash
   gitlab_url_raw                = var.gitlab_url != "https://gitlab.com" ? var.gitlab_url : try(var.connector_settings["gitlab_url"], "https://gitlab.com")
   gitlab_url                    = replace(trimsuffix(local.gitlab_url_raw, "/"), "/^https?:\\/\\//", "")
   gong_instance_subdomain       = trimsuffix(coalesce(var.gong_instance_subdomain, try(var.connector_settings["gong_instance_subdomain"], null), "YOUR_GONG_INSTANCE_SUBDOMAIN"), ".api")
   glean_instance_subdomain      = coalesce(var.glean_instance_subdomain, try(var.connector_settings["glean_instance_subdomain"], null), "YOUR_GLEAN_INSTANCE_SUBDOMAIN")
-  salesforce_example_account_id = coalesce(var.salesforce_example_account_id, try(var.connector_settings["salesforce_example_account_id"], null), "{ANY ACCOUNT ID}")
+  salesforce_example_account_id = coalesce(var.salesforce_example_account_id, try(var.connector_settings["salesforce_example_account_id"], null), "{ANY_ACCOUNT_ID}")
   salesforce_domain             = var.salesforce_domain != "" ? var.salesforce_domain : try(var.connector_settings["salesforce_domain"], "")
 
   oauth_long_access_connectors = {
@@ -98,6 +117,8 @@ locals {
       enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # Path params: `{ANY_WORKSPACE_GID}` from GET /workspaces; `{ANY_TEAM_GID}` from GET .../teams;
+      # `{ANY_PROJECT_GID}` from GET .../projects; `{ANY_TASK_GID}` from GET /tasks?project={ANY_PROJECT_GID}.
       example_api_calls : [
         "/api/1.0/workspaces",
         "/api/1.0/users?workspace={ANY_WORKSPACE_GID}&limit=10",
@@ -106,6 +127,8 @@ locals {
         "/api/1.0/tasks?project={ANY_PROJECT_GID}&limit=10",
         "/api/1.0/tasks/{ANY_TASK_GID}",
         "/api/1.0/tasks/{ANY_TASK_GID}/stories",
+        "/api/1.0/tasks/{ANY_TASK_GID}/subtasks",
+        "/api/1.0/workspaces/{ANY_WORKSPACE_GID}/tasks/search?modified_at.after=2024-01-01T00:00:00.000Z",
       ]
       external_token_todo : <<EOT
   1. Create a [Service Account User + token](https://asana.com/guide/help/premium/service-accounts)
@@ -144,10 +167,19 @@ EOT
         FOLLOW_REDIRECTS : "FALSE"
       }
       example_api_calls_user_to_impersonate : null
+      # `{WORKSPACE_ID}`: ChatGPT Enterprise workspace id (Worklytics "Workspace Id" / connector_settings.chat_gpt_enterprise_example_workspace_id).
+      # `{LOG_FILE_ID}`: a log file id from GET .../logs.
+      # Legacy `/conversations` paths below remain allow-listed for existing deployments, but OpenAI reports
+      # the stateful API was removed on June 5, 2026 — generated test calls may fail; prefer `/logs` for new integrations.
+      # `{CONVERSATION_ID}`: only meaningful if your tenant still serves the legacy conversations API.
       example_api_calls : [
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/users",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations",
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations/{CONVERSATION_ID}/messages",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/automations",
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/logs",
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/logs/{LOG_FILE_ID}",
       ]
       external_token_todo : templatefile("${path.module}/docs/chatgpt/enterprise/instructions.tftpl", {
         workspace_id                = local.chat_gpt_enterprise_example_workspace_id,
@@ -200,10 +232,17 @@ EOT
           value_managed_by_tf : false
         }
       ]
+      # `{ORGANIZATION_UUID}` from GET .../organizations. `{CHAT_ID}` from GET .../apps/chats.
+      # `{LOCAL_SESSION_ID}` from GET .../apps/sessions/local. `{CLAUDE_REMOTE_SESSION_ID}` from GET .../apps/sessions/remote.
       example_api_requests : [
         {
           method : "GET"
           path : "/v1/compliance/organizations"
+          headers : local.anthropic_api_headers
+        },
+        {
+          method : "GET"
+          path : "/v1/compliance/organizations/{ORGANIZATION_UUID}/users"
           headers : local.anthropic_api_headers
         },
         {
@@ -213,12 +252,32 @@ EOT
         },
         {
           method : "GET"
+          path : "/v1/compliance/apps/chats"
+          headers : local.anthropic_api_headers
+        },
+        {
+          method : "GET"
+          path : "/v1/compliance/apps/chats/{CHAT_ID}/messages"
+          headers : local.anthropic_api_headers
+        },
+        {
+          method : "GET"
           path : "/v1/compliance/apps/sessions/local"
           headers : local.anthropic_api_headers
         },
         {
           method : "GET"
+          path : "/v1/compliance/apps/sessions/local/{LOCAL_SESSION_ID}/messages"
+          headers : local.anthropic_api_headers
+        },
+        {
+          method : "GET"
           path : "/v1/compliance/apps/sessions/remote"
+          headers : local.anthropic_api_headers
+        },
+        {
+          method : "GET"
+          path : "/v1/compliance/apps/sessions/remote/{CLAUDE_REMOTE_SESSION_ID}/messages"
           headers : local.anthropic_api_headers
         }
       ],
@@ -267,7 +326,15 @@ EOT
         },
         {
           method : "GET"
+          path : "/v1/organizations/spend_limits/{SPEND_LIMIT_ID}"
+        },
+        {
+          method : "GET"
           path : "/v1/organizations/spend_limit_increase_requests?limit=50"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/spend_limit_increase_requests/{SPEND_LIMIT_INCREASE_REQUEST_ID}"
         }
       ],
       external_token_todo : templatefile("${path.module}/docs/claude/claude_enterprise_analytics_instructions.tftpl", {
@@ -445,15 +512,39 @@ EOT
       enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # Path params: `{ORG}`/`{OWNER}` = github_organization; `{REPO}` = github_example_repository;
+      # `{TEAM_SLUG}` from GET /orgs/{ORG}/teams; `{ISSUE_NUMBER}`/`{PULL_NUMBER}` from issues/pulls lists;
+      # `{REF}`/`{COMMIT_SHA}` from GET .../commits; `{COMMENT_ID}`/`{REVIEW_ID}` from the matching comments/reviews lists;
+      # `{USERNAME}` MUST be a reversible pseudonym (`p~...`) of a `login` from GET /orgs/{ORG}/members.
       example_api_calls : [
         "/orgs/${local.github_organization}/repos",
         "/orgs/${local.github_organization}/members",
         "/orgs/${local.github_organization}/teams",
+        "/orgs/${local.github_organization}/teams/{TEAM_SLUG}/members",
         "/orgs/${local.github_organization}/audit-log",
+        "/users/{USERNAME}",
+        "/repos/${local.github_organization}/${local.github_example_repository}/branches",
         "/repos/${local.github_organization}/${local.github_example_repository}/events",
         "/repos/${local.github_organization}/${local.github_example_repository}/commits",
+        "/repos/${local.github_organization}/${local.github_example_repository}/commits/{REF}",
+        "/repos/${local.github_organization}/${local.github_example_repository}/commits/{COMMIT_SHA}/comments",
+        "/repos/${local.github_organization}/${local.github_example_repository}/comments/{COMMENT_ID}/reactions",
         "/repos/${local.github_organization}/${local.github_example_repository}/issues",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}/comments",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}/events",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}/timeline",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}/reactions",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues/comments/{COMMENT_ID}/reactions",
         "/repos/${local.github_organization}/${local.github_example_repository}/pulls",
+        "/repos/${local.github_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}",
+        "/repos/${local.github_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}/reviews",
+        "/repos/${local.github_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}/comments",
+        "/repos/${local.github_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}/reviews/{REVIEW_ID}/comments",
+        "/repos/${local.github_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}/commits",
+      ]
+      example_api_requests : [
+        local.github_graphql_example_request,
       ]
       external_token_todo : templatefile("${path.module}/docs/github/enterprise-cloud-instructions.tftpl", {
         github_organization         = local.github_organization,
@@ -505,11 +596,18 @@ EOT
       enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # Path params: `{ORG}` = github_organization; `{TEAM_SLUG}` from GET /orgs/{ORG}/teams;
+      # `{USERNAME}` MUST be a reversible pseudonym (`p~...`) of a `login` from GET /orgs/{ORG}/members.
       example_api_calls : [
         "/orgs/${local.github_organization}/members",
         "/orgs/${local.github_organization}/teams",
+        "/orgs/${local.github_organization}/teams/{TEAM_SLUG}/members",
         "/orgs/${local.github_organization}/audit-log",
-        "/orgs/${local.github_organization}/copilot/billing/seats"
+        "/orgs/${local.github_organization}/copilot/billing/seats",
+        "/users/{USERNAME}",
+      ]
+      example_api_requests : [
+        local.github_graphql_example_request,
       ]
       external_token_todo : templatefile("${path.module}/docs/github/copilot-instructions.tftpl", {
         github_organization         = local.github_organization,
@@ -563,15 +661,40 @@ EOT
       reserved_concurrent_executions : null
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # Path params: `{ORG}`/`{OWNER}` = first github_organization; `{REPO}` = github_example_repository;
+      # `{ENTERPRISE_SERVER_VERSION}` = github_enterprise_server_version (default v3);
+      # `{TEAM_SLUG}` from GET .../orgs/{ORG}/teams; `{ISSUE_NUMBER}`/`{PULL_NUMBER}` from issues/pulls lists;
+      # `{REF}`/`{COMMIT_SHA}` from GET .../commits; `{COMMENT_ID}`/`{REVIEW_ID}` from matching comments/reviews lists;
+      # `{USERNAME}` MUST be a reversible pseudonym (`p~...`) of a `login` from GET .../orgs/{ORG}/members.
       example_api_calls : [
         "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/repos",
         "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/members",
         "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/teams",
+        "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/teams/{TEAM_SLUG}/members",
         "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/audit-log",
+        "/api/${local.github_enterprise_server_version}/users/{USERNAME}",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/branches",
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/events",
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/commits",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/commits/{REF}",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/commits/{COMMIT_SHA}/comments",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/comments/{COMMENT_ID}/reactions",
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/issues",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}/comments",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}/events",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}/timeline",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}/reactions",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/issues/comments/{COMMENT_ID}/reactions",
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/pulls",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}/reviews",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}/comments",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}/reviews/{REVIEW_ID}/comments",
+        "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}/commits",
+      ]
+      example_api_requests : [
+        local.github_enterprise_server_graphql_example_request,
       ]
       external_token_todo : templatefile("${path.module}/docs/github/enterprise-server-instructions.tftpl", {
         github_enterprise_server_host = local.github_enterprise_server_host,
@@ -620,14 +743,38 @@ EOT
       reserved_concurrent_executions : null
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # Path params: `{ORG}`/`{OWNER}` = github_organization; `{REPO}` = github_example_repository;
+      # `{TEAM_SLUG}` from GET /orgs/{ORG}/teams; `{ISSUE_NUMBER}`/`{PULL_NUMBER}` from issues/pulls lists;
+      # `{REF}`/`{COMMIT_SHA}` from GET .../commits; `{COMMENT_ID}`/`{REVIEW_ID}` from matching comments/reviews lists;
+      # `{USERNAME}` MUST be a reversible pseudonym (`p~...`) of a `login` from GET /orgs/{ORG}/members.
       example_api_calls : [
         "/orgs/${local.github_organization}/repos",
         "/orgs/${local.github_organization}/members",
         "/orgs/${local.github_organization}/teams",
+        "/orgs/${local.github_organization}/teams/{TEAM_SLUG}/members",
+        "/users/{USERNAME}",
+        "/repos/${local.github_organization}/${local.github_example_repository}/branches",
         "/repos/${local.github_organization}/${local.github_example_repository}/events",
         "/repos/${local.github_organization}/${local.github_example_repository}/commits",
+        "/repos/${local.github_organization}/${local.github_example_repository}/commits/{REF}",
+        "/repos/${local.github_organization}/${local.github_example_repository}/commits/{COMMIT_SHA}/comments",
+        "/repos/${local.github_organization}/${local.github_example_repository}/comments/{COMMENT_ID}/reactions",
         "/repos/${local.github_organization}/${local.github_example_repository}/issues",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}/comments",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}/events",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}/timeline",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues/{ISSUE_NUMBER}/reactions",
+        "/repos/${local.github_organization}/${local.github_example_repository}/issues/comments/{COMMENT_ID}/reactions",
         "/repos/${local.github_organization}/${local.github_example_repository}/pulls",
+        "/repos/${local.github_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}",
+        "/repos/${local.github_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}/reviews",
+        "/repos/${local.github_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}/comments",
+        "/repos/${local.github_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}/reviews/{REVIEW_ID}/comments",
+        "/repos/${local.github_organization}/${local.github_example_repository}/pulls/{PULL_NUMBER}/commits",
+      ]
+      example_api_requests : [
+        local.github_graphql_example_request,
       ]
       external_token_todo : templatefile("${path.module}/docs/github/non-enterprise-cloud-instructions.tftpl", {
         github_organization         = local.github_organization,
@@ -736,17 +883,38 @@ EOT
       reserved_concurrent_executions : null
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # `{ANY_ACCOUNT_ID}`: any Salesforce Account Id (connector_settings.salesforce_example_account_id). Used only for example calls.
       example_api_calls : [
         "/services/data/v64.0/sobjects/Account/describe",
+        "/services/data/v64.0/sobjects/User/describe",
         "/services/data/v64.0/sobjects/Task/describe",
+        "/services/data/v64.0/sobjects/Event/describe",
+        "/services/data/v64.0/composite/sobjects/Account?ids=${local.salesforce_example_account_id}&fields=Id,Name",
         "/services/data/v64.0/query?q=SELECT+Id,Email,IsActive+FROM+User+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
+        "/services/data/v64.0/query?q=SELECT+Id,Name+FROM+Account+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
         "/services/data/v64.0/queryAll?q=SELECT+Id,AccountId,WhoId+FROM+Task+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
         "/services/data/v64.0/queryAll?q=SELECT+Id,AccountId,WhoId+FROM+Event+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
+      ]
+      example_api_requests : [
+        {
+          method       = "POST"
+          path         = "/services/data/v64.0/composite"
+          content_type = "application/json"
+          body = jsonencode({
+            compositeRequest = [
+              {
+                method      = "GET"
+                url         = "/services/data/v64.0/sobjects/Account/${local.salesforce_example_account_id}?fields=Id,Name"
+                referenceId = "account"
+              }
+            ]
+          })
+        }
       ]
       external_token_todo : <<EOT
   Before running the example, you have to populate the following variables in terraform:
   - `salesforce_domain`. This is the [domain](https://help.salesforce.com/s/articleView?id=sf.faq_domain_name_what.htm&type=5) your instance is using.
-  - `salesforce_example_account_id`: An example of any account id; this is only applicable for example calls.
+  - `salesforce_example_account_id`: An Account Id (`{ANY_ACCOUNT_ID}`) used only in example test calls (`GET .../composite/sobjects/Account?ids={ANY_ACCOUNT_ID}`).
 
   1. Create a [Salesforce external application](https://help.salesforce.com/s/articleView?id=xcloud.create_a_local_external_client_app.htm&type=5):
      - Ensure "Enable OAuth" is checked
@@ -816,6 +984,7 @@ EOT
       reserved_concurrent_executions : null
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # `{CHANNEL_ID}`: a Slack channel id from GET /api/admin.analytics.getFile?type=public_channel&metadata_only=true (or any public channel id).
       example_api_calls : [
         "/api/admin.analytics.getFile?type=member&date=${urlencode(formatdate("YYYY-MM-DD", var.example_api_calls_sample_date))}",
         "/api/admin.analytics.getFile?type=public_channel&metadata_only=true",
@@ -851,6 +1020,9 @@ EOT
       reserved_concurrent_executions : null
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # `{WORKSPACE_ID}`: a workspace/team id from GET /api/discovery.enterprise.info (`.enterprise.teams[].id`).
+      # `{CHANNEL_ID}`: a channel id from GET /api/discovery.conversations.list (`.channels[].id`).
+      # `{USER_ID}`: a user id from GET /api/discovery.users.list (`.users[].id`); required by discovery.user.conversations.
       example_api_calls : [
         "/api/discovery.enterprise.info?include_deleted=false&limit=5",
         "/api/discovery.conversations.list?limit=10",
@@ -858,6 +1030,7 @@ EOT
         "/api/discovery.conversations.recent?limit=10",
         "/api/discovery.conversations.history?reactions=1&team={WORKSPACE_ID}&channel={CHANNEL_ID}&limit=10",
         "/api/discovery.users.list?limit=5",
+        "/api/discovery.user.conversations?user={USER_ID}&limit=10",
       ]
       external_token_todo : templatefile("${path.module}/docs/slack/discovery-api/instructions.tftpl", {
         path_to_instance_parameters = "PSOXY_SLACK_DISCOVERY_API_"
@@ -940,6 +1113,9 @@ EOT
       reserved_concurrent_executions : null # 1
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # `{USER_ID}`: a Zoom user id from GET /v2/users (`.users[].id`).
+      # `{MEETING_ID}`: a numeric meeting id from GET /v2/users/{USER_ID}/meetings, or a past-meeting
+      # instance UUID from GET /v2/past_meetings/{MEETING_ID}/instances (required for /meeting_summary).
       example_api_calls : [
         "/v2/users",
         "/v2/users/{USER_ID}/meetings",
@@ -950,7 +1126,6 @@ EOT
         "/v2/past_meetings/{MEETING_ID}/instances",
         "/v2/past_meetings/{MEETING_ID}/participants",
         "/v2/report/users/{USER_ID}/meetings",
-        "/v2/report/meetings/{MEETING_ID}",
         "/v2/report/meetings/{MEETING_ID}/participants"
       ],
       external_token_todo : <<EOT
@@ -1052,11 +1227,44 @@ EOT
       reserved_concurrent_executions : null
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
-      example_api_calls : [
-        "/2/team/members/list_v2",
-        "/2/team/groups/list",
-        "/2/team_log/get_events",
-      ],
+      # Dropbox Business endpoints are POST. `/2/team/groups/list` is NOT allowed; use `/2/team/groups/members/list`.
+      # `{FILE_PATH}`: a file path from POST /2/files/list_folder (`path_display` of an entry with `".tag": "file"`). Required by list_revisions; `/` is a folder and will fail.
+      example_api_requests : [
+        {
+          method       = "POST"
+          path         = "/2/team/members/list_v2"
+          content_type = "application/json"
+          body         = jsonencode({})
+        },
+        {
+          method       = "POST"
+          path         = "/2/team/groups/members/list"
+          content_type = "application/json"
+          body         = jsonencode({})
+        },
+        {
+          method       = "POST"
+          path         = "/2/team_log/get_events"
+          content_type = "application/json"
+          body         = jsonencode({})
+        },
+        {
+          method       = "POST"
+          path         = "/2/files/list_folder"
+          content_type = "application/json"
+          body = jsonencode({
+            path = ""
+          })
+        },
+        {
+          method       = "POST"
+          path         = "/2/files/list_revisions"
+          content_type = "application/json"
+          body = jsonencode({
+            path = "{FILE_PATH}"
+          })
+        },
+      ]
       external_token_todo : <<EOT
 Dropbox connector through Psoxy requires a Dropbox Application created in Dropbox Console. The application
 does not require to be public, and it needs to have the following scopes to support
@@ -1151,6 +1359,11 @@ EOT
       reserved_concurrent_executions : null
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # `{CLOUD_ID}`: Confluence Cloud id from GET /oauth/token/accessible-resources (connector_settings.confluence_example_cloud_id).
+      # `{GROUP_ID}`: a group id from GET .../wiki/rest/api/group (connector_settings.confluence_example_group_id).
+      # `{ATTACHMENT_ID}`: an attachment id (YAML path param is `{pageId}` on the attachments versions route).
+      # `{BLOGPOST_ID}`: a blogpost id. `{PAGE_ID}`: a page id. `{COMMENT_ID}`: a footer- or inline-comment id.
+      # `{CUSTOM_CONTENT_ID}`: a custom-content id.
       example_api_calls : [
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/group",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/group/${local.confluence_example_group_id}/membersByGroupId",
@@ -1159,6 +1372,7 @@ EOT
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/attachments/{ATTACHMENT_ID}/versions",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/blogposts/{BLOGPOST_ID}/versions",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/pages/{PAGE_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/custom-content/{CUSTOM_CONTENT_ID}/versions",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/footer-comments/{COMMENT_ID}/versions",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/inline-comments/{COMMENT_ID}/versions",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/tasks",
@@ -1188,13 +1402,21 @@ EOT
       reserved_concurrent_executions : null
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # `{ISSUE_ID}`: a Jira issue key or id (connector_settings.jira_example_issue_id), e.g. ETV-12.
+      # `{API_VERSION}`: `2` or `latest` (both are allowed).
       example_api_calls : [
         "/rest/api/2/search?maxResults=25",
+        "/rest/api/2/issue/${local.jira_example_issue_id}",
         "/rest/api/2/issue/${local.jira_example_issue_id}/comment?maxResults=25",
         "/rest/api/2/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
+        "/rest/api/2/project?maxResults=25",
+        "/rest/api/2/user/search?username=.&maxResults=25",
         "/rest/api/latest/search?maxResults=25",
+        "/rest/api/latest/issue/${local.jira_example_issue_id}",
         "/rest/api/latest/issue/${local.jira_example_issue_id}/comment?maxResults=25",
         "/rest/api/latest/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
+        "/rest/api/latest/project?maxResults=25",
+        "/rest/api/latest/user/search?username=.&maxResults=25",
       ],
       external_token_todo : templatefile("${path.module}/docs/atlassian/jira-server-instructions.tftpl", {
         path_to_instance_parameters = "PSOXY_JIRA_SERVER"
@@ -1246,10 +1468,16 @@ EOT
       reserved_concurrent_executions : null
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # `{CLOUD_ID}`: Jira Cloud id from GET /oauth/token/accessible-resources (connector_settings.jira_cloud_id).
+      # `{ISSUE_ID}`: a Jira issue key or id (connector_settings.jira_example_issue_id), e.g. ETV-12.
+      # `{GROUP_ID}`: a group id from GET .../group/bulk (query param on /group/member).
       example_api_calls : [
         "/oauth/token/accessible-resources", # obtain Atlassian Cloud ID from here
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/users",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/group/bulk",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/group/member?groupId={GROUP_ID}&maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/search/jql?jql=updated>=-30d&maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/comment?maxResults=25",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
@@ -1282,6 +1510,8 @@ EOT
       reserved_concurrent_executions : null
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # `{ORG_ID}`: Atlassian organization id (connector_settings.atlassian_organization_id).
+      # `{DIRECTORY_ID}`: a directory id, or `-` for all directories (Atlassian wildcard).
       example_api_calls : [
         "/admin/v1/orgs/${local.atlassian_organization_id}/events",
         "/admin/v1/orgs/${local.atlassian_organization_id}/events-stream",
@@ -1314,15 +1544,31 @@ EOT
       enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # `{GROUP_ID}`: a GitLab group id from GET /api/v4/groups (connector_settings.gitlab_example_group_id).
+      # `{PROJECT_ID}`: a GitLab project id from GET /api/v4/projects (connector_settings.gitlab_example_project_id).
+      # `{NAMESPACE_ID}`: same as `{GROUP_ID}` for group namespaces (`GET /api/v4/groups` `.id`, or `GET /api/v4/projects` `.namespace.id`). `/api/v4/namespaces` list is not allow-listed.
+      # `{ISSUE_ID}`: a global issue id from GET /api/v4/projects/{PROJECT_ID}/issues (`.id`, not `.iid`).
+      # `{MERGE_REQUEST_ID}`: a global MR id from GET /api/v4/projects/{PROJECT_ID}/merge_requests (`.id`, not `.iid`).
+      # `{ISSUE_IID}`/`{MERGE_REQUEST_IID}`: project-scoped iids from those same list responses.
+      # `{SHA}`: a commit SHA from GET /api/v4/projects/{PROJECT_ID}/repository/commits.
       example_api_calls : [
         "/api/v4/groups",
-        "/api/v4/namespaces",
         "/api/v4/groups/${local.gitlab_example_group_id}/members/all",
+        "/api/v4/namespaces/${local.gitlab_example_group_id}",
         "/api/v4/projects",
         "/api/v4/projects/${local.gitlab_example_project_id}/repository/branches",
         "/api/v4/projects/${local.gitlab_example_project_id}/repository/commits",
+        "/api/v4/projects/${local.gitlab_example_project_id}/repository/commits/{SHA}",
+        "/api/v4/projects/${local.gitlab_example_project_id}/repository/commits/{SHA}/discussions",
         "/api/v4/projects/${local.gitlab_example_project_id}/issues",
+        "/api/v4/issues/{ISSUE_ID}",
+        "/api/v4/projects/${local.gitlab_example_project_id}/issues/{ISSUE_IID}/notes",
+        "/api/v4/projects/${local.gitlab_example_project_id}/issues/{ISSUE_IID}/resource_state_events",
         "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests",
+        "/api/v4/merge_requests/{MERGE_REQUEST_ID}",
+        "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests/{MERGE_REQUEST_IID}/commits",
+        "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests/{MERGE_REQUEST_IID}/notes",
+        "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests/{MERGE_REQUEST_IID}/resource_state_events",
         "/api/v4/projects/${local.gitlab_example_project_id}/audit_events",
       ],
       external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-cloud-instructions.tftpl", {
@@ -1352,16 +1598,33 @@ EOT
       enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
+      # `{GROUP_ID}`: a GitLab group id from GET /api/v4/groups (connector_settings.gitlab_example_group_id).
+      # `{PROJECT_ID}`: a GitLab project id from GET /api/v4/projects (connector_settings.gitlab_example_project_id).
+      # `{USER_ID}`: a user id from GET /api/v4/users.
+      # `{ISSUE_ID}`: a global issue id from GET /api/v4/projects/{PROJECT_ID}/issues (`.id`, not `.iid`).
+      # `{MERGE_REQUEST_ID}`: a global MR id from GET /api/v4/projects/{PROJECT_ID}/merge_requests (`.id`, not `.iid`).
+      # `{ISSUE_IID}`/`{MERGE_REQUEST_IID}`: project-scoped iids from those same list responses.
+      # `{SHA}`: a commit SHA from GET /api/v4/projects/{PROJECT_ID}/repository/commits.
       example_api_calls : [
         "/api/v4/groups",
         "/api/v4/users",
+        "/api/v4/users/{USER_ID}/emails",
         "/api/v4/version",
         "/api/v4/groups/${local.gitlab_example_group_id}/members/all",
         "/api/v4/projects",
         "/api/v4/projects/${local.gitlab_example_project_id}/repository/branches",
         "/api/v4/projects/${local.gitlab_example_project_id}/repository/commits",
+        "/api/v4/projects/${local.gitlab_example_project_id}/repository/commits/{SHA}",
+        "/api/v4/projects/${local.gitlab_example_project_id}/repository/commits/{SHA}/discussions",
         "/api/v4/projects/${local.gitlab_example_project_id}/issues",
+        "/api/v4/issues/{ISSUE_ID}",
+        "/api/v4/projects/${local.gitlab_example_project_id}/issues/{ISSUE_IID}/notes",
+        "/api/v4/projects/${local.gitlab_example_project_id}/issues/{ISSUE_IID}/resource_state_events",
         "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests",
+        "/api/v4/merge_requests/{MERGE_REQUEST_ID}",
+        "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests/{MERGE_REQUEST_IID}/commits",
+        "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests/{MERGE_REQUEST_IID}/notes",
+        "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests/{MERGE_REQUEST_IID}/resource_state_events",
         "/api/v4/projects/${local.gitlab_example_project_id}/audit_events",
       ],
       external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-managed-instructions.tftpl", {
