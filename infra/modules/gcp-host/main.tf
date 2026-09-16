@@ -24,11 +24,13 @@ locals {
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
-  # GCS object prefixes use '/' hierarchy. Secret IDs use config_parameter_prefix with a trailing
-  # '_' (e.g. psoxy-dev-erik_GCAL_SOURCE); bucket keys are psoxy-dev-erik/GCAL/rules.yaml.
-  shared_resource_path = "${trimsuffix(trimprefix(local.config_parameter_prefix, "/"), "_")}/"
+  # Object-key prefixes are siblings, not nested: shared is `{env}/` and instance is
+  # `{env}-{INSTANCE}/` so IAM `env/*` does not also match instance objects. Secret IDs still use
+  # config_parameter_prefix with a trailing '_' (e.g. psoxy-dev-erik_GCAL_SOURCE).
+  resource_path_root = trimsuffix(trimprefix(local.config_parameter_prefix, "/"), "_")
+  shared_resource_path = "${local.resource_path_root}/"
   connector_instance_resource_path = { for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) :
-    k => "${local.shared_resource_path}${replace(upper(k), "-", "_")}/"
+    k => "${local.resource_path_root}-${replace(upper(k), "-", "_")}/"
   }
   remote_resources_enabled = var.enable_remote_resources && module.psoxy.artifacts_bucket_name != null
 

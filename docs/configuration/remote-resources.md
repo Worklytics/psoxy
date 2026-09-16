@@ -10,14 +10,10 @@ variables or parameter store entries to be managed centrally and loaded at runti
 ## How it Works
 
 When the `REMOTE_RESOURCE_BUCKET` environment variable is set, psoxy will attempt to load resources
-from the specified bucket using the function's execution role / service account. Resources are
-resolved using a path prefix that mirrors the existing `PATH_TO_INSTANCE_CONFIG` hierarchy:
+from the specified bucket using the function's execution role / service account. Instance and shared prefixes are **sibling** object-key prefixes (not nested folders), so an IAM grant of `{SHARED_RESOURCE_PATH}*` does not also cover instance objects:
 
-1. **Instance-specific resources** — loaded from `{INSTANCE_RESOURCE_PATH}/` within the bucket.
-   The instance path defaults to `PATH_TO_INSTANCE_CONFIG`, so resources are co-located with
-   instance configuration by default.
-2. **Shared resources** — loaded from `{SHARED_RESOURCE_PATH}/` within the bucket. This path is
-   for assets shared across all connectors (e.g., NLP models, LLM weights).
+1. **Instance-specific resources** — loaded from `{INSTANCE_RESOURCE_PATH}/` within the bucket (host default `{env}-{INSTANCE}/`, e.g. `psoxy-dev-erik-GCAL/`). If unset, falls back to `PATH_TO_INSTANCE_CONFIG`.
+2. **Shared resources** — loaded from `{SHARED_RESOURCE_PATH}/` within the bucket (host default `{env}/`, e.g. `psoxy-dev-erik/`). This path is for assets shared across all connectors (e.g., NLP models).
 
 The resource service acts as a **failover** after local environment and config service lookups.
 For example, if the `RULES` config property is not found in environment variables or the config/parameter store,
@@ -93,7 +89,7 @@ Least Privilege. Access is limited to the configured resource path prefixes with
 
 No write, delete, or list permissions are granted. When an object is missing or inaccessible, S3 may return 403 (citing `s3:ListBucket`) rather than 404 if the caller lacks bucket list permission; psoxy treats that as unavailable (non-fatal) and continues its resource lookup chain (e.g. falling back to prebuilt rules).
 
-Remote resource paths use `/` as a hierarchy separator within the bucket (e.g. `psoxy-dev-erik/GCAL/rules.yaml` for shared prefix `psoxy-dev-erik/` and connector `gcal`). They are distinct from secret / parameter prefixes, which use a trailing `_` to separate names (e.g. `psoxy-dev-erik_GCAL_SOURCE`). When `INSTANCE_RESOURCE_PATH` / `SHARED_RESOURCE_PATH` are not set, psoxy falls back to the config paths and normalizes trailing `_` to `/` and strips any leading `/`.
+Host modules join the environment id and connector id with `-`, not `/`, so the prefixes do not nest: shared objects are `{env}/*` (e.g. `psoxy-dev-erik/opennlp/en-sent.bin`) and instance objects are `{env}-{INSTANCE}/*` (e.g. `psoxy-dev-erik-GCAL/rules.yaml`). Secret / parameter names still use a trailing `_` (e.g. `psoxy-dev-erik_GCAL_SOURCE`). When `INSTANCE_RESOURCE_PATH` / `SHARED_RESOURCE_PATH` are not set, psoxy falls back to the config paths and normalizes trailing `_` to `/` and strips any leading `/`.
 
 ## Use Cases
 
