@@ -7,6 +7,7 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Unreleased
 - `salesforce`: forward `Sforce-Limit-Info` and `Sforce-Query-Options` request headers to Salesforce on Task/Event/composite/query endpoints. Lets connections set a smaller `batchSize` via `Sforce-Query-Options` to mitigate `SocketTimeoutException`s on large query responses; previously these headers were silently dropped.
+- `claude-enterprise-analytics`: `/user_usage_report` and `/user_cost_report` now allow-list `bucket_width` (so a single request can return one row per day, via `bucket_width=1d`, instead of one row aggregating the whole requested range) plus the Claude Tag / RBAC-group / Slack-channel query params (`claude_tag_categories[]`, `claude_tag_user_ids[]`, `rbac_group_ids[]`, `slack_channel_ids[]`, `exclude_deleted_users`) and response fields (`claude_tag_category`, `claude_tag_user_id`, `rbac_group_id`, `slack_channel_id`, `starting_at`, `ending_at`) that were already present in Anthropic's API but not yet allow-listed. `claude_tag_user_id` is pseudonymized like other user identifiers on this connector.
 
 ## [0.7.0](https://github.com/Worklytics/psoxy/releases/tag/v0.7.0)
 - Release cut/QA/publish orchestration (`prep.sh`, `rc-to-main.sh`, local `publish.sh`, example-repo PR helpers) moved to the internal `Worklytics/proxy-dev` repo. GitHub Actions in this repo still publish Maven packages and deployment bundles.
