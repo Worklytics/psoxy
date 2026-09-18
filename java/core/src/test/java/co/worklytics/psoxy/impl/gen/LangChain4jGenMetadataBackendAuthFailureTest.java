@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.impl.gen;
 
-import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -23,14 +23,14 @@ class LangChain4jGenMetadataBackendAuthFailureTest {
     }
 
     @Test
-    void isAuthOrQuotaFailure_detectsAccessDeniedByClassName() {
-        assertTrue(LangChain4jGenMetadataBackend.isAuthOrQuotaFailure(
+    void isAuthFailure_detectsAccessDeniedByClassName() {
+        assertTrue(LangChain4jGenMetadataBackend.isAuthFailure(
             new AccessDeniedException("User is not authorized to perform bedrock:InvokeModel")));
-        assertTrue(LangChain4jGenMetadataBackend.isAuthOrQuotaFailure(
+        assertTrue(LangChain4jGenMetadataBackend.isAuthFailure(
             new RuntimeException(new AccessDeniedException("nested"))));
-        assertTrue(LangChain4jGenMetadataBackend.isAuthOrQuotaFailure(
+        assertTrue(LangChain4jGenMetadataBackend.isAuthFailure(
             new RuntimeException("HTTP 403 Forbidden")));
-        assertFalse(LangChain4jGenMetadataBackend.isAuthOrQuotaFailure(
+        assertFalse(LangChain4jGenMetadataBackend.isAuthFailure(
             new RuntimeException("model overloaded somehow else")));
     }
 
@@ -57,16 +57,17 @@ class LangChain4jGenMetadataBackendAuthFailureTest {
         };
         GenMetadataChatModelFactory factory = new GenMetadataChatModelFactory(Set.of(bedrock));
 
+        ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config,
-            new ObjectMapper(),
-            new GenMetadataPromptBudget(),
-            factory);
+            config, om, new GenMetadataPromptBudget(), factory,
+            new GenMetadataTokenUsageAccumulator(),
+            new GenMetadataPromptBuilder(om),
+            new GenMetadataResponseFormats());
 
-        JsonSchemaFilter outputSchema = JsonSchemaFilter.builder()
+        JsonSchema outputSchema = JsonSchema.builder()
             .type("object")
             .required(List.of("category"))
-            .properties(Map.of("category", JsonSchemaFilter.builder()
+            .properties(Map.of("category", JsonSchema.builder()
                 .type("string")
                 .enumValues(List.of("Excluded", "Uncategorized"))
                 .build()))

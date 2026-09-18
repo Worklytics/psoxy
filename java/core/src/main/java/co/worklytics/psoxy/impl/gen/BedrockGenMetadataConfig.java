@@ -12,6 +12,9 @@ public final class BedrockGenMetadataConfig extends GenMetadataConfig {
     /** Default when {@link ConfigProperty#GEN_METADATA_MODEL} is unset (US cross-region inference profile). */
     public static final String DEFAULT_MODEL = "us.amazon.nova-2-lite-v1:0";
 
+    static final String NOVA_FOUNDATION_MODEL_PREFIX = "amazon.nova";
+    static final String NOVA_US_INFERENCE_PROFILE_PREFIX = "us.";
+
     BedrockGenMetadataConfig(String modelId, int timeoutSeconds, int maxAttempts) {
         super(Backend.BEDROCK, modelId, timeoutSeconds, maxAttempts);
     }
@@ -43,8 +46,8 @@ public final class BedrockGenMetadataConfig extends GenMetadataConfig {
             return modelId;
         }
         String id = modelId.trim();
-        if (id.startsWith("amazon.nova")) {
-            return "us." + id;
+        if (id.startsWith(NOVA_FOUNDATION_MODEL_PREFIX)) {
+            return NOVA_US_INFERENCE_PROFILE_PREFIX + id;
         }
         return id;
     }

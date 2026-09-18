@@ -1,14 +1,12 @@
 package com.avaulta.gateway.rules.augments;
 
-import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -33,16 +31,10 @@ public class GenMetadataProcessor {
 
     public GenMetadataProcessor(GenMetadataBackend backend, ObjectMapper objectMapper,
                                 int maxAttempts, JsonSchemaValidationUtils jsonSchemaValidationUtils) {
-        this.backend = backend != null ? backend : new UnavailableGenMetadataBackend();
-        this.objectMapper = objectMapper != null ? objectMapper : new ObjectMapper();
-        this.jsonSchemaValidationUtils = jsonSchemaValidationUtils != null
-            ? jsonSchemaValidationUtils
-            : new JsonSchemaValidationUtils();
+        this.backend = backend;
+        this.objectMapper = objectMapper;
+        this.jsonSchemaValidationUtils = jsonSchemaValidationUtils;
         this.maxAttempts = maxAttempts > 0 ? maxAttempts : DEFAULT_MAX_ATTEMPTS;
-    }
-
-    public GenMetadataProcessor(GenMetadataBackend backend, ObjectMapper objectMapper) {
-        this(backend, objectMapper, DEFAULT_MAX_ATTEMPTS, null);
     }
 
     /**
@@ -50,14 +42,14 @@ public class GenMetadataProcessor {
      */
     public Object compute(Augment.GenMetadata augment, Object input) {
         return process(augment.getPrompt(), augment.getOutputSchema(), input,
-            augment.effectiveMaxTokens(), augment.effectiveMaxInputTokens());
+            augment.getMaxOutputTokens(), augment.getMaxInputTokens());
     }
 
-    public Object process(String taskPrompt, JsonSchemaFilter outputSchema, Object input) {
+    public Object process(String taskPrompt, JsonSchema outputSchema, Object input) {
         return process(taskPrompt, outputSchema, input, null, null);
     }
 
-    public Object process(String taskPrompt, JsonSchemaFilter outputSchema, Object input,
+    public Object process(String taskPrompt, JsonSchema outputSchema, Object input,
                           Integer maxOutputTokens, Integer maxInputTokens) {
         if (StringUtils.isBlank(taskPrompt) || outputSchema == null) {
             throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
@@ -68,31 +60,22 @@ public class GenMetadataProcessor {
             throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
                 "genMetadata input empty or not serializable");
         }
-        try {
-            for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-                if (attempt > 1) {
-                    log.info("genMetadata inference retry attempt " + attempt + " of " + maxAttempts);
-                }
-                Object parsed = inferOnce(taskPrompt, outputSchema, inputJson,
-                    maxOutputTokens, maxInputTokens);
-                if (parsed != null && validatesOutputSchema(parsed, outputSchema)) {
-                    return parsed;
-                }
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            if (attempt > 1) {
+                log.info("genMetadata inference retry attempt " + attempt + " of " + maxAttempts);
             }
-            throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.INFERENCE_FAILED,
-                "genMetadata output failed schema validation after " + maxAttempts + " attempt(s)");
-        } catch (GenMetadataAugmentException e) {
-            throw e;
-        } catch (Exception e) {
-            log.log(Level.WARNING, "genMetadata inference failed", e);
-            throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.INFERENCE_FAILED,
-                "genMetadata inference failed", e);
+            Object parsed = inferOnce(taskPrompt, outputSchema, inputJson,
+                maxOutputTokens, maxInputTokens);
+            if (parsed != null && validatesOutputSchema(parsed, outputSchema)) {
+                return parsed;
+            }
         }
+        throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.INFERENCE_FAILED,
+            "genMetadata output failed schema validation after " + maxAttempts + " attempt(s)");
     }
 
-    private Object inferOnce(String taskPrompt, JsonSchemaFilter outputSchema, String inputJson,
-                             Integer maxOutputTokens, Integer maxInputTokens)
-            throws Exception {
+    private Object inferOnce(String taskPrompt, JsonSchema outputSchema, String inputJson,
+                             Integer maxOutputTokens, Integer maxInputTokens) {
         Instant startedAt = Instant.now();
         long startedNanos = System.nanoTime();
         log.info("genMetadata augment inference call started at " + startedAt);
@@ -124,14 +107,15 @@ public class GenMetadataProcessor {
         return parsed;
     }
 
-    private boolean validatesOutputSchema(Object parsed, JsonSchemaFilter outputSchema) {
+    private boolean validatesOutputSchema(Object parsed, JsonSchema outputSchema) {
+        String json;
         try {
-            String json = objectMapper.writeValueAsString(parsed);
-            return jsonSchemaValidationUtils.validateJsonBySchema(json, outputSchema);
-        } catch (Exception e) {
-            log.log(Level.WARNING, "Failed to validate genMetadata output schema", e);
-            return false;
+            json = objectMapper.writeValueAsString(parsed);
+        } catch (JsonProcessingException e) {
+            throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.INFERENCE_FAILED,
+                "Failed to serialize genMetadata output for validation", e);
         }
+        return jsonSchemaValidationUtils.validateJsonBySchema(json, outputSchema);
     }
 
     String serializeInput(Object input) {
@@ -140,79 +124,16 @@ public class GenMetadataProcessor {
         }
         try {
             if (input instanceof String text) {
-                if (text.isEmpty()) {
-                    return null;
-                }
-                return objectMapper.writeValueAsString(text);
+                return text.isEmpty() ? null : text;
             }
-            Object prepared = input instanceof Map<?, ?> map
-                ? prepareMapForLlm(map)
-                : stripAugmentKeysDeep(input);
-            return objectMapper.writeValueAsString(prepared);
-        } catch (Exception e) {
+            return objectMapper.writeValueAsString(input);
+        } catch (JsonProcessingException e) {
             log.log(Level.WARNING, "Failed to serialize genMetadata input", e);
             return null;
         }
     }
 
-    /**
-     * Build LLM corpus from a matched JSON object: strip {@code +}-prefixed augment keys and put
-     * {@code title}/{@code body} first so {@code maxInputTokens} truncation of the dynamic corpus
-     * still sees the classification text when large fields (e.g. GitHub {@code user}) sit between
-     * them in Jackson field order.
-     */
-    private LinkedHashMap<String, Object> prepareMapForLlm(Map<?, ?> map) {
-        LinkedHashMap<String, Object> ordered = new LinkedHashMap<>();
-        putPreferredTextField(ordered, map, "title");
-        putPreferredTextField(ordered, map, "body");
-        for (Map.Entry<?, ?> entry : map.entrySet()) {
-            if (!(entry.getKey() instanceof String key)) {
-                continue;
-            }
-            if (key.startsWith("+") || "title".equals(key) || "body".equals(key)) {
-                continue;
-            }
-            ordered.put(key, stripAugmentKeysDeep(entry.getValue()));
-        }
-        return ordered;
-    }
-
-    private void putPreferredTextField(LinkedHashMap<String, Object> ordered, Map<?, ?> map,
-                                       String key) {
-        if (!map.containsKey(key)) {
-            return;
-        }
-        ordered.put(key, stripAugmentKeysDeep(map.get(key)));
-    }
-
-    /**
-     * Recursively drop {@code +}-prefixed keys so prior augment output is not sent to the model.
-     */
-    private Object stripAugmentKeysDeep(Object value) {
-        if (value instanceof Map<?, ?> map) {
-            LinkedHashMap<String, Object> cleaned = new LinkedHashMap<>();
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
-                if (!(entry.getKey() instanceof String key) || key.startsWith("+")) {
-                    continue;
-                }
-                cleaned.put(key, stripAugmentKeysDeep(entry.getValue()));
-            }
-            return cleaned;
-        }
-        if (value instanceof List<?> list) {
-            List<Object> cleaned = new ArrayList<>(list.size());
-            for (Object item : list) {
-                cleaned.add(stripAugmentKeysDeep(item));
-            }
-            return cleaned;
-        }
-        return value;
-    }
-    Object parseModelJson(Object raw) {
-        return parseModelJson(raw, null);
-    }
-
-    Object parseModelJson(Object raw, JsonSchemaFilter outputSchema) {
+    Object parseModelJson(Object raw, JsonSchema outputSchema) {
         if (raw == null) {
             return null;
         }
@@ -236,7 +157,7 @@ public class GenMetadataProcessor {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> map = objectMapper.readValue(json, Map.class);
                     return new TreeMap<>(map);
-                } catch (Exception e) {
+                } catch (JsonProcessingException e) {
                     log.log(Level.WARNING, "Failed to parse genMetadata JSON response: " + json, e);
                     // Fall through: incomplete JSON may still contain a usable classify label.
                 }
@@ -271,7 +192,7 @@ public class GenMetadataProcessor {
                 if (label.isPresent()) {
                     return label.get();
                 }
-            } catch (Exception e) {
+            } catch (JsonProcessingException e) {
                 log.log(Level.FINE, "genMetadata string-enum JSON string parse failed", e);
             }
         }
@@ -285,7 +206,7 @@ public class GenMetadataProcessor {
                 if (fromMap.isPresent()) {
                     return fromMap.get();
                 }
-            } catch (Exception e) {
+            } catch (JsonProcessingException e) {
                 log.log(Level.FINE, "genMetadata string-enum object fallback parse failed", e);
             }
         }
@@ -296,7 +217,7 @@ public class GenMetadataProcessor {
     private String serializeForLog(Object parsed) {
         try {
             return objectMapper.writeValueAsString(parsed);
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             return String.valueOf(parsed);
         }
     }

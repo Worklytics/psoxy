@@ -2,7 +2,7 @@ package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.Warning;
 import com.avaulta.gateway.resources.ResourceService;
-import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
@@ -43,7 +43,7 @@ class AugmentProcessorTest {
 
         ResourceService noModels = path -> Optional.empty();
         GenMetadataProcessor genMetadataProcessor =
-            new GenMetadataProcessor(new UnavailableGenMetadataBackend(), objectMapper);
+            new GenMetadataProcessor(new UnavailableGenMetadataBackend(), objectMapper, 2, new JsonSchemaValidationUtils());
         augmentProcessor = new AugmentProcessor(jsonConfiguration,
             new JsonSchemaValidationUtils(),
             objectMapper,
@@ -369,11 +369,11 @@ class AugmentProcessorTest {
     void applyAugments_outputSchemaMismatch_omitsPropertyAndWarns() {
         Augment.TextDigest augment = Augment.TextDigest.builder()
             .jsonPath("$.body.content")
-            .outputSchema(JsonSchemaFilter.builder()
+            .outputSchema(JsonSchema.builder()
                 .type("object")
                 .required(List.of("category"))
                 .properties(Map.of(
-                    "category", JsonSchemaFilter.builder().type("string").build()))
+                    "category", JsonSchema.builder().type("string").build()))
                 .build())
             .build();
 
@@ -407,8 +407,8 @@ class AugmentProcessorTest {
         assertTrue(warnings.contains(Warning.AUGMENT_CONFLICT_SKIPPED.asHttpHeaderCode()));
     }
 
-    private static JsonSchemaFilter stringEnumSchema(String... labels) {
-        return JsonSchemaFilter.builder()
+    private static JsonSchema stringEnumSchema(String... labels) {
+        return JsonSchema.builder()
             .type("string")
             .enumValues(Arrays.asList(labels))
             .build();

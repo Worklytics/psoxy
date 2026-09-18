@@ -621,11 +621,20 @@ public class ApiDataRequestHandler {
                     } else {
                         proxyResponseContent = sanitizationResult.getContentAsString();
                         sanitizedApiResponseMetadata(sanitizationResult.getMetadata())
-                                .forEach((header, value) -> builder.header(header, value));
-                        sanitizationResult.getSanitizationWarnings().forEach(warningCode ->
-                            builder.multivaluedHeader(
-                                Pair.of(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
-                                    warningCode)));
+                                .forEach((header, value) -> {
+                                    if (ProcessedDataMetadataFields.WARNING.getHttpHeader().equals(header)) {
+                                        return;
+                                    }
+                                    builder.header(header, value);
+                                });
+                        String warningCodes = sanitizationResult.getMetadata()
+                            .get(ProcessedDataMetadataFields.WARNING.getMetadataKey());
+                        if (warningCodes != null && !warningCodes.isEmpty()) {
+                            for (String code : warningCodes.split(",")) {
+                                builder.multivaluedHeader(
+                                    Pair.of(ProcessedDataMetadataFields.WARNING.getHttpHeader(), code));
+                            }
+                        }
                     }
 
 
@@ -691,11 +700,15 @@ public class ApiDataRequestHandler {
         metadata.put(ProcessedDataMetadataFields.PII_SALT_SHA256.getMetadataKey(),
                 healthCheckRequestHandler.piiSaltHash());
 
+        List<String> warnings = sanitizerForRequest.getLastSanitizationWarnings();
+        if (!warnings.isEmpty()) {
+            metadata.put(ProcessedDataMetadataFields.WARNING.getMetadataKey(), String.join(",", warnings));
+        }
+
         return ProcessedContent.builder()
                 .contentType(originalContent.getContentType())
                 .contentCharset(originalContent.getContentCharset())
                 .metadata(metadata)
-                .sanitizationWarnings(sanitizerForRequest.getLastSanitizationWarnings())
                 .content(sanitized.getBytes(originalContent.getContentCharset()))
                 .build();
     }

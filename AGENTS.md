@@ -62,17 +62,40 @@ When testing Java code locally:
    mvn clean test
    ```
 
+## Scope and consistency
+
+Stay consistent with existing architecture, naming, and style unless you are explicitly instructed to deviate or the task itself is to improve that pattern. Implementing a feature is not a license to overhaul style, architecture, or tooling.
+
+Pull requests should accomplish **one** big-picture thing, plus only ancillary work that is directly required for that thing. Do not bundle drive-by refactors, speculative extensibility (YAGNI), or unrelated cleanup. Do not change existing types to serve a new use case when a dedicated type already exists (e.g. keep `JsonSchemaFilter` for filtering; use `JsonSchema` / a 3rd-party schema for validation).
+
 ## Java Coding Conventions
 
 When modifying Java files, follow these guidelines:
 
 1. **Avoid Fully Qualified Names (FQNs)**: Prefer explicitly importing classes and using their simple names instead of using fully qualified names in the code, except where there are intractable naming collisions.
 2. **Prefer Fluid Builders**: We generally prefer using fluid-builder patterns, leveraging Lombok's `@Builder` annotation for object construction instead of constructors with many parameters.
-3. **Stylistic Changes**: Agents should avoid making stylistic changes (e.g., reformatting code, optimizing all imports, or resolving linting issues irrelevant to the functional change) to the repository unless explicitly directed by the user. 
-4. **Separate Commits**: When explicitly directed to make stylistic changes or broad refactoring, these should be separated into distinct commits from functional changes to simplify review.
-5. **Concurrency**: The proxy may handle concurrent requests. Any new code introducing shared mutable state, lazy initialization, or caches must be thread-safe. Use `volatile`, `synchronized`, `ConcurrentHashMap`, or immutable snapshots (`Set.copyOf`, `List.copyOf`) as appropriate. Document thread-safety assumptions in javadoc.
-6. **Prefer dependency injection over static helpers**: Inject behavior via Dagger-constructed services (`@NoArgsConstructor(onConstructor_ = @Inject)`), not static utility classes. Platform adapters should expose raw request data; cross-cutting normalization belongs in shared handlers/services (e.g. `ApiDataRequestHandler`).
-7. **Config property placement**: API connector settings belong on `ApiModeConfig.ApiModeConfigProperty` (or platform-specific API-mode config types). Use `ProxyConfigProperty` for proxy-wide settings; `BulkModeConfigProperty` for bulk connectors; webhook settings on webhook config types.
+3. **Lombok + Dagger are the standard**: Use Lombok (`@NoArgsConstructor(onConstructor_ = @Inject)`, `@AllArgsConstructor(onConstructor_ = @Inject)`, `@Getter`, `@Value`, `@Builder`) rather than hand-written constructors, getters, or empty private constructors. Do **not** use Lombok `@UtilityClass` (experimental) and do not introduce Dagger `UtilityClass`. Follow existing Dagger modules: `@Provides` / `@Binds` in `PsoxyModule`, `AwsModule`, `GcpModule` — platform modules provide platform types. `new` belongs in `@Provides` methods, not in injectable service constructors.
+4. **Avoid static helpers**: Inject behavior via Dagger-constructed services. Do not wrap a library method in a private helper that adds nothing (`StringUtils.containsIgnoreCase` — call it directly). Named constants instead of repeated magic strings.
+5. **No generic `catch (Exception)`**: Catch the specific failure you expect. Unexpected errors should propagate. Do not swallow errors as `false` / warnings unless that is an explicit, documented contract.
+6. **Readable control flow**: Do not nest or chain ternaries. Prefer `if` / `else` or `Optional`. Invert conditions when that removes a nested ternary.
+7. **Stylistic Changes**: Agents should avoid making stylistic changes (e.g., reformatting code, optimizing all imports, or resolving linting issues irrelevant to the functional change) to the repository unless explicitly directed by the user.
+8. **Separate Commits**: When explicitly directed to make stylistic changes or broad refactoring, these should be separated into distinct commits from functional changes to simplify review.
+9. **Concurrency**: The proxy may handle concurrent requests. Any new code introducing shared mutable state, lazy initialization, or caches must be thread-safe. Use `volatile`, `synchronized`, `ConcurrentHashMap`, or immutable snapshots (`Set.copyOf`, `List.copyOf`) as appropriate. Document thread-safety assumptions in javadoc.
+10. **Prefer dependency injection over static helpers**: Platform adapters should expose raw request data; cross-cutting normalization belongs in shared handlers/services (e.g. `ApiDataRequestHandler`).
+11. **Config property placement**: API connector settings belong on `ApiModeConfig.ApiModeConfigProperty` (or platform-specific API-mode config types). Use `ProxyConfigProperty` for proxy-wide settings; `BulkModeConfigProperty` for bulk connectors; webhook settings on webhook config types. Do not hardcode example payloads, field names from a specific source, or demo-only constants in production code.
+12. **Keep platform code in platform modules**: AWS-only types live in `impl.aws`; GCP-only types live in `impl.gcp`. Core stays cloud-agnostic so deployment JARs stay small. Cmd-line may throw `UnsupportedOperationException` for cloud-only features.
+
+## Terraform Conventions
+
+1. **Do not add `validation` blocks in modules** unless asked. They make modules brittle; coverage belongs in CI tests (`*.tftest.hcl`) if needed.
+2. **Keep `.tf` files canonical**. Splitting by feature is OK only when the file can stand alone. Locals used by a split file should live with it, or the resources should stay in `main.tf`. Hyphenated names (`gen-metadata.tf`) if you do split.
+3. **Customer TODOs are step-by-step actions** the customer still must take. Do not explain what Terraform already did, why, or mix troubleshooting into the steps. Extra notes (SCPs, edge cases) go after the steps. Link docs at `https://docs.worklytics.co/psoxy/...`, not GitHub blob URLs.
+4. **Enable optional GCP APIs from a list** (`for_each = toset(local.services)`), not a separate `count` resource per service.
+5. **IAM extras**: `concat()` lists of statements (empty list when the feature is off), rather than a one-off ternary per feature.
+
+## Documentation Conventions
+
+Customer-facing docs (`docs/configuration/`, Terraform TODOs) describe what the customer configures and does. Implementation internals belong in `docs/development/` (and platform-specific AWS/GCP pages when the behavior is cloud-only). Alphabetize GitBook `SUMMARY.md` menu entries. Do not hard-wrap markdown prose.
 
 ## Markdown Conventions
 

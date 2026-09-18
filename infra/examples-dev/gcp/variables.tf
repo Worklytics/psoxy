@@ -255,7 +255,6 @@ variable "custom_api_connectors" {
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
     enable_gen_metadata     = optional(bool, false)
-    gen_metadata_backend    = optional(string)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -348,7 +347,6 @@ variable "custom_bulk_connectors" {
     available_memory_mb  = optional(number)
     timeout_seconds      = optional(number)
     enable_gen_metadata  = optional(bool, false)
-    gen_metadata_backend = optional(string)
     rules_file           = optional(string)
     settings_to_provide  = optional(map(string), {})
     example_file         = optional(string)
@@ -541,10 +539,4 @@ variable "enable_remote_resources" {
   type        = bool
   description = "**beta** Load rules / OpenNLP models from the artifacts GCS bucket at runtime. Default false; not required for genMetadata (Vertex). Set true only if rules are too large for Secret Manager / env, or you use sentenceMetadata."
   default     = false
-}
-
-variable "gen_metadata_backend" {
-  type        = string
-  description = "Default genMetadata backend for enable_gen_metadata connectors: \"vertex\" only."
-  default     = "vertex"
 }

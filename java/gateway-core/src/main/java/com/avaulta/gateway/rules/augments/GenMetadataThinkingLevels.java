@@ -6,12 +6,16 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * Gemini thinking-level values for {@code GEN_METADATA_THINKING_LEVEL} (Vertex only).
  *
  * <p>Env/config may use lowercase ({@code minimal}); Vertex expects uppercase ({@code MINIMAL}).
  * Bedrock ignores this setting (Claude uses a different extended-thinking API).
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GenMetadataThinkingLevels {
 
     private static final Logger log = Logger.getLogger(GenMetadataThinkingLevels.class.getName());
@@ -24,10 +28,7 @@ public final class GenMetadataThinkingLevels {
     /** Default when omitted from rules / null / blank. */
     public static final String DEFAULT = MINIMAL;
 
-    private static final Set<String> ALLOWED = Set.of(MINIMAL, LOW, MEDIUM, HIGH);
-
-    private GenMetadataThinkingLevels() {
-    }
+    public static final Set<String> ALLOWED = Set.of(MINIMAL, LOW, MEDIUM, HIGH);
 
     /**
      * Normalize a rule or config value to a Vertex API thinking level.

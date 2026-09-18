@@ -3,6 +3,7 @@ package co.worklytics.psoxy.impl.gen;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 
 /**
@@ -10,22 +11,23 @@ import lombok.Value;
  * Bulk processing resets per file; {@link #snapshot()} feeds sanitized-object metadata.
  */
 @Singleton
+@NoArgsConstructor(onConstructor_ = @Inject)
 public class GenMetadataTokenUsageAccumulator {
 
     private final AtomicLong inputTokens = new AtomicLong();
     private final AtomicLong outputTokens = new AtomicLong();
     private final AtomicLong calls = new AtomicLong();
 
-    @Inject
-    public GenMetadataTokenUsageAccumulator() {
-    }
-
     /**
      * Record one completed LLM call. Null counts are treated as zero (provider omitted usage).
      */
     public void record(Integer inputTokenCount, Integer outputTokenCount) {
-        inputTokens.addAndGet(inputTokenCount != null ? inputTokenCount : 0);
-        outputTokens.addAndGet(outputTokenCount != null ? outputTokenCount : 0);
+        if (inputTokenCount != null) {
+            inputTokens.addAndGet(inputTokenCount);
+        }
+        if (outputTokenCount != null) {
+            outputTokens.addAndGet(outputTokenCount);
+        }
         calls.incrementAndGet();
     }
 

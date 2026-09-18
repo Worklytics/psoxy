@@ -147,8 +147,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @Override
     public List<String> getLastSanitizationWarnings() {
-        List<String> warnings = lastAugmentWarnings.get();
-        return warnings == null ? List.of() : warnings;
+        return Optional.ofNullable(lastAugmentWarnings.get()).orElse(List.of());
     }
 
 

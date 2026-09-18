@@ -1,7 +1,7 @@
 package com.avaulta.gateway.rules.augments;
 
 import com.avaulta.gateway.rules.Endpoint;
-import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.RecordRules;
 import org.junit.jupiter.api.Test;
 
@@ -28,10 +28,10 @@ class AugmentValidationTest {
         Augment.GenMetadata valid = Augment.GenMetadata.builder()
             .jsonPath("$.body.content")
             .prompt("Classify the prompt")
-            .outputSchema(JsonSchemaFilter.builder()
+            .outputSchema(JsonSchema.builder()
                 .type("object")
                 .properties(java.util.Map.of(
-                    "category", JsonSchemaFilter.builder().type("string").build()))
+                    "category", JsonSchema.builder().type("string").build()))
                 .build())
             .build();
 
@@ -44,8 +44,8 @@ class AugmentValidationTest {
         Augment.GenMetadata invalid = Augment.GenMetadata.builder()
             .jsonPath("$.body.content")
             .prompt("Classify the prompt")
-            .maxTokens(0)
-            .outputSchema(JsonSchemaFilter.builder()
+            .maxOutputTokens(0)
+            .outputSchema(JsonSchema.builder()
                 .type("string")
                 .enumValues(List.of("Feature"))
                 .build())
@@ -62,7 +62,7 @@ class AugmentValidationTest {
             .jsonPath("$.body.content")
             .prompt("Classify the prompt")
             .maxInputTokens(0)
-            .outputSchema(JsonSchemaFilter.builder()
+            .outputSchema(JsonSchema.builder()
                 .type("string")
                 .enumValues(List.of("Feature"))
                 .build())

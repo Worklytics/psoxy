@@ -1,6 +1,7 @@
 package com.avaulta.gateway.rules.augments;
 
-import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchema;
+import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,7 @@ class GenMetadataSchemaSupportTest {
 
     @Test
     void classifyShape_detectsSingleEnumProperty() {
-        JsonSchemaFilter schema = categorySchema();
+        JsonSchema schema = categorySchema();
         Optional<GenMetadataSchemaSupport.ClassifyShape> shape =
             GenMetadataSchemaSupport.classifyShape(schema);
         assertTrue(shape.isPresent());
@@ -24,7 +25,7 @@ class GenMetadataSchemaSupportTest {
 
     @Test
     void classifyShape_detectsRootStringEnum() {
-        JsonSchemaFilter schema = stringEnumSchema();
+        JsonSchema schema = stringEnumSchema();
         Optional<GenMetadataSchemaSupport.ClassifyShape> shape =
             GenMetadataSchemaSupport.classifyShape(schema);
         assertTrue(shape.isPresent());
@@ -34,17 +35,17 @@ class GenMetadataSchemaSupportTest {
 
     @Test
     void classifyShape_rejectsMultiPropertySchemas() {
-        JsonSchemaFilter schema = JsonSchemaFilter.builder()
+        JsonSchema schema = JsonSchema.builder()
             .type("object")
             .required(List.of("speakers"))
             .properties(Map.of(
-                "speakers", JsonSchemaFilter.builder()
+                "speakers", JsonSchema.builder()
                     .type("array")
-                    .items(JsonSchemaFilter.builder().type("object").build())
+                    .items(JsonSchema.builder().type("object").build())
                     .build()))
             .build();
         assertTrue(GenMetadataSchemaSupport.classifyShape(schema).isEmpty());
-        assertEquals(GenMetadataSchemaSupport.Mode.EXTRACT, GenMetadataSchemaSupport.mode(schema));
+        assertEquals(GenMetadataSchemaSupport.Mode.COMPUTE, GenMetadataSchemaSupport.mode(schema));
     }
 
     @Test
@@ -74,7 +75,7 @@ class GenMetadataSchemaSupportTest {
     void processor_parsesBareClassifyLabel() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
             (prompt, schema, input) -> "Research and Ideation",
-            new ObjectMapper());
+            new ObjectMapper(), 2, new JsonSchemaValidationUtils());
         Object out = processor.compute(
             Augment.GenMetadata.builder()
                 .jsonPath("$..content")
@@ -89,7 +90,7 @@ class GenMetadataSchemaSupportTest {
     void processor_parsesJsonStringForRootStringEnum() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
             (prompt, schema, input) -> "\"Research and Ideation\"",
-            new ObjectMapper());
+            new ObjectMapper(), 2, new JsonSchemaValidationUtils());
         Object out = processor.compute(
             Augment.GenMetadata.builder()
                 .jsonPath("$..content")
@@ -104,7 +105,7 @@ class GenMetadataSchemaSupportTest {
     void processor_parsesBareLabelForRootStringEnum() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
             (prompt, schema, input) -> "Excluded",
-            new ObjectMapper());
+            new ObjectMapper(), 2, new JsonSchemaValidationUtils());
         Object out = processor.compute(
             Augment.GenMetadata.builder()
                 .jsonPath("$..content")
@@ -115,8 +116,8 @@ class GenMetadataSchemaSupportTest {
         assertEquals("Excluded", out);
     }
 
-    private static JsonSchemaFilter stringEnumSchema() {
-        return JsonSchemaFilter.builder()
+    private static JsonSchema stringEnumSchema() {
+        return JsonSchema.builder()
             .type("string")
             .enumValues(List.of(
                 "Email Drafting",
@@ -126,12 +127,12 @@ class GenMetadataSchemaSupportTest {
             .build();
     }
 
-    private static JsonSchemaFilter categorySchema() {
-        return JsonSchemaFilter.builder()
+    private static JsonSchema categorySchema() {
+        return JsonSchema.builder()
             .type("object")
             .required(List.of("category"))
             .properties(Map.of(
-                "category", JsonSchemaFilter.builder()
+                "category", JsonSchema.builder()
                     .type("string")
                     .enumValues(List.of(
                         "Email Drafting",

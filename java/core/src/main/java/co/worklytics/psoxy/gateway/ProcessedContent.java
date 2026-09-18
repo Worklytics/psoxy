@@ -6,9 +6,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -50,12 +48,6 @@ public class ProcessedContent implements Serializable {
      */
     @Builder.Default
     Map<String, String> metadata = new HashMap<>();
-
-    /**
-     * Non-fatal warning codes from sanitization (e.g. augment failures), for {@code X-Psoxy-Warning} headers.
-     */
-    @Builder.Default
-    List<String> sanitizationWarnings = Collections.emptyList();
 
     /**
      * the actual content; may be null when the upstream response has no body (e.g. 204, HEAD)

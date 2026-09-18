@@ -1,11 +1,12 @@
 package co.worklytics.psoxy.impl;
 
-import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.augments.GenMetadataAugmentException;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
@@ -271,24 +272,13 @@ public class AugmentProcessor {
             }
             return augment.compute(input);
         } catch (GenMetadataAugmentException e) {
-            throw toAugmentProcessingException(e);
+            throw AugmentProcessingException.from(e);
         }
-    }
-
-    private static AugmentProcessingException toAugmentProcessingException(
-            GenMetadataAugmentException e) {
-        Warning warning = switch (e.getCode()) {
-            case UNAVAILABLE -> Warning.AUGMENT_GEN_UNAVAILABLE;
-            case INFERENCE_FAILED -> Warning.AUGMENT_GEN_INFERENCE_FAILED;
-        };
-        return e.getCause() != null
-            ? new AugmentProcessingException(warning, e.getMessage(), e.getCause())
-            : new AugmentProcessingException(warning, e.getMessage());
     }
 
     private boolean validateOutputSchema(@NonNull Augment augment, @NonNull Object augmentValue,
                                          @NonNull String augmentPropertyName) {
-        JsonSchemaFilter outputSchema = augment.getOutputSchema();
+        JsonSchema outputSchema = augment.getOutputSchema();
         if (outputSchema == null) {
             return true;
         }
@@ -300,10 +290,10 @@ public class AugmentProcessor {
                     + "' output for '" + augmentPropertyName + "' failed schema validation");
             }
             return valid;
-        } catch (Exception e) {
-            log.log(Level.WARNING, "Failed to validate augment output schema for '"
-                + augmentPropertyName + "'", e);
-            return false;
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(
+                "Failed to serialize augment output for schema validation '"
+                    + augmentPropertyName + "'", e);
         }
     }
 

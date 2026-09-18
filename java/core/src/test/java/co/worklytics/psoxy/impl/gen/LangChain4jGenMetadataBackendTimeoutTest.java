@@ -19,11 +19,12 @@ class LangChain4jGenMetadataBackendTimeoutTest {
         GenMetadataConfig config = BedrockGenMetadataConfig.of("test-model", 1);
 
         GenMetadataChatModelFactory factory = new GenMetadataChatModelFactory(Set.of());
+        ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config,
-            new ObjectMapper(),
-            new GenMetadataPromptBudget(),
-            factory);
+            config, om, new GenMetadataPromptBudget(), factory,
+            new GenMetadataTokenUsageAccumulator(),
+            new GenMetadataPromptBuilder(om),
+            new GenMetadataResponseFormats());
 
         ChatModel slowModel = new ChatModel() {
             @Override

@@ -3,7 +3,7 @@ package co.worklytics.psoxy.impl.gen;
 import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.augments.GenMetadataAugmentException;
 import com.avaulta.gateway.rules.augments.GenMetadataBackend;
-import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.chat.ChatModel;
@@ -69,6 +69,8 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     private final GenMetadataPromptBudget promptBudget;
     private final GenMetadataChatModelFactory chatModelFactory;
     private final GenMetadataTokenUsageAccumulator tokenUsageAccumulator;
+    private final GenMetadataPromptBuilder promptBuilder;
+    private final GenMetadataResponseFormats responseFormats;
 
     private final ConcurrentHashMap<String, ModelHandle> models = new ConcurrentHashMap<>();
     private final Semaphore cloudConcurrency = new Semaphore(CLOUD_MAX_CONCURRENT);
@@ -79,35 +81,31 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
                                          ObjectMapper objectMapper,
                                          GenMetadataPromptBudget promptBudget,
                                          GenMetadataChatModelFactory chatModelFactory,
-                                         GenMetadataTokenUsageAccumulator tokenUsageAccumulator) {
+                                         GenMetadataTokenUsageAccumulator tokenUsageAccumulator,
+                                         GenMetadataPromptBuilder promptBuilder,
+                                         GenMetadataResponseFormats responseFormats) {
         this.config = config;
         this.objectMapper = objectMapper;
         this.promptBudget = promptBudget;
         this.chatModelFactory = chatModelFactory;
-        this.tokenUsageAccumulator = tokenUsageAccumulator != null
-            ? tokenUsageAccumulator
-            : new GenMetadataTokenUsageAccumulator();
-    }
-
-    public LangChain4jGenMetadataBackend(GenMetadataConfig config, ObjectMapper objectMapper,
-                                         GenMetadataPromptBudget promptBudget,
-                                         GenMetadataChatModelFactory chatModelFactory) {
-        this(config, objectMapper, promptBudget, chatModelFactory, new GenMetadataTokenUsageAccumulator());
+        this.tokenUsageAccumulator = tokenUsageAccumulator;
+        this.promptBuilder = promptBuilder;
+        this.responseFormats = responseFormats;
     }
 
     @Override
-    public Object generate(String taskPrompt, JsonSchemaFilter outputSchema, String inputData) {
+    public Object generate(String taskPrompt, JsonSchema outputSchema, String inputData) {
         return generate(taskPrompt, outputSchema, inputData, null, null);
     }
 
     @Override
-    public Object generate(String taskPrompt, JsonSchemaFilter outputSchema, String inputData,
+    public Object generate(String taskPrompt, JsonSchema outputSchema, String inputData,
                            Integer maxOutputTokens) {
         return generate(taskPrompt, outputSchema, inputData, maxOutputTokens, null);
     }
 
     @Override
-    public Object generate(String taskPrompt, JsonSchemaFilter outputSchema, String inputData,
+    public Object generate(String taskPrompt, JsonSchema outputSchema, String inputData,
                            Integer maxOutputTokens, Integer maxInputTokens) {
         if (!chatModelFactory.supports(config)) {
             throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
@@ -122,14 +120,14 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         int effectiveMaxInputTokens = effectiveMaxInputTokens(maxInputTokens);
         String fittedInput = promptBudget.fitDynamicInput(inputData, effectiveMaxInputTokens);
         List<ChatMessage> messages =
-            GenMetadataPromptBuilder.toMessages(taskPrompt, outputSchema, fittedInput, objectMapper);
+            promptBuilder.toMessages(taskPrompt, outputSchema, fittedInput);
         // Bedrock Converse maps ResponseFormat → outputConfig; Amazon Nova (our default) rejects it.
         // Claude 4.5+ supports native json_schema, but we skip for all Bedrock for now and rely on
         // prompt + GenMetadataProcessor parse / outputSchema gate.
         boolean bedrock = config.getBackend() == GenMetadataConfig.Backend.BEDROCK;
         Optional<ResponseFormat> responseFormat = bedrock
             ? Optional.empty()
-            : GenMetadataResponseFormats.fromOutputSchema(outputSchema);
+            : responseFormats.fromOutputSchema(outputSchema);
         if (bedrock) {
             log.info("genMetadata Bedrock: omitting ResponseFormat/outputConfig for model "
                 + config.getModelId());
@@ -173,7 +171,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             Thread.currentThread().interrupt();
             return null;
         } catch (Exception e) {
-            if (isAuthOrQuotaFailure(e)) {
+            if (isAuthFailure(e) || isQuotaFailure(e)) {
                 log.log(Level.WARNING,
                     "genMetadata cloud inference denied/rate-limited (backend="
                         + backendLabel() + "); omitting augment", e);
@@ -233,7 +231,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         if (ruleMaxTokens != null && ruleMaxTokens > 0) {
             return ruleMaxTokens;
         }
-        return Augment.GenMetadata.DEFAULT_MAX_TOKENS;
+        return Augment.GenMetadata.DEFAULT_MAX_OUTPUT_TOKENS;
     }
 
     ChatResponse chatWithTimeout(ChatModel chatModel, List<ChatMessage> messages,
@@ -272,22 +270,34 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         tokenUsageAccumulator.record(input, output);
     }
 
-    static boolean isAuthOrQuotaFailure(Throwable t) {
+    static boolean isAuthFailure(Throwable t) {
+        // Walk the exception cause chain looking for known auth indicators
         for (Throwable c = t; c != null; c = c.getCause()) {
-            String name = c.getClass().getName();
+            String name = c.getClass().getName().toLowerCase();
             String msg = c.getMessage() != null ? c.getMessage().toLowerCase() : "";
-            if (name.contains("AccessDenied")
-                || name.contains("Authorization")
-                || name.contains("PermissionDenied")
-                || name.contains("ResourceExhausted")
-                || name.contains("Throttling")
+            if (name.contains("accessdenied")
+                || name.contains("authorization")
+                || name.contains("permissiondenied")
                 || msg.contains("access denied")
                 || msg.contains("not authorized")
+                || msg.contains("403")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static boolean isQuotaFailure(Throwable t) {
+        // Walk the exception cause chain looking for known quota indicators
+        for (Throwable c = t; c != null; c = c.getCause()) {
+            String name = c.getClass().getName().toLowerCase();
+            String msg = c.getMessage() != null ? c.getMessage().toLowerCase() : "";
+            if (name.contains("resourceexhausted")
+                || name.contains("throttling")
                 || msg.contains("quota")
                 || msg.contains("throttl")
                 || msg.contains("rate exceeded")
-                || msg.contains("429")
-                || msg.contains("403")) {
+                || msg.contains("429")) {
                 return true;
             }
         }

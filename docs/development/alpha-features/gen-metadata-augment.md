@@ -9,7 +9,7 @@
 **genMetadata** calls a cloud LLM to derive structured metadata from a matched source value and attaches it as:
 
 - **Scalar / leaf match** (e.g. `$.title`, `$..body.content`): sibling `+{sourceProperty}:genMetadata` on the parent object.
-- **Object match** (e.g. `$` or `$[*]` when each match is a JSON object): `+self:genMetadata` on that same object; the whole matched Map is the LLM corpus (after stripping any existing `+…` keys).
+- **Object match** (e.g. `$` or `$[*]` when each match is a JSON object): `+self:genMetadata` on that same object; the whole matched Map is the LLM corpus.
 
 This is an MVP for customers to try with **custom rules**. Prebuilt source rules do not enable genMetadata.
 
@@ -27,7 +27,7 @@ Rules always declare `prompt` + `outputSchema`. The runtime **infers mode** from
 | Mode | When | Model output | Proxy normalizes to |
 |------|------|--------------|---------------------|
 | **classify** | Schema is an object with a **single** required string property that has `enum`, or a root string `enum` | Vertex: constrained JSON. Bedrock: free-form JSON/label in text | Same Map / string after parse / label recovery |
-| **extract** | Any richer object / array schema | Constrained JSON matching the schema | Parsed object/array as-is (after schema gate) |
+| **compute** | Any richer object / array schema | Constrained JSON matching the schema | Parsed object/array as-is (after schema gate) |
 
 ### Classify example
 
@@ -41,7 +41,7 @@ augments:
       Use "Uncategorized" when substantive but unclear.
       Use "Excluded" for greetings, thanks, or prompts too short to classify.
     maxInputTokens: 100
-    maxTokens: 200
+    maxOutputTokens: 200
     outputSchema:
       type: object
       required: [category]
@@ -58,7 +58,7 @@ augments:
 
 Output: sibling `+content:genMetadata` with `{"category":"Research and Ideation"}`.
 
-### Extract example
+### Compute example
 
 ```yaml
 augments:
@@ -69,7 +69,7 @@ augments:
       From the meeting transcript timeline, estimate seconds each person spoke.
       Identify speakers by users[].user_id from the timeline.
     maxInputTokens: 500
-    maxTokens: 500
+    maxOutputTokens: 500
     outputSchema:
       type: object
       required: [speakers]
@@ -108,7 +108,6 @@ transforms:
 ```
 
 - One LLM call per matched object.
-- Serialization for Maps strips `+…` keys and prefers `title` then `body` first so `maxInputTokens` truncation of the dynamic corpus still sees the text.
 - Object-level matches may send nested user/email fields to the model. Prefer prompts that tell the model to ignore ids/urls/user records, and redact source fields in `transforms` after augments.
 
 ## Rule configuration
@@ -117,19 +116,19 @@ transforms:
 |-------|----------|-------------|
 | `jsonPaths` | yes | Source values to process. Use `$` / `$[*]` to classify whole objects (→ `+self:genMetadata`); use leaf paths for scalar text (→ `+title:genMetadata`, etc.). |
 | `prompt` | yes | Static task guidance (categories, edge cases). Do **not** put conflicting format instructions here — Java always requests JSON and applies provider constraints from `outputSchema`. This prefix is not counted against `maxInputTokens`. |
-| `outputSchema` | yes | Shape + enums; drives classify vs extract and provider constraints |
-| `maxInputTokens` | no | Cap on the **dynamic** source corpus (serialized jsonPath match), in estimated tokens (~4 chars/token). Default `256`. Classify often wants `100`; longer extract `500+`. The static prompt/schema are not counted. |
-| `maxTokens` | no | Per-augment **generation** cap. Default `200` (enough for classify JSON). Extract / meeting transcripts should raise this (`500`+). On Gemini, thinking tokens share this budget with visible JSON. |
+| `outputSchema` | yes | Shape + enums; drives classify vs compute and provider constraints |
+| `maxInputTokens` | no | Cap on the **dynamic** source corpus (serialized jsonPath match). Default `256`. Classify often wants `100`; longer compute `500+`. The static prompt/schema are not counted. |
+| `maxOutputTokens` | no | Per-augment **generation** cap (`maxTokens` is accepted as an alias). Default `200` (enough for classify JSON). Compute / meeting transcripts should raise this (`500`+). On Gemini, thinking tokens share this budget with visible JSON. |
 
 No `model`, `backend`, or `thinkingLevel` in rules — those stay deployment config.
 
 ## Deployment configuration (env)
 
-Parsed by `GenMetadataConfig.from(ConfigService)` — not `ProxyConfigProperty`. Terraform sets `ENABLE_GEN_METADATA` and `GEN_METADATA_BACKEND`; model / region / thinking defaults live in Java (`BedrockGenMetadataConfig` / `VertexGenMetadataConfig`). Override via `general_environment_variables` when needed.
+Parsed from `GEN_METADATA_*` env vars (not `ProxyConfigProperty`). Terraform sets `ENABLE_GEN_METADATA` and `GEN_METADATA_BACKEND` (`bedrock` on AWS, `vertex` on GCP). Model / region / thinking defaults live in Java. Override via `general_environment_variables` when needed.
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `GEN_METADATA_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). Java defaults unset backend toward `bedrock`. | `bedrock` \| `vertex` only |
+| `GEN_METADATA_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). | `bedrock` \| `vertex` only |
 | `GEN_METADATA_MODEL` | AWS: `us.amazon.nova-2-lite-v1:0` · GCP: `gemini-3.5-flash-lite` | Cloud model id / **inference profile**. For Nova, use a CRIS id (`us.` / `eu.` / `jp.` / `global.` prefix) — bare `amazon.nova-…` foundation-model ids are rejected by Bedrock. If a bare `amazon.nova-…` value is set, Java rewrites it to `us.amazon.nova-…`. |
 | `GEN_METADATA_MODEL_REGION` | Vertex: `global` | Vertex publisher-model **location** (`VertexGenMetadataConfig`). Default `global` (google-genai → `https://aiplatform.googleapis.com`). Ignored on AWS. |
 | `GEN_METADATA_TIMEOUT_SECONDS` | `15` | Per-call timeout |
@@ -153,25 +152,20 @@ Per-row Vertex/Bedrock calls are typically several seconds. A 100-row bulk file 
 
 Set `enable_gen_metadata = true` on the API or bulk connector you want to try, and load **custom rules** that declare `!<genMetadata>` augments.
 
-Host defaults:
+- **AWS:** Terraform attaches Bedrock invoke/converse IAM. Complete the `gen_metadata_todo` output (Bedrock account/region access). Default model: `us.amazon.nova-2-lite-v1:0`.
+- **GCP:** Terraform enables `aiplatform.googleapis.com` and grants `roles/aiplatform.user`. Default model: `gemini-3.5-flash-lite` at location `global`, thinking `minimal`.
 
-- AWS: `gen_metadata_backend = "bedrock"` (validated)
-- GCP: `gen_metadata_backend = "vertex"` (validated)
+genMetadata does **not** need `enable_remote_resources` or `REMOTE_RESOURCE_BUCKET`. Those are for remote `rules.yaml` / OpenNLP (`sentenceMetadata`).
 
-Optional per-connector override: `gen_metadata_backend` on the connector object.
+### Using Anthropic Claude on Bedrock
 
-When enabled:
-
-- **AWS** attaches `bedrock:InvokeModel` / `bedrock:Converse` (including inference profiles) to the connector Lambda role. Java defaults `GEN_METADATA_MODEL` to `us.amazon.nova-2-lite-v1:0` unless overridden. Prefer a US Lambda region for that default. Anthropic Claude still needs a one-time account use-case form if you switch `GEN_METADATA_MODEL` to Claude. See aws-host output `remote_resource_gen_metadata_todo`.
-- **GCP** enables `aiplatform.googleapis.com` and grants `roles/aiplatform.user` to the connector service account. Java defaults `GEN_METADATA_MODEL=gemini-3.5-flash-lite`, `GEN_METADATA_MODEL_REGION=global`, and `GEN_METADATA_THINKING_LEVEL=minimal` unless overridden.
-
-genMetadata does **not** need `enable_remote_resources` or `REMOTE_RESOURCE_BUCKET`. Those are for remote `rules.yaml` / OpenNLP (`sentenceMetadata`) when rules do not fit in secrets or env. Bedrock and Vertex are invoked in-process; this feature does not upload or load `llm/*.zip`. Host and examples-dev default `enable_remote_resources` to `false`.
+Switching `GEN_METADATA_MODEL` to a Claude id is an advanced/expensive option. First-time Anthropic use in the account still requires a one-time use-case form (Bedrock console playground or `PutUseCaseForModelAccess`). Terraform does not submit that form.
 
 ## Java architecture
 
 ```
 GenMetadataProcessor
-  → shape detect (classify | extract) from outputSchema
+  → shape detect (classify | compute) from outputSchema
   → GenMetadataChatModelProvider (Bedrock | Vertex)
   → normalize (enum string → Map; JSON → Map/List)
   → outputSchema gate (safety net)

@@ -70,7 +70,8 @@ class WebhookSanitizerAugmentsTest {
             om,
             new com.avaulta.gateway.rules.augments.SentenceMetadataProcessor(path -> java.util.Optional.empty()),
             new com.avaulta.gateway.rules.augments.GenMetadataProcessor(
-                new com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend(), om));
+                new com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend(), om, 2,
+                new JsonSchemaValidationUtils()));
     }
 
     @Test

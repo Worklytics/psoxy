@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.impl.gen;
 
-import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.augments.Augment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.AiMessage;
@@ -47,17 +47,19 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
 
         GenMetadataConfig config = BedrockGenMetadataConfig.of(BedrockGenMetadataConfig.DEFAULT_MODEL, 30);
 
+        ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config,
-            new ObjectMapper(),
-            new GenMetadataPromptBudget(),
-            new GenMetadataChatModelFactory(Set.of(provider)));
+            config, om, new GenMetadataPromptBudget(),
+            new GenMetadataChatModelFactory(Set.of(provider)),
+            new GenMetadataTokenUsageAccumulator(),
+            new GenMetadataPromptBuilder(om),
+            new GenMetadataResponseFormats());
 
-        JsonSchemaFilter schema = JsonSchemaFilter.builder()
+        JsonSchema schema = JsonSchema.builder()
             .type("object")
             .required(List.of("category"))
             .properties(java.util.Map.of(
-                "category", JsonSchemaFilter.builder()
+                "category", JsonSchema.builder()
                     .type("string")
                     .enumValues(List.of("Excluded", "Uncategorized"))
                     .build()))
@@ -68,7 +70,7 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
         assertNotNull(seen.get());
         assertNull(seen.get().responseFormat(),
             "Bedrock/Nova must not send ResponseFormat (maps to unsupported outputConfig)");
-        assertEquals(Augment.GenMetadata.DEFAULT_MAX_TOKENS, seen.get().maxOutputTokens());
+        assertEquals(Augment.GenMetadata.DEFAULT_MAX_OUTPUT_TOKENS, seen.get().maxOutputTokens());
     }
 
     @Test
@@ -95,12 +97,14 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
             }
         };
         GenMetadataConfig config = BedrockGenMetadataConfig.of(BedrockGenMetadataConfig.DEFAULT_MODEL, 30);
+        ObjectMapper om2 = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config,
-            new ObjectMapper(),
-            new GenMetadataPromptBudget(),
-            new GenMetadataChatModelFactory(Set.of(provider)));
-        JsonSchemaFilter schema = JsonSchemaFilter.builder().type("string").build();
+            config, om2, new GenMetadataPromptBudget(),
+            new GenMetadataChatModelFactory(Set.of(provider)),
+            new GenMetadataTokenUsageAccumulator(),
+            new GenMetadataPromptBuilder(om2),
+            new GenMetadataResponseFormats());
+        JsonSchema schema = JsonSchema.builder().type("string").build();
 
         backend.generate("Classify", schema, "hello", 64);
         assertEquals(64, seen.get().maxOutputTokens());

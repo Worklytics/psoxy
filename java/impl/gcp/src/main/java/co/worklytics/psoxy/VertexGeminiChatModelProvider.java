@@ -6,6 +6,7 @@ import co.worklytics.psoxy.impl.gen.VertexGenMetadataConfig;
 import com.google.cloud.ServiceOptions;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.google.genai.GoogleGenAiChatModel;
+import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,7 +26,7 @@ import java.time.Duration;
  * and often blows the per-call timeout for tiny classify JSON. Prefer {@code thinking_level}
  * over legacy {@code thinking_budget} (they must not be set together).
  *
- * <p>Per-call {@code maxOutputTokens} comes from the augment {@code maxTokens} field (default
+ * <p>Per-call {@code maxOutputTokens} comes from the augment {@code maxOutputTokens} field (default
  * 200). Gemini thinking shares that per-call budget with visible JSON.
  *
  * <p>For {@code location=global}, google-genai uses {@code https://aiplatform.googleapis.com}
@@ -33,11 +34,8 @@ import java.time.Duration;
  */
 @Log
 @Singleton
+@NoArgsConstructor(onConstructor_ = @Inject)
 public class VertexGeminiChatModelProvider implements GenMetadataChatModelProvider {
-
-    @Inject
-    public VertexGeminiChatModelProvider() {
-    }
 
     @Override
     public boolean supports(GenMetadataConfig config) {
@@ -46,7 +44,11 @@ public class VertexGeminiChatModelProvider implements GenMetadataChatModelProvid
 
     @Override
     public ChatModel create(GenMetadataConfig config, Path modelCacheDir) {
-        VertexGenMetadataConfig vertex = (VertexGenMetadataConfig) config;
+        if (!(config instanceof VertexGenMetadataConfig vertex)) {
+            throw new IllegalStateException(
+                "VertexGeminiChatModelProvider requires VertexGenMetadataConfig, got "
+                    + config.getClass().getSimpleName());
+        }
         String project = resolveProjectId();
         log.info("Creating Vertex Gemini chat model project=" + project
             + " location=" + vertex.getModelRegion()

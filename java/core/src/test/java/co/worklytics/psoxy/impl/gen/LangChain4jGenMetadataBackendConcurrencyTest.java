@@ -50,9 +50,13 @@ class LangChain4jGenMetadataBackendConcurrencyTest {
 
         GenMetadataConfig config = BedrockGenMetadataConfig.of("test-model", 5);
 
+        ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, new ObjectMapper(), new GenMetadataPromptBudget(),
-            new GenMetadataChatModelFactory(Set.of(provider)));
+            config, om, new GenMetadataPromptBudget(),
+            new GenMetadataChatModelFactory(Set.of(provider)),
+            new GenMetadataTokenUsageAccumulator(),
+            new GenMetadataPromptBuilder(om),
+            new GenMetadataResponseFormats());
 
         int threads = 8;
         ExecutorService pool = Executors.newFixedThreadPool(threads);

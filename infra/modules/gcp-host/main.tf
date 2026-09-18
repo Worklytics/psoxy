@@ -90,20 +90,12 @@ locals {
     )
   }
 
-  # Effective genMetadata backend per connector (null if genMetadata disabled).
-  # GCP is cloud-only: vertex.
-  connector_gen_metadata_backend = {
-    for k, v in merge(var.api_connectors, var.bulk_connectors) : k => (
-      try(v.enable_gen_metadata, false)
-      ? lower(coalesce(try(v.gen_metadata_backend, null), var.gen_metadata_backend, "vertex"))
-      : null
-    )
-  }
-
-  gen_metadata_uses_vertex = length([
-    for k, backend in local.connector_gen_metadata_backend : k
-    if backend == "vertex"
+  # GCP genMetadata uses Vertex (no other backend yet).
+  gen_metadata_enabled = length([
+    for k, v in merge(var.api_connectors, var.bulk_connectors) : k
+    if try(v.enable_gen_metadata, false)
   ]) > 0
+  gen_metadata_services = local.gen_metadata_enabled ? toset(["aiplatform.googleapis.com"]) : toset([])
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -353,7 +345,7 @@ module "api_connector" {
     var.general_environment_variables,
     try(each.value.enable_gen_metadata, false) ? {
       ENABLE_GEN_METADATA  = "true"
-      GEN_METADATA_BACKEND = local.connector_gen_metadata_backend[each.key]
+      GEN_METADATA_BACKEND = "vertex"
     } : {},
   )
 
@@ -559,7 +551,7 @@ module "bulk_connector" {
     var.general_environment_variables,
     try(each.value.enable_gen_metadata, false) ? {
       ENABLE_GEN_METADATA  = "true"
-      GEN_METADATA_BACKEND = local.connector_gen_metadata_backend[each.key]
+      GEN_METADATA_BACKEND = "vertex"
     } : {},
   )
 
@@ -573,6 +565,38 @@ module "bulk_connector" {
 }
 
 # END BULK CONNECTORS
+
+resource "google_project_service" "gen_metadata" {
+  for_each = local.gen_metadata_services
+
+  project                    = var.gcp_project_id
+  service                    = each.value
+  disable_dependent_services = false
+  disable_on_destroy         = false
+}
+
+locals {
+  gen_metadata_vertex_sa_emails = merge(
+    {
+      for k, v in var.api_connectors : k => google_service_account.api_connectors[k].email
+      if try(v.enable_gen_metadata, false)
+    },
+    {
+      for k, v in var.bulk_connectors : k => module.bulk_connector[k].instance_sa_email
+      if try(v.enable_gen_metadata, false)
+    },
+  )
+}
+
+resource "google_project_iam_member" "gen_metadata_vertex_user" {
+  for_each = local.gen_metadata_vertex_sa_emails
+
+  project = var.gcp_project_id
+  role    = "roles/aiplatform.user"
+  member  = "serviceAccount:${each.value}"
+
+  depends_on = [google_project_service.gen_metadata]
+}
 
 # BEGIN LOOKUP TABLES
 module "lookup_output" {

@@ -7,6 +7,8 @@ import dev.langchain4j.model.bedrock.BedrockChatModel;
 import dev.langchain4j.model.bedrock.BedrockChatRequestParameters;
 import dev.langchain4j.model.chat.ChatModel;
 
+import lombok.NoArgsConstructor;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
@@ -19,11 +21,8 @@ import java.time.Duration;
  * AWS region provider (Lambda {@code AWS_REGION}).
  */
 @Singleton
+@NoArgsConstructor(onConstructor_ = @Inject)
 public class BedrockChatModelProvider implements GenMetadataChatModelProvider {
-
-    @Inject
-    public BedrockChatModelProvider() {
-    }
 
     @Override
     public boolean supports(GenMetadataConfig config) {
@@ -35,7 +34,7 @@ public class BedrockChatModelProvider implements GenMetadataChatModelProvider {
         return BedrockChatModel.builder()
             .modelId(config.getModelId())
             .timeout(Duration.ofSeconds(config.getTimeoutSeconds()))
-            .maxRetries(1)
+            .maxRetries(config.getMaxAttempts())
             .defaultRequestParameters(BedrockChatRequestParameters.builder()
                 .temperature(0.0)
                 .build())

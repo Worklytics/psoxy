@@ -1,20 +1,26 @@
 package co.worklytics.psoxy.impl.gen;
 
-import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.augments.GenMetadataSchemaSupport;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
-import lombok.experimental.UtilityClass;
+import lombok.AllArgsConstructor;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
 
 /**
  * Builds chat messages for genMetadata cloud inference (Bedrock / Vertex).
  */
-@UtilityClass
+@Singleton
+@AllArgsConstructor(onConstructor_ = @Inject)
 class GenMetadataPromptBuilder {
+
+    final ObjectMapper objectMapper;
 
     static final String SYSTEM_CLASSIFY =
         "You are a data-processing component in a privacy proxy. "
@@ -26,19 +32,18 @@ class GenMetadataPromptBuilder {
     static final String SYSTEM_CLASSIFY_STRING =
         "You are a data-processing component in a privacy proxy. "
             + "Respond with exactly one allowed classification label as a JSON string. "
-            + "Example: \"Research and Ideation\". "
             + "Do not wrap the label in an object or add any other keys. "
             + "No markdown fences, no prose before or after the string.";
 
-    static final String SYSTEM_EXTRACT =
+    static final String SYSTEM_COMPUTE =
         "You are a data-processing component in a privacy proxy. "
             + "Respond with exactly one JSON object that is an INSTANCE of the task result, "
             + "not a JSON Schema definition. "
             + "Never include schema keywords such as type, properties, required, or enum. "
             + "No markdown fences, no prose before or after the JSON.";
 
-    static List<ChatMessage> toMessages(String taskPrompt, JsonSchemaFilter outputSchema,
-                                        String inputData, ObjectMapper objectMapper) {
+    List<ChatMessage> toMessages(String taskPrompt, JsonSchema outputSchema,
+                                  String inputData) {
         if (GenMetadataSchemaSupport.mode(outputSchema) == GenMetadataSchemaSupport.Mode.CLASSIFY) {
             GenMetadataSchemaSupport.ClassifyShape shape =
                 GenMetadataSchemaSupport.classifyShape(outputSchema).orElseThrow();
@@ -49,13 +54,13 @@ class GenMetadataPromptBuilder {
             );
         }
         return List.of(
-            SystemMessage.from(SYSTEM_EXTRACT),
-            UserMessage.from(extractUserContent(taskPrompt, outputSchema, inputData, objectMapper))
+            SystemMessage.from(SYSTEM_COMPUTE),
+            UserMessage.from(computeUserContent(taskPrompt, outputSchema, inputData))
         );
     }
 
-    static String classifyUserContent(String taskPrompt, JsonSchemaFilter outputSchema,
-                                      String inputData) {
+    String classifyUserContent(String taskPrompt, JsonSchema outputSchema,
+                               String inputData) {
         GenMetadataSchemaSupport.ClassifyShape shape =
             GenMetadataSchemaSupport.classifyShape(outputSchema).orElseThrow();
         String labels = String.join("\n", shape.getEnumValues());
@@ -63,7 +68,7 @@ class GenMetadataPromptBuilder {
             return """
                 Task: %s
 
-                Return exactly one of these labels as a JSON string (for example "Excluded"):
+                Return exactly one of these labels as a JSON string:
                 %s
 
                 Input data to process:
@@ -86,13 +91,13 @@ class GenMetadataPromptBuilder {
             inputData);
     }
 
-    static String extractUserContent(String taskPrompt, JsonSchemaFilter outputSchema,
-                                     String inputData, ObjectMapper objectMapper) {
+    String computeUserContent(String taskPrompt, JsonSchema outputSchema,
+                              String inputData) {
         String schemaJson;
         try {
             schemaJson = objectMapper.writeValueAsString(outputSchema);
-        } catch (Exception e) {
-            schemaJson = "{}";
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to serialize genMetadata outputSchema", e);
         }
         return """
             Task: %s

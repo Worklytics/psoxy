@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
-import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatModel;
@@ -43,17 +43,18 @@ class LangChain4jGenMetadataBackendTokenUsageTest {
 
         GenMetadataConfig config = VertexGenMetadataConfig.of("gemini-test", "global", 30);
 
+        ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config,
-            new ObjectMapper(),
-            new GenMetadataPromptBudget(),
+            config, om, new GenMetadataPromptBudget(),
             new GenMetadataChatModelFactory(Set.of(provider)),
-            accumulator);
+            accumulator,
+            new GenMetadataPromptBuilder(om),
+            new GenMetadataResponseFormats());
 
-        JsonSchemaFilter schema = JsonSchemaFilter.builder()
+        JsonSchema schema = JsonSchema.builder()
             .type("object")
             .properties(java.util.Map.of(
-                "category", JsonSchemaFilter.builder()
+                "category", JsonSchema.builder()
                     .type("string")
                     .enumValues(List.of("Excluded"))
                     .build()))

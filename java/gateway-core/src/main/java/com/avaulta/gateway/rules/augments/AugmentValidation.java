@@ -1,7 +1,6 @@
 package com.avaulta.gateway.rules.augments;
 
 import com.avaulta.gateway.rules.Endpoint;
-import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.WebhookCollectionRules;
 import org.apache.commons.lang3.StringUtils;
@@ -75,10 +74,14 @@ public final class AugmentValidation {
             if (gen.getJsonPaths() == null || gen.getJsonPaths().isEmpty()) {
                 errors.add("genMetadata augment requires at least one jsonPath");
             }
-            if (gen.getMaxTokens() != null && gen.getMaxTokens() <= 0) {
-                errors.add("genMetadata maxTokens must be a positive integer when set");
+            try {
+                gen.getMaxOutputTokens();
+            } catch (IllegalArgumentException e) {
+                errors.add("genMetadata maxOutputTokens must be a positive integer when set");
             }
-            if (gen.getMaxInputTokens() != null && gen.getMaxInputTokens() <= 0) {
+            try {
+                gen.getMaxInputTokens();
+            } catch (IllegalArgumentException e) {
                 errors.add("genMetadata maxInputTokens must be a positive integer when set");
             }
         }

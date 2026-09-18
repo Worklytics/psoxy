@@ -82,3 +82,17 @@ output "next_todo_step" {
     [1]
   )...)
 }
+
+output "gen_metadata_todo" {
+  description = "TODO steps to activate Bedrock for genMetadata, when any connector has enable_gen_metadata. Null when unused."
+  value = local.gen_metadata_enabled ? trimspace(<<-EOT
+	## Bedrock genMetadata setup
+
+	1. Confirm Bedrock is usable in this AWS account and region. The default model id is `us.amazon.nova-2-lite-v1:0` (US cross-region inference profile). Use a CRIS id (`us.amazon.nova-2-lite-v1:0`), not the bare foundation-model id (`amazon.nova-2-lite-v1:0`).
+	2. Prefer a **US** Lambda region when using that default `us.*` profile. To use another geography, set `GEN_METADATA_MODEL` (for example `eu.amazon.nova-2-lite-v1:0`).
+	3. If invokes fail with access errors, check that an SCP is not blocking Bedrock in the account/region. See [Amazon Bedrock model access](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html).
+
+	Docs: [genMetadata](https://docs.worklytics.co/psoxy/development/alpha-features/gen-metadata-augment).
+	EOT
+  ) : null
+}

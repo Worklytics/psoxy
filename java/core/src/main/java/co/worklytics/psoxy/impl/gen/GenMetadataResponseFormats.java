@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.impl.gen;
 
-import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.augments.GenMetadataSchemaSupport;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ResponseFormatType;
@@ -12,20 +11,24 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.chat.request.json.JsonStringSchema;
-import lombok.experimental.UtilityClass;
+import lombok.NoArgsConstructor;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 /**
- * Builds LangChain4j {@link ResponseFormat} constraints from genMetadata {@link JsonSchemaFilter}.
+ * Builds LangChain4j {@link ResponseFormat} constraints from genMetadata
+ * {@link com.avaulta.gateway.rules.JsonSchema}.
  */
-@UtilityClass
+@Singleton
+@NoArgsConstructor(onConstructor_ = @Inject)
 public class GenMetadataResponseFormats {
 
-    public static Optional<ResponseFormat> fromOutputSchema(JsonSchemaFilter outputSchema) {
+    public Optional<ResponseFormat> fromOutputSchema(com.avaulta.gateway.rules.JsonSchema outputSchema) {
         if (outputSchema == null) {
             return Optional.empty();
         }
@@ -33,17 +36,20 @@ public class GenMetadataResponseFormats {
             GenMetadataSchemaSupport.classifyShape(outputSchema);
         if (classify.isPresent()) {
             GenMetadataSchemaSupport.ClassifyShape shape = classify.get();
-            JsonSchemaElement root = shape.isRootString()
-                ? JsonEnumSchema.builder()
+            JsonSchemaElement root;
+            if (shape.isRootString()) {
+                root = JsonEnumSchema.builder()
                     .enumValues(shape.getEnumValues())
-                    .build()
-                : JsonObjectSchema.builder()
+                    .build();
+            } else {
+                root = JsonObjectSchema.builder()
                     .addProperty(shape.getPropertyName(), JsonEnumSchema.builder()
                         .enumValues(shape.getEnumValues())
                         .build())
                     .required(shape.getPropertyName())
                     .additionalProperties(false)
                     .build();
+            }
             return Optional.of(ResponseFormat.builder()
                 .type(ResponseFormatType.JSON)
                 .jsonSchema(JsonSchema.builder()
@@ -65,7 +71,7 @@ public class GenMetadataResponseFormats {
             .build());
     }
 
-    static JsonSchemaElement toElement(JsonSchemaFilter schema) {
+    JsonSchemaElement toElement(com.avaulta.gateway.rules.JsonSchema schema) {
         if (schema == null) {
             return null;
         }

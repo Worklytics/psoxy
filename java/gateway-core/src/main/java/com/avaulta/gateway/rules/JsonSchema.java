@@ -3,7 +3,10 @@ package com.avaulta.gateway.rules;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -68,6 +71,7 @@ public class JsonSchema {
     /**
      * enum values for string validation; NOT applicable if type==object or type==array
      */
+    @JsonProperty("enum")
     List<String> enumValues;
 
     /**
@@ -75,6 +79,21 @@ public class JsonSchema {
      * default is true
      */
     Boolean additionalProperties;
+
+    @JsonIgnore
+    public boolean isObject() {
+        return Objects.equals(type, "object") || (type == null && properties != null);
+    }
+
+    @JsonIgnore
+    public boolean isString() {
+        return Objects.equals(type, "string");
+    }
+
+    @JsonIgnore
+    public boolean isArray() {
+        return Objects.equals(type, "array") || (type == null && items != null);
+    }
 
     /**
      * Custom string formats; only applicable if type==string

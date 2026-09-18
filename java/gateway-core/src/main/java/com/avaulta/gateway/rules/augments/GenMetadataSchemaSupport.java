@@ -1,6 +1,8 @@
 package com.avaulta.gateway.rules.augments;
 
-import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchema;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
 
@@ -9,15 +11,16 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Infers genMetadata inference mode from {@link JsonSchemaFilter} (classify vs extract).
+ * Infers genMetadata inference mode from {@link JsonSchema} (classify vs compute).
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GenMetadataSchemaSupport {
 
     public enum Mode {
         /** Closed-vocab label: root string enum, or object with one required string enum property. */
         CLASSIFY,
-        /** Richer object/array schema — constrained JSON extraction. */
-        EXTRACT
+        /** Richer object/array schema — constrained JSON. */
+        COMPUTE
     }
 
     @Value
@@ -31,18 +34,15 @@ public final class GenMetadataSchemaSupport {
         }
     }
 
-    private GenMetadataSchemaSupport() {
-    }
-
-    public static Mode mode(JsonSchemaFilter schema) {
-        return classifyShape(schema).isPresent() ? Mode.CLASSIFY : Mode.EXTRACT;
+    public static Mode mode(JsonSchema schema) {
+        return classifyShape(schema).isPresent() ? Mode.CLASSIFY : Mode.COMPUTE;
     }
 
     /**
      * @return classify shape when schema is a root string {@code enum}, or an object with exactly
      * one required string property that has a non-empty {@code enum}
      */
-    public static Optional<ClassifyShape> classifyShape(JsonSchemaFilter schema) {
+    public static Optional<ClassifyShape> classifyShape(JsonSchema schema) {
         if (schema == null) {
             return Optional.empty();
         }
@@ -53,13 +53,13 @@ public final class GenMetadataSchemaSupport {
         if (!schema.isObject()) {
             return Optional.empty();
         }
-        Map<String, JsonSchemaFilter> properties = schema.getProperties();
+        Map<String, JsonSchema> properties = schema.getProperties();
         if (properties == null || properties.size() != 1) {
             return Optional.empty();
         }
-        Map.Entry<String, JsonSchemaFilter> only = properties.entrySet().iterator().next();
+        Map.Entry<String, JsonSchema> only = properties.entrySet().iterator().next();
         String name = only.getKey();
-        JsonSchemaFilter prop = only.getValue();
+        JsonSchema prop = only.getValue();
         if (prop == null || !prop.isString()) {
             return Optional.empty();
         }
@@ -74,7 +74,7 @@ public final class GenMetadataSchemaSupport {
         return Optional.of(new ClassifyShape(name, List.copyOf(enums)));
     }
 
-    static Optional<ClassifyShape> rootStringEnum(JsonSchemaFilter schema) {
+    static Optional<ClassifyShape> rootStringEnum(JsonSchema schema) {
         if (!schema.isString()) {
             return Optional.empty();
         }
@@ -144,7 +144,7 @@ public final class GenMetadataSchemaSupport {
             if (StringUtils.isBlank(allowed)) {
                 continue;
             }
-            if (containsIgnoreCase(haystack, allowed)
+            if (StringUtils.containsIgnoreCase(haystack, allowed)
                 && (best == null || allowed.length() > best.length())) {
                 best = allowed;
             }
@@ -180,9 +180,5 @@ public final class GenMetadataSchemaSupport {
             return trimmed.substring(1, trimmed.length() - 1).trim();
         }
         return trimmed;
-    }
-
-    private static boolean containsIgnoreCase(String haystack, String needle) {
-        return StringUtils.containsIgnoreCase(haystack, needle);
     }
 }

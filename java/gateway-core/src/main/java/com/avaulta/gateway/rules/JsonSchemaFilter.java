@@ -25,7 +25,9 @@ import lombok.experimental.SuperBuilder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties({
     "title",
-    "$schema", // not helpful in filter use-case, although maybe should include in future
+    "$schema",
+    "required",
+    "additionalProperties",
 })
 public class JsonSchemaFilter {
 
@@ -56,23 +58,6 @@ public class JsonSchemaFilter {
 
     //only applicable if type==array
     JsonSchemaFilter items;
-
-    /**
-     * Allowed values for string validation (JSON Schema {@code enum} keyword).
-     */
-    @JsonProperty("enum")
-    List<String> enumValues;
-
-    /**
-     * Required property names when validating augment output (predicate use case).
-     */
-    List<String> required;
-
-    /**
-     * Whether additional properties are allowed; used when validating augment output.
-     * Response-schema filtering still ignores this (always strips undeclared properties).
-     */
-    Boolean additionalProperties;
 
     // @JsonProperties("$defs") on property, lombok getter/setter don't seem to do the right thing
     // get java.lang.IllegalArgumentException: Unrecognized field "definitions" (class com.avaulta.gateway.rules.SchemaRuleUtils$JsonSchema)

@@ -94,6 +94,7 @@ public class RecordRules implements BulkDataRules {
      */
     public RecordRules() {
         this.transforms = Collections.emptyList();
+        // mutable list for @Singular + Jackson compatibility, same as Endpoint
         this.augments = new ArrayList<>();
     }
 

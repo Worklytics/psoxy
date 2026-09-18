@@ -205,7 +205,6 @@ variable "api_connectors" {
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
     enable_gen_metadata     = optional(bool, false)
-    gen_metadata_backend    = optional(string) # "bedrock" (AWS); host default applies when null
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -306,7 +305,6 @@ variable "bulk_connectors" {
     memory_size_mb        = optional(number)
     settings_to_provide   = optional(map(string), {})
     enable_gen_metadata   = optional(bool, false)
-    gen_metadata_backend  = optional(string) # "bedrock" (AWS); host default applies when null
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -487,15 +485,4 @@ variable "enable_remote_resources" {
   type        = bool
   description = "**beta** Whether to enable remote resource loading from the artifacts S3 bucket (rules, NLP models, etc.). When true, sets REMOTE_RESOURCE_BUCKET env var and grants s3:GetObject to each Lambda. Provisions an artifacts bucket if one is not already created or provided."
   default     = false
-}
-
-variable "gen_metadata_backend" {
-  type        = string
-  description = "Default genMetadata backend for connectors with enable_gen_metadata when not set per connector. On AWS: \"bedrock\" only."
-  default     = "bedrock"
-
-  validation {
-    condition     = var.gen_metadata_backend == "bedrock"
-    error_message = "gen_metadata_backend must be \"bedrock\" on aws-host (Vertex is GCP-only)."
-  }
 }

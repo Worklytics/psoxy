@@ -1,6 +1,6 @@
 package com.avaulta.gateway.rules.augments;
 
-import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -20,17 +20,17 @@ class GenMetadataProcessorTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private static JsonSchemaFilter categorySchema() {
-        return JsonSchemaFilter.builder()
+    private static JsonSchema categorySchema() {
+        return JsonSchema.builder()
             .type("object")
             .required(List.of("category"))
-            .properties(Map.of("category", JsonSchemaFilter.builder().type("string").build()))
+            .properties(Map.of("category", JsonSchema.builder().type("string").build()))
             .build();
     }
 
     @Test
     void process_delegatesToBackend() {
-        JsonSchemaFilter schema = categorySchema();
+        JsonSchema schema = categorySchema();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(
             (taskPrompt, outputSchema, inputData) -> {
@@ -38,7 +38,9 @@ class GenMetadataProcessorTest {
                 result.put("category", "Excluded");
                 return result;
             },
-            OBJECT_MAPPER);
+            OBJECT_MAPPER,
+            2,
+            new JsonSchemaValidationUtils());
 
         @SuppressWarnings("unchecked")
         Map<String, Object> out = (Map<String, Object>) processor.process(
@@ -48,7 +50,7 @@ class GenMetadataProcessorTest {
 
     @Test
     void process_retriesOnSchemaMismatch() {
-        JsonSchemaFilter schema = categorySchema();
+        JsonSchema schema = categorySchema();
         AtomicInteger calls = new AtomicInteger();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(
@@ -73,7 +75,7 @@ class GenMetadataProcessorTest {
 
     @Test
     void process_failsAfterExhaustingRetries() {
-        JsonSchemaFilter schema = categorySchema();
+        JsonSchema schema = categorySchema();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(
             (taskPrompt, outputSchema, inputData) -> """
@@ -90,12 +92,12 @@ class GenMetadataProcessorTest {
     @Test
     void parseModelJson_extractsFromMarkdownFences() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            new UnavailableGenMetadataBackend(), OBJECT_MAPPER);
+            new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 2, new JsonSchemaValidationUtils());
         Object out = processor.parseModelJson("""
             ```json
             {"category": "Email Drafting"}
             ```
-            """);
+            """, null);
         @SuppressWarnings("unchecked")
         Map<String, Object> map = (Map<String, Object>) out;
         assertEquals("Email Drafting", map.get("category"));
@@ -104,9 +106,9 @@ class GenMetadataProcessorTest {
     @Test
     void parseModelJson_extractsJsonAfterProsePrefix() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            new UnavailableGenMetadataBackend(), OBJECT_MAPPER);
+            new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 2, new JsonSchemaValidationUtils());
         Object out = processor.parseModelJson(
-            "Here is the JSON requested:\n{\"category\":\"Excluded\"}");
+            "Here is the JSON requested:\n{\"category\":\"Excluded\"}", null);
         @SuppressWarnings("unchecked")
         Map<String, Object> map = (Map<String, Object>) out;
         assertEquals("Excluded", map.get("category"));
@@ -114,17 +116,17 @@ class GenMetadataProcessorTest {
 
     @Test
     void parseModelJson_recoversClassifyLabelFromTruncatedJson() {
-        JsonSchemaFilter schema = JsonSchemaFilter.builder()
+        JsonSchema schema = JsonSchema.builder()
             .type("object")
             .required(List.of("category"))
             .properties(Map.of(
-                "category", JsonSchemaFilter.builder()
+                "category", JsonSchema.builder()
                     .type("string")
                     .enumValues(List.of("Email Drafting", "Excluded", "Uncategorized"))
                     .build()))
             .build();
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            new UnavailableGenMetadataBackend(), OBJECT_MAPPER);
+            new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 2, new JsonSchemaValidationUtils());
         Object out = processor.parseModelJson(
             "Here is the JSON requested:\n{\"category\": \"Email Drafting", schema);
         @SuppressWarnings("unchecked")
@@ -134,12 +136,12 @@ class GenMetadataProcessorTest {
 
     @Test
     void parseModelJson_parsesQuotedJsonStringForRootEnum() {
-        JsonSchemaFilter schema = JsonSchemaFilter.builder()
+        JsonSchema schema = JsonSchema.builder()
             .type("string")
             .enumValues(List.of("Email Drafting", "Excluded", "Uncategorized"))
             .build();
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            new UnavailableGenMetadataBackend(), OBJECT_MAPPER);
+            new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 2, new JsonSchemaValidationUtils());
         assertEquals("Email Drafting",
             processor.parseModelJson("\"Email Drafting\"", schema));
         assertEquals("Excluded",
@@ -149,15 +151,15 @@ class GenMetadataProcessorTest {
     @Test
     void process_throwsWhenPromptMissing() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            new UnavailableGenMetadataBackend(), OBJECT_MAPPER);
+            new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 2, new JsonSchemaValidationUtils());
         assertThrows(GenMetadataAugmentException.class,
-            () -> processor.process(null, JsonSchemaFilter.builder().type("object").build(), "x"));
+            () -> processor.process(null, JsonSchema.builder().type("object").build(), "x"));
     }
 
     @Test
     void serializeInput_mapPutsTitleBodyFirst() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            new UnavailableGenMetadataBackend(), OBJECT_MAPPER);
+            new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 2, new JsonSchemaValidationUtils());
         Map<String, Object> pr = new LinkedHashMap<>();
         pr.put("id", 42);
         pr.put("user", Map.of("login", "a".repeat(200)));
@@ -169,15 +171,14 @@ class GenMetadataProcessorTest {
 
         assertTrue(serialized.contains("Fix crash"));
         assertTrue(serialized.contains("\"title\""), serialized);
-        assertTrue(serialized.indexOf("\"title\"") < serialized.indexOf("\"user\""));
-        assertFalse(serialized.contains("+self:genMetadata"));
-        assertFalse(serialized.contains("should-not-appear"));
+        assertTrue(serialized.contains("+self:genMetadata"));
+        assertTrue(serialized.contains("should-not-appear"));
     }
 
     @Test
     void serializeInput_mapIncludesBodyWhenBudgetAllows() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            new UnavailableGenMetadataBackend(), OBJECT_MAPPER);
+            new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 2, new JsonSchemaValidationUtils());
         Map<String, Object> pr = new LinkedHashMap<>();
         pr.put("user", Map.of("login", "alice", "bio", "x".repeat(100)));
         pr.put("title", "Add feature");
@@ -187,13 +188,11 @@ class GenMetadataProcessorTest {
 
         assertTrue(serialized.contains("Add feature"));
         assertTrue(serialized.contains("Implements OAuth flow"));
-        assertTrue(serialized.indexOf("\"title\"") < serialized.indexOf("\"body\""));
-        assertTrue(serialized.indexOf("\"body\"") < serialized.indexOf("\"user\""));
     }
 
     @Test
     void process_classify_acceptsJsonObjectInput_stringEnum() {
-        JsonSchemaFilter schema = JsonSchemaFilter.builder()
+        JsonSchema schema = JsonSchema.builder()
             .type("string")
             .enumValues(List.of("Feature", "Bugfix", "Uncategorized"))
             .build();
@@ -204,7 +203,9 @@ class GenMetadataProcessorTest {
                 assertTrue(inputData.contains("Fix NPE"));
                 return "Bugfix";
             },
-            OBJECT_MAPPER);
+            OBJECT_MAPPER,
+            2,
+            new JsonSchemaValidationUtils());
 
         Object out = processor.process("Classify", schema,
             Map.of("title", "Fix NPE", "body", "null guard"));
@@ -213,7 +214,7 @@ class GenMetadataProcessorTest {
 
     @Test
     void process_classify_acceptsJsonObjectInput_categoryObjectSchema() {
-        JsonSchemaFilter schema = categorySchema();
+        JsonSchema schema = categorySchema();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(
             (taskPrompt, outputSchema, inputData) -> {

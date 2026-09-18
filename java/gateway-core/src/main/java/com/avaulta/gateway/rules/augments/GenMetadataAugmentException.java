@@ -1,9 +1,12 @@
 package com.avaulta.gateway.rules.augments;
 
+import lombok.Getter;
+
 /**
  * Runtime exception from genMetadata processing; translated to
  * {@link co.worklytics.psoxy.impl.AugmentProcessingException} in the core module.
  */
+@Getter
 public class GenMetadataAugmentException extends RuntimeException {
 
     public enum Code {
@@ -21,9 +24,5 @@ public class GenMetadataAugmentException extends RuntimeException {
     public GenMetadataAugmentException(Code code, String message, Throwable cause) {
         super(message, cause);
         this.code = code;
-    }
-
-    public Code getCode() {
-        return code;
     }
 }

@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
  * That prefix is stable per augment rule and is the candidate for future provider prompt caching.
  *
  * <p>Estimate is {@value #CHARS_PER_TOKEN_ESTIMATE} chars/token, not a model tokenizer.
+ *
+ * <p>TODO: use a real tokenizer (e.g. langchain4j's OpenAiTokenCountEstimator / jtokkit) when
+ * one is available on the classpath.
  */
 @Singleton
 @NoArgsConstructor(onConstructor_ = @Inject)
