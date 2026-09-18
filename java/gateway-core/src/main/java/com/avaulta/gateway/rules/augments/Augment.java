@@ -1,6 +1,7 @@
 package com.avaulta.gateway.rules.augments;
 
-import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchema;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -21,7 +22,9 @@ import java.util.TreeMap;
  * sibling properties to API response payloads.
  *
  * <p>Augments run <b>before</b> transforms, so transforms still see original field values.
- * The output is placed in a sibling property named {@code +{sourceProperty}:{augmentFunction}}.
+ * The output is placed in a sibling property named {@code +{sourceProperty}:{augmentFunction}},
+ * or on the matched object itself as {@code +self:{augmentFunction}} when the jsonPath matches
+ * a JSON object (Map).
  *
  * @see <a href="file:///docs/development/augments.md">Augments Design Doc</a>
  */
@@ -29,6 +32,7 @@ import java.util.TreeMap;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Augment.TextDigest.class, name = "textDigest"),
     @JsonSubTypes.Type(value = Augment.SentenceMetadata.class, name = "sentenceMetadata"),
+    @JsonSubTypes.Type(value = Augment.GenMetadata.class, name = "genMetadata"),
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
@@ -59,7 +63,7 @@ public abstract class Augment {
      * (warning logged) but the response is otherwise unaffected.
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    JsonSchemaFilter outputSchema;
+    JsonSchema outputSchema;
 
     /**
      * If provided, the source value is treated as a JSON string and parsed, and this JSONPath
@@ -234,6 +238,99 @@ public abstract class Augment {
                     .forEach(word -> result.add(word.toLowerCase()));
             }
             return Set.copyOf(result);
+        }
+    }
+
+    /**
+     * BETA: Generates structured metadata via cloud LLM (Bedrock / Vertex) with constrained
+     * classify (enum) or compute (JSON schema) modes.
+     * Requires {@link #outputSchema} and {@link #prompt}; model/backend selection is deployment config.
+     */
+    @SuperBuilder(toBuilder = true)
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    public static class GenMetadata extends Augment {
+
+        public static final int DEFAULT_MAX_INPUT_TOKENS = 256;
+
+        /**
+         * Default generation cap. Enough for classify JSON ({@code 100}–{@code 200});
+         * compute / transcripts should set {@link #maxOutputTokens} higher ({@code 500}+).
+         */
+        public static final int DEFAULT_MAX_OUTPUT_TOKENS = 200;
+
+        /**
+         * Task instruction passed to the generative backend.
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String prompt;
+
+        /**
+         * Per-augment cap on generated tokens (visible JSON; Gemini thinking shares this
+         * budget). Default {@value #DEFAULT_MAX_OUTPUT_TOKENS}. Classify: {@code 100}–{@code 200};
+         * meeting transcripts / rich compute: {@code 500}+.
+         */
+        @JsonAlias("maxTokens")
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @Getter(AccessLevel.NONE)
+        Integer maxOutputTokens;
+
+        /**
+         * Cap on the <em>dynamic</em> source corpus (serialized jsonPath match).
+         * The static task {@link #prompt} and schema/labels are not counted.
+         * Default {@value #DEFAULT_MAX_INPUT_TOKENS}. Typical classify: 100; longer compute: 500+.
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @Getter(AccessLevel.NONE)
+        Integer maxInputTokens;
+
+        /**
+         * Output token cap for this augment. Returns configured value or
+         * {@value #DEFAULT_MAX_OUTPUT_TOKENS} when unset.
+         * @throws IllegalArgumentException if configured value is less than 1
+         */
+        public int getMaxOutputTokens() {
+            if (maxOutputTokens == null) {
+                return DEFAULT_MAX_OUTPUT_TOKENS;
+            }
+            if (maxOutputTokens < 1) {
+                throw new IllegalArgumentException("maxOutputTokens must be >= 1, got " + maxOutputTokens);
+            }
+            return maxOutputTokens;
+        }
+
+        /**
+         * Input token cap for the dynamic source corpus. Returns configured value or
+         * {@value #DEFAULT_MAX_INPUT_TOKENS} when unset.
+         * @throws IllegalArgumentException if configured value is less than 1
+         */
+        public int getMaxInputTokens() {
+            if (maxInputTokens == null) {
+                return DEFAULT_MAX_INPUT_TOKENS;
+            }
+            if (maxInputTokens < 1) {
+                throw new IllegalArgumentException("maxInputTokens must be >= 1, got " + maxInputTokens);
+            }
+            return maxInputTokens;
+        }
+
+        @JsonIgnore
+        @Override
+        public String getFunctionName() {
+            return "genMetadata";
+        }
+
+        @Override
+        public Object compute(Object input) {
+            // Computed at runtime by AugmentProcessor via injected GenMetadataProcessor.
+            return null;
+        }
+
+        @Override
+        protected boolean canEqual(Object other) {
+            return other instanceof GenMetadata;
         }
     }
 }
