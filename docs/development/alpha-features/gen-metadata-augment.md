@@ -124,17 +124,16 @@ No `model`, `backend`, or `thinkingLevel` in rules — those stay deployment con
 
 ## Deployment configuration (env)
 
-Parsed from `GEN_METADATA_*` env vars (not `ProxyConfigProperty`). Terraform sets `ENABLE_GEN_METADATA` and `GEN_METADATA_BACKEND` (`bedrock` on AWS, `vertex` on GCP). Model / region / thinking defaults live in Java. Override via `general_environment_variables` when needed.
+Parsed from `GEN_METADATA_*` env vars (not `ProxyConfigProperty`). Terraform `enable_gen_metadata` is IAM-only (Bedrock invoke / Vertex user). Host Dagger modules bind Bedrock (AWS) or Vertex (GCP). Terraform still sets `GEN_METADATA_BACKEND` for a future non-cloud backend; it does not gate inference in Java. Model / region / thinking defaults live in Java. Override via `general_environment_variables` when needed.
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `GEN_METADATA_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). | `bedrock` \| `vertex` only |
+| `GEN_METADATA_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). | Reserved for a future backend (e.g. local). Host modules bind Bedrock vs Vertex; Java does not switch on this today. |
 | `GEN_METADATA_MODEL` | AWS: `us.amazon.nova-2-lite-v1:0` · GCP: `gemini-3.5-flash-lite` | Cloud model id / **inference profile**. For Nova, use a CRIS id (`us.` / `eu.` / `jp.` / `global.` prefix) — bare `amazon.nova-…` foundation-model ids are rejected by Bedrock. If a bare `amazon.nova-…` value is set, Java rewrites it to `us.amazon.nova-…`. |
 | `GEN_METADATA_MODEL_REGION` | Vertex: `global` | Vertex publisher-model **location** (`VertexGenMetadataConfig`). Default `global` (google-genai → `https://aiplatform.googleapis.com`). Ignored on AWS. |
 | `GEN_METADATA_TIMEOUT_SECONDS` | `15` | Per-call timeout |
 | `GEN_METADATA_RETRIES` | `2` | Total attempts per augment when parse/schema fails |
 | `GEN_METADATA_THINKING_LEVEL` | `minimal` | **Vertex only** (`VertexGenMetadataConfig`). Gemini thinking level: `minimal` \| `low` \| `medium` \| `high`. Ignored on Bedrock. |
-| `ENABLE_GEN_METADATA` | unset | Set by Terraform `enable_gen_metadata = true` |
 
 Vertex project comes from ADC / metadata. Model location is **not** the Cloud Function region.
 

@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.impl.gen;
 
 import com.avaulta.gateway.rules.JsonSchema;
+import com.avaulta.gateway.rules.augments.GenMetadataAugmentException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -35,7 +36,7 @@ class LangChain4jGenMetadataBackendAuthFailureTest {
     }
 
     @Test
-    void generate_returnsNullOnAccessDeniedFromCloudModel() {
+    void generate_throwsUnavailableOnAccessDeniedFromCloudModel() {
         GenMetadataConfig config = BedrockGenMetadataConfig.of("us.amazon.nova-2-lite-v1:0", 5);
 
         ChatModel denied = new ChatModel() {
@@ -73,6 +74,8 @@ class LangChain4jGenMetadataBackendAuthFailureTest {
                 .build()))
             .build();
 
-        assertNull(backend.generate("classify", outputSchema, "{\"text\":\"hello\"}"));
+        GenMetadataAugmentException thrown = assertThrows(GenMetadataAugmentException.class,
+            () -> backend.generate("classify", outputSchema, "{\"text\":\"hello\"}"));
+        assertEquals(GenMetadataAugmentException.Code.UNAVAILABLE, thrown.getCode());
     }
 }

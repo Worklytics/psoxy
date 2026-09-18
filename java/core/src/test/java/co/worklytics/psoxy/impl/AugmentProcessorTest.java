@@ -316,6 +316,37 @@ class AugmentProcessorTest {
         assertTrue(innerAugments.contains("\"text\":\"{\\\"length\\\":12,\\\"word_count\\\":2}\""));
     }
 
+    @SneakyThrows
+    @Test
+    void applyAugments_innerJsonPath_propagatesGenMetadataUnavailableWarning() {
+        String adaptiveCard = """
+            {
+              "body": [
+                {"type": "TextBlock", "text": "Hello world"}
+              ]
+            }
+            """;
+        Map<String, Object> attachment = new LinkedHashMap<>();
+        attachment.put("content", adaptiveCard);
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("attachments", List.of(attachment));
+
+        Augment.GenMetadata augment = Augment.GenMetadata.builder()
+            .jsonPath("$.attachments[*].content")
+            .innerJsonPath("$..text")
+            .prompt("Classify")
+            .outputSchema(stringEnumSchema("Feature", "Bugfix", "Uncategorized"))
+            .build();
+
+        List<String> warnings = augmentProcessor.applyAugments(List.of(augment), document);
+
+        assertTrue(warnings.contains(Warning.AUGMENT_GEN_UNAVAILABLE.asHttpHeaderCode()));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> resultAttachment = (Map<String, Object>)
+            ((List<?>) document.get("attachments")).get(0);
+        assertFalse(resultAttachment.containsKey("+content:genMetadata"));
+    }
+
     @Test
     void toInnerPathSuffix_bracketNotation() {
         assertEquals("body[0].text",

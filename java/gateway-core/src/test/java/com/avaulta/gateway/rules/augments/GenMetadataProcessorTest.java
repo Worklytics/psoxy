@@ -149,6 +149,19 @@ class GenMetadataProcessorTest {
     }
 
     @Test
+    void parseModelJson_parsesJsonArrayRoot() {
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 2, new JsonSchemaValidationUtils());
+        Object out = processor.parseModelJson(
+            "Here is the JSON requested:\n[{\"label\":\"a\"},{\"label\":\"b\"}]", null);
+        assertTrue(out instanceof List<?>);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> list = (List<Map<String, Object>>) out;
+        assertEquals(2, list.size());
+        assertEquals("a", list.get(0).get("label"));
+    }
+
+    @Test
     void process_throwsWhenPromptMissing() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
             new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 2, new JsonSchemaValidationUtils());

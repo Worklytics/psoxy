@@ -1,11 +1,14 @@
 package co.worklytics.psoxy.impl;
 
+import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.Warning;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventRequestDto;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.utils.email.EmailAddressParser;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.WebhookCollectionRules;
 import com.avaulta.gateway.rules.augments.Augment;
@@ -24,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -88,5 +92,40 @@ class WebhookSanitizerAugmentsTest {
         assertTrue(output.contains("\"+content:textDigest\""));
         assertTrue(output.contains("\"word_count\""));
         assertFalse(output.contains("\"content\":\"hello world test\""));
+    }
+
+    @Test
+    void sanitize_recordsAugmentWarningsInMetadata() {
+        WebhookCollectionRules.WebhookEndpoint endpoint = WebhookCollectionRules.WebhookEndpoint.builder()
+            .augment(Augment.GenMetadata.builder()
+                .jsonPath("$.content")
+                .prompt("Classify")
+                .outputSchema(JsonSchema.builder()
+                    .type("string")
+                    .enumValues(List.of("Feature", "Bugfix"))
+                    .build())
+                .build())
+            .build();
+        sanitizer = new WebhookSanitizerImpl(WebhookCollectionRules.builder().endpoint(endpoint).build());
+        sanitizer.pseudonymizer = mock(Pseudonymizer.class);
+        sanitizer.emailAddressParser = mock(EmailAddressParser.class);
+        sanitizer.sanitizerUtils = sanitizerUtils;
+        sanitizer.jsonConfiguration = jsonConfiguration;
+        sanitizer.augmentProcessor = new AugmentProcessor(jsonConfiguration,
+            new JsonSchemaValidationUtils(),
+            objectMapper,
+            new com.avaulta.gateway.rules.augments.SentenceMetadataProcessor(path -> java.util.Optional.empty()),
+            new com.avaulta.gateway.rules.augments.GenMetadataProcessor(
+                new com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend(), objectMapper, 2,
+                new JsonSchemaValidationUtils()));
+
+        HttpEventRequest request = HttpEventRequestDto.builder()
+            .headers(Map.of("Content-Type", List.of("application/json")))
+            .body("{\"content\":\"hello\"}".getBytes(StandardCharsets.UTF_8))
+            .build();
+
+        ProcessedContent result = sanitizer.sanitize(request);
+        assertEquals(Warning.AUGMENT_GEN_UNAVAILABLE.asHttpHeaderCode(),
+            result.getMetadata().get(ProcessedDataMetadataFields.WARNING.getMetadataKey()));
     }
 }

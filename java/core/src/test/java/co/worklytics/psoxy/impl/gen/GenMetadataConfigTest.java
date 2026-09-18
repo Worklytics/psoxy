@@ -10,58 +10,44 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GenMetadataConfigTest {
 
     @Test
-    void from_unsetBackendDefaultsToBedrock() {
-        GenMetadataConfig config = GenMetadataConfig.from(configMap(Map.of()));
-        assertInstanceOf(BedrockGenMetadataConfig.class, config);
+    void bedrockFrom_defaultsModelToUsNovaInferenceProfile() {
+        GenMetadataConfig config = BedrockGenMetadataConfig.from(configMap(Map.of()));
         assertEquals(GenMetadataConfig.Backend.BEDROCK, config.getBackend());
         assertEquals(BedrockGenMetadataConfig.DEFAULT_MODEL, config.getModelId());
+        assertEquals("us.amazon.nova-2-lite-v1:0", config.getModelId());
     }
 
     @Test
-    void from_vertexDefaultsModelRegionAndThinkingLevel() {
-        VertexGenMetadataConfig config = (VertexGenMetadataConfig) GenMetadataConfig.from(configMap(Map.of(
-            GenMetadataConfig.ConfigProperty.GEN_METADATA_BACKEND.name(), "vertex")));
+    void vertexFrom_defaultsModelRegionAndThinkingLevel() {
+        VertexGenMetadataConfig config = VertexGenMetadataConfig.from(configMap(Map.of()));
         assertEquals(VertexGenMetadataConfig.DEFAULT_MODEL, config.getModelId());
         assertEquals(VertexGenMetadataConfig.DEFAULT_MODEL_REGION, config.getModelRegion());
         assertEquals(GenMetadataThinkingLevels.MINIMAL, config.getThinkingLevel());
     }
 
     @Test
-    void from_resolvesVertexThinkingLevelFromEnv() {
-        VertexGenMetadataConfig config = (VertexGenMetadataConfig) GenMetadataConfig.from(configMap(Map.of(
-            GenMetadataConfig.ConfigProperty.GEN_METADATA_BACKEND.name(), "vertex",
+    void vertexFrom_resolvesThinkingLevelFromEnv() {
+        VertexGenMetadataConfig config = VertexGenMetadataConfig.from(configMap(Map.of(
             VertexGenMetadataConfig.ConfigProperty.GEN_METADATA_THINKING_LEVEL.name(), "high")));
         assertEquals(GenMetadataThinkingLevels.HIGH, config.getThinkingLevel());
     }
 
     @Test
-    void from_defaultsBedrockModelToUsNovaInferenceProfile() {
-        GenMetadataConfig config = GenMetadataConfig.from(configMap(Map.of(
-            GenMetadataConfig.ConfigProperty.GEN_METADATA_BACKEND.name(), "bedrock")));
-        assertEquals(BedrockGenMetadataConfig.DEFAULT_MODEL, config.getModelId());
-        assertEquals("us.amazon.nova-2-lite-v1:0", config.getModelId());
-    }
-
-    @Test
-    void from_rewritesBareNovaFoundationModelToUsInferenceProfile() {
-        GenMetadataConfig config = GenMetadataConfig.from(configMap(Map.of(
-            GenMetadataConfig.ConfigProperty.GEN_METADATA_BACKEND.name(), "bedrock",
+    void bedrockFrom_rewritesBareNovaFoundationModelToUsInferenceProfile() {
+        GenMetadataConfig config = BedrockGenMetadataConfig.from(configMap(Map.of(
             GenMetadataConfig.ConfigProperty.GEN_METADATA_MODEL.name(), "amazon.nova-2-lite-v1:0")));
         assertEquals("us.amazon.nova-2-lite-v1:0", config.getModelId());
     }
 
     @Test
-    void from_unknownBackendIsUnsupported() {
-        GenMetadataConfig config = GenMetadataConfig.from(configMap(Map.of(
-            GenMetadataConfig.ConfigProperty.GEN_METADATA_BACKEND.name(), "local")));
-        assertInstanceOf(GenMetadataConfig.Unsupported.class, config);
-        assertFalse(config.isSupportedCloudBackend());
+    void unknownBackendConfigValueIsNotACloudBackend() {
+        assertTrue(GenMetadataConfig.Backend.fromConfigValue("local").isEmpty());
+        assertFalse(new GenMetadataConfig.Unsupported("local").isSupportedCloudBackend());
     }
 
     @Test

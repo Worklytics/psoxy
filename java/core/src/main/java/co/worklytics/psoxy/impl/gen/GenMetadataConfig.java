@@ -10,10 +10,13 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * Deployment configuration for genMetadata. Construct via {@link #from(ConfigService)}; env keys
- * live on {@link ConfigProperty} / platform subclasses, not {@code ProxyConfigProperty}.
+ * Deployment configuration for genMetadata. Platform Dagger modules construct the host subclass
+ * ({@link BedrockGenMetadataConfig} / {@link VertexGenMetadataConfig}); env keys live on
+ * {@link ConfigProperty} / platform subclasses, not {@code ProxyConfigProperty}.
  *
- * <p>Cloud-only: {@link Backend#BEDROCK} (AWS) or {@link Backend#VERTEX} (GCP).
+ * <p>Cloud-only today: {@link Backend#BEDROCK} (AWS) or {@link Backend#VERTEX} (GCP).
+ * {@link ConfigProperty#GEN_METADATA_BACKEND} is reserved for a future non-cloud backend
+ * (e.g. local); it does not select the implementation at runtime.
  */
 @Getter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
@@ -48,13 +51,14 @@ public abstract class GenMetadataConfig {
      * {@link VertexGenMetadataConfig.ConfigProperty}.
      */
     public enum ConfigProperty implements ConfigService.ConfigProperty {
-        /** {@code bedrock} or {@code vertex}. Unset defaults to Bedrock. */
+        /**
+         * Future backend selector ({@code bedrock} / {@code vertex} / later {@code local}). Host
+         * modules still bind Bedrock vs Vertex; this is not a runtime factory switch.
+         */
         GEN_METADATA_BACKEND,
         GEN_METADATA_MODEL,
         GEN_METADATA_TIMEOUT_SECONDS,
         GEN_METADATA_RETRIES,
-        /** Set by Terraform {@code enable_gen_metadata = true}. */
-        ENABLE_GEN_METADATA,
         ;
     }
 
@@ -62,22 +66,6 @@ public abstract class GenMetadataConfig {
     private final String modelId;
     private final int timeoutSeconds;
     private final int maxAttempts;
-
-    public static GenMetadataConfig from(ConfigService configService) {
-        String rawBackend = configService.getConfigPropertyAsOptional(ConfigProperty.GEN_METADATA_BACKEND)
-            .filter(StringUtils::isNotBlank)
-            .map(String::trim)
-            .orElse(null);
-        Optional<Backend> parsed = Backend.fromConfigValue(rawBackend);
-        if (rawBackend != null && parsed.isEmpty()) {
-            return new Unsupported(rawBackend);
-        }
-        Backend backend = parsed.orElse(Backend.BEDROCK);
-        return switch (backend) {
-            case BEDROCK -> BedrockGenMetadataConfig.from(configService);
-            case VERTEX -> VertexGenMetadataConfig.from(configService);
-        };
-    }
 
     public boolean isSupportedCloudBackend() {
         return backend == Backend.BEDROCK || backend == Backend.VERTEX;

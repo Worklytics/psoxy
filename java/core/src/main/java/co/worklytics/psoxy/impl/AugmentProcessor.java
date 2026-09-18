@@ -167,7 +167,7 @@ public class AugmentProcessor {
 
         for (String concretePath : resolvedPaths) {
             try {
-                applyAugmentAtConcretePath(augment, document, concretePath);
+                applyAugmentAtConcretePath(augment, document, concretePath, warnings);
             } catch (AugmentProcessingException e) {
                 log.log(Level.WARNING, e.getMessage(), e);
                 warnings.add(e.getWarningCode());
@@ -181,7 +181,8 @@ public class AugmentProcessor {
     }
 
     @SuppressWarnings("unchecked")
-    private void applyAugmentAtConcretePath(Augment augment, Object document, String concretePath)
+    private void applyAugmentAtConcretePath(Augment augment, Object document, String concretePath,
+                                            List<String> warnings)
             throws AugmentProcessingException {
         Object sourceValue;
         try {
@@ -229,7 +230,8 @@ public class AugmentProcessor {
         String augmentPropertyName = buildAugmentPropertyName(leafFieldName, augment.getFunctionName());
 
         if (hasInnerJsonPath(augment) && sourceValue instanceof String jsonStr && !jsonStr.isEmpty()) {
-            applyInnerJsonPathAugments(augment, (Map<String, Object>) parent, leafFieldName, jsonStr);
+            applyInnerJsonPathAugments(augment, (Map<String, Object>) parent, leafFieldName, jsonStr,
+                warnings);
             return;
         }
 
@@ -309,7 +311,8 @@ public class AugmentProcessor {
      */
     @SuppressWarnings("unchecked")
     private void applyInnerJsonPathAugments(Augment augment, Map<String, Object> parent,
-                                            String leafFieldName, String jsonStr) {
+                                            String leafFieldName, String jsonStr,
+                                            List<String> warnings) {
         DocumentContext innerContext = JsonPath.parse(jsonStr);
         Object innerDocument = innerContext.json();
 
@@ -338,6 +341,7 @@ public class AugmentProcessor {
                     log.warning("Augment '" + augment.getFunctionName()
                         + "' output failed schema validation at inner path '" + innerConcretePath
                         + "'; skipping.");
+                    warnings.add(Warning.AUGMENT_OUTPUT_SCHEMA_MISMATCH.asHttpHeaderCode());
                     continue;
                 }
 
@@ -346,6 +350,7 @@ public class AugmentProcessor {
                 anyApplied = true;
             } catch (AugmentProcessingException e) {
                 log.log(Level.WARNING, e.getMessage(), e);
+                warnings.add(e.getWarningCode());
             } catch (Exception e) {
                 log.log(Level.WARNING,
                     "Augment '" + augment.getFunctionName() + "' failed at inner path '"

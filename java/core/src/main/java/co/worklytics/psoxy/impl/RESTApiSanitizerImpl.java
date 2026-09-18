@@ -244,7 +244,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     @Override
     public String sanitize(@NonNull String httpMethod, @NonNull URL url, String jsonResponse) {
         if (StringUtils.isEmpty(jsonResponse)) {
-            // Nothing to do
+            lastAugmentWarnings.set(List.of());
             return jsonResponse;
         }
         // Convert input String to InputStream (UTF-8 encoding)

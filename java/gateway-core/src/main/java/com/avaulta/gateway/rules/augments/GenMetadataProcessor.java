@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -22,7 +23,6 @@ public class GenMetadataProcessor {
     private static final Logger log = Logger.getLogger(GenMetadataProcessor.class.getName());
 
     private static final int DEFAULT_MAX_ATTEMPTS = 2;
-    private static final int MAX_LOG_OUTPUT_CHARS = 2000;
 
     private final GenMetadataBackend backend;
     private final ObjectMapper objectMapper;
@@ -88,7 +88,7 @@ public class GenMetadataProcessor {
             log.info("genMetadata augment inference call completed in " + elapsedMs + "ms");
         }
         if (raw instanceof String rawText) {
-            log.info("genMetadata raw backend response: " + truncateForLog(rawText));
+            log.info("genMetadata backend response received chars=" + rawText.length());
         } else if (raw != null) {
             log.info("genMetadata backend returned non-string type: "
                 + raw.getClass().getSimpleName());
@@ -99,10 +99,11 @@ public class GenMetadataProcessor {
             return null;
         }
         if (parsed instanceof Map<?, ?> map) {
-            log.info("genMetadata parsed output keys: " + map.keySet()
-                + "; value=" + truncateForLog(serializeForLog(parsed)));
+            log.info("genMetadata parsed output keys: " + map.keySet());
+        } else if (parsed instanceof List<?> list) {
+            log.info("genMetadata parsed output array size: " + list.size());
         } else {
-            log.info("genMetadata parsed output: " + truncateForLog(serializeForLog(parsed)));
+            log.info("genMetadata parsed output type: " + parsed.getClass().getSimpleName());
         }
         return parsed;
     }
@@ -145,21 +146,34 @@ public class GenMetadataProcessor {
             }
             return toSortedMap(map);
         }
+        if (raw instanceof List<?> list) {
+            return list;
+        }
         if (raw instanceof String response) {
             if (classify.isPresent() && classify.get().isRootString()) {
                 return parseRootStringLabel(response, classify.get());
             }
 
-            // Prefer valid JSON object when present (including after prose / fences).
-            String json = extractJsonObject(response);
+            String json = extractJsonValue(response);
             if (json != null) {
                 try {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> map = objectMapper.readValue(json, Map.class);
-                    return new TreeMap<>(map);
+                    Object parsed = objectMapper.readValue(json, Object.class);
+                    if (parsed instanceof Map<?, ?> map) {
+                        if (classify.isPresent() && classify.get().isRootString()) {
+                            return GenMetadataSchemaSupport.labelFromMap(map, classify.get())
+                                .orElse(null);
+                        }
+                        return toSortedMap(map);
+                    }
+                    if (parsed instanceof List<?>) {
+                        return parsed;
+                    }
+                    if (classify.isEmpty()) {
+                        return parsed;
+                    }
                 } catch (JsonProcessingException e) {
-                    log.log(Level.WARNING, "Failed to parse genMetadata JSON response: " + json, e);
-                    // Fall through: incomplete JSON may still contain a usable classify label.
+                    log.log(Level.WARNING,
+                        "Failed to parse genMetadata JSON response (" + json.length() + " chars)", e);
                 }
             }
 
@@ -214,43 +228,63 @@ public class GenMetadataProcessor {
         return GenMetadataSchemaSupport.recoverLabel(trimmed, shape).orElse(null);
     }
 
-    private String serializeForLog(Object parsed) {
-        try {
-            return objectMapper.writeValueAsString(parsed);
-        } catch (JsonProcessingException e) {
-            return String.valueOf(parsed);
+    /**
+     * Pull the outermost JSON value from a model response, ignoring markdown fences and leading
+     * prose (e.g. {@code Here is the JSON requested: {...}}). Objects, arrays, and JSON scalars
+     * are all eligible.
+     */
+    String extractJsonValue(String response) {
+        if (StringUtils.isBlank(response)) {
+            return null;
         }
+        String trimmed = stripMarkdownFence(response.trim());
+        if (isJson(trimmed)) {
+            return trimmed;
+        }
+        int objStart = trimmed.indexOf('{');
+        int arrStart = trimmed.indexOf('[');
+        if (objStart < 0 && arrStart < 0) {
+            return null;
+        }
+        boolean arrayFirst = arrStart >= 0 && (objStart < 0 || arrStart < objStart);
+        if (arrayFirst) {
+            int end = trimmed.lastIndexOf(']');
+            if (end > arrStart) {
+                String candidate = trimmed.substring(arrStart, end + 1);
+                return isJson(candidate) ? candidate : null;
+            }
+            return null;
+        }
+        int end = trimmed.lastIndexOf('}');
+        if (end > objStart) {
+            String candidate = trimmed.substring(objStart, end + 1);
+            return isJson(candidate) ? candidate : null;
+        }
+        return null;
     }
 
-    private static String truncateForLog(String value) {
-        if (value == null) {
-            return "null";
+    private boolean isJson(String text) {
+        try {
+            objectMapper.readTree(text);
+            return true;
+        } catch (JsonProcessingException e) {
+            return false;
         }
-        if (value.length() <= MAX_LOG_OUTPUT_CHARS) {
-            return value;
-        }
-        return value.substring(0, MAX_LOG_OUTPUT_CHARS) + "... (" + value.length() + " chars total)";
     }
 
     /**
      * Pull the outermost JSON object from a model response, ignoring markdown fences and leading
      * prose (e.g. {@code Here is the JSON requested: {...}}).
      */
-    static String extractJsonObject(String response) {
-        if (StringUtils.isBlank(response)) {
-            return null;
+    String extractJsonObject(String response) {
+        String json = extractJsonValue(response);
+        if (json != null && json.startsWith("{")) {
+            return json;
         }
-        String trimmed = stripMarkdownFence(response.trim());
-        int start = trimmed.indexOf('{');
-        int end = trimmed.lastIndexOf('}');
-        if (start >= 0 && end > start) {
-            return trimmed.substring(start, end + 1);
-        }
-        // Incomplete object (e.g. truncated mid-generation) — not parseable as JSON.
         return null;
     }
 
-    static String stripMarkdownFence(String response) {
+    String stripMarkdownFence(String response) {
         String trimmed = response.trim();
         if (!trimmed.startsWith("```")) {
             return trimmed;

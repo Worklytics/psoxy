@@ -344,7 +344,6 @@ module "api_connector" {
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
     try(each.value.enable_gen_metadata, false) ? {
-      ENABLE_GEN_METADATA  = "true"
       GEN_METADATA_BACKEND = "vertex"
     } : {},
   )
@@ -550,7 +549,6 @@ module "bulk_connector" {
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
     try(each.value.enable_gen_metadata, false) ? {
-      ENABLE_GEN_METADATA  = "true"
       GEN_METADATA_BACKEND = "vertex"
     } : {},
   )

@@ -18,12 +18,12 @@ import javax.inject.Singleton;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -34,7 +34,7 @@ import java.util.logging.Level;
  * genMetadata inference via LangChain4j {@link ChatModel} (Bedrock or Vertex only).
  *
  * <p>Thread-safety: lazy per-modelId client init via {@link ConcurrentHashMap#computeIfAbsent};
- * concurrent cloud calls limited by semaphore.
+ * concurrent cloud calls limited to a fixed pool of {@link #CLOUD_MAX_CONCURRENT}.
  */
 @Log
 @Singleton
@@ -73,8 +73,8 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     private final GenMetadataResponseFormats responseFormats;
 
     private final ConcurrentHashMap<String, ModelHandle> models = new ConcurrentHashMap<>();
-    private final Semaphore cloudConcurrency = new Semaphore(CLOUD_MAX_CONCURRENT);
-    private final ExecutorService chatExecutor = Executors.newCachedThreadPool(chatThreadFactory());
+    private final ExecutorService chatExecutor =
+        Executors.newFixedThreadPool(CLOUD_MAX_CONCURRENT, chatThreadFactory());
 
     @Inject
     public LangChain4jGenMetadataBackend(GenMetadataConfig config,
@@ -113,7 +113,8 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         }
         ModelHandle handle = resolveModel();
         if (!handle.isReady()) {
-            return null;
+            throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
+                "genMetadata client failed to initialize", handle.failure);
         }
 
         int effectiveMaxTokens = effectiveMaxTokens(maxOutputTokens);
@@ -133,15 +134,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
                 + config.getModelId());
         }
 
-        boolean permitAcquired = false;
         try {
-            permitAcquired = cloudConcurrency.tryAcquire(config.getTimeoutSeconds(), TimeUnit.SECONDS);
-            if (!permitAcquired) {
-                log.warning("genMetadata cloud concurrency timeout for model " + config.getModelId()
-                    + " after " + config.getTimeoutSeconds() + "s");
-                return null;
-            }
-
             Instant inferenceStartedAt = Instant.now();
             long inferenceStartedNanos = System.nanoTime();
             log.info("genMetadata LLM inference started at " + inferenceStartedAt
@@ -164,25 +157,26 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             recordTokenUsage(response);
             String text = response.aiMessage().text();
             if (text != null && !text.isBlank()) {
-                log.info("genMetadata raw model response: " + truncateForLog(text));
+                log.info("genMetadata model response received"
+                    + " chars=" + text.length()
+                    + " modelId=" + config.getModelId());
             }
             return text;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return null;
+        } catch (GenMetadataAugmentException e) {
+            throw e;
         } catch (Exception e) {
             if (isAuthFailure(e) || isQuotaFailure(e)) {
                 log.log(Level.WARNING,
                     "genMetadata cloud inference denied/rate-limited (backend="
                         + backendLabel() + "); omitting augment", e);
-            } else {
-                log.log(Level.WARNING, "genMetadata inference failed", e);
+                throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
+                    "genMetadata cloud inference denied or rate-limited", e);
             }
+            log.log(Level.WARNING, "genMetadata inference failed", e);
             return null;
-        } finally {
-            if (permitAcquired) {
-                cloudConcurrency.release();
-            }
         }
     }
 
@@ -248,6 +242,19 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             future.cancel(true);
             log.warning("genMetadata LLM inference timed out after " + config.getTimeoutSeconds()
                 + "s modelId=" + config.getModelId());
+            // Keep the pool slot occupied until the worker notices cancel; do not submit more work
+            // on an unbounded pool while the SDK call may still be in flight.
+            try {
+                future.get(1, TimeUnit.SECONDS);
+            } catch (CancellationException ignored) {
+                // cancel(true) won; worker stopped
+            } catch (TimeoutException ignored) {
+                // SDK call still running; the fixed pool bounds additional in-flight work
+            } catch (ExecutionException ignored) {
+                // worker finished with an error after we timed out
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+            }
             return null;
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
@@ -309,17 +316,5 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             thread.setDaemon(true);
             return thread;
         };
-    }
-
-    private static final int MAX_LOG_OUTPUT_CHARS = 2000;
-
-    private static String truncateForLog(String value) {
-        if (value == null) {
-            return "null";
-        }
-        if (value.length() <= MAX_LOG_OUTPUT_CHARS) {
-            return value;
-        }
-        return value.substring(0, MAX_LOG_OUTPUT_CHARS) + "... (" + value.length() + " chars total)";
     }
 }

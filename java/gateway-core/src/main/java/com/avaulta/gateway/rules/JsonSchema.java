@@ -75,14 +75,26 @@ public class JsonSchema {
     List<String> enumValues;
 
     /**
-     * whether additional properties are allowed for this object; only applicable if type==object;
-     * default is true
+     * whether additional properties are allowed for this object; only applicable if type==object.
+     * JSON Schema default is {@code true} when omitted.
      */
     Boolean additionalProperties;
 
     @JsonIgnore
     public boolean isObject() {
         return Objects.equals(type, "object") || (type == null && properties != null);
+    }
+
+    /**
+     * JSON Schema default: additional properties are allowed unless the schema sets
+     * {@code additionalProperties: false}.
+     */
+    @JsonIgnore
+    public boolean allowsAdditionalProperties() {
+        if (additionalProperties == null) {
+            return true;
+        }
+        return additionalProperties;
     }
 
     @JsonIgnore

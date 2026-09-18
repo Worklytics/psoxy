@@ -92,7 +92,7 @@ public class GenMetadataResponseFormats {
                 });
             }
             JsonObjectSchema.Builder b = JsonObjectSchema.builder()
-                .additionalProperties(false);
+                .additionalProperties(schema.allowsAdditionalProperties());
             props.forEach(b::addProperty);
             if (schema.getRequired() != null && !schema.getRequired().isEmpty()) {
                 b.required(schema.getRequired());
