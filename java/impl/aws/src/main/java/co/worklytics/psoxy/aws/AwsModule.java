@@ -22,7 +22,9 @@ import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.NoOpResourceService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
+import co.worklytics.psoxy.impl.gen.BedrockGenMetadataConfig;
 import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
+import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -239,6 +241,12 @@ public interface AwsModule {
         return KmsClient.create();
     }
 
+
+    @Provides
+    @Singleton
+    static GenMetadataConfig genMetadataConfig(ConfigService configService) {
+        return BedrockGenMetadataConfig.from(configService);
+    }
 
     @Provides
     @Singleton

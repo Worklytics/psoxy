@@ -83,6 +83,11 @@ public abstract class GenMetadataConfig {
         return backend == Backend.BEDROCK || backend == Backend.VERTEX;
     }
 
+    /** Override in subclasses to append platform-specific info to inference log lines. */
+    public String extraLogSuffix() {
+        return null;
+    }
+
     static String optionalModelId(ConfigService configService) {
         return configService.getConfigPropertyAsOptional(ConfigProperty.GEN_METADATA_MODEL)
             .filter(StringUtils::isNotBlank)

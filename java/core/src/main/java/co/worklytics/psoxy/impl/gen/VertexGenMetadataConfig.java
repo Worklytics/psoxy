@@ -69,6 +69,11 @@ public final class VertexGenMetadataConfig extends GenMetadataConfig {
             thinkingLevel);
     }
 
+    @Override
+    public String extraLogSuffix() {
+        return " thinkingLevel=" + thinkingLevel;
+    }
+
     /** Test helper when ConfigService is not involved. */
     public static VertexGenMetadataConfig of(String modelId, String modelRegion, int timeoutSeconds) {
         String region = StringUtils.isNotBlank(modelRegion) ? modelRegion.trim() : DEFAULT_MODEL_REGION;

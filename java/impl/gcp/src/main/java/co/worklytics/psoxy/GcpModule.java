@@ -27,6 +27,8 @@ import co.worklytics.psoxy.gateway.impl.NoOpResourceService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
 import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
+import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
+import co.worklytics.psoxy.impl.gen.VertexGenMetadataConfig;
 import co.worklytics.psoxy.gcp.GcpKmsPublicKeyStoreClient;
 import dagger.Binds;
 import dagger.Module;
@@ -167,6 +169,12 @@ public interface GcpModule {
     @Provides
     static KeyManagementServiceClient providesKeyManagementServiceClient() {
         return KeyManagementServiceClient.create();
+    }
+
+    @Provides
+    @Singleton
+    static GenMetadataConfig genMetadataConfig(ConfigService configService) {
+        return VertexGenMetadataConfig.from(configService);
     }
 
     @Provides

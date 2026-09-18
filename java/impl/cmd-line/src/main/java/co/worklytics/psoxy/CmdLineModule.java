@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ApiModeConfig;
+import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -44,6 +45,11 @@ public class CmdLineModule {
     @Provides @Singleton
     static ApiModeConfig apiModeConfig(ConfigService configService) {
         return ApiModeConfig.fromConfigService(configService);
+    }
+
+    @Provides @Singleton
+    static GenMetadataConfig genMetadataConfig() {
+        return new GenMetadataConfig.Unsupported("cmdline");
     }
 
     /** CLI has no cloud bucket; local FS under {@link ResourceService#DEFAULT_LOCAL_RESOURCE_PATH} only. */

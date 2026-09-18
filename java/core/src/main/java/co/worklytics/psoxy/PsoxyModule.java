@@ -405,16 +405,6 @@ public class PsoxyModule {
         return Base64.getEncoder();
     }
 
-    /**
-     * {@link GenMetadataProcessor} lives in gateway-core (no Dagger). Retry count comes from
-     * {@link GenMetadataConfig}; the backend is constructor-injected via {@link Bindings}.
-     */
-    @Provides
-    @Singleton
-    static GenMetadataConfig genMetadataConfig(ConfigService configService) {
-        return GenMetadataConfig.from(configService);
-    }
-
     @Provides
     @Singleton
     static GenMetadataProcessor genMetadataProcessor(GenMetadataBackend genMetadataBackend,

@@ -221,10 +221,8 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     }
 
     private String thinkingLogSuffix() {
-        if (config instanceof VertexGenMetadataConfig vertex) {
-            return " thinkingLevel=" + vertex.getThinkingLevel();
-        }
-        return "";
+        String extra = config.extraLogSuffix();
+        return extra != null ? extra : "";
     }
 
     int effectiveMaxTokens(Integer ruleMaxTokens) {
