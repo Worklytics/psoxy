@@ -64,6 +64,33 @@ public final class AugmentValidation {
     }
 
     static void validateAugment(Augment augment, List<String> errors) {
+        if (augment instanceof Augment.Classify classify) {
+            if (StringUtils.isBlank(classify.getPrompt())) {
+                errors.add("classify augment requires non-blank prompt");
+            }
+            if (classify.getClasses() == null || classify.getClasses().isEmpty()) {
+                errors.add("classify augment requires at least one class");
+            } else {
+                boolean anyNonBlank = false;
+                for (String value : classify.getClasses()) {
+                    if (StringUtils.isNotBlank(value)) {
+                        anyNonBlank = true;
+                        break;
+                    }
+                }
+                if (!anyNonBlank) {
+                    errors.add("classify augment requires at least one non-blank class");
+                }
+            }
+            if (classify.getJsonPaths() == null || classify.getJsonPaths().isEmpty()) {
+                errors.add("classify augment requires at least one jsonPath");
+            }
+            try {
+                classify.getMaxInputTokens();
+            } catch (IllegalArgumentException e) {
+                errors.add("classify maxInputTokens must be a positive integer when set");
+            }
+        }
         if (augment instanceof Augment.GenMetadata gen) {
             if (StringUtils.isBlank(gen.getPrompt())) {
                 errors.add("genMetadata augment requires non-blank prompt");

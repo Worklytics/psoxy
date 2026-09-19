@@ -83,4 +83,27 @@ class AugmentValidationTest {
             () -> AugmentValidation.validateRecordRules(
                 RecordRules.builder().augment(invalid).build()));
     }
+
+    @Test
+    void validateClassify_requiresPromptAndClasses() {
+        Augment.Classify invalid = Augment.Classify.builder()
+            .jsonPath("$.body.content")
+            .build();
+
+        assertThrows(IllegalArgumentException.class,
+            () -> AugmentValidation.validateEndpoints(List.of(
+                Endpoint.builder().augment(invalid).pathTemplate("/test").build())));
+    }
+
+    @Test
+    void validateClassify_valid() {
+        Augment.Classify valid = Augment.Classify.builder()
+            .jsonPath("$.body.content")
+            .prompt("Classify the prompt")
+            .classes(List.of("Feature", "Bugfix"))
+            .build();
+
+        assertDoesNotThrow(() -> AugmentValidation.validateEndpoints(List.of(
+            Endpoint.builder().augment(valid).pathTemplate("/test").build())));
+    }
 }

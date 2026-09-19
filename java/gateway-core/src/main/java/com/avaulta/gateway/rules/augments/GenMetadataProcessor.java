@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -138,94 +137,29 @@ public class GenMetadataProcessor {
         if (raw == null) {
             return null;
         }
-        Optional<GenMetadataSchemaSupport.ClassifyShape> classify =
-            GenMetadataSchemaSupport.classifyShape(outputSchema);
         if (raw instanceof Map<?, ?> map) {
-            if (classify.isPresent() && classify.get().isRootString()) {
-                return GenMetadataSchemaSupport.labelFromMap(map, classify.get()).orElse(null);
-            }
             return toSortedMap(map);
         }
         if (raw instanceof List<?> list) {
             return list;
         }
         if (raw instanceof String response) {
-            if (classify.isPresent() && classify.get().isRootString()) {
-                return parseRootStringLabel(response, classify.get());
-            }
-
             String json = extractJsonValue(response);
             if (json != null) {
                 try {
                     Object parsed = objectMapper.readValue(json, Object.class);
                     if (parsed instanceof Map<?, ?> map) {
-                        if (classify.isPresent() && classify.get().isRootString()) {
-                            return GenMetadataSchemaSupport.labelFromMap(map, classify.get())
-                                .orElse(null);
-                        }
                         return toSortedMap(map);
                     }
-                    if (parsed instanceof List<?>) {
-                        return parsed;
-                    }
-                    if (classify.isEmpty()) {
-                        return parsed;
-                    }
+                    return parsed;
                 } catch (JsonProcessingException e) {
                     log.log(Level.WARNING,
                         "Failed to parse genMetadata JSON response (" + json.length() + " chars)", e);
                 }
             }
-
-            if (classify.isPresent()) {
-                Optional<Map<String, Object>> wrapped =
-                    GenMetadataSchemaSupport.wrapClassifyLabel(response, classify.get());
-                if (wrapped.isPresent()) {
-                    return new TreeMap<>(wrapped.get());
-                }
-                // Truncated JSON / prose with an enum still recoverable.
-                Optional<Map<String, Object>> fromText =
-                    GenMetadataSchemaSupport.findEnumInText(response, classify.get());
-                if (fromText.isPresent()) {
-                    return new TreeMap<>(fromText.get());
-                }
-            }
             return null;
         }
         return null;
-    }
-
-    private String parseRootStringLabel(String response,
-                                         GenMetadataSchemaSupport.ClassifyShape shape) {
-        String trimmed = stripMarkdownFence(response.trim());
-
-        if (trimmed.startsWith("\"")) {
-            try {
-                String parsed = objectMapper.readValue(trimmed, String.class);
-                Optional<String> label = GenMetadataSchemaSupport.recoverLabel(parsed, shape);
-                if (label.isPresent()) {
-                    return label.get();
-                }
-            } catch (JsonProcessingException e) {
-                log.log(Level.FINE, "genMetadata string-enum JSON string parse failed", e);
-            }
-        }
-
-        String json = extractJsonObject(trimmed);
-        if (json != null) {
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> map = objectMapper.readValue(json, Map.class);
-                Optional<String> fromMap = GenMetadataSchemaSupport.labelFromMap(map, shape);
-                if (fromMap.isPresent()) {
-                    return fromMap.get();
-                }
-            } catch (JsonProcessingException e) {
-                log.log(Level.FINE, "genMetadata string-enum object fallback parse failed", e);
-            }
-        }
-
-        return GenMetadataSchemaSupport.recoverLabel(trimmed, shape).orElse(null);
     }
 
     /**
@@ -270,18 +204,6 @@ public class GenMetadataProcessor {
         } catch (JsonProcessingException e) {
             return false;
         }
-    }
-
-    /**
-     * Pull the outermost JSON object from a model response, ignoring markdown fences and leading
-     * prose (e.g. {@code Here is the JSON requested: {...}}).
-     */
-    String extractJsonObject(String response) {
-        String json = extractJsonValue(response);
-        if (json != null && json.startsWith("{")) {
-            return json;
-        }
-        return null;
     }
 
     String stripMarkdownFence(String response) {

@@ -3,6 +3,7 @@ package co.worklytics.psoxy.impl;
 import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.augments.Augment;
+import com.avaulta.gateway.rules.augments.ClassifyProcessor;
 import com.avaulta.gateway.rules.augments.GenMetadataAugmentException;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
@@ -76,19 +77,22 @@ public class AugmentProcessor {
 
     final SentenceMetadataProcessor sentenceMetadataProcessor;
     final GenMetadataProcessor genMetadataProcessor;
+    final ClassifyProcessor classifyProcessor;
 
     @Inject
     public AugmentProcessor(Configuration jsonConfiguration,
                             JsonSchemaValidationUtils jsonSchemaValidationUtils,
                             ObjectMapper objectMapper,
                             SentenceMetadataProcessor sentenceMetadataProcessor,
-                            GenMetadataProcessor genMetadataProcessor) {
+                            GenMetadataProcessor genMetadataProcessor,
+                            ClassifyProcessor classifyProcessor) {
         this.jsonConfiguration = jsonConfiguration;
         this.jsonSchemaValidationUtils = jsonSchemaValidationUtils;
         this.objectMapper = objectMapper;
         this.pathListConfiguration = jsonConfiguration.setOptions(Option.AS_PATH_LIST);
         this.sentenceMetadataProcessor = sentenceMetadataProcessor;
         this.genMetadataProcessor = genMetadataProcessor;
+        this.classifyProcessor = classifyProcessor;
     }
 
     private final Map<Augment, List<JsonPath>> compiledAugmentPaths = new ConcurrentHashMap<>();
@@ -247,9 +251,10 @@ public class AugmentProcessor {
         Object augmentValue = invokeCompute(augment, computeInput);
 
         if (augmentValue == null) {
-            if (augment instanceof Augment.GenMetadata) {
+            if (augment instanceof Augment.GenMetadata || augment instanceof Augment.Classify) {
                 throw new AugmentProcessingException(Warning.AUGMENT_GEN_UNAVAILABLE,
-                    "genMetadata returned no value for property '" + augmentPropertyName + "'");
+                    augment.getFunctionName() + " returned no value for property '"
+                        + augmentPropertyName + "'");
             }
             return;
         }
@@ -268,6 +273,9 @@ public class AugmentProcessor {
         try {
             if (augment instanceof Augment.SentenceMetadata sentenceMetadata) {
                 return sentenceMetadataProcessor.compute(sentenceMetadata, input);
+            }
+            if (augment instanceof Augment.Classify classify) {
+                return classifyProcessor.compute(classify, input);
             }
             if (augment instanceof Augment.GenMetadata genMetadata) {
                 return genMetadataProcessor.compute(genMetadata, input);

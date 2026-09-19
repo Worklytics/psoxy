@@ -2,8 +2,10 @@ package com.avaulta.gateway.rules.augments;
 
 import com.avaulta.gateway.rules.JsonSchema;
 
+import java.util.List;
+
 /**
- * Pluggable backend for {@link Augment.GenMetadata} inference.
+ * Pluggable backend for {@link Augment.GenMetadata} and {@link Augment.Classify} inference.
  * Implementations use LangChain4j {@code ChatModel} adapters for cloud backends
  * (Bedrock on AWS, Vertex AI on GCP).
  */
@@ -33,5 +35,18 @@ public interface GenMetadataBackend {
     default Object generate(String taskPrompt, JsonSchema outputSchema, String inputData,
                             Integer maxOutputTokens, Integer maxInputTokens) {
         return generate(taskPrompt, outputSchema, inputData);
+    }
+
+    /**
+     * Closed-set classify. Default delegates to {@link #generate} with a string-enum schema so
+     * test doubles that only implement {@link #generate} still work.
+     */
+    default Object classify(String taskPrompt, List<String> classes, String inputData,
+                            int maxOutputTokens, Integer maxInputTokens) {
+        JsonSchema schema = JsonSchema.builder()
+            .type("string")
+            .enumValues(classes)
+            .build();
+        return generate(taskPrompt, schema, inputData, maxOutputTokens, maxInputTokens);
     }
 }

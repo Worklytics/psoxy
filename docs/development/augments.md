@@ -151,7 +151,9 @@ List<Augment> augments;
 // new class: com.avaulta.gateway.rules.augments.Augment
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
+    @JsonSubTypes.Type(value = Augment.Classify.class, name = "classify"),
     @JsonSubTypes.Type(value = Augment.TextDigest.class, name = "textDigest"),
+    @JsonSubTypes.Type(value = Augment.SentenceMetadata.class, name = "sentenceMetadata"),
     @JsonSubTypes.Type(value = Augment.GenMetadata.class, name = "genMetadata"),
 })
 @SuperBuilder(toBuilder = true)

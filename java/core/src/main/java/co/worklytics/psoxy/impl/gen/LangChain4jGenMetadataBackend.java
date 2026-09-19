@@ -107,6 +107,46 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     @Override
     public Object generate(String taskPrompt, JsonSchema outputSchema, String inputData,
                            Integer maxOutputTokens, Integer maxInputTokens) {
+        ModelHandle handle = requireReadyHandle();
+
+        int effectiveMaxTokens = effectiveMaxTokens(maxOutputTokens);
+        int effectiveMaxInputTokens = effectiveMaxInputTokens(maxInputTokens);
+        String fittedInput = promptBudget.fitDynamicInput(inputData, effectiveMaxInputTokens);
+        List<ChatMessage> messages =
+            promptBuilder.toMessages(taskPrompt, outputSchema, fittedInput);
+        // Bedrock Converse maps ResponseFormat → outputConfig; Amazon Nova (our default) rejects it.
+        boolean bedrock = config.getBackend() == GenMetadataConfig.Backend.BEDROCK;
+        Optional<ResponseFormat> responseFormat = bedrock
+            ? Optional.empty()
+            : responseFormats.fromOutputSchema(outputSchema);
+        if (bedrock) {
+            log.info("genMetadata Bedrock: omitting ResponseFormat/outputConfig for model "
+                + config.getModelId());
+        }
+        return completeChat(handle, messages, responseFormat.orElse(null), effectiveMaxTokens);
+    }
+
+    @Override
+    public Object classify(String taskPrompt, List<String> classes, String inputData,
+                           int maxOutputTokens, Integer maxInputTokens) {
+        ModelHandle handle = requireReadyHandle();
+
+        int effectiveMaxInputTokens = effectiveMaxInputTokens(maxInputTokens);
+        String fittedInput = promptBudget.fitDynamicInput(inputData, effectiveMaxInputTokens);
+        List<ChatMessage> messages =
+            promptBuilder.toClassifyMessages(taskPrompt, classes, fittedInput);
+        boolean bedrock = config.getBackend() == GenMetadataConfig.Backend.BEDROCK;
+        Optional<ResponseFormat> responseFormat = bedrock
+            ? Optional.empty()
+            : responseFormats.fromClasses(classes);
+        if (bedrock) {
+            log.info("classify Bedrock: omitting ResponseFormat/outputConfig for model "
+                + config.getModelId());
+        }
+        return completeChat(handle, messages, responseFormat.orElse(null), maxOutputTokens);
+    }
+
+    private ModelHandle requireReadyHandle() {
         if (!chatModelFactory.supports(config)) {
             throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
                 "genMetadata backend is not available");
@@ -116,24 +156,11 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
                 "genMetadata client failed to initialize", handle.failure);
         }
+        return handle;
+    }
 
-        int effectiveMaxTokens = effectiveMaxTokens(maxOutputTokens);
-        int effectiveMaxInputTokens = effectiveMaxInputTokens(maxInputTokens);
-        String fittedInput = promptBudget.fitDynamicInput(inputData, effectiveMaxInputTokens);
-        List<ChatMessage> messages =
-            promptBuilder.toMessages(taskPrompt, outputSchema, fittedInput);
-        // Bedrock Converse maps ResponseFormat → outputConfig; Amazon Nova (our default) rejects it.
-        // Claude 4.5+ supports native json_schema, but we skip for all Bedrock for now and rely on
-        // prompt + GenMetadataProcessor parse / outputSchema gate.
-        boolean bedrock = config.getBackend() == GenMetadataConfig.Backend.BEDROCK;
-        Optional<ResponseFormat> responseFormat = bedrock
-            ? Optional.empty()
-            : responseFormats.fromOutputSchema(outputSchema);
-        if (bedrock) {
-            log.info("genMetadata Bedrock: omitting ResponseFormat/outputConfig for model "
-                + config.getModelId());
-        }
-
+    private Object completeChat(ModelHandle handle, List<ChatMessage> messages,
+                                ResponseFormat responseFormat, int maxOutputTokens) {
         try {
             Instant inferenceStartedAt = Instant.now();
             long inferenceStartedNanos = System.nanoTime();
@@ -143,8 +170,8 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
                 + thinkingLogSuffix());
             ChatResponse response;
             try {
-                response = chatWithTimeout(handle.chatModel, messages, responseFormat.orElse(null),
-                    effectiveMaxTokens);
+                response = chatWithTimeout(handle.chatModel, messages, responseFormat,
+                    maxOutputTokens);
             } finally {
                 long inferenceMs = TimeUnit.NANOSECONDS.toMillis(
                     System.nanoTime() - inferenceStartedNanos);

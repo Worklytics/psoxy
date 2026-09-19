@@ -38,6 +38,7 @@ import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import com.avaulta.gateway.rules.augments.ClassifyProcessor;
 import com.avaulta.gateway.rules.augments.GenMetadataBackend;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
@@ -413,5 +414,14 @@ public class PsoxyModule {
                                                      JsonSchemaValidationUtils jsonSchemaValidationUtils) {
         return new GenMetadataProcessor(genMetadataBackend, objectMapper,
             genMetadataConfig.getMaxAttempts(), jsonSchemaValidationUtils);
+    }
+
+    @Provides
+    @Singleton
+    static ClassifyProcessor classifyProcessor(GenMetadataBackend genMetadataBackend,
+                                               ObjectMapper objectMapper,
+                                               GenMetadataConfig genMetadataConfig) {
+        return new ClassifyProcessor(genMetadataBackend, objectMapper,
+            genMetadataConfig.getMaxAttempts());
     }
 }

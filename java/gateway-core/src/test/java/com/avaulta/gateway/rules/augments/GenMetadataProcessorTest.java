@@ -12,7 +12,6 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -115,40 +114,6 @@ class GenMetadataProcessorTest {
     }
 
     @Test
-    void parseModelJson_recoversClassifyLabelFromTruncatedJson() {
-        JsonSchema schema = JsonSchema.builder()
-            .type("object")
-            .required(List.of("category"))
-            .properties(Map.of(
-                "category", JsonSchema.builder()
-                    .type("string")
-                    .enumValues(List.of("Email Drafting", "Excluded", "Uncategorized"))
-                    .build()))
-            .build();
-        GenMetadataProcessor processor = new GenMetadataProcessor(
-            new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 2, new JsonSchemaValidationUtils());
-        Object out = processor.parseModelJson(
-            "Here is the JSON requested:\n{\"category\": \"Email Drafting", schema);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> map = (Map<String, Object>) out;
-        assertEquals("Email Drafting", map.get("category"));
-    }
-
-    @Test
-    void parseModelJson_parsesQuotedJsonStringForRootEnum() {
-        JsonSchema schema = JsonSchema.builder()
-            .type("string")
-            .enumValues(List.of("Email Drafting", "Excluded", "Uncategorized"))
-            .build();
-        GenMetadataProcessor processor = new GenMetadataProcessor(
-            new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 2, new JsonSchemaValidationUtils());
-        assertEquals("Email Drafting",
-            processor.parseModelJson("\"Email Drafting\"", schema));
-        assertEquals("Excluded",
-            processor.parseModelJson("Excluded", schema));
-    }
-
-    @Test
     void parseModelJson_parsesJsonArrayRoot() {
         GenMetadataProcessor processor = new GenMetadataProcessor(
             new UnavailableGenMetadataBackend(), OBJECT_MAPPER, 2, new JsonSchemaValidationUtils());
@@ -204,29 +169,7 @@ class GenMetadataProcessorTest {
     }
 
     @Test
-    void process_classify_acceptsJsonObjectInput_stringEnum() {
-        JsonSchema schema = JsonSchema.builder()
-            .type("string")
-            .enumValues(List.of("Feature", "Bugfix", "Uncategorized"))
-            .build();
-
-        GenMetadataProcessor processor = new GenMetadataProcessor(
-            (taskPrompt, outputSchema, inputData) -> {
-                assertTrue(inputData.contains("\"title\""));
-                assertTrue(inputData.contains("Fix NPE"));
-                return "Bugfix";
-            },
-            OBJECT_MAPPER,
-            2,
-            new JsonSchemaValidationUtils());
-
-        Object out = processor.process("Classify", schema,
-            Map.of("title", "Fix NPE", "body", "null guard"));
-        assertEquals("Bugfix", out);
-    }
-
-    @Test
-    void process_classify_acceptsJsonObjectInput_categoryObjectSchema() {
+    void process_acceptsJsonObjectInput_categoryObjectSchema() {
         JsonSchema schema = categorySchema();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(

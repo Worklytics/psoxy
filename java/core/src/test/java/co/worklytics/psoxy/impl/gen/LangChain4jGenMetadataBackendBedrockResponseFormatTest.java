@@ -112,4 +112,44 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
         backend.generate("Classify", schema, "hello", 9999);
         assertEquals(9999, seen.get().maxOutputTokens());
     }
+
+    @Test
+    void classify_usesLongestClassLengthAsMaxOutputTokens() {
+        AtomicReference<ChatRequest> seen = new AtomicReference<>();
+        ChatModel model = new ChatModel() {
+            @Override
+            public ChatResponse chat(ChatRequest request) {
+                seen.set(request);
+                return ChatResponse.builder()
+                    .aiMessage(AiMessage.from("Feature"))
+                    .build();
+            }
+        };
+        GenMetadataChatModelProvider provider = new GenMetadataChatModelProvider() {
+            @Override
+            public boolean supports(GenMetadataConfig config) {
+                return config instanceof BedrockGenMetadataConfig;
+            }
+
+            @Override
+            public ChatModel create(GenMetadataConfig config, Path modelCacheDir) {
+                return model;
+            }
+        };
+        GenMetadataConfig config = BedrockGenMetadataConfig.of(BedrockGenMetadataConfig.DEFAULT_MODEL, 30);
+        ObjectMapper om = new ObjectMapper();
+        LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
+            config, om, new GenMetadataPromptBudget(),
+            new GenMetadataChatModelFactory(Set.of(provider)),
+            new GenMetadataTokenUsageAccumulator(),
+            new GenMetadataPromptBuilder(om),
+            new GenMetadataResponseFormats());
+
+        List<String> classes = List.of("Feature", "Uncategorized", "Bug");
+        Object result = backend.classify("Classify", classes, "hello",
+            "Uncategorized".length(), null);
+        assertEquals("Feature", result);
+        assertNull(seen.get().responseFormat());
+        assertEquals("Uncategorized".length(), seen.get().maxOutputTokens());
+    }
 }

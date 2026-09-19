@@ -6,12 +6,12 @@
 
 ## Overview
 
-**genMetadata** calls a cloud LLM to derive structured metadata from a matched source value and attaches it as:
+**genMetadata** and **classify** call a cloud LLM to derive metadata from a matched source value and attach it as:
 
-- **Scalar / leaf match** (e.g. `$.title`, `$..body.content`): sibling `+{sourceProperty}:genMetadata` on the parent object.
-- **Object match** (e.g. `$` or `$[*]` when each match is a JSON object): `+self:genMetadata` on that same object; the whole matched Map is the LLM corpus.
+- **Scalar / leaf match** (e.g. `$.title`, `$..body.content`): sibling `+{sourceProperty}:{function}` on the parent object.
+- **Object match** (e.g. `$` or `$[*]` when each match is a JSON object): `+self:{function}` on that same object; the whole matched Map is the LLM corpus.
 
-This is an MVP for customers to try with **custom rules**. Prebuilt source rules do not enable genMetadata.
+This is an MVP for customers to try with **custom rules**. Prebuilt source rules do not enable these augments.
 
 | Decision | Choice |
 |----------|--------|
@@ -20,45 +20,60 @@ This is an MVP for customers to try with **custom rules**. Prebuilt source rules
 
 Wrong cloud on wrong platform → `augment-gen-unavailable`. Auth / quota failures omit the augment and add a warning; the rest of the response still succeeds.
 
-## Two inference modes (driven by `outputSchema`)
+## `!<classify>`
 
-Rules always declare `prompt` + `outputSchema`. The runtime **infers mode** from the schema (no separate `mode` field):
+Closed-set, **exactly one** class. YAML lists the allowed strings; there is no `outputSchema` and no `maxOutputTokens` — generation is capped at the length of the longest class.
 
-| Mode | When | Model output | Proxy normalizes to |
-|------|------|--------------|---------------------|
-| **classify** | Schema is an object with a **single** required string property that has `enum`, or a root string `enum` | Vertex: constrained JSON. Bedrock: free-form JSON/label in text | Same Map / string after parse / label recovery |
-| **compute** | Any richer object / array schema | Constrained JSON matching the schema | Parsed object/array as-is (after schema gate) |
-
-### Classify example
+If the model reply contains any of those class names as an exact substring, that class is used (longer names win when more than one matches, e.g. `Email Drafting` over `Email`). On Gemini, thinking tokens share this inferred generation budget with the visible class name.
 
 ```yaml
 augments:
-  - !<genMetadata>
+  - !<classify>
     jsonPaths:
       - "$..body.content"
     prompt: >
-      Classify the input into exactly one category.
+      Classify the input into exactly one class.
       Use "Uncategorized" when substantive but unclear.
       Use "Excluded" for greetings, thanks, or prompts too short to classify.
     maxInputTokens: 100
-    maxOutputTokens: 200
-    outputSchema:
-      type: object
-      required: [category]
-      additionalProperties: false
-      properties:
-        category:
-          type: string
-          enum:
-            - Email Drafting
-            - Research and Ideation
-            - Uncategorized
-            - Excluded
+    classes:
+      - Email Drafting
+      - Research and Ideation
+      - Uncategorized
+      - Excluded
 ```
 
-Output: sibling `+content:genMetadata` with `{"category":"Research and Ideation"}`.
+Output: sibling `+content:classify` with `"Research and Ideation"`.
 
-### Compute example
+### Object-level classify (`+self:classify`)
+
+```yaml
+augments:
+  - !<classify>
+    jsonPaths: ["$[*]"]
+    prompt: |
+      Classify this pull request. Use title and body; ignore ids and user records.
+    classes: [Feature, Bugfix, Docs, Uncategorized]
+transforms:
+  - !<redact>
+    jsonPaths: ["$[*].title", "$[*].body"]
+```
+
+- One LLM call per matched object.
+- Object-level matches may send nested user/email fields to the model. Prefer prompts that tell the model to ignore ids/urls/user records, and redact source fields in `transforms` after augments.
+
+| Field | Required | Description |
+|----------|----------|-------------|
+| `jsonPaths` | yes | Source values. `$` / `$[*]` → `+self:classify`; leaf paths → `+title:classify`, etc. |
+| `prompt` | yes | How to choose among `classes`. |
+| `classes` | yes | Allowed labels (JSON Schema enum equivalent). Output is exactly one of these strings. |
+| `maxInputTokens` | no | Cap on the dynamic source corpus. Default `256`. |
+
+## `!<genMetadata>` (structured extract)
+
+Use this when the result is a JSON object/array, not a single class. Requires `prompt` + `outputSchema`.
+
+### Extract example
 
 ```yaml
 augments:
@@ -91,34 +106,15 @@ augments:
 
 If speaker ids in the augment should be pseudonymized, add a follow-on transform on `$['+timeline:genMetadata'].speakers[*].personId`.
 
-### Object-level classify (`+self:genMetadata`)
-
-```yaml
-augments:
-  - !<genMetadata>
-    jsonPaths: ["$[*]"]
-    prompt: |
-      Classify this pull request. Use title and body; ignore ids and user records.
-    outputSchema:
-      type: string
-      enum: [Feature, Bugfix, Docs, Uncategorized]
-transforms:
-  - !<redact>
-    jsonPaths: ["$[*].title", "$[*].body"]
-```
-
-- One LLM call per matched object.
-- Object-level matches may send nested user/email fields to the model. Prefer prompts that tell the model to ignore ids/urls/user records, and redact source fields in `transforms` after augments.
-
-## Rule configuration
+## Rule configuration (`!<genMetadata>`)
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `jsonPaths` | yes | Source values to process. Use `$` / `$[*]` to classify whole objects (→ `+self:genMetadata`); use leaf paths for scalar text (→ `+title:genMetadata`, etc.). |
-| `prompt` | yes | Static task guidance (categories, edge cases). Do **not** put conflicting format instructions here — Java always requests JSON and applies provider constraints from `outputSchema`. This prefix is not counted against `maxInputTokens`. |
-| `outputSchema` | yes | Shape + enums; drives classify vs compute and provider constraints |
-| `maxInputTokens` | no | Cap on the **dynamic** source corpus (serialized jsonPath match). Default `256`. Classify often wants `100`; longer compute `500+`. The static prompt/schema are not counted. |
-| `maxOutputTokens` | no | Per-augment **generation** cap (`maxTokens` is accepted as an alias). Default `200` (enough for classify JSON). Compute / meeting transcripts should raise this (`500`+). On Gemini, thinking tokens share this budget with visible JSON. |
+| `jsonPaths` | yes | Source values to process. Use `$` / `$[*]` for whole objects (→ `+self:genMetadata`); use leaf paths for scalar text (→ `+title:genMetadata`, etc.). |
+| `prompt` | yes | Static task guidance. Do **not** put conflicting format instructions here — Java always requests JSON and applies provider constraints from `outputSchema`. This prefix is not counted against `maxInputTokens`. |
+| `outputSchema` | yes | JSON Schema for the extracted object/array. |
+| `maxInputTokens` | no | Cap on the **dynamic** source corpus (serialized jsonPath match). Default `256`. Longer extract `500+`. The static prompt/schema are not counted. |
+| `maxOutputTokens` | no | Per-augment **generation** cap (`maxTokens` is accepted as an alias). Default `200`. Meeting transcripts / rich extract should raise this (`500`+). On Gemini, thinking tokens share this budget with visible JSON. |
 
 No `model`, `backend`, or `thinkingLevel` in rules — those stay deployment config.
 
@@ -149,7 +145,7 @@ Per-row Vertex/Bedrock calls are typically several seconds. A 100-row bulk file 
 
 ## Infrastructure (Terraform)
 
-Set `enable_gen_metadata = true` on the API or bulk connector you want to try, and load **custom rules** that declare `!<genMetadata>` augments.
+Set `enable_gen_metadata = true` on the API or bulk connector you want to try, and load **custom rules** that declare `!<classify>` or `!<genMetadata>` augments.
 
 - **AWS:** Terraform attaches Bedrock invoke/converse IAM. Complete the `gen_metadata_todo` output (Bedrock account/region access). Default model: `us.amazon.nova-2-lite-v1:0`.
 - **GCP:** Terraform enables `aiplatform.googleapis.com` and grants `roles/aiplatform.user`. Default model: `gemini-3.5-flash-lite` at location `global`, thinking `minimal`.
@@ -163,11 +159,10 @@ Switching `GEN_METADATA_MODEL` to a Claude id is an advanced/expensive option. F
 ## Java architecture
 
 ```
-GenMetadataProcessor
-  → shape detect (classify | compute) from outputSchema
+ClassifyProcessor / GenMetadataProcessor
   → GenMetadataChatModelProvider (Bedrock | Vertex)
-  → normalize (enum string → Map; JSON → Map/List)
-  → outputSchema gate (safety net)
+  → classify: exact substring match against `classes`
+  → genMetadata: JSON parse → outputSchema gate
 ```
 
 - Concurrent cloud calls use a semaphore (max 4).

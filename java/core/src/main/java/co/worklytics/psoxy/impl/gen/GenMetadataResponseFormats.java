@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.impl.gen;
 
-import com.avaulta.gateway.rules.augments.GenMetadataSchemaSupport;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ResponseFormatType;
 import dev.langchain4j.model.chat.request.json.JsonArraySchema;
@@ -12,9 +11,11 @@ import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.chat.request.json.JsonStringSchema;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,41 +23,39 @@ import java.util.Optional;
 
 /**
  * Builds LangChain4j {@link ResponseFormat} constraints from genMetadata
- * {@link com.avaulta.gateway.rules.JsonSchema}.
+ * {@link com.avaulta.gateway.rules.JsonSchema} or classify {@code classes}.
  */
 @Singleton
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class GenMetadataResponseFormats {
 
+    public Optional<ResponseFormat> fromClasses(List<String> classes) {
+        if (classes == null || classes.isEmpty()) {
+            return Optional.empty();
+        }
+        List<String> values = new ArrayList<>();
+        for (String value : classes) {
+            if (StringUtils.isNotBlank(value)) {
+                values.add(value);
+            }
+        }
+        if (values.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(ResponseFormat.builder()
+            .type(ResponseFormatType.JSON)
+            .jsonSchema(JsonSchema.builder()
+                .name("classify")
+                .rootElement(JsonEnumSchema.builder()
+                    .enumValues(values)
+                    .build())
+                .build())
+            .build());
+    }
+
     public Optional<ResponseFormat> fromOutputSchema(com.avaulta.gateway.rules.JsonSchema outputSchema) {
         if (outputSchema == null) {
             return Optional.empty();
-        }
-        Optional<GenMetadataSchemaSupport.ClassifyShape> classify =
-            GenMetadataSchemaSupport.classifyShape(outputSchema);
-        if (classify.isPresent()) {
-            GenMetadataSchemaSupport.ClassifyShape shape = classify.get();
-            JsonSchemaElement root;
-            if (shape.isRootString()) {
-                root = JsonEnumSchema.builder()
-                    .enumValues(shape.getEnumValues())
-                    .build();
-            } else {
-                root = JsonObjectSchema.builder()
-                    .addProperty(shape.getPropertyName(), JsonEnumSchema.builder()
-                        .enumValues(shape.getEnumValues())
-                        .build())
-                    .required(shape.getPropertyName())
-                    .additionalProperties(false)
-                    .build();
-            }
-            return Optional.of(ResponseFormat.builder()
-                .type(ResponseFormatType.JSON)
-                .jsonSchema(JsonSchema.builder()
-                    .name("genMetadataClassify")
-                    .rootElement(root)
-                    .build())
-                .build());
         }
         JsonSchemaElement root = toElement(outputSchema);
         if (root == null) {

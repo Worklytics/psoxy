@@ -8,7 +8,6 @@ import co.worklytics.psoxy.gateway.HttpEventRequestDto;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.utils.email.EmailAddressParser;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.WebhookCollectionRules;
 import com.avaulta.gateway.rules.augments.Augment;
@@ -75,7 +74,9 @@ class WebhookSanitizerAugmentsTest {
             new com.avaulta.gateway.rules.augments.SentenceMetadataProcessor(path -> java.util.Optional.empty()),
             new com.avaulta.gateway.rules.augments.GenMetadataProcessor(
                 new com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend(), om, 2,
-                new JsonSchemaValidationUtils()));
+                new JsonSchemaValidationUtils()),
+            new com.avaulta.gateway.rules.augments.ClassifyProcessor(
+                new com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend(), om, 2));
     }
 
     @Test
@@ -97,13 +98,10 @@ class WebhookSanitizerAugmentsTest {
     @Test
     void sanitize_recordsAugmentWarningsInMetadata() {
         WebhookCollectionRules.WebhookEndpoint endpoint = WebhookCollectionRules.WebhookEndpoint.builder()
-            .augment(Augment.GenMetadata.builder()
+            .augment(Augment.Classify.builder()
                 .jsonPath("$.content")
                 .prompt("Classify")
-                .outputSchema(JsonSchema.builder()
-                    .type("string")
-                    .enumValues(List.of("Feature", "Bugfix"))
-                    .build())
+                .classes(List.of("Feature", "Bugfix"))
                 .build())
             .build();
         sanitizer = new WebhookSanitizerImpl(WebhookCollectionRules.builder().endpoint(endpoint).build());
@@ -117,7 +115,9 @@ class WebhookSanitizerAugmentsTest {
             new com.avaulta.gateway.rules.augments.SentenceMetadataProcessor(path -> java.util.Optional.empty()),
             new com.avaulta.gateway.rules.augments.GenMetadataProcessor(
                 new com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend(), objectMapper, 2,
-                new JsonSchemaValidationUtils()));
+                new JsonSchemaValidationUtils()),
+            new com.avaulta.gateway.rules.augments.ClassifyProcessor(
+                new com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend(), objectMapper, 2));
 
         HttpEventRequest request = HttpEventRequestDto.builder()
             .headers(Map.of("Content-Type", List.of("application/json")))

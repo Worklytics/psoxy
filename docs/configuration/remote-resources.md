@@ -52,7 +52,7 @@ With no argument, the script only downloads models into `java/gateway-core/src/m
 
 ### genMetadata
 
-`!<genMetadata>` augments use Vertex AI or Bedrock, not this bucket. See [genMetadata](../development/alpha-features/gen-metadata-augment.md).
+`!<genMetadata>` and `!<classify>` augments use Vertex AI or Bedrock, not this bucket. See [genMetadata](../development/alpha-features/gen-metadata-augment.md).
 
 ## Troubleshooting
 

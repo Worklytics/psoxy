@@ -5,6 +5,7 @@ import com.avaulta.gateway.resources.ResourceService;
 import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.augments.Augment;
+import com.avaulta.gateway.rules.augments.ClassifyProcessor;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
 import com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend;
@@ -44,11 +45,14 @@ class AugmentProcessorTest {
         ResourceService noModels = path -> Optional.empty();
         GenMetadataProcessor genMetadataProcessor =
             new GenMetadataProcessor(new UnavailableGenMetadataBackend(), objectMapper, 2, new JsonSchemaValidationUtils());
+        ClassifyProcessor classifyProcessor =
+            new ClassifyProcessor(new UnavailableGenMetadataBackend(), objectMapper, 2);
         augmentProcessor = new AugmentProcessor(jsonConfiguration,
             new JsonSchemaValidationUtils(),
             objectMapper,
             new SentenceMetadataProcessor(noModels),
-            genMetadataProcessor);
+            genMetadataProcessor,
+            classifyProcessor);
     }
 
     @Test
@@ -331,11 +335,11 @@ class AugmentProcessorTest {
         Map<String, Object> document = new LinkedHashMap<>();
         document.put("attachments", List.of(attachment));
 
-        Augment.GenMetadata augment = Augment.GenMetadata.builder()
+        Augment.Classify augment = Augment.Classify.builder()
             .jsonPath("$.attachments[*].content")
             .innerJsonPath("$..text")
             .prompt("Classify")
-            .outputSchema(stringEnumSchema("Feature", "Bugfix", "Uncategorized"))
+            .classes(List.of("Feature", "Bugfix", "Uncategorized"))
             .build();
 
         List<String> warnings = augmentProcessor.applyAugments(List.of(augment), document);
@@ -344,7 +348,7 @@ class AugmentProcessorTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> resultAttachment = (Map<String, Object>)
             ((List<?>) document.get("attachments")).get(0);
-        assertFalse(resultAttachment.containsKey("+content:genMetadata"));
+        assertFalse(resultAttachment.containsKey("+content:classify"));
     }
 
     @Test
@@ -357,9 +361,9 @@ class AugmentProcessorTest {
     void buildAugmentPropertyName() {
         assertEquals("+content:textDigest",
             AugmentProcessor.buildAugmentPropertyName("content", "textDigest"));
-        assertEquals("+self:genMetadata",
+        assertEquals("+self:classify",
             AugmentProcessor.buildAugmentPropertyName(
-                AugmentProcessor.OBJECT_LEVEL_SOURCE_PROPERTY, "genMetadata"));
+                AugmentProcessor.OBJECT_LEVEL_SOURCE_PROPERTY, "classify"));
     }
 
     @Test
@@ -438,16 +442,13 @@ class AugmentProcessorTest {
         assertTrue(warnings.contains(Warning.AUGMENT_CONFLICT_SKIPPED.asHttpHeaderCode()));
     }
 
-    private static JsonSchema stringEnumSchema(String... labels) {
-        return JsonSchema.builder()
-            .type("string")
-            .enumValues(Arrays.asList(labels))
-            .build();
-    }
-
-    private AugmentProcessor processorWithGenMetadataStub(String label) {
-        GenMetadataProcessor genMetadataProcessor = new GenMetadataProcessor(
+    private AugmentProcessor processorWithClassifyStub(String label) {
+        ClassifyProcessor classifyProcessor = new ClassifyProcessor(
             (taskPrompt, outputSchema, inputData) -> label,
+            objectMapper,
+            2);
+        GenMetadataProcessor genMetadataProcessor = new GenMetadataProcessor(
+            new UnavailableGenMetadataBackend(),
             objectMapper,
             2,
             new JsonSchemaValidationUtils());
@@ -455,7 +456,8 @@ class AugmentProcessorTest {
             new JsonSchemaValidationUtils(),
             objectMapper,
             new SentenceMetadataProcessor(path -> Optional.empty()),
-            genMetadataProcessor);
+            genMetadataProcessor,
+            classifyProcessor);
     }
 
     private static Map<String, Object> samplePr(String title, String body) {
@@ -471,12 +473,12 @@ class AugmentProcessorTest {
 
     @SneakyThrows
     @Test
-    void applyAugments_genMetadata_objectLevel_arrayElements() {
-        AugmentProcessor processor = processorWithGenMetadataStub("Feature");
-        Augment.GenMetadata augment = Augment.GenMetadata.builder()
+    void applyAugments_classify_objectLevel_arrayElements() {
+        AugmentProcessor processor = processorWithClassifyStub("Feature");
+        Augment.Classify augment = Augment.Classify.builder()
             .jsonPath("$[*]")
             .prompt("Classify this pull request")
-            .outputSchema(stringEnumSchema("Feature", "Bugfix", "Uncategorized"))
+            .classes(List.of("Feature", "Bugfix", "Uncategorized"))
             .build();
 
         Map<String, Object> pr1 = samplePr("Add login", "Implements OAuth");
@@ -486,40 +488,40 @@ class AugmentProcessorTest {
         List<String> warnings = processor.applyAugments(List.of(augment), document);
 
         assertTrue(warnings.isEmpty());
-        assertEquals("Feature", pr1.get("+self:genMetadata"));
-        assertEquals("Feature", pr2.get("+self:genMetadata"));
+        assertEquals("Feature", pr1.get("+self:classify"));
+        assertEquals("Feature", pr2.get("+self:classify"));
         assertEquals("Add login", pr1.get("title"));
         assertEquals("Implements OAuth", pr1.get("body"));
-        assertFalse(pr1.containsKey("+title:genMetadata"));
+        assertFalse(pr1.containsKey("+title:classify"));
     }
 
     @SneakyThrows
     @Test
-    void applyAugments_genMetadata_objectLevel_rootObject() {
-        AugmentProcessor processor = processorWithGenMetadataStub("Bugfix");
-        Augment.GenMetadata augment = Augment.GenMetadata.builder()
+    void applyAugments_classify_objectLevel_rootObject() {
+        AugmentProcessor processor = processorWithClassifyStub("Bugfix");
+        Augment.Classify augment = Augment.Classify.builder()
             .jsonPath("$")
             .prompt("Classify this pull request")
-            .outputSchema(stringEnumSchema("Feature", "Bugfix", "Uncategorized"))
+            .classes(List.of("Feature", "Bugfix", "Uncategorized"))
             .build();
 
         Map<String, Object> document = samplePr("Fix NPE", "Guards null user");
 
         processor.applyAugments(List.of(augment), document);
 
-        assertEquals("Bugfix", document.get("+self:genMetadata"));
+        assertEquals("Bugfix", document.get("+self:classify"));
         assertEquals("Fix NPE", document.get("title"));
         assertEquals("Guards null user", document.get("body"));
     }
 
     @SneakyThrows
     @Test
-    void applyAugments_genMetadata_scalarPath_stillSiblingNotSelf() {
-        AugmentProcessor processor = processorWithGenMetadataStub("Feature");
-        Augment.GenMetadata augment = Augment.GenMetadata.builder()
+    void applyAugments_classify_scalarPath_stillSiblingNotSelf() {
+        AugmentProcessor processor = processorWithClassifyStub("Feature");
+        Augment.Classify augment = Augment.Classify.builder()
             .jsonPath("$[*].title")
             .prompt("Classify")
-            .outputSchema(stringEnumSchema("Feature", "Bugfix", "Uncategorized"))
+            .classes(List.of("Feature", "Bugfix", "Uncategorized"))
             .build();
 
         Map<String, Object> pr1 = samplePr("Add login", "Implements OAuth");
@@ -527,8 +529,8 @@ class AugmentProcessorTest {
 
         processor.applyAugments(List.of(augment), document);
 
-        assertEquals("Feature", pr1.get("+title:genMetadata"));
-        assertFalse(pr1.containsKey("+self:genMetadata"));
+        assertEquals("Feature", pr1.get("+title:classify"));
+        assertFalse(pr1.containsKey("+self:classify"));
     }
 
     @SneakyThrows
