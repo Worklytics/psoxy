@@ -111,6 +111,15 @@ EOT
      `${local.expected_sa_email}`.
 EOT
 
+  sa_key_todo_note = var.api_client_auth_method == "workload_identity_federation" ? "" : <<-EOT
+     Via the GCP console, you can also verify all extant keys for the service account, to ensure
+     that there is exactly one, which should be held by the proxy.  GCP provides log of key usage,
+     creation, revocation, etc, which you can monitor to ensure that the key is being used only by
+     the proxy, only for the data access you expect. If you ever suspect compromise, you may revoke
+     the key from the GCP console at any time (NOTE: that proxy connection will be broken until a new
+     key is provisioned and stored in your secrets manager).
+EOT
+
   todo_content = <<EOT
 Complete the following steps via the Google Workspace Admin console:
   1. Visit https://admin.google.com/ and navigate to "Security" --> "Access and Data Control" -->
@@ -126,13 +135,7 @@ Complete the following steps via the Google Workspace Admin console:
      This ensures you are granting domain-wide delegation to the correct service account, and
      mitigates the risk that these instructions were forged by a malicious actor.
 ${local.manual_sa_todo_note}
-     Via the GCP console, you can also verify all extant keys for the service account, to ensure
-     that there is exactly one, which should be held by the proxy.  GCP provides log of key usage,
-     creation, revocation, etc, which you can monitor to ensure that the key is being used only by
-     the proxy, only for the data access you expect. If you ever suspect compromise, you may revoke
-     the key from the GCP console at any time (NOTE: that proxy connection will be broken until a new
-     key is provisioned and stored in your secrets manager).
-
+${local.sa_key_todo_note}
   3. Copy and paste the following OAuth 2.0 scope string into the "Scopes" input:
 ```
 ${join(",", var.oauth_scopes_needed)}

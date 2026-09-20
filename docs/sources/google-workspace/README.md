@@ -63,8 +63,10 @@ You (the user running Terraform) must have the following roles (or some of the p
 | Role                                                                                                          | Reason                                                                                         |
 | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | [Service Account Creator](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator)    | create Service Accounts to be used as API clients                                              |
-| [Service Account Key Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountKeyAdmin) | to access Google Workspace&trade; API, proxy _must_ be authenticated by a key that you need to create |
-| [Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin)   | you will need to enable the Google Workspace&trade; APIs in your GCP Project                          |
+| [Service Account Key Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountKeyAdmin) | required only for `api_client_auth_method = "service_account_key"` (the default)               |
+| [Workload Identity Pool Admin](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.workloadIdentityPoolAdmin) | required on AWS hosts when `api_client_auth_method = "workload_identity_federation"` |
+| [Service Account Token Creator](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountTokenCreator) | Terraform grants this on each DWD SA for the proxy runtime identity when using WIF |
+| [Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin)   | you will need to enable the Google Workspace APIs in your GCP Project                          |
 
 As these are very permissive roles, we recommend that you use a _dedicated_ GCP project so that these roles are scoped just to the Service Accounts used for this deployment. If you used a shared GCP project, these roles would give you access to create keys for ALL the service accounts in the project, for example - which is not good practice.
 
@@ -113,11 +115,22 @@ An example least-privilege Custom Role for the Directory connector:
 
 ## General Authentication Overview
 
-Google Workspace&trade; APIs use OAuth 2.0 for authentication and authorization. You create an Oauth 2.0 client in Google Cloud Platform and a credential (service account key), which you store in as a secret in your Proxy instance.
+Google Workspace&trade; APIs use OAuth 2.0. You create an OAuth 2.0 client as a GCP service account and grant it Domain-wide Delegation in the Google Workspace Admin console.
 
-When the proxy connects to Google, it first authenticates with Google API using this secret (a service account key) by signing a request for a short-lived access token. Google returns this access token, which the proxy then uses for subsequent requests to Google's APIS until the token expires.
+How the proxy authenticates _as_ that client is configurable via `google_workspace_connector_settings.api_client_auth_method`:
 
-The service account key can be rotated at any time, and the terraform configuration examples we provide can be configured to do this for you if applied regularly.
+- `service_account_key` (default) — Terraform (or you) create a JSON key for the service account and store it as a secret on the proxy. The proxy signs a JWT locally with that key (`createDelegated`).
+- `workload_identity_federation` — no downloaded key. The proxy's runtime identity (Cloud Function attached SA on GCP, or AWS IAM role federated via Workload Identity Federation on AWS) calls IAM `signJwt` on the DWD service account. Opt in with:
+
+```hcl
+google_workspace_connector_settings = {
+  api_client_auth_method = "workload_identity_federation"
+}
+```
+
+When the proxy connects to Google, it obtains a short-lived access token for the Workspace user being impersonated, then uses that token until it expires.
+
+With `service_account_key`, keys can be rotated at any time; the terraform examples will do this if applied regularly (`provision_keys` / `key_rotation_days`).
 
 More information: [https://developers.google.com/workspace/guides/auth-overview](https://developers.google.com/workspace/guides/auth-overview)
 
@@ -128,9 +141,9 @@ If you use the provided Terraform modules (namely, `google-workspace-dwd-connect
 Note that while Domain-wide Delegation is a broad grant of data access, the implementation of it in proxy is mitigated in several ways because the GCP Service Account resides in your own GCP project, and remains under your organizes control - unlike the most common Domain-wide Delegation scenarios which have been the subject of criticism by security researchers. In particular:
 
 - you may directly verify the numeric ID of the service account in the GCP web console, or via the GCP CLI; you don't need to take our word for it.
-- you may monitor and log the use of each service account and its key as you see fit.
-- you can ensure there is never more than one active key for each service account, and rotate keys at any time.
-- the key is only used from infrastructure (GCP CLoud Function or Lambda) in your environment; you should be able to reconcile logs and usage between your GCP and AWS environments should you desire to ensure there has been no malicious use of the key.
+- you may monitor and log the use of each service account (and, if using keys, its key) as you see fit.
+- with `service_account_key`, you can ensure there is never more than one active key for each service account, and rotate keys at any time; with `workload_identity_federation` there is no user-managed key to leak or rotate.
+- the client is only used from infrastructure (GCP Cloud Function or Lambda) in your environment.
 
 ### Provisioning API clients without Terraform
 
@@ -152,6 +165,8 @@ google_workspace_connector_settings = {
   provision_keys             = false
 }
 ```
+
+To skip user-managed keys entirely (IAM `signJwt` via the proxy runtime identity), set `api_client_auth_method = "workload_identity_federation"` instead of `provision_keys = false`.
 
 When any of these are `false`, Terraform will skip creating the corresponding resources and instead emit TODO files (or `todos_1` outputs, if configured) with instructions to complete those steps outside of Terraform.
 

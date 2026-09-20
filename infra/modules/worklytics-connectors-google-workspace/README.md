@@ -11,3 +11,5 @@ your Terraform configuration.
 
 If you are not using Google Workspace sources, DELETE or comment out all invocations of this
 module from your Terraform configuration to avoid these errors.
+
+Set `google_workspace_connector_settings.api_client_auth_method` to `workload_identity_federation` to provision keyless DWD (IAM signJwt) instead of downloaded service-account keys. Pass `host_platform_id` (`AWS` or `GCP`); AWS also needs `aws_account_id`.
