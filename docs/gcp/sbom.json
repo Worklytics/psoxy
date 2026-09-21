@@ -4,7 +4,7 @@
   "serialNumber" : "urn:uuid:9535c98c-817a-3752-9baa-1ff4c426ce3a",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2026-09-01T22:55:13Z",
+    "timestamp" : "2026-09-21T09:58:40Z",
     "lifecycles" : [
       {
         "phase" : "build"
@@ -92,35 +92,35 @@
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "b529aba9aa0984fb2d45920d205c8c8d"
+          "content" : "72e4bf8ea5d83c952a34901d1b929e18"
         },
         {
           "alg" : "SHA-1",
-          "content" : "a3c6e0e75dc00221b2ae9fd7f6a869b23a36069a"
+          "content" : "0e4ccea7985de6a20bc7f6ec760cdd2432ec599d"
         },
         {
           "alg" : "SHA-256",
-          "content" : "dc96e18f23703432072656b0e0676dae939d76cf586931d288abff39e977d7fd"
+          "content" : "0d732d8fec9f8f3d785866366565bd6e36e86771f5458932e3df481717297569"
         },
         {
           "alg" : "SHA-512",
-          "content" : "de47890dfd68c7af496d7f71a3acdda55380a9faf7bb1975dc207380fe0c2d9e66b880cf284c83d85acf5106dc729301c6dd912881a54605f86866190b1967ef"
+          "content" : "53a2c3b597b9ea191ac8bf7d48957b7807d04f850471300d4a730124ce37617d45347bd62e4b23308da1395740bad13c211e6a60f4a5bdf9888184ffeaeddb0d"
         },
         {
           "alg" : "SHA-384",
-          "content" : "ae253f5f35ebce670eefb6dbe35330fff89c39cdf6adb2d11d80119af20a7b79ed95823edf89c646f3f55e8f0a4255a5"
+          "content" : "cbbf8debb84e87f8921a0f67ecc464260fc0ef4b4abc08d9949e5508d24c2dfa2ce7d90a47afa67f6110ca1d4b0972e0"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "515cb747039d22a0e60a6261fe362284dc4a889475bdddb0b35b4d4d1d6eeede0cb99d52c4572740eccbef00e2135e8b"
+          "content" : "ea75edf289e4a75c0dbe850547c56a5c763b17425b75bc4fcc2431adfc3906911833811ba302197954b3a39171b556bb"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "323a593e0fe2aa6449e8f0e098313331cb68504e323748aefa0ba3eaa2bb66e0"
+          "content" : "ab721af349dc5ef091a11ed4e54f2e49913f7e12ee1c8c6d67917910ce782f78"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "333370883901d7af779d24f2d167d399aabceebd5fdac682c6a8dfe4bf7be19dcb9417c59a80c638a05b496e2fe764e3404b639f101a40438eb19954c48d606c"
+          "content" : "879cfa31b3aad840dbcf3e81ed76acead8400ce266b768c22ac9d6d0015942c22dd3f1451ba11e12f8b14b9e36a962dec2e29534bbdfbcb6188e3f4dfbbcc6cb"
         }
       ],
       "licenses" : [
@@ -143,35 +143,35 @@
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "3760055f8447e067032d15922677beb4"
+          "content" : "d35f2556155ae1fd36e5d9fe4e7f7e9c"
         },
         {
           "alg" : "SHA-1",
-          "content" : "79eb75fe033c14846053ad1b30f4f0858c59db5e"
+          "content" : "e7287e0642c42c65e75aefdbefccd3918ebd65fc"
         },
         {
           "alg" : "SHA-256",
-          "content" : "93e7378117632300b49a140ed31825d0c88d20cde6bc52992f5c1c5203c11582"
+          "content" : "4937ddc60552be25d01f15ee4f800997b874669f161c37b42e629f49bb587e61"
         },
         {
           "alg" : "SHA-512",
-          "content" : "cba96e5051f9032d63f6b5864c792524d70bdcd7bc5fcc4612ac4b1f915c8b0fb4c44ade0a4ab9b15acf2fe6607f7c3df4864404b3e4c42faea1c7098c1a2de8"
+          "content" : "3d8b3623f34cea12e6502b4f7adcec98ac6215593135e75499d96a12855829b530b8356fa178f2922209c0bd21d185eb070d589f2b3dbb695a8b3f9e180c5520"
         },
         {
           "alg" : "SHA-384",
-          "content" : "7b1c038f173b605499951753703bca8868bcc662c332554dea3bc847bd41ea8303b00d2c428dbc1b1b2f1d1b9ae44437"
+          "content" : "5518724abac3aa629f96afe2d2ecd06b654e60bf987d9d6ef39cc15c04bdeb5be2d7a7399cb7ff42523c47cef175dc45"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "bd5e6d873dad7e8908fd152a8d28c443db11cb2330b5b73199fb5f397cc69aea1c7b5f68f7fb12af9fd8b21e2fb3bcce"
+          "content" : "d597c4fc58f1c25f22f90df36517c0f472b16d76ca6007ed2b5c84146fcfc989005a9c1ff09665b797f77d1626a64555"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "0b0b813d0d049e49a12558977f4b16f71f4e46b7dc903f689957bd6216fe42c2"
+          "content" : "b2fe451c67128fd3284da27e446e6a8e901ad087420007218149dd6076cd9649"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "39b4355380edc63a2d543bbe1bb4c6f359ba9722010a56b13539ac999322701a3ac30da2ffae782e6e5bd1df65c49e3d05bb2c3be805c4c1f0c4eae8e59bd2bf"
+          "content" : "55ad96222cc6d1e70473f77f973f0cb58e260cecd4e359b5274b01d4ab2c55c24ef341546fd94cdbc5c829153e96ec9af4c0956986ffeee9e9520ec8b188368c"
         }
       ],
       "licenses" : [
@@ -4791,44 +4791,44 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.cloud.functions/functions-framework-api@1.1.4?type=jar",
+      "bom-ref" : "pkg:maven/com.google.cloud.functions/functions-framework-api@2.0.2?type=jar",
       "group" : "com.google.cloud.functions",
       "name" : "functions-framework-api",
-      "version" : "1.1.4",
-      "description" : "Sonatype helps open source projects to set up Maven repositories on https://oss.sonatype.org/",
+      "version" : "2.0.2",
+      "description" : "An open source FaaS (Function as a service) framework for writing portable Java functions.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "984a5187f315edb4f5725da4f937f1dc"
+          "content" : "48d811969a769fd5ac9e29fd361b112d"
         },
         {
           "alg" : "SHA-1",
-          "content" : "d87c7655ecb82b1c6c7ba2f6fe96fe9cec7035b1"
+          "content" : "f59f0ad07f521f15bd09bc89025357854ee7bf45"
         },
         {
           "alg" : "SHA-256",
-          "content" : "db7d1d10861dfc50a5171bba6aa6e371c0682a81d57965eff8e60ca3aa3af52e"
+          "content" : "0b73ceb64042dfb25deb28bc3abfaaa1ad75aae0f6f1d26c6b470f3896418582"
         },
         {
           "alg" : "SHA-512",
-          "content" : "608be33eea49e2841695bcaa6f11d2caf5b90b83568f69da6ad4c7f83925afac0332c5d4cdeebd576ec8590c9cb207ce255c15f2cf1736643ddcec863ee08e37"
+          "content" : "9b94b01084ad3f1b4d65844f6c13f88b4884405765dedffd7f98323059cf0fc93ef2eb2aa8faafa4c76f4c21149418ac9e15bea6d72a68802a8304004678f8e5"
         },
         {
           "alg" : "SHA-384",
-          "content" : "6d39cd7e446cbd8d3cf66a65d82f1f5656c52ca651cacbd502b7c70adb203ed89dac77f6ddf68a65f31c9315e3f3593f"
+          "content" : "a2361eebf7952b1824173c050bc23f9425257534467517fc6b79143e3991e2e84512c799db5a1c3f32469eabbcbfc0c5"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "3f71a6d2c4d0cf76f7e1a17616d4a78326712a37ca3527663b7b0416852f143193ca21bacbbb5a4d629b7aeb85ae0ad0"
+          "content" : "e95895361c6cdba32c66fa519e495d10a3d160dfdb408195935920dc9314b26042df5ae4096631ab4356365e5fbc4230"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "6a3c9c34424761f296a2c71a1d36d54f13a1d2b7e79a33eb55ada8798ee48dae"
+          "content" : "257333dd88107b3c58e308cc00f2f00abc8721c8b676cd2c093dc946cb132690"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "16897041916c628a4cf1c6dded67f7df6dded3880aa71b82037d44db55388910eabc45f068fb327279e707a6f740ea78ff5a8b15dfca92f835a65ad9b0a48f44"
+          "content" : "a3fbcb0c89d9c604487f05761eb1a56d701d8bdc7ab50e4a8e71e132113d979703c572cfbe59b8368ae9455b475bf15b28ab71af6b6f5ede57ee71f8fe52bd2d"
         }
       ],
       "licenses" : [
@@ -4843,11 +4843,11 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.cloud.functions/functions-framework-api@1.1.4?type=jar",
+      "purl" : "pkg:maven/com.google.cloud.functions/functions-framework-api@2.0.2?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
-          "url" : "http://nexus.sonatype.org/oss-repository-hosting.html/functions-framework-api"
+          "url" : "https://github.com/GoogleCloudPlatform/functions-framework-java"
         },
         {
           "type" : "distribution-intake",
@@ -4861,44 +4861,44 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/io.cloudevents/cloudevents-api@4.0.1?type=jar",
+      "bom-ref" : "pkg:maven/io.cloudevents/cloudevents-api@4.0.2?type=jar",
       "group" : "io.cloudevents",
       "name" : "cloudevents-api",
-      "version" : "4.0.1",
+      "version" : "4.0.2",
       "description" : "CloudEvents SDK for Java",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "50d622046d7070d3b549fc3cdeb2472d"
+          "content" : "d228d65eafdfb7ea6903cf798fde6c92"
         },
         {
           "alg" : "SHA-1",
-          "content" : "94d42196e5717b6d44d9c86ae6015710574f01bf"
+          "content" : "38e5a784e5599941e0f2cb9c7fd7c57cf843717d"
         },
         {
           "alg" : "SHA-256",
-          "content" : "1eb08784349017f4d9bf7e31cd9107c7e1dd15138f60507168a3a68b0206cf5b"
+          "content" : "d8fed41e56c7e76767eb142c396603ef4499dd5ba974fd6ac85df12d486a88c5"
         },
         {
           "alg" : "SHA-512",
-          "content" : "0dbc2cd23de3c16b4d3bfb78bd524af47ab0abc42e1cb96bee267ccebe73b0c965a750cf453c22170c72cc6bbdee601fcc05b778c505e3fc2654c844a9233d21"
+          "content" : "12eba53581adfde511fff6c561d4b89b7d8b88114d7482ad32e25dee17ed7ced6757b2732c3c4cbbeb9ceaea728a15faf2c14c0a594a6d86cf1051fa28be8819"
         },
         {
           "alg" : "SHA-384",
-          "content" : "795a3ab8833175a7c14bdc21ac675930ad01cfcc6accd9a0ce02797fc7099a5b29584d1faa62b2b567d310c2dea66001"
+          "content" : "c4c756549cd1e270d3b9fabee3be02af4ddd5f2c3862c54164c4b7f4fdb42362099b7917a68b43fbb270d2cdd201b5e0"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "cff8dd807abd26a99a8629af5be577a6151a8b72541cd6d532576148c376a23e0c6e5895a4ad361ce8a760c6bf2dec68"
+          "content" : "c5d7f1c188ef95ac9c5529155529c84b05912467c512e205b01c79afac7e1537fcbb024709b309d843f0c5bd00a6a4f9"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "2727f6893d89295d42a3e1df6f5495aaaa7000256da66b25834606623190cfcf"
+          "content" : "47ee503d560691077be0af89f8ba48e3912c269f3e7bd602d716557b43677c2a"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "549fc75da3b395c551d74f5029fd5ce34cf334bc483721ce137c95dff91118e2ec706e1b60c98ab6fe18e440dacb0f7921f4beb068c235f0243fd72aff1f582f"
+          "content" : "c8e8f857ed75f2d9bcf18bf7417cbe95dccf93623f51bbf76fb94967b7fa8cd4bababc91c77801215fcdcfa0527b19ba611c6b57b6491a9b654a3d5a54a4c72c"
         }
       ],
       "licenses" : [
@@ -4913,7 +4913,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/io.cloudevents/cloudevents-api@4.0.1?type=jar",
+      "purl" : "pkg:maven/io.cloudevents/cloudevents-api@4.0.2?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -4921,7 +4921,7 @@
         },
         {
           "type" : "distribution-intake",
-          "url" : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+          "url" : "https://central.sonatype.com"
         },
         {
           "type" : "vcs",
@@ -11097,7 +11097,7 @@
         "pkg:maven/com.google.dagger/dagger@2.60.1?type=jar",
         "pkg:maven/com.google.dagger/dagger-compiler@2.60.1?type=jar",
         "pkg:maven/org.apache.commons/commons-lang3@3.20.0?type=jar",
-        "pkg:maven/com.google.cloud.functions/functions-framework-api@1.1.4?type=jar",
+        "pkg:maven/com.google.cloud.functions/functions-framework-api@2.0.2?type=jar",
         "pkg:maven/com.google.cloud/google-cloud-storage@2.71.0?type=jar",
         "pkg:maven/com.google.cloud/google-cloud-secretmanager@2.95.0?type=jar",
         "pkg:maven/com.google.cloud/google-cloud-pubsub@1.153.0?type=jar",
@@ -11610,13 +11610,13 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.cloud.functions/functions-framework-api@1.1.4?type=jar",
+      "ref" : "pkg:maven/com.google.cloud.functions/functions-framework-api@2.0.2?type=jar",
       "dependsOn" : [
-        "pkg:maven/io.cloudevents/cloudevents-api@4.0.1?type=jar"
+        "pkg:maven/io.cloudevents/cloudevents-api@4.0.2?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/io.cloudevents/cloudevents-api@4.0.1?type=jar",
+      "ref" : "pkg:maven/io.cloudevents/cloudevents-api@4.0.2?type=jar",
       "dependsOn" : [ ]
     },
     {
