@@ -129,8 +129,10 @@ locals {
 
   todos = [for id, connection in module.google_workspace_connection : local.connector_todos[id]]
 
-  current_todo_step = try(max(values(module.google_workspace_connection)[*].next_todo_step...), local.dwd_todo_step)
-  next_todo_step    = (local.provision_gcp_sa_keys || local.use_wif) ? local.current_todo_step : local.current_todo_step + 1
+  # Same value as max(connection.next_todo_step) (each connection is todo_step+1) without iterating
+  # the DWD module — that waits on module close (local_file todos) and cycles through psoxy.todo_step
+  # when SA keys are destroyed on a WIF cutover.
+  next_todo_step = (local.provision_gcp_sa_keys || local.use_wif) ? local.dwd_todo_step + 1 : local.dwd_todo_step + 2
 
   connectors_needing_manual_api_enablement = {
     for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
@@ -197,13 +199,28 @@ locals {
     PROCESS_IDENTITY_SOURCE = "gcp_hosted"
   } : {}
 
+  # Deterministic DWD SA email (same formula as google-workspace-dwd-connection). Used for WIF env
+  # so enabled_api_connectors does not wait on that module's close / local_file todos.
+  gws_dwd_sa_id_raw = {
+    for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
+    k => lower(replace(trim("${local.environment_id_prefix}${substr(k, 0, 30 - length(local.environment_id_prefix))}", " "), " ", "-"))
+  }
+  gws_dwd_sa_email = {
+    for k, raw in local.gws_dwd_sa_id_raw :
+    k => format(
+      "%s@%s.iam.gserviceaccount.com",
+      length(raw) < 6 ? "psoxy-${raw}" : (length(raw) < 31 ? raw : substr(md5(raw), 0, 30)),
+      var.gcp_project_id
+    )
+  }
+
   enabled_api_connectors = {
     for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
     k => merge(v, {
       environment_variables = merge(
         try(v.environment_variables, {}),
         local.use_wif ? merge({
-          SERVICE_ACCOUNT_EMAIL = module.google_workspace_connection[k].service_account_email
+          SERVICE_ACCOUNT_EMAIL = local.gws_dwd_sa_email[k]
         }, local.wif_process_identity_env) : {}
       )
       # rather than this merge thing, should we this as a distinct output?
