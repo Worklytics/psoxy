@@ -1,29 +1,26 @@
-To enable the connector, you need to allow permissions on the application created for reading OnlineMeetings. You will need Powershell for this.
+Online meeting access requires a tenant-wide application access policy in addition to the `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` application permissions. Entra admin consent does not create this policy. Until it is granted, online meeting calls fail with `403 Forbidden` and message `No application access policy found for this app`. A Teams Administrator must create and grant the policy with the Microsoft Teams PowerShell module. Policy changes can take up to 30 minutes to take effect.
 
-Please follow the steps below:
-1. Ensure the user you are going to use for running the commands has the "Teams Administrator" role. You can add the role in the
-[Microsoft 365 Admin Center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users)
+1. Assign the **Teams Administrator** role to the account that will run the commands, in the [Microsoft 365 admin center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users) or in the Azure portal (Microsoft Entra ID → Users → Assign roles). The Teams Administrator role is sometimes missing from the Entra admin center even for an admin account; assign it in the Azure portal in that case.
+2. Install the [Microsoft Teams PowerShell module](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install).
+3. Connect and sign in as that Teams Administrator:
 
-**NOTE**: About the role, can be assigned through Entra Id portal in Azure portal OR in Entra Admin center https://admin.microsoft.com/AdminPortal/Home. It is possible that even login with an admin account in Entra Admin Center the Teams role is not available to assign to any user; if so, please do it through Azure Portal (Entra Id -> Users -> Assign roles)
-
-2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install)  You can use `pwsh` in the terminal
-    enter to PowerShell.
-3. Then, run the following command. It will open a browser window for login to Microsoft Teams. After login, close the browser and return to the terminal.
-   Please choose the user who has the "Teams Administrator" role.
-```shell
+```powershell
 Connect-MicrosoftTeams
 ```
 
-4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
-  - Add a policy for the application created for the connector, providing its `application id` (client ID)
-```shell
+4. Create a policy that includes this connector's application (client) ID:
+
+```powershell
 New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds "%%entraid.client_id%%" -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
 ```
-  - Grant the policy to the whole tenant (NOT to any specific application or user)
-```shell
+
+5. Grant that policy to the whole tenant, so the connector can read meetings organized by any user:
+
+```powershell
 Grant-CsApplicationAccessPolicy -PolicyName Teams-Policy-For-Worklytics -Global
 ```
 
 **Issues**:
-- If you receive "access denied" is because no admin role for Teams has been detected. Please close and reopen the Powershell terminal after assigning the role.
-- Commands have been tested over a Powershell (7.4.0) terminal in Windows, installed from Microsoft Store and with Teams Module (5.8.0). It might not work on a different environment
+
+- `Access denied` means the signed-in account does not yet have the Teams Administrator role. Assign the role, then close and reopen PowerShell before connecting again.
+- These commands were verified on PowerShell 7.4.0 on Windows (Microsoft Store) with MicrosoftTeams module 5.8.0.

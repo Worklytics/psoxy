@@ -19,7 +19,7 @@ Please review the [Microsoft 365 README](../README.md) for general information a
 - [`OnlineMeetings.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#onlinemeetingsreadall)
 - [`OnlineMeetingArtifact.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#onlinemeetingartifactreadall)
 
-You must also [Configure Access to Online Meetings](#configure-access-to-online-meetings) for your application.
+`OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` also require a tenant-wide application access policy. A Teams Administrator must create and grant that policy with the Microsoft Teams PowerShell module. Entra admin consent does not create it. See [Configure Access to Online Meetings](#configure-access-to-online-meetings).
 
 ## Authentication
 
@@ -31,38 +31,36 @@ See the [Microsoft 365 Authorization](../README.md#authorization) section of the
 
 ### Configure Access to Online Meetings
 
-Besides having `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` scopes defined in the application, you need to allow a new role and a policy on the application created for reading online meetings. You will need [PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell) for this.
+Online meeting and meeting-artifact calls require an [application access policy](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy) in addition to the `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` application permissions. A Teams Administrator creates that policy with the [Microsoft Teams PowerShell module](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install) and grants it to the whole tenant, naming this connector's application (client) ID. Entra admin consent does not create the policy.
 
-Please follow the steps below:
+Until the policy is granted, those endpoints return `403 Forbidden` with message `No application access policy found for this app`. Policy changes can take up to 30 minutes to take effect.
 
-1. Ensure the user you are going to use for running the commands has the "Teams Administrator" role. You can add the role in the [Microsoft 365 Admin Center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users)
+1. Assign the **Teams Administrator** role to the account that will run the commands, in the [Microsoft 365 admin center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users) or in the Azure portal (Microsoft Entra ID → Users → Assign roles). The Teams Administrator role is sometimes missing from the Entra admin center even for an admin account; assign it in the Azure portal in that case.
 
-**NOTE**: It can be assigned through the Entra ID portal in Azure Portal or in the [Microsoft 365 Admin Center](https://admin.microsoft.com/AdminPortal/Home). Even when logged in with an admin account in Entra admin center, the Teams role may not be available to assign; if so, assign it through Azure Portal (Entra ID → Users → Assign roles).
+2. Install the [Microsoft Teams PowerShell module](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install).
 
-2. Install the [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install) module.
-3. Run the following command in a PowerShell terminal:
+3. Connect and sign in as that Teams Administrator:
 
-```shell
+```powershell
 Connect-MicrosoftTeams
 ```
 
-Sign in with the user that has the "Teams Administrator" role.
+4. Create a policy that includes the connector application's client ID. Terraform setup output fills this in; otherwise substitute the application (client) ID for `<application_id>`:
 
-4. Follow the steps in [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
-
-- Add a policy for the application created for the connector, providing its `application id` (client ID) in place of `<application_id>` below:
-```shell
+```powershell
 New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds "<application_id>" -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
 ```
-- Grant the policy to the whole tenant (NOT to any specific application or user)
-```shell
+
+5. Grant that policy to the whole tenant, so the connector can read meetings organized by any user:
+
+```powershell
 Grant-CsApplicationAccessPolicy -PolicyName Teams-Policy-For-Worklytics -Global
 ```
 
 **Issues**:
 
-- If you receive "access denied", no Teams admin role has been detected. Close and reopen the PowerShell terminal after assigning the role.
-- Commands have been tested on PowerShell 7.4.0 on Windows, installed from the Microsoft Store, with Teams module 5.8.0. They might not work in a different environment.
+- `Access denied` means the signed-in account does not yet have the Teams Administrator role. Assign the role, then close and reopen PowerShell before connecting again.
+- These commands were verified on PowerShell 7.4.0 on Windows (Microsoft Store) with MicrosoftTeams module 5.8.0.
 
 ## Example Data
 

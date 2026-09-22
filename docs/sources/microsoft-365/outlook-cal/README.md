@@ -17,7 +17,6 @@ all Microsoft 365 connectors.
 - [`Group.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
 - [`Calendars.Read`](https://learn.microsoft.com/en-us/graph/permissions-reference#calendarsread)
 - [`MailboxSettings.Read`](https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsread)
-- [`OnlineMeetings.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#onlinemeetingsreadall)
 
 ## Authentication
 
