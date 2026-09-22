@@ -164,7 +164,7 @@ module "worklytics_connectors_google_workspace" {
 }
 ```
 
-In the example repos, that module argument is already wired to `var.google_workspace_connector_settings`, so setting the same map in `terraform.tfvars` is equivalent.
+In the example repos, that module argument is already wired to `var.google_workspace_connector_settings`, so setting the same map in `terraform.tfvars` is equivalent. `./init` on a new clone writes `api_client_auth_method = "workload_identity_federation"` into `terraform.tfvars` when you enable Google Workspace sources. Existing deployments that omit the setting keep downloaded keys.
 
 What Terraform does when you opt in:
 
