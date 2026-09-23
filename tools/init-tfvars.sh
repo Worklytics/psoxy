@@ -284,6 +284,19 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
           printf "google_workspace_example_admin=\"{{FILL_YOUR_VALUE}}\"\n\n" >> $TFVARS_FILE
         fi
       fi
+
+      # New clones: keyless DWD (IAM signJwt). Module default remains service_account_key so
+      # existing terraform.tfvars that omit this map are unchanged.
+      [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_connector_settings"' variables.tf
+      if [[ $? -eq 0 ]]; then
+        printf "# How the proxy authenticates as Google Workspace API clients (Domain-wide Delegation service accounts)\n" >> $TFVARS_FILE
+        printf "#  - workload_identity_federation: IAM signJwt; no downloaded JSON keys (default for new deployments)\n" >> $TFVARS_FILE
+        printf "#  - service_account_key: downloaded JSON keys stored as secrets (set this, or omit the map, for the legacy path)\n" >> $TFVARS_FILE
+        printf "google_workspace_connector_settings = {\n" >> $TFVARS_FILE
+        printf "  api_client_auth_method = \"workload_identity_federation\"\n" >> $TFVARS_FILE
+        printf "}\n\n" >> $TFVARS_FILE
+        printf "  ${SUCCESS}google_workspace_connector_settings.api_client_auth_method${NC}=${CODE}\"workload_identity_federation\"${NC}\n"
+      fi
     else
       remove_google_workspace
     fi

@@ -111,6 +111,15 @@ EOT
      `${local.expected_sa_email}`.
 EOT
 
+  sa_key_todo_note = var.api_client_auth_method == "workload_identity_federation" ? "" : <<-EOT
+     Via the GCP console, you can also verify all extant keys for the service account, to ensure
+     that there is exactly one, which should be held by the proxy.  GCP provides log of key usage,
+     creation, revocation, etc, which you can monitor to ensure that the key is being used only by
+     the proxy, only for the data access you expect. If you ever suspect compromise, you may revoke
+     the key from the GCP console at any time (NOTE: that proxy connection will be broken until a new
+     key is provisioned and stored in your secrets manager).
+EOT
+
   todo_content = <<EOT
 Complete the following steps via the Google Workspace Admin console:
   1. Visit https://admin.google.com/ and navigate to "Security" --> "Access and Data Control" -->
@@ -126,13 +135,7 @@ Complete the following steps via the Google Workspace Admin console:
      This ensures you are granting domain-wide delegation to the correct service account, and
      mitigates the risk that these instructions were forged by a malicious actor.
 ${local.manual_sa_todo_note}
-     Via the GCP console, you can also verify all extant keys for the service account, to ensure
-     that there is exactly one, which should be held by the proxy.  GCP provides log of key usage,
-     creation, revocation, etc, which you can monitor to ensure that the key is being used only by
-     the proxy, only for the data access you expect. If you ever suspect compromise, you may revoke
-     the key from the GCP console at any time (NOTE: that proxy connection will be broken until a new
-     key is provisioned and stored in your secrets manager).
-
+${local.sa_key_todo_note}
   3. Copy and paste the following OAuth 2.0 scope string into the "Scopes" input:
 ```
 ${join(",", var.oauth_scopes_needed)}
@@ -156,15 +159,18 @@ resource "local_file" "todo_auth_google_workspace" {
 
 # NOTE: there are several options for how to authenticate a service as the OAuth client created
 # above:
-#   1.) with a Service Account Key (modules/gcp-sa-auth-key)
-#   2.) via a delegation chain (modules/gcp-sa-auth-chain)
+#   1.) with a Service Account Key (modules/gcp-sa-auth-key) — SourceAuthStrategy
+#       `gcp_service_account_key`; uses createDelegated(user) signed with the downloaded key
+#   2.) keyless DWD via IAM Credentials signJwt (Google-managed SA key) — SourceAuthStrategy
+#       `gcp_iam_sign_jwt`. Process identity is explicit (not ADC):
+#         - GCP host: PROCESS_IDENTITY_SOURCE=gcp_hosted (Cloud Function attached SA)
+#         - AWS host: PROCESS_IDENTITY_SOURCE=aws_wif (AWS IAM role federated to a GCP principal)
+#       That principal needs roles/iam.serviceAccountTokenCreator on this DWD-enabled SA, then
+#       signJwt issues a JWT with sub=Workspace user, exchanged at oauth2.googleapis.com/token.
+#       Java's createDelegated() is a no-op on metadata/WIF credentials; signJwt is the equivalent.
 #   3.) directly by having process (VM, cloud function, etc) launched "as" the Service Account
-#           (probably requires granting some sort of permissions to compute/cloud function SA to
-#            be able to launch process as another SA, although by default cloud functions run as
-#            app engine SA)
+#           (limited to GCP; still cannot set JWT `sub` without signJwt or a key)
 #
 # of those (1) is most flexible as works anywhere, but requires a SA key to be managed and kept
-# secure, etc; (2) is very clean and has potential via identity payload stuff to work outside GCP,
-# but does not work to access Google APIs via impersonation of an end user (which is most of the
-# Google Workspace ones, including GMail, GCalendar, etc)
-# (3) is limited to GCP environments.
+# secure; (2) is Workspace's recommended approach (avoid user-managed keys for DWD);
+# (3) is limited to GCP and is not sufficient for Workspace user impersonation by itself.
