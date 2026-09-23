@@ -330,10 +330,13 @@ Depending on your Cloud Host / Data Sources, you will need:
       <td>
         <ul>
           <li>
-            <a href="https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator">Service Account Creator</a>
+            <a href="https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountAdmin">Service Account Admin</a>
           </li>
           <li>
-            <a href="https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountKeyAdmin">Service Account Key Admin</a>
+            <a href="https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountKeyAdmin">Service Account Key Admin</a> (default <code>service_account_key</code> auth only; not needed for Workload Identity Federation)
+          </li>
+          <li>
+            <a href="https://cloud.google.com/iam/docs/roles-permissions/iam#iam.workloadIdentityPoolAdmin">Workload Identity Pool Admin</a> (AWS hosts using <code>workload_identity_federation</code>)
           </li>
           <li>
             <a href="https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin">Service Usage Admin</a>

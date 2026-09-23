@@ -8,6 +8,28 @@ locals {
     coalesce(var.google_workspace_connector_settings["example_admin"]),
     coalesce(var.google_workspace_example_admin, local.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_ADMIN@YOUR_COMPANY.COM")
   )
+
+  # How the proxy authenticates as each GWS API client (the DWD-enabled GCP SA).
+  # service_account_key (default): downloaded JSON key; Java gcp_service_account_key.
+  # workload_identity_federation: IAM signJwt (no user-managed key); Java gcp_iam_sign_jwt.
+  gws_api_client_auth_method = try(var.google_workspace_connector_settings["api_client_auth_method"], "service_account_key")
+
+  # tflint-ignore: terraform_unused_declarations
+  validate_gws_api_client_auth_method         = contains(["service_account_key", "workload_identity_federation"], local.gws_api_client_auth_method)
+  validate_gws_api_client_auth_method_message = "google_workspace_connector_settings.api_client_auth_method must be service_account_key or workload_identity_federation."
+  validate_gws_api_client_auth_method_check = regex(
+    "^${local.validate_gws_api_client_auth_method_message}$",
+    local.validate_gws_api_client_auth_method ? local.validate_gws_api_client_auth_method_message : ""
+  )
+
+  # referenced so the regex validation above is always evaluated
+  gws_source_auth_strategy = (
+    local.validate_gws_api_client_auth_method_check == local.validate_gws_api_client_auth_method_message &&
+    local.gws_api_client_auth_method == "workload_identity_federation"
+    ? "gcp_iam_sign_jwt"
+    : "gcp_service_account_key"
+  )
+
   # oauth_scopes_needed below are documented (short form, without the
   # https://www.googleapis.com/auth/ prefix) in docs/sources/google-workspace/.
   google_workspace_sources = {
@@ -20,7 +42,7 @@ locals {
       apis_consumed : [
         "calendar-json.googleapis.com"
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "www.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
@@ -58,7 +80,7 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.group.readonly",
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "admin.googleapis.com"
       environment_variables : {}
       enable_side_output : false
@@ -84,7 +106,7 @@ locals {
       apis_consumed : [
         "drive.googleapis.com"
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "www.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/drive.readonly"
@@ -110,7 +132,7 @@ locals {
       apis_consumed : [
         "gmail.googleapis.com"
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "www.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/gmail.metadata"
@@ -133,7 +155,7 @@ locals {
       apis_consumed : [
         "admin.googleapis.com"
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "admin.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
@@ -153,7 +175,7 @@ locals {
       apis_consumed : [
         "admin.googleapis.com"
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "admin.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
@@ -174,7 +196,7 @@ locals {
       apis_consumed : [
         "admin.googleapis.com"
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "admin.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
