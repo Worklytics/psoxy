@@ -15,6 +15,8 @@
 # Usage:
 #   ./generate-todos.sh
 #   ./generate-todos.sh --yes
+#
+# Tests (no cloud credentials): ./tools/generate-todos.test.sh
 
 set -euo pipefail
 
