@@ -63,7 +63,7 @@ This example repository provides:
 ### Code Navigation
 
 - **Terraform files** (`.tf`) define the infrastructure
-- **Helper scripts** (`init`, `check-prereqs`, `available-connectors`) assist with setup
+- **Helper scripts** (`init`, `check-prereqs`, `available-connectors`, `build-tests.sh`) assist with setup and testing
 - **Module references** point to the main Psoxy repository at specific version tags
 - **Example configurations** show how to enable various data source connectors
 

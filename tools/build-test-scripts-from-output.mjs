@@ -3,7 +3,7 @@
  * Build Psoxy connector test scripts from Terraform outputs.
  *
  * Synthesizes the same test-*.sh / test-all.sh scripts that Terraform writes via local_file,
- * using standard root outputs (connector instances, aws_region, psoxy_base_dir, etc.).
+ * using standard root outputs (connector instances, aws_region, repo_base_dir, etc.).
  */
 
 import { execFileSync } from 'node:child_process';
@@ -39,13 +39,13 @@ Arguments:
   output-dir            Where to write scripts (default: terraform-config-dir)
 
 Environment:
-  PSOXY_BASE_DIR   Override psoxy_base_dir Terraform output when synthesizing scripts
+  PSOXY_BASE_DIR   Override repo_base_dir Terraform output when synthesizing scripts
   TF_WORKSPACE     Terraform workspace to select before reading outputs
 
-Required Terraform outputs (from Psoxy examples):
+Required Terraform outputs (from examples):
   api_connector_instances, bulk_connector_instances, webhook_collector_instances
-  AWS: caller_role_arn, aws_region, psoxy_base_dir
-  GCP: psoxy_base_dir; webhook collectors include batch_scheduler_job_id when applicable
+  AWS: caller_role_arn, aws_region, repo_base_dir
+  GCP: repo_base_dir; webhook collectors include batch_scheduler_job_id when applicable
 `;
 }
 
@@ -78,7 +78,7 @@ function unwrapOutputs(wrapped) {
 }
 
 function resolvePsoxyBaseDir(outputs) {
-  const explicit = process.env.PSOXY_BASE_DIR || outputs.psoxy_base_dir;
+  const explicit = process.env.PSOXY_BASE_DIR || outputs.repo_base_dir;
   if (explicit) return ensureTrailingSlash(explicit);
   const jar = outputs.path_to_deployment_jar;
   if (typeof jar === 'string' && jar !== 'unknown' && !/^(s3|gs):\/\//.test(jar)) {
@@ -183,7 +183,8 @@ function buildApiTestScript({
   const gcpFlagSuffix = gcpFlags ? ` ${gcpFlags}` : '';
   const commandCliCall = `node ${psoxyBaseDir}tools/psoxy-test/cli-call.js${roleParam}${regionParam}${gcpFlagSuffix}`;
   const supportsAsync = Boolean(testExamples?.supports_async);
-  const defaultHeaderFlagsQuoted = shellSingleQuote(defaultHeaderFlags);
+  const headerFlagsDefault =
+    defaultHeaderFlags.trim() !== '' ? shellSingleQuote(defaultHeaderFlags) : '';
 
   const getInvocations = getRequests.map((r) => ({
     ...r,
@@ -201,7 +202,9 @@ function buildApiTestScript({
     `API_PATH=\${2:-${shellSingleQuote(defaultPath)}}`,
     'CONTENT_TYPE=${3:-""}',
     'BODY=${4:-""}',
-    `HEADER_FLAGS=\${5:-${defaultHeaderFlagsQuoted}}`,
+    headerFlagsDefault !== ''
+      ? `HEADER_FLAGS=\${5:-${headerFlagsDefault}}`
+      : 'HEADER_FLAGS=${5:-}',
     '',
     `echo "Quick test of ${functionName} ..."`,
     '',
@@ -382,6 +385,7 @@ function buildAwsWebhookTestScript({
 --identity-issuer "${endpointUrl}" \\
 `;
   }
+  // AWS collectors expose POST /collect; well-known endpoints stay on the base URL.
   let identityLine = '';
   if (example?.identity != null) {
     identityLine = `--identity-subject ${shellSingleQuote(String(example.identity))} \\
@@ -399,7 +403,7 @@ OPENID_CONFIG_RC=$?
 ${commandCliCall} -u "${endpointUrl}/.well-known/jwks.json"
 JWKS_RC=$?
 
-${commandCliCall} -u "${endpointUrl}/" --method POST \\
+${commandCliCall} -u "${endpointUrl}/collect" --method POST \\
 ${signingLines}${identityLine}--verify-collection "${sanitizedBucket}" \\
 --body ${payload}
 COLLECTION_RC=$?
@@ -549,34 +553,25 @@ function generateScriptsFromOutputs({ outputs, psoxyBaseDir, platform, awsRegion
   return scripts;
 }
 
-function buildTestAllFromScripts(scripts, platform, outputs) {
-  const apiKeys = Object.keys(outputs.api_connector_instances ?? {});
-  const bulkKeys = Object.keys(outputs.bulk_connector_instances ?? {});
-  const webhookKeys = Object.keys(outputs.webhook_collector_instances ?? {});
+function buildTestAllScript() {
+  // Same discovery script Terraform writes. Listing connector outputs here created destroy cycles.
+  return `#!/bin/bash
 
-  const lines = ['#!/bin/bash', '', 'echo "Testing API Connectors ..."', ''];
-  for (const key of apiKeys) {
-    const name = apiScriptFilename(platform, key);
-    if (scripts[name]) lines.push(`./${name}`);
-  }
+# Run all per-connector test-*.sh scripts in the current directory (alphabetical).
+# Per-connector scripts are generated from Terraform outputs.
 
-  if (bulkKeys.length > 0) {
-    lines.push('', 'echo "Testing Bulk Connectors ..."', '');
-    for (const key of bulkKeys) {
-      const name = bulkScriptFilename(key);
-      if (scripts[name]) lines.push(`./${name}`);
-    }
-  }
+found=0
+while IFS= read -r script; do
+  found=1
+  echo "Running \${script} ..."
+  "\${script}"
+done < <(find . -maxdepth 1 -type f -name 'test-*.sh' ! -name 'test-all.sh' | LC_ALL=C sort)
 
-  if (webhookKeys.length > 0) {
-    lines.push('', 'echo "Testing Webhook Collectors ..."', '');
-    for (const key of webhookKeys) {
-      const name = webhookScriptFilename(key);
-      if (scripts[name]) lines.push(`./${name}`);
-    }
-  }
-
-  return lines.join('\n') + '\n';
+if [ "$found" -eq 0 ]; then
+  echo "No per-connector test-*.sh scripts found."
+  exit 1
+fi
+`;
 }
 
 function writeScripts(outputDir, scripts) {
@@ -624,7 +619,7 @@ function main() {
     process.exit(1);
   }
 
-  generated['test-all.sh'] = buildTestAllFromScripts(generated, platform, outputs);
+  generated['test-all.sh'] = buildTestAllScript();
 
   const written = writeScripts(args.outputDir, generated);
   process.stdout.write(`Wrote ${written.length} script(s) to ${args.outputDir} (from Terraform outputs).\n`);

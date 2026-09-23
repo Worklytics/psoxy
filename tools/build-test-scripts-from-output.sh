@@ -2,7 +2,7 @@
 # Materialize connector test scripts from Terraform outputs.
 #
 # Synthesizes the same test-*.sh / test-all.sh scripts that Terraform writes via local_file,
-# using standard root outputs (connector instances, aws_region, psoxy_base_dir, etc.).
+# using standard root outputs (connector instances, aws_region, repo_base_dir, etc.).
 #
 # Works wherever Terraform state is accessible (local, CI, Terraform Cloud, etc.).
 #
@@ -10,7 +10,7 @@
 #   ./tools/build-test-scripts-from-output.sh [terraform-config-dir] [output-dir]
 #
 # Environment:
-#   PSOXY_BASE_DIR   Override psoxy_base_dir Terraform output
+#   PSOXY_BASE_DIR   Override repo_base_dir Terraform output
 #   TF_WORKSPACE     Terraform workspace to select
 
 set -euo pipefail

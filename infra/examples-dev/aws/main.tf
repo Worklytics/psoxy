@@ -258,8 +258,8 @@ output "aws_region" {
   value       = var.aws_region
 }
 
-output "psoxy_base_dir" {
-  description = "Absolute path to the psoxy repository root (trailing slash)."
+output "repo_base_dir" {
+  description = "Absolute path to the repository root used to build test scripts (trailing slash)."
   value       = var.psoxy_base_dir
 }
 

@@ -4,6 +4,16 @@ By default, the Terraform examples provided by Worklytics install a NodeJS-based
 
 Full documentation of the test tool is available [here](psoxy-test-tool.md). And the code is located in the `tools` directory of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
+### Generating test scripts from Terraform outputs
+
+From the root of an AWS or GCP example, after `terraform init` and `terraform apply`:
+
+```shell
+./build-tests.sh
+```
+
+That wrapper runs `tools/build-test-scripts-from-output.sh` from the repository clone Terraform downloaded under `.terraform/modules/`, and writes `test-*.sh` plus `test-all.sh` into the example directory. Pass a repo path (`./build-tests.sh /path/to/psoxy`) when that clone is not present.
+
 ### Testing Pre-requisites
 
 Wherever you run this test tool from, your AWS or GCloud CLI _must_ be authenticated as an entity with permissions to invoke the Lambda functions / Cloud functions that you deployed for Psoxy.

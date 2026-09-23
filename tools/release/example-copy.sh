@@ -85,6 +85,10 @@ fi
 copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/available-connectors.sh" "${EXAMPLE_TEMPLATE_REPO}available-connectors"
 copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/az-auth.sh" "${EXAMPLE_TEMPLATE_REPO}az-auth"
 
+if [ -f "${EXAMPLE_TO_COPY_FROM}/build-tests.sh" ]; then
+  copy_script_lf "${EXAMPLE_TO_COPY_FROM}/build-tests.sh" "${EXAMPLE_TEMPLATE_REPO}build-tests.sh"
+fi
+
 # Force LF on checkout for customer-facing scripts (overrides Git for Windows autocrlf).
 # Scoped to scripts only — do not force LF on all text in the example repo.
 cat > "${EXAMPLE_TEMPLATE_REPO}.gitattributes" <<'EOF'

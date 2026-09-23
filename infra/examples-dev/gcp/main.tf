@@ -242,8 +242,8 @@ output "artifacts_bucket_id" {
   value       = module.psoxy.artifacts_bucket_id
 }
 
-output "psoxy_base_dir" {
-  description = "Absolute path to the psoxy repository root (trailing slash)."
+output "repo_base_dir" {
+  description = "Absolute path to the repository root used to build test scripts (trailing slash)."
   value       = var.psoxy_base_dir
 }
 
