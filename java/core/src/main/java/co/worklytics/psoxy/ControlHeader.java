@@ -49,6 +49,29 @@ public enum ControlHeader {
      * this is a header, but NOT something we forward to the source API. rather used
      */
     USER_TO_IMPERSONATE("User-To-Impersonate"),
+
+    /**
+     * Override the HTTP request path used for rule matching and upstream URL construction.
+     * When present (and valid), the proxy treats the request as if it were sent to this path
+     * and ignores the actual request path.
+     *
+     * <p>Value is used as-is (no base64 encoding). Must be a path beginning with {@code /}.
+     *
+     * <p>NOTE: when combined with inbound path-prefix trimming ({@code REQUEST_PATH_PREFIX_TO_TRIM}),
+     * a present TargetPath should be used exactly — not run through prefix stripping — because it
+     * already expresses the logical path for rules and upstream calls.
+     */
+    TARGET_PATH("TargetPath"),
+
+    /**
+     * Override the HTTP request query string used for rule matching and upstream URL construction.
+     * When present (and valid), the proxy treats the request as if it were sent with this query
+     * string and ignores any actual query string on the request.
+     *
+     * <p>Value should be the raw query string without a leading {@code ?} (a leading {@code ?}
+     * is stripped if present). An empty value means "no query string".
+     */
+    TARGET_QUERY("TargetQuery"),
     ;
 
     @NonNull

@@ -1,0 +1,75 @@
+{
+  "value":[
+    {
+      "id":"0123456789abc",
+      "folder":{ },
+      "createdBy":{
+        "user":{
+          "id":"48d31887-5fad-4d73-a9f5-3c356e68a038",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      },
+      "lastModifiedBy":{
+        "user":{
+          "id":"382f7e1a-59bf-4d40-9c69-f44a6836c40e",
+          "email":"t~NttC3KNgmfBytDUHQ6TNJdyX3qUaxeMIrkO6j2yhEuY@contoso.com"
+        }
+      }
+    },
+    {
+      "id":"123010204abac",
+      "file":{ },
+      "createdBy":{
+        "user":{
+          "id":"48d31887-5fad-4d73-a9f5-3c356e68a038",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      },
+      "lastModifiedBy":{
+        "user":{
+          "id":"48d31887-5fad-4d73-a9f5-3c356e68a038",
+          "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+        }
+      },
+      "shared":{
+        "owner":{
+          "user":{
+            "id":"48d31887-5fad-4d73-a9f5-3c356e68a038",
+            "email":"t~_0UTLTcAWlr01ytd2FdRyq6nvly3PDCmY9eal8_rB_A@contoso.com"
+          }
+        },
+        "sharedBy":{
+          "user":{
+            "id":"382f7e1a-59bf-4d40-9c69-f44a6836c40e",
+            "email":"t~NttC3KNgmfBytDUHQ6TNJdyX3qUaxeMIrkO6j2yhEuY@contoso.com"
+          }
+        },
+        "sharedDateTime":"2023-10-20T02:06:58.147Z"
+      }
+    },
+    {
+      "id":"2353010204ddgg",
+      "deleted":{ }
+    },
+    {
+      "id":"9a8b7c6d5e4f",
+      "file":{ },
+      "remoteItem":{
+        "id":"remote-item-1",
+        "createdBy":{
+          "user":{
+            "id":"9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
+            "email":"t~1ECTeY42RlWDU6D4DtrXKyFmVrUHbEEpdYzI34l0y9Q@contoso.com"
+          }
+        },
+        "lastModifiedBy":{
+          "user":{
+            "id":"9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
+            "email":"t~1ECTeY42RlWDU6D4DtrXKyFmVrUHbEEpdYzI34l0y9Q@contoso.com"
+          }
+        }
+      }
+    }
+  ],
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/drives/b!abc123/root/delta(token=1230919asd190410jlka)"
+}

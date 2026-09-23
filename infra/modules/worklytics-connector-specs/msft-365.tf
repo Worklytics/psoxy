@@ -28,13 +28,13 @@ locals {
       "MailboxSettings.Read"
     ]
     environment_variables : local.msft_365_environment_variables
-    external_todo : null
+    external_token_todo : null
     enable_side_output : false
     example_api_calls : [
       "/v1.0/users",
       "/v1.0/users/${local.example_msft_user_guid}",
       "/v1.0/groups",
-      "/v1.0/groups/{GROUP_ID}/members"
+      "/v1.0/groups/${local.example_msft_group_guid}/members"
     ]
   }
 
@@ -63,16 +63,16 @@ locals {
         "User.Read.All"
       ],
       environment_variables : local.msft_365_environment_variables
-      external_todo : null
+      external_token_todo : null
       enable_side_output : false
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users?\\$select=id,mail,otherMails",
         "/v1.0/users/${local.example_msft_user_guid}/events",
-        "/v1.0/users/${local.example_msft_user_guid}/calendarView?startDateTime=${timeadd(var.example_api_calls_sample_date, "-4320h")}&endDateTime=${var.example_api_calls_sample_date}",
+        "/v1.0/users/${local.example_msft_user_guid}/calendar/calendarView?startDateTime=${timeadd(var.example_api_calls_sample_date, "-4320h")}&endDateTime=${var.example_api_calls_sample_date}",
         "/v1.0/users/${local.example_msft_user_guid}/mailboxSettings",
         "/v1.0/groups",
-        "/v1.0/groups/{GROUP_ID}/members"
+        "/v1.0/groups/${local.example_msft_group_guid}/members"
       ]
     },
     "outlook-mail" : {
@@ -91,15 +91,48 @@ locals {
         "User.Read.All"
       ]
       environment_variables : local.msft_365_environment_variables
-      external_todo : null
+      external_token_todo : null
       enable_side_output : false
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users?\\$select=id,mail,otherMails",
         "/v1.0/users/${local.example_msft_user_guid}/mailboxSettings",
         "/v1.0/users/${local.example_msft_user_guid}/mailFolders/SentItems/messages",
+        # `{MESSAGE_ID}` is a mail message id from GET .../mailFolders/SentItems/messages.
+        "/v1.0/users/${local.example_msft_user_guid}/messages/{MESSAGE_ID}",
         "/v1.0/groups",
-        "/v1.0/groups/{GROUP_ID}/members"
+        "/v1.0/groups/${local.example_msft_group_guid}/members"
+      ]
+    },
+    "msft-onedrive" : {
+      source_kind : "msft-onedrive"
+      availability : "beta",
+      enable_by_default : false,
+      worklytics_connector_id : "msft-onedrive-psoxy",
+      display_name : "Microsoft OneDrive"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
+      required_oauth2_permission_scopes : []
+      required_app_roles : [
+        # least-privilege permission for enumerating users'/groups' drives and reading the
+        # driveItem delta and activities feeds this connector calls.
+        "Files.Read.All",
+        # to enumerate the users/groups whose OneDrives are polled; this connector also requires
+        # a separate Microsoft Entra ID connection to be configured.
+        "User.Read.All",
+        "Group.Read.All",
+      ]
+      environment_variables : local.msft_365_environment_variables
+      external_token_todo : null
+      enable_side_output : false
+      example_api_calls : [
+        "/v1.0/users",
+        "/v1.0/groups",
+        "/v1.0/users/${local.example_msft_user_guid}/drives",
+        "/v1.0/groups/${local.example_msft_group_guid}/drives",
+        "/v1.0/drives/${local.msft_onedrive_example_drive_id}/root/delta",
+        "/v1.0/drives/${local.msft_onedrive_example_drive_id}/items/${local.msft_onedrive_example_item_id}/activities",
+        "/v1.0/drives/${local.msft_onedrive_example_drive_id}/activities",
       ]
     },
     "msft-teams" : {
@@ -123,9 +156,11 @@ locals {
       ],
       environment_variables : local.msft_365_environment_variables
       enable_side_output : false
+      # `{EXAMPLE_MSFT_USER_GUID}`/`{EXAMPLE_MSFT_TEAMS_TEAM_GUID}`/`{EXAMPLE_MSFT_TEAMS_CHANNEL_GUID}`/`{EXAMPLE_MSFT_TEAMS_CHAT_GUID}`/`{EXAMPLE_MSFT_TEAMS_CALL_GUID}` are Entra/Teams GUIDs from the list calls above (or msft_365_connector_settings). `{EXAMPLE_MSFT_TEAMS_ONLINE_MEETING_URL}` is an online-meeting join URL used as the JoinWebUrl filter. `{MEETING_ID}` is an onlineMeeting id from GET .../onlineMeetings. `{REPORT_ID}` is an attendance report id from GET .../attendanceReports. `{EXAMPLE_MSFT_TEAMS_CALL_RECORD_GUID}` must be a call-record GUID (the allow-list regex requires UUID form).
       example_api_calls : [
         "/v1.0/teams",
         "/v1.0/teams/${local.msft_teams_example_team_guid}/allChannels",
+        "/v1.0/users",
         "/v1.0/users/${local.example_msft_user_guid}/chats",
         "/v1.0/teams/${local.msft_teams_example_team_guid}/channels/${local.msft_teams_example_channel_guid}/messages",
         "/v1.0/teams/${local.msft_teams_example_team_guid}/channels/${local.msft_teams_example_channel_guid}/messages/delta",
@@ -135,39 +170,11 @@ locals {
         "/v1.0/communications/callRecords/${local.msft_teams_example_call_record_guid}",
         "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(var.example_api_calls_sample_date, "-2160h"))},toDateTime=${urlencode(var.example_api_calls_sample_date)})",
         "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(var.example_api_calls_sample_date, "-2160h"))},toDateTime=${urlencode(var.example_api_calls_sample_date)})",
-        "/v1.0/users/${local.example_msft_user_guid}/onlineMeetings?\\$filter=JoinWebUrl eq '${local.msft_teams_example_online_meeting_join_url}'"
+        "/v1.0/users/${local.example_msft_user_guid}/onlineMeetings?\\$filter=JoinWebUrl eq '${local.msft_teams_example_online_meeting_join_url}'",
+        "/v1.0/users/${local.example_msft_user_guid}/onlineMeetings/{MEETING_ID}/attendanceReports",
+        "/v1.0/users/${local.example_msft_user_guid}/onlineMeetings/{MEETING_ID}/attendanceReports/{REPORT_ID}"
       ]
-      external_todo : <<EOT
-To enable the connector, you need to allow permissions on the application created for reading OnlineMeetings. You will need Powershell for this.
-
-Please follow the steps below:
-1. Ensure the user you are going to use for running the commands has the "Teams Administrator" role. You can add the role in the
-[Microsoft 365 Admin Center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users)
-
-**NOTE**: About the role, can be assigned through Entra Id portal in Azure portal OR in Entra Admin center https://admin.microsoft.com/AdminPortal/Home. It is possible that even login with an admin account in Entra Admin Center the Teams role is not available to assign to any user; if so, please do it through Azure Portal (Entra Id -> Users -> Assign roles)
-
-2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install)  You can use `pwsh` in the terminal
-    enter to PowerShell.
-3. Then, run the following command. It will open a browser window for login to Microsoft Teams. After login, close the browser and return to the terminal.
-   Please choose the user who has the "Teams Administrator" role.
-```shell
-Connect-MicrosoftTeams
-```
-
-4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
-  - Add a policy for the application created for the connector, providing its `application id` (client ID)
-```shell
-New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds "%%entraid.client_id%%" -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
-```
-  - Grant the policy to the whole tenant (NOT to any specific application or user)
-```shell
-Grant-CsApplicationAccessPolicy -PolicyName Teams-Policy-For-Worklytics -Global
-```
-
-**Issues**:
-- If you receive "access denied" is because no admin role for Teams has been detected. Please close and reopen the Powershell terminal after assigning the role.
-- Commands have been tested over a Powershell (7.4.0) terminal in Windows, installed from Microsoft Store and with Teams Module (5.8.0). It might not work on a different environment
-EOT
+      external_token_todo : templatefile("${path.module}/docs/msft-teams/instructions.tftpl", {})
     },
     "msft-copilot" : {
       source_kind : "msft-copilot"
@@ -183,7 +190,7 @@ EOT
         "AiEnterpriseInteraction.Read.All"
       ]
       environment_variables : local.msft_365_environment_variables
-      external_todo : null
+      external_token_todo : null
       enable_side_output : false
       example_api_calls : [
         "/v1.0/users",

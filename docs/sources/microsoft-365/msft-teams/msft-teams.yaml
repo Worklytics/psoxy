@@ -37,6 +37,8 @@ endpoints:
       - "$filter"
       - "$orderby"
       - "$expand"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -146,6 +148,10 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.userPrincipalName"
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -285,6 +291,9 @@ endpoints:
       - "$skiptoken"
       - "$orderBy"
       - "$count"
+      - "$filter"
+    allowedRequestHeaders:
+      - "ConsistencyLevel"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:

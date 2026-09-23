@@ -47,18 +47,18 @@ node cli-call.js -u https://us-central1-acme.cloudfunctions.net/outlook-cal/v1.0
 
 #### External ALB URLs (beta)
 
-When API connectors are fronted by a customer-composed external ALB, test URLs look like `https://<domain-or-ip>/<function-name>/...` rather than `*.run.app`. Use:
+When API connectors are fronted by an external Application Load Balancer (ALB), test URLs look like `https://<domain-or-ip>/<function-name>/...` rather than `*.run.app`. Use:
 
 - `-f gcp` so the tool treats the host as a GCP-hosted deployment (required when the hostname is not `*.run.app` / `*.cloudfunctions.net`)
-- `--allow-insecure-tls` for PoC self-signed certs on a reserved global IP, **or** `--cacert <path>` to trust the PEM from Terraform output `external_alb_self_signed_ca_cert`
+- `--allow-insecure-tls` for PoC self-signed certs on a reserved global IP, **or** `--cacert <path>` to trust the PEM from Terraform output `external_api_alb.self_signed_ca_cert`
 
 ```shell
 node cli-call.js -u https://203.0.113.10/myenv-outlook-cal/ -f gcp --allow-insecure-tls --health-check
 ```
 
-Generated test scripts from Terraform add these flags when `api_connector_external_lb_host` is set. Your client IP must be allowlisted in Cloud Armor / `allowed_data_access_ip_blocks` to reach the ALB. See [GCP External ALB + Cloud Armor](../development/gcp-external-alb.md).
+Generated test scripts from Terraform add these flags when an external LB base URL is set (`external_api_alb` on `gcp-host`, or BYO `api_connector_external_lb_host`). When `allowed_data_access_ip_blocks` is set, your client IP must be allowlisted (Cloud Armor + app layer) to reach the ALB. See [GCP External Application Load Balancer (ALB) + Cloud Armor](../development/gcp-external-alb.md).
 
-**Common errors when testing through an external ALB:**
+**Common errors when testing through an external Application Load Balancer (ALB):**
 
 | Symptom | Likely cause | What to check |
 |---|---|---|
@@ -128,6 +128,63 @@ node cli-call.js -u https://us-central1-acme.cloudfunctions.net -d zoom
 ```
 
 Notice how the URL changes, and any other option the Psoxy may need doesn't.
+
+### Zoom: finding a meeting that has a summary
+
+`GET /v2/meetings/{MEETING_ID}/meeting_summary` requires a past meeting instance UUID where Zoom AI Companion actually produced a meeting summary. Numeric IDs from `GET /v2/users/{USER_ID}/meetings` are scheduled meetings and usually return `Invalid meeting id`.
+
+`find-zoom-meeting-summary.js` (in `tools/psoxy-test/`, next to `cli-call.js`) walks users → past meetings → instances until `has_meeting_summary` is true, then fetches the summary. Pass the Zoom function **base URL** (no API path) and the same flags you use with `cli-call.js` / `test-zoom.sh`:
+
+```shell
+# GCP (including external ALB)
+node find-zoom-meeting-summary.js -u https://us-central1-acme.cloudfunctions.net/psoxy-zoom -f gcp --allow-insecure-tls
+# AWS
+node find-zoom-meeting-summary.js -u https://acme.lambda-url.us-east-1.on.aws -r <ROLE>
+```
+
+Useful flags: `--lookback-days 180` (report meetings are searched in 30-day windows), `--max-users 5`. See [Zoom example API calls](../../docs/sources/zoom/README.md#example-api-calls).
+
+### Microsoft Teams: finding a call record, online meeting, channel, or chat
+
+Several `msft-teams` example calls need an id Terraform can't enumerate on its own:
+- `GET /v1.0/communications/callRecords/{callRecordId}` needs a real call record id.
+- `GET /v1.0/users/{userId}/onlineMeetings/{meetingId}` (and its `attendanceReports`) needs a real online meeting, which Graph can only look up by `joinWebUrl`, not by listing.
+- `GET /v1.0/teams/{teamId}/channels/{channelId}/messages` (and `/delta`) need a team/channel that actually has messages, not just any team/channel.
+- `GET /v1.0/chats/{chatId}/messages` needs a chat that actually has messages.
+
+(`GET /v1.0/communications/calls/{callId}` is not covered by any script: Graph has no endpoint to list existing calls — a `call` resource only exists for the lifetime of a session created by a calling bot, so its id is only known to whatever created it.)
+
+`find-msft-teams-example-values.js` (in `tools/psoxy-test/`, next to `cli-call.js`) covers all four:
+- a real call record (`GET /communications/callRecords` → first result)
+- an online meeting, by listing each user's chats where `onlineMeetingInfo/joinWebUrl` is set and resolving that URL against `onlineMeetings`
+- a team/channel with messages, by walking teams → `allChannels` → channel messages until one is non-empty
+- a chat with messages, by walking users → chats → chat messages until one is non-empty
+
+Pass the msft-teams function **base URL** (no API path) and the same flags you use with `cli-call.js` / `test-msft-teams.sh`:
+
+```shell
+# GCP (including external ALB)
+node find-msft-teams-example-values.js -u https://us-central1-acme.cloudfunctions.net/psoxy-msft-teams -f gcp --allow-insecure-tls
+# AWS
+node find-msft-teams-example-values.js -u https://acme.lambda-url.us-east-1.on.aws -r <ROLE>
+```
+
+By default it looks for all four. Use `--target call-record` / `online-meeting` / `team-channel` / `chat` to look for just one, or `--skip-call-record` / `--skip-online-meeting` / `--skip-team-channel` / `--skip-chat` (and `--skip-calls-note`) to exclude any combination — e.g. `--skip-call-record --skip-team-channel --skip-chat` to look only for an online meeting. Useful flags: `--max-users 20` (online-meeting/chat search), `--max-teams 20` (team-channel search), `--page-size 100`.
+
+### Microsoft OneDrive: finding a drive and drive item
+
+`GET /v1.0/drives/{driveId}/root/delta`, `.../activities`, and `.../items/{itemId}/activities` need a real `Drive.id` and `driveItem.id`, which Terraform cannot enumerate on its own (see `msft_onedrive_example_drive_id`/`msft_onedrive_example_item_id` in `msft_365_connector_settings`).
+
+`find-msft-onedrive-example-values.js` checks each user's (then each group's) `/drives` for one that exists, then looks at that drive's `root/delta` feed for a real item (preferring an actual file over a folder). Pass the msft-onedrive function **base URL** (no API path) and the same flags you use with `cli-call.js` / `test-msft-onedrive.sh`:
+
+```shell
+# GCP (including external ALB)
+node find-msft-onedrive-example-values.js -u https://us-central1-acme.cloudfunctions.net/psoxy-msft-onedrive -f gcp --allow-insecure-tls
+# AWS
+node find-msft-onedrive-example-values.js -u https://acme.lambda-url.us-east-1.on.aws -r <ROLE>
+```
+
+Use `--source users` or `--source groups` to check just one (equivalently, `--skip-groups` or `--skip-users`); useful flags: `--max-owners 20`, `--page-size 100`.
 
 ## Psoxy Logs: AWS
 Assuming that you've successfully deployed the Psoxy to AWS, you can inspect the logs by running the following command:

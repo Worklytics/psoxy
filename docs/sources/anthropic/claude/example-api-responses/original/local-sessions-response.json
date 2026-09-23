@@ -1,0 +1,29 @@
+{
+  "data": [
+    {
+      "type": "compliance_local_session",
+      "id": "clls_eyJ2IjoxLCJvIjoiOWEx1",
+      "organization_uuid": "9a1e0000-0000-0000-0000-000000000000",
+      "workspace_id": "wrkspc_01SvYKoWVRVHoEbwESNvzYdR",
+      "user": {
+        "id": "user_01GpKpLmNoPqRsTuVwXyZaBc",
+        "email_address": "engineer@example.com"
+      },
+      "product_surface": "cowork",
+      "created_at": "2026-07-09T14:02:11Z"
+    },
+    {
+      "type": "compliance_local_session",
+      "id": "clls_eyJ2IjoxLCJvIjoiOWEx2",
+      "organization_uuid": "9a1e0000-0000-0000-0000-000000000000",
+      "workspace_id": null,
+      "user": {
+        "id": "user_01WCz1FkmYMm4gnmykNKUu3Q",
+        "email_address": "jane.doe@example.com"
+      },
+      "product_surface": "claude_code",
+      "created_at": "2026-07-10T09:30:00Z"
+    }
+  ],
+  "next_page": null
+}

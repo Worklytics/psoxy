@@ -1,0 +1,23 @@
+See OpenAI's Codex Enterprise Analytics documentation for the latest, but as of 2026 you must
+create a Platform API key and have OpenAI grant it a dedicated read-only analytics scope.
+
+1 - Create a new [Platform API key](https://platform.openai.com/settings/organization/api-keys).
+  - Note that this must be a new key. Once the `codex.enterprise.analytics.read` scope is granted,
+    all other scopes are revoked.
+  - Reminder: this key can only be viewed/copied once.
+2 - Copy the key immediately - you won't see it again; then paste it as the
+  `${path_to_instance_parameters}ACCESS_TOKEN` parameter value in the proxy's Secret Manager.
+3 - Send an email to [support@openai.com](mailto:support@openai.com) requesting that the
+  `codex.enterprise.analytics.read` scope be added to the key (and all other scopes removed).
+  Include:
+  - (1) the last 4 digits of the API key
+  - (2) the Key Name
+  - (3) the Created By Name
+OpenAI's team will verify the key and grant the requested scope.
+
+4. After your administrator deploys the Psoxy instance (`terraform apply`), follow the
+   `TODO 3 - connect codex-enterprise-analytics in Worklytics.md` file generated in your Terraform
+   working directory. That file provides the **Psoxy Base URL** (your proxy/function endpoint),
+   which you must enter in the Worklytics connector settings, along with your Codex **Workspace
+   Id** (example: `${workspace_id}`), found in the ChatGPT Admin console
+   (https://chatgpt.com/admin) on the workspace settings page.

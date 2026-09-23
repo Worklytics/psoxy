@@ -2,9 +2,9 @@
 
 **Connector ID:** `windsurf`
 
-**Availability:** Alpha
+**Availability:** Deprecated — we are not supporting new Windsurf connections as of Aug 2026, given Windsurf's acquisition and rebrand as Devin Desktop.
 
-May change in backwards incompatible ways. We are NOT committed to supporting it, or making it available to all customers.
+Existing deployments should continue to work for as long as Windsurf/Devin expose and maintain the Analytics API, but given that transition we do not expect that to remain the case indefinitely and are not committing to ongoing support.
 
 Our Windsurf data connector uses the Analytics API to import data about Users (accounts) and aggregate usage data  (metrics) to Worklytics. As of July 2025, this API requires an Enterprise SaaS subscription.
 

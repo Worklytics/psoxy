@@ -362,11 +362,11 @@ Check that the Psoxy works as expected, and it transforms the files of your inpu
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js \\
-  -f ${local.example_files_csv} \\
-  -d AWS \\
-  -i ${aws_s3_bucket.input.bucket} \\
-  -o ${aws_s3_bucket.sanitized.bucket} \\
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js \
+  -f ${local.example_files_csv} \
+  -d AWS \
+  -i ${aws_s3_bucket.input.bucket} \
+  -o ${aws_s3_bucket.sanitized.bucket} \
 ${local.cli_file_upload_role_args_todo != "" ? "${local.cli_file_upload_role_args_todo}\n" : ""}  --region ${data.aws_region.current.region}
 ```
 EOT

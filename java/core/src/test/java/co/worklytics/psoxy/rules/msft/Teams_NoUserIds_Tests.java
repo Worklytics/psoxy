@@ -179,7 +179,7 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
         String jsonResponse = asJson("Communications_callRecords_" + "v1.0" + ".json");
 
         String sanitized = sanitize(endpoint, jsonResponse);
-        assertPseudonymized(sanitized, "821809f5-0000-0000-0000-3b5136c0e777");
+        assertPseudonymized(sanitized, "821809f5-0000-0000-0000-3b5136c0e777", "AbbieW@contoso.com");
         assertRedacted(sanitized,
                 "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#communications/callRecords(sessions(segments()))/$entity",
                 "@odata.type", "#microsoft.graph.callRecords.participantEndpoint",
@@ -205,7 +205,8 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
         String jsonResponse = asJson("Communications_callRecord_" + "v1.0" + ".json");
 
         String sanitized = sanitize(endpoint, jsonResponse);
-        assertPseudonymized(sanitized, "821809f5-0000-0000-0000-3b5136c0e777", "f69e2c00-0000-0000-0000-185e5f5f5d8a");
+        assertPseudonymized(sanitized, "821809f5-0000-0000-0000-3b5136c0e777", "f69e2c00-0000-0000-0000-185e5f5f5d8a",
+                "AbbieW@contoso.com", "OwenF@contoso.com");
         assertRedacted(sanitized,
                 "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#communications/callRecords(sessions(segments()))/$entity",
                 "@odata.type", "#microsoft.graph.callRecords.participantEndpoint",

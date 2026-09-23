@@ -1,0 +1,22 @@
+{
+  "scope": {
+    "type": "user",
+    "user_id": "user_abc123"
+  },
+  "actor": {
+    "type": "user_actor",
+    "user_id": "user_abc123",
+    "email_address": "alice@example.com",
+    "name": "Alice",
+    "deleted": false
+  },
+  "amount": "50000",
+  "currency": "USD",
+  "period": "monthly",
+  "source": {
+    "type": "seat_tier",
+    "seat_tier": "enterprise_standard"
+  },
+  "spend_limit_id": "spl_01XyZaBcDeFgHiJkLmNoPq",
+  "period_to_date_spend": "31402.5"
+}

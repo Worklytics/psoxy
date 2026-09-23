@@ -57,9 +57,6 @@ PARENT_POM="${JAVA_SOURCE_ROOT}pom.xml"
 
 PSOXY_CHECKOUT_ROOT=$(dirname "${JAVA_SOURCE_ROOT%/}")
 
-if [ -n "$DISTRIBUTION_PROFILE" ]; then
-    export PSOXY_SKIP_OPENNLP=1
-fi
 MAVEN_LOCAL_REPO_SH="$(dirname "$0")/lib/maven-local-repo.sh"
 if [ -f "$MAVEN_LOCAL_REPO_SH" ]; then
   # shellcheck source=lib/maven-local-repo.sh
@@ -73,18 +70,15 @@ fi
 
 # Clean all modules
 mvn ${PSOXY_MAVEN_LOCAL_REPO:+-Dmaven.repo.local="$PSOXY_MAVEN_LOCAL_REPO"} \
-    ${PSOXY_SKIP_OPENNLP:+-DskipOpenNlpModelDownload=true} \
     clean $QUIET_OPTIONS -f "${PARENT_POM}"
 
 # Build and install gateway-core and core (dependencies must be installed for impl module)
 mvn ${PSOXY_MAVEN_LOCAL_REPO:+-Dmaven.repo.local="$PSOXY_MAVEN_LOCAL_REPO"} \
-    ${PSOXY_SKIP_OPENNLP:+-DskipOpenNlpModelDownload=true} \
     install $QUIET_OPTIONS -f "${PARENT_POM}" -pl gateway-core,core -am
 
 # Build the implementation module (package only, not install)
 # The reactor will ensure dependencies are available from the previous install step
 mvn ${PSOXY_MAVEN_LOCAL_REPO:+-Dmaven.repo.local="$PSOXY_MAVEN_LOCAL_REPO"} \
-    ${PSOXY_SKIP_OPENNLP:+-DskipOpenNlpModelDownload=true} \
     package $QUIET_OPTIONS -f "${PARENT_POM}" -pl impl/${IMPLEMENTATION} -am $DISTRIBUTION_PROFILE
 
 DEPLOYMENT_DIR="${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment"

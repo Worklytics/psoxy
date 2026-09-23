@@ -8,7 +8,9 @@ Eg, as of v0.4.55 of the proxy, our docs provide guidance on using an AWS role t
 
 Additionally, you can specify resource constraints to improve security within a shared AWS account. (However, we do not recommend or officially support deployment into a shared AWS account. We recommend deploying your proxy instances in isolated AWS account to provide an implicit security boundary by default, as an additional layer of protection beyond those provided by our proxy modules)
 
-We provide an example IAM policy document in our `psoxy-constants` module that you can use to create an IAM policy in AWS. You can do this outside terraform, finding the JSON from that policy OR via terraform as follows:
+We provide an example IAM policy document in our `psoxy-constants` module that you can use to create an IAM policy in AWS. You can do this outside terraform, finding the JSON from that policy OR via terraform as follows.
+
+If you use provider `default_tags` (or otherwise tag managed resources), the provisioner role needs the tag list/write actions for each service Terraform touches — for example `logs:ListTagsForResource` / `logs:TagResource` on Lambda log groups, and `s3:PutObjectTagging` when uploading the proxy JAR from a source build. Those actions are included in `aws_least_privileged_policy`; re-apply or diff your attached policy when upgrading so tagging does not fail at apply time.
 
 ```hcl
 module "psoxy_constants" {

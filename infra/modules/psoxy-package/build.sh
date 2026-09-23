@@ -65,13 +65,13 @@ if [ ! -f "$PATH_TO_DEPLOYMENT_JAR" ] || [ -n "$FORCE_BUILD" ]; then
 
   ln -sf "${LOG_FILE}" "${TERRAFORM_CONFIG_PATH}/last-build.log"
 
-  run_mvn clean $OPTIONAL_TEST_SKIP -DskipOpenNlpModelDownload=true -f "${JAVA_SOURCE_ROOT}/pom.xml"
+  run_mvn clean $OPTIONAL_TEST_SKIP -f "${JAVA_SOURCE_ROOT}/pom.xml"
 
-  run_mvn package install $OPTIONAL_TEST_SKIP -DskipOpenNlpModelDownload=true -f "${JAVA_SOURCE_ROOT}/gateway-core/pom.xml"
+  run_mvn package install $OPTIONAL_TEST_SKIP -f "${JAVA_SOURCE_ROOT}/gateway-core/pom.xml"
 
-  run_mvn package install $OPTIONAL_TEST_SKIP -DskipOpenNlpModelDownload=true -f "${JAVA_SOURCE_ROOT}/core/pom.xml"
+  run_mvn package install $OPTIONAL_TEST_SKIP -f "${JAVA_SOURCE_ROOT}/core/pom.xml"
 
-  run_mvn package $OPTIONAL_TEST_SKIP -DskipOpenNlpModelDownload=true -f "${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}/pom.xml"
+  run_mvn package $OPTIONAL_TEST_SKIP -f "${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}/pom.xml"
 fi
 
 if [ ! -f "$PATH_TO_DEPLOYMENT_JAR" ]; then

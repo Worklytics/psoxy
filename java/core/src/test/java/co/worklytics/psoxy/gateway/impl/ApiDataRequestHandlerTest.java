@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.ConfigRulesModule;
 import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.ErrorCauses;
 import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PseudonymizerImplFactory;
@@ -84,6 +85,7 @@ class ApiDataRequestHandlerTest {
         MockModules.ForHttpTransportFactory.class,
         MockModules.ForSideOutputs.class,
         MockModules.ForAsyncApiDataRequestHandler.class,
+        MockModules.ForHostEnvironment.class,
         TestModules.ForWebhookCollectorModeConfig.class,
         TestModules.ForApiModeConfig.class,
         TestModules.ForFixedUUID.class,
@@ -238,6 +240,45 @@ class ApiDataRequestHandlerTest {
         when(request.getQuery()).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> handler.parseRequestedTarget(request));
+    }
+
+    @SneakyThrows
+    @Test
+    void parseTargetUrlUsesTargetPathAndQueryHeaders() {
+        setup("zoom", "api.zoom.us");
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getPath()).thenReturn("/ignored/path");
+        when(request.getQuery()).thenReturn(Optional.of("ignored=1"));
+        when(request.getHeader(anyString())).thenReturn(Optional.empty());
+        when(request.getHeader(ControlHeader.TARGET_PATH.getHttpHeader()))
+            .thenReturn(Optional.of("/v2/users"));
+        when(request.getHeader(ControlHeader.TARGET_QUERY.getHttpHeader()))
+            .thenReturn(Optional.of("status=active"));
+
+        HttpEventRequest withOverrides = handler.targetOverrideRequestResolver.applyOverrides(request);
+        URL url = new URL(handler.parseRequestedTarget(withOverrides));
+
+        assertEquals("https://api.zoom.us/v2/users?status=active", url.toString());
+        assertEquals("/v2/users", withOverrides.getPath());
+    }
+
+    @Test
+    void handle_rejectsInvalidTargetPathHeader() {
+        setup("zoom", "api.zoom.us");
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.isHttps()).thenReturn(Optional.of(true));
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getClientIp()).thenReturn(Optional.empty());
+        when(request.getHeader(anyString())).thenReturn(Optional.empty());
+        when(request.getHeader(ControlHeader.TARGET_PATH.getHttpHeader()))
+            .thenReturn(Optional.of("no-leading-slash"));
+
+        HttpEventResponse response = handler.handle(request,
+            ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
+
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
+        assertEquals(ErrorCauses.INVALID_REQUEST.name(),
+            response.getHeaders().get(ProcessedDataMetadataFields.ERROR.getHttpHeader()));
     }
 
     @Test
@@ -620,7 +661,7 @@ class ApiDataRequestHandlerTest {
     void sanitizedApiResponseMetadata_includesOnlyProcessedDataFields() {
         Map<String, String> metadata = Map.of(
             ProcessedDataMetadataFields.RULES_SHA.getMetadataKey(), "abc123",
-            ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(), "rc-v0.6.9",
+            ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(), "rc-v0.7.1",
             ApiDataOutputUtils.OutputObjectMetadata.REQUEST_BODY.name(), "base64body",
             ApiDataOutputUtils.OutputObjectMetadata.QUERY_STRING.name(), "foo=bar",
             ApiDataOutputUtils.OutputObjectMetadata.PATH.name(), "users/me"
@@ -631,7 +672,7 @@ class ApiDataRequestHandlerTest {
 
         assertEquals("abc123",
             responseMetadata.get(ProcessedDataMetadataFields.RULES_SHA.getHttpHeader()));
-        assertEquals("rc-v0.6.9",
+        assertEquals("rc-v0.7.1",
             responseMetadata.get(ProcessedDataMetadataFields.PROXY_VERSION.getHttpHeader()));
         assertEquals(2, responseMetadata.size());
         assertFalse(responseMetadata.containsKey(
@@ -867,6 +908,9 @@ class ApiDataRequestHandlerTest {
     void handleShouldFollowRedirectManuallyInAsyncMode() {
         setup("gmail", "google.apis.com");
 
+        when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.FOLLOW_REDIRECTS)))
+            .thenReturn(Optional.of("false"));
+
         ApiDataRequestHandler spy = spy(handler);
 
         String locationUrl = "https://pre-signed.example.com/data.json";
@@ -1003,5 +1047,70 @@ class ApiDataRequestHandlerTest {
         assertEquals(redirectedContent, sanitizedBodyCaptor.getValue());
 
         assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+    }
+
+    @Test
+    @SneakyThrows
+    void handle_sourceAuthTokenFailure_isUnauthorizedNotInternalParseError() {
+        setup("gmail", "www.googleapis.com");
+        ApiDataRequestHandler spy = spy(handler);
+        when(spy.sourceAuthStrategy.isSourceAuthFailure(any(IOException.class))).thenReturn(true);
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/gmail/v1/users/me/messages");
+        when(request.getQuery()).thenReturn(Optional.empty());
+        when(request.getHeader(any())).thenReturn(Optional.empty());
+        when(request.getClientIp()).thenReturn(Optional.empty());
+        when(request.isHttps()).thenReturn(Optional.of(true));
+
+        HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
+        when(requestFactory.buildRequest(anyString(), any(), any()))
+            .thenThrow(new IOException(
+                "Error getting access token for service account: 401 Unauthorized\nPOST https://oauth2.googleapis.com/token, iss: sa@example.iam.gserviceaccount.com"));
+        doReturn(requestFactory).when(spy).getRequestFactory(any());
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        spy.sanitizer = sanitizer;
+
+        HttpEventResponse response = spy.handle(request,
+            ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
+
+        assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatusCode());
+        assertEquals(ErrorCauses.CONNECTION_SETUP.name(),
+            response.getHeaders().get(ProcessedDataMetadataFields.ERROR.getHttpHeader()));
+        assertTrue(response.getBody().contains("access token"));
+        assertFalse(response.getBody().contains("Failed to parse request"));
+    }
+
+    @Test
+    @SneakyThrows
+    void handle_unclassifiedIoException_isStillParseError() {
+        setup("gmail", "www.googleapis.com");
+        ApiDataRequestHandler spy = spy(handler);
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/gmail/v1/users/me/messages");
+        when(request.getQuery()).thenReturn(Optional.empty());
+        when(request.getHeader(any())).thenReturn(Optional.empty());
+        when(request.getClientIp()).thenReturn(Optional.empty());
+        when(request.isHttps()).thenReturn(Optional.of(true));
+
+        HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
+        when(requestFactory.buildRequest(anyString(), any(), any()))
+            .thenThrow(new IOException("unexpected end of stream"));
+        doReturn(requestFactory).when(spy).getRequestFactory(any());
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        spy.sanitizer = sanitizer;
+
+        HttpEventResponse response = spy.handle(request,
+            ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
+
+        assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertTrue(response.getBody().contains("Failed to parse request"));
     }
 }

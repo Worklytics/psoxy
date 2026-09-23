@@ -71,6 +71,12 @@ If provided, only HTTP methods included in this list will be permitted for the e
 
 NOTE: for AWS-hosted deployments using API Gateway, IAM policies and routes may also be used to restrict HTTP methods. See [aws/guides/api-gateway.md](aws/guides/api-gateway.md) for more details.
 
+### Allowed Query Parameters
+
+`<allowed-query-params> ::= "- allowedQueryParams: " <param-name-list>`
+
+If provided, only query parameters whose names appear in this list are permitted on requests to the endpoint. Parameter name matching is case-insensitive (e.g., `$top` and `$TOP` are treated as equivalent).
+
 #### Path / Query Parameter Schemas
 
 `<path-parameter-schemas> ::= "- pathParameterSchemas: " <parameter-schema-map>`
@@ -78,7 +84,7 @@ NOTE: for AWS-hosted deployments using API Gateway, IAM policies and routes may 
 
 **beta** - a **parameter schema** to use to _validate_ path/query parameter values; if validation fails, proxy will return 403 forbidden response. Given the use-case of validating URL / query parameters, only a small subset of JSON Schema is supported.
 
-Path and query parameters without a defined schema permit any value. When `allowedQueryParams` is also specified for an endpoint, only query parameters in that list are permitted; `queryParamSchemas` adds validation for parameters in that list.
+Path and query parameters without a defined schema permit any value. When `allowedQueryParams` is also specified for an endpoint, only query parameters in that list are permitted (matched case-insensitively); `queryParamSchemas` adds validation for parameters in that list.
 
 Currently, the supported JSON Schema features are:
 

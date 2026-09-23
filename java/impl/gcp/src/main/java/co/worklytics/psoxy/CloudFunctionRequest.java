@@ -17,23 +17,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(staticName = "of")
 public class CloudFunctionRequest implements HttpEventRequest {
 
-    public static String getFunctionName() {
-        return System.getenv(GcpEnvironment.RuntimeEnvironmentVariables.K_SERVICE.name());
-    }
-
     @NonNull
     final HttpRequest request;
 
     private Map<String, List<String>> caseInsensitiveHeaders;
 
-
     private byte[] body;
 
-    // path relative to function root
+    // path as received from the HTTP runtime (normalization happens in ApiDataRequestHandler)
     @Override
     public String getPath() {
-        return request.getPath()
-            .replace(getFunctionName() + "/", "");
+        return request.getPath();
     }
 
     @Override

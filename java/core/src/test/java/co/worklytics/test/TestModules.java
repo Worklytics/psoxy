@@ -100,6 +100,7 @@ public class TestModules {
             when(m.getSourceAuthStrategyIdentifier()).thenReturn(Optional.of("test-source-auth"));
             when(m.getAsyncOutputDestination()).thenReturn(Optional.empty());
             when(m.getAllowedDataAccessIpBlocks()).thenReturn(Collections.emptyList());
+            when(m.getRequestPathPrefixToTrim()).thenReturn(Optional.empty());
             return m;
         }
     }

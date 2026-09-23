@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway;
 
 import com.google.auth.Credentials;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -46,5 +47,17 @@ public interface SourceAuthStrategy extends RequiresConfiguration {
 
 
     Credentials getCredentials(Optional<String> userToImpersonate);
+
+    /**
+     * Whether {@code e} was thrown while authenticating to the data source (token exchange,
+     * credential refresh), as opposed to a malformed inbound request.
+     *
+     * <p>Default is {@code false}: strategies that attach static credentials do not call an
+     * identity provider during request construction. Strategies that exchange tokens should
+     * override with the exception types/messages their identity provider produces.
+     */
+    default boolean isSourceAuthFailure(IOException e) {
+        return false;
+    }
 
 }

@@ -1,5 +1,7 @@
 # GitHub Free/Pro/Teams
 
+**Connector ID:** `github-non-enterprise`
+
 Availability: **GA**
 
 ## Authentication workflow
@@ -8,10 +10,20 @@ The connector uses a GitHub App to authenticate and access the data you must pro
 
 ## Examples
 
-- [Example Rules](../github/github.yaml)
+- [Example Rules](github-non-enterprise.yaml)
 - Example Data:
   - [original/user.json](example-api-responses/original/user.json) |
     [sanitized/user.json](example-api-responses/sanitized/user.json)
+
+Example API call path parameters (uppercase placeholders in generated test calls):
+
+- `{ORG}` / `{OWNER}`: `github_organization`.
+- `{REPO}`: `github_example_repository`.
+- `{TEAM_SLUG}`: a team slug from `GET /orgs/{ORG}/teams`.
+- `{ISSUE_NUMBER}` / `{PULL_NUMBER}`: numbers from `GET .../issues` and `GET .../pulls`.
+- `{REF}` / `{COMMIT_SHA}`: from `GET .../commits`.
+- `{COMMENT_ID}` / `{REVIEW_ID}`: from the matching comments/reviews lists.
+- `{USERNAME}`: **must** be a reversible-pseudonym token (`p~` + ≥43 base64url chars) of a `login` from `GET /orgs/{ORG}/members`. A raw GitHub login is blocked. GraphQL is `POST /graphql`.
 
 ## GitHub Cloud (Free, Teams, Professional): Steps to Connect
 

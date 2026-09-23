@@ -20,7 +20,6 @@ CHECKOUT_ROOT=$(pwd)
 PSOXY_CHECKOUT_ROOT="${CHECKOUT_ROOT}"
 # shellcheck source=../lib/maven-local-repo.sh
 source "${CHECKOUT_ROOT}/tools/lib/maven-local-repo.sh"
-export PSOXY_SKIP_OPENNLP=1
 
 printf "Generating Software Bill of Materials (SBOM) for AWS and GCP implementations...\n\n"
 
@@ -28,7 +27,6 @@ printf "Generating Software Bill of Materials (SBOM) for AWS and GCP implementat
 printf "${INFO}Building AWS module and generating SBOM...${NC}\n"
 ${CHECKOUT_ROOT}/tools/build.sh -q aws "${CHECKOUT_ROOT}/java/"
 mvn ${PSOXY_MAVEN_LOCAL_REPO:+-Dmaven.repo.local="$PSOXY_MAVEN_LOCAL_REPO"} \
-    -DskipOpenNlpModelDownload=true \
     -f "${CHECKOUT_ROOT}/java/impl/aws/pom.xml" clean verify -DskipTests -Dmaven.deploy.skip=false
 if [ $? -ne 0 ]; then
   printf "${ERR}Failed to build AWS module. Exiting.${NC}\n"
@@ -51,7 +49,6 @@ printf "AWS SBOM copied to ${INFO}docs/aws/sbom.json${NC}\n\n"
 printf "${INFO}Building GCP module and generating SBOM...${NC}\n"
 ${CHECKOUT_ROOT}/tools/build.sh -q gcp "${CHECKOUT_ROOT}/java/"
 mvn ${PSOXY_MAVEN_LOCAL_REPO:+-Dmaven.repo.local="$PSOXY_MAVEN_LOCAL_REPO"} \
-    -DskipOpenNlpModelDownload=true \
     -f "${CHECKOUT_ROOT}/java/impl/gcp/pom.xml" clean verify -DskipTests -Dmaven.deploy.skip=false
 if [ $? -ne 0 ]; then
   printf "${ERR}Failed to build GCP module. Exiting.${NC}\n"

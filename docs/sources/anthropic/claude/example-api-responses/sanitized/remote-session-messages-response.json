@@ -1,0 +1,39 @@
+{
+  "data":[
+    {
+      "id":"csev_abc001",
+      "content":[
+        {
+          "text":"{\"length\":39,\"word_count\":8}",
+          "truncated":false,
+          "type":"text"
+        }
+      ],
+      "content_unavailable":false,
+      "created_at":"2026-01-03T10:05:01.000000Z",
+      "role":"user",
+      "sent_by_user_id":"t~jKM-CaMiqY6bEt5D95tRBB7o1c5rdWPsRoS4cJDvjdQ"
+    },
+    {
+      "id":"csev_abc002",
+      "content":[ ],
+      "content_unavailable":true,
+      "created_at":"2026-01-03T10:05:05.000000Z",
+      "role":"assistant",
+      "sent_by_user_id":null
+    }
+  ],
+  "next_page":null,
+  "session":{
+    "id":"cse_01A0000000000000000002",
+    "agent_id":"agent_01SvYKoWVRVHoEbwESNvzYdR",
+    "claude_project_id":null,
+    "created_at":"2026-01-03T10:00:00.000000Z",
+    "organization_uuid":"00000000-0000-0000-0000-000000000000",
+    "product_surface":"cowork_remote",
+    "started_by_user":null,
+    "status":"active",
+    "updated_at":"2026-01-03T10:05:05.000000Z",
+    "user":null
+  }
+}

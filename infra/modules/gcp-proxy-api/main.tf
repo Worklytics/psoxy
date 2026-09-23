@@ -471,6 +471,18 @@ locals {
 
   test_script_filename = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   default_header_flags = length(local.example_api_get_requests_for_script) > 0 ? local.example_api_get_requests_for_script[0].header_flags : ""
+  # Keep content on a local so outputs/other files never interpolate local_file.test_script
+  # (that dependency causes a content replace to delete the file just written).
+  test_script = templatefile("${path.module}/test_script.tftpl", {
+    proxy_endpoint_url        = local.proxy_endpoint_url,
+    function_name             = var.instance_id,
+    impersonation_param       = local.impersonation_param,
+    command_cli_call          = local.command_cli_call,
+    default_header_flags      = local.default_header_flags,
+    example_api_get_requests  = local.example_api_get_requests_for_script,
+    example_api_post_requests = local.example_api_post_requests_for_script,
+    enable_async_processing   = var.enable_async_processing
+  })
 
   # Generate test calls from all example requests
   command_test_calls = [for request in local.all_example_api_requests :
@@ -547,18 +559,9 @@ EOT
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
-  filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
+  filename        = local.test_script_filename
   file_permission = "755"
-  content = templatefile("${path.module}/test_script.tftpl", {
-    proxy_endpoint_url        = local.proxy_endpoint_url,
-    function_name             = var.instance_id,
-    impersonation_param       = local.impersonation_param,
-    command_cli_call          = local.command_cli_call,
-    default_header_flags      = local.default_header_flags,
-    example_api_get_requests  = local.example_api_get_requests_for_script,
-    example_api_post_requests = local.example_api_post_requests_for_script,
-    enable_async_processing   = var.enable_async_processing
-  })
+  content         = local.test_script
 }
 
 resource "local_file" "review" {
@@ -581,12 +584,18 @@ output "cloud_function_name" {
 }
 
 output "cloud_function_url" {
-  value = local.cloud_function_url
+  description = "Direct Cloud Function / Cloud Run URI (*.run.app). Pub/Sub push and internal callers use this; internet clients should use endpoint_url when an external ALB is enabled."
+  value       = local.cloud_function_url
 }
 
 output "proxy_endpoint_url" {
-  description = "Public URL used for tests / TODOs (per-connector path on external_lb_base_url when set, otherwise Cloud Function URI)."
+  description = "Public URL used for tests / TODOs (per-connector path on external_lb_base_url when set, otherwise Cloud Function URI). No trailing slash."
   value       = local.proxy_endpoint_url
+}
+
+output "endpoint_url" {
+  description = "Public proxy base URL with trailing slash (ALB https://<host>/<function-name>/ when external_lb_base_url is set, otherwise the Cloud Function URI). Use this in Worklytics connection TODOs and terraform outputs."
+  value       = "${local.proxy_endpoint_url}/"
 }
 
 output "proxy_kind" {
@@ -594,8 +603,18 @@ output "proxy_kind" {
   description = "The kind of proxy instance this is."
 }
 
+# Name only; do not interpolate local_file.test_script (content replace then deletes the file).
+output "test_script_filename" {
+  value = local.test_script_filename
+}
+
 output "test_script" {
-  value = try(local_file.test_script[0].filename, null)
+  # Do not interpolate local_file.test_script (content replace then deletes the file).
+  value = var.todos_as_local_files ? local.test_script_filename : null
+}
+
+output "test_script_content" {
+  value = local.test_script
 }
 
 output "async_output_bucket_id" {

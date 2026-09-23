@@ -12,9 +12,11 @@ import java.util.Map;
 public class PrebuiltSanitizerRules {
 
     static final RESTRules ENTERPRISE = Rules2.load("sources/chatgpt-enterprise/chatgpt-enterprise.yaml");
+    static final RESTRules CODEX_ENTERPRISE_ANALYTICS = Rules2.load("sources/codex-enterprise-analytics/codex-enterprise-analytics.yaml");
 
     static public final Map<String, RESTRules> DEFAULT_RULES_MAP =
         ImmutableMap.<String, RESTRules>builder()
             .put("chatgpt-enterprise", ENTERPRISE)
+            .put("codex-enterprise-analytics", CODEX_ENTERPRISE_ANALYTICS)
             .build();
 }

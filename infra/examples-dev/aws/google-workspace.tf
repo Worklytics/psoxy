@@ -8,7 +8,7 @@ provider "google" {
 
 module "worklytics_connectors_google_workspace" {
   source = "../../modules/worklytics-connectors-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-google-workspace?ref=rc-v0.6.9"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-google-workspace?ref=rc-v0.7.1"
 
   google_workspace_connector_settings = var.google_workspace_connector_settings
 
@@ -18,6 +18,8 @@ module "worklytics_connectors_google_workspace" {
   }
 
   environment_id                 = var.environment_name
+  host_platform_id               = "AWS"
+  aws_account_id                 = var.aws_account_id
   base_dir                       = var.psoxy_base_dir
   enabled_connectors             = var.enabled_connectors
   gcp_project_id                 = var.google_workspace_gcp_project_id

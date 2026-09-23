@@ -5,8 +5,6 @@
 #
 # Exports:
 #   PSOXY_MAVEN_LOCAL_REPO - passed to mvn as -Dmaven.repo.local when set (local dev only)
-#
-# Callers may export PSOXY_SKIP_OPENNLP=1 before sourcing to skip OpenNLP model downloads.
 
 if [ -z "${PSOXY_CHECKOUT_ROOT:-}" ]; then
     printf 'PSOXY_CHECKOUT_ROOT must be set before sourcing maven-local-repo.sh\n' >&2

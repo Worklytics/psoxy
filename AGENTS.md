@@ -32,9 +32,9 @@ fi
 printf "${SUCCESS}Operation completed successfully.${NC}\n"
 ```
 
-## Release QA
+## Release cut / QA / publish
 
-Before merging an `rc-vX.Y.Z` branch to `main`, follow [tools/release/release-qa.md](tools/release/release-qa.md). The orchestrator is `./tools/release/run-release-qa.sh vX.Y.Z`.
+Release orchestration (cut RC, QA examples-dev, rc→main, tag/publish) lives in the internal `Worklytics/proxy-dev` repo. GitHub Actions in this repo still publish Maven packages and deployment bundles on `v*` tags and `rc-*` branches; those workflows call the remaining scripts under `tools/release/`.
 
 ## Testing Conventions
 
@@ -71,6 +71,8 @@ When modifying Java files, follow these guidelines:
 3. **Stylistic Changes**: Agents should avoid making stylistic changes (e.g., reformatting code, optimizing all imports, or resolving linting issues irrelevant to the functional change) to the repository unless explicitly directed by the user. 
 4. **Separate Commits**: When explicitly directed to make stylistic changes or broad refactoring, these should be separated into distinct commits from functional changes to simplify review.
 5. **Concurrency**: The proxy may handle concurrent requests. Any new code introducing shared mutable state, lazy initialization, or caches must be thread-safe. Use `volatile`, `synchronized`, `ConcurrentHashMap`, or immutable snapshots (`Set.copyOf`, `List.copyOf`) as appropriate. Document thread-safety assumptions in javadoc.
+6. **Prefer dependency injection over static helpers**: Inject behavior via Dagger-constructed services (`@NoArgsConstructor(onConstructor_ = @Inject)`), not static utility classes. Platform adapters should expose raw request data; cross-cutting normalization belongs in shared handlers/services (e.g. `ApiDataRequestHandler`).
+7. **Config property placement**: API connector settings belong on `ApiModeConfig.ApiModeConfigProperty` (or platform-specific API-mode config types). Use `ProxyConfigProperty` for proxy-wide settings; `BulkModeConfigProperty` for bulk connectors; webhook settings on webhook config types.
 
 ## Markdown Conventions
 

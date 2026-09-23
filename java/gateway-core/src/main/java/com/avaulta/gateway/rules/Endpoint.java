@@ -71,7 +71,7 @@ public class Endpoint {
         return Optional.ofNullable(pathParameterSchemas);
     }
 
-    // if provided, only query params in this list will be allowed
+    // if provided, only query params in this list will be allowed (matched case-insensitively)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<String> allowedQueryParams;
 

@@ -10,7 +10,7 @@ on:
         required: false
         type: string
         description: Java version to use # see https://github.com/actions/setup-java#supported-version-syntax
-        default: 17
+        default: '25' # toolchain JDK; pom.xml compiles to Java 21 language level
       java-distribution:
         required: false
         type: string
@@ -28,6 +28,8 @@ env:
 jobs:
   ci_java:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -56,8 +58,14 @@ jobs:
         working-directory: java/
         run: |
           mvn clean compile -T 2C -Dversions.logOutput=false
+      - name: Submit Maven dependency snapshot
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/rc-'))
+        uses: advanced-security/maven-dependency-submission-action@v5
+        with:
+          directory: java
+          correlator: java-${{ inputs.java-version }}
       - name: Test
         working-directory: java/
         run: |
-          mvn post-clean test -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true
+          mvn post-clean test -T 2C -Dversions.logOutput=false -DprocessDependencies=false -DprocessDependencyManagement=false -Dsurefire.forkCount=2.5C -Dsurefire.reuseForks=true -DskipOpenNlpModelDownload=false
 

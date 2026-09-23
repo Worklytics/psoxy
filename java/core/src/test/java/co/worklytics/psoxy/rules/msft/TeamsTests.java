@@ -297,6 +297,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
+        assertPseudonymized(sanitized, "AbbieW@contoso.com");
         assertRedacted(sanitized,
                 "Abbie Wilkins",
                 "Owen Franklin",
@@ -329,6 +330,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
+        assertPseudonymized(sanitized, "AbbieW@contoso.com", "OwenF@contoso.com");
         assertRedacted(sanitized,
                 "Abbie Wilkins",
                 "Owen Franklin",

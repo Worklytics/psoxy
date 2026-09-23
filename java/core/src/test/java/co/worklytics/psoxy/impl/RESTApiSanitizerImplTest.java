@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -95,6 +96,7 @@ class RESTApiSanitizerImplTest {
                 PsoxyModule.class,
         MockModules.ForOpenNlp.class,
                 TestModules.ForApiModeConfig.class,
+                MockModules.ForHostEnvironment.class,
                 ForConfigService.class,
                 MockModules.ForSecretStore.class,
             // TestModules.ForSecretStore.class,
@@ -121,6 +123,7 @@ class RESTApiSanitizerImplTest {
         container.inject(this);
 
         when(apiModeConfig.getTargetHost()).thenReturn(Optional.of("gmail.googleapis.com"));
+        when(apiModeConfig.getRequestPathPrefixToTrim()).thenReturn(Optional.empty());
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory
                 .create(Pseudonymizer.ConfigurationOptions.builder().build());
@@ -475,8 +478,12 @@ class RESTApiSanitizerImplTest {
     @CsvSource(value = {"https://api.example.com/api/v1/users/1,true",
             "https://api.example.com/api/v1/users,false",
             "https://api.example.com/api/v1/users/1?foo=bar,true",
+            "https://api.example.com/api/v1/users/1?FOO=bar,true",
+            "https://api.example.com/api/v1/users/1?Foo=bar&BAR=baz,false",
             "https://api.example.com/api/v1/users/1?foo=bar&bar=foo,false",
-            "https://api.example.com/api/v1/users/1?bar=foo,false",})
+            "https://api.example.com/api/v1/users/1?bar=foo,false",
+            "https://api.example.com/api/v1/users/1?FOO=bar,true",
+            "https://api.example.com/api/v1/users/1?Foo=bar,true",})
     @ParameterizedTest
     void hasPathTemplateMatchingUrl_queryParams(String url, Boolean expected) {
         Endpoint endpoint = Endpoint.builder().pathTemplate("/api/v1/users/{id}")
@@ -486,6 +493,27 @@ class RESTApiSanitizerImplTest {
                 Map.entry(endpoint, Pattern.compile(sanitizer.effectiveRegex(endpoint)));
 
         assertEquals(expected, sanitizer.getHasPathTemplateMatchingUrl(new URL(url)).test(entry));
+    }
+
+    @CsvSource(value = {"foo,true", "FOO,true", "Foo,true", "bar,false",})
+    @ParameterizedTest
+    void allowedQueryParams_caseInsensitive(String queryParamName, Boolean expected) {
+        Endpoint endpoint =
+                Endpoint.builder().pathTemplate("/api/v1/users/{id}")
+                        .allowedQueryParams(List.of("foo")).build();
+
+        assertEquals(expected, sanitizer.allowedQueryParams(endpoint,
+                List.of(Pair.of(queryParamName, "value"))));
+    }
+
+    @Test
+    void allowedQueryParams_caseInsensitive_allowListAlsoMatchedCaseInsensitively() {
+        Endpoint endpoint =
+                Endpoint.builder().pathTemplate("/api/v1/users/{id}")
+                        .allowedQueryParams(List.of("FOO")).build();
+
+        assertTrue(sanitizer.allowedQueryParams(endpoint,
+                List.of(Pair.of("foo", "value"))));
     }
 
     @SneakyThrows
@@ -661,14 +689,42 @@ class RESTApiSanitizerImplTest {
     }
 
     @Test
-    public void stripTargetHostPath() {
-        assertEquals("/path", sanitizer.stripTargetHostPath("/path"));
+    public void pathForRuleMatching_withoutTargetHostOrInboundRouting() {
+        when(apiModeConfig.getRequestPathPrefixToTrim()).thenReturn(Optional.empty());
+        assertEquals("/path", sanitizer.pathForRuleMatching("/path"));
+    }
+
+    @Test
+    public void pathForRuleMatching_stripsTargetHostPathPrefix() {
         sanitizer.targetHostPath = "/api/v1";
-        assertEquals("/path", sanitizer.stripTargetHostPath("/api/v1/path"));
+        when(apiModeConfig.getRequestPathPrefixToTrim()).thenReturn(Optional.empty());
+        assertEquals("/path", sanitizer.pathForRuleMatching("/api/v1/path"));
 
         // only at beginning of path
-        assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/api/v1/path/api/v1"));
-        assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/path/api/v1"));
+        assertEquals("/path/api/v1", sanitizer.pathForRuleMatching("/api/v1/path/api/v1"));
+        assertEquals("/path/api/v1", sanitizer.pathForRuleMatching("/path/api/v1"));
+    }
+
+    @Test
+    public void pathForRuleMatching_stripsTargetHostPathPrefixWithRegexMetacharacters() {
+        sanitizer.targetHostPath = "/api/v1.0";
+        when(apiModeConfig.getRequestPathPrefixToTrim()).thenReturn(Optional.empty());
+        assertEquals("/path", sanitizer.pathForRuleMatching("/api/v1.0/path"));
+        assertEquals("/api/v1X0/path", sanitizer.pathForRuleMatching("/api/v1X0/path"));
+    }
+
+    @Test
+    public void pathForRuleMatching_stripsInboundRoutingPrefix() {
+        when(apiModeConfig.getRequestPathPrefixToTrim()).thenReturn(Optional.of("/v1/"));
+        assertEquals("/users", sanitizer.pathForRuleMatching("/v1/psoxy-test/users"));
+    }
+
+    @Test
+    public void pathForRuleMatching_stripsTargetHostBeforeInboundRouting() {
+        sanitizer.targetHostPath = "/calendar/v3";
+        when(apiModeConfig.getRequestPathPrefixToTrim()).thenReturn(Optional.of("/v1/"));
+        assertEquals("/users",
+                sanitizer.pathForRuleMatching("/calendar/v3/v1/psoxy-test/users"));
     }
 
 

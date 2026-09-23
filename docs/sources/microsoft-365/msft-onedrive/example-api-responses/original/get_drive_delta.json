@@ -1,0 +1,87 @@
+{
+  "value": [
+    {
+      "id": "0123456789abc",
+      "name": "folder2",
+      "folder": {},
+      "createdBy": {
+        "user": {
+          "id": "48d31887-5fad-4d73-a9f5-3c356e68a038",
+          "displayName": "Alice Johnson",
+          "email": "alice@contoso.com"
+        }
+      },
+      "lastModifiedBy": {
+        "user": {
+          "id": "382f7e1a-59bf-4d40-9c69-f44a6836c40e",
+          "displayName": "Bob Smith",
+          "email": "bob@contoso.com"
+        }
+      }
+    },
+    {
+      "id": "123010204abac",
+      "name": "file.txt",
+      "file": {},
+      "createdBy": {
+        "user": {
+          "id": "48d31887-5fad-4d73-a9f5-3c356e68a038",
+          "displayName": "Alice Johnson",
+          "email": "alice@contoso.com"
+        }
+      },
+      "lastModifiedBy": {
+        "user": {
+          "id": "48d31887-5fad-4d73-a9f5-3c356e68a038",
+          "displayName": "Alice Johnson",
+          "email": "alice@contoso.com"
+        }
+      },
+      "shared": {
+        "owner": {
+          "user": {
+            "id": "48d31887-5fad-4d73-a9f5-3c356e68a038",
+            "displayName": "Alice Johnson",
+            "email": "alice@contoso.com"
+          }
+        },
+        "sharedBy": {
+          "user": {
+            "id": "382f7e1a-59bf-4d40-9c69-f44a6836c40e",
+            "displayName": "Bob Smith",
+            "email": "bob@contoso.com"
+          }
+        },
+        "sharedDateTime": "2023-10-20T02:06:58.147Z"
+      }
+    },
+    {
+      "id": "2353010204ddgg",
+      "name": "file5.txt",
+      "deleted": {}
+    },
+    {
+      "id": "9a8b7c6d5e4f",
+      "name": "shared-from-other-drive.docx",
+      "file": {},
+      "remoteItem": {
+        "id": "remote-item-1",
+        "createdBy": {
+          "user": {
+            "id": "9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
+            "displayName": "Dana Lee",
+            "email": "dana@contoso.com"
+          }
+        },
+        "lastModifiedBy": {
+          "user": {
+            "id": "9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d",
+            "displayName": "Dana Lee",
+            "email": "dana@contoso.com"
+          }
+        }
+      }
+    }
+  ],
+  "@odata.nextLink": "https://graph.microsoft.com/v1.0/drives/b!abc123/root/delta(token=1230919asd190410jlka)"
+}

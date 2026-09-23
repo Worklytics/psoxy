@@ -163,6 +163,7 @@ abstract public class RulesBaseTestCase {
         PsoxyModule.class,
         MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
+        MockModules.ForHostEnvironment.class,
         MockModules.ForConfigService.class,
         MockModules.ForSecretStore.class,
     })

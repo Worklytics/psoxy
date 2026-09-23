@@ -29,7 +29,7 @@ Each connector page includes the full comma-separated OAuth scope string to past
 | [calendar](calendar/README.md) | `gcal` | `calendar-json.googleapis.com` | `calendar.readonly` |
 | [google-chat](google-chat/README.md) | `google-chat` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
 | [directory](directory/README.md) | `gdirectory` | `admin.googleapis.com` | `admin.directory.user.readonly` `admin.directory.domain.readonly` `admin.directory.group.readonly` `admin.directory.orgunit.readonly` |
-| [gdrive](gdrive/README.md) | `gdrive` | `drive.googleapis.com` | `drive.metadata.readonly` |
+| [gdrive](gdrive/README.md) | `gdrive` | `drive.googleapis.com` | `drive.readonly` (v0.7.0+; see [gdrive README](gdrive/README.md#scope-change-in-v070-action-required)) |
 | [gmail](gmail/README.md) | `gmail` | `gmail.googleapis.com` | `gmail.metadata` |
 | [meet](meet/README.md) | `google-meet` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
 | [gemini-in-workspace-apps](gemini-in-workspace-apps/README.md) | `gemini-in-workspace-apps` | `admin.googleapis.com` | `admin.reports.audit.readonly` |
@@ -44,8 +44,10 @@ When granting Domain-wide Delegation in the Google Workspace Admin console, past
 If you share a **single OAuth client** across multiple connectors (see [Provisioning API clients without Terraform](#provisioning-api-clients-without-terraform)), enable the union of all required GCP APIs and grant the superset of OAuth scopes:
 
 ```
-https://www.googleapis.com/auth/calendar.readonly,https://www.googleapis.com/auth/admin.directory.user.readonly,https://www.googleapis.com/auth/admin.directory.domain.readonly,https://www.googleapis.com/auth/admin.directory.group.readonly,https://www.googleapis.com/auth/admin.directory.orgunit.readonly,https://www.googleapis.com/auth/drive.metadata.readonly,https://www.googleapis.com/auth/gmail.metadata,https://www.googleapis.com/auth/admin.reports.audit.readonly
+https://www.googleapis.com/auth/calendar.readonly,https://www.googleapis.com/auth/admin.directory.user.readonly,https://www.googleapis.com/auth/admin.directory.domain.readonly,https://www.googleapis.com/auth/admin.directory.group.readonly,https://www.googleapis.com/auth/admin.directory.orgunit.readonly,https://www.googleapis.com/auth/drive.readonly,https://www.googleapis.com/auth/gmail.metadata,https://www.googleapis.com/auth/admin.reports.audit.readonly
 ```
+
+As of v0.7.0 the gdrive connector requires `drive.readonly` instead of `drive.metadata.readonly`. If you already granted this shared string, update the Domain-wide Delegation grant (see [gdrive README](gdrive/README.md#scope-change-in-v070-action-required)).
 
 Required GCP APIs for the single shared OAuth client:
 
@@ -56,15 +58,35 @@ Required GCP APIs for the single shared OAuth client:
 
 ## Required Permissions
 
-You (the user running Terraform) must have the following roles (or some of the permissions within them) in the GCP project in which you will provision the OAuth clients that will be used to connect to your Google Workspace&trade; data:
+You (the user running Terraform) must have the following roles (or equivalent custom-role permissions) in the GCP project where you provision the OAuth clients that connect to Google Workspace&trade;.
 
-| Role                                                                                                          | Reason                                                                                         |
-| ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| [Service Account Creator](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator)    | create Service Accounts to be used as API clients                                              |
-| [Service Account Key Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountKeyAdmin) | to access Google Workspace&trade; API, proxy _must_ be authenticated by a key that you need to create |
-| [Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin)   | you will need to enable the Google Workspace&trade; APIs in your GCP Project                          |
+The [`psoxy-constants`](../../../infra/modules/psoxy-constants) module exposes the same lists for bootstrap: `required_gcp_roles_to_provision_google_workspace_source` (always), `required_gcp_roles_to_provision_google_workspace_source_with_sa_keys` (default key path), and `required_gcp_roles_to_provision_google_workspace_source_with_wif` (AWS WIF). Matching permission lists are available for custom IAM roles.
 
-As these are very permissive roles, we recommend that you use a _dedicated_ GCP project so that these roles are scoped just to the Service Accounts used for this deployment. If you used a shared GCP project, these roles would give you access to create keys for ALL the service accounts in the project, for example - which is not good practice.
+### Always required (either auth method)
+
+| Role | Reason |
+| ---- | ------ |
+| [Service Account Admin](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountAdmin) | create/update the Domain-wide Delegation (DWD) service accounts and bind IAM on them (including Token Creator when using WIF) |
+| [Service Usage Admin](https://cloud.google.com/iam/docs/roles-permissions/serviceusage#serviceusage.serviceUsageAdmin) | enable Google Workspace APIs in the project (and IAM Credentials / STS when using WIF) |
+
+### Required only for downloaded keys (`api_client_auth_method = "service_account_key"`, the default)
+
+| Role | Reason |
+| ---- | ------ |
+| [Service Account Key Admin](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountKeyAdmin) | create and rotate JSON keys for each DWD service account |
+
+If you opt into Workload Identity Federation, **do not grant** Service Account Key Admin. Terraform will not create keys, and the provisioner no longer needs `iam.serviceAccountKeys.create`, `.delete`, or `.get`.
+
+### Required only for Workload Identity Federation (`api_client_auth_method = "workload_identity_federation"`)
+
+| Role | Who | Reason |
+| ---- | --- | ------ |
+| [Workload Identity Pool Admin](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.workloadIdentityPoolAdmin) | Terraform runner, **AWS hosts only** | create the WIF pool and AWS provider in the GWS GCP project. Not needed on GCP hosts (no pool; Cloud Function service accounts call `signJwt` directly) |
+| [Service Account Token Creator](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountTokenCreator) | **proxy runtime identity**, not the Terraform runner | Terraform *grants* this on each DWD SA to the runtime (Cloud Function attached SA on GCP; WIF runtime SA on AWS). The runner needs Service Account Admin (`iam.serviceAccounts.setIamPolicy`) to make that grant, not Token Creator itself |
+
+On GCP hosts, the example `google-workspace.tf` binds Token Creator after `gcp-host` creates the function service accounts.
+
+As these are very permissive roles, we recommend that you use a _dedicated_ GCP project so that these roles are scoped just to the Service Accounts used for this deployment. If you used a shared GCP project, Key Admin would give you access to create keys for ALL the service accounts in the project, for example - which is not good practice.
 
 Additionally, a Google Workspace&trade; Admin will need to make a Domain-wide Delegation grant to the Oauth Clients you create. This is done via the Google Workspace&trade; Admin console. In default setup, this requires [Super Admin](https://support.google.com/a/answer/2405986?hl=en&fl=1) role, but your organization may have a Custom Role with sufficient privileges.
 
@@ -111,13 +133,45 @@ An example least-privilege Custom Role for the Directory connector:
 
 ## General Authentication Overview
 
-Google Workspace&trade; APIs use OAuth 2.0 for authentication and authorization. You create an Oauth 2.0 client in Google Cloud Platform and a credential (service account key), which you store in as a secret in your Proxy instance.
+Google Workspace&trade; APIs use OAuth 2.0. You create an OAuth 2.0 client as a GCP service account and grant it Domain-wide Delegation in the Google Workspace Admin console.
 
-When the proxy connects to Google, it first authenticates with Google API using this secret (a service account key) by signing a request for a short-lived access token. Google returns this access token, which the proxy then uses for subsequent requests to Google's APIS until the token expires.
+How the proxy authenticates _as_ that client is configurable via `google_workspace_connector_settings.api_client_auth_method` on the `worklytics-connectors-google-workspace` module:
 
-The service account key can be rotated at any time, and the terraform configuration examples we provide can be configured to do this for you if applied regularly.
+- `service_account_key` (default) — Terraform (or you) create a JSON key for the service account and store it as a secret on the proxy. The proxy signs a JWT locally with that key (`createDelegated`).
+- `workload_identity_federation` — no downloaded key. The proxy's runtime identity (Cloud Function attached SA on GCP, or AWS IAM role federated via Workload Identity Federation on AWS) calls IAM `signJwt` on the DWD service account.
+
+When the proxy connects to Google, it obtains a short-lived access token for the Workspace user being impersonated, then uses that token until it expires.
+
+With `service_account_key`, keys can be rotated at any time; the terraform examples will do this if applied regularly (`provision_keys` / `key_rotation_days`). With `workload_identity_federation` there is no user-managed key to leak or rotate.
 
 More information: [https://developers.google.com/workspace/guides/auth-overview](https://developers.google.com/workspace/guides/auth-overview)
+
+### Opting into Workload Identity Federation
+
+Pass `google_workspace_connector_settings` into the `worklytics-connectors-google-workspace` module in your `main.tf` (in the example repos that module is invoked from `google-workspace.tf`, which is part of the same root module):
+
+```hcl
+module "worklytics_connectors_google_workspace" {
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-google-workspace?ref=v0.7.1"
+
+  google_workspace_connector_settings = {
+    api_client_auth_method = "workload_identity_federation"
+  }
+
+  host_platform_id = "GCP" # or "AWS"
+  aws_account_id   = var.aws_account_id # required when host_platform_id is AWS
+  # ... other arguments (environment_id, gcp_project_id, enabled_connectors, etc.)
+}
+```
+
+In the example repos, that module argument is already wired to `var.google_workspace_connector_settings`, so setting the same map in `terraform.tfvars` is equivalent. `./init` on a new clone writes `api_client_auth_method = "workload_identity_federation"` into `terraform.tfvars` when you enable Google Workspace sources. Existing deployments that omit the setting keep downloaded keys.
+
+What Terraform does when you opt in:
+
+- It does **not** create JSON keys or `SERVICE_ACCOUNT_KEY` secrets.
+- You no longer need [Service Account Key Admin](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountKeyAdmin) (or `iam.serviceAccountKeys.*`) on the GWS project. See [Required Permissions](#required-permissions).
+- **GCP host:** the example `google-workspace.tf` grants [Service Account Token Creator](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountTokenCreator) on each DWD SA to the Cloud Function attached SA (after `gcp-host` creates those function SAs). No WIF pool is created.
+- **AWS host:** the module creates a Workload Identity pool and AWS provider (ids prefixed with `environment_id`) plus a runtime SA that Lambdas impersonate; that SA is granted Token Creator on each DWD SA. Pass `host_platform_id = "AWS"` and `aws_account_id`. The Terraform runner needs [Workload Identity Pool Admin](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.workloadIdentityPoolAdmin) on the GWS project.
 
 To initially authorize each connector, a sufficiently privileged Google Workspace&trade; Admin must make a Domain-wide Delegation grant to the Oauth Client you create, by pasting its numeric ID and a CSV of the required OAuth Scopes into the Google Workspace&trade; Admin console. This is a one-time setup step.
 
@@ -126,9 +180,9 @@ If you use the provided Terraform modules (namely, `google-workspace-dwd-connect
 Note that while Domain-wide Delegation is a broad grant of data access, the implementation of it in proxy is mitigated in several ways because the GCP Service Account resides in your own GCP project, and remains under your organizes control - unlike the most common Domain-wide Delegation scenarios which have been the subject of criticism by security researchers. In particular:
 
 - you may directly verify the numeric ID of the service account in the GCP web console, or via the GCP CLI; you don't need to take our word for it.
-- you may monitor and log the use of each service account and its key as you see fit.
-- you can ensure there is never more than one active key for each service account, and rotate keys at any time.
-- the key is only used from infrastructure (GCP CLoud Function or Lambda) in your environment; you should be able to reconcile logs and usage between your GCP and AWS environments should you desire to ensure there has been no malicious use of the key.
+- you may monitor and log the use of each service account (and, if using keys, its key) as you see fit.
+- with `service_account_key`, you can ensure there is never more than one active key for each service account, and rotate keys at any time; with `workload_identity_federation` there is no user-managed key.
+- the client is only used from infrastructure (GCP Cloud Function or Lambda) in your environment.
 
 ### Provisioning API clients without Terraform
 
@@ -139,7 +193,7 @@ While not recommended, it is possible to set up Google API clients without Terra
 3. Create a Service Account in the project; this will be the OAuth Client.
 4. Get the numeric ID of the service account. Use this plus the oauth scopes to make domain-wide delegation grants via the Google Workspace admin console.
 
-Then follow the steps in the next section to create the keys for the Oauth Clients.
+Then follow the steps in the next section to create the keys for the Oauth Clients, or use `api_client_auth_method = "workload_identity_federation"` so the proxy calls IAM `signJwt` instead of a downloaded key.
 
 If your organization's policies don't allow Terraform to manage some or all of these GCP resources, you can still use our Terraform modules for the rest of your deployment and disable the parts you must do manually via `google_workspace_connector_settings` in your `terraform.tfvars`:
 
@@ -150,6 +204,8 @@ google_workspace_connector_settings = {
   provision_keys             = false
 }
 ```
+
+To skip user-managed keys entirely (IAM `signJwt` via the proxy runtime identity), set `api_client_auth_method = "workload_identity_federation"` instead of `provision_keys = false`.
 
 When any of these are `false`, Terraform will skip creating the corresponding resources and instead emit TODO files (or `todos_1` outputs, if configured) with instructions to complete those steps outside of Terraform.
 
@@ -203,7 +259,7 @@ Cons:
 - you must use a dedicated GCP project for the Marketplace App; "installation" of a Google Marketplace App grants all the service accounts in the project access to the listed oauth scopes. You must understand the OAuth grant is to the project, not a specific service account.
 - you must enable additional APIs in the GCP project (marketplace SDK).
 - as of Dec 2023, Marketplace Apps cannot be completely managed by Terraform resources; so there are more out-of-band steps that someone must complete by hand to create the App; and a simple `terraform destroy` will not remove the associated infrastructure. In contrast, `terraform destroy` in the DWD approach will result in revocation of the access grants when the service account is deleted.
-- You must monitor how many service accounts exist in the project and ensure only the expected ons  are created. Note that all Google Workspace&trade; API access, as of Dec 2023, requires the service account to authenticate with a key; so any SA without a key provisioned cannot access your data.
+- You must monitor how many service accounts exist in the project and ensure only the expected ones are created. Marketplace Apps still typically authenticate with a downloaded service-account key. The DWD path can instead use `workload_identity_federation` (IAM `signJwt`) so a SA without a user-managed key can still access Workspace APIs.
 
 
 ## Troubleshooting
@@ -217,6 +273,7 @@ Match log / response signals to a setup issue. Token failures occur on `POST htt
 | `"error":"access_denied"` or `"error":"invalid_scope"` on `oauth2.googleapis.com/token` (some scope mismatches appear as `401` instead) | `OAUTH_SCOPES` not covered by DWD grant | Connector README OAuth scopes |
 | `"error":"invalid_grant"` + `Invalid JWT Signature` / `SignatureException` on `oauth2.googleapis.com/token` | SA key wrong, revoked, or rotated | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
 | `IllegalArgumentException` parsing service account key secret | Malformed key secret (not JSON / not base64 JSON) | [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform) |
+| `403` on `iamcredentials.googleapis.com` `signJwt` | Runtime identity lacks Token Creator on the DWD SA (WIF path) | [Opting into Workload Identity Federation](#opting-into-workload-identity-federation) |
 | `403` + `insufficientPermissions` (after token succeeds) | Impersonated user lacks Workspace admin privileges | [Google Workspace User for Connection](#google-workspace-user-for-connection) |
 
 ### `403` — `usageLimits` — `accessNotConfigured`
@@ -283,6 +340,16 @@ java.security.SignatureException: Invalid signature for token
 ```
 
 **Fix:** [Provisioning API Keys without Terraform](#provisioning-api-keys-without-terraform).
+
+### `403` — `iamcredentials.googleapis.com` — `signJwt`
+
+The proxy runtime cannot call IAM `signJwt` as the DWD service account. Typical when `api_client_auth_method = "workload_identity_federation"` but Token Creator was not granted (or was granted to the wrong identity).
+
+```
+POST https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/psoxy-example-gcal@example-project.iam.gserviceaccount.com:signJwt 403
+```
+
+**Fix:** [Opting into Workload Identity Federation](#opting-into-workload-identity-federation). On GCP, confirm the Cloud Function attached SA is a Token Creator on that DWD SA. On AWS, confirm the WIF runtime SA has Token Creator and the Lambda can federate into it (`aws_account_id`, pool/provider).
 
 ### `invalid_scope` — `oauth2.googleapis.com/token`
 

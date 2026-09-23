@@ -100,8 +100,21 @@ public class EntraIDTests extends JavaRulesTestBaseCase {
 
     @Test
     void users_filter() {
-        String endpoint = "https://graph.microsoft.com/v1.0/users?$filter=accountEnabled eq true";
-        assertUrlBlocked(endpoint);
+        String jsonString = asJson(ENTRA_ID_API_EXAMPLES_PATH, "users.json");
+
+        // $filter, as used to partition user enumeration across parallel jobs by userPrincipalName prefix
+        String endpoint = "https://graph.microsoft.com/v1.0/users?$filter=startswith(userPrincipalName,'a')";
+
+        Collection<String> PII = Arrays.asList(
+                "john@worklytics.onmicrosoft.com",
+                "Paul Allen"
+        );
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "john@worklytics.onmicrosoft.com");
+        assertRedacted(sanitized, "Paul Allen");
     }
 
     @Test

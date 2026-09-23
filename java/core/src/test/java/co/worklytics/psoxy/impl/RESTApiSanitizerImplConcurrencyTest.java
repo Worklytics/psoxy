@@ -57,6 +57,7 @@ class RESTApiSanitizerImplConcurrencyTest {
         MockModules.ForOpenNlp.class,
                 ForConfigService.class,
                 MockModules.ForSecretStore.class,
+                MockModules.ForHostEnvironment.class,
                 TestModules.ForApiModeConfig.class,
             })
     public interface Container {

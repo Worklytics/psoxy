@@ -34,7 +34,7 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.6.9"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.7.1"
 
   base_dir                                 = var.psoxy_base_dir
   enabled_connectors                       = var.enabled_connectors
@@ -108,7 +108,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=rc-v0.6.9"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=rc-v0.7.1"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
@@ -139,9 +139,10 @@ module "psoxy" {
   bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
   allowed_data_access_ip_blocks  = var.allowed_data_access_ip_blocks
   allowed_webhook_ip_blocks      = var.allowed_webhook_ip_blocks
-  api_connector_external_lb_host = null
-  # api_connector_external_lb_host = local.api_connector_external_lb_host  # uncomment when using external-api-alb.tf
-  # api_connector_external_lb_host = "proxy.example.com"                 # or your customer-provisioned ALB host/IP
+  # **beta** Provision ALB inside gcp-host: external_api_alb = {} (self-signed PoC) or { domain = "proxy.example.com" }
+  external_api_alb = var.external_api_alb
+  # Or BYO ALB (mutually exclusive with external_api_alb):
+  # api_connector_external_lb_host = "proxy.example.com"
   custom_bulk_connector_rules     = var.custom_bulk_connector_rules
   custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
   lookup_tables                   = var.lookup_tables
@@ -175,7 +176,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=rc-v0.6.9"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=rc-v0.7.1"
 
   host_platform_id     = local.host_platform_id
   proxy_instance_id    = each.key
@@ -186,7 +187,7 @@ module "connection_in_worklytics" {
   todos_as_local_files = var.todos_as_local_files
 
   settings_to_provide = merge(
-    # Source API case
+    # Source API case — endpoint_url is the ALB URL when external_api_alb / api_connector_external_lb_host is set
     try({
       "Psoxy Base URL" = each.value.endpoint_url
     }, {}),
@@ -245,6 +246,12 @@ output "psoxy_base_dir" {
   description = "Absolute path to the psoxy repository root (trailing slash)."
   value       = var.psoxy_base_dir
 }
+
+# Uncomment when using the **beta** external_api_alb (or BYO api_connector_external_lb_host) and you need these values:
+# output "external_api_alb" {
+#   description = "**beta** External Application Load Balancer (ALB) details from gcp-host (host, ip_address, todo_dns_setup, self_signed_ca_cert)."
+#   value       = module.psoxy.external_api_alb
+# }
 
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."

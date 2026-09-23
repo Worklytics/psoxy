@@ -1,0 +1,42 @@
+{
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/groups/6257b47d-9e87-418b-9ac2-031f09397de7/drives?$top=1&$skiptoken=aWQ9OUZCRjU2OUEtN0UwOC00RDFELTlFREMtMkY3ODg3MTUzNjY3",
+  "value":[
+    {
+      "id":"b!-RIj2DuyvEyV1T4NlOaMHk8XkS_I8MdFlUCq1BlcjgmhRfAj3-Z8RY2VpuvV_tpd",
+      "driveType":"documentLibrary",
+      "createdDateTime":"2017-07-27T02:41:36Z",
+      "createdBy":{
+        "user":{
+          "id":"t~jL-PZwZ7AqMLlWzY4F0nkDdSpci8cF1GzIzZC51Y9Rg",
+          "email":"t~rhHXsIpQCoOYdgzj6URY4x8oUcvnLMLR5d71_wRuVAA@contoso.com"
+        }
+      },
+      "lastModifiedDateTime":"2018-03-27T07:34:38Z",
+      "lastModifiedBy":{
+        "user":{
+          "id":"t~DTbvYdTNRIQXAF1SvLNyAIENog0-Dy0dxTEB2Yoo5Ys",
+          "email":"t~1ECTeY42RlWDU6D4DtrXKyFmVrUHbEEpdYzI34l0y9Q@contoso.com"
+        }
+      }
+    },
+    {
+      "id":"b!kjtJnMGCeEeNkZsY18PtOiNjCV0Z9s9Fqyly8jKvPEB2kal9T5pOT5y7TXClirlE",
+      "driveType":"documentLibrary",
+      "system":{ },
+      "createdDateTime":"2017-07-27T02:41:36Z",
+      "createdBy":{
+        "user":{
+          "id":"t~jL-PZwZ7AqMLlWzY4F0nkDdSpci8cF1GzIzZC51Y9Rg",
+          "email":"t~rhHXsIpQCoOYdgzj6URY4x8oUcvnLMLR5d71_wRuVAA@contoso.com"
+        }
+      },
+      "lastModifiedDateTime":"2017-07-27T02:41:36Z",
+      "lastModifiedBy":{
+        "user":{
+          "id":"t~jL-PZwZ7AqMLlWzY4F0nkDdSpci8cF1GzIzZC51Y9Rg",
+          "email":"t~rhHXsIpQCoOYdgzj6URY4x8oUcvnLMLR5d71_wRuVAA@contoso.com"
+        }
+      }
+    }
+  ]
+}
