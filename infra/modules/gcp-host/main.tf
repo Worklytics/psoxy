@@ -383,6 +383,8 @@ EOT
   alb_dns_todo         = local.alb_managed_tls ? local.alb_dns_todo_content : null
 }
 
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
 resource "local_file" "todo_alb_dns_setup" {
   count = var.todos_as_local_files && local.alb_managed_tls ? 1 : 0
 

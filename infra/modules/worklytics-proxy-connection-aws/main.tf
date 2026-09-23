@@ -35,3 +35,8 @@ output "next_todo_step" {
 output "todo" {
   value = module.generic.todo
 }
+
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. The local_file copy is deprecated and will be removed in 0.8."
+  value       = module.generic.todo_files
+}

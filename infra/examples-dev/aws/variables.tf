@@ -521,7 +521,7 @@ variable "todos_as_outputs" {
 
 variable "todos_as_local_files" {
   type        = bool
-  description = "whether to render TODOs as flat files"
+  description = "whether to render TODOs as flat files. Default remains true, so apply still writes them. TODO markdown local_file resources are deprecated and will be removed in 0.8; ./generate-todos.sh writes the same files from terraform output. This flag also controls test-script files."
   default     = true
 }
 

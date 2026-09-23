@@ -16,10 +16,16 @@ ${join("\n", var.additional_steps)}
 EOT
 }
 
+locals {
+  todo_filename = "TODO ${var.todo_step} - setup ${var.source_id}.md"
+}
+
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
 resource "local_file" "source_connection_instructions" {
   count = var.todos_as_local_files ? 1 : 0
 
-  filename = "TODO ${var.todo_step} - setup ${var.source_id}.md"
+  filename = local.todo_filename
   content  = local.todo_content
 }
 
@@ -29,4 +35,11 @@ output "next_todo_step" {
 
 output "todo" {
   value = local.todo_content
+}
+
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. The local_file copy is deprecated and will be removed in 0.8."
+  value = {
+    (local.todo_filename) = local.todo_content
+  }
 }

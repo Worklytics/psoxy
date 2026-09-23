@@ -78,6 +78,10 @@ fi
 copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/init-example.sh" "${EXAMPLE_TEMPLATE_REPO}init"
 copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/check-prereqs.sh" "${EXAMPLE_TEMPLATE_REPO}check-prereqs"
 
+if [ -f "${EXAMPLE_TO_COPY_FROM}/generate-todos.sh" ]; then
+  copy_script_lf "${EXAMPLE_TO_COPY_FROM}/generate-todos.sh" "${EXAMPLE_TEMPLATE_REPO}generate-todos.sh"
+fi
+
 if [ -f "${EXAMPLE_TO_COPY_FROM}/preflight.sh" ]; then
   copy_script_lf "${EXAMPLE_TO_COPY_FROM}/preflight.sh" "${EXAMPLE_TEMPLATE_REPO}preflight"
 fi
@@ -98,6 +102,7 @@ check-prereqs text eol=lf
 available-connectors text eol=lf
 az-auth text eol=lf
 preflight text eol=lf
+generate-todos.sh text eol=lf
 EOF
 
 # Dev-only artifacts present in examples-dev (symlinks, local scripts, backups).
