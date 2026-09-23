@@ -35,9 +35,59 @@ If you receive an error such as:
 Error: Error applying IAM policy for cloudfunctions cloudfunction googleapi: Error 400: One or more users named in the policy do not belong to a permitted customer.
 ```
 
-This may be due to an [Organization Policy](https://cloud.google.com/resource-manager/docs/organization-policy/overview) that restricts the domains that can be used in IAM policies. See [https://cloud.google.com/resource-manager/docs/organization-policy/restricting-domains](https://cloud.google.com/resource-manager/docs/organization-policy/restricting-domains).
+or the same message for a Cloud Run service:
 
-You may need define an exception for the GCP project in which you're deploying the proxy, or add the domain of your Worklytics Tenant SA to the list of allowed domains.
+```
+Error: Error applying IAM policy for cloudrun service googleapi: Error 400: One or more users named in the policy do not belong to a permitted customer.
+```
+
+This is usually due to [domain-restricted sharing](https://cloud.google.com/resource-manager/docs/organization-policy/restricting-domains) (`constraints/iam.allowedPolicyMemberDomains`, or the newer managed constraint `iam.managed.allowedPolicyMembers`). The policy blocks IAM bindings that include principals outside your allowed Google Workspace customer IDs or organization principal sets.
+
+For **API connectors**, this error often appears when Terraform grants `roles/run.invoker` on each Cloud Run service to your Worklytics tenant service account (the identity shown in the Worklytics portal). That grant is required whether Worklytics calls the connector on its public `*.run.app` URL or through an [external Application Load Balancer (ALB)](../development/gcp-external-alb.md) (**beta**).
+
+The external ALB forwards each request, including the `Authorization` header, to the Cloud Run service. Cloud Run then checks that the identity in that token has `roles/run.invoker` on that service. Locking ingress to the load balancer (`internal-and-cloud-load-balancing`) only changes which network path can reach the service. It does not replace that IAM check.
+
+**References:**
+
+- [Cloud Run access control](https://cloud.google.com/run/docs/securing/managing-access) — `roles/run.invoker` allows a caller to invoke the service
+- [Service-to-service authentication](https://cloud.google.com/run/docs/authenticating/service-to-service) — the caller presents a Google identity token, and Cloud Run authorizes that identity
+- [Serverless NEG concepts](https://cloud.google.com/load-balancing/docs/negs/serverless-neg-concepts) — an external Application Load Balancer does not authenticate requests to Cloud Run
+- [Restrict identities with domain-restricted sharing](https://cloud.google.com/resource-manager/docs/organization-policy/restricting-domains) — `constraints/iam.allowedPolicyMemberDomains`
+
+### Obtain Worklytics identifiers
+
+You need three values:
+
+1. **Worklytics tenant service account email** — from the Worklytics portal (connection / proxy configuration). This is the principal Terraform binds as `roles/run.invoker`. Set it in `worklytics_sa_emails` in your Terraform variables.
+2. **Worklytics Google Workspace customer ID** (`C0…`) — the Google Workspace customer that owns the Worklytics tenant service account. This is **not** your company's customer ID and **not** the service account email domain. Contact your Worklytics account team or [support@worklytics.co](mailto:support@worklytics.co) if you do not already have it.
+3. **Worklytics GCP organization number** (numeric, e.g. `123456789012`) — used for an organization principal set alternative to the customer ID. Worklytics can provide this with the customer ID above.
+
+To list **your** organization's identifiers (keep these in the allowlist when you add Worklytics):
+
+```bash
+gcloud organizations list
+```
+
+Use the `ID` column as your organization number and `DIRECTORY_CUSTOMER_ID` as your Google Workspace customer ID. Workspace admins can also find your customer ID in **Admin console → Account → Account settings → Customer ID**.
+
+### Create the org-policy exception
+
+On the **Psoxy GCP project**, open **IAM & Admin → Organization policies → Domain restricted sharing** (`constraints/iam.allowedPolicyMemberDomains`).
+
+1. **Override** the policy for this project only (or use a folder exception if your security team prefers).
+2. Under **allowed values**, keep every customer ID and organization principal set you already allow for your own organization.
+3. Add **Worklytics's Google Workspace customer ID** (`C0…` from Worklytics). The service account email domain is **not** a valid allowed value.
+4. Alternatively (or in addition), add Worklytics's organization principal set:
+
+   `principalSet://iam.googleapis.com/organizations/WORKLYTICS_ORG_NUMBER`
+
+5. If you enforce the newer managed constraint **`iam.managed.allowedPolicyMembers`** instead, add this principal (same service account as in the Worklytics portal):
+
+   `principal://iam.googleapis.com/projects/-/serviceAccounts/WORKLYTICS_SA_EMAIL`
+
+6. Re-run `terraform apply` in your Psoxy Terraform directory. That creates the Cloud Run Invoker binding on each API connector.
+
+**Bulk connectors** may hit the same error when Terraform grants `roles/storage.objectViewer` on sanitized output buckets to the Worklytics tenant service account. Use the same Worklytics customer ID / organization principal set in the exception.
 
 ## Error 400: Validation failed for trigger, Permission denied while using the Eventarc Service Agent
 
