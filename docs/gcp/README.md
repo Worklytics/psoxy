@@ -4,11 +4,11 @@
 
 - [Getting Started](getting-started.md)
 - [Authentication & Authorization](authentication-authorization.md)
-- [VPC (egress)](vpc.md)
 - [Troubleshooting](troubleshooting.md)
 
 ## Guides
 
+- [VPC (egress)](guides/vpc.md)
 - [External Application Load Balancer (ALB) - beta](guides/external-alb.md)
 - [Lookup Tables](guides/lookup-tables.md)
 

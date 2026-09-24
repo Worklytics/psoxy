@@ -104,7 +104,7 @@ Error: Error updating function "projects/.../functions/outlook-mail": googleapi:
 
 **Fix:** grant the missing permission. Our [GCP prerequisites](./getting-started.md#iam-permissions) list the least-privileged predefined roles that cover a full Psoxy deployment; the [`psoxy-constants`](../../infra/modules/psoxy-constants) module exposes the same role list for bootstrapping (`required_gcp_roles_to_provision_host`). In particular, initial deploys often fail until the Terraform runner has **Artifact Registry Editor** (`roles/artifactregistry.editor`) — Terraform provisions the Docker repository used by Cloud Functions Gen 2.
 
-If you use a custom IAM role instead of the predefined roles, compare your role against `required_gcp_perms_to_provision_host` from `psoxy-constants`. If you use [VPC egress](./vpc.md), you may also need `roles/compute.networkAdmin` (when Terraform creates the VPC) and, for Shared VPC, `roles/compute.networkUser` on the host-project subnet for the Cloud Run service agent.
+If you use a custom IAM role instead of the predefined roles, compare your role against `required_gcp_perms_to_provision_host` from `psoxy-constants`. If you use [VPC egress](./guides/vpc.md), you may also need `roles/compute.networkAdmin` (when Terraform creates the VPC) and, for Shared VPC, `roles/compute.networkUser` on the host-project subnet for the Cloud Run service agent.
 
 If you set `external_api_alb` on `gcp-host`, grant `required_gcp_roles_to_use_external_api_alb` (or `required_gcp_permissions_to_use_external_api_alb` for a custom role). Typical missing-permission errors:
 
@@ -135,7 +135,7 @@ When policy and your Terraform configuration disagree, `terraform apply` may fai
 Error: Error updating function "projects/.../functions/outlook-mail": googleapi: Error 400: Could not update Cloud Run service ... spec.template.metadata.annotations: The run.googleapis.com/vpc-access-egress annotation cannot be set without also setting the run.googleapis.com/vpc-access-connector annotation or the run.googleapis.com/network-interfaces annotation.
 ```
 
-**Fix (preferred if your security team allows it):** request a **project-level exception** (or folder exception) so Psoxy can use the networking settings documented in [VPC configuration](./vpc.md) — Direct VPC egress for fixed outbound IPs, and default or ALB-compatible ingress as appropriate.
+**Fix (preferred if your security team allows it):** request a **project-level exception** (or folder exception) so Psoxy can use the networking settings documented in [VPC configuration](./guides/vpc.md) — Direct VPC egress for fixed outbound IPs, and default or ALB-compatible ingress as appropriate.
 
 **Fix (ingress restriction without VPC exception):** deploy an **external Application Load Balancer (ALB)** (**beta**) in front of API connectors — set `external_api_alb` on `gcp-host`, or pass a customer-owned host via `api_connector_external_lb_host`. That sets `ingress_settings` to `ALLOW_INTERNAL_AND_GCLB`, which satisfies `internal-and-cloud-load-balancing` while Worklytics reaches connectors through the ALB. See [External Application Load Balancer (ALB)](./guides/external-alb.md). VPC egress (`vpc_config`) is orthogonal to the ALB path.
 
@@ -182,7 +182,7 @@ Alternatively, a single apply can replace a function without a separate destroy 
 terraform apply -replace='module.psoxy.module.api_connector["gcal"].google_cloudfunctions2_function.function'
 ```
 
-See [VPC configuration](./vpc.md#removing-vpc-egress) for background on Direct VPC egress and removal.
+See [VPC configuration](./guides/vpc.md#removing-vpc-egress) for background on Direct VPC egress and removal.
 
 ## Bulk processing failures
 

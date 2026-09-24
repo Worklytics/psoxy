@@ -57,7 +57,16 @@ Through the load balancer, the audience is the public URL Worklytics calls, not 
 
 If these audiences are missing, Cloud Run rejects the identity token. The failure is often HTTP 401 or 403. With `ALLOW_INTERNAL_AND_GCLB`, a missing or rejected token can also surface as HTTP 404.
 
-As of 2026-09-15, Google's terraform resource `google_cloudfunctions2_function` has no custom-audience argument and the GCP console UX does not allow directly setting these values. The only solution is to use the `gcloud` CLI.Terraform does not set these. From the directory that contains `terraform.tfvars` (after `terraform apply`), run:
+As of 2026-09-15, Google's terraform resource `google_cloudfunctions2_function` has no custom-audience argument and the GCP console UX does not allow directly setting these values. The only solution is to use the `gcloud` CLI.
+
+Specifically, you must run a gcloud command like the following for each API connector:
+
+```shell
+gcloud run services update "$FUNCTION_NAME" \ 
+  --project="$PROJECT_ID" \ 
+  --region="$REGION" \
+  --update-custom-audiences="https://${API_PROXY_DOMAIN}/${FUNCTION_NAME}"
+```
 
 To ease this, we provide a script, which after your `terraform init` locally, you can find in `.terraform/psoxy/tools/gcp/configure-custom-audiences.sh`. Run that from the root of your terraform configuration and it will assist you by running the gcloud commands
 
