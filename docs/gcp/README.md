@@ -7,4 +7,9 @@
 - [VPC (egress)](vpc.md)
 - [Troubleshooting](troubleshooting.md)
 
-Related (**beta**): [External Application Load Balancer (ALB) + Cloud Armor](../development/gcp-external-alb.md)
+## Guides
+
+- [External Application Load Balancer (ALB) - beta](guides/external-alb.md)
+- [Lookup Tables](guides/lookup-tables.md)
+
+Deeper ALB implementation notes: [External Application Load Balancer (ALB) + Cloud Armor](../development/gcp-external-alb.md).
