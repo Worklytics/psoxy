@@ -48,6 +48,10 @@ copy_script_lf() {
   chmod +x "$dest"
 }
 
+# Resolve before cd. The publish workflow invokes this as a relative path
+# (proxy/tools/release/example-copy.sh); after cd, dirname "$0" is relative to the example dir.
+RELEASE_REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+
 cd "$EXAMPLE_TO_COPY_FROM"
 FILES_TO_COPY=( *.tf )
 
@@ -93,7 +97,6 @@ fi
 
 # Git module sources use a subdirectory, so the Terraform checkout does not
 # contain tools/. Ship the generator with the example so ./build-tests.sh works.
-RELEASE_REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 mkdir -p "${EXAMPLE_TEMPLATE_REPO}tools"
 copy_script_lf "${RELEASE_REPO_ROOT}/tools/build-test-scripts-from-output.sh" "${EXAMPLE_TEMPLATE_REPO}tools/build-test-scripts-from-output.sh"
 copy_lf "${RELEASE_REPO_ROOT}/tools/build-test-scripts-from-output.mjs" "${EXAMPLE_TEMPLATE_REPO}tools/build-test-scripts-from-output.mjs"
