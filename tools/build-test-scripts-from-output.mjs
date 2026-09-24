@@ -77,9 +77,12 @@ function unwrapOutputs(wrapped) {
   return out;
 }
 
-function resolvePsoxyBaseDir(outputs) {
+function resolvePsoxyBaseDir(outputs, tfDir) {
   const explicit = process.env.PSOXY_BASE_DIR || outputs.repo_base_dir;
-  if (explicit) return ensureTrailingSlash(explicit);
+  if (explicit) {
+    const resolved = path.isAbsolute(explicit) ? explicit : path.resolve(tfDir, explicit);
+    return ensureTrailingSlash(resolved);
+  }
   const jar = outputs.path_to_deployment_jar;
   if (typeof jar === 'string' && jar !== 'unknown' && !/^(s3|gs):\/\//.test(jar)) {
     const javaIdx = jar.indexOf('/java/');
@@ -98,37 +101,30 @@ function shellSingleQuote(value) {
   return `'${String(value).split("'").join("'\\''")}'`;
 }
 
-function buildHeaderFlags(request) {
+function headerArgPairs(request) {
   const headers = request.headers ?? {};
-  return Object.entries(headers)
-    .map(([name, value]) => ` -H "${name}: ${value}"`)
-    .join('');
+  const pairs = [];
+  for (const [name, value] of Object.entries(headers)) {
+    pairs.push('-H', `${name}: ${value}`);
+  }
+  return pairs;
 }
 
-function buildScriptInvocation(request, headerFlagsByKey) {
-  const key = `${request.method} ${request.path}`;
-  const headerFlags = headerFlagsByKey.get(key) ?? buildHeaderFlags(request);
-  const parts = [request.method, shellSingleQuote(request.path)];
+function bashArrayLiteral(words) {
+  if (words.length === 0) return '()';
+  return `(${words.map((word) => shellSingleQuote(word)).join(' ')})`;
+}
+
+function buildScriptInvocation(request) {
+  const words = [request.method, request.path];
   if (request.body != null) {
-    parts.push(request.content_type ?? 'application/json');
-    const bodyValue =
-      typeof request.body === 'string' ? request.body : JSON.stringify(request.body);
-    parts.push(shellSingleQuote(bodyValue));
-  } else if (headerFlags.trim() !== '') {
-    parts.push("''", "''");
+    words.push(request.content_type ?? 'application/json');
+    words.push(typeof request.body === 'string' ? request.body : JSON.stringify(request.body));
+  } else if (headerArgPairs(request).length > 0) {
+    words.push('', '');
   }
-  if (headerFlags.trim() !== '') {
-    parts.push(shellSingleQuote(headerFlags.trim()));
-  }
-  return parts.join(' ');
-}
-
-function buildHeaderFlagsMap(requests) {
-  const map = new Map();
-  for (const request of requests) {
-    map.set(`${request.method} ${request.path}`, buildHeaderFlags(request));
-  }
-  return map;
+  words.push(...headerArgPairs(request));
+  return words.map((word) => shellSingleQuote(word)).join(' ');
 }
 
 function isIpHost(host) {
@@ -152,11 +148,18 @@ function gcpCliCallFlags(endpointUrl) {
 }
 
 function detectPlatform(outputs) {
-  if (outputs.caller_role_arn != null) return 'aws';
+  if (outputs.deployment_platform === 'aws' || outputs.deployment_platform === 'gcp') {
+    return outputs.deployment_platform;
+  }
+  if (outputs.webhook_test_caller_role_arn != null || outputs.caller_role_arn != null) return 'aws';
   if (outputs.artifacts_bucket_id != null) return 'gcp';
-  const api = outputs.api_connector_instances ?? {};
-  const first = Object.values(api)[0];
-  if (first?.cloud_function_name) return 'gcp';
+  const instances = [
+    ...Object.values(outputs.api_connector_instances ?? {}),
+    ...Object.values(outputs.bulk_connector_instances ?? {}),
+    ...Object.values(outputs.webhook_collector_instances ?? {}),
+  ];
+  if (instances.some((inst) => inst?.cloud_function_name || inst?.batch_scheduler_job_id)) return 'gcp';
+  if (instances.some((inst) => /cloudfunctions\.net|run\.app/.test(inst?.endpoint_url ?? ''))) return 'gcp';
   return 'aws';
 }
 
@@ -172,11 +175,8 @@ function buildApiTestScript({
   const requests = testExamples?.api_requests ?? [];
   const getRequests = requests.filter((r) => r.method === 'GET');
   const postRequests = requests.filter((r) => r.method === 'POST' && r.body != null);
-  const headerFlagsMap = buildHeaderFlagsMap(requests);
   const defaultPath = getRequests[0]?.path ?? '';
-  const defaultHeaderFlags = getRequests[0]
-    ? (headerFlagsMap.get(`${getRequests[0].method} ${getRequests[0].path}`) ?? '').trim()
-    : '';
+  const defaultHeaderArgs = getRequests[0] ? headerArgPairs(getRequests[0]) : [];
   const impersonationParam =
     testExamples?.user_to_impersonate != null ? ` -i "${testExamples.user_to_impersonate}"` : '';
   const roleParam = platform === 'aws' && callerRoleArn ? ` -r "${callerRoleArn}"` : '';
@@ -185,16 +185,14 @@ function buildApiTestScript({
   const gcpFlagSuffix = gcpFlags ? ` ${gcpFlags}` : '';
   const commandCliCall = `node ${psoxyBaseDir}tools/psoxy-test/cli-call.js${roleParam}${regionParam}${gcpFlagSuffix}`;
   const supportsAsync = Boolean(testExamples?.supports_async);
-  const headerFlagsDefault =
-    defaultHeaderFlags.trim() !== '' ? shellSingleQuote(defaultHeaderFlags) : '';
 
   const getInvocations = getRequests.map((r) => ({
     ...r,
-    script_invocation: buildScriptInvocation(r, headerFlagsMap),
+    script_invocation: buildScriptInvocation(r),
   }));
   const postInvocations = postRequests.map((r) => ({
     ...r,
-    script_invocation: buildScriptInvocation(r, headerFlagsMap),
+    script_invocation: buildScriptInvocation(r),
   }));
 
   const lines = [
@@ -204,9 +202,12 @@ function buildApiTestScript({
     `API_PATH=\${2:-${shellSingleQuote(defaultPath)}}`,
     'CONTENT_TYPE=${3:-""}',
     'BODY=${4:-""}',
-    headerFlagsDefault !== ''
-      ? `HEADER_FLAGS=\${5:-${headerFlagsDefault}}`
-      : 'HEADER_FLAGS=${5:-}',
+    'if [ "$#" -gt 4 ]; then',
+    '  shift 4',
+    '  HEADER_FLAGS=("$@")',
+    'else',
+    `  HEADER_FLAGS=${bashArrayLiteral(defaultHeaderArgs)}`,
+    'fi',
     '',
     `echo "Quick test of ${functionName} ..."`,
     '',
@@ -216,14 +217,14 @@ function buildApiTestScript({
     `${commandCliCall} -u "${endpointUrl}/" --health-check`,
     'HEALTHCHECK_RC=$?',
     '',
-    `${commandCliCall} -u "${endpointUrl}$API_PATH" ${impersonationParam} -m $METHOD -b "$BODY" $HEADER_FLAGS`,
+    `${commandCliCall} -u "${endpointUrl}$API_PATH" ${impersonationParam} -m $METHOD -b "$BODY" "\${HEADER_FLAGS[@]}"`,
     'SYNC_CALL_RC=$?',
     '',
   ];
 
   if (supportsAsync) {
     lines.push(
-      `${commandCliCall} -u "${endpointUrl}$API_PATH" ${impersonationParam} -m $METHOD -b "$BODY" $HEADER_FLAGS --async`,
+      `${commandCliCall} -u "${endpointUrl}$API_PATH" ${impersonationParam} -m $METHOD -b "$BODY" "\${HEADER_FLAGS[@]}" --async`,
       'ASYNC_CALL_RC=$?',
     );
   } else {
@@ -236,10 +237,10 @@ function buildApiTestScript({
     '',
   );
   for (const r of getInvocations) {
-    lines.push(`    printf "\\t%s\\n" "${r.script_invocation}"`);
+    lines.push(`    printf '\\t%s\\n' ${shellSingleQuote(r.script_invocation)}`);
   }
   for (const r of postInvocations) {
-    lines.push(`    printf "\\t%s\\n" "${r.script_invocation}"`);
+    lines.push(`    printf '\\t%s\\n' ${shellSingleQuote(r.script_invocation)}`);
   }
   lines.push('', 'exit $(( HEALTHCHECK_RC + SYNC_CALL_RC + ASYNC_CALL_RC ))', '');
   return lines.join('\n');
@@ -252,14 +253,15 @@ function buildAwsBulkTestScript({
   sanitizedBucket,
   exampleFiles,
   callerRoleArn,
+  writeRoleArn,
   awsRegion,
 }) {
   const paths = exampleFiles.map((f) => `${psoxyBaseDir}${f.path}`);
   const defaultPaths = paths.join(',');
-  const roleLine =
-    callerRoleArn && callerRoleArn.includes(':role/')
-      ? `    -r ${callerRoleArn} \\\n`
-      : '';
+  const roleLines = [
+    writeRoleArn ? `    --write-role-to-assume ${writeRoleArn} \\` : '',
+    callerRoleArn && String(callerRoleArn).includes(':role/') ? `    -r ${callerRoleArn} \\` : '',
+  ].filter(Boolean);
   return `#!/bin/bash
 FILE_PATH=\${1:-${defaultPaths}}
 BLUE='\\e[0;34m'
@@ -287,7 +289,7 @@ for FILE in "\${FILES[@]}"; do
     -d "AWS" \\
     -i "${inputBucket}" \\
     -o "${sanitizedBucket}" \\
-${roleLine}    --region "${awsRegion}"
+${roleLines.join('\n')}${roleLines.length ? '\n' : ''}    --region "${awsRegion}"
   if [ $? -ne 0 ]; then
     FAILED=1
   fi
@@ -519,7 +521,8 @@ function generateScriptsFromOutputs({ outputs, psoxyBaseDir, platform, awsRegion
         inputBucket: inst.input_bucket,
         sanitizedBucket: inst.sanitized_bucket,
         exampleFiles,
-        callerRoleArn: outputs.caller_role_arn,
+        callerRoleArn: inst.aws_principal_arn_when_testing || outputs.caller_role_arn,
+        writeRoleArn: inst.aws_write_role_to_assume_when_testing,
         awsRegion,
       });
     }
@@ -546,7 +549,7 @@ function generateScriptsFromOutputs({ outputs, psoxyBaseDir, platform, awsRegion
         psoxyBaseDir,
         sanitizedBucket: inst.sanitized_bucket,
         testExamples: inst.test_examples,
-        callerRoleArn: outputs.caller_role_arn,
+        callerRoleArn: outputs.webhook_test_caller_role_arn || outputs.caller_role_arn,
         awsRegion,
       });
     }
@@ -607,7 +610,7 @@ function main() {
     );
   }
 
-  const psoxyBaseDir = resolvePsoxyBaseDir(outputs);
+  const psoxyBaseDir = resolvePsoxyBaseDir(outputs, args.tfDir);
   const generated = generateScriptsFromOutputs({
     outputs,
     psoxyBaseDir,

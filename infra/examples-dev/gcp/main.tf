@@ -202,6 +202,11 @@ module "connection_in_worklytics" {
   try(local.all_connectors[each.key].settings_to_provide, {}))
 }
 
+output "deployment_platform" {
+  description = "Cloud platform for this deployment. Used when synthesizing test scripts."
+  value       = "gcp"
+}
+
 output "path_to_deployment_jar" {
   description = "Path to the package to deploy (JAR)."
   value       = module.psoxy.path_to_deployment_jar

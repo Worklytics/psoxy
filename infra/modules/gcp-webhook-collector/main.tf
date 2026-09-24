@@ -610,7 +610,7 @@ output "provisioned_auth_key_pairs" {
 }
 
 output "test_examples" {
-  value = try(var.example_payload, null) != null ? [{
+  value = (try(var.example_payload, null) != null || length(local.auth_key_ids_sorted) > 0 || try(var.example_identity, null) != null) ? [{
     content_base64 = try(var.example_payload, null) != null ? base64encode(var.example_payload) : null
     signing_key_id = length(local.auth_key_ids_sorted) > 0 ? "gcp-kms:${element(local.auth_key_ids_sorted, 0)}" : null
     identity       = try(var.example_identity, null)

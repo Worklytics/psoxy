@@ -234,9 +234,11 @@ output "api_connector_instances" {
 
 output "bulk_connector_instances" {
   value = { for k, v in module.psoxy.bulk_connector_instances : k => {
-    input_bucket     = try(v.input_bucket, null)
-    sanitized_bucket = v.sanitized_bucket
-    example_files    = try(v.example_files, [])
+    input_bucket                          = try(v.input_bucket, null)
+    sanitized_bucket                      = v.sanitized_bucket
+    example_files                         = try(v.example_files, [])
+    aws_principal_arn_when_testing        = try(v.aws_principal_arn_when_testing, null)
+    aws_write_role_to_assume_when_testing = try(v.aws_write_role_to_assume_when_testing, null)
   } }
 }
 
@@ -248,9 +250,19 @@ output "webhook_collector_instances" {
   } }
 }
 
+output "deployment_platform" {
+  description = "Cloud platform for this deployment. Used when synthesizing test scripts."
+  value       = "aws"
+}
+
 output "caller_role_arn" {
   description = "ARN of the AWS role to impersonate when making API calls (AWS case)"
   value       = module.psoxy.caller_role_arn
+}
+
+output "webhook_test_caller_role_arn" {
+  description = "ARN of the role granted invoke, KMS, and bucket access for webhook collector tests."
+  value       = module.psoxy.webhook_test_caller_role_arn
 }
 
 output "aws_region" {

@@ -71,6 +71,12 @@ else
     done < <(find "${EXAMPLE_ROOT}/.terraform/modules" -type f -path "*/${GENERATOR_REL}" 2>/dev/null)
   fi
 
+  # Published modules are a git subdirectory, so .terraform/modules/psoxy has no tools/.
+  # example-copy ships the generator next to this wrapper for that case.
+  if [[ -z "$GENERATOR" && -f "${EXAMPLE_ROOT}/tools/build-test-scripts-from-output.sh" ]]; then
+    GENERATOR="${EXAMPLE_ROOT}/tools/build-test-scripts-from-output.sh"
+  fi
+
   if [[ -z "$GENERATOR" ]]; then
     if REPO_ROOT="$(resolve_repo_root "$EXAMPLE_ROOT")"; then
       GENERATOR="${REPO_ROOT}/${GENERATOR_REL}"

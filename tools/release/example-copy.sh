@@ -91,6 +91,13 @@ if [ -f build-tests.sh ]; then
   copy_script_lf build-tests.sh "${EXAMPLE_TEMPLATE_REPO}build-tests.sh"
 fi
 
+# Git module sources use a subdirectory, so the Terraform checkout does not
+# contain tools/. Ship the generator with the example so ./build-tests.sh works.
+RELEASE_REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+mkdir -p "${EXAMPLE_TEMPLATE_REPO}tools"
+copy_script_lf "${RELEASE_REPO_ROOT}/tools/build-test-scripts-from-output.sh" "${EXAMPLE_TEMPLATE_REPO}tools/build-test-scripts-from-output.sh"
+copy_lf "${RELEASE_REPO_ROOT}/tools/build-test-scripts-from-output.mjs" "${EXAMPLE_TEMPLATE_REPO}tools/build-test-scripts-from-output.mjs"
+
 # Force LF on checkout for customer-facing scripts (overrides Git for Windows autocrlf).
 # Scoped to scripts only — do not force LF on all text in the example repo.
 cat > "${EXAMPLE_TEMPLATE_REPO}.gitattributes" <<'EOF'
