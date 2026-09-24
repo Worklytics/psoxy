@@ -347,6 +347,61 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
+    static final Set<String> GDRIVE_LOG_EVENT_PARAMETERS_PII = ImmutableSet.of(
+            "owner",
+            "target_user",
+            "new_owner",
+            "delegating_principal"
+    );
+
+    static final Set<String> GDRIVE_LOG_EVENT_PARAMETERS_ALLOWED = ImmutableSet.<String>builder()
+            .addAll(GDRIVE_LOG_EVENT_PARAMETERS_PII)
+            .add("actor_is_collaborator_account", "billable", "primary_event")
+            .add("doc_id", "doc_type", "is_encrypted", "originating_app_id")
+            .add("owner_is_shared_drive", "owner_shared_drive_id", "shared_drive_id")
+            .add("visibility", "visibility_change", "old_visibility")
+            .add("added_role", "removed_role", "requested_role")
+            .add("destination_folder_id", "source_folder_id")
+            .add("copy_type")
+            .add("new_owner_is_shared_drive", "new_owner_shared_drive_id")
+            .add("target_domain", "membership_change_type")
+            .add("ip_address")
+            .build();
+
+    static final RESTRules GDRIVE_LOG = Rules2.builder()
+            .endpoint(Endpoint.builder()
+                .pathTemplate("/admin/reports/v1/activity/users/all/applications/drive")
+                    .transform(Transform.Pseudonymize.builder()
+                            .jsonPath("$..email")
+                            .jsonPath("$..userEmail")
+                            .jsonPath("$..groupEmail")
+                            .jsonPath("$.items[*].actor.profileId")
+                            .jsonPath("$..userIdentity.id")
+                            .jsonPath("$..groupIdentity.id")
+                            .jsonPath("$.items[*].events[*].parameters[?(@.name in ['owner','target_user','new_owner','delegating_principal'])].value")
+                            .build())
+                    .transform(HashIp.builder()
+                            // Drive audit events include the actor's client IP, which is often a
+                            // residential/home address. Hash (tokenize as t~...) rather than pass through.
+                            .jsonPath("$..ipAddress")
+                            .jsonPath("$.items[*].events[*].parameters[?(@.name == 'ip_address')].value")
+                            .jsonPath("$.items[*].events[*].parameters[?(@.name == 'ip_address')].multiValue[*]")
+                            .build())
+                    .transform(Transform.Redact.builder()
+                            .jsonPath("$.items[*].events[*].parameters[?(!(@.name =~ /^" +
+                                    String.join("|", GDRIVE_LOG_EVENT_PARAMETERS_ALLOWED) +
+                                    "$/i))]")
+                            // resourceDetails.title / labels / display names are content; user ids
+                            // and emails are handled by the pseudonymize transform above
+                            .jsonPath("$.items[*].resourceDetails[*].title")
+                            .jsonPath("$.items[*].resourceDetails[*]..title")
+                            .jsonPath("$.items[*].resourceDetails[*]..displayName")
+                            .jsonPath("$.items[*].resourceDetails[*].appliedLabels")
+                            .jsonPath("$.items[*].events[*].sensitiveParameters")
+                            .build())
+                    .build())
+            .build();
+
     static final  RESTRules GEMINI_IN_WORKSPACE_APPS =
         Rules2.load("sources/google-workspace/gemini-in-workspace-apps/gemini-in-workspace-apps.yaml");
     static final RESTRules GEMINI_IN_WORKSPACE_APPS_NO_APP_IDS =
@@ -357,6 +412,7 @@ public class PrebuiltSanitizerRules {
             .put("gdirectory", GDIRECTORY)
             .put("gdirectory" + ConfigRulesModule.NO_APP_IDS_SUFFIX, GDIRECTORY_WITHOUT_GOOGLE_IDS)
             .put("gdrive", GDRIVE)
+            .put("gdrive-log", GDRIVE_LOG)
             .put("gmail", GMAIL)
             .put("google-chat", GOOGLE_CHAT)
             .put("google-meet", GOOGLE_MEET)

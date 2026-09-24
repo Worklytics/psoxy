@@ -90,6 +90,7 @@
     * [Google Chat](sources/google-workspace/google-chat/README.md)
     * [Google Directory](sources/google-workspace/directory/README.md)
     * [Google Drive](sources/google-workspace/gdrive/README.md)
+    * [Google Drive Audit Log](sources/google-workspace/gdrive-log/README.md)
     * [Google Meet](sources/google-workspace/meet/README.md)
     * [Gmail](sources/google-workspace/gmail/README.md)
     * [Gemini in Workspace Apps](sources/google-workspace/gemini-in-workspace-apps/README.md)
