@@ -127,7 +127,7 @@ Parsed from `GEN_METADATA_*` env vars (not `ProxyConfigProperty`). Terraform `en
 | `GEN_METADATA_BACKEND` | Terraform: `bedrock` (AWS) / `vertex` (GCP). | Reserved for a future backend (e.g. local). Host modules bind Bedrock vs Vertex; Java does not switch on this today. |
 | `GEN_METADATA_MODEL` | AWS: `us.amazon.nova-2-lite-v1:0` · GCP: `gemini-3.5-flash-lite` | Cloud model id / **inference profile**. For Nova, use a CRIS id (`us.` / `eu.` / `jp.` / `global.` prefix) — bare `amazon.nova-…` foundation-model ids are rejected by Bedrock. If a bare `amazon.nova-…` value is set, Java rewrites it to `us.amazon.nova-…`. |
 | `GEN_METADATA_MODEL_REGION` | Vertex: `global` | Vertex publisher-model **location** (`VertexGenMetadataConfig`). Default `global` (google-genai → `https://aiplatform.googleapis.com`). Ignored on AWS. |
-| `GEN_METADATA_TIMEOUT_SECONDS` | `15` | Per-call timeout |
+| `GEN_METADATA_TIMEOUT_SECONDS` | `15` | Bound on wait for a worker slot plus the LLM call. Override via env. |
 | `GEN_METADATA_RETRIES` | `2` | Total attempts per augment when parse/schema fails |
 | `GEN_METADATA_THINKING_LEVEL` | `minimal` | **Vertex only** (`VertexGenMetadataConfig`). Gemini thinking level: `minimal` \| `low` \| `medium` \| `high`. Ignored on Bedrock. |
 

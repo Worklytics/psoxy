@@ -22,9 +22,12 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,7 +37,8 @@ import java.util.logging.Level;
  * genMetadata inference via LangChain4j {@link ChatModel} (Bedrock or Vertex only).
  *
  * <p>Thread-safety: lazy per-modelId client init via {@link ConcurrentHashMap#computeIfAbsent};
- * concurrent cloud calls limited to a fixed pool of {@link #CLOUD_MAX_CONCURRENT}.
+ * concurrent cloud calls limited to {@link #CLOUD_MAX_CONCURRENT}. Wait for a slot plus the LLM
+ * call share {@link GenMetadataConfig#getTimeoutSeconds()} (default 15).
  */
 @Log
 @Singleton
@@ -73,8 +77,15 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     private final GenMetadataResponseFormats responseFormats;
 
     private final ConcurrentHashMap<String, ModelHandle> models = new ConcurrentHashMap<>();
-    private final ExecutorService chatExecutor =
-        Executors.newFixedThreadPool(CLOUD_MAX_CONCURRENT, chatThreadFactory());
+    private final Semaphore cloudSlots = new Semaphore(CLOUD_MAX_CONCURRENT, true);
+    private final ExecutorService chatExecutor = new ThreadPoolExecutor(
+        CLOUD_MAX_CONCURRENT,
+        CLOUD_MAX_CONCURRENT,
+        0L,
+        TimeUnit.MILLISECONDS,
+        new SynchronousQueue<>(),
+        chatThreadFactory(),
+        new ThreadPoolExecutor.AbortPolicy());
 
     @Inject
     public LangChain4jGenMetadataBackend(GenMetadataConfig config,
@@ -262,33 +273,67 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             requestBuilder.responseFormat(responseFormat);
         }
         ChatRequest request = requestBuilder.build();
-        Future<ChatResponse> future = chatExecutor.submit(() -> chatModel.chat(request));
+        int timeoutSeconds = config.getTimeoutSeconds();
+        long deadlineNanos = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds);
+        boolean acquired = false;
         try {
-            return future.get(config.getTimeoutSeconds(), TimeUnit.SECONDS);
-        } catch (TimeoutException e) {
-            future.cancel(true);
-            log.warning("genMetadata LLM inference timed out after " + config.getTimeoutSeconds()
-                + "s modelId=" + config.getModelId());
-            // Keep the pool slot occupied until the worker notices cancel; do not submit more work
-            // on an unbounded pool while the SDK call may still be in flight.
+            long waitNanos = deadlineNanos - System.nanoTime();
+            if (waitNanos <= 0
+                || !cloudSlots.tryAcquire(waitNanos, TimeUnit.NANOSECONDS)) {
+                log.warning("genMetadata timed out after " + timeoutSeconds
+                    + "s waiting for an inference slot modelId=" + config.getModelId());
+                return null;
+            }
+            acquired = true;
+            Future<ChatResponse> future;
             try {
-                future.get(1, TimeUnit.SECONDS);
-            } catch (CancellationException ignored) {
-                // cancel(true) won; worker stopped
-            } catch (TimeoutException ignored) {
-                // SDK call still running; the fixed pool bounds additional in-flight work
-            } catch (ExecutionException ignored) {
-                // worker finished with an error after we timed out
-            } catch (InterruptedException interrupted) {
-                Thread.currentThread().interrupt();
+                future = chatExecutor.submit(() -> chatModel.chat(request));
+            } catch (RejectedExecutionException e) {
+                log.warning("genMetadata inference rejected; all workers busy modelId="
+                    + config.getModelId());
+                return null;
             }
-            return null;
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof Exception ex) {
-                throw ex;
+            long remainingNanos = deadlineNanos - System.nanoTime();
+            if (remainingNanos <= 0) {
+                future.cancel(true);
+                drainCancelled(future);
+                log.warning("genMetadata LLM inference timed out after " + timeoutSeconds
+                    + "s modelId=" + config.getModelId());
+                return null;
             }
-            throw e;
+            try {
+                return future.get(remainingNanos, TimeUnit.NANOSECONDS);
+            } catch (TimeoutException e) {
+                future.cancel(true);
+                log.warning("genMetadata LLM inference timed out after " + timeoutSeconds
+                    + "s modelId=" + config.getModelId());
+                drainCancelled(future);
+                return null;
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof Exception ex) {
+                    throw ex;
+                }
+                throw e;
+            }
+        } finally {
+            if (acquired) {
+                cloudSlots.release();
+            }
+        }
+    }
+
+    private void drainCancelled(Future<ChatResponse> future) {
+        try {
+            future.get(1, TimeUnit.SECONDS);
+        } catch (CancellationException ignored) {
+            // cancel(true) won; worker stopped
+        } catch (TimeoutException ignored) {
+            // SDK call still running; the fixed pool bounds additional in-flight work
+        } catch (ExecutionException ignored) {
+            // worker finished with an error after we timed out
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
         }
     }
 
