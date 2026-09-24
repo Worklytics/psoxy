@@ -10,7 +10,10 @@ Changes to be including in future/planned release notes will be added here.
 ## [0.7.1](https://github.com/Worklytics/psoxy/releases/tag/v0.7.1)
 - Google Workspace connectors: optional `api_client_auth_method = "workload_identity_federation"` (IAM `signJwt`, no downloaded SA keys). Opt in via `google_workspace_connector_settings` on the Google Workspace connectors module in `main.tf`. New example clones (`./init` / `init-tfvars.sh`) write that setting when Google Workspace sources are enabled; existing `terraform.tfvars` and the module default remain `service_account_key`. `psoxy-constants` now splits provisioner roles/permissions: Key Admin is only for the default `service_account_key` path; Workload Identity Pool Admin is only for AWS WIF. See [Google Workspace](docs/sources/google-workspace/README.md).
 - AWS GWS WIF: prefix the workload identity pool provider id and display names with `environment_id` (project-global IDs; `psoxy-` fallback when environment id is empty).
-- `salesforce`: forward `Sforce-Limit-Info` and `Sforce-Query-Options` request headers to Salesforce on Task/Event/composite/query endpoints. Lets connections set a smaller `batchSize` via `Sforce-Query-Options` to mitigate `SocketTimeoutException`s on large query responses; previously these headers were silently dropped.
+- `salesforce`:
+  - forward `Sforce-Limit-Info` and `Sforce-Query-Options` request headers to Salesforce on Task/Event/composite/query endpoints. Lets connections set a smaller `batchSize` via `Sforce-Query-Options` to mitigate `SocketTimeoutException`s on large query responses; previously these headers were silently dropped.
+  - `salesforce`: removed the `/composite` (Task+Event batch) endpoint. It wasn't in use; Task and Event are already fetched via separate `queryAll` endpoints, and the combined-batch response made error handling for partial failures unreliable. The unrelated `/composite/sobjects/Account` (bulk-by-ID account lookup) endpoint is unaffected.
+
 
 ## [0.7.0](https://github.com/Worklytics/psoxy/releases/tag/v0.7.0)
 - Release cut/QA/publish orchestration (`prep.sh`, `rc-to-main.sh`, local `publish.sh`, example-repo PR helpers) moved to the internal `Worklytics/proxy-dev` repo. GitHub Actions in this repo still publish Maven packages and deployment bundles.
