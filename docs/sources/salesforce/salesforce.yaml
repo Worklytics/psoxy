@@ -1,37 +1,5 @@
 ---
 endpoints:
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite$"
-    allowedMethods:
-      - "POST"
-    allowedQueryParams: []
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..records[*].CreatedById"
-          - "$..records[*].ContactId"
-          - "$..records[*].ManagerId"
-          - "$..records[*].Email"
-          - "$..records[*].LastModifiedById"
-          - "$..records[*].OwnerId"
-          - "$..records[*].WhoId"
-          - "$..records[*].eventWhoIds"
-          - "$..records[*].acceptedEventInviteeIds"
-          - "$..records[*].declinedEventInviteeIds"
-          - "$..records[*].taskWhoIds"
-          - "$..records[*].undecidedEventInviteeIds"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$..records[*].Description"
-          - "$..records[*].Subject"
-          - "$..records[*].CallResult"
-    responseSchema:
-      type: "object"
-      properties:
-        compositeResponse:
-          type: "array"
-          items:
-            $ref: "#/definitions/CompositeResult(Response)"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite/sobjects/Account[?][^/]*"
     allowedQueryParams:
       - "ids"
@@ -52,6 +20,9 @@ endpoints:
         $ref: "#/definitions/Account"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/query/[^?]+$"
     allowedQueryParams: []
+    allowedRequestHeaders:
+      - "Sforce-Limit-Info"
+      - "Sforce-Query-Options"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -99,6 +70,9 @@ endpoints:
     +)*.*$"
     allowedQueryParams:
       - "q"
+    allowedRequestHeaders:
+      - "Sforce-Limit-Info"
+      - "Sforce-Query-Options"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -133,6 +107,9 @@ endpoints:
     +)*.*$"
     allowedQueryParams:
       - "q"
+    allowedRequestHeaders:
+      - "Sforce-Limit-Info"
+      - "Sforce-Query-Options"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -187,6 +164,9 @@ endpoints:
     +|\\b).*"
     allowedQueryParams:
       - "q"
+    allowedRequestHeaders:
+      - "Sforce-Limit-Info"
+      - "Sforce-Query-Options"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -211,6 +191,9 @@ endpoints:
     +|\\b).*"
     allowedQueryParams:
       - "q"
+    allowedRequestHeaders:
+      - "Sforce-Limit-Info"
+      - "Sforce-Query-Options"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -289,32 +272,6 @@ definitions:
       field:
         type: "string"
       relationshipName:
-        type: "string"
-  CompositeResult(Response):
-    type: "object"
-    properties:
-      body:
-        $ref: "#/definitions/NestedQueryResult(Response)"
-      errorBody:
-        type: "array"
-        items:
-          $ref: "#/definitions/ErrorBody"
-      httpHeaders:
-        type: "object"
-      httpStatusCode:
-        type: "integer"
-      referenceId:
-        type: "string"
-  ErrorBody:
-    type: "object"
-    properties:
-      errorCode:
-        type: "string"
-      extendedErrorDetails:
-        type: "array"
-        items:
-          $ref: "#/definitions/ExtendedErrorDetails"
-      message:
         type: "string"
   Event:
     type: "object"
@@ -453,13 +410,6 @@ definitions:
         type: "integer"
       WhoId:
         type: "string"
-  ExtendedErrorDetails:
-    type: "object"
-    properties:
-      extendedErrorCode:
-        type: "string"
-      message:
-        type: "string"
   Field:
     type: "object"
     properties:
@@ -477,22 +427,6 @@ definitions:
         type: "boolean"
       sortable:
         type: "boolean"
-  NestedQueryResult(Response):
-    type: "object"
-    properties:
-      done:
-        type: "boolean"
-      nextRecordsUrl:
-        type: "string"
-      records:
-        type: "array"
-        items:
-          $ref: "#/definitions/Response"
-      totalSize:
-        type: "integer"
-  Object:
-    type: "object"
-    properties: {}
   Response:
     type: "object"
     properties:

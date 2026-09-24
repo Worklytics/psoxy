@@ -18,6 +18,7 @@ module "worklytics_connectors_google_workspace" {
   }
 
   environment_id                 = var.environment_name
+  host_platform_id               = "GCP"
   base_dir                       = var.psoxy_base_dir
   enabled_connectors             = var.enabled_connectors
   gcp_project_id                 = var.google_workspace_gcp_project_id
@@ -33,4 +34,17 @@ module "worklytics_connectors_google_workspace" {
 output "google_workspace_api_clients" {
   description = "Map of API client identifiers for Google Workspace connectors. Useful for migrations."
   value       = module.worklytics_connectors_google_workspace.api_clients
+}
+
+# Cloud Function SAs (host project) need Token Creator on each DWD SA (GWS project) to call signJwt.
+resource "google_service_account_iam_member" "gws_dwd_token_creator" {
+  for_each = {
+    for k, v in module.worklytics_connectors_google_workspace.enabled_api_connectors :
+    k => v if try(v.source_auth_strategy, "") == "gcp_iam_sign_jwt"
+  }
+
+  provider           = google.google_workspace
+  service_account_id = module.worklytics_connectors_google_workspace.api_clients[each.key].service_account_id
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:${module.psoxy.api_connector_gcp_execution_service_accounts[each.key].email}"
 }
