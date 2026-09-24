@@ -473,9 +473,14 @@ function webhookScriptFilename(instanceKey) {
 }
 
 function materializeExampleFiles(_outputDir, _instanceKey, exampleFiles, psoxyBaseDir) {
+  const baseDir = path.resolve(psoxyBaseDir);
   for (const file of exampleFiles) {
     if (!file?.content_base64 || !file?.path) continue;
-    const target = path.join(psoxyBaseDir, file.path);
+    const target = path.resolve(baseDir, file.path);
+    const relativeTarget = path.relative(baseDir, target);
+    if (relativeTarget === '..' || relativeTarget.startsWith(`..${path.sep}`) || path.isAbsolute(relativeTarget)) {
+      throw new Error(`Refusing to write example file outside base directory: ${file.path}`);
+    }
     if (fs.existsSync(target)) continue;
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, Buffer.from(file.content_base64, 'base64'));
