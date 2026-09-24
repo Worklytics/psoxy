@@ -21,7 +21,7 @@ printf "${INFO}Cloud Run custom audiences for the external Application Load Bala
 printf "API connectors authenticate callers with a Google identity token. Cloud Run accepts that token only when its audience matches the service URL, or a URL you register as a custom audience.\n\n"
 printf "With an external Application Load Balancer in front of the connectors, Worklytics (and local tests) mint the token for the public URL they call — ${CODE}https://<api-proxy-domain>/<function>${NC} — and sometimes for the Cloud Functions URL ${CODE}https://<region>-<project>.cloudfunctions.net/<function>${NC}. Those are not the default Cloud Run (*.run.app) audience, so Cloud Run rejects the token until you register them.\n\n"
 printf "Without this step, calls through the load balancer fail authentication. Ingress can mask that as HTTP 404; a mismatched audience is often HTTP 401 or 403.\n\n"
-printf "This script registers those two audiences on each API connector Cloud Run service. ${WARN}--update-custom-audiences replaces any custom audiences already set on the service.${NC}\n\n"
+printf "This script registers those two audiences on each API connector Cloud Run service. ${WARN}--set-custom-audiences replaces any custom audiences already set on the service.${NC}\n\n"
 
 for cmd in terraform gcloud jq; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
@@ -85,8 +85,9 @@ tfvar_external_api_alb_domain() {
     /^[[:space:]]*external_api_alb[[:space:]]*=/ { in_block=1 }
     in_block && /domain[[:space:]]*=/ {
       line=$0
-      sub(/^[^#]*=[[:space:]]*/, "", line)
+      sub(/.*domain[[:space:]]*=[[:space:]]*/, "", line)
       sub(/[[:space:]]*#.*/, "", line)
+      sub(/[[:space:]]*}.*/, "", line)
       gsub(/^[[:space:]]+|[[:space:]]+$/, "", line)
       gsub(/^"|"$/, "", line)
       gsub(/^'\''|'\''$/, "", line)
@@ -222,7 +223,7 @@ for fn in "${FUNCTIONS[@]}"; do
   gcloud run services update "$fn" \
     --project="$PROJECT_ID" \
     --region="$REGION" \
-    --update-custom-audiences="$audiences"
+    --set-custom-audiences="$audiences"
 done
 
 printf "\n${SUCCESS}Custom audiences updated for %s service(s).${NC}\n" "${#FUNCTIONS[@]}"

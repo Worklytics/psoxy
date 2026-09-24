@@ -68,8 +68,8 @@ gcloud run services update "$FUNCTION_NAME" \
   --set-custom-audiences="https://${REGION}-${PROJECT_ID}.cloudfunctions.net/${FUNCTION_NAME},https://${API_PROXY_DOMAIN}/${FUNCTION_NAME}"
 ```
 
-To ease this, we provide a script, which after your `terraform init` locally, you can find in `.terraform/psoxy/tools/gcp/configure-custom-audiences.sh`. Run that from the root of your terraform configuration and it will assist you by running the gcloud commands
+To ease this, we provide a script. After `terraform init`, it is at `.terraform/modules/psoxy/tools/gcp/configure-custom-audiences.sh`. Run that from the root of your Terraform configuration and it will assist you by running the gcloud commands.
 
 The script checks that `terraform`, `gcloud`, and `jq` are installed, that `terraform.tfvars` is in the current directory, and that `gcloud` is authenticated. It reads the project, region, API proxy domain, and connector function names from Terraform output when those outputs exist, and otherwise from `terraform.tfvars` (`gcp_project_id`, `gcp_region`, `api_proxy_domain`, `external_api_alb.domain`, or `api_connector_external_lb_host`). If `gcp_region` is omitted from `terraform.tfvars` (the example default is `us-central1`), the script asks you to enter the region. It prints the resolved values and the `gcloud` updates it will run, and waits for confirmation before changing anything.
 
-Re-run the script after you add an API connector. `--update-custom-audiences` replaces the custom-audience list on each service.
+Re-run the script after you add an API connector. `--set-custom-audiences` replaces the custom-audience list on each service.
