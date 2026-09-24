@@ -114,6 +114,10 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             while ((record = recordReader.readRecord()) != null) {
                 try {
                     Map<String, Object> sanitized = sanitizeRecord(record, compiledTransforms);
+                    if (ObjectUtils.isNotEmpty(rules.getAugments())) {
+                        augmentProcessor.ensureTopLevelAugmentProperties(
+                            sanitized, rules.getAugments());
+                    }
                     recordWriter.writeRecord(sanitized);
                 } catch (UnmatchedPseudonymization e) {
                     log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());

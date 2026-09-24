@@ -20,8 +20,10 @@ import lombok.extern.java.Log;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
@@ -376,6 +378,79 @@ public class AugmentProcessor {
      */
     static String buildAugmentPropertyName(String leafFieldName, String functionName) {
         return AUGMENT_PROPERTY_PREFIX + leafFieldName + AUGMENT_SEPARATOR + functionName;
+    }
+
+    /**
+     * Record-level augment column names implied by {@code jsonPaths} that target the record
+     * itself ({@code $} / {@code $[*]}) or a top-level field ({@code $.prompt}). Nested paths
+     * are omitted; those siblings are not bulk columns.
+     *
+     * <p>Used so CSV/Parquet writers always emit these columns, with an empty cell when a
+     * record has no jsonPath match.
+     */
+    public List<String> topLevelAugmentPropertyNames(Iterable<Augment> augments) {
+        if (augments == null) {
+            return List.of();
+        }
+        Set<String> names = new LinkedHashSet<>();
+        for (Augment augment : augments) {
+            if (augment == null || augment.getJsonPaths() == null) {
+                continue;
+            }
+            String functionName = augment.getFunctionName();
+            for (String jsonPath : augment.getJsonPaths()) {
+                String column = topLevelAugmentPropertyName(jsonPath, functionName);
+                if (column != null) {
+                    names.add(column);
+                }
+            }
+        }
+        return List.copyOf(names);
+    }
+
+    /**
+     * Insert missing top-level augment columns as {@code null} so tabular writers see a stable
+     * schema even when this record had no jsonPath match.
+     */
+    public void ensureTopLevelAugmentProperties(Map<String, Object> record,
+                                                Iterable<Augment> augments) {
+        if (record == null) {
+            return;
+        }
+        for (String name : topLevelAugmentPropertyNames(augments)) {
+            record.putIfAbsent(name, null);
+        }
+    }
+
+    static String topLevelAugmentPropertyName(String jsonPath, String functionName) {
+        if (jsonPath == null || functionName == null) {
+            return null;
+        }
+        String path = jsonPath.trim();
+        if (path.isEmpty()) {
+            return null;
+        }
+        if ("$".equals(path) || "$[*]".equals(path)) {
+            return buildAugmentPropertyName(OBJECT_LEVEL_SOURCE_PROPERTY, functionName);
+        }
+        if (path.startsWith("$.")) {
+            String rest = path.substring(2);
+            if (rest.endsWith("[*]")) {
+                rest = rest.substring(0, rest.length() - 3);
+            }
+            if (!rest.isEmpty() && rest.indexOf('.') < 0 && rest.indexOf('[') < 0
+                && rest.indexOf(']') < 0) {
+                return buildAugmentPropertyName(rest, functionName);
+            }
+            return null;
+        }
+        if (path.startsWith("$['") && path.endsWith("']") && path.length() > 5) {
+            String rest = path.substring(3, path.length() - 2);
+            if (!rest.isEmpty() && rest.indexOf('\'') < 0) {
+                return buildAugmentPropertyName(rest, functionName);
+            }
+        }
+        return null;
     }
 
     /**

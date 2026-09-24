@@ -367,6 +367,19 @@ class AugmentProcessorTest {
     }
 
     @Test
+    void topLevelAugmentPropertyNames_fromRules() {
+        List<String> names = augmentProcessor.topLevelAugmentPropertyNames(List.of(
+            Augment.TextDigest.builder().jsonPath("$.prompt").build(),
+            Augment.Classify.builder()
+                .jsonPath("$")
+                .prompt("Classify")
+                .classes(List.of("Feature", "Bugfix"))
+                .build(),
+            Augment.TextDigest.builder().jsonPath("$.body.content").build()));
+        assertEquals(List.of("+prompt:textDigest", "+self:classify"), names);
+    }
+
+    @Test
     void hasConflictingProperties_topLevel() {
         Map<String, Object> document = new LinkedHashMap<>();
         document.put("+augmented", "conflict");

@@ -204,6 +204,73 @@ class RecordBulkDataSanitizerImplTest {
             "must not use Map.toString(); got:\n" + output);
     }
 
+    @SneakyThrows
+    @Test
+    void ndjson_augmentColumnPresentWhenFirstRecordHasNoMatch() {
+        this.setUpWithRules("---\n" +
+            "format: \"NDJSON\"\n" +
+            "augments:\n" +
+            "- !<textDigest>\n" +
+            "  jsonPaths:\n" +
+            "  - \"$.prompt\"\n");
+
+        String input = "{\"id\":1}\n"
+            + "{\"id\":2,\"prompt\":\"hello world\"}\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/file.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        String[] lines = output.split("\n", -1);
+        assertTrue(lines[0].contains("\"+prompt:textDigest\":null"), lines[0]);
+        assertTrue(lines[1].contains("\"+prompt:textDigest\""), lines[1]);
+        assertTrue(lines[1].contains("\"word_count\""), lines[1]);
+    }
+
+    @SneakyThrows
+    @Test
+    void csv_augmentColumnPresentWhenFirstRecordHasNoMatch() {
+        Container container = DaggerRecordBulkDataSanitizerImplTest_Container.builder()
+            .forConfigService(new Container.ForConfigService() {
+                @Provides
+                @Singleton
+                public ConfigService configService() {
+                    ConfigService mock = MockModules.provideMock(ConfigService.class);
+                    when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
+                        .thenReturn(Optional.of("---\n" +
+                            "format: \"NDJSON\"\n" +
+                            "augments:\n" +
+                            "- !<textDigest>\n" +
+                            "  jsonPaths:\n" +
+                            "  - \"$.prompt\"\n"));
+                    when(mock.getConfigPropertyAsOptional(
+                        eq(BulkModeConfig.BulkModeConfigProperty.BULK_OUTPUT_FORMAT)))
+                        .thenReturn(Optional.of("CSV"));
+                    return mock;
+                }
+            })
+            .build();
+        container.inject(this);
+        outputStream = new ByteArrayOutputStream();
+        outputStreamSupplier = () -> outputStream;
+
+        String input = "{\"id\":1}\n"
+            + "{\"id\":2,\"prompt\":\"hello world\"}\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/file.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        assertEquals("id,+prompt:textDigest\n"
+            + "1,\n"
+            + "2,\"{\"\"length\"\":11,\"\"word_count\"\":2}\"\n",
+            output);
+    }
+
     @Test
     void noTransforms() throws IOException {
         this.setUpWithRules("---\n" +
