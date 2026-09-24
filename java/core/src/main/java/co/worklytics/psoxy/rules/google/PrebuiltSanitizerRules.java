@@ -388,9 +388,9 @@ public class PrebuiltSanitizerRules {
                             .jsonPath("$.items[*].events[*].parameters[?(@.name == 'ip_address')].multiValue[*]")
                             .build())
                     .transform(Transform.Redact.builder()
-                            .jsonPath("$.items[*].events[*].parameters[?(!(@.name =~ /^(?:" +
+                            .jsonPath("$.items[*].events[*].parameters[?(!(@.name =~ /^" +
                                     String.join("|", GDRIVE_LOG_EVENT_PARAMETERS_ALLOWED) +
-                                    ")$/i))]")
+                                    "$/i))]")
                             // resourceDetails.title / labels / display names are content; user ids
                             // and emails are handled by the pseudonymize transform above
                             .jsonPath("$.items[*].resourceDetails[*].title")

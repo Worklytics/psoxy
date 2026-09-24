@@ -4,7 +4,8 @@
 
 **Availability:** Beta
 
-Please review the [Google Workspace&trade; README](../README.md) for general information applicable to all Google Workspace connectors.
+Please review the [Google Workspace&trade; README](../README.md) for general information applicable to
+all Google Workspace connectors.
 
 This connector pulls Drive events from the Google Workspace audit log (Reports API), rather than the Drive files API used by the [`gdrive`](../gdrive/README.md) connector.
 
