@@ -1,11 +1,16 @@
 package co.worklytics.psoxy;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -77,11 +82,22 @@ public class GcsFileEventHandler {
                 return Channels.newInputStream(readChannel);
             };
 
-            Supplier<OutputStream> outputStreamSupplier = () -> {
-                // Token aggregates are not known yet (sanitize runs after the write channel opens).
-                // Base metadata is set here; genMetadata token keys are patched after handle().
-                BlobInfo.Builder blobInfoBuilder = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
-                    .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform));
+            // Sanitize to a temp file first so object metadata (including genMetadata token
+            // aggregates) can be set when the GCS object is created — same pattern as S3Handler.
+            File tmpFile = new File("/tmp/" + UUID.randomUUID());
+            try {
+                try (FileOutputStream fos = new FileOutputStream(tmpFile);
+                     BufferedOutputStream outputStream =
+                         new BufferedOutputStream(fos, storageHandler.getBufferSize())) {
+                    storageHandler.handle(request, transform, inputStreamSupplier, () -> outputStream);
+                }
+
+                Map<String, String> metadata =
+                    storageHandler.buildObjectMetadata(importBucket, sourceName, transform);
+
+                BlobInfo.Builder blobInfoBuilder = BlobInfo.newBuilder(
+                        BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
+                    .setMetadata(metadata);
 
                 Optional.ofNullable(request.getContentType())
                     .ifPresent(blobInfoBuilder::setContentType);
@@ -92,22 +108,19 @@ public class GcsFileEventHandler {
                     Optional.ofNullable(sourceBlobInfo.getContentEncoding())
                         .ifPresent(blobInfoBuilder::setContentEncoding);
                 }
-                //NOTE: disableGzipContent() is important to avoid double compression
-                WriteChannel writeChannel = storage.writer(blobInfoBuilder.build(), Storage.BlobWriteOption.disableGzipContent());
-                //NOTE: when close() called on the stream, close is called on channel, so should be OK
-                return Channels.newOutputStream(writeChannel);
-            };
 
-            storageHandler.handle(request, transform, inputStreamSupplier, outputStreamSupplier);
-
-            // Apply final metadata including genMetadata token aggregates (S3 builds metadata after
-            // sanitize; GCS must open the writer first, so patch after).
-            Map<String, String> finalMetadata =
-                storageHandler.buildObjectMetadata(importBucket, sourceName, transform);
-            storage.update(BlobInfo.newBuilder(
-                    BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
-                .setMetadata(finalMetadata)
-                .build());
+                try (FileInputStream processed = new FileInputStream(tmpFile);
+                     WriteChannel writeChannel = storage.writer(blobInfoBuilder.build(),
+                         Storage.BlobWriteOption.disableGzipContent());
+                     OutputStream gcsOut = Channels.newOutputStream(writeChannel)) {
+                    processed.transferTo(gcsOut);
+                }
+            } finally {
+                if (tmpFile.exists() && !tmpFile.delete()) {
+                    log.warning("Failed to delete temporary GCS output file: "
+                        + tmpFile.getAbsolutePath());
+                }
+            }
         } else {
             log.info("Skipping " + importBucket + "/" + request.getSourceObjectPath() + " because no rules apply");
         }
