@@ -12,7 +12,7 @@ From the root of an AWS or GCP example, after `terraform init` and `terraform ap
 ./build-tests.sh
 ```
 
-That wrapper runs `tools/build-test-scripts-from-output.sh` from the repository clone Terraform downloaded under `.terraform/modules/`, and writes `test-*.sh` plus `test-all.sh` into the example directory. Pass a repo path (`./build-tests.sh /path/to/psoxy`) when that clone is not present.
+That wrapper prefers `tools/build-test-scripts-from-output.sh` from the repository clone Terraform downloaded under `.terraform/modules/`, falls back to the generator shipped in the example's `tools/` directory, and writes `test-*.sh` plus `test-all.sh` into the example directory. You can pass a repo path (`./build-tests.sh /path/to/psoxy`) to use an explicit checkout instead.
 
 ### Testing Pre-requisites
 
