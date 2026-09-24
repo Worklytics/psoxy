@@ -48,9 +48,15 @@ copy_script_lf() {
   chmod +x "$dest"
 }
 
-# Resolve before cd. The publish workflow invokes this as a relative path
-# (proxy/tools/release/example-copy.sh); after cd, dirname "$0" is relative to the example dir.
+# Resolve paths before cd. The publish workflow invokes this with relative paths.
 RELEASE_REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+EXAMPLE_TO_COPY_FROM="$(cd "$EXAMPLE_TO_COPY_FROM" && pwd)"
+EXAMPLE_TEMPLATE_REPO="$(cd "$EXAMPLE_TEMPLATE_REPO" && pwd)/"
+if [ -z "$PATH_TO_MAIN_REPO_ROOT" ]; then
+  PATH_TO_MAIN_REPO_ROOT="${RELEASE_REPO_ROOT}/"
+else
+  PATH_TO_MAIN_REPO_ROOT="$(cd "$PATH_TO_MAIN_REPO_ROOT" && pwd)/"
+fi
 
 cd "$EXAMPLE_TO_COPY_FROM"
 FILES_TO_COPY=( *.tf )
