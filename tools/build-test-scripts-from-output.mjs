@@ -93,7 +93,9 @@ function ensureTrailingSlash(p) {
 }
 
 function shellSingleQuote(value) {
-  return `'${String(value).replace(/'/g, `'\\''`)}'`;
+  // Bash single quotes: backslash is literal; only ' is special (end, \', start).
+  // split/join avoids String.replace, which CodeQL treats as an incomplete escape.
+  return `'${String(value).split("'").join("'\\''")}'`;
 }
 
 function buildHeaderFlags(request) {

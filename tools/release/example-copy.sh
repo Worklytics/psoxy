@@ -85,8 +85,10 @@ fi
 copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/available-connectors.sh" "${EXAMPLE_TEMPLATE_REPO}available-connectors"
 copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/az-auth.sh" "${EXAMPLE_TEMPLATE_REPO}az-auth"
 
-if [ -f "build-tests.sh" ]; then
-  copy_script_lf "build-tests.sh" "${EXAMPLE_TEMPLATE_REPO}build-tests.sh"
+# cwd is the example directory (cd above). A relative EXAMPLE_TO_COPY_FROM would
+# resolve against this directory and miss the file.
+if [ -f build-tests.sh ]; then
+  copy_script_lf build-tests.sh "${EXAMPLE_TEMPLATE_REPO}build-tests.sh"
 fi
 
 # Force LF on checkout for customer-facing scripts (overrides Git for Windows autocrlf).
