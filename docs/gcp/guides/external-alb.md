@@ -62,10 +62,10 @@ As of 2026-09-15, Google's terraform resource `google_cloudfunctions2_function` 
 Specifically, you must run a gcloud command like the following for each API connector:
 
 ```shell
-gcloud run services update "$FUNCTION_NAME" \ 
-  --project="$PROJECT_ID" \ 
+gcloud run services update "$FUNCTION_NAME" \
+  --project="$PROJECT_ID" \
   --region="$REGION" \
-  --update-custom-audiences="https://${API_PROXY_DOMAIN}/${FUNCTION_NAME}"
+  --set-custom-audiences="https://${REGION}-${PROJECT_ID}.cloudfunctions.net/${FUNCTION_NAME},https://${API_PROXY_DOMAIN}/${FUNCTION_NAME}"
 ```
 
 To ease this, we provide a script, which after your `terraform init` locally, you can find in `.terraform/psoxy/tools/gcp/configure-custom-audiences.sh`. Run that from the root of your terraform configuration and it will assist you by running the gcloud commands
