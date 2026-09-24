@@ -64,6 +64,29 @@ run "alb_domain_used_in_host_todos_and_outputs" {
   }
 }
 
+run "self_signed_alb_enables_ingress_at_plan_time" {
+  command = plan
+
+  variables {
+    external_api_alb = {}
+  }
+
+  assert {
+    error_message = "self-signed PoC ALB should reserve a global address"
+    condition     = length(google_compute_global_address.api_connector_alb) == 1
+  }
+
+  assert {
+    error_message = "self-signed PoC ALB should provision the external_api_alb module"
+    condition     = length(module.external_api_alb) == 1
+  }
+
+  assert {
+    error_message = "reserved-IP ALB must set ALLOW_INTERNAL_AND_GCLB at plan time (not wait for the global address value)"
+    condition     = module.api_connector["test-gmail"].function_config.service_config[0].ingress_settings == "ALLOW_INTERNAL_AND_GCLB"
+  }
+}
+
 run "byo_alb_host_used_in_endpoint_url" {
   command = plan
 

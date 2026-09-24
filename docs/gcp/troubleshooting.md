@@ -77,13 +77,17 @@ On the **Psoxy GCP project**, open **IAM & Admin → Organization policies → D
 1. **Override** the policy for this project only (or use a folder exception if your security team prefers).
 2. Under **allowed values**, keep every customer ID and organization principal set you already allow for your own organization.
 3. Add **Worklytics's Google Workspace customer ID** (`C0…` from Worklytics). The service account email domain is **not** a valid allowed value.
-4. Alternatively (or in addition), add Worklytics's organization principal set:
+4. Alternatively (or in addition), add Worklytics's organization principal set (Cloud Resource Manager authority):
 
-   `principalSet://iam.googleapis.com/organizations/WORKLYTICS_ORG_NUMBER`
+   `is:principalSet://cloudresourcemanager.googleapis.com/organizations/WORKLYTICS_ORG_NUMBER`
 
-5. If you enforce the newer managed constraint **`iam.managed.allowedPolicyMembers`** instead, add this principal (same service account as in the Worklytics portal):
+5. If you enforce the newer managed constraint **`iam.managed.allowedPolicyMembers`** instead, add the Worklytics tenant service account under **`allowedMemberSubjects`** (same email as in the Worklytics portal):
 
-   `principal://iam.googleapis.com/projects/-/serviceAccounts/WORKLYTICS_SA_EMAIL`
+   `serviceAccount:WORKLYTICS_SA_EMAIL`
+
+   You can also add Worklytics's organization under **`allowedPrincipalSets`**:
+
+   `//cloudresourcemanager.googleapis.com/organizations/WORKLYTICS_ORG_NUMBER`
 
 6. Re-run `terraform apply` in your Psoxy Terraform directory. That creates the Cloud Run Invoker binding on each API connector.
 
