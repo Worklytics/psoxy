@@ -101,6 +101,10 @@ function shellSingleQuote(value) {
   return `'${String(value).split("'").join("'\\''")}'`;
 }
 
+function nodeCli(psoxyBaseDir, scriptName) {
+  return `node ${shellSingleQuote(`${psoxyBaseDir}tools/psoxy-test/${scriptName}`)}`;
+}
+
 function headerArgPairs(request) {
   const headers = request.headers ?? {};
   const pairs = [];
@@ -183,7 +187,7 @@ function buildApiTestScript({
   const regionParam = platform === 'aws' && awsRegion ? ` --region "${awsRegion}"` : '';
   const gcpFlags = platform === 'gcp' ? gcpCliCallFlags(endpointUrl) : '';
   const gcpFlagSuffix = gcpFlags ? ` ${gcpFlags}` : '';
-  const commandCliCall = `node ${psoxyBaseDir}tools/psoxy-test/cli-call.js${roleParam}${regionParam}${gcpFlagSuffix}`;
+  const commandCliCall = `${nodeCli(psoxyBaseDir, 'cli-call.js')}${roleParam}${regionParam}${gcpFlagSuffix}`;
   const supportsAsync = Boolean(testExamples?.supports_async);
 
   const getInvocations = getRequests.map((r) => ({
@@ -284,7 +288,7 @@ for FILE in "\${FILES[@]}"; do
   fi
   
   printf "Testing file: $FILE\\n"
-  node ${psoxyBaseDir}tools/psoxy-test/cli-file-upload.js \\
+  ${nodeCli(psoxyBaseDir, 'cli-file-upload.js')} \\
     -f "$FILE" \\
     -d "AWS" \\
     -i "${inputBucket}" \\
@@ -330,7 +334,7 @@ for FILE in "\${FILES[@]}"; do
   fi
   
   printf "Testing file: $FILE\\n"
-  node ${psoxyBaseDir}tools/psoxy-test/cli-file-upload.js -f "$FILE" -d GCP -i ${inputBucket} -o ${sanitizedBucket}
+  ${nodeCli(psoxyBaseDir, 'cli-file-upload.js')} -f "$FILE" -d GCP -i ${inputBucket} -o ${sanitizedBucket}
   if [ $? -ne 0 ]; then
     FAILED=1
     continue
@@ -349,7 +353,7 @@ for FILE in "\${FILES[@]}"; do
       FAILED=1
       continue
     fi
-    node ${psoxyBaseDir}tools/psoxy-test/cli-file-upload.js -f "$TEST_FILE_NAME" -d GCP -i ${inputBucket} -o ${sanitizedBucket}
+    ${nodeCli(psoxyBaseDir, 'cli-file-upload.js')} -f "$TEST_FILE_NAME" -d GCP -i ${inputBucket} -o ${sanitizedBucket}
     NODE_EXIT=$?
     rm -f "$TEST_FILE_NAME"
     if [ $NODE_EXIT -ne 0 ]; then
@@ -360,6 +364,18 @@ done
 
 exit $FAILED
 `;
+}
+
+function webhookTestExamples(inst, platform) {
+  const examples = Array.isArray(inst?.test_examples) ? inst.test_examples : [];
+  const first = examples[0] ?? null;
+  if (first?.signing_key_id) return examples;
+  const keys = inst?.provisioned_auth_key_pairs;
+  const raw = Array.isArray(keys) && keys.length > 0 ? keys[platform === 'aws' ? keys.length - 1 : 0] : null;
+  if (!raw) return examples;
+  const prefix = platform === 'aws' ? 'aws-kms:' : 'gcp-kms:';
+  const signingKeyId = String(raw).startsWith(prefix) ? String(raw) : `${prefix}${raw}`;
+  return [{ ...(first ?? {}), signing_key_id: signingKeyId }];
 }
 
 function decodeExamplePayload(testExamples) {
@@ -381,7 +397,7 @@ function buildAwsWebhookTestScript({
   const payload = shellSingleQuote(decodeExamplePayload(testExamples));
   const roleParam = callerRoleArn ? ` -r "${callerRoleArn}"` : '';
   const regionParam = awsRegion ? ` --region "${awsRegion}"` : '';
-  const commandCliCall = `node ${psoxyBaseDir}tools/psoxy-test/cli-call.js${roleParam}${regionParam}`;
+  const commandCliCall = `${nodeCli(psoxyBaseDir, 'cli-call.js')}${roleParam}${regionParam}`;
   let signingLines = '';
   if (example?.signing_key_id) {
     const arn = example.signing_key_id.replace(/^aws-kms:/, '');
@@ -426,7 +442,7 @@ function buildGcpWebhookTestScript({
 }) {
   const example = Array.isArray(testExamples) ? testExamples[0] : null;
   const payload = shellSingleQuote(decodeExamplePayload(testExamples));
-  const commandCliCall = `node ${psoxyBaseDir}tools/psoxy-test/cli-call.js`;
+  const commandCliCall = nodeCli(psoxyBaseDir, 'cli-call.js');
   let signingLines = '';
   if (example?.signing_key_id) {
     signingLines = `--signing-key "${example.signing_key_id}" \\
@@ -544,7 +560,7 @@ function generateScriptsFromOutputs({ outputs, psoxyBaseDir, platform, awsRegion
         endpointUrl,
         psoxyBaseDir,
         sanitizedBucket: inst.sanitized_bucket,
-        testExamples: inst.test_examples,
+        testExamples: webhookTestExamples(inst, platform),
         schedulerJob: inst.batch_scheduler_job_id,
       });
     } else {
@@ -553,7 +569,7 @@ function generateScriptsFromOutputs({ outputs, psoxyBaseDir, platform, awsRegion
         endpointUrl,
         psoxyBaseDir,
         sanitizedBucket: inst.sanitized_bucket,
-        testExamples: inst.test_examples,
+        testExamples: webhookTestExamples(inst, platform),
         callerRoleArn: outputs.webhook_test_caller_role_arn || outputs.caller_role_arn,
         awsRegion,
       });

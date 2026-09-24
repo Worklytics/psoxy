@@ -238,6 +238,7 @@ output "webhook_collector_instances" {
     side_output_sanitized_bucket_id = try(v.side_output_sanitized_bucket_id, null)
     side_output_original_bucket_id  = try(v.side_output_original_bucket_id, null)
     test_examples                   = try(v.test_examples, [])
+    provisioned_auth_key_pairs      = try(v.provisioned_auth_key_pairs, [])
     batch_scheduler_job_id          = try(v.batch_scheduler_job_id, null)
   } }
 }

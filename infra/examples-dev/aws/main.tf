@@ -244,9 +244,10 @@ output "bulk_connector_instances" {
 
 output "webhook_collector_instances" {
   value = { for k, v in module.psoxy.webhook_collector_instances : k => {
-    endpoint_url     = try(v.endpoint_url, null)
-    sanitized_bucket = v.output_sanitized_bucket_id
-    test_examples    = try(v.test_examples, [])
+    endpoint_url               = try(v.endpoint_url, null)
+    sanitized_bucket           = v.output_sanitized_bucket_id
+    test_examples              = try(v.test_examples, [])
+    provisioned_auth_key_pairs = try(v.provisioned_auth_key_pairs, [])
   } }
 }
 
