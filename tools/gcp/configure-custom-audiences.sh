@@ -83,7 +83,7 @@ tfvar_string() {
 tfvar_external_api_alb_domain() {
   awk '
     /^[[:space:]]*external_api_alb[[:space:]]*=/ { in_block=1 }
-    in_block && /domain[[:space:]]*=/ {
+    in_block && /^[[:space:]]*domain[[:space:]]*=/ {
       line=$0
       sub(/.*domain[[:space:]]*=[[:space:]]*/, "", line)
       sub(/[[:space:]]*#.*/, "", line)
