@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -15,6 +16,7 @@ class CsvRecordWriter implements RecordWriter {
     private static final String RECORD_SEPARATOR = "\n";
 
     final Writer writer;
+    final ObjectMapper objectMapper;
     
     CSVPrinter printer;
     String[] headers;
@@ -37,7 +39,7 @@ class CsvRecordWriter implements RecordWriter {
         }
         
         for (String header : headers) {
-            printer.print(record.get(header));
+            printer.print(RecordCellSerialization.forTabularCell(record.get(header), objectMapper));
         }
         printer.println();
     }

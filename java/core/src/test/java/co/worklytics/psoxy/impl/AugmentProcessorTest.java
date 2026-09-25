@@ -1,8 +1,15 @@
 package co.worklytics.psoxy.impl;
 
+import co.worklytics.psoxy.Warning;
 import com.avaulta.gateway.resources.ResourceService;
+import com.avaulta.gateway.rules.JsonSchema;
+import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.augments.Augment;
+import com.avaulta.gateway.rules.augments.ClassifyProcessor;
+import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
+import com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
@@ -11,6 +18,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,9 +31,11 @@ class AugmentProcessorTest {
 
     AugmentProcessor augmentProcessor;
     Configuration jsonConfiguration;
+    ObjectMapper objectMapper;
 
     @BeforeEach
     void setup() {
+        objectMapper = new ObjectMapper();
         jsonConfiguration = Configuration.builder()
             .jsonProvider(new JacksonJsonProvider())
             .mappingProvider(new JacksonMappingProvider())
@@ -33,7 +43,16 @@ class AugmentProcessorTest {
             .build();
 
         ResourceService noModels = path -> Optional.empty();
-        augmentProcessor = new AugmentProcessor(jsonConfiguration, new SentenceMetadataProcessor(noModels));
+        GenMetadataProcessor genMetadataProcessor =
+            new GenMetadataProcessor(new UnavailableGenMetadataBackend(), objectMapper, 2, new JsonSchemaValidationUtils());
+        ClassifyProcessor classifyProcessor =
+            new ClassifyProcessor(new UnavailableGenMetadataBackend(), objectMapper, 2);
+        augmentProcessor = new AugmentProcessor(jsonConfiguration,
+            new JsonSchemaValidationUtils(),
+            objectMapper,
+            new SentenceMetadataProcessor(noModels),
+            genMetadataProcessor,
+            classifyProcessor);
     }
 
     @Test
@@ -301,6 +320,37 @@ class AugmentProcessorTest {
         assertTrue(innerAugments.contains("\"text\":\"{\\\"length\\\":12,\\\"word_count\\\":2}\""));
     }
 
+    @SneakyThrows
+    @Test
+    void applyAugments_innerJsonPath_propagatesGenMetadataUnavailableWarning() {
+        String adaptiveCard = """
+            {
+              "body": [
+                {"type": "TextBlock", "text": "Hello world"}
+              ]
+            }
+            """;
+        Map<String, Object> attachment = new LinkedHashMap<>();
+        attachment.put("content", adaptiveCard);
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("attachments", List.of(attachment));
+
+        Augment.Classify augment = Augment.Classify.builder()
+            .jsonPath("$.attachments[*].content")
+            .innerJsonPath("$..text")
+            .prompt("Classify")
+            .classes(List.of("Feature", "Bugfix", "Uncategorized"))
+            .build();
+
+        List<String> warnings = augmentProcessor.applyAugments(List.of(augment), document);
+
+        assertTrue(warnings.contains(Warning.AUGMENT_GEN_UNAVAILABLE.asHttpHeaderCode()));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> resultAttachment = (Map<String, Object>)
+            ((List<?>) document.get("attachments")).get(0);
+        assertFalse(resultAttachment.containsKey("+content:classify"));
+    }
+
     @Test
     void toInnerPathSuffix_bracketNotation() {
         assertEquals("body[0].text",
@@ -311,6 +361,22 @@ class AugmentProcessorTest {
     void buildAugmentPropertyName() {
         assertEquals("+content:textDigest",
             AugmentProcessor.buildAugmentPropertyName("content", "textDigest"));
+        assertEquals("+self:classify",
+            AugmentProcessor.buildAugmentPropertyName(
+                AugmentProcessor.OBJECT_LEVEL_SOURCE_PROPERTY, "classify"));
+    }
+
+    @Test
+    void topLevelAugmentPropertyNames_fromRules() {
+        List<String> names = augmentProcessor.topLevelAugmentPropertyNames(List.of(
+            Augment.TextDigest.builder().jsonPath("$.prompt").build(),
+            Augment.Classify.builder()
+                .jsonPath("$")
+                .prompt("Classify")
+                .classes(List.of("Feature", "Bugfix"))
+                .build(),
+            Augment.TextDigest.builder().jsonPath("$.body.content").build()));
+        assertEquals(List.of("+prompt:textDigest", "+self:classify"), names);
     }
 
     @Test
@@ -344,5 +410,153 @@ class AugmentProcessorTest {
         String expected = AugmentProcessor.AUGMENT_PROPERTY_PREFIX + "content"
             + AugmentProcessor.AUGMENT_SEPARATOR + "textDigest";
         assertEquals("+content:textDigest", expected);
+    }
+
+    @SneakyThrows
+    @Test
+    void applyAugments_outputSchemaMismatch_omitsPropertyAndWarns() {
+        Augment.TextDigest augment = Augment.TextDigest.builder()
+            .jsonPath("$.body.content")
+            .outputSchema(JsonSchema.builder()
+                .type("object")
+                .required(List.of("category"))
+                .properties(Map.of(
+                    "category", JsonSchema.builder().type("string").build()))
+                .build())
+            .build();
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("content", "Hello world");
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("body", body);
+
+        List<String> warnings = augmentProcessor.applyAugments(List.of(augment), document);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> resultBody = (Map<String, Object>) document.get("body");
+        assertFalse(resultBody.containsKey("+content:textDigest"));
+        assertTrue(warnings.contains(Warning.AUGMENT_OUTPUT_SCHEMA_MISMATCH.asHttpHeaderCode()));
+    }
+
+    @Test
+    void applyAugments_conflictDetection_reportsWarning() {
+        Augment.TextDigest augment = Augment.TextDigest.builder()
+            .jsonPath("$.body.content")
+            .build();
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("content", "Hello world");
+        body.put("+content:someExisting", "conflict");
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("body", body);
+
+        List<String> warnings = augmentProcessor.applyAugments(List.of(augment), document);
+
+        assertTrue(warnings.contains(Warning.AUGMENT_CONFLICT_SKIPPED.asHttpHeaderCode()));
+    }
+
+    private AugmentProcessor processorWithClassifyStub(String label) {
+        ClassifyProcessor classifyProcessor = new ClassifyProcessor(
+            (taskPrompt, outputSchema, inputData) -> label,
+            objectMapper,
+            2);
+        GenMetadataProcessor genMetadataProcessor = new GenMetadataProcessor(
+            new UnavailableGenMetadataBackend(),
+            objectMapper,
+            2,
+            new JsonSchemaValidationUtils());
+        return new AugmentProcessor(jsonConfiguration,
+            new JsonSchemaValidationUtils(),
+            objectMapper,
+            new SentenceMetadataProcessor(path -> Optional.empty()),
+            genMetadataProcessor,
+            classifyProcessor);
+    }
+
+    private static Map<String, Object> samplePr(String title, String body) {
+        Map<String, Object> pr = new LinkedHashMap<>();
+        pr.put("title", title);
+        Map<String, Object> user = new LinkedHashMap<>();
+        user.put("login", "alice");
+        user.put("id", 1);
+        pr.put("user", user);
+        pr.put("body", body);
+        return pr;
+    }
+
+    @SneakyThrows
+    @Test
+    void applyAugments_classify_objectLevel_arrayElements() {
+        AugmentProcessor processor = processorWithClassifyStub("Feature");
+        Augment.Classify augment = Augment.Classify.builder()
+            .jsonPath("$[*]")
+            .prompt("Classify this pull request")
+            .classes(List.of("Feature", "Bugfix", "Uncategorized"))
+            .build();
+
+        Map<String, Object> pr1 = samplePr("Add login", "Implements OAuth");
+        Map<String, Object> pr2 = samplePr("Fix crash", "Null check");
+        List<Map<String, Object>> document = new ArrayList<>(List.of(pr1, pr2));
+
+        List<String> warnings = processor.applyAugments(List.of(augment), document);
+
+        assertTrue(warnings.isEmpty());
+        assertEquals("Feature", pr1.get("+self:classify"));
+        assertEquals("Feature", pr2.get("+self:classify"));
+        assertEquals("Add login", pr1.get("title"));
+        assertEquals("Implements OAuth", pr1.get("body"));
+        assertFalse(pr1.containsKey("+title:classify"));
+    }
+
+    @SneakyThrows
+    @Test
+    void applyAugments_classify_objectLevel_rootObject() {
+        AugmentProcessor processor = processorWithClassifyStub("Bugfix");
+        Augment.Classify augment = Augment.Classify.builder()
+            .jsonPath("$")
+            .prompt("Classify this pull request")
+            .classes(List.of("Feature", "Bugfix", "Uncategorized"))
+            .build();
+
+        Map<String, Object> document = samplePr("Fix NPE", "Guards null user");
+
+        processor.applyAugments(List.of(augment), document);
+
+        assertEquals("Bugfix", document.get("+self:classify"));
+        assertEquals("Fix NPE", document.get("title"));
+        assertEquals("Guards null user", document.get("body"));
+    }
+
+    @SneakyThrows
+    @Test
+    void applyAugments_classify_scalarPath_stillSiblingNotSelf() {
+        AugmentProcessor processor = processorWithClassifyStub("Feature");
+        Augment.Classify augment = Augment.Classify.builder()
+            .jsonPath("$[*].title")
+            .prompt("Classify")
+            .classes(List.of("Feature", "Bugfix", "Uncategorized"))
+            .build();
+
+        Map<String, Object> pr1 = samplePr("Add login", "Implements OAuth");
+        List<Map<String, Object>> document = new ArrayList<>(List.of(pr1));
+
+        processor.applyAugments(List.of(augment), document);
+
+        assertEquals("Feature", pr1.get("+title:classify"));
+        assertFalse(pr1.containsKey("+self:classify"));
+    }
+
+    @SneakyThrows
+    @Test
+    void applyAugments_arrayParent_nonMapMatch_noOpsSafely() {
+        Augment.TextDigest augment = Augment.TextDigest.builder()
+            .jsonPath("$[*]")
+            .build();
+
+        List<Object> document = new ArrayList<>(List.of("plain-string", "another"));
+
+        assertDoesNotThrow(() -> augmentProcessor.applyAugments(List.of(augment), document));
+        assertEquals(2, document.size());
+        assertEquals("plain-string", document.get(0));
     }
 }

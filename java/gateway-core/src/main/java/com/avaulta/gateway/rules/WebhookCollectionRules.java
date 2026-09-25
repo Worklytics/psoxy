@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -74,6 +75,16 @@ public class WebhookCollectionRules implements Serializable {
         //TODO: schemaFilter for request payload?  avoids risk of unexpected fields included in request payload
 
         /**
+         * Augments to compute and inject as synthetic sibling properties, run before transforms.
+         *
+         * @see <a href="file:///docs/development/augments.md">Augments Design Doc</a>
+         */
+        @Setter
+        @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+        @Singular
+        List<Augment> augments;
+
+        /**
          * a list of transforms to apply to the request payload
          */
         @Setter
@@ -87,6 +98,7 @@ public class WebhookCollectionRules implements Serializable {
          * 2) Explicit instantiation of @Singular fields required to avoid Lombok warnings about ignored default values.
          */
         public WebhookEndpoint() {
+            this.augments = new ArrayList<>();
             this.transforms = new ArrayList<>();
         }
     }

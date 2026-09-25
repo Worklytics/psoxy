@@ -86,6 +86,27 @@ locals {
 
   # proxy caller role requires direct lambda access if API Gateway v2 is not used and there are API connectors
   caller_requires_direct_lambda_access = !local.use_api_gateway_v2 && length(module.api_connector) > 0
+
+  # TEMP: any connector with enable_gen_metadata uses Bedrock (AWS-only; no other backend yet).
+  gen_metadata_enabled = length([
+    for k, v in merge(var.api_connectors, var.bulk_connectors) : k
+    if try(v.enable_gen_metadata, false)
+  ]) > 0
+
+  bedrock_invoke_iam_statements = [{
+    Sid    = "InvokeBedrockForGenMetadata"
+    Effect = "Allow"
+    Action = [
+      "bedrock:InvokeModel",
+      "bedrock:Converse",
+      "bedrock:InvokeModelWithResponseStream",
+      "bedrock:ConverseStream",
+    ]
+    Resource = [
+      "arn:aws:bedrock:*::foundation-model/*",
+      "arn:aws:bedrock:*:*:inference-profile/*",
+    ]
+  }]
 }
 
 module "psoxy" {
@@ -119,14 +140,15 @@ module "psoxy" {
 locals {
   path_to_shared_secrets = var.secrets_store_implementation == "aws_secrets_manager" ? var.aws_secrets_manager_path : var.aws_ssm_param_root_path
 
-  # S3 object prefixes use '/' hierarchy (see gcp-host for rationale).
+  # Object-key prefixes are siblings, not nested: shared is `{env}/` and instance is
+  # `{env}-{INSTANCE}/` so IAM `env/*` does not also match instance objects.
   resource_path_root = trimsuffix(trimprefix(coalesce(
     local.path_to_shared_secrets != "" ? local.path_to_shared_secrets : null,
     trimsuffix(local.instance_ssm_prefix, "_")
   ), "/"), "_")
   shared_resource_path = "${local.resource_path_root}/"
   connector_instance_resource_path = { for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) :
-    k => "${local.shared_resource_path}${replace(upper(k), "-", "_")}/"
+    k => "${local.resource_path_root}-${replace(upper(k), "-", "_")}/"
   }
   remote_resources_enabled = var.enable_remote_resources && module.psoxy.artifacts_bucket_name != null
 
@@ -250,6 +272,10 @@ module "api_connector" {
   timeout_seconds               = coalesce(try(each.value.timeout_seconds, null), 180)
   allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
 
+  extra_lambda_role_iam_statements = concat(
+    try(each.value.enable_gen_metadata, false) ? local.bedrock_invoke_iam_statements : [],
+  )
+
   environment_variables = merge(
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
@@ -262,6 +288,9 @@ module "api_connector" {
     var.api_connector_path_prefix_to_trim != null ? { REQUEST_PATH_PREFIX_TO_TRIM = var.api_connector_path_prefix_to_trim } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      GEN_METADATA_BACKEND = "bedrock"
+    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
@@ -339,6 +368,10 @@ module "bulk_connector" {
 
 
 
+  extra_lambda_role_iam_statements = concat(
+    try(each.value.enable_gen_metadata, false) ? local.bedrock_invoke_iam_statements : [],
+  )
+
   environment_variables = merge(
     {
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
@@ -349,7 +382,10 @@ module "bulk_connector" {
     try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) != null ? {
       RULES = each.value.rules_raw
     } : {},
-    var.general_environment_variables
+    var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      GEN_METADATA_BACKEND = "bedrock"
+    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null

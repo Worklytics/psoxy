@@ -96,6 +96,7 @@ public class BulkDataSanitizerImplTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        TestModules.ForGenMetadataConfig.class,
         MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
         TestModules.ForFixedClock.class,

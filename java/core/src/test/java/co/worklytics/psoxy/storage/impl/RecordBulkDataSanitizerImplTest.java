@@ -74,6 +74,7 @@ class RecordBulkDataSanitizerImplTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        TestModules.ForGenMetadataConfig.class,
         MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
         ConfigRulesModule.class,
@@ -143,6 +144,132 @@ class RecordBulkDataSanitizerImplTest {
 
     }
 
+
+    @SneakyThrows
+    @Test
+    void augmentsAppliedBeforeRedact() {
+        this.setUpWithRules("---\n" +
+            "format: \"NDJSON\"\n" +
+            "augments:\n" +
+            "- !<textDigest>\n" +
+            "  jsonPaths:\n" +
+            "  - \"$.content\"\n" +
+            "transforms:\n" +
+            "- redact: \"content\"\n");
+
+        String input = "{\"content\":\"hello world test\"}\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/file.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        assertTrue(output.contains("\"+content:textDigest\""));
+        assertTrue(output.contains("\"word_count\""));
+        assertTrue(output.contains("\"content\":null"));
+    }
+
+    /**
+     * CSV cells must JSON-serialize structured augment outputs (textDigest / genMetadata Maps),
+     * not Java {@code Map#toString()} ({@code {category=...}}).
+     */
+    @SneakyThrows
+    @Test
+    void csv_structuredAugmentOutputAsJson() {
+        this.setUpWithRules("---\n" +
+            "format: \"CSV\"\n" +
+            "augments:\n" +
+            "- !<textDigest>\n" +
+            "  jsonPaths:\n" +
+            "  - \"$.prompt\"\n" +
+            "transforms:\n" +
+            "- redact: \"prompt\"\n");
+
+        String input = "id,prompt\n" +
+            "1,hello world\n" +
+            "2,classify this text\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/prompts.csv"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        assertEquals("id,prompt,+prompt:textDigest\n"
+            + "1,,\"{\"\"length\"\":11,\"\"word_count\"\":2}\"\n"
+            + "2,,\"{\"\"length\"\":18,\"\"word_count\"\":3}\"\n",
+            output);
+        assertTrue(!output.contains("{length="),
+            "must not use Map.toString(); got:\n" + output);
+    }
+
+    @SneakyThrows
+    @Test
+    void ndjson_augmentColumnPresentWhenFirstRecordHasNoMatch() {
+        this.setUpWithRules("---\n" +
+            "format: \"NDJSON\"\n" +
+            "augments:\n" +
+            "- !<textDigest>\n" +
+            "  jsonPaths:\n" +
+            "  - \"$.prompt\"\n");
+
+        String input = "{\"id\":1}\n"
+            + "{\"id\":2,\"prompt\":\"hello world\"}\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/file.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        String[] lines = output.split("\n", -1);
+        assertTrue(lines[0].contains("\"+prompt:textDigest\":null"), lines[0]);
+        assertTrue(lines[1].contains("\"+prompt:textDigest\""), lines[1]);
+        assertTrue(lines[1].contains("\"word_count\""), lines[1]);
+    }
+
+    @SneakyThrows
+    @Test
+    void csv_augmentColumnPresentWhenFirstRecordHasNoMatch() {
+        Container container = DaggerRecordBulkDataSanitizerImplTest_Container.builder()
+            .forConfigService(new Container.ForConfigService() {
+                @Provides
+                @Singleton
+                public ConfigService configService() {
+                    ConfigService mock = MockModules.provideMock(ConfigService.class);
+                    when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
+                        .thenReturn(Optional.of("---\n" +
+                            "format: \"NDJSON\"\n" +
+                            "augments:\n" +
+                            "- !<textDigest>\n" +
+                            "  jsonPaths:\n" +
+                            "  - \"$.prompt\"\n"));
+                    when(mock.getConfigPropertyAsOptional(
+                        eq(BulkModeConfig.BulkModeConfigProperty.BULK_OUTPUT_FORMAT)))
+                        .thenReturn(Optional.of("CSV"));
+                    return mock;
+                }
+            })
+            .build();
+        container.inject(this);
+        outputStream = new ByteArrayOutputStream();
+        outputStreamSupplier = () -> outputStream;
+
+        String input = "{\"id\":1}\n"
+            + "{\"id\":2,\"prompt\":\"hello world\"}\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/file.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        assertEquals("id,+prompt:textDigest\n"
+            + "1,\n"
+            + "2,\"{\"\"length\"\":11,\"\"word_count\"\":2}\"\n",
+            output);
+    }
 
     @Test
     void noTransforms() throws IOException {

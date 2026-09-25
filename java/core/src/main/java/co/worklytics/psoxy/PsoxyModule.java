@@ -38,20 +38,43 @@ import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import co.worklytics.psoxy.impl.AugmentProcessor;
+import com.avaulta.gateway.rules.augments.ClassifyProcessor;
+import com.avaulta.gateway.rules.augments.GenMetadataBackend;
+import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
+import co.worklytics.psoxy.impl.AugmentProcessor;
+import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
+import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
+import co.worklytics.psoxy.impl.gen.LangChain4jGenMetadataBackend;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.Multibinds;
 import lombok.extern.java.Log;
 
 /**
  * provides implementations for platform-independent dependencies of 'core' module
  */
 @Log
-@Module
+@Module(includes = PsoxyModule.Bindings.class)
 public class PsoxyModule {
+
+
+    /**
+     * SPI set for cloud chat-model providers (empty in cmd-line / unit tests) plus the
+     * {@link GenMetadataBackend} binding. Same nested-{@code Bindings} pattern as
+     * {@link FunctionRuntimeModule}.
+     */
+    @Module
+    public abstract static class Bindings {
+        @Multibinds
+        abstract Set<GenMetadataChatModelProvider> chatModelProviders();
+
+        @Binds
+        abstract GenMetadataBackend genMetadataBackend(LangChain4jGenMetadataBackend impl);
+    }
 
 
     @Provides
@@ -381,5 +404,24 @@ public class PsoxyModule {
     @Provides
     Base64.Encoder provideBase64Encoder() {
         return Base64.getEncoder();
+    }
+
+    @Provides
+    @Singleton
+    static GenMetadataProcessor genMetadataProcessor(GenMetadataBackend genMetadataBackend,
+                                                     ObjectMapper objectMapper,
+                                                     GenMetadataConfig genMetadataConfig,
+                                                     JsonSchemaValidationUtils jsonSchemaValidationUtils) {
+        return new GenMetadataProcessor(genMetadataBackend, objectMapper,
+            genMetadataConfig.getMaxAttempts(), jsonSchemaValidationUtils);
+    }
+
+    @Provides
+    @Singleton
+    static ClassifyProcessor classifyProcessor(GenMetadataBackend genMetadataBackend,
+                                               ObjectMapper objectMapper,
+                                               GenMetadataConfig genMetadataConfig) {
+        return new ClassifyProcessor(genMetadataBackend, objectMapper,
+            genMetadataConfig.getMaxAttempts());
     }
 }

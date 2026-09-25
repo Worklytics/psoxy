@@ -3,6 +3,7 @@
 > **Status:** Design · Draft
 > **Since:** v0.6.x
 > **Relates to:** `Transform`, `Endpoint`, `Rules2`, `JsonSchemaFilter`
+> **See also:** [genMetadata augment (BETA)](alpha-features/gen-metadata-augment.md)
 
 ## Motivation
 
@@ -150,8 +151,10 @@ List<Augment> augments;
 // new class: com.avaulta.gateway.rules.augments.Augment
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
+    @JsonSubTypes.Type(value = Augment.Classify.class, name = "classify"),
     @JsonSubTypes.Type(value = Augment.TextDigest.class, name = "textDigest"),
-    // future: @JsonSubTypes.Type(value = Augment.Classify.class, name = "classify"),
+    @JsonSubTypes.Type(value = Augment.SentenceMetadata.class, name = "sentenceMetadata"),
+    @JsonSubTypes.Type(value = Augment.GenMetadata.class, name = "genMetadata"),
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
@@ -193,7 +196,7 @@ public abstract class Augment {
 
 ### `outputSchema` — Output Validation
 
-Each augment rule carries an optional `outputSchema` property of type `JsonSchemaFilter`. This schema is applied as a **predicate** (not a filter) to the value produced by the augment's `compute()` method:
+Each augment rule carries an optional `outputSchema` property of type `JsonSchema`. This schema is applied as a **predicate** (not a filter) to the value produced by the augment's `compute()` method:
 
 | Outcome | Action |
 |---|---|
