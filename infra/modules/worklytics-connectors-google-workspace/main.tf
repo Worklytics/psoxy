@@ -129,6 +129,30 @@ locals {
 
   todos = [for id, connection in module.google_workspace_connection : local.connector_todos[id]]
 
+  # Individual files, matching the local_file resources below. The joined `todos` list stays
+  # for todos_1. generate-todos.sh can write these files; local_file still does until 0.8.
+  todo_files = merge(
+    {
+      for id, content in local.api_enable_todos :
+      "TODO ${local.api_todo_step} - Enable APIs for ${id}.md" => content
+      if !local.enable_apis
+    },
+    {
+      for id, content in local.sa_creation_todos :
+      "TODO ${local.sa_todo_step} - Create Service Account for ${id}.md" => content
+      if !local.provision_service_accounts
+    },
+    merge(concat(
+      [{}],
+      [for connection in values(module.google_workspace_connection) : connection.todo_files],
+    )...),
+    {
+      for id, content in local.key_creation_todos :
+      "TODO ${local.key_todo_step} - Create Key for ${id}.md" => content
+      if !local.provision_gcp_sa_keys && !local.use_wif
+    },
+  )
+
   # Same value as max(connection.next_todo_step) (each connection is todo_step+1) without iterating
   # the DWD module — that waits on module close (local_file todos) and cycles through psoxy.todo_step
   # when SA keys are destroyed on a WIF cutover.
@@ -158,6 +182,8 @@ locals {
   }
 }
 
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
 resource "local_file" "todo_gcp_api_enablement" {
   for_each = var.todos_as_local_files ? local.connectors_needing_manual_api_enablement : {}
 
@@ -165,6 +191,8 @@ resource "local_file" "todo_gcp_api_enablement" {
   content  = local.api_enable_todos[each.key]
 }
 
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
 resource "local_file" "todo_gcp_sa_creation" {
   for_each = var.todos_as_local_files ? local.connectors_needing_manual_sa_creation : {}
 
@@ -172,6 +200,8 @@ resource "local_file" "todo_gcp_sa_creation" {
   content  = local.sa_creation_todos[each.key]
 }
 
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
 resource "local_file" "todo_gcp_sa_key_creation" {
   for_each = var.todos_as_local_files ? local.service_accounts_user_managed_keys : {}
 

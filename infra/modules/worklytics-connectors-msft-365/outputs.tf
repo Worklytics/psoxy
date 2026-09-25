@@ -8,6 +8,11 @@ output "todos" {
   value       = values(local.msft_365_todos)
 }
 
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. The local_file copies are deprecated and will be removed in 0.8."
+  value       = local.todo_files
+}
+
 
 locals {
   next_todo_steps = tolist([for k, v in module.msft_365_grants : tonumber(v.next_todo_step)])
