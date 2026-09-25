@@ -31,6 +31,12 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 
+/**
+ * Domain-wide delegation using a downloaded GCP service-account JSON key and
+ * {@link GoogleCredentials#createDelegated(String)}.
+ *
+ * @see GcpIamSignJwtAuthStrategy keyless DWD via IAM {@code signJwt}
+ */
 @Log
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceAuthStrategy {

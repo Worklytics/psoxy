@@ -32,10 +32,10 @@ jobs:
           - { name: 'aws-proxy-lambda', test: true }
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 'setup Terraform'
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ matrix.terraform_version }}
 

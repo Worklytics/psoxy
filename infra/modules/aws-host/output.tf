@@ -22,6 +22,11 @@ output "caller_role_arn" {
   value = module.psoxy.api_caller_role_arn
 }
 
+output "webhook_test_caller_role_arn" {
+  description = "ARN of the role granted invoke, KMS, and bucket access for webhook collector tests."
+  value       = module.psoxy.webhook_test_caller_role_arn
+}
+
 output "test_aws_principal_arns" {
   description = "AWS principal ARNs allowed to test the deployment when provision_testing_infra is enabled."
   value       = local.test_aws_principal_arns
