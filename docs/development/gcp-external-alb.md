@@ -102,6 +102,12 @@ Implemented by `infra/modules/gcp-external-api-alb` (invoked from `gcp-host`):
 
 Path routing relies on the proxy stripping the function-name prefix via `K_SERVICE` in `CloudFunctionRequest.getPath()`.
 
+### Custom audiences (required)
+
+Cloud Run IAM accepts a Google identity token only when its audience is the service URL or a [custom audience](https://cloud.google.com/run/docs/configuring/custom-audiences). Callers that reach connectors through the ALB mint the token for the public URL (`https://<host>/<function>`) and may also use `https://<region>-<project>.cloudfunctions.net/<function>`. Those are not the default `*.run.app` audience. Register both on each API connector or Cloud Run rejects the token (HTTP 401/403, sometimes masked as 404 under `ALLOW_INTERNAL_AND_GCLB`).
+
+`google_cloudfunctions2_function.service_config` still does not expose custom audiences (hashicorp/google 7.31 docs). `google_cloud_run_v2_service.custom_audiences` does, but these connectors are Cloud Functions gen2 resources, so the field is not available on the resource we manage. Customer steps and `tools/gcp/configure-custom-audiences.sh` are in [External Application Load Balancer (ALB)](../gcp/guides/external-alb.md#custom-audiences-required).
+
 Useful output from `gcp-host`: `external_api_alb` (object with `host`, `ip_address`, `todo_dns_setup`, `self_signed_ca_cert`; null when unused). The example root keeps that output commented out — uncomment if you need it.
 
 ### IP Allowlist Enforcement
