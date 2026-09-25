@@ -510,6 +510,16 @@ output "proxy_kind" {
   description = "The kind of proxy instance this is."
 }
 
+output "aws_principal_arn_when_testing" {
+  description = "Principal ARN passed to the bulk test tool as -r when it is an IAM role."
+  value       = local.aws_principal_arn_when_testing != "" ? local.aws_principal_arn_when_testing : null
+}
+
+output "aws_write_role_to_assume_when_testing" {
+  description = "Role ARN passed to the bulk test tool as --write-role-to-assume."
+  value       = local.aws_write_role_to_assume_when_testing != "" ? local.aws_write_role_to_assume_when_testing : null
+}
+
 output "test_script" {
   value = try(local_file.test_script[0].filename, null)
 }
