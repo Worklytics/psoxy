@@ -72,26 +72,66 @@ Use the `ID` column as your organization number and `DIRECTORY_CUSTOMER_ID` as y
 
 ### Create the org-policy exception
 
-On the **Psoxy GCP project**, open **IAM & Admin → Organization policies → Domain restricted sharing** (`constraints/iam.allowedPolicyMemberDomains`).
+Google documents two different constraints (and **different value formats** for each). See [Restrict identities with domain-restricted sharing](https://cloud.google.com/resource-manager/docs/organization-policy/restricting-domains).
 
-1. **Override** the policy for this project only (or use a folder exception if your security team prefers).
-2. Under **allowed values**, keep every customer ID and organization principal set you already allow for your own organization.
-3. Add **Worklytics's Google Workspace customer ID** (`C0…` from Worklytics). The service account email domain is **not** a valid allowed value.
-4. Alternatively (or in addition), add Worklytics's organization principal set (Cloud Resource Manager authority):
+On the **Psoxy GCP project**, override the policy for this project only (or use a folder exception if your security team prefers). Keep every allowlist entry you already use for **your** organization, then add Worklytics using the path that matches the constraint your org enforces.
 
-   `is:principalSet://cloudresourcemanager.googleapis.com/organizations/WORKLYTICS_ORG_NUMBER`
+The service account email domain is **not** a valid allowlist value on either constraint.
 
-5. If you enforce the newer managed constraint **`iam.managed.allowedPolicyMembers`** instead, add the Worklytics tenant service account under **`allowedMemberSubjects`** (same email as in the Worklytics portal):
+#### Legacy constraint: `constraints/iam.allowedPolicyMemberDomains`
 
-   `serviceAccount:WORKLYTICS_SA_EMAIL`
+Console: **IAM & Admin → Organization policies → Domain restricted sharing**.
 
-   You can also add Worklytics's organization under **`allowedPrincipalSets`**:
+Google's [legacy constraint instructions](https://cloud.google.com/resource-manager/docs/organization-policy/restricting-domains#use_the_iamallowedpolicymemberdomains_constraint_to_implement_domain-restricted_sharing) allow either a [Google Workspace customer ID](https://cloud.google.com/resource-manager/docs/organization-policy/restricting-domains#retrieving_a_google_workspace_customer_id) or an [organization principal set](https://cloud.google.com/resource-manager/docs/organization-policy/restricting-domains#retrieving_an_organization_principal_set). Add **one or both** for Worklytics:
 
-   `//cloudresourcemanager.googleapis.com/organizations/WORKLYTICS_ORG_NUMBER`
+| What to allow | Console **Custom values** field | `gcloud org-policies` / Terraform `allowedValues` |
+|---|---|---|
+| Worklytics Google Workspace customer ID (`C0…`) | `C0xxxxxxxx` | `is:C0xxxxxxxx` |
+| Worklytics organization principal set | `principalSet://iam.googleapis.com/organizations/WORKLYTICS_ORG_NUMBER` | `is:principalSet://cloudresourcemanager.googleapis.com/organizations/WORKLYTICS_ORG_NUMBER` |
 
-6. Re-run `terraform apply` in your Psoxy Terraform directory. That creates the Cloud Run Invoker binding on each API connector.
+The customer ID is usually simplest. The two principal-set columns look different because Google uses different syntax in the Console versus policy YAML; both come from the same page linked above.
 
-**Bulk connectors** may hit the same error when Terraform grants `roles/storage.objectViewer` on sanitized output buckets to the Worklytics tenant service account. Use the same Worklytics customer ID / organization principal set in the exception.
+Example project override YAML (keep your existing `allowedValues`, then add Worklytics):
+
+```yaml
+name: organizations/YOUR_ORG_ID/policies/iam.allowedPolicyMemberDomains
+spec:
+  rules:
+    - values:
+        allowedValues:
+          - is:YOUR_DIRECTORY_CUSTOMER_ID      # your org — keep
+          - is:C0xxxxxxxx                      # Worklytics customer ID
+          # or, instead of / in addition to the line above:
+          - is:principalSet://cloudresourcemanager.googleapis.com/organizations/WORKLYTICS_ORG_NUMBER
+```
+
+#### Managed constraint: `constraints/iam.managed.allowedPolicyMembers`
+
+If your org enforces the newer managed constraint instead, follow Google's [managed constraint instructions](https://cloud.google.com/resource-manager/docs/organization-policy/restricting-domains#use_the_iammanagedallowedpolicymembers_constraint_to_implement_domain-restricted_sharing). Formats differ from the legacy constraint:
+
+| Parameter | Value for Worklytics |
+|---|---|
+| `allowedMemberSubjects` | `serviceAccount:WORKLYTICS_SA_EMAIL` |
+| `allowedPrincipalSets` (optional alternative) | `//cloudresourcemanager.googleapis.com/organizations/WORKLYTICS_ORG_NUMBER` |
+
+Example:
+
+```yaml
+name: organizations/YOUR_ORG_ID/policies/iam.managed.allowedPolicyMembers
+spec:
+  rules:
+    - enforce: true
+      parameters:
+        allowedMemberSubjects:
+          - serviceAccount:WORKLYTICS_SA_EMAIL
+        allowedPrincipalSets:
+          - //cloudresourcemanager.googleapis.com/organizations/YOUR_ORG_NUMBER   # keep yours
+          - //cloudresourcemanager.googleapis.com/organizations/WORKLYTICS_ORG_NUMBER
+```
+
+After the exception is in place, re-run `terraform apply` in your Psoxy Terraform directory. That creates the Cloud Run Invoker binding on each API connector.
+
+**Bulk connectors** may hit the same error when Terraform grants `roles/storage.objectViewer` on sanitized output buckets to the Worklytics tenant service account. Use the same Worklytics allowlist entry on whichever constraint your org enforces.
 
 ## Error 400: Validation failed for trigger, Permission denied while using the Eventarc Service Agent
 
