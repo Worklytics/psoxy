@@ -325,6 +325,15 @@ public abstract class Transform {
         Boolean includeReversible;
 
         /**
+         * @deprecated use {@link #getIncludeEncrypted()}
+         */
+        @Deprecated
+        @Override
+        public Boolean getIncludeReversible() {
+            return includeReversible;
+        }
+
+        /**
          * {@value PseudonymizationTransform#INCLUDE_ENCRYPTED_DESCRIPTION}
          *
          * Null when omitted. An explicit false is honored and is not treated as unset.
@@ -388,6 +397,15 @@ public abstract class Transform {
         @JsonPropertyDescription("Deprecated. Use includeEncrypted. If true, an encrypted form of the pseudonym is included in the output.")
         @JsonInclude(JsonInclude.Include.NON_NULL)
         Boolean includeReversible;
+
+        /**
+         * @deprecated use {@link #getIncludeEncrypted()}
+         */
+        @Deprecated
+        @Override
+        public Boolean getIncludeReversible() {
+            return includeReversible;
+        }
 
         /**
          * {@value PseudonymizationTransform#INCLUDE_ENCRYPTED_DESCRIPTION}
