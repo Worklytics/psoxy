@@ -94,7 +94,7 @@ The customer ID is usually simplest. The two principal-set columns look differen
 Example project override YAML (keep your existing `allowedValues`, then add Worklytics):
 
 ```yaml
-name: organizations/YOUR_ORG_ID/policies/iam.allowedPolicyMemberDomains
+name: projects/PSOXY_PROJECT_NUMBER/policies/iam.allowedPolicyMemberDomains
 spec:
   rules:
     - values:
