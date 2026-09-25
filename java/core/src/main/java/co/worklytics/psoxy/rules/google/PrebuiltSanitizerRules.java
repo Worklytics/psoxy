@@ -82,7 +82,11 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.FilterTokenByRegex.builder().jsonPath("$.items[*].summaryOverride")
                 .jsonPath("$.items[*].summary")
                 .filter("Transferred").build())
-            .transform(Transform.Pseudonymize.builder().jsonPath("$.items[*].id").includeReversible(true).encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build())
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$.items[*].id")
+                .includeEncrypted(true)
+                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                .build())
             .build())
         .build();
 
@@ -241,13 +245,13 @@ public class PrebuiltSanitizerRules {
             .withTransformByEndpointTemplate(GDIRECTORY_ENDPOINT_TEMPLATE_USER,
                     Transform.Pseudonymize.builder()
                             .jsonPath("$.id")
-                            .includeReversible(true)
+                            .includeEncrypted(true)
                             .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
                             .build())
             .withTransformByEndpointTemplate(GDIRECTORY_ENDPOINT_TEMPLATE_USERS,
                     Transform.Pseudonymize.builder()
                             .jsonPath("$.users[*].id")
-                            .includeReversible(true)
+                            .includeEncrypted(true)
                             .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
                             .build())
             .withTransformByEndpointTemplate(GDIRECTORY_ENDPOINT_TEMPLATE_MEMBERS,

@@ -190,5 +190,5 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.items[*].id"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"

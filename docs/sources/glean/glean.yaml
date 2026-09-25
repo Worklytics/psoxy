@@ -36,7 +36,7 @@ endpoints:
         jsonPaths:
           - "$..email"
           - "$..obfuscatedId"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"

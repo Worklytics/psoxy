@@ -8,6 +8,7 @@ Changes to be including in future/planned release notes will be added here.
 ## Unreleased
 
 ## [0.7.1](https://github.com/Worklytics/psoxy/releases/tag/v0.7.1)
+- Pseudonymize transforms: `includeReversible` is deprecated in favor of `includeEncrypted` (same behavior: return an encrypted form of the pseudonym alongside the hash). Existing rules that set `includeReversible` continue to work, including an explicit `false`. Setting both flags logs a warning and `includeEncrypted` takes precedence. Shipped rules now use `includeEncrypted`.
 - Google Workspace connectors: optional `api_client_auth_method = "workload_identity_federation"` (IAM `signJwt`, no downloaded SA keys). Opt in via `google_workspace_connector_settings` on the Google Workspace connectors module in `main.tf`. New example clones (`./init` / `init-tfvars.sh`) write that setting when Google Workspace sources are enabled; existing `terraform.tfvars` and the module default remain `service_account_key`. `psoxy-constants` now splits provisioner roles/permissions: Key Admin is only for the default `service_account_key` path; Workload Identity Pool Admin is only for AWS WIF. See [Google Workspace](docs/sources/google-workspace/README.md).
 - AWS GWS WIF: prefix the workload identity pool provider id and display names with `environment_id` (project-global IDs; `psoxy-` fallback when environment id is empty).
 - `salesforce`:
