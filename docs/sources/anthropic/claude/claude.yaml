@@ -945,7 +945,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].id"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"

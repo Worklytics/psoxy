@@ -24,7 +24,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].gid"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/api/1.0/workspaces/{workspaceId}/teams"
     allowedQueryParams:

@@ -61,7 +61,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$.data[*].email")
                     .build())
             .transform(Transform.Pseudonymize.builder()
-                    .includeReversible(true)
+                    .includeEncrypted(true)
                     .jsonPath("$.data[*].gid")
                     .build())
             .build();

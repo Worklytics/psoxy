@@ -36,7 +36,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/users/{username}"
     allowedQueryParams:
@@ -72,7 +72,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
     pathParameterSchemas:
       username:
@@ -94,7 +94,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -426,7 +426,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/orgs/{org}/repos"
     allowedQueryParams:
@@ -450,7 +450,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['owner'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/branches"
     allowedQueryParams:
@@ -483,7 +483,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/commits/{ref}"
     allowedQueryParams:
@@ -507,7 +507,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/events"
     allowedQueryParams:
@@ -540,7 +540,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['requested_reviewers[*]','owner','user','closed_by','actor','assignee','creator','merged_by'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -552,7 +552,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/commits/{commitSha}/comments"
     allowedQueryParams:
@@ -580,7 +580,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/comments/{commentId}/reactions"
     allowedQueryParams:
@@ -597,7 +597,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issueNumber}"
     transforms:
@@ -618,7 +618,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user','closed_by','assignee','creator'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -630,7 +630,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues"
     allowedQueryParams:
@@ -661,7 +661,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['owner','user','closed_by','assignee','creator'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -673,7 +673,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issueNumber}/comments"
     allowedQueryParams:
@@ -696,7 +696,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issueNumber}/events"
     allowedQueryParams:
@@ -725,7 +725,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer','review_requester','owner','user','requested_reviewer','closed_by','assigner','actor','assignee','creator'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issueNumber}/timeline"
     allowedQueryParams:
@@ -754,7 +754,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer','review_requester','owner','user','requested_reviewer','closed_by','assigner','actor','assignee','creator'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/{issueNumber}/reactions"
     allowedQueryParams:
@@ -771,7 +771,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/issues/comments/{commentId}/reactions"
     allowedQueryParams:
@@ -788,7 +788,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pullNumber}/reviews"
     allowedQueryParams:
@@ -810,7 +810,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/pulls"
     allowedQueryParams:
@@ -843,7 +843,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -855,7 +855,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..requested_reviewers[*].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -867,7 +867,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pullNumber}/comments"
     allowedQueryParams:
@@ -892,7 +892,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pullNumber}/reviews/{reviewId}/comments"
     allowedQueryParams:
@@ -914,7 +914,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pullNumber}/commits"
     allowedQueryParams:
@@ -938,7 +938,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/repos/{owner}/{repo}/pulls/{pullNumber}"
     transforms:
@@ -962,7 +962,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -974,7 +974,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..requested_reviewers[*].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -986,5 +986,5 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"

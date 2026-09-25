@@ -43,7 +43,7 @@ endpoints:
         jsonPaths:
           - "$.records[*].Id"
         applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -205,7 +205,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.records[*].Id"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"

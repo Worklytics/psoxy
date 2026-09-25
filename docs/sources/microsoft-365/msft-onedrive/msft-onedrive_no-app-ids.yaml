@@ -173,7 +173,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..id"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
       - !<pseudonymizeRegexMatches>
         jsonPaths:

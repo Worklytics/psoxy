@@ -134,7 +134,7 @@ public class PseudonymizerImpl implements Pseudonymizer {
 
         builder.hash(encodedHash);
 
-        if (transformOptions.getIncludeReversible()) {
+        if (transformOptions.includesEncrypted()) {
             builder.reversible(urlSafePseudonymEncoder.encode(
                 Pseudonym.builder()
                     .hash(hashWithDefaultImpl)
