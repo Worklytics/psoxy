@@ -1,5 +1,10 @@
-# When gcp-host provisions an external ALB with a domain, public endpoint_url and TODOs
-# must use that domain (not the Cloud Function *.run.app URI).
+# ALB endpoint URL and ingress behavior in gcp-host:
+# - managed TLS domain (external_api_alb.domain)
+# - self-signed PoC on reserved global IP (external_api_alb = {})
+# - BYO host (api_connector_external_lb_host)
+#
+# The external_api_alb = {} case is the reserved-IP branch: the global address is unknown
+# until apply, so ingress must be decided from plan-time inputs (not from the IP value).
 
 variables {
   gcp_project_id       = "test-project-123456"
@@ -64,7 +69,7 @@ run "alb_domain_used_in_host_todos_and_outputs" {
   }
 }
 
-run "self_signed_alb_enables_ingress_at_plan_time" {
+run "external_api_alb_empty_reserved_ip_plan" {
   command = plan
 
   variables {
@@ -72,17 +77,17 @@ run "self_signed_alb_enables_ingress_at_plan_time" {
   }
 
   assert {
-    error_message = "self-signed PoC ALB should reserve a global address"
+    error_message = "external_api_alb = {} should reserve a global address for self-signed PoC"
     condition     = length(google_compute_global_address.api_connector_alb) == 1
   }
 
   assert {
-    error_message = "self-signed PoC ALB should provision the external_api_alb module"
+    error_message = "external_api_alb = {} should provision the external_api_alb module"
     condition     = length(module.external_api_alb) == 1
   }
 
   assert {
-    error_message = "reserved-IP ALB must set ALLOW_INTERNAL_AND_GCLB at plan time (not wait for the global address value)"
+    error_message = "external_api_alb = {} must set ALLOW_INTERNAL_AND_GCLB at plan time without waiting for the reserved IP"
     condition     = module.api_connector["test-gmail"].function_config.service_config[0].ingress_settings == "ALLOW_INTERNAL_AND_GCLB"
   }
 }
