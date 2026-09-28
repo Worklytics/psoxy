@@ -10,11 +10,11 @@ As Worklytics tenants run inside GCP, they are implicitly authenticated by GCP. 
 
 ## Authorization
 
-Invocations of your proxy instances are authorized by the IAM policies you define in GCP. For API connectors, you grant the Cloud Function Invoker role to your Worklytics tenant's GCP service account on the Cloud Function for your instance.
+Invocations of your proxy instances are authorized by the IAM policies you define in GCP. For API connectors, the shipped modules grant `roles/run.invoker` to each email in `worklytics_sa_emails` on the Cloud Function / Cloud Run service for your instance. That applies for direct `*.run.app` invocation and when API connectors are fronted by an [external Application Load Balancer (ALB)](../development/gcp-external-alb.md) (**beta**); the ALB forwards the caller's identity token and Cloud Run still enforces `roles/run.invoker`.
 
 For the bulk data case, you grant the Storage Object Viewer role to your Worklytics tenant's GCP service account on the sanitized output bucket for your connector.
 
-You can obtain the identity of your Worklytics tenant's GCP service account from the Worklytics portal.
+You can obtain the identity of your Worklytics tenant's GCP service account from the Worklytics portal. If your organization enforces domain-restricted sharing, you may need a project-level exception before Terraform can create cross-organization IAM bindings — see [Error 400: permitted customer](./troubleshooting.md#error-400--one-or-more-users-named-in-policy-do-not-belong-to-a-permitted-customer).
 
 ## Client IP allowlisting
 

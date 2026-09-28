@@ -40,6 +40,12 @@ Leave `external_api_alb = null` (default) to expose API connectors via their dir
 
 Optionally set `allowed_data_access_ip_blocks` to Worklytics egress IPs (same list for Cloud Armor and the proxy). Leave `null` for open ingress through the ALB (PoC / rely on IAM + app auth). An empty list is invalid.
 
+### Worklytics tenant IAM (`roles/run.invoker`)
+
+An external ALB does not replace Cloud Run authorization. The load balancer forwards each request (including the `Authorization` header) to Cloud Run; Cloud Run still requires `roles/run.invoker` for the caller's identity. Terraform grants that role to each email in `worklytics_sa_emails` on each API connector, same as the direct `*.run.app` path. Optional Cloud Armor IP allowlisting is orthogonal — it restricts who can reach the ALB, not who Cloud Run accepts.
+
+If your organization enforces domain-restricted sharing, `terraform apply` may fail when creating that binding until you add a project-level exception for Worklytics's Google Workspace customer ID or organization principal set. See [GCP troubleshooting — permitted customer](../gcp/troubleshooting.md#error-400--one-or-more-users-named-in-policy-do-not-belong-to-a-permitted-customer).
+
 ### IAM permissions (Terraform provisioner)
 
 These apply when **`external_api_alb` is set** and Terraform provisions the ALB (not when you use `api_connector_external_lb_host` for a customer-owned load balancer).
