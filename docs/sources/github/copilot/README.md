@@ -1,5 +1,7 @@
 # GitHub Copilot
 
+**Connector ID:** `github-copilot`
+
 Availability: **ALPHA**
 
 ## Authentication workflow
@@ -12,6 +14,12 @@ The connector uses a GitHub App to authenticate and access the data. You must pr
 - Example Data:
   - [original/user.json](example-api-responses/original/user.json) |
     [sanitized/user.json](example-api-responses/sanitized/user.json)
+
+Example API call path parameters (uppercase placeholders in generated test calls):
+
+- `{ORG}`: `github_organization`.
+- `{TEAM_SLUG}`: a team slug from `GET /orgs/{ORG}/teams`.
+- `{USERNAME}`: **must** be a reversible-pseudonym token (`p~` + ≥43 base64url chars) of a `login` from `GET /orgs/{ORG}/members`. GraphQL is `POST /graphql`.
 
 ## GitHub Copilot: Steps to connect
 

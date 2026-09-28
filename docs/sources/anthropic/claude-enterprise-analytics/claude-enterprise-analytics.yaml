@@ -26,6 +26,7 @@ endpoints:
     allowedQueryParams:
       - "starting_at"
       - "ending_at"
+      - "bucket_width"
       - "page"
       - "limit"
       - "products[]"
@@ -37,6 +38,11 @@ endpoints:
       - "group_by[]"
       - "order"
       - "order_by"
+      - "claude_tag_categories[]"
+      - "claude_tag_user_ids[]"
+      - "rbac_group_ids[]"
+      - "slack_channel_ids[]"
+      - "exclude_deleted_users"
     allowedRequestHeaders:
       - "anthropic-version"
       - "content-type"
@@ -44,6 +50,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].actor['user_id','email']"
+          - "$.data[*]['claude_tag_user_id']"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -65,6 +72,7 @@ endpoints:
     allowedQueryParams:
       - "starting_at"
       - "ending_at"
+      - "bucket_width"
       - "page"
       - "limit"
       - "products[]"
@@ -76,6 +84,11 @@ endpoints:
       - "group_by[]"
       - "order"
       - "order_by"
+      - "claude_tag_categories[]"
+      - "claude_tag_user_ids[]"
+      - "rbac_group_ids[]"
+      - "slack_channel_ids[]"
+      - "exclude_deleted_users"
     allowedRequestHeaders:
       - "anthropic-version"
       - "content-type"
@@ -83,6 +96,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].actor['user_id','email']"
+          - "$.data[*]['claude_tag_user_id']"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -504,12 +518,19 @@ definitions:
         $ref: "#/definitions/AnalyticsActor"
       amount:
         type: "string"
+      claude_tag_category:
+        type: "string"
+      claude_tag_user_id:
+        type: "string"
       context_window:
         type: "integer"
       cost_type:
         type: "string"
       currency:
         type: "string"
+      ending_at:
+        type: "string"
+        format: "date-time"
       inference_geo:
         type: "string"
       list_amount:
@@ -518,10 +539,17 @@ definitions:
         type: "string"
       product:
         type: "string"
+      rbac_group_id:
+        type: "string"
       requests:
         type: "integer"
+      slack_channel_id:
+        type: "string"
       speed:
         type: "string"
+      starting_at:
+        type: "string"
+        format: "date-time"
       token_type:
         type: "string"
   UserUsageEntry:
@@ -533,8 +561,15 @@ definitions:
         $ref: "#/definitions/CacheCreation"
       cache_read_input_tokens:
         type: "integer"
+      claude_tag_category:
+        type: "string"
+      claude_tag_user_id:
+        type: "string"
       context_window:
         type: "integer"
+      ending_at:
+        type: "string"
+        format: "date-time"
       inference_geo:
         type: "string"
       model:
@@ -543,12 +578,19 @@ definitions:
         type: "integer"
       product:
         type: "string"
+      rbac_group_id:
+        type: "string"
       requests:
         type: "integer"
       server_tool_use:
         $ref: "#/definitions/ServerToolUse"
+      slack_channel_id:
+        type: "string"
       speed:
         type: "string"
+      starting_at:
+        type: "string"
+        format: "date-time"
       total_tokens:
         type: "integer"
       uncached_input_tokens:

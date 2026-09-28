@@ -8,6 +8,28 @@ locals {
     coalesce(var.google_workspace_connector_settings["example_admin"]),
     coalesce(var.google_workspace_example_admin, local.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_ADMIN@YOUR_COMPANY.COM")
   )
+
+  # How the proxy authenticates as each GWS API client (the DWD-enabled GCP SA).
+  # service_account_key (default): downloaded JSON key; Java gcp_service_account_key.
+  # workload_identity_federation: IAM signJwt (no user-managed key); Java gcp_iam_sign_jwt.
+  gws_api_client_auth_method = try(var.google_workspace_connector_settings["api_client_auth_method"], "service_account_key")
+
+  # tflint-ignore: terraform_unused_declarations
+  validate_gws_api_client_auth_method         = contains(["service_account_key", "workload_identity_federation"], local.gws_api_client_auth_method)
+  validate_gws_api_client_auth_method_message = "google_workspace_connector_settings.api_client_auth_method must be service_account_key or workload_identity_federation."
+  validate_gws_api_client_auth_method_check = regex(
+    "^${local.validate_gws_api_client_auth_method_message}$",
+    local.validate_gws_api_client_auth_method ? local.validate_gws_api_client_auth_method_message : ""
+  )
+
+  # referenced so the regex validation above is always evaluated
+  gws_source_auth_strategy = (
+    local.validate_gws_api_client_auth_method_check == local.validate_gws_api_client_auth_method_message &&
+    local.gws_api_client_auth_method == "workload_identity_federation"
+    ? "gcp_iam_sign_jwt"
+    : "gcp_service_account_key"
+  )
+
   # oauth_scopes_needed below are documented (short form, without the
   # https://www.googleapis.com/auth/ prefix) in docs/sources/google-workspace/.
   google_workspace_sources = {
@@ -20,18 +42,20 @@ locals {
       apis_consumed : [
         "calendar-json.googleapis.com"
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "www.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/calendar.readonly"
       ]
       environment_variables : {}
       enable_side_output : false
+      # YAML `{accountId}` is `primary` (calendar) or `me` (settings / calendarList) here.
       example_api_calls : [
         "/calendar/v3/calendars/primary",
         "/calendar/v3/users/me/settings",
         "/calendar/v3/users/me/calendarList",
         "/calendar/v3/calendars/primary/events?maxResults=10",
+        # `{EVENT_ID}` is a Calendar event id from GET .../calendars/primary/events.
         "/calendar/v3/calendars/primary/events/{EVENT_ID}"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
@@ -56,18 +80,20 @@ locals {
         "https://www.googleapis.com/auth/admin.directory.group.readonly",
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "admin.googleapis.com"
       environment_variables : {}
       enable_side_output : false
       example_api_calls : [
         "/admin/directory/v1/users?customer=my_customer&maxResults=10",
+        # `{USER_ID}` is a Directory user email or user id from GET .../users (YAML `{accountId}`). `{GROUP_ID}` is a group email or group id from GET .../groups. `{ORG_UNIT_PATH}` is an org-unit path from GET .../orgunits (for example `Engineering`). YAML `{customerId}` is `my_customer` here.
         "/admin/directory/v1/users/{USER_ID}",
         "/admin/directory/v1/groups?customer=my_customer&maxResults=10",
         "/admin/directory/v1/groups/{GROUP_ID}",
         "/admin/directory/v1/groups/{GROUP_ID}/members?maxResults=10",
         "/admin/directory/v1/customer/my_customer/domains",
         "/admin/directory/v1/customer/my_customer/orgunits?maxResults=10",
+        "/admin/directory/v1/customer/my_customer/orgunits/{ORG_UNIT_PATH}",
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
@@ -80,7 +106,7 @@ locals {
       apis_consumed : [
         "drive.googleapis.com"
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "www.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/drive.readonly"
@@ -90,6 +116,7 @@ locals {
       example_api_calls : [
         "/drive/v2/files",
         "/drive/v3/files",
+        # `{FILE_ID}` is a Drive file id from GET /drive/v3/files for the impersonated user.
         "/drive/v3/files/{FILE_ID}",
         "/drive/v3/files/{FILE_ID}/permissions",
         "/drive/v3/files/{FILE_ID}/revisions"
@@ -105,7 +132,7 @@ locals {
       apis_consumed : [
         "gmail.googleapis.com"
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "www.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/gmail.metadata"
@@ -114,6 +141,7 @@ locals {
       enable_side_output : false
       example_api_calls : [
         "/gmail/v1/users/me/messages?maxResults=5&labelIds=SENT",
+        # YAML `{mailboxId}` is `me` here (the impersonated user). `{MESSAGE_ID}` is a Gmail message id from GET .../messages.
         "/gmail/v1/users/me/messages/{MESSAGE_ID}?format=metadata"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
@@ -127,7 +155,7 @@ locals {
       apis_consumed : [
         "admin.googleapis.com"
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "admin.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
@@ -147,7 +175,7 @@ locals {
       apis_consumed : [
         "admin.googleapis.com"
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "admin.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
@@ -168,7 +196,7 @@ locals {
       apis_consumed : [
         "admin.googleapis.com"
       ]
-      source_auth_strategy : "gcp_service_account_key"
+      source_auth_strategy : local.gws_source_auth_strategy
       target_host : "admin.googleapis.com"
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"

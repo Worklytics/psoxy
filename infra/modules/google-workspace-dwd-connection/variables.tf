@@ -59,3 +59,9 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 1
 }
+
+variable "api_client_auth_method" {
+  type        = string
+  description = "How the proxy authenticates as this DWD service account: service_account_key (downloaded JSON key) or workload_identity_federation (IAM signJwt; no user-managed key)."
+  default     = "service_account_key"
+}

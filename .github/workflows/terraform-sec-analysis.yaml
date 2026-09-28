@@ -19,11 +19,11 @@ jobs:
 
     steps:
       - name: Clone repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
         # see: https://github.com/marketplace/actions/aqua-security-trivy#inputs
       - name: trivy-all
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-ref: infra/${{ inputs.example_path }}
           scan-type: 'config'
@@ -33,7 +33,7 @@ jobs:
           tf-vars: .github/workflows/tfvars-examples/${{ inputs.example_path }}.tfvars
       - name: trivy-severe
         id: trivy-severe
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-ref: infra/${{ inputs.example_path }}
           scan-type: 'config'
