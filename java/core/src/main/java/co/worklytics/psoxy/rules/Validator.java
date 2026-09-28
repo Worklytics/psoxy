@@ -119,6 +119,10 @@ public class Validator {
                 throw new Error("cannot serialize output of Pseudonymize to URL_SAFE_TOKEN if including original");
             }
         }
+        if (transform instanceof Transform.PseudonymizationTransform) {
+            ((Transform.PseudonymizationTransform) transform).encryptionFlagsConflict()
+                .ifPresent(log::warning);
+        }
     }
 
 }
