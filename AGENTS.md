@@ -32,9 +32,9 @@ fi
 printf "${SUCCESS}Operation completed successfully.${NC}\n"
 ```
 
-## Release QA
+## Release cut / QA / publish
 
-Before merging an `rc-vX.Y.Z` branch to `main`, follow [tools/release/release-qa.md](tools/release/release-qa.md). The orchestrator is `./tools/release/run-release-qa.sh vX.Y.Z`.
+Release orchestration (cut RC, QA examples-dev, rc→main, tag/publish) lives in the internal `Worklytics/proxy-dev` repo. GitHub Actions in this repo still publish Maven packages and deployment bundles on `v*` tags and `rc-*` branches; those workflows call the remaining scripts under `tools/release/`.
 
 ## Testing Conventions
 
