@@ -189,10 +189,13 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
                 log.info("genMetadata LLM inference completed in " + inferenceMs + "ms"
                     + " modelId=" + config.getModelId());
             }
-            if (response == null || response.aiMessage() == null) {
+            if (response == null) {
                 return null;
             }
             recordTokenUsage(response);
+            if (response.aiMessage() == null) {
+                return null;
+            }
             String text = response.aiMessage().text();
             if (text != null && !text.isBlank()) {
                 log.info("genMetadata model response received"
