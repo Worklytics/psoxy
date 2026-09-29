@@ -7,11 +7,14 @@ import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Builds chat messages for genMetadata / classify cloud inference (Bedrock / Vertex).
@@ -23,13 +26,13 @@ class GenMetadataPromptBuilder {
     final ObjectMapper objectMapper;
 
     static final String SYSTEM_CLASSIFY =
-        "You are a data-processing component in a privacy proxy. "
+        "You are a processing component in a data sanitization proxy. "
             + "Respond with exactly one allowed class. "
             + "The class name must appear in your reply as an exact substring. "
             + "No markdown fences.";
 
     static final String SYSTEM_COMPUTE =
-        "You are a data-processing component in a privacy proxy. "
+        "You are a processing component in a data sanitization proxy. "
             + "Respond with exactly one JSON object that is an INSTANCE of the task result, "
             + "not a JSON Schema definition. "
             + "Never include schema keywords such as type, properties, required, or enum. "
@@ -51,16 +54,11 @@ class GenMetadataPromptBuilder {
         );
     }
 
-    String classifyUserContent(String taskPrompt, List<String> classes, String inputData) {
-        StringBuilder labels = new StringBuilder();
-        if (classes != null) {
-            for (String value : classes) {
-                if (StringUtils.isBlank(value)) {
-                    continue;
-                }
-                labels.append(value).append('\n');
-            }
-        }
+    String classifyUserContent(String taskPrompt, @NonNull List<String> classes, String inputData) {
+        String labels = classes.stream()
+            .map(StringUtils::trimToNull)
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining("\n"));
         return """
             Task: %s
 

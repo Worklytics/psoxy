@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,11 +31,8 @@ class GenMetadataProcessorTest {
         JsonSchema schema = categorySchema();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            (taskPrompt, outputSchema, inputData) -> {
-                TreeMap<String, Object> result = new TreeMap<>();
-                result.put("category", "Excluded");
-                return result;
-            },
+            (taskPrompt, outputSchema, inputData, options) ->
+                GenMetadataInferenceResult.of("{\"category\":\"Excluded\"}"),
             OBJECT_MAPPER,
             2,
             new JsonSchemaValidationUtils());
@@ -53,13 +49,13 @@ class GenMetadataProcessorTest {
         AtomicInteger calls = new AtomicInteger();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            (taskPrompt, outputSchema, inputData) -> {
+            (taskPrompt, outputSchema, inputData, options) -> {
                 if (calls.incrementAndGet() == 1) {
-                    return """
+                    return GenMetadataInferenceResult.of("""
                         {"type":"object","properties":{"category":{"type":"string"}},"required":["category"]}
-                        """;
+                        """);
                 }
-                return "{\"category\":\"Excluded\"}";
+                return GenMetadataInferenceResult.of("{\"category\":\"Excluded\"}");
             },
             OBJECT_MAPPER,
             2,
@@ -77,9 +73,9 @@ class GenMetadataProcessorTest {
         JsonSchema schema = categorySchema();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            (taskPrompt, outputSchema, inputData) -> """
+            (taskPrompt, outputSchema, inputData, options) -> GenMetadataInferenceResult.of("""
                 {"type":"object","properties":{"category":{"type":"string"}},"required":["category"]}
-                """,
+                """),
             OBJECT_MAPPER,
             1,
             new JsonSchemaValidationUtils());
@@ -173,9 +169,9 @@ class GenMetadataProcessorTest {
         JsonSchema schema = categorySchema();
 
         GenMetadataProcessor processor = new GenMetadataProcessor(
-            (taskPrompt, outputSchema, inputData) -> {
+            (taskPrompt, outputSchema, inputData, options) -> {
                 assertTrue(inputData.contains("\"body\""));
-                return "{\"category\":\"Excluded\"}";
+                return GenMetadataInferenceResult.of("{\"category\":\"Excluded\"}");
             },
             OBJECT_MAPPER,
             2,

@@ -40,14 +40,15 @@ public class ClassifyProcessor {
             throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
                 "classify input empty or not serializable");
         }
-        int maxOutputTokens = augment.getMaxOutputTokens();
-        int maxInputTokens = augment.getMaxInputTokens();
+        GenMetadataInferenceOptions options = GenMetadataInferenceOptions.builder()
+            .maxOutputTokens(augment.getMaxOutputTokens() + Augment.Classify.MAX_OUTPUT_TOKEN_SLACK)
+            .maxInputTokens(augment.getMaxInputTokens())
+            .build();
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             if (attempt > 1) {
                 log.info("classify inference retry attempt " + attempt + " of " + maxAttempts);
             }
-            String label = inferOnce(augment.getPrompt(), augment.getClasses(), inputJson,
-                maxOutputTokens, maxInputTokens);
+            String label = inferOnce(augment.getPrompt(), augment.getClasses(), inputJson, options);
             if (label != null) {
                 return label;
             }
@@ -58,18 +59,18 @@ public class ClassifyProcessor {
     }
 
     private String inferOnce(String taskPrompt, List<String> classes, String inputJson,
-                             int maxOutputTokens, int maxInputTokens) {
+                             GenMetadataInferenceOptions options) {
         Instant startedAt = Instant.now();
         long startedNanos = System.nanoTime();
         log.info("classify augment inference call started at " + startedAt);
-        Object raw;
+        GenMetadataInferenceResult result;
         try {
-            raw = backend.classify(taskPrompt, classes, inputJson, maxOutputTokens, maxInputTokens);
+            result = backend.classify(taskPrompt, classes, inputJson, options);
         } finally {
             long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedNanos);
             log.info("classify augment inference call completed in " + elapsedMs + "ms");
         }
-        String label = findClass(raw, classes);
+        String label = findClass(result == null ? null : result.getText(), classes);
         if (label == null) {
             log.warning("classify backend response did not contain exactly one allowed class");
         }

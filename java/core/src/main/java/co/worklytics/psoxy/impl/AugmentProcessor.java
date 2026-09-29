@@ -20,12 +20,12 @@ import lombok.extern.java.Log;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
+import java.util.stream.StreamSupport;
 
 /**
  * Applies augments to a JSON document, adding synthetic properties named
@@ -62,6 +62,13 @@ public class AugmentProcessor {
      * Yields names like {@code +self:genMetadata}.
      */
     public static final String OBJECT_LEVEL_SOURCE_PROPERTY = "self";
+
+    static final String JSON_PATH_ROOT = "$";
+    static final String JSON_PATH_ROOT_WILDCARD = "$[*]";
+    static final String JSON_PATH_DOT_PREFIX = "$.";
+    static final String JSON_PATH_ARRAY_WILDCARD_SUFFIX = "[*]";
+    static final String JSON_PATH_BRACKET_PREFIX = "$['";
+    static final String JSON_PATH_BRACKET_SUFFIX = "']";
 
     /** Default config: reads return matched values (used for parent/source lookups). */
     final Configuration jsonConfiguration;
@@ -111,29 +118,25 @@ public class AugmentProcessor {
      * @param document the Jayway JSONPath document (will be mutated in place)
      * @return warning header codes to add to the response (may be empty)
      */
-    public List<String> applyAugments(List<Augment> augments, Object document) {
-        if (augments == null || augments.isEmpty()) {
+    public List<String> applyAugments(@NonNull List<Augment> augments, Object document) {
+        if (augments.isEmpty()) {
             return List.of();
-        }
-
-        List<String> warnings = new ArrayList<>();
-
-        if (hasConflictingProperties(document)) {
+        } else if (hasConflictingProperties(document)) {
             log.warning("Response contains properties starting with '" + AUGMENT_PROPERTY_PREFIX
                 + "'; skipping all augment processing to avoid conflicts.");
-            warnings.add(Warning.AUGMENT_CONFLICT_SKIPPED.asHttpHeaderCode());
+            return List.of(Warning.AUGMENT_CONFLICT_SKIPPED.asHttpHeaderCode());
+        } else {
+            List<String> warnings = new ArrayList<>();
+            for (Augment augment : augments) {
+                try {
+                    warnings.addAll(applyAugment(augment, document));
+                } catch (Exception e) {
+                    log.log(Level.WARNING,
+                        "Augment '" + augment.getFunctionName() + "' failed; skipping.", e);
+                }
+            }
             return List.copyOf(warnings);
         }
-
-        for (Augment augment : augments) {
-            try {
-                warnings.addAll(applyAugment(augment, document));
-            } catch (Exception e) {
-                log.log(Level.WARNING,
-                    "Augment '" + augment.getFunctionName() + "' failed; skipping.", e);
-            }
-        }
-        return List.copyOf(warnings);
     }
 
     private List<String> applyAugment(Augment augment, Object document) {
@@ -388,38 +391,25 @@ public class AugmentProcessor {
      * <p>Used so CSV/Parquet writers always emit these columns, with an empty cell when a
      * record has no jsonPath match.
      */
-    public List<String> topLevelAugmentPropertyNames(Iterable<Augment> augments) {
-        if (augments == null) {
-            return List.of();
-        }
-        Set<String> names = new LinkedHashSet<>();
-        for (Augment augment : augments) {
-            if (augment == null || augment.getJsonPaths() == null) {
-                continue;
-            }
-            String functionName = augment.getFunctionName();
-            for (String jsonPath : augment.getJsonPaths()) {
-                String column = topLevelAugmentPropertyName(jsonPath, functionName);
-                if (column != null) {
-                    names.add(column);
-                }
-            }
-        }
-        return List.copyOf(names);
+    public List<String> topLevelAugmentPropertyNames(@NonNull Iterable<Augment> augments) {
+        return StreamSupport.stream(augments.spliterator(), false)
+            .filter(Objects::nonNull)
+            .flatMap(augment -> Objects.requireNonNullElse(augment.getJsonPaths(), List.<String>of())
+                .stream()
+                .map(jsonPath -> topLevelAugmentPropertyName(jsonPath, augment.getFunctionName()))
+                .filter(Objects::nonNull))
+            .distinct()
+            .toList();
     }
 
     /**
      * Insert missing top-level augment columns as {@code null} so tabular writers see a stable
      * schema even when this record had no jsonPath match.
      */
-    public void ensureTopLevelAugmentProperties(Map<String, Object> record,
-                                                Iterable<Augment> augments) {
-        if (record == null) {
-            return;
-        }
-        for (String name : topLevelAugmentPropertyNames(augments)) {
-            record.putIfAbsent(name, null);
-        }
+    public void ensureTopLevelAugmentProperties(@NonNull Map<String, Object> record,
+                                                @NonNull Iterable<Augment> augments) {
+        topLevelAugmentPropertyNames(augments)
+            .forEach(name -> record.putIfAbsent(name, null));
     }
 
     static String topLevelAugmentPropertyName(String jsonPath, String functionName) {
@@ -430,13 +420,13 @@ public class AugmentProcessor {
         if (path.isEmpty()) {
             return null;
         }
-        if ("$".equals(path) || "$[*]".equals(path)) {
+        if (JSON_PATH_ROOT.equals(path) || JSON_PATH_ROOT_WILDCARD.equals(path)) {
             return buildAugmentPropertyName(OBJECT_LEVEL_SOURCE_PROPERTY, functionName);
         }
-        if (path.startsWith("$.")) {
-            String rest = path.substring(2);
-            if (rest.endsWith("[*]")) {
-                rest = rest.substring(0, rest.length() - 3);
+        if (path.startsWith(JSON_PATH_DOT_PREFIX)) {
+            String rest = path.substring(JSON_PATH_DOT_PREFIX.length());
+            if (rest.endsWith(JSON_PATH_ARRAY_WILDCARD_SUFFIX)) {
+                rest = rest.substring(0, rest.length() - JSON_PATH_ARRAY_WILDCARD_SUFFIX.length());
             }
             if (!rest.isEmpty() && rest.indexOf('.') < 0 && rest.indexOf('[') < 0
                 && rest.indexOf(']') < 0) {
@@ -444,8 +434,10 @@ public class AugmentProcessor {
             }
             return null;
         }
-        if (path.startsWith("$['") && path.endsWith("']") && path.length() > 5) {
-            String rest = path.substring(3, path.length() - 2);
+        if (path.startsWith(JSON_PATH_BRACKET_PREFIX) && path.endsWith(JSON_PATH_BRACKET_SUFFIX)
+            && path.length() > JSON_PATH_BRACKET_PREFIX.length() + JSON_PATH_BRACKET_SUFFIX.length()) {
+            String rest = path.substring(JSON_PATH_BRACKET_PREFIX.length(),
+                path.length() - JSON_PATH_BRACKET_SUFFIX.length());
             if (!rest.isEmpty() && rest.indexOf('\'') < 0) {
                 return buildAugmentPropertyName(rest, functionName);
             }

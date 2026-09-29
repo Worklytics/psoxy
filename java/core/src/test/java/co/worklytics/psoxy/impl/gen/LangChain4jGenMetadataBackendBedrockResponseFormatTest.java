@@ -2,6 +2,8 @@ package co.worklytics.psoxy.impl.gen;
 
 import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.augments.Augment;
+import com.avaulta.gateway.rules.augments.GenMetadataInferenceOptions;
+import com.avaulta.gateway.rules.augments.GenMetadataInferenceResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatModel;
@@ -10,6 +12,7 @@ import dev.langchain4j.model.chat.response.ChatResponse;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
+import java.time.Clock;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -49,11 +52,12 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
 
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, om, new GenMetadataPromptBudget(),
+            config, new GenMetadataPromptBudget(),
             new GenMetadataChatModelFactory(Set.of(provider)),
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
-            new GenMetadataResponseFormats());
+            new GenMetadataResponseFormats(),
+            Clock.systemUTC());
 
         JsonSchema schema = JsonSchema.builder()
             .type("object")
@@ -65,8 +69,8 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
                     .build()))
             .build();
 
-        Object result = backend.generate("Classify", schema, "hello");
-        assertEquals("{\"category\":\"Excluded\"}", result);
+        GenMetadataInferenceResult result = backend.generate("Classify", schema, "hello");
+        assertEquals("{\"category\":\"Excluded\"}", result.getText());
         assertNotNull(seen.get());
         assertNull(seen.get().responseFormat(),
             "Bedrock/Nova must not send ResponseFormat (maps to unsupported outputConfig)");
@@ -99,17 +103,20 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
         GenMetadataConfig config = BedrockGenMetadataConfig.of(BedrockGenMetadataConfig.DEFAULT_MODEL, 30);
         ObjectMapper om2 = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, om2, new GenMetadataPromptBudget(),
+            config, new GenMetadataPromptBudget(),
             new GenMetadataChatModelFactory(Set.of(provider)),
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om2),
-            new GenMetadataResponseFormats());
+            new GenMetadataResponseFormats(),
+            Clock.systemUTC());
         JsonSchema schema = JsonSchema.builder().type("string").build();
 
-        backend.generate("Classify", schema, "hello", 64);
+        backend.generate("Classify", schema, "hello",
+            GenMetadataInferenceOptions.builder().maxOutputTokens(64).build());
         assertEquals(64, seen.get().maxOutputTokens());
 
-        backend.generate("Classify", schema, "hello", 9999);
+        backend.generate("Classify", schema, "hello",
+            GenMetadataInferenceOptions.builder().maxOutputTokens(9999).build());
         assertEquals(9999, seen.get().maxOutputTokens());
     }
 
@@ -139,16 +146,19 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
         GenMetadataConfig config = BedrockGenMetadataConfig.of(BedrockGenMetadataConfig.DEFAULT_MODEL, 30);
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, om, new GenMetadataPromptBudget(),
+            config, new GenMetadataPromptBudget(),
             new GenMetadataChatModelFactory(Set.of(provider)),
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
-            new GenMetadataResponseFormats());
+            new GenMetadataResponseFormats(),
+            Clock.systemUTC());
 
         List<String> classes = List.of("Feature", "Uncategorized", "Bug");
-        Object result = backend.classify("Classify", classes, "hello",
-            "Uncategorized".length(), null);
-        assertEquals("Feature", result);
+        GenMetadataInferenceResult result = backend.classify("Classify", classes, "hello",
+            GenMetadataInferenceOptions.builder()
+                .maxOutputTokens("Uncategorized".length())
+                .build());
+        assertEquals("Feature", result.getText());
         assertNull(seen.get().responseFormat());
         assertEquals("Uncategorized".length(), seen.get().maxOutputTokens());
     }

@@ -61,7 +61,16 @@ The diagram below provides an architecture overview of the 'API' and 'Bulk' mode
 aws sts assume-role --role-arn arn:aws:iam::123456789012:role/PsoxyProvisioningRole --role-session-name tf_session
 ```
 
-    If not, use `aws sts get-caller-identity` to confirm how your CLI is authenticated.
+   If not, use `aws sts get-caller-identity` to confirm how your CLI is authenticated.
+
+## genMetadata via Bedrock
+
+If any connector sets `enable_gen_metadata = true`:
+
+1. Confirm Bedrock is usable in this AWS account and region. The default model id is `us.amazon.nova-2-lite-v1:0` (US cross-region inference profile). Use a CRIS id (`us.amazon.nova-2-lite-v1:0`), not the bare foundation-model id (`amazon.nova-2-lite-v1:0`).
+2. Prefer a **US** Lambda region when using that default `us.*` profile. To use another geography, set `GEN_METADATA_MODEL` (for example `eu.amazon.nova-2-lite-v1:0`).
+
+See [genMetadata](../development/alpha-features/gen-metadata-augment.md). If invokes fail with `AccessDeniedException` / `not authorized to perform bedrock:InvokeModel`, check [troubleshooting](troubleshooting.md#bedrock-genmetadata-access-denied).
 
 ## Provisioning Environment
 

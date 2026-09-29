@@ -1,6 +1,7 @@
 package com.avaulta.gateway.rules.augments;
 
 import com.avaulta.gateway.rules.JsonSchema;
+import lombok.NonNull;
 
 import java.util.List;
 
@@ -17,36 +18,31 @@ public interface GenMetadataBackend {
      * @param taskPrompt augment rule task prompt
      * @param outputSchema required output schema predicate
      * @param inputData JSON-serialized source value
-     * @return parsed JSON object (typically a Map), or raw JSON string from the model
+     * @return model text, or {@code null} if inference produced nothing
      */
-    Object generate(String taskPrompt, JsonSchema outputSchema, String inputData);
+    default GenMetadataInferenceResult generate(String taskPrompt, JsonSchema outputSchema,
+                                                String inputData) {
+        return generate(taskPrompt, outputSchema, inputData, GenMetadataInferenceOptions.defaults());
+    }
 
     /**
-     * Same as {@link #generate(String, JsonSchema, String)} with optional per-call generation
-     * and dynamic-input token caps. {@code null} means use
-     * {@link Augment.GenMetadata#DEFAULT_MAX_OUTPUT_TOKENS} /
-     * {@link Augment.GenMetadata#DEFAULT_MAX_INPUT_TOKENS}.
+     * Same as {@link #generate(String, JsonSchema, String)} with per-call token caps in
+     * {@code options}.
      */
-    default Object generate(String taskPrompt, JsonSchema outputSchema, String inputData,
-                            Integer maxOutputTokens) {
-        return generate(taskPrompt, outputSchema, inputData, maxOutputTokens, null);
-    }
-
-    default Object generate(String taskPrompt, JsonSchema outputSchema, String inputData,
-                            Integer maxOutputTokens, Integer maxInputTokens) {
-        return generate(taskPrompt, outputSchema, inputData);
-    }
+    GenMetadataInferenceResult generate(String taskPrompt, JsonSchema outputSchema, String inputData,
+                                        GenMetadataInferenceOptions options);
 
     /**
      * Closed-set classify. Default delegates to {@link #generate} with a string-enum schema so
      * test doubles that only implement {@link #generate} still work.
      */
-    default Object classify(String taskPrompt, List<String> classes, String inputData,
-                            int maxOutputTokens, Integer maxInputTokens) {
+    default GenMetadataInferenceResult classify(String taskPrompt, @NonNull List<String> classes,
+                                                String inputData,
+                                                GenMetadataInferenceOptions options) {
         JsonSchema schema = JsonSchema.builder()
             .type("string")
             .enumValues(classes)
             .build();
-        return generate(taskPrompt, schema, inputData, maxOutputTokens, maxInputTokens);
+        return generate(taskPrompt, schema, inputData, options);
     }
 }

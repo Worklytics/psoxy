@@ -6,6 +6,7 @@ import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.augments.ClassifyProcessor;
+import com.avaulta.gateway.rules.augments.GenMetadataInferenceResult;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
 import com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend;
@@ -457,7 +458,7 @@ class AugmentProcessorTest {
 
     private AugmentProcessor processorWithClassifyStub(String label) {
         ClassifyProcessor classifyProcessor = new ClassifyProcessor(
-            (taskPrompt, outputSchema, inputData) -> label,
+            (taskPrompt, outputSchema, inputData, options) -> GenMetadataInferenceResult.of(label),
             objectMapper,
             2);
         GenMetadataProcessor genMetadataProcessor = new GenMetadataProcessor(

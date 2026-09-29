@@ -258,6 +258,12 @@ public abstract class Augment {
         public static final int DEFAULT_MAX_INPUT_TOKENS = 256;
 
         /**
+         * Extra generation tokens so the model can wrap the class name ({@code class:foo}) and we
+         * can still substring-match.
+         */
+        public static final int MAX_OUTPUT_TOKEN_SLACK = 16;
+
+        /**
          * Task instruction passed to the generative backend (how to choose among {@link #classes}).
          */
         @JsonInclude(JsonInclude.Include.NON_NULL)

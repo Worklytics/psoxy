@@ -22,7 +22,7 @@ Wrong cloud on wrong platform → `augment-gen-unavailable`. Auth / quota failur
 
 ## `!<classify>`
 
-Closed-set, **exactly one** class. YAML lists the allowed strings; there is no `outputSchema` and no `maxOutputTokens` — generation is capped at the length of the longest class.
+Closed-set, **exactly one** class. YAML lists the allowed strings; there is no `outputSchema` and no `maxOutputTokens` — generation is capped at the length of the longest class, plus a small slack so the model can emit light formatting (for example `class:foo`).
 
 If the model reply contains any of those class names as an exact substring, that class is used (longer names win when more than one matches, e.g. `Email Drafting` over `Email`). On Gemini, thinking tokens share this inferred generation budget with the visible class name.
 
@@ -147,7 +147,7 @@ Per-row Vertex/Bedrock calls are typically several seconds. A 100-row bulk file 
 
 Set `enable_gen_metadata = true` on the API or bulk connector you want to try, and load **custom rules** that declare `!<classify>` or `!<genMetadata>` augments.
 
-- **AWS:** Terraform attaches Bedrock invoke/converse IAM. Complete the `gen_metadata_todo` output (Bedrock account/region access). Default model: `us.amazon.nova-2-lite-v1:0`.
+- **AWS:** Terraform attaches Bedrock invoke/converse IAM. Confirm Bedrock is usable in the account and region (see [AWS getting started](../../aws/getting-started.md#genmetadata-via-bedrock)). Default model: `us.amazon.nova-2-lite-v1:0`.
 - **GCP:** Terraform enables `aiplatform.googleapis.com` and grants `roles/aiplatform.user`. Default model: `gemini-3.5-flash-lite` at location `global`, thinking `minimal`.
 
 genMetadata does **not** need `enable_remote_resources` or `REMOTE_RESOURCE_BUCKET`. Those are for remote `rules.yaml` / OpenNLP (`sentenceMetadata`).

@@ -9,6 +9,7 @@ import dev.langchain4j.model.chat.response.ChatResponse;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
+import java.time.Clock;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,10 +61,11 @@ class LangChain4jGenMetadataBackendAuthFailureTest {
 
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, om, new GenMetadataPromptBudget(), factory,
+            config, new GenMetadataPromptBudget(), factory,
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
-            new GenMetadataResponseFormats());
+            new GenMetadataResponseFormats(),
+            Clock.systemUTC());
 
         JsonSchema outputSchema = JsonSchema.builder()
             .type("object")

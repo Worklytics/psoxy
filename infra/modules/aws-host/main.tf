@@ -87,12 +87,6 @@ locals {
   # proxy caller role requires direct lambda access if API Gateway v2 is not used and there are API connectors
   caller_requires_direct_lambda_access = !local.use_api_gateway_v2 && length(module.api_connector) > 0
 
-  # TEMP: any connector with enable_gen_metadata uses Bedrock (AWS-only; no other backend yet).
-  gen_metadata_enabled = length([
-    for k, v in merge(var.api_connectors, var.bulk_connectors) : k
-    if try(v.enable_gen_metadata, false)
-  ]) > 0
-
   bedrock_invoke_iam_statements = [{
     Sid    = "InvokeBedrockForGenMetadata"
     Effect = "Allow"
@@ -272,9 +266,7 @@ module "api_connector" {
   timeout_seconds               = coalesce(try(each.value.timeout_seconds, null), 180)
   allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
 
-  extra_lambda_role_iam_statements = concat(
-    try(each.value.enable_gen_metadata, false) ? local.bedrock_invoke_iam_statements : [],
-  )
+  extra_lambda_role_iam_statements = try(each.value.enable_gen_metadata, false) ? local.bedrock_invoke_iam_statements : []
 
   environment_variables = merge(
     {
@@ -368,9 +360,7 @@ module "bulk_connector" {
 
 
 
-  extra_lambda_role_iam_statements = concat(
-    try(each.value.enable_gen_metadata, false) ? local.bedrock_invoke_iam_statements : [],
-  )
+  extra_lambda_role_iam_statements = try(each.value.enable_gen_metadata, false) ? local.bedrock_invoke_iam_statements : []
 
   environment_variables = merge(
     {

@@ -7,6 +7,7 @@ import dev.langchain4j.model.chat.response.ChatResponse;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
+import java.time.Clock;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -52,11 +53,12 @@ class LangChain4jGenMetadataBackendConcurrencyTest {
 
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, om, new GenMetadataPromptBudget(),
+            config, new GenMetadataPromptBudget(),
             new GenMetadataChatModelFactory(Set.of(provider)),
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
-            new GenMetadataResponseFormats());
+            new GenMetadataResponseFormats(),
+            Clock.systemUTC());
 
         int threads = 8;
         ExecutorService pool = Executors.newFixedThreadPool(threads);

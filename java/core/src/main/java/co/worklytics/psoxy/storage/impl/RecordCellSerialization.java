@@ -1,10 +1,11 @@
 package co.worklytics.psoxy.storage.impl;
 
 import java.io.UncheckedIOException;
-import java.util.Collection;
 import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 /**
@@ -12,9 +13,8 @@ import lombok.NonNull;
  * Scalars stay as-is; Maps/Collections (augment outputs) serialize as JSON strings —
  * not {@link Object#toString()} ({@code {category=...}}).
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class RecordCellSerialization {
-
-    private RecordCellSerialization() {}
 
     static Object forTabularCell(Object value, @NonNull ObjectMapper objectMapper) {
         if (value == null

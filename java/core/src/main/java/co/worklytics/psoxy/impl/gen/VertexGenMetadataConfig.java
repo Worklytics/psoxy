@@ -41,8 +41,8 @@ public final class VertexGenMetadataConfig extends GenMetadataConfig {
     private final String modelRegion;
     private final String thinkingLevel;
 
-    VertexGenMetadataConfig(String modelId, int timeoutSeconds, int maxAttempts,
-                            String modelRegion, String thinkingLevel) {
+    private VertexGenMetadataConfig(String modelId, int timeoutSeconds, int maxAttempts,
+                                    String modelRegion, String thinkingLevel) {
         super(Backend.VERTEX, modelId, timeoutSeconds, maxAttempts);
         this.modelRegion = modelRegion;
         this.thinkingLevel = thinkingLevel;

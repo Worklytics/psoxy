@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import java.time.Clock;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
@@ -49,6 +50,7 @@ import co.worklytics.psoxy.impl.gen.LangChain4jGenMetadataBackend;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
 import dagger.Binds;
+import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.Multibinds;
@@ -69,6 +71,9 @@ public class PsoxyModule {
      */
     @Module
     public abstract static class Bindings {
+        @BindsOptionalOf
+        abstract Clock clock();
+
         @Multibinds
         abstract Set<GenMetadataChatModelProvider> chatModelProviders();
 

@@ -15,6 +15,7 @@ import org.apache.parquet.schema.PrimitiveType;
 import org.apache.parquet.schema.Types;
 import blue.strategic.parquet.ParquetWriter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NonNull;
 import lombok.extern.java.Log;
 
 @Log
@@ -26,13 +27,9 @@ public class ParquetRecordWriter implements RecordWriter {
     private ParquetWriter<Map<String, Object>> writer;
     private boolean initialized = false;
 
-    public ParquetRecordWriter(OutputStream out) {
-        this(out, new ObjectMapper());
-    }
-
-    public ParquetRecordWriter(OutputStream out, ObjectMapper objectMapper) {
+    public ParquetRecordWriter(OutputStream out, @NonNull ObjectMapper objectMapper) {
         this.outputStream = out;
-        this.objectMapper = objectMapper != null ? objectMapper : new ObjectMapper();
+        this.objectMapper = objectMapper;
     }
 
     @Override

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.RuleSet;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import co.worklytics.psoxy.ConfigRulesModule;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.BulkModeConfig;
@@ -553,7 +554,7 @@ class RecordBulkDataSanitizerImplTest {
 
         // Write sample data to Parquet bytes using our own writer implementation
         ByteArrayOutputStream sourceOut = new ByteArrayOutputStream();
-        try (ParquetRecordWriter writer = new ParquetRecordWriter(sourceOut)) {
+        try (ParquetRecordWriter writer = new ParquetRecordWriter(sourceOut, new ObjectMapper())) {
             writer.beginRecordSet();
             writer.writeRecord(record1);
             writer.writeRecord(record2);
@@ -617,7 +618,7 @@ class RecordBulkDataSanitizerImplTest {
 
         // Write sample data
         ByteArrayOutputStream sourceOut = new ByteArrayOutputStream();
-        try (ParquetRecordWriter writer = new ParquetRecordWriter(sourceOut)) {
+        try (ParquetRecordWriter writer = new ParquetRecordWriter(sourceOut, new ObjectMapper())) {
             writer.beginRecordSet();
             writer.writeRecord(record);
             writer.endRecordSet();
@@ -668,7 +669,7 @@ class RecordBulkDataSanitizerImplTest {
         record.put("other", "three");
 
         ByteArrayOutputStream sourceOut = new ByteArrayOutputStream();
-        try (ParquetRecordWriter writer = new ParquetRecordWriter(sourceOut)) {
+        try (ParquetRecordWriter writer = new ParquetRecordWriter(sourceOut, new ObjectMapper())) {
             writer.beginRecordSet();
             writer.writeRecord(record);
             writer.endRecordSet();

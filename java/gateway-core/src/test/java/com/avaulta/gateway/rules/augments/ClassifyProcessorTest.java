@@ -66,10 +66,10 @@ class ClassifyProcessorTest {
     @Test
     void compute_serializesMapInput() {
         ClassifyProcessor processor = new ClassifyProcessor(
-            (taskPrompt, outputSchema, inputData) -> {
+            (taskPrompt, outputSchema, inputData, options) -> {
                 assertTrue(inputData.contains("\"title\""));
                 assertTrue(inputData.contains("Fix NPE"));
-                return "Bugfix";
+                return GenMetadataInferenceResult.of("Bugfix");
             },
             OBJECT_MAPPER,
             2);
@@ -126,7 +126,7 @@ class ClassifyProcessorTest {
 
     private static ClassifyProcessor processorReturning(String raw) {
         return new ClassifyProcessor(
-            (taskPrompt, outputSchema, inputData) -> raw,
+            (taskPrompt, outputSchema, inputData, options) -> GenMetadataInferenceResult.of(raw),
             OBJECT_MAPPER,
             1);
     }

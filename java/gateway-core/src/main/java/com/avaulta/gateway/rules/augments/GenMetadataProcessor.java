@@ -64,7 +64,10 @@ public class GenMetadataProcessor {
                 log.info("genMetadata inference retry attempt " + attempt + " of " + maxAttempts);
             }
             Object parsed = inferOnce(taskPrompt, outputSchema, inputJson,
-                maxOutputTokens, maxInputTokens);
+                GenMetadataInferenceOptions.builder()
+                    .maxOutputTokens(maxOutputTokens)
+                    .maxInputTokens(maxInputTokens)
+                    .build());
             if (parsed != null && validatesOutputSchema(parsed, outputSchema)) {
                 return parsed;
             }
@@ -74,25 +77,22 @@ public class GenMetadataProcessor {
     }
 
     private Object inferOnce(String taskPrompt, JsonSchema outputSchema, String inputJson,
-                             Integer maxOutputTokens, Integer maxInputTokens) {
+                             GenMetadataInferenceOptions options) {
         Instant startedAt = Instant.now();
         long startedNanos = System.nanoTime();
         log.info("genMetadata augment inference call started at " + startedAt);
-        Object raw;
+        GenMetadataInferenceResult result;
         try {
-            raw = backend.generate(taskPrompt, outputSchema, inputJson,
-                maxOutputTokens, maxInputTokens);
+            result = backend.generate(taskPrompt, outputSchema, inputJson, options);
         } finally {
             long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedNanos);
             log.info("genMetadata augment inference call completed in " + elapsedMs + "ms");
         }
-        if (raw instanceof String rawText) {
-            log.info("genMetadata backend response received chars=" + rawText.length());
-        } else if (raw != null) {
-            log.info("genMetadata backend returned non-string type: "
-                + raw.getClass().getSimpleName());
+        if (result == null || result.getText() == null) {
+            return null;
         }
-        Object parsed = parseModelJson(raw, outputSchema);
+        log.info("genMetadata backend response received chars=" + result.getText().length());
+        Object parsed = parseModelJson(result.getText(), outputSchema);
         if (parsed == null) {
             log.warning("genMetadata backend returned unparseable output");
             return null;

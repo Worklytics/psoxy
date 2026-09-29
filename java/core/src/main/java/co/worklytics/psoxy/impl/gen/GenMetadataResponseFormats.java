@@ -11,14 +11,15 @@ import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.chat.request.json.JsonStringSchema;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -29,25 +30,16 @@ import java.util.Optional;
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class GenMetadataResponseFormats {
 
-    public Optional<ResponseFormat> fromClasses(List<String> classes) {
-        if (classes == null || classes.isEmpty()) {
-            return Optional.empty();
-        }
-        List<String> values = new ArrayList<>();
-        for (String value : classes) {
-            if (StringUtils.isNotBlank(value)) {
-                values.add(value);
-            }
-        }
-        if (values.isEmpty()) {
-            return Optional.empty();
-        }
+    public Optional<ResponseFormat> fromClasses(@NonNull List<String> classes) {
         return Optional.of(ResponseFormat.builder()
             .type(ResponseFormatType.JSON)
             .jsonSchema(JsonSchema.builder()
                 .name("classify")
                 .rootElement(JsonEnumSchema.builder()
-                    .enumValues(values)
+                    .enumValues(classes.stream()
+                        .map(StringUtils::trimToNull)
+                        .filter(Objects::nonNull)
+                        .toList())
                     .build())
                 .build())
             .build());

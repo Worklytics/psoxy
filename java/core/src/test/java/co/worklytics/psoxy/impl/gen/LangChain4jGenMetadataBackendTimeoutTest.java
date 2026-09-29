@@ -7,6 +7,7 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -28,10 +29,11 @@ class LangChain4jGenMetadataBackendTimeoutTest {
         GenMetadataChatModelFactory factory = new GenMetadataChatModelFactory(Set.of());
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, om, new GenMetadataPromptBudget(), factory,
+            config, new GenMetadataPromptBudget(), factory,
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
-            new GenMetadataResponseFormats());
+            new GenMetadataResponseFormats(),
+            Clock.systemUTC());
 
         ChatModel slowModel = new ChatModel() {
             @Override
@@ -57,10 +59,11 @@ class LangChain4jGenMetadataBackendTimeoutTest {
         GenMetadataChatModelFactory factory = new GenMetadataChatModelFactory(Set.of());
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, om, new GenMetadataPromptBudget(), factory,
+            config, new GenMetadataPromptBudget(), factory,
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
-            new GenMetadataResponseFormats());
+            new GenMetadataResponseFormats(),
+            Clock.systemUTC());
 
         ChatModel occupying = new ChatModel() {
             @Override

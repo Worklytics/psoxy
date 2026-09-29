@@ -72,6 +72,13 @@ Usually an issue with the above will cause an error in the `terraform apply` ste
 
 You should contact your AWS team if in doubt.
 
+## Bedrock genMetadata access denied
+
+If a connector with `enable_gen_metadata = true` logs `AccessDeniedException` / `not authorized to perform bedrock:InvokeModel` (or the proxy warning `augment-gen-unavailable`):
+
+1. Confirm Bedrock is available in the Lambda region, or that you are using a cross-region inference profile (`us.amazon.nova-2-lite-v1:0`, not `amazon.nova-2-lite-v1:0`).
+2. Check that an SCP is not blocking `bedrock:InvokeModel` / `bedrock:Converse` in the account or region. See [Amazon Bedrock model access](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html).
+
 ## Logs via Cloud Watch
 
 ### via Web Console

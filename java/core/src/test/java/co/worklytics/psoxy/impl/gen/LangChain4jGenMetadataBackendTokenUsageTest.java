@@ -3,10 +3,12 @@ package co.worklytics.psoxy.impl.gen;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import com.avaulta.gateway.rules.JsonSchema;
+import com.avaulta.gateway.rules.augments.GenMetadataInferenceResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatModel;
@@ -45,11 +47,12 @@ class LangChain4jGenMetadataBackendTokenUsageTest {
 
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, om, new GenMetadataPromptBudget(),
+            config, new GenMetadataPromptBudget(),
             new GenMetadataChatModelFactory(Set.of(provider)),
             accumulator,
             new GenMetadataPromptBuilder(om),
-            new GenMetadataResponseFormats());
+            new GenMetadataResponseFormats(),
+            Clock.systemUTC());
 
         JsonSchema schema = JsonSchema.builder()
             .type("object")
@@ -60,8 +63,8 @@ class LangChain4jGenMetadataBackendTokenUsageTest {
                     .build()))
             .build();
 
-        Object result = backend.generate("Classify", schema, "hello");
-        assertEquals("{\"category\":\"Excluded\"}", result);
+        GenMetadataInferenceResult result = backend.generate("Classify", schema, "hello");
+        assertEquals("{\"category\":\"Excluded\"}", result.getText());
 
         GenMetadataTokenUsageAccumulator.Snapshot snap = accumulator.snapshot();
         assertTrue(snap.hasUsage());
