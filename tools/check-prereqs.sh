@@ -50,11 +50,11 @@ fi
 # Check Maven installation
 
 if ! mvn -v &> /dev/null ; then
-  printf "${WARN}Maven not installed.${NC} It is REQUIRED unless you will use a pre-built JAR.\n"
+  printf "${WARN}Maven not installed.${NC} Required only if you will build the Psoxy Java deployment bundle from source in this repo.\n"
   printf " Note: Java JDK and Maven are only needed if building and bundling the java from source.\n"
   printf " To install Maven, see https://maven.apache.org/install.html\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${CODE}brew install maven${NC}\n"; fi
-  printf " (Using a prebuilt jar requires adding ${CODE}deployment_bundle=""${NC} to your ${CODE}terraform.tfvars${NC} file, and filling with s3/gcs uri for your desired JAR. The JRE of your host platform (AWS/GCP) will still be used at runtime).\n"
+  printf " (Using a prebuilt bundle requires setting ${CODE}deployment_bundle${NC} in your ${CODE}terraform.tfvars${NC} to an s3/gcs uri for your desired JAR/ZIP. The JRE of your host platform (AWS/GCP) will still be used at runtime).\n"
 else
   MVN_VERSION=`mvn -v | grep "Apache Maven"`
   MVN_VERSION_MAJOR_MINOR=$(echo $MVN_VERSION | sed -n 's/^Apache Maven \([0-9]*\.[0-9]*\).*$/\1/p')
@@ -64,9 +64,9 @@ else
   MVN_MAJOR=$(echo "$MVN_VERSION_MAJOR_MINOR" | cut -d. -f1)
   MVN_MINOR=$(echo "$MVN_VERSION_MAJOR_MINOR" | cut -d. -f2)
   if (( MVN_MAJOR < 3 || (MVN_MAJOR == 3 && MVN_MINOR < 6) )); then
-    printf "${ERR}This Maven version appears to be unsupported.${NC} Psoxy requires a supported version of Maven 3.6 or later.\n"
+    printf "${WARN}This Maven version appears to be unsupported.${NC} Psoxy requires Maven 3.6 or later to build from source.\n"
     printf "We recommend you upgrade. See https://maven.apache.org/install.html\n"
-    printf "Maven is used to build the package that will be deployed to your host platform as an AWS lambda or a GCP Cloud Function\n"
+    printf "Maven is only needed if you intend to build the deployment bundle from source in this repo; prebuilt bundles can be used via ${CODE}deployment_bundle${NC} in ${CODE}terraform.tfvars${NC}.\n"
   fi
 
   printf "\n"
@@ -77,10 +77,11 @@ else
 
   printf "Your Maven installation uses ${CODE}${JAVA_VERSION}${NC}.\n"
 
-  if [[  "$JAVA_VERSION_MAJOR" != 21  && "$JAVA_VERSION_MAJOR" != 25 && "$JAVA_VERSION_MAJOR" != 26 ]]; then
-    printf "${ERR}This Java version appears to be unsupported. You should upgrade it, or may have compile errors.${NC} Psoxy requires an Oracle-supported version of Java 21 or later;  as of March 2026, this includes Java 21, 25, and 26. See https://maven.apache.org/install.html\n"
+  if [[  "$JAVA_VERSION_MAJOR" != 21  && "$JAVA_VERSION_MAJOR" != 25 && "$JAVA_VERSION_MAJOR" != 27 ]]; then
+    printf "${WARN}This Java version appears to be unsupported. You should upgrade it, or may have compile errors if building from source.${NC} Psoxy requires an Oracle-supported version of Java 21 or later; as of September 2026, this includes Java 21, 25, and 27. See https://maven.apache.org/install.html\n"
     if $HOMEBREW_AVAILABLE; then printf "or as you have Homebrew available, run ${CODE}brew install openjdk@21${NC}\n"; fi
     printf "If you have an alternative JDK installed, then you must update your ${CODE}JAVA_HOME${NC} environment variable to point to it.\n"
+    printf "Java is only needed if you intend to build the deployment bundle from source in this repo; prebuilt bundles can be used via ${CODE}deployment_bundle${NC} in ${CODE}terraform.tfvars${NC}.\n"
   fi
 
   printf "\n"
@@ -91,8 +92,9 @@ else
     MVN_VERSION_FULL=$(echo "$MVN_VERSION" | sed -n 's/^Apache Maven \([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/p')
     MVN_PATCH=$(echo "$MVN_VERSION_FULL" | cut -d. -f3)
     if (( MVN_MAJOR < 3 || (MVN_MAJOR == 3 && MVN_MINOR < 9) || (MVN_MAJOR == 3 && MVN_MINOR == 9 && MVN_PATCH < 10) )); then
-      printf "${ERR}Maven < 3.9.10 has compatibility issues with Java 24.${NC} If you're using Java 24, psoxy will NOT build correctly unless you upgrade Maven to 3.9.10 or later.\n"
+      printf "${WARN}Maven < 3.9.10 has compatibility issues with Java 24+.${NC} Psoxy will NOT build correctly from source unless you upgrade Maven to 3.9.10 or later.\n"
       printf "See https://maven.apache.org/install.html\n"
+      printf "This only matters if you intend to build the deployment bundle from source; prebuilt bundles can be used via ${CODE}deployment_bundle${NC} in ${CODE}terraform.tfvars${NC}.\n"
     fi
   fi
 

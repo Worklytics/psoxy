@@ -238,11 +238,11 @@ You will need all the following in your deployment environment (eg, your laptop)
 |----------------------------------------------|----------------------|-----------------------|
 | [git](https://git-scm.com/)                  | 2.17+                | `git --version`       |
 | [Maven](https://maven.apache.org/)           | 3.6+ ; 3.9.10+ required for java 24+ | `mvn -v`              |
-| [Java JDK 21+](https://openjdk.org/install/) | 21, 25, 26 (see notes) | `mvn -v \| grep Java` |
+| [Java JDK 21+](https://openjdk.org/install/) | 21, 25, 27 (see notes) | `mvn -v \| grep Java` |
 | [Terraform](https://www.terraform.io/)       | 1.7+, < 2.0          | `terraform version`   |
 
 
-NOTE: we will support Java versions for duration of official support windows, in particular the LTS versions. Minor versions may work but are not routinely tested. As of March 2026, officially tested versions include Java 21 (LTS), 25, and 26.
+NOTE: we will support Java versions for duration of official support windows, in particular the LTS versions. Minor versions may work but are not routinely tested. As of September 2026, officially tested versions include Java 21 (LTS), 25, and 27.
 
 NOTE: Using `terraform` is not strictly necessary, but it is the only supported method. You may provision your infrastructure via your host's CLI, web console, or another infrastructure provisioning tool, but we don't offer documentation or support in doing so.  Adapting one of our [terraform examples](https://github.com/Worklytics/psoxy/tree/main/infra/examples-dev) or writing your own config that re-uses our [modules](https://github.com/Worklytics/psoxy/tree/main/infra/modules) will simplify things greatly.
 
