@@ -120,7 +120,7 @@ No `model`, `backend`, or `thinkingLevel` in rules — those stay deployment con
 
 ## Deployment configuration (env)
 
-Parsed from `GEN_METADATA_*` env vars (not `ProxyConfigProperty`). Terraform `enable_gen_metadata` is IAM-only (Bedrock invoke / Vertex user). Host Dagger modules bind Bedrock (AWS) or Vertex (GCP). Terraform still sets `GEN_METADATA_BACKEND` for a future non-cloud backend; it does not gate inference in Java. Model / region / thinking defaults live in Java. Override via `general_environment_variables` when needed.
+Parsed from `GEN_METADATA_*` env vars (not `ProxyConfigProperty`). Terraform `enable_gen_metadata` is IAM-only (AWS host maps it to Bedrock invoke; GCP host to Vertex user). Host Dagger modules bind Bedrock (AWS) or Vertex (GCP). Terraform still sets `GEN_METADATA_BACKEND` for a future non-cloud backend; it does not gate inference in Java. Model / region / thinking defaults live in Java. Override via `general_environment_variables` when needed.
 
 | Variable | Default | Purpose |
 |----------|---------|---------|

@@ -201,6 +201,12 @@ variable "extra_lambda_role_iam_statements" {
   default     = []
 }
 
+variable "enable_bedrock" {
+  type        = bool
+  description = "Grant this Lambda Bedrock InvokeModel/Converse for genMetadata/classify augments, and set GEN_METADATA_BACKEND=bedrock."
+  default     = false
+}
+
 variable "environment_variables" {
   type        = map(string)
   description = "Non-sensitive values to add to functions environment variables"

@@ -285,7 +285,7 @@ variable "custom_api_connectors" {
     #   source_auth_strategy = "bearer"
     #   target_host          = "api.example.com"
     #   example_api_calls    = ["/v1/users"]
-    #   enable_gen_metadata  = true # BETA: !<genMetadata> augments in custom rules (Vertex)
+    #   enable_gen_metadata  = true # ALPHA: !<classify> / !<genMetadata> augments in custom rules (Vertex)
     #   rules_file           = "custom-api.yaml"
     #   secured_variables = [
     #     { name = "API_KEY" }
@@ -344,13 +344,13 @@ variable "custom_bulk_connectors" {
         transforms = optional(list(map(string)), [])
       })))
     }))
-    available_memory_mb  = optional(number)
-    timeout_seconds      = optional(number)
-    enable_gen_metadata  = optional(bool, false)
-    rules_file           = optional(string)
-    settings_to_provide  = optional(map(string), {})
-    example_file         = optional(string)
-    example_files        = optional(list(string), [])
+    available_memory_mb = optional(number)
+    timeout_seconds     = optional(number)
+    enable_gen_metadata = optional(bool, false)
+    rules_file          = optional(string)
+    settings_to_provide = optional(map(string), {})
+    example_file        = optional(string)
+    example_files       = optional(list(string), [])
   }))
   description = "specs of custom bulk connectors to create"
 

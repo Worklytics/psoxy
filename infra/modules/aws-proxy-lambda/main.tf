@@ -100,6 +100,7 @@ resource "aws_lambda_function" "instance" {
       var.remote_resource_bucket != null ? { REMOTE_RESOURCE_BUCKET = var.remote_resource_bucket } : {},
       var.remote_resource_bucket != null && var.remote_resource_instance_path != null ? { INSTANCE_RESOURCE_PATH = var.remote_resource_instance_path } : {},
       var.remote_resource_bucket != null && var.remote_resource_shared_path != null ? { SHARED_RESOURCE_PATH = var.remote_resource_shared_path } : {},
+      var.enable_bedrock ? { GEN_METADATA_BACKEND = "bedrock" } : {},
     )
   }
 
@@ -328,6 +329,21 @@ locals {
     Resource = var.aws_kms_public_keys
   }] : []
 
+  bedrock_invoke_statements = var.enable_bedrock ? [{
+    Sid    = "InvokeBedrockForGenMetadata"
+    Effect = "Allow"
+    Action = [
+      "bedrock:InvokeModel",
+      "bedrock:Converse",
+      "bedrock:InvokeModelWithResponseStream",
+      "bedrock:ConverseStream",
+    ]
+    Resource = [
+      "arn:aws:bedrock:*::foundation-model/*",
+      "arn:aws:bedrock:*:*:inference-profile/*",
+    ]
+  }] : []
+
   policy_statements = concat(
     local.global_ssm_param_statements,
     local.global_secretsmanager_statements,
@@ -339,6 +355,7 @@ locals {
     local.s3_write_statements,
     local.remote_resource_bucket_statements,
     local.aws_kms_public_key_statements,
+    local.bedrock_invoke_statements,
     flatten(values(module.side_output_iam_statements)[*].iam_statements),
     var.lambda_role_iam_statements,
   )

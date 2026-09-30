@@ -27,7 +27,7 @@ locals {
   # Object-key prefixes are siblings, not nested: shared is `{env}/` and instance is
   # `{env}-{INSTANCE}/` so IAM `env/*` does not also match instance objects. Secret IDs still use
   # config_parameter_prefix with a trailing '_' (e.g. psoxy-dev-erik_GCAL_SOURCE).
-  resource_path_root = trimsuffix(trimprefix(local.config_parameter_prefix, "/"), "_")
+  resource_path_root   = trimsuffix(trimprefix(local.config_parameter_prefix, "/"), "_")
   shared_resource_path = "${local.resource_path_root}/"
   connector_instance_resource_path = { for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) :
     k => "${local.resource_path_root}-${replace(upper(k), "-", "_")}/"
@@ -90,12 +90,6 @@ locals {
     )
   }
 
-  # GCP genMetadata uses Vertex (no other backend yet).
-  gen_metadata_enabled = length([
-    for k, v in merge(var.api_connectors, var.bulk_connectors) : k
-    if try(v.enable_gen_metadata, false)
-  ]) > 0
-  gen_metadata_services = local.gen_metadata_enabled ? toset(["aiplatform.googleapis.com"]) : toset([])
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -564,36 +558,18 @@ module "bulk_connector" {
 
 # END BULK CONNECTORS
 
-resource "google_project_service" "gen_metadata" {
-  for_each = local.gen_metadata_services
-
-  project                    = var.gcp_project_id
-  service                    = each.value
-  disable_dependent_services = false
-  disable_on_destroy         = false
-}
-
 locals {
-  gen_metadata_vertex_sa_emails = merge(
-    {
-      for k, v in var.api_connectors : k => google_service_account.api_connectors[k].email
-      if try(v.enable_gen_metadata, false)
-    },
-    {
-      for k, v in var.bulk_connectors : k => module.bulk_connector[k].instance_sa_email
-      if try(v.enable_gen_metadata, false)
-    },
-  )
+  vertex_sa_emails = toset(compact(concat(
+    [for k, v in var.api_connectors : google_service_account.api_connectors[k].email if try(v.enable_gen_metadata, false)],
+    [for k, v in var.bulk_connectors : module.bulk_connector[k].instance_sa_email if try(v.enable_gen_metadata, false)],
+  )))
 }
 
-resource "google_project_iam_member" "gen_metadata_vertex_user" {
-  for_each = local.gen_metadata_vertex_sa_emails
+module "enable_vertex" {
+  source = "../../modules/gcp-enable-vertex"
 
-  project = var.gcp_project_id
-  role    = "roles/aiplatform.user"
-  member  = "serviceAccount:${each.value}"
-
-  depends_on = [google_project_service.gen_metadata]
+  project_id             = var.gcp_project_id
+  service_account_emails = local.vertex_sa_emails
 }
 
 # BEGIN LOOKUP TABLES

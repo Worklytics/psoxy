@@ -86,21 +86,6 @@ locals {
 
   # proxy caller role requires direct lambda access if API Gateway v2 is not used and there are API connectors
   caller_requires_direct_lambda_access = !local.use_api_gateway_v2 && length(module.api_connector) > 0
-
-  bedrock_invoke_iam_statements = [{
-    Sid    = "InvokeBedrockForGenMetadata"
-    Effect = "Allow"
-    Action = [
-      "bedrock:InvokeModel",
-      "bedrock:Converse",
-      "bedrock:InvokeModelWithResponseStream",
-      "bedrock:ConverseStream",
-    ]
-    Resource = [
-      "arn:aws:bedrock:*::foundation-model/*",
-      "arn:aws:bedrock:*:*:inference-profile/*",
-    ]
-  }]
 }
 
 module "psoxy" {
@@ -266,7 +251,7 @@ module "api_connector" {
   timeout_seconds               = coalesce(try(each.value.timeout_seconds, null), 180)
   allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
 
-  extra_lambda_role_iam_statements = try(each.value.enable_gen_metadata, false) ? local.bedrock_invoke_iam_statements : []
+  enable_bedrock = try(each.value.enable_gen_metadata, false)
 
   environment_variables = merge(
     {
@@ -280,9 +265,6 @@ module "api_connector" {
     var.api_connector_path_prefix_to_trim != null ? { REQUEST_PATH_PREFIX_TO_TRIM = var.api_connector_path_prefix_to_trim } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
-    try(each.value.enable_gen_metadata, false) ? {
-      GEN_METADATA_BACKEND = "bedrock"
-    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
@@ -358,9 +340,7 @@ module "bulk_connector" {
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   todos_as_local_files                 = var.todos_as_local_files
 
-
-
-  extra_lambda_role_iam_statements = try(each.value.enable_gen_metadata, false) ? local.bedrock_invoke_iam_statements : []
+  enable_bedrock = try(each.value.enable_gen_metadata, false)
 
   environment_variables = merge(
     {
@@ -373,9 +353,6 @@ module "bulk_connector" {
       RULES = each.value.rules_raw
     } : {},
     var.general_environment_variables,
-    try(each.value.enable_gen_metadata, false) ? {
-      GEN_METADATA_BACKEND = "bedrock"
-    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null

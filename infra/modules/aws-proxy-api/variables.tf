@@ -280,6 +280,12 @@ variable "enable_async_processing" {
   default     = false
 }
 
+variable "enable_bedrock" {
+  type        = bool
+  description = "Grant this Lambda Bedrock InvokeModel/Converse for genMetadata/classify augments, and set GEN_METADATA_BACKEND=bedrock."
+  default     = false
+}
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"
@@ -326,6 +332,6 @@ variable "remote_resource_shared_path" {
 
 variable "extra_lambda_role_iam_statements" {
   type        = list(any)
-  description = "Additional IAM statements to add to the lambda execution role (e.g. Bedrock InvokeModel)."
+  description = "Additional IAM statements to add to the lambda execution role."
   default     = []
 }

@@ -240,6 +240,7 @@ module "psoxy_lambda" {
   remote_resource_bucket        = var.remote_resource_bucket
   remote_resource_instance_path = var.remote_resource_instance_path
   remote_resource_shared_path   = var.remote_resource_shared_path
+  enable_bedrock                = var.enable_bedrock
 }
 
 # if async processing is enabled, trigger the lambda from the SQS queue

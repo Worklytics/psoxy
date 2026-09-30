@@ -59,6 +59,7 @@ module "psoxy_lambda" {
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   lambda_role_iam_statements           = var.extra_lambda_role_iam_statements
+  enable_bedrock                       = var.enable_bedrock
 
   environment_variables = merge(
     var.environment_variables,
