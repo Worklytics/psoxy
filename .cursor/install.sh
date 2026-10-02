@@ -72,7 +72,7 @@ printf "${INFO}Building Java modules...${NC}\n"
 
 # Install Node dependencies for the CLI testing / schema tools.
 printf "${INFO}Installing Node tool dependencies...${NC}\n"
-(cd tools/psoxy-test && npm ci --no-fund --no-audit || npm install --no-fund --no-audit)
+(cd tools/psoxy-test && npm ci --no-fund --no-audit)
 (cd tools/schema-tool && npm ci --no-fund --no-audit || npm install --no-fund --no-audit)
 
 printf "${SUCCESS}Psoxy Cloud Agent environment ready.${NC}\n"
