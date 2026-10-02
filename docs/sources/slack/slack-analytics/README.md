@@ -4,7 +4,7 @@
 
 **Availability:** Alpha
 
-The Slack Analytics connector provides access to Slack's [Admin Analytics API](https://docs.slack.dev/admins/analytics/). It complements the [`slack-discovery-api`](../slack-discovery-api/README.md) connector: Analytics covers member activity, public channels, and message metadata/engagement metrics without message body content, while Discovery API remains required for DMs and MPDMs (and other conversation types not exposed by Analytics).
+The Slack Analytics connector provides access to Slack's [Admin Analytics API](https://docs.slack.dev/reference/methods/admin.analytics.getFile). It complements the [`slack-discovery-api`](../slack-discovery-api/README.md) connector: Analytics covers member activity, public channels, and message metadata/engagement metrics without message body content, while Discovery API remains required for DMs and MPDMs (and other conversation types not exposed by Analytics).
 
 {% hint style="info" %}
 This connector requires **Slack Enterprise Grid** and an org owner or admin to install the app and grant scopes. The `admin.analytics:read` scope is available in the standard OAuth scope picker for Enterprise Grid orgs on eligible plans.
