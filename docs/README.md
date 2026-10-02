@@ -230,19 +230,19 @@ You, or the IAM Role / GCP Service account you use to deploy Psoxy, usually does
 As of March 2026, Psoxy is implemented with Java 21 and built via Maven. The proxy infrastructure is provisioned and the Psoxy code deployed using Terraform, relying on Azure, Google Cloud, and/or AWS command line tools.
 
 > [!NOTE]
-> Java JDK and Maven are **only required if you are building and bundling the Psoxy Java code from source**. Alternatively, you can deploy a pre-existing release bundle (JAR) by specifying `deployment_bundle="<url-to-jar>"` in your Terraform variables. At runtime, the JRE provided by your host platform (AWS Lambda or GCP Cloud Functions) will be used to execute the code.
+> Java JDK and Maven are **REQUIRED only if you are building and bundling the Psoxy Java code from source** (for example, if you decline the prebuilt bundle during `./init`). Our examples default to a published prebuilt bundle via `deployment_bundle` in `terraform.tfvars`, which does not require Java or Maven on your machine. At runtime, the JRE provided by your host platform (AWS Lambda or GCP Cloud Functions) will be used to execute the code.
 
-You will need all the following in your deployment environment (eg, your laptop):
+You will need the following in your deployment environment (eg, your laptop):
 
 | Tool                                         | Version              | Test Command          |
 |----------------------------------------------|----------------------|-----------------------|
 | [git](https://git-scm.com/)                  | 2.17+                | `git --version`       |
-| [Maven](https://maven.apache.org/)           | 3.6+ ; 3.9.10+ required for java 24+ | `mvn -v`              |
-| [Java JDK 21+](https://openjdk.org/install/) | 21, 25, 26 (see notes) | `mvn -v \| grep Java` |
+| [Maven](https://maven.apache.org/)           | 3.6+ ; 3.9.10+ required for java 24+ **(required only if building from source)** | `mvn -v`              |
+| [Java JDK 21+](https://openjdk.org/install/) | 21, 25, 27 (see notes) **(required only if building from source)** | `mvn -v \| grep Java` |
 | [Terraform](https://www.terraform.io/)       | 1.7+, < 2.0          | `terraform version`   |
 
 
-NOTE: we will support Java versions for duration of official support windows, in particular the LTS versions. Minor versions may work but are not routinely tested. As of March 2026, officially tested versions include Java 21 (LTS), 25, and 26.
+NOTE: we will support Java versions for duration of official support windows, in particular the LTS versions. Minor versions may work but are not routinely tested. As of September 2026, officially tested versions include Java 21 (LTS), 25, and 27.
 
 NOTE: Using `terraform` is not strictly necessary, but it is the only supported method. You may provision your infrastructure via your host's CLI, web console, or another infrastructure provisioning tool, but we don't offer documentation or support in doing so.  Adapting one of our [terraform examples](https://github.com/Worklytics/psoxy/tree/main/infra/examples-dev) or writing your own config that re-uses our [modules](https://github.com/Worklytics/psoxy/tree/main/infra/modules) will simplify things greatly.
 

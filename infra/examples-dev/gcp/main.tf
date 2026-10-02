@@ -202,6 +202,11 @@ module "connection_in_worklytics" {
   try(local.all_connectors[each.key].settings_to_provide, {}))
 }
 
+output "deployment_platform" {
+  description = "Cloud platform for this deployment. Used when synthesizing test scripts."
+  value       = "gcp"
+}
+
 output "path_to_deployment_jar" {
   description = "Path to the package to deploy (JAR)."
   value       = module.psoxy.path_to_deployment_jar
@@ -233,12 +238,19 @@ output "webhook_collector_instances" {
     side_output_sanitized_bucket_id = try(v.side_output_sanitized_bucket_id, null)
     side_output_original_bucket_id  = try(v.side_output_original_bucket_id, null)
     test_examples                   = try(v.test_examples, [])
+    provisioned_auth_key_pairs      = try(v.provisioned_auth_key_pairs, [])
+    batch_scheduler_job_id          = try(v.batch_scheduler_job_id, null)
   } }
 }
 
 output "artifacts_bucket_id" {
   description = "The ID of the artifacts google_storage_bucket resource"
   value       = module.psoxy.artifacts_bucket_id
+}
+
+output "repo_base_dir" {
+  description = "Absolute path to the repository root used to build test scripts (trailing slash)."
+  value       = var.psoxy_base_dir
 }
 
 # Uncomment when using the **beta** external_api_alb (or BYO api_connector_external_lb_host) and you need these values:

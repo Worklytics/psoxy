@@ -21,13 +21,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java-version: [ '21', '25', '26' ]
+        # 26 is EoL as of September 15, 2026; kept in CI for now, not listed as supported
+        java-version: [ '21', '25', '26', '27' ]
     name: bundle ${{ matrix.implementation }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.java-version }}
           distribution: zulu

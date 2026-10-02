@@ -272,7 +272,8 @@ locals {
     try(var.external_api_alb.domain, null) != null ? var.external_api_alb.domain :
     google_compute_global_address.api_connector_alb[0].address
   )
-  api_connector_external_lb_enabled = local.api_connector_external_lb_host != null
+  # Plan-time signal only (do not derive from api_connector_external_lb_host when it is the reserved IP).
+  api_connector_external_lb_enabled = var.api_connector_external_lb_host != null || local.provision_external_api_alb
   # Shared LB base (no per-connector path); gcp-proxy-api appends /<function-name> for TODOs and endpoint_url
   api_connector_external_lb_base_url = local.api_connector_external_lb_enabled ? "https://${local.api_connector_external_lb_host}" : null
 }
