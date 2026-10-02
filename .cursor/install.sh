@@ -42,12 +42,23 @@ HASHICORP_GPG_FINGERPRINT="${HASHICORP_GPG_FINGERPRINT// /}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
+maven_current_version() {
+    command -v mvn >/dev/null 2>&1 || return 0
+    mvn -v 2>/dev/null | sed -n 's/^Apache Maven \([0-9][0-9.]*\).*/\1/p' | head -n 1
+}
+
 install_maven() {
-    if command -v mvn >/dev/null 2>&1; then
-        printf "${INFO}Maven already present: %s${NC}\n" "$(mvn -v | head -n 1)"
+    local current
+    current="$(maven_current_version)"
+    if [ "$current" = "$MAVEN_VERSION" ]; then
+        printf "${INFO}Maven %s already present.${NC}\n" "$current"
         return
     fi
-    printf "${INFO}Installing Apache Maven %s...${NC}\n" "$MAVEN_VERSION"
+    if [ -n "$current" ]; then
+        printf "${WARN}Found Maven %s, which differs from the pinned %s; installing pinned release...${NC}\n" "$current" "$MAVEN_VERSION"
+    else
+        printf "${INFO}Installing Apache Maven %s...${NC}\n" "$MAVEN_VERSION"
+    fi
     local tmp archive
     tmp="$(mktemp -d)"
     archive="${tmp}/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
@@ -68,19 +79,29 @@ install_maven() {
     printf "${SUCCESS}Maven installed: %s${NC}\n" "$(mvn -v | head -n 1)"
 }
 
-install_terraform() {
-    if command -v terraform >/dev/null 2>&1; then
-        printf "${INFO}Terraform already present: %s${NC}\n" "$(terraform -version | head -n 1)"
-        return
-    fi
+terraform_current_version() {
+    command -v terraform >/dev/null 2>&1 || return 0
+    terraform -version 2>/dev/null | sed -n 's/^Terraform v\([0-9][0-9.]*\).*/\1/p' | head -n 1
+}
 
-    local version
+install_terraform() {
+    local version current
     version="$(tr -d '[:space:]' < "$TERRAFORM_VERSION_FILE")"
     if [ -z "$version" ]; then
         printf "${ERR}Could not read Terraform version from %s; aborting.${NC}\n" "$TERRAFORM_VERSION_FILE" >&2
         exit 1
     fi
-    printf "${INFO}Installing Terraform %s...${NC}\n" "$version"
+
+    current="$(terraform_current_version)"
+    if [ "$current" = "$version" ]; then
+        printf "${INFO}Terraform %s already present.${NC}\n" "$current"
+        return
+    fi
+    if [ -n "$current" ]; then
+        printf "${WARN}Found Terraform %s, which differs from the pinned %s; installing pinned release...${NC}\n" "$current" "$version"
+    else
+        printf "${INFO}Installing Terraform %s...${NC}\n" "$version"
+    fi
 
     local tmp base zip
     tmp="$(mktemp -d)"
@@ -91,7 +112,7 @@ install_terraform() {
     curl -fsSL "${base}/terraform_${version}_SHA256SUMS.sig" -o "${tmp}/SHA256SUMS.sig"
 
     printf "${INFO}Verifying Terraform SHA256SUMS signature...${NC}\n"
-    local gnupg_home
+    local gnupg_home sig_status
     gnupg_home="$(mktemp -d)"
     if ! curl -fsSL https://www.hashicorp.com/.well-known/pgp-key.txt \
         | GNUPGHOME="$gnupg_home" gpg --quiet --import >/dev/null 2>&1; then
@@ -99,14 +120,14 @@ install_terraform() {
         rm -rf "$tmp" "$gnupg_home"
         exit 1
     fi
-    if ! GNUPGHOME="$gnupg_home" gpg --with-colons --fingerprint 2>/dev/null \
-        | awk -F: '/^fpr:/{print $10}' | grep -qx "$HASHICORP_GPG_FINGERPRINT"; then
-        printf "${ERR}HashiCorp signing key fingerprint mismatch; aborting.${NC}\n" >&2
-        rm -rf "$tmp" "$gnupg_home"
-        exit 1
-    fi
-    if ! GNUPGHOME="$gnupg_home" gpg --quiet --verify "${tmp}/SHA256SUMS.sig" "${tmp}/SHA256SUMS" >/dev/null 2>&1; then
-        printf "${ERR}Terraform SHA256SUMS signature verification failed; aborting.${NC}\n" >&2
+    # Enforce that the signature was made by the pinned HashiCorp key: the final
+    # field of the VALIDSIG status line is the signer's primary-key fingerprint.
+    # Checking it (rather than relying on plain --verify, which accepts a signature
+    # from any imported key) ensures the pin governs verification even if the key
+    # bundle were tampered with to include an additional key.
+    sig_status="$(GNUPGHOME="$gnupg_home" gpg --status-fd 1 --verify "${tmp}/SHA256SUMS.sig" "${tmp}/SHA256SUMS" 2>/dev/null || true)"
+    if ! printf '%s\n' "$sig_status" | grep -qE "^\[GNUPG:\] VALIDSIG [0-9A-F]+ .* ${HASHICORP_GPG_FINGERPRINT}\$"; then
+        printf "${ERR}Terraform SHA256SUMS was not signed by the pinned HashiCorp key; aborting.${NC}\n" >&2
         rm -rf "$tmp" "$gnupg_home"
         exit 1
     fi
