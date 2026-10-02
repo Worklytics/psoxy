@@ -24,11 +24,13 @@ locals {
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
-  # GCS object prefixes use '/' hierarchy. Secret IDs use config_parameter_prefix with a trailing
-  # '_' (e.g. psoxy-dev-erik_GCAL_SOURCE); bucket keys are psoxy-dev-erik/GCAL/rules.yaml.
-  shared_resource_path = "${trimsuffix(trimprefix(local.config_parameter_prefix, "/"), "_")}/"
+  # Object-key prefixes are siblings, not nested: shared is `{env}/` and instance is
+  # `{env}-{INSTANCE}/` so IAM `env/*` does not also match instance objects. Secret IDs still use
+  # config_parameter_prefix with a trailing '_' (e.g. psoxy-dev-erik_GCAL_SOURCE).
+  resource_path_root   = trimsuffix(trimprefix(local.config_parameter_prefix, "/"), "_")
+  shared_resource_path = "${local.resource_path_root}/"
   connector_instance_resource_path = { for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) :
-    k => "${local.shared_resource_path}${replace(upper(k), "-", "_")}/"
+    k => "${local.resource_path_root}-${replace(upper(k), "-", "_")}/"
   }
   remote_resources_enabled = var.enable_remote_resources && module.psoxy.artifacts_bucket_name != null
 
@@ -87,6 +89,7 @@ locals {
       try(local.api_connector_rules_raw[k], null) != null ? local.api_connector_rules_raw[k] : null
     )
   }
+
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -335,6 +338,9 @@ module "api_connector" {
     var.api_connector_path_prefix_to_trim != null ? { REQUEST_PATH_PREFIX_TO_TRIM = var.api_connector_path_prefix_to_trim } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      GEN_METADATA_BACKEND = "vertex"
+    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
@@ -539,6 +545,9 @@ module "bulk_connector" {
     },
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      GEN_METADATA_BACKEND = "vertex"
+    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
@@ -551,6 +560,20 @@ module "bulk_connector" {
 }
 
 # END BULK CONNECTORS
+
+locals {
+  vertex_sa_emails = toset(compact(concat(
+    [for k, v in var.api_connectors : google_service_account.api_connectors[k].email if try(v.enable_gen_metadata, false)],
+    [for k, v in var.bulk_connectors : module.bulk_connector[k].instance_sa_email if try(v.enable_gen_metadata, false)],
+  )))
+}
+
+module "enable_vertex" {
+  source = "../../modules/gcp-enable-vertex"
+
+  project_id             = var.gcp_project_id
+  service_account_emails = local.vertex_sa_emails
+}
 
 # BEGIN LOOKUP TABLES
 module "lookup_output" {

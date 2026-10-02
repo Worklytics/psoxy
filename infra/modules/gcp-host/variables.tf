@@ -193,6 +193,7 @@ variable "api_connectors" {
     oauth_scopes_needed     = optional(list(string), [])
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -274,6 +275,7 @@ variable "bulk_connectors" {
     settings_to_provide   = optional(map(string), {})
     available_memory_mb   = optional(number)
     timeout_seconds       = optional(number)
+    enable_gen_metadata   = optional(bool, false)
   }))
 
   description = "map of connector id  => bulk connectors to provision"

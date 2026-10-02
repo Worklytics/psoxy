@@ -214,7 +214,8 @@ module "psoxy_lambda" {
   sqs_trigger_queue_arns               = var.enable_async_processing ? [aws_sqs_queue.async_api_request_queue[0].arn] : []
   lambda_role_iam_statements = concat(
     var.enable_async_processing ? module.async_output_iam_statements[0].iam_statements : [],
-    local.sqs_iam_statements
+    local.sqs_iam_statements,
+    var.extra_lambda_role_iam_statements
   )
 
   environment_variables = merge(
@@ -239,6 +240,7 @@ module "psoxy_lambda" {
   remote_resource_bucket        = var.remote_resource_bucket
   remote_resource_instance_path = var.remote_resource_instance_path
   remote_resource_shared_path   = var.remote_resource_shared_path
+  enable_bedrock                = var.enable_bedrock
 }
 
 # if async processing is enabled, trigger the lambda from the SQS queue

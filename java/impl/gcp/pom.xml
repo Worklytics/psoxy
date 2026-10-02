@@ -116,6 +116,13 @@
             <artifactId>google-cloud-kms</artifactId>
         </dependency>
 
+        <!-- Vertex via LangChain4j; google-genai adapter is still on LangChain4j's beta line (GA langchain4j + langchain4j-bedrock are 1.16.0). -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-google-genai</artifactId>
+            <version>${dependency.langchain4j-beta.version}</version>
+        </dependency>
+
 
         <!-- JUnit Jupiter API for writing tests -->
         <dependency>

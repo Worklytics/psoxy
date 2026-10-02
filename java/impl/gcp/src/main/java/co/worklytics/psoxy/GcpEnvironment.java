@@ -148,9 +148,4 @@ public class GcpEnvironment implements HostEnvironment {
     final String cloudSchedulerUserAgent = "Google-Cloud-Scheduler";
 
     public static final String PUBSUB_DELIVERY_ATTEMPT_HEADER = "X-Goog-Delivery-Attempt";
-
-
-    //q: how can we get the REGION in which the function is running/executing?
-
-
 }
