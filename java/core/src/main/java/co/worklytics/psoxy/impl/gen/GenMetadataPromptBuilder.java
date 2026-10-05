@@ -36,7 +36,7 @@ class GenMetadataPromptBuilder {
             + "Respond with exactly one JSON value that is an INSTANCE of the task result, "
             + "not a JSON Schema definition. "
             + "Never include schema keywords such as type, properties, required, or enum. "
-            + "No markdown fences, no prose before or after the JSON."
+            + "No markdown fences, no prose before or after the JSON.";
 
     List<ChatMessage> toMessages(String taskPrompt, JsonSchema outputSchema,
                                   String inputData) {
