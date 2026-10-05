@@ -7,4 +7,4 @@
 - [Guides](guides/README.md)
 - [Troubleshooting](troubleshooting.md)
 
-Related (**beta**): [External Application Load Balancer (ALB) + Cloud Armor](../development/gcp-external-alb.md)
+Related (**beta**): [External Application Load Balancer](guides/external-application-load-balancer.md)

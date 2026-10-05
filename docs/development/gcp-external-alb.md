@@ -2,6 +2,8 @@
 
 > **Status**: **Beta** — provisioned by `gcp-host` when `external_api_alb` is set (or BYO via `api_connector_external_lb_host`). Interfaces and resource shapes may change in a future release.
 > **Last Updated**: 2026-08-12
+>
+> Customer setup is in [External Application Load Balancer](../gcp/guides/external-application-load-balancer.md). This page is the design notes.
 
 ## Motivation
 

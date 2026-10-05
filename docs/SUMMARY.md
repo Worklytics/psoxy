@@ -25,6 +25,7 @@
   * [Guides](gcp/guides/README.md)
     * [Lookup Tables](gcp/guides/lookup-tables.md)
     * [VPC](gcp/guides/vpc.md)
+    * [External Application Load Balancer](gcp/guides/external-application-load-balancer.md)
     * [Deploying from Google Cloud Shell](gcp/guides/cloud-shell.md)
   * [GCP Troubleshooting](gcp/troubleshooting.md)
   * [GCP Development](gcp/development.md)
