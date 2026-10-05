@@ -1,4 +1,4 @@
-# Google Cloud Shell
+# Deploying from Google Cloud Shell
 
 IMPORTANT: Google Cloud Shells are somewhat ephemeral; GCP will delete the `home` directory of your Cloud Shell if you don't use it for ~180 days or so. As such, please be CERTAIN that you 1) [use a remote terraform state backend](https://developer.hashicorp.com/terraform/language/backend) and 2) commit or otherwise backup the Terraform configuration files you create/modify.
 
