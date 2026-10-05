@@ -147,6 +147,37 @@ locals {
   )
 }
 
+locals {
+  # Grant TODOs, with external-token instructions overwriting the same filename the local_file
+  # resource writes. try() avoids indexing a count=0 module. merge() of single-key maps
+  # last-wins on a shared filename (several connectors, one Entra app) instead of erroring.
+  msft_grant_todo_files = merge(concat(
+    [{}],
+    [for grant in values(module.msft_365_grants) : grant.todo_files],
+    [try(module.msft_365_grant_to_shared[0].todo_files, {})],
+  )...)
+
+  msft_external_todo_entries = [
+    for id, content in local.msft_365_todos : {
+      filename = coalesce(
+        try(module.msft_365_grants[id].todo_filename, null),
+        try(module.msft_365_grant_to_shared[0].todo_filename, null),
+      )
+      content = content
+    }
+    if contains(keys(local.connectors_with_external_todo), id)
+  ]
+
+  msft_external_todo_files = merge(concat(
+    [{}],
+    [for entry in local.msft_external_todo_entries : { (entry.filename) = entry.content } if entry.filename != null],
+  )...)
+
+  todo_files = merge(local.msft_grant_todo_files, local.msft_external_todo_files)
+}
+
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
 resource "local_file" "todo-with-external-todo" {
   for_each = local.todos_to_populate
 

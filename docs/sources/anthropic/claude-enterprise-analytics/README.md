@@ -6,7 +6,7 @@
 
 Our Claude Enterprise Analytics data connector uses the [Enterprise Analytics API](https://support.claude.com/en/articles/13703965-claude-enterprise-analytics-api-reference-guide) (Enterprise plan only) to import per-user usage metrics across all Claude surfaces — chat, Claude Code, Office add-ins, and Cowork — into Worklytics. It also imports per-member spend limit data from the [Spend Limits API](https://platform.claude.com/docs/en/manage-claude/spend-limits-api), which shares the same Enterprise key and is likewise Enterprise-only.
 
-**Proxy version:** the Spend Limits endpoints below are allow-listed starting in proxy version `0.6.9`.
+**Proxy version:** the Spend Limits endpoints below are allow-listed starting in proxy version `0.6.9`. The `bucket_width` param and the Claude Tag/RBAC-group/Slack-channel query params and response fields on `/user_usage_report` and `/user_cost_report` are allow-listed starting in proxy version `0.7.1`.
 
 ## Data Collected
 
@@ -14,8 +14,8 @@ Our Claude Enterprise Analytics data connector uses the [Enterprise Analytics AP
 |---|---|---|
 | `GET /v1/organizations/analytics/users` | Per-user daily activity counters: chat conversations, Claude Code sessions/commits/PRs/lines of code, Office add-in sessions, web searches | `read:analytics` |
 | `GET /v1/organizations/analytics/apps/chat/projects` | Per-project chat stats: creator identity, distinct user count, conversation count, message count | `read:analytics` |
-| `GET /v1/organizations/analytics/user_usage_report` | Aggregated token consumption per user: uncached input, cache creation, cache read, output, total tokens, web search requests, request count | `read:analytics` |
-| `GET /v1/organizations/analytics/user_cost_report` | Aggregated cost breakdown per user: amount, list amount, currency, request count | `read:analytics` |
+| `GET /v1/organizations/analytics/user_usage_report` | Per-user token consumption: uncached input, cache creation, cache read, output, total tokens, web search requests, request count. `bucket_width=1d` returns one row per user per day (each with its own `starting_at`/`ending_at`) instead of one row aggregating the whole requested range | `read:analytics` |
+| `GET /v1/organizations/analytics/user_cost_report` | Per-user cost breakdown: amount, list amount, currency, request count. Same `bucket_width=1d` behavior as `/user_usage_report` | `read:analytics` |
 | `GET /v1/organizations/spend_limits/effective` | Per-member effective spend limit, its source (user override, seat tier, group, or org default), and period-to-date spend | `read:spend_limits` |
 | `GET /v1/organizations/spend_limits/{SPEND_LIMIT_ID}` | Single spend-limit record lookup by id (same shape as one row of `/effective`) | `read:spend_limits` |
 | `GET /v1/organizations/spend_limit_increase_requests` | A member's request for a higher spend limit and how it was resolved (pending/approved/denied) | `read:spend_limits` |
@@ -27,7 +27,7 @@ Only `GET` endpoints are allow-listed. Setting/clearing a spend limit override a
 
 ### Privacy
 
-User identifiers (`user_id`, `email`, `id`, `email_address`) are pseudonymized before data leaves your infrastructure. No message content is collected.
+User identifiers (`user_id`, `email`, `id`, `email_address`, `claude_tag_user_id`) are pseudonymized before data leaves your infrastructure. No message content is collected.
 
 ### Data Freshness
 
@@ -51,7 +51,9 @@ See the [Claude Enterprise Analytics API Reference](https://support.claude.com/e
   - [users.json](example-api-responses/original/users.json) | [sanitized](example-api-responses/sanitized/users.json)
   - [apps_chat_projects.json](example-api-responses/original/apps_chat_projects.json) | [sanitized](example-api-responses/sanitized/apps_chat_projects.json)
   - [user_usage_report.json](example-api-responses/original/user_usage_report.json) | [sanitized](example-api-responses/sanitized/user_usage_report.json)
+  - [user_usage_report_bucketed.json](example-api-responses/original/user_usage_report_bucketed.json) | [sanitized](example-api-responses/sanitized/user_usage_report_bucketed.json) (`bucket_width=1d`)
   - [user_cost_report.json](example-api-responses/original/user_cost_report.json) | [sanitized](example-api-responses/sanitized/user_cost_report.json)
+  - [user_cost_report_bucketed.json](example-api-responses/original/user_cost_report_bucketed.json) | [sanitized](example-api-responses/sanitized/user_cost_report_bucketed.json) (`bucket_width=1d`)
   - [spend_limits_effective.json](example-api-responses/original/spend_limits_effective.json) | [sanitized](example-api-responses/sanitized/spend_limits_effective.json)
   - [spend_limit_effective_single.json](example-api-responses/original/spend_limit_effective_single.json) | [sanitized](example-api-responses/sanitized/spend_limit_effective_single.json)
   - [spend_limit_increase_requests.json](example-api-responses/original/spend_limit_increase_requests.json) | [sanitized](example-api-responses/sanitized/spend_limit_increase_requests.json)

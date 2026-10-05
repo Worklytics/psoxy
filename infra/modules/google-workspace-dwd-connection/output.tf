@@ -22,3 +22,14 @@ output "next_todo_step" {
 output "todo" {
   value = local.todo_content
 }
+
+output "todo_filename" {
+  value = local.todo_filename
+}
+
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. The local_file copy is deprecated and will be removed in 0.8."
+  value = {
+    (local.todo_filename) = local.todo_content
+  }
+}
