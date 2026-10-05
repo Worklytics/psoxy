@@ -36,7 +36,7 @@
         <plugin.shade.version>3.6.2</plugin.shade.version>
         <plugin.resources.version>3.5.0</plugin.resources.version>
         <plugin.jar.version>3.5.1</plugin.jar.version>
-        <plugin.exec.version>3.6.3</plugin.exec.version>
+        <plugin.exec.version>3.6.4</plugin.exec.version>
         <plugin.cyclonedx.version>2.9.3</plugin.cyclonedx.version>
         <plugin.license.version>2.7.1</plugin.license.version>
         <maven.deploy.skip>true</maven.deploy.skip>
