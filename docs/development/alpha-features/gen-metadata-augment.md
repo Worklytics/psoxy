@@ -166,7 +166,7 @@ ClassifyProcessor / GenMetadataProcessor
 ```
 
 - Concurrent cloud calls use a semaphore (max 4).
-- **Token usage:** each cloud call accumulates provider `input` / `output` token counts (when returned). Totals are logged at the end of each bulk file. On AWS those totals are also written on the sanitized object (`psoxy-gen-metadata-input-tokens`, `psoxy-gen-metadata-output-tokens`, `psoxy-gen-metadata-calls`). GCS streams the destination object and does not patch metadata after create, so token counts stay in logs only.
+- **Token usage:** each cloud call accumulates provider `input` / `output` token counts (when returned). Totals are logged at the end of each bulk file and written on the sanitized object (`psoxy-gen-metadata-input-tokens`, `psoxy-gen-metadata-output-tokens`, `psoxy-gen-metadata-calls`). GCS streams the object then PATCHes metadata; if `storage.objects.update` is missing the PATCH 403s and totals stay in logs only.
 - Structured augment cells in CSV/Parquet are JSON-serialized (not Java `Map#toString()`).
 
 ## Error handling

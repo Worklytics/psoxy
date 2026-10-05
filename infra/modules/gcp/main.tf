@@ -277,22 +277,19 @@ module "test_tool" {
   psoxy_version = module.psoxy_package.version
 }
 
-# create custom role needed for any proxy use-case that writes output to a GCS bucket:
-# - bulk mode
-# - webhook collectors
-# - side output
-# - async mode
-# could condition creation of this on at least one of the above being used, but essentially EVERYONE uses at least one of those,
-# so not bothering with unnecessary complexity of that.
+# Least-privilege GCS writer for bulk / webhooks / side output / async.
+# roles/storage.objectCreator cannot overwrite or PATCH metadata.
+# roles/storage.objectUser also grants get/list/restore/multipart — more than these writers need.
 resource "google_project_iam_custom_role" "bucket_write" {
   project     = var.project_id
   role_id     = "${local.environment_id_role_prefix}writeAccess"
   title       = "${local.environment_id_prefix_display}Bucket Object Write/Update"
-  description = "Write and update support, because storage.objectCreator role only support creation - not update"
+  description = "Create, overwrite (delete+create), and PATCH object metadata. Narrower than roles/storage.objectUser (no get/list/restore)."
 
   permissions = [
     "storage.objects.create",
-    "storage.objects.delete"
+    "storage.objects.delete",
+    "storage.objects.update",
   ]
 }
 
