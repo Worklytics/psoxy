@@ -22,7 +22,7 @@ The Terraform identity that applies this needs these roles on the proxy project,
 
 | Role | Used for |
 |---|---|
-| [Compute Network Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.networkAdmin) (`roles/compute.networkAdmin`) | Reserved global IP and the load balancer |
+| [Compute Load Balancer Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.loadBalancerAdmin) (`roles/compute.loadBalancerAdmin`) | Reserved global IP, the load balancer, and the self-signed certificate |
 | [Compute Security Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.securityAdmin) (`roles/compute.securityAdmin`) | Cloud Armor, when you set an IP allowlist |
 | [Certificate Manager Editor](https://cloud.google.com/iam/docs/roles-permissions/certificatemanager#certificatemanager.editor) (`roles/certificatemanager.editor`) | Google-managed certificate for `domain` |
 

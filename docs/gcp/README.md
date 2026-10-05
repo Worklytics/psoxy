@@ -7,4 +7,4 @@
 - [Guides](guides/README.md)
 - [Troubleshooting](troubleshooting.md)
 
-Related (**beta**): [External Application Load Balancer](guides/external-application-load-balancer.md)
+Related (**beta**): [External Application Load Balancer](guides/external-alb.md)

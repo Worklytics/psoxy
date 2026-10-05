@@ -667,9 +667,9 @@ locals {
   # When gcp-host provisions external_api_alb (global external ALB + optional Cloud Armor).
   # Not required when using api_connector_external_lb_host (customer-owned ALB).
   required_gcp_roles_to_use_external_api_alb = {
-    "roles/compute.networkAdmin" = {
-      display_name    = "Compute Network Admin",
-      description_url = "https://cloud.google.com/iam/docs/roles-permissions/compute#compute.networkAdmin"
+    "roles/compute.loadBalancerAdmin" = {
+      display_name    = "Compute Load Balancer Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/compute#compute.loadBalancerAdmin"
     },
     "roles/compute.securityAdmin" = {
       display_name    = "Compute Security Admin",
