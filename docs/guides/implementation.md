@@ -30,7 +30,7 @@ Prior to this call, please follow the initial steps in the `Getting Started` sec
 
 Goals:
   1. get example customized and a terraform plan working.
-  2. run `terraform apply`. Obtain the `TODO 1` files you can send to your data source administrators to complete, as needed.
+  2. run `terraform apply`. Obtain the `TODO 1` files you can send to your data source administrators to complete, as needed. If those files were not written beside your configuration (`todos_as_local_files = false`), run `./generate-todos.sh` to write them from Terraform outputs. `local_file` generation of TODO markdown is deprecated and will be removed in 0.8.
 
 Tips:
   - Works best if we screenshare

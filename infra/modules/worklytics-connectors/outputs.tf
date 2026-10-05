@@ -19,6 +19,14 @@ output "todos" {
   value = values(module.source_token_external_todo)[*].todo
 }
 
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. The local_file copies are deprecated and will be removed in 0.8."
+  value = merge(concat(
+    [{}],
+    [for todo in values(module.source_token_external_todo) : todo.todo_files],
+  )...)
+}
+
 output "next_todo_step" {
   value = try(max(values(module.source_token_external_todo)[*].next_todo_step...), var.todo_step)
 }

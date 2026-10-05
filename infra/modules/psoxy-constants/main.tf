@@ -683,34 +683,46 @@ locals {
   }
 
   # Permissions to provision external_api_alb via gcp-host / gcp-external-api-alb.
-  # Subset suitable for a custom IAM role; see required_gcp_roles_to_use_external_api_alb for predefined roles.
+  # Suitable for a custom IAM role instead of required_gcp_roles_to_use_external_api_alb.
+  # Names are IAM permission IDs (Certificate Manager uses certs/certmaps/certmapentries, not the longer resource names).
   required_gcp_perms_to_use_external_api_alb = [
-    # Global external Application Load Balancer (Compute Engine API)
+    # Reserved global IP and long-running Compute operations
     "compute.globalAddresses.create",
     "compute.globalAddresses.delete",
     "compute.globalAddresses.get",
     "compute.globalAddresses.list",
     "compute.globalAddresses.use",
+    "compute.globalOperations.get",
+    "compute.regionOperations.get",
+
+    # Serverless NEGs, backend services, URL map, HTTPS proxy, forwarding rule
     "compute.regionNetworkEndpointGroups.create",
     "compute.regionNetworkEndpointGroups.delete",
     "compute.regionNetworkEndpointGroups.get",
     "compute.regionNetworkEndpointGroups.list",
+    "compute.regionNetworkEndpointGroups.use",
     "compute.backendServices.create",
     "compute.backendServices.delete",
     "compute.backendServices.get",
     "compute.backendServices.list",
     "compute.backendServices.update",
+    "compute.backendServices.use",
     "compute.backendServices.setSecurityPolicy",
     "compute.urlMaps.create",
     "compute.urlMaps.delete",
     "compute.urlMaps.get",
     "compute.urlMaps.list",
     "compute.urlMaps.update",
+    "compute.urlMaps.use",
     "compute.targetHttpsProxies.create",
     "compute.targetHttpsProxies.delete",
     "compute.targetHttpsProxies.get",
     "compute.targetHttpsProxies.list",
     "compute.targetHttpsProxies.update",
+    "compute.targetHttpsProxies.use",
+    "compute.targetHttpsProxies.setUrlMap",
+    "compute.targetHttpsProxies.setSslCertificates",
+    "compute.targetHttpsProxies.setCertificateMap",
     "compute.globalForwardingRules.create",
     "compute.globalForwardingRules.delete",
     "compute.globalForwardingRules.get",
@@ -732,20 +744,31 @@ locals {
     "compute.sslCertificates.get",
     "compute.sslCertificates.list",
 
+    # Enable certificatemanager.googleapis.com when external_api_alb.domain is set.
+    # Also included in the host provisioning permission set.
+    "serviceusage.services.enable",
+    "serviceusage.services.get",
+
     # Google-managed TLS (external_api_alb.domain)
-    "certificatemanager.certificates.create",
-    "certificatemanager.certificates.delete",
-    "certificatemanager.certificates.get",
-    "certificatemanager.certificates.list",
-    "certificatemanager.certificateMaps.create",
-    "certificatemanager.certificateMaps.delete",
-    "certificatemanager.certificateMaps.get",
-    "certificatemanager.certificateMaps.list",
-    "certificatemanager.certificateMaps.use",
-    "certificatemanager.certificateMapEntries.create",
-    "certificatemanager.certificateMapEntries.delete",
-    "certificatemanager.certificateMapEntries.get",
-    "certificatemanager.certificateMapEntries.list",
+    "certificatemanager.certs.create",
+    "certificatemanager.certs.delete",
+    "certificatemanager.certs.get",
+    "certificatemanager.certs.list",
+    "certificatemanager.certs.update",
+    "certificatemanager.certs.use",
+    "certificatemanager.certmaps.create",
+    "certificatemanager.certmaps.delete",
+    "certificatemanager.certmaps.get",
+    "certificatemanager.certmaps.list",
+    "certificatemanager.certmaps.update",
+    "certificatemanager.certmaps.use",
+    "certificatemanager.certmapentries.create",
+    "certificatemanager.certmapentries.delete",
+    "certificatemanager.certmapentries.get",
+    "certificatemanager.certmapentries.list",
+    "certificatemanager.certmapentries.update",
+    "certificatemanager.operations.get",
+    "certificatemanager.operations.list",
   ]
 
   # TODO: add list of permissions, which customer could use to create custom role as alternative

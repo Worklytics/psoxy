@@ -32,7 +32,7 @@ output "required_gcp_roles_to_use_external_api_alb" {
 
 output "required_gcp_permissions_to_use_external_api_alb" {
   value       = local.required_gcp_perms_to_use_external_api_alb
-  description = "The GCP permissions required when gcp-host provisions external_api_alb. Subset of permissions in required_gcp_roles_to_use_external_api_alb, suitable for creating a custom IAM role."
+  description = "IAM permission IDs required when gcp-host provisions external_api_alb, for a custom role instead of required_gcp_roles_to_use_external_api_alb. Includes apply and destroy for the load balancer, Cloud Armor, and managed certificates."
 }
 
 output "required_gcp_roles_to_provision_google_workspace_source" {

@@ -24,7 +24,7 @@
   * [Authentication and Authorization](gcp/authentication-authorization.md)
   * [Guides](gcp/guides/README.md)
     * [Deploying from Google Cloud Shell](gcp/guides/cloud-shell.md)
-    * [External Application Load Balancer](gcp/guides/external-alb.md)
+    * [External Application Load Balancer (ALB)](gcp/guides/external-alb.md)
     * [Lookup Tables](gcp/guides/lookup-tables.md)
     * [VPC](gcp/guides/vpc.md)
   * [GCP Troubleshooting](gcp/troubleshooting.md)

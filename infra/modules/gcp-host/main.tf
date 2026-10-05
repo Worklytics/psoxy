@@ -272,7 +272,8 @@ locals {
     try(var.external_api_alb.domain, null) != null ? var.external_api_alb.domain :
     google_compute_global_address.api_connector_alb[0].address
   )
-  api_connector_external_lb_enabled = local.api_connector_external_lb_host != null
+  # Plan-time signal only (do not derive from api_connector_external_lb_host when it is the reserved IP).
+  api_connector_external_lb_enabled = var.api_connector_external_lb_host != null || local.provision_external_api_alb
   # Shared LB base (no per-connector path); gcp-proxy-api appends /<function-name> for TODOs and endpoint_url
   api_connector_external_lb_base_url = local.api_connector_external_lb_enabled ? "https://${local.api_connector_external_lb_host}" : null
 }
@@ -383,6 +384,8 @@ EOT
   alb_dns_todo         = local.alb_managed_tls ? local.alb_dns_todo_content : null
 }
 
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
 resource "local_file" "todo_alb_dns_setup" {
   count = var.todos_as_local_files && local.alb_managed_tls ? 1 : 0
 

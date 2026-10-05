@@ -29,8 +29,14 @@ jobs:
     with:
       java-version: '25'
 
-  # Java 26 - released March 2026
+  # Java 26 - released March 2026; EoL September 15, 2026 (kept in CI for now, not listed as supported)
   ci_java26:
     uses: ./.github/workflows/build-java.yaml
     with:
       java-version: '26'
+
+  # Java 27 - released September 2026
+  ci_java27:
+    uses: ./.github/workflows/build-java.yaml
+    with:
+      java-version: '27'

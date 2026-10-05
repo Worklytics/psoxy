@@ -42,6 +42,12 @@ Leave `external_api_alb = null` (default) to expose API connectors via their dir
 
 Optionally set `allowed_data_access_ip_blocks` to Worklytics egress IPs (same list for Cloud Armor and the proxy). Leave `null` for open ingress through the ALB (PoC / rely on IAM + app auth). An empty list is invalid.
 
+### Worklytics tenant IAM (`roles/run.invoker`)
+
+An external ALB does not replace Cloud Run authorization. The load balancer forwards each request (including the `Authorization` header) to Cloud Run; Cloud Run still requires `roles/run.invoker` for the caller's identity. Terraform grants that role to each email in `worklytics_sa_emails` on each API connector, same as the direct `*.run.app` path. Optional Cloud Armor IP allowlisting is orthogonal — it restricts who can reach the ALB, not who Cloud Run accepts.
+
+If your organization enforces domain-restricted sharing, `terraform apply` may fail when creating that binding until you add a project-level exception for Worklytics's Google Workspace customer ID or organization principal set. See [GCP troubleshooting — permitted customer](../gcp/troubleshooting.md#error-400--one-or-more-users-named-in-policy-do-not-belong-to-a-permitted-customer).
+
 ### IAM permissions (Terraform provisioner)
 
 These apply when **`external_api_alb` is set** and Terraform provisions the ALB (not when you use `api_connector_external_lb_host` for a customer-owned load balancer).
@@ -103,6 +109,12 @@ Implemented by `infra/modules/gcp-external-api-alb` (invoked from `gcp-host`):
 - `google_compute_global_forwarding_rule` on `:443`
 
 Path routing relies on the proxy stripping the function-name prefix via `K_SERVICE` in `CloudFunctionRequest.getPath()`.
+
+### Custom audiences (required)
+
+Cloud Run IAM accepts a Google identity token only when its audience is the service URL or a [custom audience](https://cloud.google.com/run/docs/configuring/custom-audiences). Callers that reach connectors through the ALB mint the token for the public URL (`https://<host>/<function>`) and may also use `https://<region>-<project>.cloudfunctions.net/<function>`. Those are not the default `*.run.app` audience. Register both on each API connector or Cloud Run rejects the token (HTTP 401/403, sometimes masked as 404 under `ALLOW_INTERNAL_AND_GCLB`).
+
+`google_cloudfunctions2_function.service_config` still does not expose custom audiences (hashicorp/google 7.31 docs). `google_cloud_run_v2_service.custom_audiences` does, but these connectors are Cloud Functions gen2 resources, so the field is not available on the resource we manage. Customer steps and `tools/gcp/configure-custom-audiences.sh` are in [External Application Load Balancer (ALB)](../gcp/guides/external-alb.md#custom-audiences-required).
 
 Useful output from `gcp-host`: `external_api_alb` (object with `host`, `ip_address`, `todo_dns_setup`, `self_signed_ca_cert`; null when unused). The example root keeps that output commented out — uncomment if you need it.
 

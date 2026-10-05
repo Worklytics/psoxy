@@ -1,50 +1,84 @@
-# External Application Load Balancer
+# External Application Load Balancer (ALB)
 
-**Beta.** Setting `external_api_alb` provisions a global external HTTPS load balancer in front of your API connectors. The settings below may change in a future release.
+> **Status: Beta.** Provisioned by `gcp-host` when `external_api_alb` is set, or bring-your-own via `api_connector_external_lb_host`. Interfaces may change in a future release.
 
-Use this when Worklytics must reach your API connectors over the public internet through a hostname you control, or when your organization policy disallows public `*.run.app` URLs and requires Cloud Run ingress of `internal-and-cloud-load-balancing`. You can also restrict which source IPs may call the load balancer.
+Use this when Worklytics must reach API connectors over the public internet through a hostname you control, or when your organization policy requires Cloud Run ingress of `internal-and-cloud-load-balancing`. You can also restrict which source IPs may call the load balancer.
 
-This is the inbound path for API connectors. Outbound calls from the proxy to data sources, including a fixed egress IP, are configured separately with [VPC egress](vpc.md). Bulk connectors are unchanged. Webhook collectors keep their own endpoints.
+This is the inbound path for API connectors. Outbound calls from the proxy to data sources, including a fixed egress IP, are configured separately with [VPC egress](vpc.md). Bulk connectors are unchanged. Webhook collectors keep their own endpoints. Leave `external_api_alb` unset to keep each API connector on its direct Cloud Functions URL (`*.run.app`).
 
-## Enable managed TLS
+Implementation notes live in [GCP External Application Load Balancer (ALB) + Cloud Armor](../../development/gcp-external-alb.md).
+
+## Enable it
 
 In `terraform.tfvars`:
 
 ```hcl
+# Google-managed TLS. Create the DNS record from the apply TODO before testing.
 external_api_alb = {
   domain = "proxy.example.com"
 }
+
+# Self-signed certificate on a reserved global IP (proof of concept)
+# external_api_alb = {}
 ```
 
-`domain` is the hostname Worklytics and your tests will use. Leave `external_api_alb` unset to keep each API connector on its direct Cloud Functions URL.
+`terraform apply` then:
 
-The Terraform identity that applies this needs these roles on the proxy project, in addition to the [roles required for a GCP deployment](../getting-started.md#iam-permissions):
+- Sets each API connector’s Cloud Functions ingress to `ALLOW_INTERNAL_AND_GCLB`, so internet clients reach the connector through the load balancer rather than `*.run.app`.
+- Sets each connector’s public endpoint URL to `https://<host>/<function-name>/`. Test TODOs, generated test scripts, and the Worklytics "Psoxy Base URL" use that URL.
+- For managed TLS (`domain` set), writes a DNS-setup TODO. Point that hostname at the reserved IP before you test or connect Worklytics. Certificate provisioning often takes 15–60 minutes after DNS propagates.
 
-| Role | Used for |
+Uncomment the `external_api_alb` output in the example root if you need the host, reserved IP, DNS TODO, or self-signed CA certificate from `terraform output`.
+
+### IAM when Terraform provisions the load balancer
+
+Grant the Terraform runner these predefined roles on the host project when `external_api_alb` is set, in addition to the [roles required for a GCP deployment](../getting-started.md#iam-permissions). Bring-your-own (`api_connector_external_lb_host`) does not need them.
+
+| Role | Why |
 |---|---|
 | [Compute Load Balancer Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.loadBalancerAdmin) (`roles/compute.loadBalancerAdmin`) | Reserved global IP, the load balancer, and the self-signed certificate |
 | [Compute Security Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.securityAdmin) (`roles/compute.securityAdmin`) | Cloud Armor, when you set an IP allowlist |
-| [Certificate Manager Editor](https://cloud.google.com/iam/docs/roles-permissions/certificatemanager#certificatemanager.editor) (`roles/certificatemanager.editor`) | Google-managed certificate for `domain` |
+| [Certificate Manager Editor](https://cloud.google.com/iam/docs/roles-permissions/certificatemanager#certificatemanager.editor) (`roles/certificatemanager.editor`) | Google-managed TLS when `external_api_alb.domain` is set |
 
-[Compute Engine API](https://console.cloud.google.com/apis/library/compute.googleapis.com) and [Certificate Manager API](https://console.cloud.google.com/apis/library/certificatemanager.googleapis.com) must be enabled. A missing role usually surfaces as `403` on `compute.globalAddresses.create`, `compute.sslCertificates.create`, or a Certificate Manager resource during `terraform apply`.
+[Compute Engine API](https://console.cloud.google.com/apis/library/compute.googleapis.com) must be enabled. [Certificate Manager API](https://console.cloud.google.com/apis/library/certificatemanager.googleapis.com) must be enabled for managed TLS; Terraform attempts to enable it when `domain` is set.
 
-After apply:
+To grant a custom role instead of these predefined roles, use `required_gcp_permissions_to_use_external_api_alb` from [`psoxy-constants`](../../../infra/modules/psoxy-constants).
 
-1. Create the DNS record from the TODO file `TODO * - configure DNS for API connector load balancer.md` (an `A` record for your domain pointing at the reserved global IP).
-2. Wait for the Google-managed certificate. Provisioning often takes 15–60 minutes after DNS propagates.
-3. Use the connector URLs from the Worklytics connection TODOs. They look like `https://proxy.example.com/<function-name>/`. Give Worklytics those URLs.
+## Custom audiences (required)
 
-To print the hostname, reserved IP, and DNS instructions from Terraform, uncomment the `external_api_alb` output in the example `main.tf` and run `terraform output external_api_alb`.
+**Required after apply.** API connectors authenticate the caller with a Google identity token (`roles/run.invoker` on the Cloud Run service). Cloud Run accepts that token only when the token’s audience is the Cloud Run service URL, or a URL registered as a [custom audience](https://cloud.google.com/run/docs/configuring/custom-audiences).
+
+Through the load balancer, the audience is the public URL Worklytics calls, not the default `*.run.app` URL. Register both of the following on each API connector service:
+
+- `https://<region>-<project>.cloudfunctions.net/<function>`
+- `https://<api-proxy-domain>/<function>`
+
+`<api-proxy-domain>` is `external_api_alb.domain` for managed TLS, the reserved global IP for the self-signed proof of concept, or `api_connector_external_lb_host` for a load balancer you provisioned yourself.
+
+If these audiences are missing, Cloud Run rejects the identity token. The failure is often HTTP 401 or 403. With `ALLOW_INTERNAL_AND_GCLB`, a missing or rejected token can also surface as HTTP 404.
+
+As of 2026-09-15, Google's terraform resource `google_cloudfunctions2_function` has no custom-audience argument and the GCP console UX does not allow directly setting these values. The only solution is to use the `gcloud` CLI.
+
+Specifically, you must run a gcloud command like the following for each API connector:
+
+```shell
+gcloud run services update "$FUNCTION_NAME" \
+  --project="$PROJECT_ID" \
+  --region="$REGION" \
+  --set-custom-audiences="https://${REGION}-${PROJECT_ID}.cloudfunctions.net/${FUNCTION_NAME},https://${API_PROXY_DOMAIN}/${FUNCTION_NAME}"
+```
+
+To ease this, we provide a script. After `terraform init`, it is at `.terraform/modules/psoxy/tools/gcp/configure-custom-audiences.sh`. Run that from the root of your Terraform configuration and it will assist you by running the gcloud commands.
+
+The script checks that `terraform`, `gcloud`, and `jq` are installed, that `terraform.tfvars` is in the current directory, and that `gcloud` is authenticated. It reads the project, region, API proxy domain, and connector function names from Terraform output when those outputs exist, and otherwise from `terraform.tfvars` (`gcp_project_id`, `gcp_region`, `api_proxy_domain`, `external_api_alb.domain`, or `api_connector_external_lb_host`). If `gcp_region` is omitted from `terraform.tfvars` (the example default is `us-central1`), the script asks you to enter the region. It prints the resolved values and the `gcloud` updates it will run, and waits for confirmation before changing anything.
+
+Re-run the script after you add an API connector. `--set-custom-audiences` replaces the custom-audience list on each service.
 
 ## Restrict source IPs
 
 To allow only known client IPs through the load balancer, set `allowed_data_access_ip_blocks` to a non-empty list of IPs or CIDR blocks. Worklytics can provide fixed egress IPs for your tenant as a paid add-on; contact [sales@worklytics.co](mailto:sales@worklytics.co).
 
 ```hcl
-external_api_alb = {
-  domain = "proxy.example.com"
-}
-
 allowed_data_access_ip_blocks = [
   "203.0.113.10/32",
   "2001:db8::/32",
@@ -55,17 +89,15 @@ Terraform attaches Cloud Armor rules for that list on the load balancer, and the
 
 Leave `allowed_data_access_ip_blocks` unset to leave the load balancer open to any source IP. Callers still authenticate to the connector. An empty list is rejected by Terraform.
 
-See [Client IP Allowlisting](../../configuration/ip-allowlisting.md) for how the proxy applies the list.
+See [Client IP Allowlisting](../../configuration/ip-allowlisting.md).
 
 ## Try it without a domain
-
-For a short proof of concept, reserve an IP and serve a self-signed certificate:
 
 ```hcl
 external_api_alb = {}
 ```
 
-Clients use `https://<reserved-ip>/<function-name>/`. The certificate is issued for that IP. Test commands need `--allow-insecure-tls`, or `--cacert` with the PEM in `external_api_alb.self_signed_ca_cert` from `terraform output external_api_alb`. Use a domain and managed TLS for a Worklytics connection.
+Clients use `https://<reserved-ip>/<function-name>/`. The certificate is issued for that IP. Test commands need `--allow-insecure-tls`, or `--cacert` with the PEM in `external_api_alb.self_signed_ca_cert` from `terraform output external_api_alb`. Use a domain and managed TLS for a Worklytics connection. Custom audiences are still required; use the reserved IP as `<api-proxy-domain>`.
 
 ## Use a load balancer you already operate
 
@@ -77,7 +109,7 @@ api_connector_external_lb_host = "proxy.example.com"
 
 In the GCP example this argument is commented next to `external_api_alb` in `main.tf`. The two settings cannot be used together.
 
-You provide TLS, DNS, and any Cloud Armor policy. Route `https://<host>/<function-name>` and `https://<host>/<function-name>/*` to that connector. Terraform switches each API connector to load-balancer ingress and rewrites the URLs in the connection TODOs to `https://<host>/<function-name>/`. `allowed_data_access_ip_blocks` is still enforced by the proxy. Cloud Armor is not created for you in this mode.
+You provide TLS, DNS, and any Cloud Armor policy. Route `https://<host>/<function-name>` and `https://<host>/<function-name>/*` to that connector. Terraform switches each API connector to load-balancer ingress and rewrites the URLs in the connection TODOs to `https://<host>/<function-name>/`. `allowed_data_access_ip_blocks` is still enforced by the proxy. Cloud Armor is not created for you in this mode. Register custom audiences for your hostname.
 
 ## Testing
 
@@ -99,7 +131,7 @@ A completed TLS handshake with HTTP 403 or 404 means the load balancer is up. Fo
 
 ### 403 Forbidden
 
-A minimal HTML page (`<title>403</title>403 Forbidden`) is Cloud Armor rejecting the source IP before the request reaches the proxy. A 403 response body from Psoxy means the request passed Cloud Armor and the connector's own allowlist rejected it.
+A minimal HTML page (`<title>403</title>403 Forbidden`) is Cloud Armor rejecting the source IP before the request reaches the proxy. A 403 response body from Psoxy means the request passed Cloud Armor and the connector's own allowlist rejected it. HTTP 401 or 403 after Cloud Armor allows the request can also mean the [custom audience](#custom-audiences-required) is missing.
 
 1. Check the address you are connecting from. Add both if you are unsure which one clients use:
 

@@ -163,6 +163,22 @@ class PseudonymizerImplTest {
                 encoder.encodeToString(decoded.getHash()));
     }
 
+    @Test
+    @SuppressWarnings("deprecation")
+    void includeEncryptedMatchesDeprecatedIncludeReversible() {
+        final String CANONICAL = "original";
+
+        PseudonymizedIdentity encrypted = pseudonymizer.pseudonymize(CANONICAL,
+            Transform.Pseudonymize.builder().includeEncrypted(true).build());
+        PseudonymizedIdentity reversible = pseudonymizer.pseudonymize(CANONICAL,
+            Transform.Pseudonymize.builder().includeReversible(true).build());
+
+        assertNotNull(encrypted.getReversible());
+        assertEquals(encrypted.getHash(), reversible.getHash());
+        assertEquals(encrypted.getReversible(), reversible.getReversible());
+        assertNull(pseudonymizer.pseudonymize(CANONICAL, Transform.Pseudonymize.builder().build()).getReversible());
+    }
+
 
     @CsvSource({
         "PRESERVE,alice@acme.com,acme.com",

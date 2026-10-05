@@ -280,6 +280,18 @@ output "todos_3" {
   value       = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics)[*].todo) : null
 }
 
+output "todo_files" {
+  description = "TODO markdown files (filename => content). Write them with ./generate-todos.sh. local_file resources that write the same files are deprecated and will be removed in 0.8."
+  value = merge(concat(
+    [{}],
+    [module.worklytics_connectors.todo_files],
+    [module.worklytics_connectors_google_workspace.todo_files],
+    [module.worklytics_connectors_msft_365.todo_files],
+    [module.psoxy.todo_files],
+    [for connection in values(module.connection_in_worklytics) : connection.todo_files],
+  )...)
+}
+
 # although should be sensitive such that Terraform won't echo it to command line or expose it, leave
 # commented out in example until needed
 # if you uncomment it, you will then be able to obtain the value through `terraform output --raw pseudonym_salt`

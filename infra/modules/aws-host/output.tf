@@ -80,6 +80,15 @@ output "setup_todos" {
   value       = values(module.bulk_connector)[*].todo_setup
 }
 
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. local_file copies are deprecated and will be removed in 0.8."
+  value = merge(concat(
+    [{}],
+    [for connector in values(module.api_connector) : connector.todo_files],
+    [for connector in values(module.bulk_connector) : connector.todo_files],
+  )...)
+}
+
 output "next_todo_step" {
   value = max(concat(
     values(module.api_connector)[*].next_todo_step,

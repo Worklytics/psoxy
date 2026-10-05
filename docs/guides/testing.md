@@ -38,8 +38,8 @@ If you're running the Terraform examples in a different location from where you 
 
 3. Get specific test commands for your deployment
 
-    - If you set the `todos_as_outputs` variable to `true`, your Terraform apply run should contain `todo2` output variable with testing instructions.
-    - If you set `todos_as_local_files` variable to `true`, your Terraform apply run should contain local files named `TODO 2 ...` with testing instructions.
+    - If you set the `todos_as_outputs` variable to `true`, your Terraform apply run should contain `todos_2` output variable with testing instructions. `./generate-todos.sh` writes each TODO file from the `todo_files` output (or, on older modules, `todos_1.md` / `todos_2.md` / `todos_3.md` from the joined outputs).
+    - If you set `todos_as_local_files` variable to `true` (the default), your Terraform apply run still writes local files named `TODO 2 ...` with testing instructions. That `local_file` behavior is deprecated and will be removed in 0.8. `./generate-todos.sh` writes the same files from outputs.
 
     In both cases, you will need to replace the test tool path included there with the path to your installation.
 
