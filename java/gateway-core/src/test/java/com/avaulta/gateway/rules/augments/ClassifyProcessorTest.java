@@ -57,6 +57,12 @@ class ClassifyProcessorTest {
     }
 
     @Test
+    void findClass_trimsConfiguredClassNames() {
+        ClassifyProcessor processor = processorReturning("ignored");
+        assertEquals("Feature", processor.findClass("Feature", List.of(" Feature ")));
+    }
+
+    @Test
     void compute_throwsWhenNoClassPresent() {
         ClassifyProcessor processor = processorReturning("not a known label");
         assertThrows(GenMetadataAugmentException.class,

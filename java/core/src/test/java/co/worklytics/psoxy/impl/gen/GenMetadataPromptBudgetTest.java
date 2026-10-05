@@ -33,4 +33,11 @@ class GenMetadataPromptBudgetTest {
     void fitDynamicInput_zeroBudgetYieldsEmpty() {
         assertTrue(promptBudget.fitDynamicInput("abc", 0).isEmpty());
     }
+
+    @Test
+    void fitDynamicInput_breaksOnNonWordCharacter() {
+        // 2 estimated tokens → 8 chars would cut "hello world extra" mid-"world"
+        String fitted = promptBudget.fitDynamicInput("hello world extra", 2);
+        assertEquals("hello ", fitted);
+    }
 }

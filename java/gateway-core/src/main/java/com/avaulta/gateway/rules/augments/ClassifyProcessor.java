@@ -90,17 +90,18 @@ public class ClassifyProcessor {
         String best = null;
         int bestIndex = Integer.MAX_VALUE;
         for (String candidate : classes) {
-            if (StringUtils.isBlank(candidate)) {
+            String trimmed = StringUtils.trimToNull(candidate);
+            if (trimmed == null) {
                 continue;
             }
-            int index = text.indexOf(candidate);
+            int index = text.indexOf(trimmed);
             if (index < 0) {
                 continue;
             }
             if (best == null
-                || candidate.length() > best.length()
-                || (candidate.length() == best.length() && index < bestIndex)) {
-                best = candidate;
+                || trimmed.length() > best.length()
+                || (trimmed.length() == best.length() && index < bestIndex)) {
+                best = trimmed;
                 bestIndex = index;
             }
         }

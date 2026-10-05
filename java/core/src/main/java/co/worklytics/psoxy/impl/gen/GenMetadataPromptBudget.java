@@ -24,6 +24,7 @@ public class GenMetadataPromptBudget {
 
     /**
      * Truncate serialized source so it fits {@code maxInputTokens} estimated tokens.
+     * When truncating, the cut prefers a preceding whitespace or punctuation so a word is not split.
      */
     public String fitDynamicInput(String inputData, int maxInputTokens) {
         if (inputData == null) {
@@ -33,6 +34,13 @@ public class GenMetadataPromptBudget {
         if (inputData.length() <= budgetChars) {
             return inputData;
         }
-        return inputData.substring(0, budgetChars);
+        int cut = budgetChars;
+        while (cut > 0 && Character.isLetterOrDigit(inputData.charAt(cut - 1))) {
+            cut--;
+        }
+        if (cut == 0) {
+            cut = budgetChars;
+        }
+        return inputData.substring(0, cut);
     }
 }
