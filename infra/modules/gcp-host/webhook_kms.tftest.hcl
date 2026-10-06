@@ -39,18 +39,9 @@ mock_provider "google" {
 run "provision_auth_key_enables_kms_and_creates_key_ring" {
   command = plan
 
-  # Service id is computed; pin it so the plan-time output is known.
-  override_resource {
-    target = module.psoxy.google_project_service.cloud_kms[0]
-    values = {
-      id = "test-project-123456/cloudkms.googleapis.com"
-    }
-    override_during = plan
-  }
-
   assert {
     error_message = "Cloud KMS API should be enabled when a webhook provisions an auth key."
-    condition     = module.psoxy.kms_api_enabled == "test-project-123456/cloudkms.googleapis.com"
+    condition     = module.psoxy.enable_cloud_kms
   }
 
   assert {
@@ -66,17 +57,9 @@ run "byo_key_ring_skips_key_ring_but_enables_kms" {
     kms_key_ring = "projects/test-project-123456/locations/us-central1/keyRings/existing"
   }
 
-  override_resource {
-    target = module.psoxy.google_project_service.cloud_kms[0]
-    values = {
-      id = "test-project-123456/cloudkms.googleapis.com"
-    }
-    override_during = plan
-  }
-
   assert {
     error_message = "Cloud KMS API is still required to create a crypto key on a customer-supplied key ring."
-    condition     = module.psoxy.kms_api_enabled == "test-project-123456/cloudkms.googleapis.com"
+    condition     = module.psoxy.enable_cloud_kms
   }
 
   assert {

@@ -630,6 +630,11 @@ output "kms_api_enabled" {
   description = "ID of the enabled cloudkms.googleapis.com service, or null when enable_cloud_kms is false. gcp-host waits on this before creating a KMS key ring."
 }
 
+output "enable_cloud_kms" {
+  value       = var.enable_cloud_kms
+  description = "Whether cloudkms.googleapis.com is enabled. Known at plan time; kms_api_enabled is not, because the service id is computed."
+}
+
 output "oidc_token_verifier_role_id" {
   value       = try(google_project_iam_custom_role.oidc_token_verifier[0].id, null)
   description = "Role to grant on crypto key(s) used to sign OIDC tokens (used to authenticate requests to webhook collectors). Only provisioned if support_webhook_collectors is true."
