@@ -77,8 +77,8 @@ data "aws_region" "current" {}
 
 # role that Worklytics user will use to call the API
 resource "aws_iam_role" "api-caller" {
-  name                 = "${var.deployment_id}Caller"
-  description          = "role for AWS principals that may invoke the psoxy instance or read an instance's output"
+  name                 = "${var.deployment_id}SanitizedDataAccessor"
+  description          = "role for AWS principals that may access sanitized data via proxy, either by reading from -sanitized buckets or invoking instances"
   permissions_boundary = var.iam_roles_permissions_boundary
 
   # who can assume this role
@@ -102,6 +102,7 @@ resource "aws_iam_role" "api-caller" {
 
   lifecycle {
     ignore_changes = [
+      name, # TODO: drop in 1.0; existing deployments retain legacy *Caller role name until then
       tags
     ]
   }
