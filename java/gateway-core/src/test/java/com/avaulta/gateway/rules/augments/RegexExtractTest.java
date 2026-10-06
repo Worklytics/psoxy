@@ -121,6 +121,16 @@ class RegexExtractTest {
     }
 
     @Test
+    void compute_invalidGroup_returnsNull() {
+        Augment.RegexExtract augment = Augment.RegexExtract.builder()
+            .extraction("aiAssistModel", List.of(
+                groupRule("(?i)model:\\s*([\\w./+-]+)", 2)))
+            .build();
+
+        assertNull(augment.compute("model: claude-sonnet-4"));
+    }
+
+    @Test
     void compute_extractsCaptureGroup() {
         Augment.RegexExtract augment = Augment.RegexExtract.builder()
             .extraction("aiAssistModel", List.of(

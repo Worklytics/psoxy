@@ -9,6 +9,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AugmentValidationTest {
 
@@ -131,5 +132,39 @@ class AugmentValidationTest {
 
         assertDoesNotThrow(() -> AugmentValidation.validateEndpoints(List.of(
             Endpoint.builder().augment(valid).pathTemplate("/test").build())));
+    }
+
+    @Test
+    void validateRegexExtract_rejectsGroupExceedingCaptureCount() {
+        Augment.RegexExtract invalid = Augment.RegexExtract.builder()
+            .jsonPath("$.commit.message")
+            .extraction("aiAssistModel", List.of(
+                Augment.RegexExtract.ExtractionRule.builder()
+                    .regex("(?i)model:\\s*([\\w./+-]+)")
+                    .group(2)
+                    .build()))
+            .build();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            () -> AugmentValidation.validateEndpoints(List.of(
+                Endpoint.builder().augment(invalid).pathTemplate("/test").build())));
+        assertTrue(ex.getMessage().contains("group 2 exceeds capture group count"));
+    }
+
+    @Test
+    void validateRegexExtract_invalidRegexIncludesPatternInMessage() {
+        Augment.RegexExtract invalid = Augment.RegexExtract.builder()
+            .jsonPath("$.commit.message")
+            .extraction("aiAssistPlatform", List.of(
+                Augment.RegexExtract.ExtractionRule.builder()
+                    .regex("(?i)[unclosed")
+                    .value("Cursor")
+                    .build()))
+            .build();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            () -> AugmentValidation.validateEndpoints(List.of(
+                Endpoint.builder().augment(invalid).pathTemplate("/test").build())));
+        assertTrue(ex.getMessage().contains("invalid regex '(?i)[unclosed'"));
     }
 }

@@ -27,6 +27,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -215,6 +216,7 @@ class RegexExtractAiAttributionAugmentTest {
 
     private Augment.RegexExtract loadAugment(String resourcePath) throws Exception {
         try (InputStream in = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            assertNotNull(in, "Missing test resource: " + resourcePath);
             Augment augment = yamlMapper.readValue(in, Augment.class);
             assertInstanceOf(Augment.RegexExtract.class, augment);
             return (Augment.RegexExtract) augment;
@@ -223,6 +225,7 @@ class RegexExtractAiAttributionAugmentTest {
 
     private Map<String, Object> loadJson(String resourcePath) throws Exception {
         try (InputStream in = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            assertNotNull(in, "Missing test resource: " + resourcePath);
             return objectMapper.readValue(in, new TypeReference<>() {});
         }
     }

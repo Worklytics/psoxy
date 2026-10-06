@@ -144,24 +144,25 @@ public final class AugmentValidation {
                                 + "' requires non-blank regex on each rule");
                             continue;
                         }
+                        Pattern pattern;
                         try {
-                            Pattern pattern = Pattern.compile(rule.getRegex());
-                            if (rule.getGroup() != null) {
-                                if (rule.getGroup() < 1) {
-                                    errors.add("regexExtract field '" + entry.getKey()
-                                        + "' group must be >= 1 when set");
-                                } else {
-                                    int groupCount = pattern.matcher("").groupCount();
-                                    if (rule.getGroup() > groupCount) {
-                                        errors.add("regexExtract field '" + entry.getKey()
-                                            + "' group must be <= capture group count ("
-                                            + groupCount + ") when set");
-                                    }
-                                }
-                            }
+                            pattern = Pattern.compile(rule.getRegex());
                         } catch (PatternSyntaxException e) {
                             errors.add("regexExtract field '" + entry.getKey()
-                                + "' has invalid regex: " + e.getDescription());
+                                + "' has invalid regex '" + rule.getRegex() + "': "
+                                + e.getDescription());
+                            continue;
+                        }
+                        if (StringUtils.isBlank(rule.getValue())) {
+                            int group = rule.getGroup() != null ? rule.getGroup() : 1;
+                            if (group < 1) {
+                                errors.add("regexExtract field '" + entry.getKey()
+                                    + "' group must be >= 1 when set");
+                            } else if (group > pattern.matcher("").groupCount()) {
+                                errors.add("regexExtract field '" + entry.getKey()
+                                    + "' group " + group + " exceeds capture group count for regex '"
+                                    + rule.getRegex() + "'");
+                            }
                         }
                     }
                 }

@@ -485,7 +485,7 @@ public abstract class Augment {
                     continue;
                 }
                 for (ExtractionRule rule : entry.getValue()) {
-                    String extracted = rule.extract(text, compiledPatterns);
+                    String extracted = applyRule(text, rule);
                     if (extracted != null && !extracted.isEmpty()) {
                         result.put(field, extracted);
                         break;
@@ -493,6 +493,26 @@ public abstract class Augment {
                 }
             }
             return result.isEmpty() ? null : result;
+        }
+
+        private String applyRule(String text, ExtractionRule rule) {
+            if (rule == null || StringUtils.isBlank(rule.getRegex()) || text == null) {
+                return null;
+            }
+            Pattern pattern = compiledPatterns.computeIfAbsent(rule.getRegex(), Pattern::compile);
+            Matcher matcher = pattern.matcher(text);
+            if (!matcher.find()) {
+                return null;
+            }
+            if (StringUtils.isNotBlank(rule.getValue())) {
+                return rule.getValue();
+            }
+            int captureGroup = rule.getGroup() != null ? rule.getGroup() : 1;
+            if (captureGroup < 1 || captureGroup > matcher.groupCount()) {
+                return null;
+            }
+            String captured = matcher.group(captureGroup);
+            return captured == null ? null : captured.trim();
         }
 
         @SuppressWarnings("unchecked")
@@ -544,26 +564,6 @@ public abstract class Augment {
              */
             @JsonInclude(JsonInclude.Include.NON_NULL)
             Integer group;
-
-            String extract(String text, ConcurrentHashMap<String, Pattern> patternCache) {
-                if (StringUtils.isBlank(regex) || text == null) {
-                    return null;
-                }
-                Pattern pattern = patternCache.computeIfAbsent(regex, Pattern::compile);
-                Matcher matcher = pattern.matcher(text);
-                if (!matcher.find()) {
-                    return null;
-                }
-                if (StringUtils.isNotBlank(value)) {
-                    return value;
-                }
-                int captureGroup = group != null ? group : 1;
-                if (captureGroup < 1 || captureGroup > matcher.groupCount()) {
-                    return null;
-                }
-                String captured = matcher.group(captureGroup);
-                return captured == null ? null : captured.trim();
-            }
         }
     }
 }
