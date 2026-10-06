@@ -30,7 +30,7 @@ endpoints:
 
 The `textMetadata` augment requires OpenNLP model files (`en-sent.bin`, `en-pos-maxent.bin`, `en-chunker.bin`). These are **not** bundled in deployment JARs. Upload them to the [remote resources bucket](../../configuration/remote-resources.md) (requires `enable_remote_resources = true` on the host module).
 
-Place them under `{SHARED_RESOURCE_PATH}/opennlp/` (e.g. `{SHARED_RESOURCE_PATH}/opennlp/en-sent.bin`). `{SHARED_RESOURCE_PATH}` defaults to `PATH_TO_SHARED_CONFIG` / your Terraform `config_parameter_prefix` (GCP) or shared secrets path (AWS).
+Place them under the deployed function's `SHARED_RESOURCE_PATH` followed by `opennlp/`. Use the resource prefix, not the raw config/secrets prefix: for example, the GCP host converts `config_parameter_prefix = "psoxy_"` to `SHARED_RESOURCE_PATH = "psoxy/"`, so the model belongs at `psoxy/opennlp/en-sent.bin`. Host-generated resource prefixes already end in `/`. See [remote resource path prefixes](../../configuration/remote-resources.md#path-prefixes) for defaults and fallback rules.
 
 ### Helper script
 
