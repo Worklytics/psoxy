@@ -486,7 +486,7 @@ variable "external_api_alb" {
     domain = optional(string)
   })
   description = <<-EOT
-    **beta** When non-null, gcp-host provisions a global external Application Load Balancer in front of API connectors. Use `{}` for self-signed PoC on a reserved IP, or `{ domain = "proxy.example.com" }` for Google-managed TLS. See docs/development/gcp-external-alb.md. Mutually exclusive with passing api_connector_external_lb_host into the module for a customer-owned ALB.
+    **beta** When non-null, gcp-host provisions a global external Application Load Balancer in front of API connectors. Use `{}` for self-signed PoC on a reserved IP, or `{ domain = "proxy.example.com" }` for Google-managed TLS. See docs/gcp/guides/external-alb.md. Mutually exclusive with passing api_connector_external_lb_host into the module for a customer-owned ALB.
   EOT
   default     = null
   nullable    = true

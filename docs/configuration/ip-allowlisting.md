@@ -60,9 +60,9 @@ Health checks are not subject to this gate (they run before IP enforcement) but 
 
 **Beta:** You can run a GCP Application Load Balancer (ALB) **without** Cloud Armor (open at the network layer; rely on IAM and application-layer auth). Cloud Armor IP filtering is optional and only applies when both of the following are true:
 
-1. An external Application Load Balancer is enabled — set `external_api_alb` on `gcp-host`, or pass `api_connector_external_lb_host` for a customer-owned ALB (see [GCP External Application Load Balancer (ALB) + Cloud Armor](../development/gcp-external-alb.md)).
+1. An external Application Load Balancer is enabled — set `external_api_alb` on `gcp-host`, or pass `api_connector_external_lb_host` for a customer-owned ALB (see [External Application Load Balancer](../gcp/guides/external-alb.md)).
 2. `allowed_data_access_ip_blocks` is non-null (a non-empty CIDR list).
 
 Then that list is applied as **Cloud Armor** rules on the ALB backends (network layer) in addition to the connector env vars (application layer). A mismatch between the list you configured and the IP you test from produces **`403 Forbidden`** from Cloud Armor before the proxy runs — typically a bare HTML page, not a Psoxy error body. With a `null` list, no Cloud Armor IP rules are attached even if the ALB is enabled.
 
-After editing the allowlist in `terraform.tfvars`, run `terraform apply` and confirm the deployed rule (for example `gcloud compute security-policies rules describe 1000 ...`) includes your current IPv4 **and** IPv6 if either might be used. See [Troubleshooting](../development/gcp-external-alb.md#troubleshooting) in the ALB doc for `ECONNRESET` / TLS and 403 symptoms.
+After editing the allowlist in `terraform.tfvars`, run `terraform apply` and confirm the deployed rule (for example `gcloud compute security-policies rules describe 1000 ...`) includes your current IPv4 **and** IPv6 if either might be used. See [Troubleshooting](../gcp/guides/external-alb.md#troubleshooting) for TLS and 403 symptoms.

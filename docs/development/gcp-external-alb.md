@@ -2,6 +2,8 @@
 
 > **Status**: **Beta** — provisioned by `gcp-host` when `external_api_alb` is set (or BYO via `api_connector_external_lb_host`). Interfaces and resource shapes may change in a future release.
 > **Last Updated**: 2026-08-12
+>
+> Customer setup is in [GCP External ALB](../gcp/guides/external-alb.md). This page is the design notes.
 
 ## Motivation
 
@@ -54,8 +56,8 @@ Grant the Terraform runner the following predefined roles on the host project, o
 
 | Role | Why |
 |---|---|
-| [Compute Network Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.networkAdmin) (`roles/compute.networkAdmin`) | Reserved global IP (`compute.globalAddresses.*`), serverless NEGs, backend services, URL map, HTTPS proxy, global forwarding rule |
-| [Compute Security Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.securityAdmin) (`roles/compute.securityAdmin`) | Cloud Armor security policies (when `allowed_data_access_ip_blocks` is set); self-signed `google_compute_ssl_certificate` for PoC TLS |
+| [Compute Load Balancer Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.loadBalancerAdmin) (`roles/compute.loadBalancerAdmin`) | Reserved global IP (`compute.globalAddresses.create` and the rest of `compute.globalAddresses.*`), regional serverless NEGs (`compute.regionNetworkEndpointGroups.create` / `delete` / `get` / `list` / `use`), backend services, URL map, HTTPS proxy, global forwarding rule, and self-signed `google_compute_ssl_certificate` |
+| [Compute Security Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.securityAdmin) (`roles/compute.securityAdmin`) | Cloud Armor security policies (when `allowed_data_access_ip_blocks` is set) |
 | [Certificate Manager Editor](https://cloud.google.com/iam/docs/roles-permissions/certificatemanager#certificatemanager.editor) (`roles/certificatemanager.editor`) | Google-managed TLS when `external_api_alb.domain` is set (Certificate Manager certificate + map) |
 
 Common `403` errors during `terraform apply` if these are missing:
@@ -64,13 +66,17 @@ Common `403` errors during `terraform apply` if these are missing:
 Error: Error creating GlobalAddress: googleapi: Error 403: Required 'compute.globalAddresses.create' permission ...
 ```
 
-→ grant **Compute Network Admin** (or include `compute.globalAddresses.create` in a custom role).
+```
+Error: Error creating RegionNetworkEndpointGroup: googleapi: Error 403: Required 'compute.regionNetworkEndpointGroups.create' permission ...
+```
+
+→ grant **Compute Load Balancer Admin** (or include `compute.globalAddresses.*` and `compute.regionNetworkEndpointGroups.*` in a custom role). Both are in that predefined role.
 
 ```
 Error: Error creating SslCertificate: googleapi: Error 403: Required 'compute.sslCertificates.create' permission ...
 ```
 
-→ grant **Compute Security Admin** (or include `compute.sslCertificates.create` in a custom role).
+→ grant **Compute Load Balancer Admin** (or include `compute.sslCertificates.create` in a custom role).
 
 When using managed TLS (`domain` set), failures on `google_certificate_manager_*` resources require **Certificate Manager Editor** (or the `certificatemanager.*` permissions listed in `required_gcp_permissions_to_use_external_api_alb`).
 
