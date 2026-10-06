@@ -29,8 +29,8 @@
         <dependency.json-path.version>3.0.0</dependency.json-path.version>
         <dependency.opennlp.version>2.5.12</dependency.opennlp.version>
         <skipOpenNlpModelDownload>true</skipOpenNlpModelDownload>
+        <plugin.surefire.version>3.6.0</plugin.surefire.version>
         <dependency.bouncycastle.version>1.86</dependency.bouncycastle.version>
-        <plugin.surefire.version>3.5.6</plugin.surefire.version>
         <plugin.compiler.version>3.16.0</plugin.compiler.version>
         <plugin.flatten.version>1.8.0</plugin.flatten.version>
         <plugin.shade.version>3.6.2</plugin.shade.version>
