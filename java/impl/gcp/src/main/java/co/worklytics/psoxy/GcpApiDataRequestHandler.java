@@ -140,6 +140,10 @@ public class GcpApiDataRequestHandler {
             // unhandled exception while handling request
             log.log(Level.SEVERE, "Error while handling request", e);
             try {
+                if (GcpClientConnectivity.isTransportFailure(e)) {
+                    GcpConfigStoreResponses.write(request, response, e);
+                    return;
+                }
                 response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
                 response.appendHeader(ProcessedDataMetadataFields.ERROR.getHttpHeader(), ErrorCauses.UNKNOWN.name());
                 response.getWriter().write("Unknown internal proxy error; review logs");

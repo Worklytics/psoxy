@@ -98,11 +98,13 @@ public class HealthCheckRequestHandler {
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
     static final String CONFIG_STORE_UNREACHABLE_SUMMARY =
-            "Unable to reach the configuration store (AWS SSM Parameter Store or Secrets Manager). "
-                    + "Outbound connectivity from this function is blocked. On a VPC, this usually means "
-                    + "the interface endpoint or NAT gateway for that service is missing or unreachable, "
-                    + "or a security group blocks HTTPS to it. Check CloudWatch logs for "
-                    + "\"Error reading configuration from SSM\".";
+            "Unable to reach the configuration store. Outbound connectivity from this function is blocked. "
+                    + "On AWS, the VPC interface endpoint or NAT for SSM Parameter Store or Secrets Manager "
+                    + "is missing or unreachable, or a security group blocks HTTPS to it. "
+                    + "On GCP, a Cloud Function with VPC egress set to all traffic needs Private Google Access "
+                    + "or Cloud NAT to reach Secret Manager. "
+                    + "Search logs for \"Error reading configuration from SSM\" or "
+                    + "\"Error reading configuration from Secret Manager\".";
 
     private HttpEventResponse handle(HttpEventRequest request) {
         try {
@@ -124,8 +126,8 @@ public class HealthCheckRequestHandler {
 
     /**
      * JSON health-check body plus {@code X-Psoxy-Error: CONFIG_STORE_UNREACHABLE}.
-     * Used both when a health check reads SSM during the request and when Lambda startup failed
-     * before the handler graph was built.
+     * Used when a health check reads the configuration store during the request, and when function
+     * startup failed before the handler graph was built.
      */
     public static HttpEventResponse configStoreUnreachable(String callerIp, Throwable failure) {
         String detail = NetworkConnectivityFailures.describe(failure);

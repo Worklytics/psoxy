@@ -17,31 +17,31 @@ import java.util.concurrent.ExecutorService;
 @Log
 public class Route implements HttpFunction {
 
-    volatile GcpContainer container;
+    final GcpContainerStartup startup = new GcpContainerStartup();
 
     static {
         Security.addProvider(new BouncyCastleProvider());
     }
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
-        injectDependenciesIfNeeded();
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
+        GcpContainer container = startup.getOrCreate(DaggerGcpContainer::create);
+        if (startup.failed()) {
+            GcpConfigStoreResponses.write(request, response, startup.failure());
+            return;
+        }
 
         if (request.getMethod() == null) {
             log.warning("HTTP method of  com.google.cloud.functions.HttpRequest is null !???!");
         }
 
-        container.httpRequestHandler().service(request, response);
-
-    }
-
-    void injectDependenciesIfNeeded() {
-        if (container == null) {
-            synchronized (this) {
-                if (container == null) {
-                    container = DaggerGcpContainer.create();
-                }
+        try {
+            container.httpRequestHandler().service(request, response);
+        } catch (Throwable e) {
+            if (!GcpClientConnectivity.isTransportFailure(e)) {
+                throw e;
             }
+            GcpConfigStoreResponses.write(request, response, e);
         }
     }
 

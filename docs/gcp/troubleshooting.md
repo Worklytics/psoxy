@@ -220,6 +220,24 @@ Error: Error creating SslCertificate: googleapi: Error 403: Required 'compute.ss
 
 See [GCP External ALB](./guides/external-alb.md#iam-when-terraform-provisions-the-load-balancer).
 
+## Health check returns 503 `CONFIG_STORE_UNREACHABLE`
+
+Cloud Functions that set VPC egress to all traffic send Secret Manager calls through the VPC. Without [Private Google Access](https://cloud.google.com/vpc/docs/configure-private-google-access) on the subnet, or Cloud NAT, those calls cannot reach `secretmanager.googleapis.com`. The function then cannot read its configuration, including the pseudonym salt, at startup.
+
+A health check returns **HTTP 503** with header `X-Psoxy-Error: CONFIG_STORE_UNREACHABLE`. The JSON body has the same value in `error`, and `warningMessages` includes the client error. The same response is returned when container startup itself failed, instead of a generic 500 from Cloud Functions.
+
+Logs include `Error reading configuration from Secret Manager`.
+
+This is a network path problem. A secret that was never created is a different failure (`no value for PSOXY_SALT`), and a missing IAM grant is `Permission denied`, not this code.
+
+Check:
+
+- the subnet has Private Google Access, or Cloud NAT can reach the public internet
+- the VPC firewall allows egress to the Secret Manager API on port 443
+- the function service account is allowed to access the secret
+
+See [VPC configuration](guides/vpc.md#troubleshooting).
+
 ## Organization policy blocks Cloud Run networking
 
 Some enterprises enforce Cloud Run networking via [organization policy](https://cloud.google.com/resource-manager/docs/organization-policy/overview), for example:

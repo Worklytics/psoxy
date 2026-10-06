@@ -33,6 +33,7 @@ import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.FieldMask;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ConfigStoreUnreachableException;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.WritableConfigService;
@@ -170,8 +171,9 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                     return accessSecretVersion(client, secretVersionName);
                 } catch (NotFoundException notFoundException) {
                     log.log(Level.WARNING, "Failover to getting 'latest' version of secret " + paramName + " also failed; check if secret exists and has versions.", notFoundException);
-                } catch (Exception ignored) {
-                    log.log(Level.WARNING, "Failover to getting 'latest' version of secret " + paramName + " failed due to something other than 'NotFound' case.", ignored);
+                } catch (Exception failoverFailure) {
+                    rethrowIfSecretManagerUnreachable(paramName, failoverFailure);
+                    log.log(Level.WARNING, "Failover to getting 'latest' version of secret " + paramName + " failed due to something other than 'NotFound' case.", failoverFailure);
                 }
             }
 
@@ -179,9 +181,10 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                 log.log(Level.INFO, "Could not find secret " + paramName + " in Secret Manager", e);
             }
             return Optional.empty();
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            rethrowIfSecretManagerUnreachable(paramName, e);
             if (envVarsConfigService.isDevelopment()) {
-                log.log(Level.INFO, "Some exception other than NotFoundException for " + paramName + " in Secret Manager", ignored);
+                log.log(Level.INFO, "Some exception other than NotFoundException for " + paramName + " in Secret Manager", e);
             }
             // If secret is not found, it will return an exception
             return Optional.empty();
@@ -344,6 +347,20 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
         }
     }
 
+    private void rethrowIfSecretManagerUnreachable(String paramName, Exception e) {
+        if (e instanceof ConfigStoreUnreachableException unreachable) {
+            throw unreachable;
+        }
+        if (!GcpClientConnectivity.isTransportFailure(e)) {
+            return;
+        }
+        log.log(Level.SEVERE, "Error reading configuration from Secret Manager: " + e.getMessage(), e);
+        String message = e.getMessage() != null
+                ? e.getMessage()
+                : "Error reading configuration from Secret Manager for " + paramName;
+        throw new ConfigStoreUnreachableException(message, e);
+    }
+
     private SecretName getLockSecret(String lockName) {
         // As lockName is handled by Terraform, variable should be converted to uppercase
         // otherwise secret will not be found
@@ -413,6 +430,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                         }
                         return null;
                     } catch (Exception e) {
+                        rethrowIfSecretManagerUnreachable(paramName, e);
                         log.log(Level.WARNING, "Failed to retrieve version " + version.getName() + " of secret " + paramName, e);
                         return null;
                     }
@@ -431,6 +449,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
             }
             return Collections.emptyList();
         } catch (Exception e) {
+            rethrowIfSecretManagerUnreachable(paramName, e);
             log.log(Level.WARNING, "Unexpected error listing secret versions for " + paramName, e);
             return Collections.emptyList();
         }

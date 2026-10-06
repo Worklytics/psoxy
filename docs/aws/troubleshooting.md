@@ -143,6 +143,22 @@ terraform import module.psoxy-msft-connector\[\"outlook-mail\"\].aws_lambda_func
 NOTE: you likely need to change `outlook-mail` if your error is with a different data source. The
 `\` chars are needed to escape the double-quotes/brackets in your bash command.
 
+## Health check returns 503 `CONFIG_STORE_UNREACHABLE`
+
+A health check against a Lambda that cannot reach SSM Parameter Store or Secrets Manager returns **HTTP 503** with header `X-Psoxy-Error: CONFIG_STORE_UNREACHABLE`. The JSON body has the same value in `error`, and `warningMessages` includes the AWS SDK client error. The same response is returned when class initialization itself failed, so API Gateway does not collapse it into a generic 500/502.
+
+CloudWatch logs `Error reading configuration from SSM` or `Error reading configuration from Secrets Manager`.
+
+This is a network path problem. A parameter that does not exist, or that the execution role cannot read, is a different failure (`no value for PSOXY_SALT`); see [error reading SSM Parameters](#error-reading-ssm-parameters) below.
+
+On a VPC, check:
+
+- an interface VPC endpoint for SSM (and for Secrets Manager, when that store is used) on the Lambda's subnets, or a NAT path to those APIs
+- security groups allow HTTPS (443) from the Lambda to that endpoint
+- the endpoint's private DNS is enabled, so `ssm.<region>.amazonaws.com` resolves inside the VPC
+
+See [Lambdas on a VPC](guides/lambdas-on-vpc.md#troubleshooting).
+
 ## Permissions Errors
 
 ### error reading SSM Parameters

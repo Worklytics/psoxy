@@ -15,11 +15,17 @@ import java.io.*;
 public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
 
-    volatile GcpContainer container;
+    final GcpContainerStartup startup = new GcpContainerStartup();
 
     @Override
     public void accept(GcsEvent gcsEvent, Context context) throws Exception {
-       injectDependenciesIfNeeded();
+       GcpContainer container = startup.getOrCreate(DaggerGcpContainer::create);
+       if (startup.failed()) {
+           throw new IllegalStateException(
+                   "Cloud Function failed to initialize because Secret Manager is unreachable: "
+                           + GcpClientConnectivity.describe(startup.failure()),
+                   startup.failure());
+       }
 
        container.gcsFileEventHandler().process(gcsEvent, context);
     }
@@ -42,13 +48,4 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
     }
 
 
-    void injectDependenciesIfNeeded() {
-        if (container == null) {
-            synchronized (this) {
-                if (container == null) {
-                    container = DaggerGcpContainer.create();
-                }
-            }
-        }
-    }
 }

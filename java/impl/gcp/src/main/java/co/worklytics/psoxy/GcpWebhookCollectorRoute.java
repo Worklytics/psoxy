@@ -12,22 +12,22 @@ import lombok.extern.java.Log;
 @Log
 public class GcpWebhookCollectorRoute implements HttpFunction {
 
-    volatile GcpContainer container;
-
+    final GcpContainerStartup startup = new GcpContainerStartup();
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
-        injectDependenciesIfNeeded();
-        container.gcpWebhookCollectionHandler().handle(request, response);
-    }
-
-    void injectDependenciesIfNeeded() {
-        if (container == null) {
-            synchronized (this) {
-                if (container == null) {
-                    container = DaggerGcpContainer.create();
-                }
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
+        GcpContainer container = startup.getOrCreate(DaggerGcpContainer::create);
+        if (startup.failed()) {
+            GcpConfigStoreResponses.write(request, response, startup.failure());
+            return;
+        }
+        try {
+            container.gcpWebhookCollectionHandler().handle(request, response);
+        } catch (Throwable e) {
+            if (!GcpClientConnectivity.isTransportFailure(e)) {
+                throw e;
             }
+            GcpConfigStoreResponses.write(request, response, e);
         }
     }
 }

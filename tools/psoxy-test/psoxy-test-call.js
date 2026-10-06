@@ -172,9 +172,10 @@ export default async function (options = {}) {
             break;
           case 'CONFIG_STORE_UNREACHABLE':
             errorMessage =
-              'Configuration store unreachable: this Lambda cannot reach SSM Parameter Store or Secrets Manager. ' +
-              'On a VPC, add a reachable interface endpoint (or NAT) for that service and allow HTTPS from the Lambda security group. ' +
-              'Check CloudWatch logs for "Error reading configuration from SSM".';
+              'Configuration store unreachable: the function cannot reach its configuration service. ' +
+              'On AWS, add a reachable interface endpoint (or NAT) for SSM Parameter Store or Secrets Manager and allow HTTPS from the Lambda security group. ' +
+              'On GCP, a Cloud Function with VPC egress set to all traffic needs Private Google Access or Cloud NAT to reach Secret Manager. ' +
+              'Search logs for "Error reading configuration from SSM" or "Error reading configuration from Secret Manager".';
             break;
         }
       } else if (result.headers['x-amzn-errortype']) {
