@@ -744,6 +744,8 @@ locals {
     "compute.sslCertificates.get",
     "compute.sslCertificates.list",
 
+    "compute.sslCertificates.use",
+
     # Enable certificatemanager.googleapis.com when external_api_alb.domain is set.
     # Also included in the host provisioning permission set.
     "serviceusage.services.enable",
