@@ -145,7 +145,7 @@ Per-row Vertex/Bedrock calls are typically several seconds. A 100-row bulk file 
 
 ## Infrastructure (Terraform)
 
-Set `enable_gen_metadata = true` on the API or bulk connector you want to try, and load **custom rules** that declare `!<classify>` or `!<genMetadata>` augments.
+Set `enable_gen_metadata = true` on the API, bulk, or webhook collector you want to try, and load **custom rules** that declare `!<classify>` or `!<genMetadata>` augments.
 
 - **AWS:** Terraform attaches Bedrock invoke/converse IAM. Confirm Bedrock is usable in the account and region (see [AWS getting started](../../aws/getting-started.md#genmetadata-via-bedrock)). Default model: `us.amazon.nova-2-lite-v1:0`.
 - **GCP:** Terraform enables `aiplatform.googleapis.com` and grants `roles/aiplatform.user`. Default model: `gemini-3.5-flash-lite` at location `global`, thinking `minimal`.
@@ -167,7 +167,7 @@ ClassifyProcessor / GenMetadataProcessor
 
 - Concurrent cloud calls use a semaphore (max 4).
 - **Token usage:** each cloud call accumulates provider `input` / `output` token counts (when returned). Totals are logged at the end of each bulk file and written on the sanitized object (`psoxy-gen-metadata-input-tokens`, `psoxy-gen-metadata-output-tokens`, `psoxy-gen-metadata-calls`). GCS streams the object then PATCHes metadata; if `storage.objects.update` is missing the PATCH 403s and totals stay in logs only.
-- Structured augment cells in CSV/Parquet are JSON-serialized (not Java `Map#toString()`).
+- Structured augment cells in CSV/Parquet are JSON-serialized (not Java `Map#toString()`). Rule-derived augment columns are always present; a record with no match or a failed inference gets an empty placeholder so later rows cannot drop the column.
 
 ## Error handling
 

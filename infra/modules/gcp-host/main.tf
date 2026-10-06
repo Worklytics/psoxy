@@ -477,6 +477,9 @@ module "webhook_collector" {
     },
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      GEN_METADATA_BACKEND = "vertex"
+    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
@@ -565,6 +568,7 @@ locals {
   vertex_sa_emails = toset(compact(concat(
     [for k, v in var.api_connectors : google_service_account.api_connectors[k].email if try(v.enable_gen_metadata, false)],
     [for k, v in var.bulk_connectors : module.bulk_connector[k].instance_sa_email if try(v.enable_gen_metadata, false)],
+    [for k, v in var.webhook_collectors : google_service_account.webhook_collector[k].email if try(v.enable_gen_metadata, false)],
   )))
 }
 

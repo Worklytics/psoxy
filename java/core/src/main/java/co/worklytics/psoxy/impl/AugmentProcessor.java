@@ -388,8 +388,8 @@ public class AugmentProcessor {
      * itself ({@code $} / {@code $[*]}) or a top-level field ({@code $.prompt}). Nested paths
      * are omitted; those siblings are not bulk columns.
      *
-     * <p>Used so CSV/Parquet writers always emit these columns, with an empty cell when a
-     * record has no jsonPath match.
+     * <p>Used so CSV/Parquet writers always emit these columns, with an empty placeholder when a
+     * record has no jsonPath match or inference failed.
      */
     public List<String> topLevelAugmentPropertyNames(@NonNull Iterable<Augment> augments) {
         return StreamSupport.stream(augments.spliterator(), false)
@@ -403,13 +403,20 @@ public class AugmentProcessor {
     }
 
     /**
-     * Insert missing top-level augment columns as {@code null} so tabular writers see a stable
-     * schema even when this record had no jsonPath match.
+     * Empty cell for a rule-derived tabular augment column when this record had no jsonPath match
+     * or inference failed. CSV/Parquet lock headers from the first written row; a missing key
+     * there would drop the column for the whole file.
+     */
+    static final String TABULAR_AUGMENT_PLACEHOLDER = "";
+
+    /**
+     * Insert missing top-level augment columns as an empty placeholder so tabular writers see a
+     * stable schema even when this record had no jsonPath match or the augment failed.
      */
     public void ensureTopLevelAugmentProperties(@NonNull Map<String, Object> record,
                                                 @NonNull Iterable<Augment> augments) {
         topLevelAugmentPropertyNames(augments)
-            .forEach(name -> record.putIfAbsent(name, null));
+            .forEach(name -> record.putIfAbsent(name, TABULAR_AUGMENT_PLACEHOLDER));
     }
 
     static String topLevelAugmentPropertyName(String jsonPath, String functionName) {

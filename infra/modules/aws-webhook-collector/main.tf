@@ -102,6 +102,8 @@ module "gate_instance" {
     aws_kms_key.auth_key[*].arn
   )
 
+  enable_bedrock = var.enable_bedrock
+
   environment_variables = merge(
     var.environment_variables,
     local.required_env_vars,

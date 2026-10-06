@@ -381,6 +381,33 @@ class AugmentProcessorTest {
     }
 
     @Test
+    void ensureTopLevelAugmentProperties_emptyPlaceholderWhenMissing() {
+        Map<String, Object> record = new LinkedHashMap<>();
+        record.put("prompt", "hello");
+        augmentProcessor.ensureTopLevelAugmentProperties(record, List.of(
+            Augment.Classify.builder()
+                .jsonPath("$.prompt")
+                .prompt("Classify")
+                .classes(List.of("Feature", "Bugfix"))
+                .build()));
+        assertEquals(AugmentProcessor.TABULAR_AUGMENT_PLACEHOLDER, record.get("+prompt:classify"));
+        assertEquals("hello", record.get("prompt"));
+    }
+
+    @Test
+    void ensureTopLevelAugmentProperties_doesNotOverwriteExisting() {
+        Map<String, Object> record = new LinkedHashMap<>();
+        record.put("+prompt:classify", "Feature");
+        augmentProcessor.ensureTopLevelAugmentProperties(record, List.of(
+            Augment.Classify.builder()
+                .jsonPath("$.prompt")
+                .prompt("Classify")
+                .classes(List.of("Feature", "Bugfix"))
+                .build()));
+        assertEquals("Feature", record.get("+prompt:classify"));
+    }
+
+    @Test
     void hasConflictingProperties_topLevel() {
         Map<String, Object> document = new LinkedHashMap<>();
         document.put("+augmented", "conflict");

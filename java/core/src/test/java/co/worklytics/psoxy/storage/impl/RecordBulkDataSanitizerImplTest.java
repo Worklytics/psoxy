@@ -225,7 +225,7 @@ class RecordBulkDataSanitizerImplTest {
 
         String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
         String[] lines = output.split("\n", -1);
-        assertTrue(lines[0].contains("\"+prompt:textDigest\":null"), lines[0]);
+        assertTrue(lines[0].contains("\"+prompt:textDigest\":\"\""), lines[0]);
         assertTrue(lines[1].contains("\"+prompt:textDigest\""), lines[1]);
         assertTrue(lines[1].contains("\"word_count\""), lines[1]);
     }
@@ -270,6 +270,83 @@ class RecordBulkDataSanitizerImplTest {
             + "1,\n"
             + "2,\"{\"\"length\"\":11,\"\"word_count\"\":2}\"\n",
             output);
+    }
+
+    @SneakyThrows
+    @Test
+    void csv_augmentColumnPresentWhenFirstRecordAugmentFailed() {
+        this.setUpWithRules("---\n" +
+            "format: \"CSV\"\n" +
+            "augments:\n" +
+            "- !<classify>\n" +
+            "  jsonPaths:\n" +
+            "  - \"$.prompt\"\n" +
+            "  prompt: Classify\n" +
+            "  classes:\n" +
+            "  - Feature\n" +
+            "  - Bugfix\n");
+
+        String input = "id,prompt\n" +
+            "1,hello world\n" +
+            "2,classify this text\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/prompts.csv"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        assertEquals("id,prompt,+prompt:classify\n"
+            + "1,hello world,\n"
+            + "2,classify this text,\n",
+            output);
+    }
+
+    @SneakyThrows
+    @Test
+    void parquet_augmentColumnPresentWhenFirstRecordHasNoMatch() {
+        Container container = DaggerRecordBulkDataSanitizerImplTest_Container.builder()
+            .forConfigService(new Container.ForConfigService() {
+                @Provides
+                @Singleton
+                public ConfigService configService() {
+                    ConfigService mock = MockModules.provideMock(ConfigService.class);
+                    when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
+                        .thenReturn(Optional.of("---\n" +
+                            "format: \"NDJSON\"\n" +
+                            "augments:\n" +
+                            "- !<textDigest>\n" +
+                            "  jsonPaths:\n" +
+                            "  - \"$.prompt\"\n"));
+                    when(mock.getConfigPropertyAsOptional(
+                        eq(BulkModeConfig.BulkModeConfigProperty.BULK_OUTPUT_FORMAT)))
+                        .thenReturn(Optional.of("PARQUET"));
+                    return mock;
+                }
+            })
+            .build();
+        container.inject(this);
+        outputStream = new ByteArrayOutputStream();
+        outputStreamSupplier = () -> outputStream;
+
+        String input = "{\"id\":1}\n"
+            + "{\"id\":2,\"prompt\":\"hello world\"}\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/file.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),
+            outputStreamSupplier);
+
+        try (ParquetRecordReader reader =
+                 new ParquetRecordReader(new ByteArrayInputStream(outputStream.toByteArray()))) {
+            Map<String, Object> r1 = reader.readRecord();
+            Map<String, Object> r2 = reader.readRecord();
+            assertNotNull(r1);
+            assertNotNull(r2);
+            assertTrue(r1.containsKey("+prompt:textDigest"), "first row must reserve the augment column");
+            assertEquals("", r1.get("+prompt:textDigest"));
+            assertTrue(String.valueOf(r2.get("+prompt:textDigest")).contains("word_count"));
+        }
     }
 
     @Test

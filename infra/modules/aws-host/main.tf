@@ -398,6 +398,8 @@ module "webhook_collectors" {
   todos_as_local_files      = var.todos_as_local_files
   allowed_webhook_ip_blocks = var.allowed_webhook_ip_blocks
 
+  enable_bedrock = try(each.value.enable_gen_metadata, false)
+
   environment_variables = merge(
     {
       EMAIL_CANONICALIZATION = var.email_canonicalization

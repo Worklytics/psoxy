@@ -241,8 +241,9 @@ variable "webhook_collectors" {
     batch_processing_frequency_minutes = optional(number, 5)           # frequency (in minutes) at which to batch process webhooks
     output_path_prefix                 = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket
 
-    example_identity = optional(string, null) # example identity to use in test payloads
-    example_payload  = optional(string, null) # example payload content to use in test scripts
+    example_identity    = optional(string, null) # example identity to use in test payloads
+    example_payload     = optional(string, null) # example payload content to use in test scripts
+    enable_gen_metadata = optional(bool, false)  # ALPHA: !<classify> / !<genMetadata> in webhook rules (Vertex)
   }))
   default = {}
 

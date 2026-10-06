@@ -388,6 +388,7 @@ variable "webhook_collectors" {
     keep_warm_instances = optional(number, null)        # if set, keeps N Lambda instances warm to eliminate cold starts; adds cost (~$11/month per instance) but improves reliability
     example_identity    = optional(string, null)        # example identity to use in test payloads
     example_payload     = optional(string, null)        # example payload content to use in test scripts
+    enable_gen_metadata = optional(bool, false)         # ALPHA: !<classify> / !<genMetadata> in webhook rules (Bedrock)
   }))
   default = {}
 
