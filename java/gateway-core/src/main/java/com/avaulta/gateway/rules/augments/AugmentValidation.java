@@ -145,14 +145,23 @@ public final class AugmentValidation {
                             continue;
                         }
                         try {
-                            Pattern.compile(rule.getRegex());
+                            Pattern pattern = Pattern.compile(rule.getRegex());
+                            if (rule.getGroup() != null) {
+                                if (rule.getGroup() < 1) {
+                                    errors.add("regexExtract field '" + entry.getKey()
+                                        + "' group must be >= 1 when set");
+                                } else {
+                                    int groupCount = pattern.matcher("").groupCount();
+                                    if (rule.getGroup() > groupCount) {
+                                        errors.add("regexExtract field '" + entry.getKey()
+                                            + "' group must be <= capture group count ("
+                                            + groupCount + ") when set");
+                                    }
+                                }
+                            }
                         } catch (PatternSyntaxException e) {
                             errors.add("regexExtract field '" + entry.getKey()
                                 + "' has invalid regex: " + e.getDescription());
-                        }
-                        if (rule.getGroup() != null && rule.getGroup() < 1) {
-                            errors.add("regexExtract field '" + entry.getKey()
-                                + "' group must be >= 1 when set");
                         }
                     }
                 }
