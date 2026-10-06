@@ -214,7 +214,7 @@ Error: Error creating SslCertificate: googleapi: Error 403: Required 'compute.ss
 
 → **Compute Load Balancer Admin** (`roles/compute.loadBalancerAdmin`).
 
-See [GCP External ALB](./guides/external-alb.md#enable-managed-tls).
+See [GCP External ALB](./guides/external-alb.md#iam-when-terraform-provisions-the-load-balancer).
 
 ## Organization policy blocks Cloud Run networking
 
