@@ -684,7 +684,11 @@ locals {
 
   # Permissions to provision external_api_alb via gcp-host / gcp-external-api-alb.
   # Suitable for a custom IAM role instead of required_gcp_roles_to_use_external_api_alb.
-  # Names are IAM permission IDs (Certificate Manager uses certs/certmaps/certmapentries, not the longer resource names).
+  # Names are IAM permission IDs. The global IP, regional serverless NEG, and load balancer
+  # IDs below are included in roles/compute.loadBalancerAdmin. Certificate Manager uses
+  # certs/certmaps/certmapentries, not the longer resource names.
+  # There is no compute.sslCertificates.use or compute.globalForwardingRules.use permission.
+  # Attaching a self-signed cert uses targetHttpsProxies.setSslCertificates plus sslCertificates.get.
   required_gcp_perms_to_use_external_api_alb = [
     # Reserved global IP and long-running Compute operations
     "compute.globalAddresses.create",
@@ -728,7 +732,6 @@ locals {
     "compute.globalForwardingRules.get",
     "compute.globalForwardingRules.list",
     "compute.globalForwardingRules.setTarget",
-    "compute.globalForwardingRules.use",
 
     # Cloud Armor (when allowed_data_access_ip_blocks is set)
     "compute.securityPolicies.create",
@@ -743,8 +746,6 @@ locals {
     "compute.sslCertificates.delete",
     "compute.sslCertificates.get",
     "compute.sslCertificates.list",
-
-    "compute.sslCertificates.use",
 
     # Enable certificatemanager.googleapis.com when external_api_alb.domain is set.
     # Also included in the host provisioning permission set.

@@ -56,7 +56,7 @@ Grant the Terraform runner the following predefined roles on the host project, o
 
 | Role | Why |
 |---|---|
-| [Compute Load Balancer Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.loadBalancerAdmin) (`roles/compute.loadBalancerAdmin`) | Reserved global IP (`compute.globalAddresses.*`), serverless NEGs, backend services, URL map, HTTPS proxy, global forwarding rule, and self-signed `google_compute_ssl_certificate` |
+| [Compute Load Balancer Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.loadBalancerAdmin) (`roles/compute.loadBalancerAdmin`) | Reserved global IP (`compute.globalAddresses.create` and the rest of `compute.globalAddresses.*`), regional serverless NEGs (`compute.regionNetworkEndpointGroups.create` / `delete` / `get` / `list` / `use`), backend services, URL map, HTTPS proxy, global forwarding rule, and self-signed `google_compute_ssl_certificate` |
 | [Compute Security Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.securityAdmin) (`roles/compute.securityAdmin`) | Cloud Armor security policies (when `allowed_data_access_ip_blocks` is set) |
 | [Certificate Manager Editor](https://cloud.google.com/iam/docs/roles-permissions/certificatemanager#certificatemanager.editor) (`roles/certificatemanager.editor`) | Google-managed TLS when `external_api_alb.domain` is set (Certificate Manager certificate + map) |
 
@@ -66,7 +66,11 @@ Common `403` errors during `terraform apply` if these are missing:
 Error: Error creating GlobalAddress: googleapi: Error 403: Required 'compute.globalAddresses.create' permission ...
 ```
 
-→ grant **Compute Load Balancer Admin** (or include `compute.globalAddresses.create` in a custom role).
+```
+Error: Error creating RegionNetworkEndpointGroup: googleapi: Error 403: Required 'compute.regionNetworkEndpointGroups.create' permission ...
+```
+
+→ grant **Compute Load Balancer Admin** (or include `compute.globalAddresses.*` and `compute.regionNetworkEndpointGroups.*` in a custom role). Both are in that predefined role.
 
 ```
 Error: Error creating SslCertificate: googleapi: Error 403: Required 'compute.sslCertificates.create' permission ...

@@ -36,7 +36,7 @@ Grant the Terraform runner these predefined roles on the host project when `exte
 
 | Role | Why |
 |---|---|
-| [Compute Load Balancer Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.loadBalancerAdmin) (`roles/compute.loadBalancerAdmin`) | Reserved global IP, the load balancer, and the self-signed certificate |
+| [Compute Load Balancer Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.loadBalancerAdmin) (`roles/compute.loadBalancerAdmin`) | Reserved global IP (`compute.globalAddresses.*`), regional serverless NEGs (`compute.regionNetworkEndpointGroups.*`), the load balancer, and the self-signed certificate (`compute.sslCertificates.create` / `get` / `list` / `delete`, attached with `compute.targetHttpsProxies.setSslCertificates`) |
 | [Compute Security Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.securityAdmin) (`roles/compute.securityAdmin`) | Cloud Armor, when you set an IP allowlist |
 | [Certificate Manager Editor](https://cloud.google.com/iam/docs/roles-permissions/certificatemanager#certificatemanager.editor) (`roles/certificatemanager.editor`) | Google-managed TLS when `external_api_alb.domain` is set |
 

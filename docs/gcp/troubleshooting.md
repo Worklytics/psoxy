@@ -206,7 +206,11 @@ If you set `external_api_alb` on `gcp-host`, grant `required_gcp_roles_to_use_ex
 Error: Error creating GlobalAddress: googleapi: Error 403: Required 'compute.globalAddresses.create' permission ...
 ```
 
-→ **Compute Load Balancer Admin** (`roles/compute.loadBalancerAdmin`).
+```
+Error: Error creating RegionNetworkEndpointGroup: googleapi: Error 403: Required 'compute.regionNetworkEndpointGroups.create' permission ...
+```
+
+→ **Compute Load Balancer Admin** (`roles/compute.loadBalancerAdmin`). That role includes the reserved global IP and the regional serverless NEGs, as well as the load balancer resources.
 
 ```
 Error: Error creating SslCertificate: googleapi: Error 403: Required 'compute.sslCertificates.create' permission ...
