@@ -55,7 +55,7 @@ test.beforeEach(async (t) => {
 
 test.afterEach(() => td.reset());
 
-test('isValidURL URL', (t) => {
+test.serial('isValidURL URL', (t) => {
   const aws = t.context.subject;
   t.true(aws.isValidURL(LAMBDA_URL));
   t.true(aws.isValidURL(new URL(LAMBDA_URL)));
@@ -71,7 +71,7 @@ test('isValidURL URL', (t) => {
   );
 });
 
-test('Psoxy Logs: parse log events command result', (t) => {
+test.serial('Psoxy Logs: parse log events command result', (t) => {
   const aws = t.context.subject;
 
   t.deepEqual([], aws.parseLogEvents(null));

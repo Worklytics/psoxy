@@ -458,7 +458,7 @@ variable "todos_as_outputs" {
 
 variable "todos_as_local_files" {
   type        = bool
-  description = "whether to render TODOs as flat files"
+  description = "whether to render TODOs as flat files. Default remains true, so apply still writes them. TODO markdown local_file resources are deprecated and will be removed in 0.8; ./generate-todos.sh writes the same files from terraform output. This flag also controls test-script files."
   default     = true
 }
 
@@ -481,7 +481,7 @@ variable "external_api_alb" {
     domain = optional(string)
   })
   description = <<-EOT
-    **beta** When non-null, gcp-host provisions a global external Application Load Balancer in front of API connectors. Use `{}` for self-signed PoC on a reserved IP, or `{ domain = "proxy.example.com" }` for Google-managed TLS. See docs/development/gcp-external-alb.md. Mutually exclusive with passing api_connector_external_lb_host into the module for a customer-owned ALB.
+    **beta** When non-null, gcp-host provisions a global external Application Load Balancer in front of API connectors. Use `{}` for self-signed PoC on a reserved IP, or `{ domain = "proxy.example.com" }` for Google-managed TLS. See docs/gcp/guides/external-alb.md. Mutually exclusive with passing api_connector_external_lb_host into the module for a customer-owned ALB.
   EOT
   default     = null
   nullable    = true

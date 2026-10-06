@@ -32,9 +32,9 @@ fi
 printf "${SUCCESS}Operation completed successfully.${NC}\n"
 ```
 
-## Release QA
+## Release cut / QA / publish
 
-Before merging an `rc-vX.Y.Z` branch to `main`, follow [tools/release/release-qa.md](tools/release/release-qa.md). The orchestrator is `./tools/release/run-release-qa.sh vX.Y.Z`.
+Release orchestration (cut RC, QA examples-dev, rc→main, tag/publish) lives in the internal `Worklytics/proxy-dev` repo. GitHub Actions in this repo still publish Maven packages and deployment bundles on `v*` tags and `rc-*` branches; those workflows call the remaining scripts under `tools/release/`.
 
 ## Testing Conventions
 
@@ -49,7 +49,7 @@ To validate terraform changes locally:
 3. If modifying modules, you may also need to run `terraform test` within those module directories if tests are defined (e.g. `terraform test --var="deployment_bundle=..."`)
 
 ### Java Testing
-Java changes are tested across multiple Java versions to ensure compatibility. The GitHub Actions workflows test against Java 21 (LTS), 25 (LTS), and latest (26). In practice, testing with Java 21 is sufficient for local development.
+Java changes are tested across multiple Java versions to ensure compatibility. The GitHub Actions workflows test against Java 21 (LTS), 25 (LTS), and 27; Java 26 is also exercised in CI but is EoL as of September 15, 2026 and is not listed as supported. In practice, testing with Java 21 is sufficient for local development.
 
 When testing Java code locally:
 1. Ensure your code builds and tests pass using Maven.

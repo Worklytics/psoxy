@@ -21,7 +21,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.7.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.7.1"
 
   enabled_connectors                       = var.enabled_connectors
   connector_settings                       = var.connector_settings
@@ -121,7 +121,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.7.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=rc-v0.7.1"
 
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
@@ -200,7 +200,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=v0.7.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=rc-v0.7.1"
 
   proxy_instance_id    = each.key
   worklytics_host      = var.worklytics_host
@@ -234,23 +234,46 @@ output "api_connector_instances" {
 
 output "bulk_connector_instances" {
   value = { for k, v in module.psoxy.bulk_connector_instances : k => {
-    input_bucket     = try(v.input_bucket, null)
-    sanitized_bucket = v.sanitized_bucket
-    example_files    = try(v.example_files, [])
+    input_bucket                          = try(v.input_bucket, null)
+    sanitized_bucket                      = v.sanitized_bucket
+    example_files                         = try(v.example_files, [])
+    aws_principal_arn_when_testing        = try(v.aws_principal_arn_when_testing, null)
+    aws_write_role_to_assume_when_testing = try(v.aws_write_role_to_assume_when_testing, null)
   } }
 }
 
 output "webhook_collector_instances" {
   value = { for k, v in module.psoxy.webhook_collector_instances : k => {
-    endpoint_url     = try(v.endpoint_url, null)
-    sanitized_bucket = v.output_sanitized_bucket_id
-    test_examples    = try(v.test_examples, [])
+    endpoint_url               = try(v.endpoint_url, null)
+    sanitized_bucket           = v.output_sanitized_bucket_id
+    test_examples              = try(v.test_examples, [])
+    provisioned_auth_key_pairs = try(v.provisioned_auth_key_pairs, [])
   } }
+}
+
+output "deployment_platform" {
+  description = "Cloud platform for this deployment. Used when synthesizing test scripts."
+  value       = "aws"
 }
 
 output "caller_role_arn" {
   description = "ARN of the AWS role to impersonate when making API calls (AWS case)"
   value       = module.psoxy.caller_role_arn
+}
+
+output "webhook_test_caller_role_arn" {
+  description = "ARN of the role granted invoke, KMS, and bucket access for webhook collector tests."
+  value       = module.psoxy.webhook_test_caller_role_arn
+}
+
+output "aws_region" {
+  description = "AWS region where Psoxy is deployed."
+  value       = var.aws_region
+}
+
+output "repo_base_dir" {
+  description = "Absolute path to the repository root used to build test scripts (trailing slash)."
+  value       = var.psoxy_base_dir
 }
 
 output "todos_1" {
@@ -266,6 +289,18 @@ output "todos_2" {
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value       = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics)[*].todo) : null
+}
+
+output "todo_files" {
+  description = "TODO markdown files (filename => content). Write them with ./generate-todos.sh. local_file resources that write the same files are deprecated and will be removed in 0.8."
+  value = merge(concat(
+    [{}],
+    [module.worklytics_connectors.todo_files],
+    [module.worklytics_connectors_google_workspace.todo_files],
+    [module.worklytics_connectors_msft_365.todo_files],
+    [module.psoxy.todo_files],
+    [for connection in values(module.connection_in_worklytics) : connection.todo_files],
+  )...)
 }
 
 # although should be sensitive such that Terraform won't echo it to command line or expose it, leave

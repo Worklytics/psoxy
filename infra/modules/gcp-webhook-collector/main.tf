@@ -551,10 +551,16 @@ resource "local_file" "test_script" {
   content         = local.test_script
 }
 
+locals {
+  todo_filename = "TODO ${var.todo_step} - test ${google_cloudfunctions2_function.function.name}.md"
+}
+
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
 resource "local_file" "test_todo" {
   count = var.todos_as_local_files ? 1 : 0
 
-  filename = "TODO ${var.todo_step} - test ${google_cloudfunctions2_function.function.name}.md"
+  filename = local.todo_filename
   content  = local.todo_content
 }
 
@@ -610,7 +616,7 @@ output "provisioned_auth_key_pairs" {
 }
 
 output "test_examples" {
-  value = try(var.example_payload, null) != null ? [{
+  value = (try(var.example_payload, null) != null || length(local.auth_key_ids_sorted) > 0 || try(var.example_identity, null) != null) ? [{
     content_base64 = try(var.example_payload, null) != null ? base64encode(var.example_payload) : null
     signing_key_id = length(local.auth_key_ids_sorted) > 0 ? "gcp-kms:${element(local.auth_key_ids_sorted, 0)}" : null
     identity       = try(var.example_identity, null)
@@ -618,6 +624,18 @@ output "test_examples" {
   description = "Array of test examples with base64-encoded content, signing key, and identity"
 }
 
+output "batch_scheduler_job_id" {
+  description = "Cloud Scheduler job ID used to trigger webhook batch processing (for test scripts)."
+  value       = google_cloud_scheduler_job.trigger_batch_processing.id
+}
+
 output "todo" {
   value = local.todo_content
+}
+
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. The local_file copy is deprecated and will be removed in 0.8."
+  value = {
+    (local.todo_filename) = local.todo_content
+  }
 }

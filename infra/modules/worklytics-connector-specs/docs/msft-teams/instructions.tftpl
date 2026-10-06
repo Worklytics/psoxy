@@ -1,0 +1,26 @@
+Online meeting access requires a tenant-wide application access policy in addition to the `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` application permissions. Entra admin consent does not create this policy. Until it is granted, online meeting calls fail with `403 Forbidden` and message `No application access policy found for this app`. A Teams Administrator must create and grant the policy with the Microsoft Teams PowerShell module. Policy changes can take up to 30 minutes to take effect.
+
+1. Assign the **Teams Administrator** role to the account that will run the commands, in the [Microsoft 365 admin center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users) or in the Azure portal (Microsoft Entra ID → Users → Assign roles). The Teams Administrator role is sometimes missing from the Entra admin center even for an admin account; assign it in the Azure portal in that case.
+2. Install the [Microsoft Teams PowerShell module](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install).
+3. Connect and sign in as that Teams Administrator:
+
+```powershell
+Connect-MicrosoftTeams
+```
+
+4. Create a policy that includes this connector's application (client) ID:
+
+```powershell
+New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds "%%entraid.client_id%%" -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
+```
+
+5. Grant that policy to the whole tenant, so the connector can read meetings organized by any user:
+
+```powershell
+Grant-CsApplicationAccessPolicy -PolicyName Teams-Policy-For-Worklytics -Global
+```
+
+**Issues**:
+
+- `Access denied` means the signed-in account does not yet have the Teams Administrator role. Assign the role, then close and reopen PowerShell before connecting again.
+- These commands were verified on PowerShell 7.4.0 on Windows (Microsoft Store) with MicrosoftTeams module 5.8.0.

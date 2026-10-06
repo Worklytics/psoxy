@@ -26,9 +26,11 @@ This connector uses API token authentication. See the [Atlassian Organization Ad
 
 | Endpoint                                                 | Purpose                                      | Scope Required           |
 |----------------------------------------------------------|----------------------------------------------|--------------------------|
-| `/admin/v1/orgs/{orgId}/events`                          | Retrieve organization audit events           | `read:events:admin`      |
-| `/admin/v1/orgs/{orgId}/events-stream`                   | Stream organization audit events             | `read:events:admin`      |
-| `/admin/v2/orgs/{orgId}/directories/{directoryId}/users` | Retrieve users from organization directories | `read:directories:admin` |
+| `/admin/v1/orgs/{ORG_ID}/events`                          | Retrieve organization audit events           | `read:events:admin`      |
+| `/admin/v1/orgs/{ORG_ID}/events-stream`                   | Stream organization audit events             | `read:events:admin`      |
+| `/admin/v2/orgs/{ORG_ID}/directories/{DIRECTORY_ID}/users` | Retrieve users from organization directories | `read:directories:admin` |
+
+`{ORG_ID}` is your Atlassian organization id (`connector_settings.atlassian_organization_id`). `{DIRECTORY_ID}` is a directory id, or `-` for all directories (Atlassian wildcard).
 
 ## Example API Responses
 

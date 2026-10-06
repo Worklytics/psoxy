@@ -48,6 +48,16 @@ copy_script_lf() {
   chmod +x "$dest"
 }
 
+# Resolve paths before cd. The publish workflow invokes this with relative paths.
+RELEASE_REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+EXAMPLE_TO_COPY_FROM="$(cd "$EXAMPLE_TO_COPY_FROM" && pwd)"
+EXAMPLE_TEMPLATE_REPO="$(cd "$EXAMPLE_TEMPLATE_REPO" && pwd)/"
+if [ -z "$PATH_TO_MAIN_REPO_ROOT" ]; then
+  PATH_TO_MAIN_REPO_ROOT="${RELEASE_REPO_ROOT}/"
+else
+  PATH_TO_MAIN_REPO_ROOT="$(cd "$PATH_TO_MAIN_REPO_ROOT" && pwd)/"
+fi
+
 cd "$EXAMPLE_TO_COPY_FROM"
 FILES_TO_COPY=( *.tf )
 
@@ -78,12 +88,28 @@ fi
 copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/init-example.sh" "${EXAMPLE_TEMPLATE_REPO}init"
 copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/check-prereqs.sh" "${EXAMPLE_TEMPLATE_REPO}check-prereqs"
 
+if [ -f "${EXAMPLE_TO_COPY_FROM}/generate-todos.sh" ]; then
+  copy_script_lf "${EXAMPLE_TO_COPY_FROM}/generate-todos.sh" "${EXAMPLE_TEMPLATE_REPO}generate-todos.sh"
+fi
+
 if [ -f "${EXAMPLE_TO_COPY_FROM}/preflight.sh" ]; then
   copy_script_lf "${EXAMPLE_TO_COPY_FROM}/preflight.sh" "${EXAMPLE_TEMPLATE_REPO}preflight"
 fi
 
 copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/available-connectors.sh" "${EXAMPLE_TEMPLATE_REPO}available-connectors"
 copy_script_lf "${PATH_TO_MAIN_REPO_ROOT}tools/az-auth.sh" "${EXAMPLE_TEMPLATE_REPO}az-auth"
+
+# cwd is the example directory (cd above). A relative EXAMPLE_TO_COPY_FROM would
+# resolve against this directory and miss the file.
+if [ -f build-tests.sh ]; then
+  copy_script_lf build-tests.sh "${EXAMPLE_TEMPLATE_REPO}build-tests.sh"
+fi
+
+# Git module sources use a subdirectory, so the Terraform checkout does not
+# contain tools/. Ship the generator with the example so ./build-tests.sh works.
+mkdir -p "${EXAMPLE_TEMPLATE_REPO}tools"
+copy_script_lf "${RELEASE_REPO_ROOT}/tools/build-test-scripts-from-output.sh" "${EXAMPLE_TEMPLATE_REPO}tools/build-test-scripts-from-output.sh"
+copy_lf "${RELEASE_REPO_ROOT}/tools/build-test-scripts-from-output.mjs" "${EXAMPLE_TEMPLATE_REPO}tools/build-test-scripts-from-output.mjs"
 
 # Force LF on checkout for customer-facing scripts (overrides Git for Windows autocrlf).
 # Scoped to scripts only — do not force LF on all text in the example repo.
@@ -98,6 +124,7 @@ check-prereqs text eol=lf
 available-connectors text eol=lf
 az-auth text eol=lf
 preflight text eol=lf
+generate-todos.sh text eol=lf
 EOF
 
 # Dev-only artifacts present in examples-dev (symlinks, local scripts, backups).

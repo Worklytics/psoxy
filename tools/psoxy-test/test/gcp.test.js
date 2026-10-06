@@ -15,7 +15,7 @@ test.beforeEach(async (t) => {
 
 test.afterEach(() => td.reset());
 
-test('isValidURL URL', (t) => {
+test.serial('isValidURL URL', (t) => {
   const gcp = t.context.subject;
 
   t.true(gcp.isValidURL(GCP_URL));
@@ -29,7 +29,7 @@ test('isValidURL URL', (t) => {
   );
 });
 
-test('Get logs link based on cloud function URL', (t) => {
+test.serial('Get logs link based on cloud function URL', (t) => {
   const gcp = t.context.subject;
 
   t.is(undefined, gcp.getLogsURL('foo'));
@@ -47,7 +47,7 @@ test('Get logs link based on cloud function URL', (t) => {
   t.is(undefined, gcp.getLogsURL('https://proxy.example.com/myenv-outlook-cal/'));
 })
 
-test('Psoxy Logs: parse log entries', (t) => {
+test.serial('Psoxy Logs: parse log entries', (t) => {
   const gcp = t.context.subject;
 
   t.deepEqual(gcp.parseLogEntries(), []);

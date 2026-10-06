@@ -2,6 +2,8 @@
 
 > **Status**: **Beta** — provisioned by `gcp-host` when `external_api_alb` is set (or BYO via `api_connector_external_lb_host`). Interfaces and resource shapes may change in a future release.
 > **Last Updated**: 2026-08-12
+>
+> Customer setup is in [GCP External ALB](../gcp/guides/external-alb.md). This page is the design notes.
 
 ## Motivation
 
@@ -40,6 +42,12 @@ Leave `external_api_alb = null` (default) to expose API connectors via their dir
 
 Optionally set `allowed_data_access_ip_blocks` to Worklytics egress IPs (same list for Cloud Armor and the proxy). Leave `null` for open ingress through the ALB (PoC / rely on IAM + app auth). An empty list is invalid.
 
+### Worklytics tenant IAM (`roles/run.invoker`)
+
+An external ALB does not replace Cloud Run authorization. The load balancer forwards each request (including the `Authorization` header) to Cloud Run; Cloud Run still requires `roles/run.invoker` for the caller's identity. Terraform grants that role to each email in `worklytics_sa_emails` on each API connector, same as the direct `*.run.app` path. Optional Cloud Armor IP allowlisting is orthogonal — it restricts who can reach the ALB, not who Cloud Run accepts.
+
+If your organization enforces domain-restricted sharing, `terraform apply` may fail when creating that binding until you add a project-level exception for Worklytics's Google Workspace customer ID or organization principal set. See [GCP troubleshooting — permitted customer](../gcp/troubleshooting.md#error-400--one-or-more-users-named-in-policy-do-not-belong-to-a-permitted-customer).
+
 ### IAM permissions (Terraform provisioner)
 
 These apply when **`external_api_alb` is set** and Terraform provisions the ALB (not when you use `api_connector_external_lb_host` for a customer-owned load balancer).
@@ -48,8 +56,8 @@ Grant the Terraform runner the following predefined roles on the host project, o
 
 | Role | Why |
 |---|---|
-| [Compute Network Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.networkAdmin) (`roles/compute.networkAdmin`) | Reserved global IP (`compute.globalAddresses.*`), serverless NEGs, backend services, URL map, HTTPS proxy, global forwarding rule |
-| [Compute Security Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.securityAdmin) (`roles/compute.securityAdmin`) | Cloud Armor security policies (when `allowed_data_access_ip_blocks` is set); self-signed `google_compute_ssl_certificate` for PoC TLS |
+| [Compute Load Balancer Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.loadBalancerAdmin) (`roles/compute.loadBalancerAdmin`) | Reserved global IP (`compute.globalAddresses.create` and the rest of `compute.globalAddresses.*`), regional serverless NEGs (`compute.regionNetworkEndpointGroups.create` / `delete` / `get` / `list` / `use`), backend services, URL map, HTTPS proxy, global forwarding rule, and self-signed `google_compute_ssl_certificate` |
+| [Compute Security Admin](https://cloud.google.com/iam/docs/roles-permissions/compute#compute.securityAdmin) (`roles/compute.securityAdmin`) | Cloud Armor security policies (when `allowed_data_access_ip_blocks` is set) |
 | [Certificate Manager Editor](https://cloud.google.com/iam/docs/roles-permissions/certificatemanager#certificatemanager.editor) (`roles/certificatemanager.editor`) | Google-managed TLS when `external_api_alb.domain` is set (Certificate Manager certificate + map) |
 
 Common `403` errors during `terraform apply` if these are missing:
@@ -58,13 +66,17 @@ Common `403` errors during `terraform apply` if these are missing:
 Error: Error creating GlobalAddress: googleapi: Error 403: Required 'compute.globalAddresses.create' permission ...
 ```
 
-→ grant **Compute Network Admin** (or include `compute.globalAddresses.create` in a custom role).
+```
+Error: Error creating RegionNetworkEndpointGroup: googleapi: Error 403: Required 'compute.regionNetworkEndpointGroups.create' permission ...
+```
+
+→ grant **Compute Load Balancer Admin** (or include `compute.globalAddresses.*` and `compute.regionNetworkEndpointGroups.*` in a custom role). Both are in that predefined role.
 
 ```
 Error: Error creating SslCertificate: googleapi: Error 403: Required 'compute.sslCertificates.create' permission ...
 ```
 
-→ grant **Compute Security Admin** (or include `compute.sslCertificates.create` in a custom role).
+→ grant **Compute Load Balancer Admin** (or include `compute.sslCertificates.create` in a custom role).
 
 When using managed TLS (`domain` set), failures on `google_certificate_manager_*` resources require **Certificate Manager Editor** (or the `certificatemanager.*` permissions listed in `required_gcp_permissions_to_use_external_api_alb`).
 
@@ -101,6 +113,12 @@ Implemented by `infra/modules/gcp-external-api-alb` (invoked from `gcp-host`):
 - `google_compute_global_forwarding_rule` on `:443`
 
 Path routing relies on the proxy stripping the function-name prefix via `K_SERVICE` in `CloudFunctionRequest.getPath()`.
+
+### Custom audiences (required)
+
+Cloud Run IAM accepts a Google identity token only when its audience is the service URL or a [custom audience](https://cloud.google.com/run/docs/configuring/custom-audiences). Callers that reach connectors through the ALB mint the token for the public URL (`https://<host>/<function>`) and may also use `https://<region>-<project>.cloudfunctions.net/<function>`. Those are not the default `*.run.app` audience. Register both on each API connector or Cloud Run rejects the token (HTTP 401/403, sometimes masked as 404 under `ALLOW_INTERNAL_AND_GCLB`).
+
+`google_cloudfunctions2_function.service_config` still does not expose custom audiences (hashicorp/google 7.31 docs). `google_cloud_run_v2_service.custom_audiences` does, but these connectors are Cloud Functions gen2 resources, so the field is not available on the resource we manage. Customer steps and `tools/gcp/configure-custom-audiences.sh` are in [External Application Load Balancer (ALB)](../gcp/guides/external-alb.md#custom-audiences-required).
 
 Useful output from `gcp-host`: `external_api_alb` (object with `host`, `ip_address`, `todo_dns_setup`, `self_signed_ca_cert`; null when unused). The example root keeps that output commented out — uncomment if you need it.
 
