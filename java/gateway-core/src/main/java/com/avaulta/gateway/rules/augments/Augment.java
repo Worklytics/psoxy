@@ -458,6 +458,9 @@ public abstract class Augment {
         @Singular("sourceField")
         List<String> sourceFields;
 
+        @JsonIgnore
+        @Getter(AccessLevel.NONE)
+        @EqualsAndHashCode.Exclude
         private final ConcurrentHashMap<String, Pattern> compiledPatterns = new ConcurrentHashMap<>();
 
         @JsonIgnore
