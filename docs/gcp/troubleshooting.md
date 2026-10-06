@@ -206,15 +206,19 @@ If you set `external_api_alb` on `gcp-host`, grant `required_gcp_roles_to_use_ex
 Error: Error creating GlobalAddress: googleapi: Error 403: Required 'compute.globalAddresses.create' permission ...
 ```
 
-→ **Compute Network Admin** (`roles/compute.networkAdmin`).
+```
+Error: Error creating RegionNetworkEndpointGroup: googleapi: Error 403: Required 'compute.regionNetworkEndpointGroups.create' permission ...
+```
+
+→ **Compute Load Balancer Admin** (`roles/compute.loadBalancerAdmin`). That role includes the reserved global IP and the regional serverless NEGs, as well as the load balancer resources.
 
 ```
 Error: Error creating SslCertificate: googleapi: Error 403: Required 'compute.sslCertificates.create' permission ...
 ```
 
-→ **Compute Security Admin** (`roles/compute.securityAdmin`).
+→ **Compute Load Balancer Admin** (`roles/compute.loadBalancerAdmin`).
 
-See [GCP External ALB](../development/gcp-external-alb.md#iam-permissions-terraform-provisioner).
+See [GCP External ALB](./guides/external-alb.md#iam-when-terraform-provisions-the-load-balancer).
 
 ## Organization policy blocks Cloud Run networking
 
@@ -231,7 +235,7 @@ Error: Error updating function "projects/.../functions/outlook-mail": googleapi:
 
 **Fix (preferred if your security team allows it):** request a **project-level exception** (or folder exception) so Psoxy can use the networking settings documented in [VPC configuration](./guides/vpc.md) — Direct VPC egress for fixed outbound IPs, and default or ALB-compatible ingress as appropriate.
 
-**Fix (ingress restriction without VPC exception):** deploy an **external Application Load Balancer (ALB)** (**beta**) in front of API connectors — set `external_api_alb` on `gcp-host`, or pass a customer-owned host via `api_connector_external_lb_host`. That sets `ingress_settings` to `ALLOW_INTERNAL_AND_GCLB`, which satisfies `internal-and-cloud-load-balancing` while Worklytics reaches connectors through the ALB. See [External Application Load Balancer (ALB)](./guides/external-alb.md). VPC egress (`vpc_config`) is orthogonal to the ALB path.
+**Fix (ingress restriction without VPC exception):** deploy an **external Application Load Balancer (ALB)** (**beta**) in front of API connectors — set `external_api_alb` on `gcp-host`, or pass a customer-owned host via `api_connector_external_lb_host`. That sets `ingress_settings` to `ALLOW_INTERNAL_AND_GCLB`, which satisfies `internal-and-cloud-load-balancing` while Worklytics reaches connectors through the ALB. See [GCP External ALB](./guides/external-alb.md). VPC egress (`vpc_config`) is orthogonal to the ALB path.
 
 If your org mandates VPC egress for all Cloud Run traffic, keep `vpc_config` populated with valid `network` and `subnet` values and ensure the exception (or policy values) allow Direct VPC egress with `all-traffic`.
 

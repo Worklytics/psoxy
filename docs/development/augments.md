@@ -3,6 +3,7 @@
 > **Status:** Design · Draft
 > **Since:** v0.6.x
 > **Relates to:** `Transform`, `Endpoint`, `Rules2`, `JsonSchemaFilter`
+> **See also:** [genMetadata augment (BETA)](alpha-features/gen-metadata-augment.md)
 
 ## Motivation
 
@@ -12,7 +13,7 @@ Several use-cases require the proxy to inject *computed metadata* into the API r
 |---|---|
 | Text statistics | word count, character length |
 | Keyword frequency | counts of configured keywords |
-| NLP statistics | sentence structure, readability scores |
+| NLP statistics | sentence structure, readability scores ([`textMetadata`](alpha-features/text-metadata-augments.md), alpha) |
 | Payload classification | labelling an LLM prompt as "email composition" vs "code generation" |
 
 Today the `textDigest` transform **replaces** the source field's value with a nested JSON string containing the computed output (e.g. `{"length":42,"word_count":7}`). This is brittle because:
@@ -150,8 +151,10 @@ List<Augment> augments;
 // new class: com.avaulta.gateway.rules.augments.Augment
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
+    @JsonSubTypes.Type(value = Augment.Classify.class, name = "classify"),
     @JsonSubTypes.Type(value = Augment.TextDigest.class, name = "textDigest"),
-    // future: @JsonSubTypes.Type(value = Augment.Classify.class, name = "classify"),
+    @JsonSubTypes.Type(value = Augment.TextMetadata.class, name = "textMetadata"),
+    @JsonSubTypes.Type(value = Augment.GenMetadata.class, name = "genMetadata"),
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
@@ -193,7 +196,7 @@ public abstract class Augment {
 
 ### `outputSchema` — Output Validation
 
-Each augment rule carries an optional `outputSchema` property of type `JsonSchemaFilter`. This schema is applied as a **predicate** (not a filter) to the value produced by the augment's `compute()` method:
+Each augment rule carries an optional `outputSchema` property of type `JsonSchema`. This schema is applied as a **predicate** (not a filter) to the value produced by the augment's `compute()` method:
 
 | Outcome | Action |
 |---|---|

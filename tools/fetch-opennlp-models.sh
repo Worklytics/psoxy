@@ -48,7 +48,7 @@ fi
 BASE_URL="https://opennlp.sourceforge.net/models-1.5"
 DEST_DIR="java/gateway-core/src/main/resources/opennlp"
 
-# Downloaded for local dev / tests (includes NER models not used by sentenceMetadata at runtime).
+# Downloaded for local dev / tests (includes NER models not used by textMetadata at runtime).
 MODELS=(
     "en-sent.bin"
     "en-pos-maxent.bin"
@@ -59,7 +59,7 @@ MODELS=(
     "en-ner-date.bin"
 )
 
-# Required by SentenceMetadataProcessor at opennlp/{model}.bin via ResourceService.
+# Required by TextMetadataProcessor at opennlp/{model}.bin via ResourceService.
 RUNTIME_MODELS=(
     "en-sent.bin"
     "en-pos-maxent.bin"

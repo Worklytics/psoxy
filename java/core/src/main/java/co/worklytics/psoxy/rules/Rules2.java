@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.augments.AugmentValidation;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -151,7 +152,9 @@ public class Rules2 implements RESTRules {
             if (is == null) {
                 throw new IllegalArgumentException("Resource not found: " + path);
             }
-            return mapper.readerFor(Rules2.class).readValue(is);
+            Rules2 rules = mapper.readerFor(Rules2.class).readValue(is);
+            AugmentValidation.validateEndpoints(rules.getEndpoints());
+            return rules;
         } catch (IOException e) {
             throw new RuntimeException("Failed to load rules from: " + path, e);
         }

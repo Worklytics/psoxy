@@ -171,7 +171,7 @@ module "psoxy" {
   custom_side_outputs                  = var.custom_side_outputs
   todo_step                            = local.max_auth_todo_step
   todos_as_local_files                 = false # root todos.tf writes these files
-  enable_remote_resources              = true
+  enable_remote_resources              = var.enable_remote_resources
 
 
   #  vpc_config = {

@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ApiModeConfig;
+import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -8,6 +9,8 @@ import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.impl.BlindlyOptimisticLockService;
 
 import co.worklytics.psoxy.gateway.impl.GoogleCloudPlatformServiceAccountKeyAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.NoOpResourceService;
+import com.avaulta.gateway.resources.ResourceService;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
@@ -16,13 +19,17 @@ import dagger.Module;
 import dagger.Provides;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Module(
-   includes = CmdLineModule.Bindings.class
+   includes = {
+       CmdLineModule.Bindings.class,
+       ResourceServiceBindingsModule.class,
+   }
 )
 public class CmdLineModule {
 
@@ -38,6 +45,22 @@ public class CmdLineModule {
     @Provides @Singleton
     static ApiModeConfig apiModeConfig(ConfigService configService) {
         return ApiModeConfig.fromConfigService(configService);
+    }
+
+    @Provides @Singleton
+    static GenMetadataConfig genMetadataConfig() {
+        return new GenMetadataConfig.Unsupported("cmdline");
+    }
+
+    /** CLI has no cloud bucket; local FS under {@link ResourceService#DEFAULT_LOCAL_RESOURCE_PATH} only. */
+    @Provides @Singleton @Named("Remote")
+    static ResourceService remoteResourceService() {
+        return new NoOpResourceService();
+    }
+
+    @Provides @Singleton @Named("SharedRemote")
+    static ResourceService sharedRemoteResourceService() {
+        return new NoOpResourceService();
     }
 
     @Provides @Singleton

@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import javax.inject.Inject;
@@ -14,6 +15,7 @@ import com.google.cloud.functions.Context;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageException;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.storage.StorageHandler;
 import lombok.SneakyThrows;
@@ -21,6 +23,8 @@ import lombok.extern.java.Log;
 
 @Log
 public class GcsFileEventHandler {
+
+    static final int HTTP_FORBIDDEN = 403;
 
     final StorageHandler storageHandler;
 
@@ -76,6 +80,7 @@ public class GcsFileEventHandler {
                 return Channels.newInputStream(readChannel);
             };
 
+            // Stream directly to GCS. Do not buffer the sanitized object on /tmp.
             Supplier<OutputStream> outputStreamSupplier = () -> {
                 BlobInfo.Builder blobInfoBuilder = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
                     .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform));
@@ -96,8 +101,42 @@ public class GcsFileEventHandler {
             };
 
             storageHandler.handle(request, transform, inputStreamSupplier, outputStreamSupplier);
+
+            patchDestinationMetadata(
+                storage,
+                BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()),
+                storageHandler.buildObjectMetadata(importBucket, sourceName, transform));
         } else {
             log.info("Skipping " + importBucket + "/" + request.getSourceObjectPath() + " because no rules apply");
         }
+    }
+
+    /**
+     * After a streamed write, PATCH custom metadata (token totals are only known after sanitize).
+     * Skips when there is nothing to add. A 403 is non-fatal: some deployments omit
+     * {@code storage.objects.update} (BYO IAM / older role). Does not {@code get} the blob first,
+     * so the writer role need not include {@code storage.objects.get}.
+     */
+    void patchDestinationMetadata(Storage storage, BlobId destination, Map<String, String> metadata) {
+        if (!hasGenMetadataTokenKeys(metadata)) {
+            return;
+        }
+        try {
+            storage.update(BlobInfo.newBuilder(destination).setMetadata(metadata).build());
+        } catch (StorageException e) {
+            if (e.getCode() == HTTP_FORBIDDEN) {
+                log.warning("Could not PATCH GCS object metadata at gs://"
+                    + destination.getBucket() + "/" + destination.getName()
+                    + " (need storage.objects.update); genMetadata token totals remain in logs only");
+                return;
+            }
+            throw e;
+        }
+    }
+
+    static boolean hasGenMetadataTokenKeys(Map<String, String> metadata) {
+        return metadata.containsKey(StorageHandler.BulkMetaData.GEN_METADATA_CALLS.getMetaDataKey())
+            || metadata.containsKey(StorageHandler.BulkMetaData.GEN_METADATA_INPUT_TOKENS.getMetaDataKey())
+            || metadata.containsKey(StorageHandler.BulkMetaData.GEN_METADATA_OUTPUT_TOKENS.getMetaDataKey());
     }
 }

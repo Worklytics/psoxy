@@ -3,6 +3,10 @@
 Provider-less module that defines a bunch of constants that you might need to provision Psoxy, or
 bootstrap stuff needed for provisioning.
 
+## Checking permission IDs
+
+`tools/gcp/check-gcp-iam-permissions.sh` reads the GCP permission outputs from this module and checks each ID with `gcloud iam list-testable-permissions`. Those are the permissions Google allows in a custom role. CI runs that check in `.github/workflows/ci-gcp-iam-permissions.yaml`.
+
 ## Usage
 
 Use this to bootstrap roles that a service account needs to provision Psoxy in GCP:

@@ -259,6 +259,7 @@ variable "custom_api_connectors" {
     oauth_scopes_needed     = optional(list(string), [])
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -289,6 +290,8 @@ variable "custom_api_connectors" {
     #   source_auth_strategy = "bearer"
     #   target_host          = "api.example.com"
     #   example_api_calls    = ["/v1/users"]
+    #   enable_gen_metadata  = true # ALPHA: !<classify> / !<genMetadata> augments in custom rules (Bedrock)
+    #   rules_file           = "custom-api.yaml"
     #   secured_variables = [
     #     { name = "API_KEY" }
     #   ]
@@ -341,6 +344,7 @@ variable "custom_bulk_connectors" {
       })), {})
     }))
     memory_size_mb      = optional(number, null)
+    enable_gen_metadata = optional(bool, false)
     settings_to_provide = optional(map(string), {})
     example_file        = optional(string)
     example_files       = optional(list(string), [])
@@ -431,6 +435,7 @@ variable "webhook_collectors" {
     keep_warm_instances  = optional(number, null)        # if set to 1+, keeps that many Lambda instances warm to eliminate cold starts; adds cost (~$11/month per instance) but improves reliability
     example_payload_file = optional(string, null)        # path to example payload file to use for testing; if provided, will be used in the test script
     example_identity     = optional(string, null)        # example identity to use for testing; if provided, will be used to test the collector
+    enable_gen_metadata  = optional(bool, false)         # ALPHA: !<classify> / !<genMetadata> in webhook rules (Bedrock)
   }))
 
   default = {}
@@ -523,6 +528,12 @@ variable "todos_as_local_files" {
   type        = bool
   description = "whether todos.tf writes TODO markdown and test scripts. Default true. This example calls the connector, host, and Worklytics-connection modules with todos_as_local_files = false so they do not write the same paths. Set false on Terraform Cloud, then run ./generate-todos.sh or read the todo_files output. These local_file resources are deprecated and will be removed in 0.8. Host and connector modules still create the files when you pass this variable through as true."
   default     = true
+}
+
+variable "enable_remote_resources" {
+  type        = bool
+  description = "**beta** Load rules / OpenNLP models from the artifacts S3 bucket at runtime. Default false; not required for genMetadata (Bedrock). Set true only if rules are too large for SSM / env, or you use textMetadata."
+  default     = false
 }
 
 
