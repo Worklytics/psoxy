@@ -7,6 +7,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Validates augment rules at load time.
@@ -110,6 +113,52 @@ public final class AugmentValidation {
                 gen.getMaxInputTokens();
             } catch (IllegalArgumentException e) {
                 errors.add("genMetadata maxInputTokens must be a positive integer when set");
+            }
+        }
+        if (augment instanceof Augment.RegexExtract regexExtract) {
+            if (regexExtract.getJsonPaths() == null || regexExtract.getJsonPaths().isEmpty()) {
+                errors.add("regexExtract augment requires at least one jsonPath");
+            }
+            Map<String, List<Augment.RegexExtract.ExtractionRule>> extractions =
+                regexExtract.getExtractions();
+            if (extractions == null || extractions.isEmpty()) {
+                errors.add("regexExtract augment requires at least one extraction field");
+            } else {
+                boolean anyField = false;
+                for (Map.Entry<String, List<Augment.RegexExtract.ExtractionRule>> entry
+                        : extractions.entrySet()) {
+                    if (StringUtils.isBlank(entry.getKey())) {
+                        errors.add("regexExtract extraction field names must be non-blank");
+                        continue;
+                    }
+                    anyField = true;
+                    List<Augment.RegexExtract.ExtractionRule> rules = entry.getValue();
+                    if (rules == null || rules.isEmpty()) {
+                        errors.add("regexExtract field '" + entry.getKey()
+                            + "' requires at least one rule");
+                        continue;
+                    }
+                    for (Augment.RegexExtract.ExtractionRule rule : rules) {
+                        if (rule == null || StringUtils.isBlank(rule.getRegex())) {
+                            errors.add("regexExtract field '" + entry.getKey()
+                                + "' requires non-blank regex on each rule");
+                            continue;
+                        }
+                        try {
+                            Pattern.compile(rule.getRegex());
+                        } catch (PatternSyntaxException e) {
+                            errors.add("regexExtract field '" + entry.getKey()
+                                + "' has invalid regex: " + e.getDescription());
+                        }
+                        if (rule.getGroup() != null && rule.getGroup() < 1) {
+                            errors.add("regexExtract field '" + entry.getKey()
+                                + "' group must be >= 1 when set");
+                        }
+                    }
+                }
+                if (!anyField) {
+                    errors.add("regexExtract augment requires at least one non-blank extraction field");
+                }
             }
         }
     }

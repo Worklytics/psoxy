@@ -1,0 +1,41 @@
+# Example (alpha): AI authorship + conventional-commit classification from GitHub commit.message.
+# Not enabled in prebuilt GitHub connector rules; exercised by RegexExtractAiAttributionAugmentTest.
+!<regexExtract>
+jsonPaths:
+  - "$..commit.message"
+extractions:
+  aiAssistPlatform:
+    - regex: "(?i)Made with Cursor"
+      value: "Cursor"
+    - regex: "(?i)Co-Authored-By:\\s*Cursor"
+      value: "Cursor"
+    - regex: "(?i)cursoragent@cursor\\.com"
+      value: "Cursor"
+    - regex: "(?i)Co-Authored-By:\\s*Claude"
+      value: "Claude Code"
+    - regex: "(?i)Generated with Claude Code"
+      value: "Claude Code"
+    - regex: "(?i)noreply@anthropic\\.com"
+      value: "Claude Code"
+    - regex: "(?i)Copilot coding-agent"
+      value: "Copilot"
+    - regex: "(?i)copilot-swe-agent"
+      value: "Copilot"
+    - regex: "(?i)Co-Authored-By:\\s*(?:GitHub )?Copilot"
+      value: "Copilot"
+    - regex: "(?i)Co-Authored-By:\\s*[^\\n<]+<[^>]*(?:bot|ai)[^>]*>"
+      value: "Other AI"
+  aiAssistModel:
+    - regex: "(?i)model:\\s*([\\w./+-]+)"
+      group: 1
+    - regex: "(?i)Claude\\s+([\\w./+-]+)"
+      group: 1
+  commitType:
+    - regex: "(?i)^(?:fix|bugfix)(?:\\(|:|\\s)"
+      value: "fix"
+    - regex: "(?i)^(?:feat|feature)(?:\\(|:|\\s)"
+      value: "feature"
+    - regex: "(?i)^(?:docs?)(?:\\(|:|\\s)"
+      value: "docs"
+    - regex: "(?i)^(?:chore|refactor|test|ci|build|style|perf)(?:\\(|:|\\s)"
+      value: "other"

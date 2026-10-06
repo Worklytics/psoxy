@@ -106,4 +106,30 @@ class AugmentValidationTest {
         assertDoesNotThrow(() -> AugmentValidation.validateEndpoints(List.of(
             Endpoint.builder().augment(valid).pathTemplate("/test").build())));
     }
+
+    @Test
+    void validateRegexExtract_requiresExtractions() {
+        Augment.RegexExtract invalid = Augment.RegexExtract.builder()
+            .jsonPath("$.commit.message")
+            .build();
+
+        assertThrows(IllegalArgumentException.class,
+            () -> AugmentValidation.validateEndpoints(List.of(
+                Endpoint.builder().augment(invalid).pathTemplate("/test").build())));
+    }
+
+    @Test
+    void validateRegexExtract_valid() {
+        Augment.RegexExtract valid = Augment.RegexExtract.builder()
+            .jsonPath("$.commit.message")
+            .extraction("aiAssistPlatform", List.of(
+                Augment.RegexExtract.ExtractionRule.builder()
+                    .regex("(?i)Made with Cursor")
+                    .value("Cursor")
+                    .build()))
+            .build();
+
+        assertDoesNotThrow(() -> AugmentValidation.validateEndpoints(List.of(
+            Endpoint.builder().augment(valid).pathTemplate("/test").build())));
+    }
 }

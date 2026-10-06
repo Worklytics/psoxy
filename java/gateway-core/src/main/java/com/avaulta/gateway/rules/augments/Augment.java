@@ -13,10 +13,14 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Base class for augments — computed field enrichment rules that add synthetic
@@ -35,6 +39,7 @@ import java.util.TreeMap;
     @JsonSubTypes.Type(value = Augment.TextDigest.class, name = "textDigest"),
     @JsonSubTypes.Type(value = Augment.SentenceMetadata.class, name = "sentenceMetadata"),
     @JsonSubTypes.Type(value = Augment.GenMetadata.class, name = "genMetadata"),
+    @JsonSubTypes.Type(value = Augment.RegexExtract.class, name = "regexExtract"),
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
@@ -424,6 +429,138 @@ public abstract class Augment {
         @Override
         protected boolean canEqual(Object other) {
             return other instanceof GenMetadata;
+        }
+    }
+
+    /**
+     * Extracts structured values from text using ordered regex rules per output field.
+     * The first matching rule for each field wins; fields with no match are omitted.
+     */
+    @SuperBuilder(toBuilder = true)
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    public static class RegexExtract extends Augment {
+
+        /**
+         * Output field name to ordered extraction rules. First match per field is used.
+         */
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @Singular
+        Map<String, List<ExtractionRule>> extractions;
+
+        /**
+         * When the matched value is a JSON object, concatenate these field values (in order,
+         * separated by newlines) before applying {@link #extractions}. Ignored for string inputs.
+         */
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @Singular("sourceField")
+        List<String> sourceFields;
+
+        private final ConcurrentHashMap<String, Pattern> compiledPatterns = new ConcurrentHashMap<>();
+
+        @JsonIgnore
+        @Override
+        public String getFunctionName() {
+            return "regexExtract";
+        }
+
+        @Override
+        public Object compute(Object input) {
+            String text = toSearchText(input);
+            if (text == null || text.isEmpty()) {
+                return null;
+            }
+            if (extractions == null || extractions.isEmpty()) {
+                return null;
+            }
+            TreeMap<String, Object> result = new TreeMap<>();
+            for (Map.Entry<String, List<ExtractionRule>> entry : extractions.entrySet()) {
+                String field = entry.getKey();
+                if (StringUtils.isBlank(field) || entry.getValue() == null) {
+                    continue;
+                }
+                for (ExtractionRule rule : entry.getValue()) {
+                    String extracted = rule.extract(text, compiledPatterns);
+                    if (extracted != null && !extracted.isEmpty()) {
+                        result.put(field, extracted);
+                        break;
+                    }
+                }
+            }
+            return result.isEmpty() ? null : result;
+        }
+
+        @SuppressWarnings("unchecked")
+        private String toSearchText(Object input) {
+            if (input instanceof String s) {
+                return s;
+            }
+            if (input instanceof Map<?, ?> map && sourceFields != null && !sourceFields.isEmpty()) {
+                StringBuilder combined = new StringBuilder();
+                for (String field : sourceFields) {
+                    if (StringUtils.isBlank(field)) {
+                        continue;
+                    }
+                    Object value = map.get(field);
+                    if (value instanceof String s && !s.isEmpty()) {
+                        if (combined.length() > 0) {
+                            combined.append('\n');
+                        }
+                        combined.append(s);
+                    }
+                }
+                return combined.length() == 0 ? null : combined.toString();
+            }
+            return null;
+        }
+
+        @SuperBuilder(toBuilder = true)
+        @NoArgsConstructor
+        @AllArgsConstructor
+        @Getter
+        @EqualsAndHashCode
+        public static class ExtractionRule {
+
+            /**
+             * Java regex pattern. When {@link #value} is set, a match assigns that literal;
+             * otherwise the configured {@link #group} (default 1) is extracted.
+             */
+            String regex;
+
+            /**
+             * Literal value to assign when {@link #regex} matches. Mutually exclusive with
+             * extracting a capture group unless both are set (literal wins).
+             */
+            @JsonInclude(JsonInclude.Include.NON_NULL)
+            String value;
+
+            /**
+             * 1-based capture group to extract when {@link #value} is not set. Defaults to 1.
+             */
+            @JsonInclude(JsonInclude.Include.NON_NULL)
+            Integer group;
+
+            String extract(String text, ConcurrentHashMap<String, Pattern> patternCache) {
+                if (StringUtils.isBlank(regex) || text == null) {
+                    return null;
+                }
+                Pattern pattern = patternCache.computeIfAbsent(regex, Pattern::compile);
+                Matcher matcher = pattern.matcher(text);
+                if (!matcher.find()) {
+                    return null;
+                }
+                if (StringUtils.isNotBlank(value)) {
+                    return value;
+                }
+                int captureGroup = group != null ? group : 1;
+                if (captureGroup < 1 || captureGroup > matcher.groupCount()) {
+                    return matcher.group(0);
+                }
+                String captured = matcher.group(captureGroup);
+                return captured == null ? null : captured.trim();
+            }
         }
     }
 }
