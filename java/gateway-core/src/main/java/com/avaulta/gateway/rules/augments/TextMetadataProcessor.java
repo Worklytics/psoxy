@@ -1,13 +1,13 @@
 package com.avaulta.gateway.rules.augments;
 
 import com.avaulta.gateway.resources.ResourceService;
-import com.avaulta.gateway.rules.augments.SentenceMetadataResult.DocSummary;
-import com.avaulta.gateway.rules.augments.SentenceMetadataResult.Noun;
-import com.avaulta.gateway.rules.augments.SentenceMetadataResult.Sentence;
-import com.avaulta.gateway.rules.augments.SentenceMetadataResult.Signals;
-import com.avaulta.gateway.rules.augments.SentenceMetadataResult.Structure;
-import com.avaulta.gateway.rules.augments.SentenceMetadataResult.SuppressedCounts;
-import com.avaulta.gateway.rules.augments.SentenceMetadataResult.Verb;
+import com.avaulta.gateway.rules.augments.TextMetadataResult.DocSummary;
+import com.avaulta.gateway.rules.augments.TextMetadataResult.Noun;
+import com.avaulta.gateway.rules.augments.TextMetadataResult.Sentence;
+import com.avaulta.gateway.rules.augments.TextMetadataResult.Signals;
+import com.avaulta.gateway.rules.augments.TextMetadataResult.Structure;
+import com.avaulta.gateway.rules.augments.TextMetadataResult.SuppressedCounts;
+import com.avaulta.gateway.rules.augments.TextMetadataResult.Verb;
 import opennlp.tools.chunker.ChunkerME;
 import opennlp.tools.chunker.ChunkerModel;
 import opennlp.tools.postag.POSModel;
@@ -29,14 +29,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * ALPHA: Proof of concept NLP processor for the {@code sentenceMetadata} augment.
+ * ALPHA: Proof of concept NLP processor for the {@code textMetadata} augment.
  * Lazily loads OpenNLP models from a {@link ResourceService} and performs sentence structure extraction.
  *
  * <p>Thread-safe for concurrent requests: model fields are published only after full initialization.
  */
-public class SentenceMetadataProcessor {
+public class TextMetadataProcessor {
 
-    private static final Logger log = Logger.getLogger(SentenceMetadataProcessor.class.getName());
+    private static final Logger log = Logger.getLogger(TextMetadataProcessor.class.getName());
 
     static final String MODEL_PATH_PREFIX = "opennlp/";
 
@@ -48,28 +48,28 @@ public class SentenceMetadataProcessor {
 
     private final Object lock = new Object();
 
-    public SentenceMetadataProcessor(ResourceService resourceService) {
+    public TextMetadataProcessor(ResourceService resourceService) {
         this.resourceService = resourceService;
     }
 
     /**
-     * Compute sentence metadata for a single augment invocation.
+     * Compute text metadata for a single augment invocation.
      */
-    public SentenceMetadataResult compute(Augment.SentenceMetadata augment, Object input) {
+    public TextMetadataResult compute(Augment.TextMetadata augment, Object input) {
         if (!(input instanceof String text) || text.isEmpty()) {
             return null;
         }
         return process(
             text,
             augment.getTaxonomy(),
-            Augment.SentenceMetadata.signalWords(augment.getHedgeWords(), Augment.SentenceMetadata.DEFAULT_HEDGE_WORDS),
-            Augment.SentenceMetadata.signalWords(augment.getConstraintWords(), Augment.SentenceMetadata.DEFAULT_CONSTRAINT_WORDS));
+            Augment.TextMetadata.signalWords(augment.getHedgeWords(), Augment.TextMetadata.DEFAULT_HEDGE_WORDS),
+            Augment.TextMetadata.signalWords(augment.getConstraintWords(), Augment.TextMetadata.DEFAULT_CONSTRAINT_WORDS));
     }
 
-    public SentenceMetadataResult process(String text,
-                                          Map<String, List<String>> taxonomy,
-                                          Set<String> hedgeWords,
-                                          Set<String> constraintWords) {
+    public TextMetadataResult process(String text,
+                                      Map<String, List<String>> taxonomy,
+                                      Set<String> hedgeWords,
+                                      Set<String> constraintWords) {
         initializeModels();
         if (sentenceDetector == null) {
             return null;
@@ -125,7 +125,7 @@ public class SentenceMetadataProcessor {
             .anyNegated(anyNegated)
             .build();
 
-        return SentenceMetadataResult.builder()
+        return TextMetadataResult.builder()
             .sentences(sentencesOutput)
             .docSummary(docSummary)
             .build();
@@ -296,7 +296,7 @@ public class SentenceMetadataProcessor {
                 posTagger = tagger;
                 chunker = chunkerModel;
             } catch (Exception e) {
-                log.log(Level.INFO, "OpenNLP models not available; sentenceMetadata augment unavailable", e);
+                log.log(Level.INFO, "OpenNLP models not available; textMetadata augment unavailable", e);
             }
         }
     }

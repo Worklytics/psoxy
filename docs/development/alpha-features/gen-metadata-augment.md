@@ -149,7 +149,7 @@ Set `enable_gen_metadata = true` on the API, bulk, or webhook collector you want
 - **AWS:** Terraform attaches Bedrock invoke/converse IAM. Confirm Bedrock is usable in the account and region (see [AWS getting started](../../aws/getting-started.md#genmetadata-via-bedrock)). Default model: `us.amazon.nova-2-lite-v1:0`.
 - **GCP:** Terraform enables `aiplatform.googleapis.com` and grants `roles/aiplatform.user`. Default model: `gemini-3.5-flash-lite` at location `global`, thinking `minimal`.
 
-genMetadata does **not** need `enable_remote_resources` or `REMOTE_RESOURCE_BUCKET`. Those are for remote `rules.yaml` / OpenNLP (`sentenceMetadata`).
+genMetadata does **not** need `enable_remote_resources` or `REMOTE_RESOURCE_BUCKET`. Those are for remote `rules.yaml` / OpenNLP (`textMetadata`).
 
 ### Using Anthropic Claude on Bedrock
 

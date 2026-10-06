@@ -13,7 +13,7 @@ Several use-cases require the proxy to inject *computed metadata* into the API r
 |---|---|
 | Text statistics | word count, character length |
 | Keyword frequency | counts of configured keywords |
-| NLP statistics | sentence structure, readability scores ([`sentenceMetadata`](alpha-features/text-metadata-augments.md), alpha) |
+| NLP statistics | sentence structure, readability scores ([`textMetadata`](alpha-features/text-metadata-augments.md), alpha) |
 | Payload classification | labelling an LLM prompt as "email composition" vs "code generation" |
 
 Today the `textDigest` transform **replaces** the source field's value with a nested JSON string containing the computed output (e.g. `{"length":42,"word_count":7}`). This is brittle because:
@@ -153,7 +153,7 @@ List<Augment> augments;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Augment.Classify.class, name = "classify"),
     @JsonSubTypes.Type(value = Augment.TextDigest.class, name = "textDigest"),
-    @JsonSubTypes.Type(value = Augment.SentenceMetadata.class, name = "sentenceMetadata"),
+    @JsonSubTypes.Type(value = Augment.TextMetadata.class, name = "textMetadata"),
     @JsonSubTypes.Type(value = Augment.GenMetadata.class, name = "genMetadata"),
 })
 @SuperBuilder(toBuilder = true)

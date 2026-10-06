@@ -7,17 +7,17 @@
 
 | Augment | Documentation |
 |---------|---------------|
-| `sentenceMetadata` | [Sentence metadata augment](sentence-metadata-augment.md) — OpenNLP sentence structure, POS tags, and derived signals |
+| `textMetadata` | [Text metadata augment](text-metadata-augment.md) — OpenNLP sentence structure, POS tags, and derived signals |
 
 ## Rule configuration
 
-Text metadata augments are defined per-endpoint under `augments:`, parallel to `transforms`. Output appears as sibling properties named `+{sourceProperty}:sentenceMetadata`.
+Text metadata augments are defined per-endpoint under `augments:`, parallel to `transforms`. Output appears as sibling properties named `+{sourceProperty}:textMetadata`.
 
 ```yaml
 endpoints:
   - pathTemplate: "/v1/example"
     augments:
-      - !<sentenceMetadata>
+      - !<textMetadata>
         jsonPaths:
           - "$..prompt"
         taxonomy:
@@ -28,7 +28,7 @@ endpoints:
 
 ## OpenNLP model deployment
 
-The `sentenceMetadata` augment requires OpenNLP model files (`en-sent.bin`, `en-pos-maxent.bin`, `en-chunker.bin`). These are **not** bundled in deployment JARs. Upload them to the [remote resources bucket](../../configuration/remote-resources.md) (requires `enable_remote_resources = true` on the host module).
+The `textMetadata` augment requires OpenNLP model files (`en-sent.bin`, `en-pos-maxent.bin`, `en-chunker.bin`). These are **not** bundled in deployment JARs. Upload them to the [remote resources bucket](../../configuration/remote-resources.md) (requires `enable_remote_resources = true` on the host module).
 
 Place them under `{SHARED_RESOURCE_PATH}/opennlp/` (e.g. `{SHARED_RESOURCE_PATH}/opennlp/en-sent.bin`). `{SHARED_RESOURCE_PATH}` defaults to `PATH_TO_SHARED_CONFIG` / your Terraform `config_parameter_prefix` (GCP) or shared secrets path (AWS).
 

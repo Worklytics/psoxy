@@ -1,11 +1,11 @@
 package com.avaulta.gateway.rules.augments;
 
-import com.avaulta.gateway.rules.augments.SentenceMetadataResult.Sentence;
+import com.avaulta.gateway.rules.augments.TextMetadataResult.Sentence;
 
 import java.util.Set;
 
 /**
- * Intermediate result from {@link SentenceMetadataProcessor#analyzeSentence}.
+ * Intermediate result from {@link TextMetadataProcessor#analyzeSentence}.
  */
 record SentenceAnalysis(Sentence sentence,
                         String sentenceType,

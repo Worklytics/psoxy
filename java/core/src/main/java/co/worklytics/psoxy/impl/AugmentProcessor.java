@@ -6,7 +6,7 @@ import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.augments.ClassifyProcessor;
 import com.avaulta.gateway.rules.augments.GenMetadataAugmentException;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
-import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
+import com.avaulta.gateway.rules.augments.TextMetadataProcessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
@@ -84,7 +84,7 @@ public class AugmentProcessor {
      */
     final Configuration pathListConfiguration;
 
-    final SentenceMetadataProcessor sentenceMetadataProcessor;
+    final TextMetadataProcessor textMetadataProcessor;
     final GenMetadataProcessor genMetadataProcessor;
     final ClassifyProcessor classifyProcessor;
 
@@ -92,14 +92,14 @@ public class AugmentProcessor {
     public AugmentProcessor(Configuration jsonConfiguration,
                             JsonSchemaValidationUtils jsonSchemaValidationUtils,
                             ObjectMapper objectMapper,
-                            SentenceMetadataProcessor sentenceMetadataProcessor,
+                            TextMetadataProcessor textMetadataProcessor,
                             GenMetadataProcessor genMetadataProcessor,
                             ClassifyProcessor classifyProcessor) {
         this.jsonConfiguration = jsonConfiguration;
         this.jsonSchemaValidationUtils = jsonSchemaValidationUtils;
         this.objectMapper = objectMapper;
         this.pathListConfiguration = jsonConfiguration.setOptions(Option.AS_PATH_LIST);
-        this.sentenceMetadataProcessor = sentenceMetadataProcessor;
+        this.textMetadataProcessor = textMetadataProcessor;
         this.genMetadataProcessor = genMetadataProcessor;
         this.classifyProcessor = classifyProcessor;
     }
@@ -276,8 +276,8 @@ public class AugmentProcessor {
 
     private Object invokeCompute(Augment augment, Object input) throws AugmentProcessingException {
         try {
-            if (augment instanceof Augment.SentenceMetadata sentenceMetadata) {
-                return sentenceMetadataProcessor.compute(sentenceMetadata, input);
+            if (augment instanceof Augment.TextMetadata textMetadata) {
+                return textMetadataProcessor.compute(textMetadata, input);
             }
             if (augment instanceof Augment.Classify classify) {
                 return classifyProcessor.compute(classify, input);

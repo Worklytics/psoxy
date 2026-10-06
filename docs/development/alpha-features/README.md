@@ -8,4 +8,4 @@ guarantee of long-term support or stability.
 | [genMetadata / classify](gen-metadata-augment.md) | Cloud LLM (Vertex / Bedrock) metadata on custom rules |
 | [Email handling](email-handling.md) | Email canonicalization and related behavior |
 | [Text Metadata Augments](text-metadata-augments.md) | Alpha text metadata augments and OpenNLP model deployment |
-| [Sentence metadata](sentence-metadata-augment.md) | `sentenceMetadata` augment design and output schema |
+| [Text metadata](text-metadata-augment.md) | `textMetadata` augment design and output schema |

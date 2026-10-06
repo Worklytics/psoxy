@@ -13,14 +13,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Structured output of the {@code sentenceMetadata} augment.
+ * Structured output of the {@code textMetadata} augment.
  */
 @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SentenceMetadataResult {
+public class TextMetadataResult {
 
     @Singular
     List<Sentence> sentences;
