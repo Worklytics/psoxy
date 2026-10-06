@@ -101,7 +101,6 @@ augments:
                 type: string
               secondsTalking:
                 type: number
-                minimum: 0
 ```
 
 If speaker ids in the augment should be pseudonymized, add a follow-on transform on `$['+timeline:genMetadata'].speakers[*].personId`.
