@@ -57,6 +57,20 @@ class ClassifyProcessorTest {
     }
 
     @Test
+    void findClass_doesNotMatchLetterInsideAnotherWord() {
+        ClassifyProcessor processor = processorReturning("ignored");
+        assertEquals("B", processor.findClass("The Answer is B", List.of("A", "B")));
+        assertNull(processor.findClass("The Answer is unknown", List.of("A", "B")));
+    }
+
+    @Test
+    void findClass_doesNotMatchShorterLabelInsideLongerWord() {
+        ClassifyProcessor processor = processorReturning("ignored");
+        assertEquals("dog", processor.findClass("category vs dog", List.of("cat", "dog")));
+        assertNull(processor.findClass("category", List.of("cat")));
+    }
+
+    @Test
     void findClass_trimsConfiguredClassNames() {
         ClassifyProcessor processor = processorReturning("ignored");
         assertEquals("Feature", processor.findClass("Feature", List.of(" Feature ")));

@@ -24,7 +24,7 @@ Wrong cloud on wrong platform → `augment-gen-unavailable`. Auth / quota failur
 
 Closed-set, **exactly one** class. YAML lists the allowed strings; there is no `outputSchema` and no `maxOutputTokens` — generation is capped at the length of the longest class, plus a small slack so the model can emit light formatting (for example `class:foo`).
 
-If the model reply contains any of those class names as an exact substring, that class is used (longer names win when more than one matches, e.g. `Email Drafting` over `Email`). On Gemini, thinking tokens share this inferred generation budget with the visible class name.
+If the model reply is exactly one class (or a JSON string of that class), that class is used. Otherwise a class name must appear as a whole token — not inside another word — so `A` cannot match inside `Answer`. Longer names still win when more than one matches (e.g. `Email Drafting` over `Email`). On Gemini, thinking tokens share this inferred generation budget with the visible class name.
 
 ```yaml
 augments:
@@ -161,7 +161,7 @@ Switching `GEN_METADATA_MODEL` to a Claude id is an advanced/expensive option. F
 ```
 ClassifyProcessor / GenMetadataProcessor
   → GenMetadataChatModelProvider (Bedrock | Vertex)
-  → classify: exact substring match against `classes`
+  → classify: exact class / JSON string, then token-boundary match against `classes`
   → genMetadata: JSON parse → outputSchema gate
 ```
 

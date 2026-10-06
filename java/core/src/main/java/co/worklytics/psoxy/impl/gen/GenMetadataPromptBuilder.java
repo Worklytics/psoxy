@@ -28,7 +28,7 @@ class GenMetadataPromptBuilder {
     static final String SYSTEM_CLASSIFY =
         "You are a processing component in a data sanitization proxy. "
             + "Respond with exactly one allowed class. "
-            + "The class name must appear in your reply as an exact substring. "
+            + "The class name must appear as a whole token, not inside another word. "
             + "No markdown fences.";
 
     static final String SYSTEM_COMPUTE =

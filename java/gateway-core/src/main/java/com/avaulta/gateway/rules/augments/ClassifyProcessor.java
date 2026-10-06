@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Facade for {@link Augment.Classify} — closed-set label via {@link GenMetadataBackend}.
@@ -78,15 +80,58 @@ public class ClassifyProcessor {
     }
 
     /**
-     * If {@code raw} contains any class name as an exact substring, return that class.
-     * Longer matches win (so {@code Email Drafting} beats {@code Email}); equal length prefers
-     * the earlier occurrence.
+     * Resolve {@code raw} to one configured class: whole-string / JSON-string exact match first,
+     * then a token-boundary search (so {@code A} cannot match inside {@code Answer}). Longer
+     * bounded matches win ({@code Email Drafting} beats {@code Email}); equal length prefers the
+     * earlier occurrence.
      */
     String findClass(Object raw, List<String> classes) {
         if (raw == null || classes == null || classes.isEmpty()) {
             return null;
         }
         String text = raw instanceof String s ? s : String.valueOf(raw);
+        String exact = matchExactClass(text, classes);
+        if (exact != null) {
+            return exact;
+        }
+        return matchBoundedClass(text, classes);
+    }
+
+    private String matchExactClass(String text, List<String> classes) {
+        String trimmedText = text.trim();
+        String exact = firstEqualClass(trimmedText, classes);
+        if (exact != null) {
+            return exact;
+        }
+        String unquoted = unquoteJsonString(trimmedText);
+        if (unquoted == null) {
+            return null;
+        }
+        return firstEqualClass(unquoted, classes);
+    }
+
+    private String firstEqualClass(String value, List<String> classes) {
+        for (String candidate : classes) {
+            String trimmed = StringUtils.trimToNull(candidate);
+            if (trimmed != null && trimmed.equals(value)) {
+                return trimmed;
+            }
+        }
+        return null;
+    }
+
+    private String unquoteJsonString(String trimmedText) {
+        if (trimmedText.length() < 2 || trimmedText.charAt(0) != '"') {
+            return null;
+        }
+        try {
+            return objectMapper.readValue(trimmedText, String.class);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+    }
+
+    private String matchBoundedClass(String text, List<String> classes) {
         String best = null;
         int bestIndex = Integer.MAX_VALUE;
         for (String candidate : classes) {
@@ -94,10 +139,12 @@ public class ClassifyProcessor {
             if (trimmed == null) {
                 continue;
             }
-            int index = text.indexOf(trimmed);
-            if (index < 0) {
+            Matcher matcher = Pattern.compile("(?<!\\w)" + Pattern.quote(trimmed) + "(?!\\w)")
+                .matcher(text);
+            if (!matcher.find()) {
                 continue;
             }
+            int index = matcher.start();
             if (best == null
                 || trimmed.length() > best.length()
                 || (trimmed.length() == best.length() && index < bestIndex)) {

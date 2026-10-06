@@ -1,8 +1,9 @@
 # Enable Vertex AI and grant invoke access to the given service accounts.
-# No-op when `service_account_emails` is empty.
+# `service_accounts` is keyed by stable connector ids (known at plan); emails may be
+# computed and must not be used as for_each keys. No-op when the map is empty.
 
 locals {
-  services = length(var.service_account_emails) > 0 ? toset(["aiplatform.googleapis.com"]) : toset([])
+  services = length(var.service_accounts) > 0 ? toset(["aiplatform.googleapis.com"]) : toset([])
 }
 
 resource "google_project_service" "aiplatform" {
@@ -15,7 +16,7 @@ resource "google_project_service" "aiplatform" {
 }
 
 resource "google_project_iam_member" "vertex_user" {
-  for_each = var.service_account_emails
+  for_each = var.service_accounts
 
   project = var.project_id
   role    = "roles/aiplatform.user"

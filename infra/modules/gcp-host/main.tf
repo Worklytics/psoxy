@@ -565,18 +565,18 @@ module "bulk_connector" {
 # END BULK CONNECTORS
 
 locals {
-  vertex_sa_emails = toset(compact(concat(
-    [for k, v in var.api_connectors : google_service_account.api_connectors[k].email if try(v.enable_gen_metadata, false)],
-    [for k, v in var.bulk_connectors : module.bulk_connector[k].instance_sa_email if try(v.enable_gen_metadata, false)],
-    [for k, v in var.webhook_collectors : google_service_account.webhook_collector[k].email if try(v.enable_gen_metadata, false)],
-  )))
+  vertex_service_accounts = merge(
+    { for k, v in var.api_connectors : "api-${k}" => google_service_account.api_connectors[k].email if try(v.enable_gen_metadata, false) },
+    { for k, v in var.bulk_connectors : "bulk-${k}" => module.bulk_connector[k].instance_sa_email if try(v.enable_gen_metadata, false) },
+    { for k, v in var.webhook_collectors : "webhook-${k}" => google_service_account.webhook_collector[k].email if try(v.enable_gen_metadata, false) },
+  )
 }
 
 module "enable_vertex" {
   source = "../../modules/gcp-enable-vertex"
 
-  project_id             = var.gcp_project_id
-  service_account_emails = local.vertex_sa_emails
+  project_id       = var.gcp_project_id
+  service_accounts = local.vertex_service_accounts
 }
 
 # BEGIN LOOKUP TABLES
