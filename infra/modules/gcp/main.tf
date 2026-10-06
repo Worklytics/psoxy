@@ -12,9 +12,10 @@ locals {
     "pubsub.googleapis.com",   # needed for cloud run gen2
   ]
 
-  # additional services required for webhook collectors
+  # additional services required for webhook collectors.
+  # cloudkms.googleapis.com is separate (google_project_service.cloud_kms): only when a collector
+  # provisions an auth key, and the key ring in gcp-host must wait on that resource.
   services_required_for_webhook_collectors = [
-    "cloudkms.googleapis.com",       # signing webhooks
     "cloudscheduler.googleapis.com", # triggering batches
     "pubsub.googleapis.com",         # webhooks batched via pubsub
   ]
@@ -50,6 +51,17 @@ resource "google_project_service" "gcp_infra_api" {
   project                    = var.project_id
   disable_dependent_services = false
   disable_on_destroy         = false # disabling on destroy has potential to conflict with other uses of the project
+}
+
+# Own resource so gcp-host can wait on this API before creating a key ring. Not part of
+# gcp_infra_api: that set is enabled for every webhook, including ones that do not provision keys.
+resource "google_project_service" "cloud_kms" {
+  count = var.enable_cloud_kms ? 1 : 0
+
+  service                    = "cloudkms.googleapis.com"
+  project                    = var.project_id
+  disable_dependent_services = false
+  disable_on_destroy         = false
 }
 
 resource "google_artifact_registry_repository" "psoxy-functions-repo" {
@@ -614,6 +626,11 @@ output "artifact_repository" {
     # If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry., forbidden"
     google_project_service.gcp_infra_api
   ]
+}
+
+output "kms_api_enabled" {
+  value       = one(google_project_service.cloud_kms[*].id)
+  description = "ID of the enabled cloudkms.googleapis.com service, or null when enable_cloud_kms is false. gcp-host waits on this before creating a KMS key ring."
 }
 
 output "oidc_token_verifier_role_id" {

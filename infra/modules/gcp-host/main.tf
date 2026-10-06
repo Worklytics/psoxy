@@ -115,6 +115,7 @@ module "psoxy" {
   enable_remote_resources           = var.enable_remote_resources
   support_bulk_mode                 = length(var.bulk_connectors) > 0
   support_webhook_collectors        = length(var.webhook_collectors) > 0
+  enable_cloud_kms                  = length(local.webhook_collectors_needing_keys) > 0
   vpc_config                        = var.vpc_config
   bucket_force_destroy              = var.bucket_force_destroy
   tf_runner_iam_principal           = module.tf_runner.iam_principal
@@ -405,12 +406,25 @@ locals {
 # necessarily exclusive to that use-case
 # it's just a single resource, couple to single mode ... pushing it down in into the 'gcp' module would add a bunch of
 # variables/outputs, as well as going against the general "inversion of control / composition" patterned preferred by terraform
+# depends_on module.psoxy: that module enables cloudkms.googleapis.com (output kms_api_enabled). Without
+# this, a fresh project creates the key ring before the API is enabled and KMS returns 403.
 resource "google_kms_key_ring" "proxy_key_ring" {
   count = local.key_ring_needed ? 1 : 0
 
   project  = var.gcp_project_id
   name     = replace(replace(var.environment_name, "/[^a-zA-Z0-9_-]/", "-"), "/-+/", "-")
   location = var.gcp_region
+
+  depends_on = [
+    module.psoxy,
+  ]
+
+  lifecycle {
+    precondition {
+      condition     = module.psoxy.kms_api_enabled != null
+      error_message = "Cloud KMS API must be enabled before creating the webhook key ring."
+    }
+  }
 }
 
 resource "google_service_account" "webhook_collector" {
@@ -453,6 +467,7 @@ module "webhook_collector" {
   bucket_access_logs_destination     = var.bucket_access_logs_destination
   builder_sa_id                      = module.psoxy.builder_sa_id
   key_ring_id                        = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
+  kms_api_service_id                 = each.value.provision_auth_key != null ? module.psoxy.kms_api_enabled : null
   oidc_token_verifier_role_id        = module.psoxy.oidc_token_verifier_role_id
   provision_auth_key                 = each.value.provision_auth_key
   rules_file                         = try(local.webhook_collector_rules_file_paths[each.key], null)

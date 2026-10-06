@@ -202,6 +202,12 @@ variable "provision_auth_key" {
   }
 }
 
+variable "kms_api_service_id" {
+  type        = string
+  description = "ID of the enabled cloudkms.googleapis.com service. When set, webhook auth key creation waits for that API enablement. Null is allowed for callers that enable Cloud KMS themselves."
+  default     = null
+}
+
 variable "key_ring_id" {
   type        = string
   description = "id of KMS key ring on which to provision any required KMS keys; REQUIRED if `provision_auth_key` is provided"
