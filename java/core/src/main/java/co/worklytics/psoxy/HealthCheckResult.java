@@ -94,8 +94,16 @@ public class HealthCheckResult {
     @Singular
     List<String> warningMessages;
 
+    /**
+     * Machine-readable failure from {@link ErrorCauses}, set when the health check itself cannot
+     * complete (for example the configuration store is unreachable). Omitted when unset.
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String error;
+
     public boolean passed() {
-        return getConfiguredSource() != null
+        return error == null
+            && getConfiguredSource() != null
             && getNonDefaultSalt()
             && getMissingConfigProperties().isEmpty()
             && (clientIpAuthorized == null || clientIpAuthorized);

@@ -1,7 +1,9 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.ErrorCauses;
 import co.worklytics.psoxy.HealthCheckResult;
+import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
@@ -22,12 +24,16 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.common.util.concurrent.UncheckedExecutionException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -186,5 +192,43 @@ public class HealthCheckRequestHandlerTest {
         assertTrue(result.getClientIpAuthorized());
         assertTrue(result.passed());
         assertEquals(HttpStatus.SC_OK, response.get().getStatusCode());
+    }
+
+    @Test
+    void handleIfHealthCheck_reports_configuration_store_connectivity_failure() throws IOException {
+        when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
+                .thenReturn(Optional.of(""));
+        when(request.getClientIp()).thenReturn(Optional.of("203.0.113.9"));
+        when(apiModeConfig.getTargetHost()).thenReturn(Optional.of("host"));
+        when(handler.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
+                .thenThrow(new UncheckedExecutionException(
+                        new UnknownHostException("ssm.us-east-1.amazonaws.com")));
+
+        Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
+
+        assertTrue(response.isPresent());
+        assertEquals(HttpStatus.SC_SERVICE_UNAVAILABLE, response.get().getStatusCode());
+        assertEquals(ErrorCauses.CONFIG_STORE_UNREACHABLE.name(),
+                response.get().getHeaders().get(ProcessedDataMetadataFields.ERROR.getHttpHeader()));
+
+        HealthCheckResult result = handler.objectMapper.readValue(response.get().getBody(), HealthCheckResult.class);
+        assertEquals(ErrorCauses.CONFIG_STORE_UNREACHABLE.name(), result.getError());
+        assertEquals("203.0.113.9", result.getCallerIp());
+        assertFalse(result.passed());
+        assertTrue(result.getWarningMessages().stream()
+                .anyMatch(message -> message.contains("configuration store")
+                        && message.contains("ssm.us-east-1.amazonaws.com")
+                        && message.contains("Error reading configuration from SSM")));
+    }
+
+    @Test
+    void handleIfHealthCheck_still_propagates_unrelated_failures() {
+        when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
+                .thenReturn(Optional.of(""));
+        when(apiModeConfig.getTargetHost()).thenReturn(Optional.of("host"));
+        when(handler.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
+                .thenThrow(new IllegalStateException("bug"));
+
+        assertThrows(IllegalStateException.class, () -> handler.handleIfHealthCheck(request));
     }
 }

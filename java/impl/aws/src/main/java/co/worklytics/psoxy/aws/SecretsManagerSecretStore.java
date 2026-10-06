@@ -21,6 +21,7 @@ import dagger.assisted.AssistedInject;
 import lombok.Getter;
 import lombok.extern.java.Log;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.DecryptionFailureException;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
@@ -142,6 +143,11 @@ public class SecretsManagerSecretStore implements SecretStore {
                 log.log(Level.SEVERE, String.format("Throttling issues for Secrets Manager Secret %s, rate limit reached most likely despite retries", id), e);
             }
             throw new IllegalStateException(String.format("failed to get config value: %s", id));
+        } catch (SdkClientException e) {
+            // Same VPC/endpoint failure mode as SSM. Health checks map this to
+            // CONFIG_STORE_UNREACHABLE; search CloudWatch for this line.
+            log.log(Level.SEVERE, "Error reading configuration from Secrets Manager: " + e.getMessage(), e);
+            throw e;
         }
     }
 

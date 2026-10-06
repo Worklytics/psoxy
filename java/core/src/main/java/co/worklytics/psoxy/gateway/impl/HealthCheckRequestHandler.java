@@ -15,14 +15,20 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.ErrorCauses;
 import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.HealthCheckResult;
+import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
+import co.worklytics.psoxy.gateway.OutboundConnectivityFailures;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -86,7 +92,94 @@ public class HealthCheckRequestHandler {
         }
     }
 
+    private static final ObjectMapper STARTUP_OBJECT_MAPPER = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .registerModule(new Jdk8Module())
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+    static final String CONFIG_STORE_UNREACHABLE_SUMMARY =
+            "Unable to reach the configuration store (AWS SSM Parameter Store or Secrets Manager). "
+                    + "Outbound connectivity from this function is blocked. On a VPC, this usually means "
+                    + "the interface endpoint or NAT gateway for that service is missing or unreachable, "
+                    + "or a security group blocks HTTPS to it. Check CloudWatch logs for "
+                    + "\"Error reading configuration from SSM\".";
+
     private HttpEventResponse handle(HttpEventRequest request) {
+        try {
+            return buildHealthCheck(request);
+        } catch (Throwable e) {
+            if (!OutboundConnectivityFailures.isConnectivityFailure(e)) {
+                if (e instanceof Error error) {
+                    throw error;
+                }
+                if (e instanceof RuntimeException runtimeException) {
+                    throw runtimeException;
+                }
+                throw new RuntimeException(e);
+            }
+            log.log(Level.SEVERE, "Health check could not reach the configuration store", e);
+            return configStoreUnreachable(callerIp(request), e);
+        }
+    }
+
+    /**
+     * JSON health-check body plus {@code X-Psoxy-Error: CONFIG_STORE_UNREACHABLE}.
+     * Used both when a health check reads SSM during the request and when Lambda startup failed
+     * before the handler graph was built.
+     */
+    public static HttpEventResponse configStoreUnreachable(String callerIp, Throwable failure) {
+        String detail = OutboundConnectivityFailures.describe(failure);
+        HealthCheckResult result = HealthCheckResult.builder()
+                .javaSourceCodeVersion(ProxyConstants.JAVA_SOURCE_CODE_VERSION)
+                .callerIp(callerIp)
+                .nonDefaultSalt(false)
+                .missingConfigProperties(Set.of())
+                .error(ErrorCauses.CONFIG_STORE_UNREACHABLE.name())
+                .warningMessage(CONFIG_STORE_UNREACHABLE_SUMMARY + " Underlying error: " + detail)
+                .build();
+
+        HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder()
+                .statusCode(HttpStatus.SC_SERVICE_UNAVAILABLE)
+                .header(HttpHeaders.CONTENT_TYPE,
+                        ContentType.APPLICATION_JSON.withCharset(StandardCharsets.UTF_8).getMimeType())
+                .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                        ErrorCauses.CONFIG_STORE_UNREACHABLE.name());
+        try {
+            String json = STARTUP_OBJECT_MAPPER.writeValueAsString(result);
+            responseBuilder.body(json + "\r\n");
+            log.warning("Health check failed: " + json);
+        } catch (IOException e) {
+            log.log(Level.WARNING, "Failed to write configuration-store health check details", e);
+            responseBuilder.body("{\"error\":\"" + ErrorCauses.CONFIG_STORE_UNREACHABLE.name() + "\"}\r\n");
+        }
+        return responseBuilder.build();
+    }
+
+    public static String callerIp(HttpEventRequest request) {
+        try {
+            if (request == null) {
+                return "unknown";
+            }
+            return request.getClientIp().orElse("unknown");
+        } catch (RuntimeException e) {
+            return "unknown";
+        }
+    }
+
+    private static void rethrowIfConnectivityFailure(Throwable e) {
+        if (!OutboundConnectivityFailures.isConnectivityFailure(e)) {
+            return;
+        }
+        if (e instanceof Error error) {
+            throw error;
+        }
+        if (e instanceof RuntimeException runtimeException) {
+            throw runtimeException;
+        }
+        throw new RuntimeException(e);
+    }
+
+    private HttpEventResponse buildHealthCheck(HttpEventRequest request) {
 
         Set<String> missing = new HashSet<>();
 
@@ -98,6 +191,7 @@ public class HealthCheckRequestHandler {
                     .map(ConfigService.ConfigProperty::name)
                     .collect(Collectors.toSet()));
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             // will fail if sourceAuthStrategy is not set up properly
             logInDev(e.getMessage(), e);
             missing = new HashSet<>();
@@ -114,6 +208,7 @@ public class HealthCheckRequestHandler {
                 missing.add(ApiModeConfig.ApiModeConfigProperty.TARGET_HOST.name());
             }
         } catch (Throwable ignored) {
+            rethrowIfConnectivityFailure(ignored);
             logInDev("Failed to add TARGET_HOST info to health check", ignored);
         }
 
@@ -142,6 +237,7 @@ public class HealthCheckRequestHandler {
                 .map(Boolean::parseBoolean)
                 .ifPresent(healthCheckResult::pseudonymizeAppIds);
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to add pseudonymizeAppIds to health check", e);
         }
 
@@ -165,6 +261,7 @@ public class HealthCheckRequestHandler {
                                     .map(metadata -> metadata.getLastModifiedDate().orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))
                                 .orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))));
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to fill 'configPropertiesLastModified' on health check", e);
         }
 
@@ -172,6 +269,7 @@ public class HealthCheckRequestHandler {
             apiModeConfig.getSourceAuthStrategyIdentifier()
                     .ifPresent(healthCheckResult::sourceAuthStrategy);
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to add sourceAuthStrategy to health check", e);
         }
 
@@ -179,6 +277,7 @@ public class HealthCheckRequestHandler {
             config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE)
                     .ifPresent(healthCheckResult::sourceAuthGrantType);
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to add sourceAuthGrantType to health check", e);
         }
 
@@ -186,6 +285,7 @@ public class HealthCheckRequestHandler {
             config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME)
                     .ifPresent(healthCheckResult::bundleFilename);
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to add bundleFilename to health check", e);
         }
 
@@ -199,8 +299,10 @@ public class HealthCheckRequestHandler {
                 config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES)
                         .ifPresent(healthCheckResult::rules);
             } catch (Throwable ignored) {
+                rethrowIfConnectivityFailure(ignored);
             }
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to add rules to health check", e);
         }
 
@@ -214,6 +316,7 @@ public class HealthCheckRequestHandler {
         try {
             sourceAuthStrategy.get().validateConfigValues().forEach(healthCheckResult::warningMessage);
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to add warnings from sourceAuthStrategy to health check", e);
         }
 

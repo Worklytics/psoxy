@@ -22,11 +22,14 @@ import com.newrelic.opentracing.aws.LambdaTracing;
 import io.opentracing.util.GlobalTracer;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
+import co.worklytics.psoxy.aws.LambdaContainerStartup;
 import co.worklytics.psoxy.aws.request.APIGatewayV1ProxyEventRequestAdapter;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
 import co.worklytics.psoxy.aws.request.LambdaEventUtils;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.OutboundConnectivityFailures;
+import co.worklytics.psoxy.gateway.impl.HealthCheckRequestHandler;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import lombok.extern.java.Log;
 
@@ -53,7 +56,7 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
     static LambdaEventUtils lambdaEventUtils;
 
     static {
-        staticInit();
+        LambdaContainerStartup.initialize(AwsApiDataModeHybridHandler::staticInit);
     }
 
     private static void staticInit() {
@@ -74,6 +77,9 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context)
             throws IOException {
+        if (LambdaContainerStartup.writeIfStartupFailed(input, output)) {
+            return;
+        }
         // Read the full input stream into a tree
         JsonNode rootNode = lambdaEventUtils.read(input);
 
@@ -217,6 +223,10 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
             context.getLogger()
                     .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
+            if (OutboundConnectivityFailures.isConnectivityFailure(e)) {
+                return Pair.of(false, HealthCheckRequestHandler.configStoreUnreachable(
+                        LambdaContainerStartup.callerIp(request), e));
+            }
             return Pair.of(false, HttpEventResponse.builder()
                     .statusCode(500)
                     .body("Unknown error: " + e.getClass().getName())

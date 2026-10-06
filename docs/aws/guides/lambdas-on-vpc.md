@@ -73,6 +73,8 @@ See the following terraform resources that you'll likely need:
 
 Check your Cloud Watch logs for the lambda. Proxy lambda will time out in INIT phase if SSM Parameter Store *or* your secret store implementation (AWS Secrets Manager, Vault) is not reachable.
 
+A health check against that failure returns **HTTP 503** with header `X-Psoxy-Error: CONFIG_STORE_UNREACHABLE` and a JSON body whose `error` field is the same code. `warningMessages` includes the AWS SDK client error (search the logs for `Error reading configuration from SSM`). That response is also returned when class initialization itself failed to reach the configuration store, so the health check is not collapsed into a generic 500/502 from API Gateway.
+
 Some potential causes of this:
 
 - DNS failure - it's going to look up the SSM service by domain; if the DNS zone for the SSM endpoint you've provisioned is not published on the VPC, this will fail; similarly, if the endpoint wasn't configured on a subnet - then it won't have an IP to be resolved.

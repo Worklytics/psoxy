@@ -170,6 +170,12 @@ export default async function (options = {}) {
               '2) Target API is unreachable or experiencing connectivity issues. ' +
               'If using VPC connector, verify: VPC connector is active, CIDR range is correct, firewall allows egress, Cloud NAT is configured.';
             break;
+          case 'CONFIG_STORE_UNREACHABLE':
+            errorMessage =
+              'Configuration store unreachable: this Lambda cannot reach SSM Parameter Store or Secrets Manager. ' +
+              'On a VPC, add a reachable interface endpoint (or NAT) for that service and allow HTTPS from the Lambda security group. ' +
+              'Check CloudWatch logs for "Error reading configuration from SSM".';
+            break;
         }
       } else if (result.headers['x-amzn-errortype']) {
         errorMessage += ` AWS ${result.headers['x-amzn-errortype']}`;

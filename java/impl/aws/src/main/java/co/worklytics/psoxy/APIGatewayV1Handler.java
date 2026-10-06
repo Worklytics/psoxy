@@ -14,7 +14,10 @@ import com.newrelic.opentracing.aws.LambdaTracing;
 import io.opentracing.util.GlobalTracer;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
+import co.worklytics.psoxy.aws.LambdaContainerStartup;
 import co.worklytics.psoxy.aws.request.APIGatewayV1ProxyEventRequestAdapter;
+import co.worklytics.psoxy.gateway.OutboundConnectivityFailures;
+import co.worklytics.psoxy.gateway.impl.HealthCheckRequestHandler;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 
@@ -40,7 +43,7 @@ public class APIGatewayV1Handler implements
     static ResponseCompressionHandler responseCompressionHandler;
 
     static {
-        staticInit();
+        LambdaContainerStartup.initialize(APIGatewayV1Handler::staticInit);
     }
 
     private static void staticInit() {
@@ -59,6 +62,10 @@ public class APIGatewayV1Handler implements
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent invocationEvent,
             Context context) {
+        if (LambdaContainerStartup.failed()) {
+            return toApiGatewayResponse(
+                    LambdaContainerStartup.response(callerIp(invocationEvent)), false);
+        }
         if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
             return LambdaTracing.instrument(invocationEvent, context, this::actualHandleRequest);
         } else {
@@ -93,23 +100,40 @@ public class APIGatewayV1Handler implements
             context.getLogger()
                     .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
-            response = HttpEventResponse.builder().statusCode(500)
-                    .body("Unknown error: " + e.getClass().getName())
-                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), "Unknown error")
-                    .build();
+            if (OutboundConnectivityFailures.isConnectivityFailure(e)) {
+                response = HealthCheckRequestHandler.configStoreUnreachable(callerIp(invocationEvent), e);
+            } else {
+                response = HttpEventResponse.builder().statusCode(500)
+                        .body("Unknown error: " + e.getClass().getName())
+                        .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), "Unknown error")
+                        .build();
+            }
         }
 
         try {
             // NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
             // in the lambda logs if this is malformed somehow (Eg, missing statusCode)
-
-            return new APIGatewayProxyResponseEvent().withStatusCode(response.getStatusCode())
-                    .withHeaders(response.getHeaders())
-                    .withMultiValueHeaders(response.getMultivaluedHeaders())
-                    .withBody(response.getBody()).withIsBase64Encoded(base64Encoded);
+            return toApiGatewayResponse(response, base64Encoded);
         } catch (Throwable e) {
             context.getLogger().log("Error writing response as Lambda return");
             throw new Error(e);
+        }
+    }
+
+    private static APIGatewayProxyResponseEvent toApiGatewayResponse(HttpEventResponse response,
+            boolean base64Encoded) {
+        return new APIGatewayProxyResponseEvent().withStatusCode(response.getStatusCode())
+                .withHeaders(response.getHeaders())
+                .withMultiValueHeaders(response.getMultivaluedHeaders())
+                .withBody(response.getBody()).withIsBase64Encoded(base64Encoded);
+    }
+
+    private static String callerIp(APIGatewayProxyRequestEvent invocationEvent) {
+        try {
+            return LambdaContainerStartup.callerIp(
+                    APIGatewayV1ProxyEventRequestAdapter.of(invocationEvent));
+        } catch (RuntimeException e) {
+            return "unknown";
         }
     }
 }
