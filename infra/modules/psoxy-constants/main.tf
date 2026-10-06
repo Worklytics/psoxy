@@ -606,7 +606,6 @@ locals {
     # "storage.objects.get",
     # "storage.objects.list",
     # "storage.objects.update",
-    "storage.serviceAccounts.get",
 
     # Cloud Functions (Gen 2) and Cloud Run
     "cloudfunctions.functions.create",
@@ -834,7 +833,6 @@ locals {
     "storage.objects.get",
     "storage.objects.list",
     "storage.objects.update",
-    "storage.serviceAccounts.get",
 
     # Cloud Functions (Gen 2) and Cloud Run
     "cloudfunctions.functions.create",
@@ -882,8 +880,8 @@ locals {
     "cloudscheduler.jobs.delete",
     "cloudscheduler.jobs.get",
     "cloudscheduler.jobs.list",
+    "cloudscheduler.jobs.enable", # ResumeJob authorizes as cloudscheduler.jobs.enable
     "cloudscheduler.jobs.pause",
-    "cloudscheduler.jobs.resume",
     "cloudscheduler.jobs.run",
     "cloudscheduler.jobs.update",
 

@@ -63,3 +63,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test generate-todos.sh
         run: ./tools/generate-todos.test.sh
+
+  ci_gcp_iam_permission_script:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Test GCP IAM permission check fixtures
+        run: ./tools/gcp/check-gcp-iam-permissions.test.sh
