@@ -40,10 +40,8 @@ jobs:
         # see tools/build.sh; this should be equivalent to that, w/o re-routing errors to log file
         # or logic to skip build if artifact already exists
         run: |
-          mvn clean -f pom.xml
-          mvn package install -f "gateway-core/pom.xml" -Dmaven.test.skip=true
-          mvn package install -f "core/pom.xml" -Dmaven.test.skip=true
-          mvn package   -Pdistribution -f "impl/${{ matrix.implementation }}/pom.xml"
+          # Reactor build. Packaging impl/<platform> alone resolves psoxy-core from Central.
+          mvn -f pom.xml clean package -Pdistribution -pl "impl/${{ matrix.implementation }}" -am -Dmaven.test.skip=true
       - name: Verify license artifacts are in the uber jar
         working-directory: java/impl/${{ matrix.implementation }}
         run: |
