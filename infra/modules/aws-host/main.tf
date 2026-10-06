@@ -685,16 +685,10 @@ locals {
   }
 
   all_instances = merge(local.api_instances, local.bulk_instances, local.webhook_collector_instances)
-}
 
-# Static content only — discovers ./test-*.sh in the deployment directory (alphabetical).
-# Do not interpolate connector module outputs here; that created Terraform destroy cycles.
-resource "local_file" "test_all_script" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename        = "test-all.sh"
-  file_permission = "755"
-  content         = <<-EOF
+  # Static content only — discovers ./test-*.sh in the deployment directory (alphabetical).
+  # Do not interpolate connector module outputs here; that created Terraform destroy cycles.
+  test_all_script = <<-EOF
 #!/bin/bash
 
 # Run all per-connector test-*.sh scripts in the current directory (alphabetical).
@@ -712,6 +706,16 @@ if [ "$found" -eq 0 ]; then
   exit 1
 fi
 EOF
+}
+
+# DEPRECATED: this local_file test script is deprecated and will be removed in 0.8.
+# Example todos.tf writes the same file from the test_script_files output.
+resource "local_file" "test_all_script" {
+  count = var.todos_as_local_files ? 1 : 0
+
+  filename        = "test-all.sh"
+  file_permission = "755"
+  content         = local.test_all_script
 }
 
 output "artifacts_bucket_name" {

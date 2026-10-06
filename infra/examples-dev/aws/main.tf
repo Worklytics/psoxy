@@ -7,6 +7,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.0"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = ">= 2.0"
+    }
   }
 
   # NOTE: Terraform backend block is configured in a separate 'backend.tf' file, as expect everyone
@@ -47,7 +51,7 @@ module "worklytics_connectors" {
   gong_instance_subdomain                  = var.gong_instance_subdomain
   glean_instance_subdomain                 = var.glean_instance_subdomain
   salesforce_example_account_id            = var.salesforce_example_account_id
-  todos_as_local_files                     = var.todos_as_local_files
+  todos_as_local_files                     = false # root todos.tf writes these files
   todo_step                                = 1
 }
 
@@ -166,7 +170,7 @@ module "psoxy" {
   custom_bulk_connector_arguments      = var.custom_bulk_connector_arguments
   custom_side_outputs                  = var.custom_side_outputs
   todo_step                            = local.max_auth_todo_step
-  todos_as_local_files                 = var.todos_as_local_files
+  todos_as_local_files                 = false # root todos.tf writes these files
   enable_remote_resources              = true
 
 
@@ -211,7 +215,7 @@ module "connection_in_worklytics" {
   connector_id         = try(local.all_connectors[each.key].worklytics_connector_id, "bulk-import-psoxy", "")
   display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${try(local.all_connectors[each.key].display_name, replace(each.key, "-", " "))} via Psoxy", "${replace(each.key, "-", " ")} via Psoxy")
   todo_step            = module.psoxy.next_todo_step
-  todos_as_local_files = var.todos_as_local_files
+  todos_as_local_files = false # root todos.tf writes these files
 
   connector_settings_to_provide = merge(
     try(each.value.settings_to_provide, {}),
@@ -292,15 +296,8 @@ output "todos_3" {
 }
 
 output "todo_files" {
-  description = "TODO markdown files (filename => content). Write them with ./generate-todos.sh. local_file resources that write the same files are deprecated and will be removed in 0.8."
-  value = merge(concat(
-    [{}],
-    [module.worklytics_connectors.todo_files],
-    [module.worklytics_connectors_google_workspace.todo_files],
-    [module.worklytics_connectors_msft_365.todo_files],
-    [module.psoxy.todo_files],
-    [for connection in values(module.connection_in_worklytics) : connection.todo_files],
-  )...)
+  description = "TODO markdown files (filename => content). todos.tf writes them when todos_as_local_files is true. ./generate-todos.sh writes the same files from this output. These local_file resources are deprecated and will be removed in 0.8."
+  value       = local.todo_files
 }
 
 # although should be sensitive such that Terraform won't echo it to command line or expose it, leave

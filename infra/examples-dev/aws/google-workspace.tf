@@ -28,7 +28,7 @@ module "worklytics_connectors_google_workspace" {
   google_workspace_example_admin = var.google_workspace_example_admin
   provision_gcp_sa_keys          = var.google_workspace_provision_keys
   gcp_sa_key_rotation_days       = var.google_workspace_key_rotation_days
-  todos_as_local_files           = var.todos_as_local_files
+  todos_as_local_files           = false # root todos.tf writes these files
   todo_step                      = 1
 }
 

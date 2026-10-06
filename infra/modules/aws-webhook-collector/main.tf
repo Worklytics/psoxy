@@ -363,6 +363,8 @@ locals {
   })
 }
 
+# DEPRECATED: this local_file test script is deprecated and will be removed in 0.8.
+# Example todos.tf writes the same file from the test_script_files output.
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
@@ -403,7 +405,15 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = try(local_file.test_script[0].filename, null)
+  # Do not interpolate local_file.test_script (content replace then deletes the file).
+  value = var.todos_as_local_files ? "test-${var.instance_id}.sh" : null
+}
+
+output "test_script_files" {
+  description = "Test script filename => content. Independent of the local_file resource, so a root module can write the file when todos_as_local_files is false."
+  value = {
+    "test-${var.instance_id}.sh" = local.test_script
+  }
 }
 
 output "test_script_content" {

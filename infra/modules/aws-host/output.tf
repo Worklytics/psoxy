@@ -89,6 +89,19 @@ output "todo_files" {
   )...)
 }
 
+output "test_script_files" {
+  description = "Test scripts (filename => content), including test-all.sh. Independent of the local_file resources, so a root module can write them when todos_as_local_files is false."
+  value = merge(
+    { "test-all.sh" = local.test_all_script },
+    merge(concat(
+      [{}],
+      [for connector in values(module.api_connector) : connector.test_script_files],
+      [for connector in values(module.bulk_connector) : connector.test_script_files],
+      [for connector in values(module.webhook_collectors) : connector.test_script_files],
+    )...),
+  )
+}
+
 output "next_todo_step" {
   value = max(concat(
     values(module.api_connector)[*].next_todo_step,
