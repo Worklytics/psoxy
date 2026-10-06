@@ -71,7 +71,7 @@ class WebhookSanitizerAugmentsTest {
         sanitizer.augmentProcessor = new AugmentProcessor(jsonConfiguration,
             new JsonSchemaValidationUtils(),
             om,
-            new com.avaulta.gateway.rules.augments.SentenceMetadataProcessor(path -> java.util.Optional.empty()),
+            new com.avaulta.gateway.rules.augments.TextMetadataProcessor(path -> java.util.Optional.empty()),
             new com.avaulta.gateway.rules.augments.GenMetadataProcessor(
                 new com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend(), om, 2,
                 new JsonSchemaValidationUtils()),
@@ -112,7 +112,7 @@ class WebhookSanitizerAugmentsTest {
         sanitizer.augmentProcessor = new AugmentProcessor(jsonConfiguration,
             new JsonSchemaValidationUtils(),
             objectMapper,
-            new com.avaulta.gateway.rules.augments.SentenceMetadataProcessor(path -> java.util.Optional.empty()),
+            new com.avaulta.gateway.rules.augments.TextMetadataProcessor(path -> java.util.Optional.empty()),
             new com.avaulta.gateway.rules.augments.GenMetadataProcessor(
                 new com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend(), objectMapper, 2,
                 new JsonSchemaValidationUtils()),

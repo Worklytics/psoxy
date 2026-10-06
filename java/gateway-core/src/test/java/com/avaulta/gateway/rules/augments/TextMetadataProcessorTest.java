@@ -13,10 +13,10 @@ import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SentenceMetadataProcessorTest {
+class TextMetadataProcessorTest {
 
-    private static final Set<String> DEFAULT_HEDGE = Set.copyOf(Augment.SentenceMetadata.DEFAULT_HEDGE_WORDS);
-    private static final Set<String> DEFAULT_CONSTRAINT = Set.copyOf(Augment.SentenceMetadata.DEFAULT_CONSTRAINT_WORDS);
+    private static final Set<String> DEFAULT_HEDGE = Set.copyOf(Augment.TextMetadata.DEFAULT_HEDGE_WORDS);
+    private static final Set<String> DEFAULT_CONSTRAINT = Set.copyOf(Augment.TextMetadata.DEFAULT_CONSTRAINT_WORDS);
 
     private static final String MODELS_MISSING_MESSAGE =
         "OpenNLP models not on classpath (expected at /opennlp/en-sent.bin). "
@@ -27,7 +27,7 @@ class SentenceMetadataProcessorTest {
     void analyzeSentence_derivesSignalsAndTaxonomyWithoutModels() {
         Map<String, String> taxonomy = Map.of("email", "MEDIUM");
 
-        SentenceAnalysis analysis = SentenceMetadataProcessor.analyzeSentence(
+        SentenceAnalysis analysis = TextMetadataProcessor.analyzeSentence(
             0,
             new String[] {"Could", "you", "avoid", "sending", "an", "email", "?"},
             new String[] {"MD", "PRP", "VB", "VBG", "DT", "NN", "."},
@@ -50,7 +50,7 @@ class SentenceMetadataProcessorTest {
     @Test
     void testProcessWithModels() {
         assertModelsAvailable();
-        SentenceMetadataProcessor processor = processorWithClasspathModels();
+        TextMetadataProcessor processor = processorWithClasspathModels();
 
         Map<String, List<String>> taxonomy = new TreeMap<>();
         taxonomy.put("CODE_ARTIFACT", List.of("code", "script", "function", "api"));
@@ -58,14 +58,14 @@ class SentenceMetadataProcessorTest {
 
         String text = "Please write a python script! Could you avoid sending an email?";
 
-        SentenceMetadataResult result = processor.process(
+        TextMetadataResult result = processor.process(
             text, taxonomy, DEFAULT_HEDGE, DEFAULT_CONSTRAINT);
 
         assertNotNull(result);
         assertNotNull(result.getSentences());
         assertEquals(2, result.getSentences().size());
 
-        SentenceMetadataResult.Sentence s2 = result.getSentences().get(1);
+        TextMetadataResult.Sentence s2 = result.getSentences().get(1);
         assertEquals("interrogative", s2.getType());
         assertNotNull(s2.getSignals());
         assertTrue(s2.getSignals().isQuestion());
@@ -76,7 +76,7 @@ class SentenceMetadataProcessorTest {
             .anyMatch(n -> "MEDIUM".equals(n.getCategory()) && "email".equals(n.getNoun()));
         assertTrue(foundMedium);
 
-        SentenceMetadataResult.DocSummary docSummary = result.getDocSummary();
+        TextMetadataResult.DocSummary docSummary = result.getDocSummary();
         assertNotNull(docSummary);
         assertEquals(2, docSummary.getSentenceCount());
         assertTrue(docSummary.isAnyQuestion());
@@ -88,7 +88,7 @@ class SentenceMetadataProcessorTest {
     @Test
     void testProcessWithInvalidModelBytes() {
         byte[] stubModel = "stub-model".getBytes(StandardCharsets.UTF_8);
-        SentenceMetadataProcessor processor = new SentenceMetadataProcessor(path -> {
+        TextMetadataProcessor processor = new TextMetadataProcessor(path -> {
             if (path.startsWith("opennlp/")) {
                 return Optional.of(new ByteArrayInputStream(stubModel));
             }
@@ -102,9 +102,9 @@ class SentenceMetadataProcessorTest {
     @Test
     void testEmptyText() {
         assertModelsAvailable();
-        SentenceMetadataProcessor processor = processorWithClasspathModels();
+        TextMetadataProcessor processor = processorWithClasspathModels();
 
-        SentenceMetadataResult result = processor.process(
+        TextMetadataResult result = processor.process(
             "", Map.of(), DEFAULT_HEDGE, DEFAULT_CONSTRAINT);
         assertNotNull(result);
         assertNotNull(result.getDocSummary());
@@ -113,20 +113,20 @@ class SentenceMetadataProcessorTest {
 
     @Test
     void testWithoutModelsReturnsNull() {
-        SentenceMetadataProcessor processor = new SentenceMetadataProcessor(path -> Optional.empty());
+        TextMetadataProcessor processor = new TextMetadataProcessor(path -> Optional.empty());
         assertNull(processor.process(
             "Hello world.", Map.of(), DEFAULT_HEDGE, DEFAULT_CONSTRAINT));
     }
 
     private static void assertModelsAvailable() {
         assertNotNull(
-            SentenceMetadataProcessorTest.class.getResourceAsStream("/opennlp/en-sent.bin"),
+            TextMetadataProcessorTest.class.getResourceAsStream("/opennlp/en-sent.bin"),
             MODELS_MISSING_MESSAGE);
     }
 
-    private static SentenceMetadataProcessor processorWithClasspathModels() {
+    private static TextMetadataProcessor processorWithClasspathModels() {
         ResourceService resourceService =
-            path -> Optional.ofNullable(SentenceMetadataProcessorTest.class.getResourceAsStream("/" + path));
-        return new SentenceMetadataProcessor(resourceService);
+            path -> Optional.ofNullable(TextMetadataProcessorTest.class.getResourceAsStream("/" + path));
+        return new TextMetadataProcessor(resourceService);
     }
 }
