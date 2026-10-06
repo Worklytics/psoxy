@@ -13,7 +13,7 @@ Several use-cases require the proxy to inject *computed metadata* into the API r
 |---|---|
 | Text statistics | word count, character length |
 | Keyword frequency | counts of configured keywords |
-| NLP statistics | sentence structure, readability scores |
+| NLP statistics | sentence structure, readability scores ([`sentenceMetadata`](alpha-features/text-metadata-augments.md), alpha) |
 | Payload classification | labelling an LLM prompt as "email composition" vs "code generation" |
 
 Today the `textDigest` transform **replaces** the source field's value with a nested JSON string containing the computed output (e.g. `{"length":42,"word_count":7}`). This is brittle because:

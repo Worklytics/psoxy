@@ -41,7 +41,7 @@ gcloud storage cp my-rules.yaml gs://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE
 
 ### Text Metadata Augments (alpha)
 
-OpenNLP model files for `sentenceMetadata` augments are loaded from `{SHARED_RESOURCE_PATH}/opennlp/` in the remote bucket. See [Text Metadata Augments](../development/alpha-features/text-metadata-augments.md) for setup and upload instructions.
+OpenNLP model files for the `sentenceMetadata` augment are loaded from `{SHARED_RESOURCE_PATH}/opennlp/` in the remote bucket. See [Text Metadata Augments](../development/alpha-features/text-metadata-augments.md#opennlp-model-deployment) for setup and upload instructions.
 
 ### genMetadata
 

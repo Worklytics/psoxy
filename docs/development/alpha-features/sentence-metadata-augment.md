@@ -2,6 +2,8 @@
 
 > **Status: ALPHA / Proof of Concept**
 > This NLP feature is a proposed half-solution for users who want to transmit sophisticated metadata to support better client-side analysis, but prefer not to perform LLM-powered analysis directly within the proxy. Much of the structural analysis and pattern detection achievable here with OpenNLP could alternatively be achieved with LLMs.
+>
+> Part of [Text Metadata Augments](text-metadata-augments.md). See [Augments](../augments.md) for the general augment mechanism.
 
 ## Overview
 We are building an augment that performs NLP analysis on text fields in API requests/responses, with the primary use case being the analysis of LLM prompts. The output is a `+{field}.sentenceMetadata` metadata block attached to the API payload.
@@ -92,7 +94,7 @@ The NLP processing will rely exclusively on Apache OpenNLP. We use pretrained En
   - For local development, testing, and CI, the `.bin` models can be loaded from the classpath (e.g. `src/main/resources/opennlp/`) after running `tools/fetch-opennlp-models.sh`.
   - **Deployment bundles exclude model binaries.** The shaded AWS/GCP JARs do not contain `opennlp/*.bin` files; only the `opennlp-tools` library is included.
   - **Remote Loading Architecture**: In cloud deployments, the proxy loads models on demand at runtime via `ResourceService`. Models are resolved at `opennlp/{model}.bin` under the shared resource path (`SHARED_RESOURCE_PATH` in the remote bucket). The JVM streams binaries directly into memory via `InputStream`.
-  - **Uploading models**: Customers must download and upload model binaries to the remote resources bucket. See [Text Metadata Augments (alpha)](alpha-features/text-metadata-augments.md) for setup and upload instructions.
+  - **Uploading models**: Customers must download and upload model binaries to the remote resources bucket. See [Text Metadata Augments](text-metadata-augments.md#opennlp-model-deployment) for setup and upload instructions.
   - **Future Terraform option**: We may later offer a small, optional Terraform module (invoked at the top level of an example deployment, not wired into `aws-host` / `gcp-host`) that downloads and uploads the model binaries to the remote resources bucket. That follows proper composition—customers who do not use `sentenceMetadata` augments can omit the module entirely, and teams with lint/policy restrictions on `local-exec` provisioners can leave it out without affecting core host modules.
   - *Note on Future Extensibility*: This architecture—allowing heavy machine learning artifacts to be embedded or loaded remotely via GCS/S3—will serve as the foundational pattern for future local LLM integrations, allowing model weights to be fetched on demand or delegated to external cloud services (Vertex AI, Amazon Bedrock).
 ## Noun Taxonomy Design
