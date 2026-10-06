@@ -901,6 +901,8 @@ locals {
   # TODO: confirm that this is indeed the same list (believe it is)
   required_gcp_apis_to_provision_google_workspace_source = local.required_gcp_apis_to_host
 
+  # Always needed to provision Google Workspace DWD service accounts, for both
+  # api_client_auth_method = service_account_key (default) and workload_identity_federation.
   required_gcp_roles_to_provision_google_workspace_source = {
     "roles/iam.serviceAccountAdmin" = {
       display_name    = "Service Account Admin",
@@ -912,11 +914,71 @@ locals {
     }
   }
 
-  # Permissions required to provision Google Workspace connectors (service account keys)
+  # Additional when api_client_auth_method = service_account_key (the default). Not needed for
+  # workload_identity_federation (no downloaded JSON keys).
+  required_gcp_roles_to_provision_google_workspace_source_with_sa_keys = {
+    "roles/iam.serviceAccountKeyAdmin" = {
+      display_name    = "Service Account Key Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountKeyAdmin"
+    }
+  }
+
+  # Additional when api_client_auth_method = workload_identity_federation on an AWS host (WIF pool +
+  # AWS provider). GCP hosts do not create a pool; Token Creator bindings use Service Account Admin
+  # (iam.serviceAccounts.setIamPolicy) from the base role list above.
+  required_gcp_roles_to_provision_google_workspace_source_with_wif = {
+    "roles/iam.workloadIdentityPoolAdmin" = {
+      display_name    = "Workload Identity Pool Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/iam#iam.workloadIdentityPoolAdmin"
+    }
+  }
+
+  # STS is AWS WIF only; IAM Credentials is also in required_gcp_apis_to_host / the GWS source APIs.
+  required_gcp_apis_to_provision_google_workspace_source_with_wif = {
+    "iamcredentials.googleapis.com" = "IAM Service Account Credentials API",
+    "sts.googleapis.com"            = "Security Token Service API",
+  }
+
+  # Subset of Service Account Admin + Service Usage Admin; suitable for a custom IAM role covering
+  # either auth method (create DWD SAs, bind Token Creator / Workload Identity User, enable APIs).
+  required_gcp_perms_to_provision_google_workspace_source_base = [
+    "iam.serviceAccounts.create",
+    "iam.serviceAccounts.delete",
+    "iam.serviceAccounts.get",
+    "iam.serviceAccounts.getIamPolicy",
+    "iam.serviceAccounts.list",
+    "iam.serviceAccounts.setIamPolicy",
+    "iam.serviceAccounts.update",
+    "serviceusage.services.enable",
+    "serviceusage.services.get",
+    "serviceusage.services.list",
+  ]
+
+  # Additional permissions for downloaded service-account keys (api_client_auth_method =
+  # service_account_key). These are in Service Account Key Admin, not in
+  # required_gcp_roles_to_provision_google_workspace_source. Not required for
+  # workload_identity_federation.
   required_gcp_perms_to_provision_google_workspace_source = [
     "iam.serviceAccountKeys.create",
     "iam.serviceAccountKeys.delete",
     "iam.serviceAccountKeys.get",
+  ]
+
+  # Additional permissions for AWS-hosted WIF (pool + provider). Subset of Workload Identity Pool
+  # Admin. Not required on GCP hosts.
+  required_gcp_perms_to_provision_google_workspace_source_with_wif = [
+    "iam.workloadIdentityPoolProviders.create",
+    "iam.workloadIdentityPoolProviders.delete",
+    "iam.workloadIdentityPoolProviders.get",
+    "iam.workloadIdentityPoolProviders.list",
+    "iam.workloadIdentityPoolProviders.undelete",
+    "iam.workloadIdentityPoolProviders.update",
+    "iam.workloadIdentityPools.create",
+    "iam.workloadIdentityPools.delete",
+    "iam.workloadIdentityPools.get",
+    "iam.workloadIdentityPools.list",
+    "iam.workloadIdentityPools.undelete",
+    "iam.workloadIdentityPools.update",
   ]
 
   required_azuread_roles_to_provision_msft_365_source = {

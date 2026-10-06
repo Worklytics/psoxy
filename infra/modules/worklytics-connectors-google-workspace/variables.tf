@@ -50,7 +50,7 @@ variable "google_workspace_example_admin" {
 
 variable "provision_gcp_sa_keys" {
   type        = bool
-  description = "[DEPRECATED - use google_workspace_connector_settings map instead] whether to provision key for each connector's GCP Service Account (OAuth Client). If false, you must create the key manually and provide it. Ignored if service accounts are not provisioned by Terraform."
+  description = "[DEPRECATED - use google_workspace_connector_settings map instead] whether to provision key for each connector's GCP Service Account (OAuth Client). If false, you must create the key manually and provide it. Ignored if service accounts are not provisioned by Terraform, or if api_client_auth_method is workload_identity_federation."
   default     = true
 }
 
@@ -80,6 +80,18 @@ variable "todo_step" {
 
 variable "google_workspace_connector_settings" {
   type        = map(any)
-  description = "Map of configuration settings specifically for Google Workspace connectors. Supported keys: example_user, example_admin, provision_keys, key_rotation_days, provision_service_accounts, enable_apis. Provider-controlling parameters (like GCP project IDs or impersonation SAs) remain top-level variables."
+  description = "Map of configuration settings specifically for Google Workspace connectors. Supported keys: example_user, example_admin, api_client_auth_method (service_account_key | workload_identity_federation; default service_account_key), provision_keys, key_rotation_days, provision_service_accounts, enable_apis. Provider-controlling parameters (like GCP project IDs or impersonation SAs) remain top-level variables."
   default     = {}
+}
+
+variable "host_platform_id" {
+  type        = string
+  description = "Proxy host platform: AWS or GCP. Required when api_client_auth_method is workload_identity_federation (selects aws_wif vs gcp_hosted process identity)."
+  default     = ""
+}
+
+variable "aws_account_id" {
+  type        = string
+  description = "AWS account ID that hosts the proxy. Required when host_platform_id is AWS and api_client_auth_method is workload_identity_federation (Workload Identity Federation trust)."
+  default     = null
 }
