@@ -8,7 +8,7 @@ import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.augments.ClassifyProcessor;
 import com.avaulta.gateway.rules.augments.GenMetadataInferenceResult;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
-import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
+import com.avaulta.gateway.rules.augments.TextMetadataProcessor;
 import com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
@@ -51,7 +51,7 @@ class AugmentProcessorTest {
         augmentProcessor = new AugmentProcessor(jsonConfiguration,
             new JsonSchemaValidationUtils(),
             objectMapper,
-            new SentenceMetadataProcessor(noModels),
+            new TextMetadataProcessor(noModels),
             genMetadataProcessor,
             classifyProcessor);
     }
@@ -528,7 +528,7 @@ class AugmentProcessorTest {
         return new AugmentProcessor(jsonConfiguration,
             new JsonSchemaValidationUtils(),
             objectMapper,
-            new SentenceMetadataProcessor(path -> Optional.empty()),
+            new TextMetadataProcessor(path -> Optional.empty()),
             genMetadataProcessor,
             classifyProcessor);
     }

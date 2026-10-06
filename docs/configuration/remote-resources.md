@@ -39,16 +39,9 @@ aws s3 cp my-rules.yaml s3://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/r
 gcloud storage cp my-rules.yaml gs://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/rules.yaml
 ```
 
-### NLP models for `sentenceMetadata`
+### Text Metadata Augments (alpha)
 
-OpenNLP binaries (`en-sent.bin`, `en-pos-maxent.bin`, `en-chunker.bin`) are not in the deployment JAR. With `enable_remote_resources = true`, put them at `{SHARED_RESOURCE_PATH}/opennlp/{model}.bin`.
-
-```bash
-./tools/fetch-opennlp-models.sh s3://REMOTE_RESOURCE_BUCKET/PREFIX/
-./tools/fetch-opennlp-models.sh gs://REMOTE_RESOURCE_BUCKET/PREFIX/
-```
-
-With no argument, the script only downloads models into `java/gateway-core/src/main/resources/opennlp/` for local tests.
+OpenNLP model files for the `textMetadata` augment are loaded from `{SHARED_RESOURCE_PATH}/opennlp/` in the remote bucket. See [Text Metadata Augments](../development/alpha-features/text-metadata-augments.md#opennlp-model-deployment) for setup and upload instructions.
 
 ### genMetadata
 

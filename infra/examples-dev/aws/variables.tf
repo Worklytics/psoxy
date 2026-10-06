@@ -532,7 +532,7 @@ variable "todos_as_local_files" {
 
 variable "enable_remote_resources" {
   type        = bool
-  description = "**beta** Load rules / OpenNLP models from the artifacts S3 bucket at runtime. Default false; not required for genMetadata (Bedrock). Set true only if rules are too large for SSM / env, or you use sentenceMetadata."
+  description = "**beta** Load rules / OpenNLP models from the artifacts S3 bucket at runtime. Default false; not required for genMetadata (Bedrock). Set true only if rules are too large for SSM / env, or you use textMetadata."
   default     = false
 }
 
