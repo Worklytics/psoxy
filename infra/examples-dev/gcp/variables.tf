@@ -254,6 +254,7 @@ variable "custom_api_connectors" {
     oauth_scopes_needed     = optional(list(string), [])
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -284,6 +285,8 @@ variable "custom_api_connectors" {
     #   source_auth_strategy = "bearer"
     #   target_host          = "api.example.com"
     #   example_api_calls    = ["/v1/users"]
+    #   enable_gen_metadata  = true # ALPHA: !<classify> / !<genMetadata> augments in custom rules (Vertex)
+    #   rules_file           = "custom-api.yaml"
     #   secured_variables = [
     #     { name = "API_KEY" }
     #   ]
@@ -313,6 +316,7 @@ variable "webhook_collectors" {
     output_path_prefix   = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket (e.g., 'events_', 'webhooks/')
     example_payload_file = optional(string, null)        # path to example payload file to use for testing; if provided, will be used in the test script
     example_identity     = optional(string, null)        # example identity to use for testing; if provided, will be used to test the collector
+    enable_gen_metadata  = optional(bool, false)         # ALPHA: !<classify> / !<genMetadata> in webhook rules (Vertex)
   }))
 
   default = {}
@@ -343,6 +347,7 @@ variable "custom_bulk_connectors" {
     }))
     available_memory_mb = optional(number)
     timeout_seconds     = optional(number)
+    enable_gen_metadata = optional(bool, false)
     rules_file          = optional(string)
     settings_to_provide = optional(map(string), {})
     example_file        = optional(string)
@@ -529,4 +534,10 @@ variable "connector_settings" {
   type        = map(string)
   default     = {}
   description = "Connector-specific settings."
+}
+
+variable "enable_remote_resources" {
+  type        = bool
+  description = "**beta** Load rules / OpenNLP models from the artifacts GCS bucket at runtime. Default false; not required for genMetadata (Vertex). Set true only if rules are too large for Secret Manager / env, or you use sentenceMetadata."
+  default     = false
 }

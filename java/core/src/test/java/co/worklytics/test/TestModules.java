@@ -1,6 +1,7 @@
 package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.ApiModeConfig;
+import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -102,6 +103,15 @@ public class TestModules {
             when(m.getAllowedDataAccessIpBlocks()).thenReturn(Collections.emptyList());
             when(m.getRequestPathPrefixToTrim()).thenReturn(Optional.empty());
             return m;
+        }
+    }
+
+    @Module
+    public interface ForGenMetadataConfig {
+        @Provides
+        @Singleton
+        static GenMetadataConfig genMetadataConfig() {
+            return new GenMetadataConfig.Unsupported("test");
         }
     }
 

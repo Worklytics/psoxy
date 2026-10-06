@@ -56,6 +56,7 @@ class StorageHandlerTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        TestModules.ForGenMetadataConfig.class,
         MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
         ForRules.class,
@@ -193,6 +194,23 @@ class StorageHandlerTest {
         assertTrue(handler.buildObjectMetadata("bucket", "/directory/file.csv", handler.buildDefaultTransform())
             .containsKey(StorageHandler.BulkMetaData.INSTANCE_ID.getMetaDataKey()));
 
+    }
+
+    @Test
+    public void getObjectMetadata_includesGenMetadataTokenAggregates() {
+        handler.genMetadataTokenUsage.reset();
+        handler.genMetadataTokenUsage.record(100, 20);
+        handler.genMetadataTokenUsage.record(50, 10);
+
+        var metadata = handler.buildObjectMetadata("bucket", "/directory/file.csv",
+            handler.buildDefaultTransform());
+
+        assertEquals("150",
+            metadata.get(StorageHandler.BulkMetaData.GEN_METADATA_INPUT_TOKENS.getMetaDataKey()));
+        assertEquals("30",
+            metadata.get(StorageHandler.BulkMetaData.GEN_METADATA_OUTPUT_TOKENS.getMetaDataKey()));
+        assertEquals("2",
+            metadata.get(StorageHandler.BulkMetaData.GEN_METADATA_CALLS.getMetaDataKey()));
     }
 
     @Test

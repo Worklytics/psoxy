@@ -77,6 +77,7 @@ class ApiDataRequestHandlerTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        TestModules.ForGenMetadataConfig.class,
         MockModules.ForOpenNlp.class,
         MockModules.ForConfigService.class,
         MockModules.ForSecretStore.class,

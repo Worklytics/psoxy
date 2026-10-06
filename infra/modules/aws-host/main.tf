@@ -119,14 +119,15 @@ module "psoxy" {
 locals {
   path_to_shared_secrets = var.secrets_store_implementation == "aws_secrets_manager" ? var.aws_secrets_manager_path : var.aws_ssm_param_root_path
 
-  # S3 object prefixes use '/' hierarchy (see gcp-host for rationale).
+  # Object-key prefixes are siblings, not nested: shared is `{env}/` and instance is
+  # `{env}-{INSTANCE}/` so IAM `env/*` does not also match instance objects.
   resource_path_root = trimsuffix(trimprefix(coalesce(
     local.path_to_shared_secrets != "" ? local.path_to_shared_secrets : null,
     trimsuffix(local.instance_ssm_prefix, "_")
   ), "/"), "_")
   shared_resource_path = "${local.resource_path_root}/"
   connector_instance_resource_path = { for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) :
-    k => "${local.shared_resource_path}${replace(upper(k), "-", "_")}/"
+    k => "${local.resource_path_root}-${replace(upper(k), "-", "_")}/"
   }
   remote_resources_enabled = var.enable_remote_resources && module.psoxy.artifacts_bucket_name != null
 
@@ -250,6 +251,8 @@ module "api_connector" {
   timeout_seconds               = coalesce(try(each.value.timeout_seconds, null), 180)
   allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
 
+  enable_bedrock = try(each.value.enable_gen_metadata, false)
+
   environment_variables = merge(
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
@@ -337,7 +340,7 @@ module "bulk_connector" {
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   todos_as_local_files                 = var.todos_as_local_files
 
-
+  enable_bedrock = try(each.value.enable_gen_metadata, false)
 
   environment_variables = merge(
     {
@@ -349,7 +352,7 @@ module "bulk_connector" {
     try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) != null ? {
       RULES = each.value.rules_raw
     } : {},
-    var.general_environment_variables
+    var.general_environment_variables,
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
@@ -394,6 +397,8 @@ module "webhook_collectors" {
 
   todos_as_local_files      = var.todos_as_local_files
   allowed_webhook_ip_blocks = var.allowed_webhook_ip_blocks
+
+  enable_bedrock = try(each.value.enable_gen_metadata, false)
 
   environment_variables = merge(
     {

@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.*;
+import com.avaulta.gateway.rules.augments.AugmentValidation;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.JsonPath;
@@ -54,6 +55,7 @@ public class Validator {
 
     public void validate(@NonNull RecordRules rules) {
         Preconditions.checkNotNull(rules.getFormat());
+        AugmentValidation.validateRecordRules(rules);
     }
 
     public void validate(@NonNull MultiTypeBulkDataRules rules) {
@@ -83,6 +85,7 @@ public class Validator {
     }
 
     public void validate(@NonNull Rules2 rules) {
+        AugmentValidation.validateEndpoints(rules.getEndpoints());
         rules.getEndpoints().forEach(this::validate);
     }
 

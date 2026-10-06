@@ -122,6 +122,12 @@ variable "environment_variables" {
   default     = {}
 }
 
+variable "enable_bedrock" {
+  type        = bool
+  description = "Grant this Lambda Bedrock InvokeModel/Converse for genMetadata/classify augments, and set GEN_METADATA_BACKEND=bedrock."
+  default     = false
+}
+
 variable "new_relic_account_id" {
   type        = string
   description = "**beta** New Relic account ID to enable New Relic instrumentation."

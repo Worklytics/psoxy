@@ -83,6 +83,10 @@ See: [https://developer.hashicorp.com/terraform/language/settings/backends/local
 
 The module [psoxy-constants](../../infra/modules/psoxy-constants) is a dependency-free module that provides lists of GCP roles, etc needed for bootstraping a GCP project in which your proxy instances will reside.
 
+## genMetadata via Vertex
+
+If any connector sets `enable_gen_metadata = true`, Terraform enables `aiplatform.googleapis.com` and grants `roles/aiplatform.user` to that connector's service account. See [genMetadata](../development/alpha-features/gen-metadata-augment.md).
+
 ## Example
 
 The [Worklytics/psoxy-example-gcp](https://github.com/Worklytics/psoxy-example-gcp) repo provides an example configuration for hosting proxy instances in GCP. You use that template, following its `Usage` docs to get started.

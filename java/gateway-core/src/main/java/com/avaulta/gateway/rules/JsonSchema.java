@@ -3,7 +3,10 @@ package com.avaulta.gateway.rules;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -68,13 +71,41 @@ public class JsonSchema {
     /**
      * enum values for string validation; NOT applicable if type==object or type==array
      */
+    @JsonProperty("enum")
     List<String> enumValues;
 
     /**
-     * whether additional properties are allowed for this object; only applicable if type==object;
-     * default is true
+     * whether additional properties are allowed for this object; only applicable if type==object.
+     * JSON Schema default is {@code true} when omitted.
      */
     Boolean additionalProperties;
+
+    @JsonIgnore
+    public boolean isObject() {
+        return Objects.equals(type, "object") || (type == null && properties != null);
+    }
+
+    /**
+     * JSON Schema default: additional properties are allowed unless the schema sets
+     * {@code additionalProperties: false}.
+     */
+    @JsonIgnore
+    public boolean allowsAdditionalProperties() {
+        if (additionalProperties == null) {
+            return true;
+        }
+        return additionalProperties;
+    }
+
+    @JsonIgnore
+    public boolean isString() {
+        return Objects.equals(type, "string");
+    }
+
+    @JsonIgnore
+    public boolean isArray() {
+        return Objects.equals(type, "array") || (type == null && items != null);
+    }
 
     /**
      * Custom string formats; only applicable if type==string

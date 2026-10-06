@@ -9,9 +9,8 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
-import com.avaulta.gateway.resources.ResourceService;
 import com.avaulta.gateway.rules.WebhookCollectionRules;
-import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
+import com.avaulta.gateway.rules.augments.AugmentValidation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -26,9 +25,7 @@ import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
-import co.worklytics.psoxy.gateway.impl.CompositeResourceService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import co.worklytics.psoxy.gateway.impl.LocalFileResourceService;
 import co.worklytics.psoxy.gateway.impl.WebhookSanitizer;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
@@ -52,6 +49,7 @@ import lombok.SneakyThrows;
 @Module(
     includes = {
         FunctionRuntimeModule.Bindings.class,
+        ResourceServiceBindingsModule.class,
     }
 )
 public class FunctionRuntimeModule {
@@ -125,43 +123,6 @@ public class FunctionRuntimeModule {
             .build();
     }
 
-    /**
-     * Provides the instance-scoped ResourceService, composing local FS with the
-     * platform-specific remote ResourceService (S3/GCS), using failover semantics.
-     *
-     * <p>Failover order: local filesystem ({@link ResourceService#DEFAULT_LOCAL_RESOURCE_PATH})
-     * → remote cloud storage → no-op</p>
-     *
-     * <p>The local FS path is always checked first (no env var needed). It can be populated
-     * via deployment layers, Lambda layers, init scripts, etc.</p>
-     */
-    @Provides @Singleton
-    static ResourceService instanceResourceService(@Named("Remote") ResourceService remoteResourceService) {
-        // always layer local FS on top of remote — local is a fast path / override
-        return CompositeResourceService.builder()
-            .preferred(new LocalFileResourceService(ResourceService.DEFAULT_LOCAL_RESOURCE_PATH))
-            .fallback(remoteResourceService)
-            .build();
-    }
-
-    /**
-     * Resource resolution for OpenNLP models: instance-local (FS / instance bucket) first,
-     * then shared remote bucket (e.g. org-wide model artifacts).
-     */
-    @Provides @Singleton @Named("OpenNlp")
-    static ResourceService openNlpResourceService(ResourceService instanceResourceService,
-                                                  @Named("SharedRemote") ResourceService sharedRemoteResourceService) {
-        return CompositeResourceService.builder()
-            .preferred(instanceResourceService)
-            .fallback(sharedRemoteResourceService)
-            .build();
-    }
-
-    @Provides @Singleton
-    static SentenceMetadataProcessor sentenceMetadataProcessor(@Named("OpenNlp") ResourceService openNlpResourceService) {
-        return new SentenceMetadataProcessor(openNlpResourceService);
-    }
-
     @Provides @Singleton @Named("async")
     static ApiSanitizedDataOutput apiSanitizedDataOutput(OutputUtils outputUtils) {
         return outputUtils.asyncOutput();
@@ -201,7 +162,10 @@ public class FunctionRuntimeModule {
                                                            co.worklytics.psoxy.rules.RulesUtils rulesUtils) {
         String rulesStr = configService.getConfigPropertyOrError(ProxyConfigProperty.RULES);
         String yamlEncodedRules = rulesUtils.decodeToYaml(rulesStr);
-        return webhookSanitizerFactory.create(objectMapper.readerFor(WebhookCollectionRules.class).readValue(yamlEncodedRules));
+        WebhookCollectionRules rules =
+            objectMapper.readerFor(WebhookCollectionRules.class).readValue(yamlEncodedRules);
+        AugmentValidation.validateWebhookEndpoints(rules.getEndpoints());
+        return webhookSanitizerFactory.create(rules);
     }
 
     @Provides @Singleton
