@@ -15,7 +15,7 @@ import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.LambdaContainerStartup;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
-import co.worklytics.psoxy.gateway.OutboundConnectivityFailures;
+import co.worklytics.psoxy.aws.AwsClientConnectivity;
 import co.worklytics.psoxy.gateway.impl.HealthCheckRequestHandler;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
@@ -113,8 +113,9 @@ public class AwsApiGatewayV2ApiDataRequestHandler implements
             context.getLogger()
                     .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
-            if (OutboundConnectivityFailures.isConnectivityFailure(e)) {
-                response = HealthCheckRequestHandler.configStoreUnreachable(callerIp(httpEvent), e);
+            if (AwsClientConnectivity.isConnectivityFailure(e)) {
+                response = HealthCheckRequestHandler.configStoreUnreachable(
+                        callerIp(httpEvent), AwsClientConnectivity.forHealthCheck(e));
             } else {
                 response = HttpEventResponse.builder().statusCode(500)
                         .body("Unknown error: " + e.getClass().getName())

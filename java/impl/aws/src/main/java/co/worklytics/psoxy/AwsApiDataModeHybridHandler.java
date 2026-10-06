@@ -28,7 +28,7 @@ import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
 import co.worklytics.psoxy.aws.request.LambdaEventUtils;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.OutboundConnectivityFailures;
+import co.worklytics.psoxy.aws.AwsClientConnectivity;
 import co.worklytics.psoxy.gateway.impl.HealthCheckRequestHandler;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import lombok.extern.java.Log;
@@ -223,9 +223,9 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
             context.getLogger()
                     .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
-            if (OutboundConnectivityFailures.isConnectivityFailure(e)) {
+            if (AwsClientConnectivity.isConnectivityFailure(e)) {
                 return Pair.of(false, HealthCheckRequestHandler.configStoreUnreachable(
-                        LambdaContainerStartup.callerIp(request), e));
+                        LambdaContainerStartup.callerIp(request), AwsClientConnectivity.forHealthCheck(e)));
             }
             return Pair.of(false, HttpEventResponse.builder()
                     .statusCode(500)

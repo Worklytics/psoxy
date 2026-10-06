@@ -9,7 +9,7 @@ import software.amazon.awssdk.core.exception.SdkClientException;
 import co.worklytics.psoxy.ErrorCauses;
 import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.OutboundConnectivityFailures;
+import co.worklytics.psoxy.gateway.NetworkConnectivityFailures;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -61,14 +61,14 @@ class LambdaContainerStartupTest {
     void sdkClientException_httpFailureIsConnectivity_credentialFailureIsNot() {
         SdkClientException http = SdkClientException.builder()
                 .message("Unable to execute HTTP request: ssm.us-east-1.amazonaws.com")
-                .cause(new UnknownHostException("ssm.us-east-1.amazonaws.com"))
                 .build();
-        assertTrue(OutboundConnectivityFailures.isConnectivityFailure(http));
+        assertTrue(AwsClientConnectivity.isSdkHttpFailure(http));
+        assertFalse(NetworkConnectivityFailures.isConnectivityFailure(http));
 
         SdkClientException credentials = SdkClientException.builder()
                 .message("Unable to load credentials from any of the providers in the chain")
                 .build();
-        assertFalse(OutboundConnectivityFailures.isConnectivityFailure(credentials));
+        assertFalse(AwsClientConnectivity.isConnectivityFailure(credentials));
     }
 
     @Test

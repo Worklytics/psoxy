@@ -16,7 +16,6 @@ import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
 import co.worklytics.psoxy.aws.request.LambdaEventUtils;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.OutboundConnectivityFailures;
 import co.worklytics.psoxy.gateway.impl.HealthCheckRequestHandler;
 import lombok.extern.java.Log;
 
@@ -43,7 +42,7 @@ public final class LambdaContainerStartup {
         try {
             initializer.run();
         } catch (Throwable e) {
-            if (!OutboundConnectivityFailures.isConnectivityFailure(e)) {
+            if (!AwsClientConnectivity.isConnectivityFailure(e)) {
                 if (e instanceof Error error) {
                     throw error;
                 }
@@ -57,7 +56,7 @@ public final class LambdaContainerStartup {
                     "Lambda initialization failed because the configuration store is unreachable. "
                             + "Health checks will report CONFIG_STORE_UNREACHABLE. "
                             + "Check VPC endpoints, NAT, and security groups. Underlying error: "
-                            + OutboundConnectivityFailures.describe(e),
+                            + AwsClientConnectivity.describe(e),
                     e);
         }
     }
@@ -71,7 +70,8 @@ public final class LambdaContainerStartup {
         if (failure == null) {
             failure = new IllegalStateException("configuration store unreachable");
         }
-        return HealthCheckRequestHandler.configStoreUnreachable(callerIp, failure);
+        return HealthCheckRequestHandler.configStoreUnreachable(
+                callerIp, AwsClientConnectivity.forHealthCheck(failure));
     }
 
     /**
@@ -89,7 +89,7 @@ public final class LambdaContainerStartup {
         if (utils.isSQSEvent(root)) {
             throw new IllegalStateException(
                     "Lambda failed to initialize because the configuration store is unreachable: "
-                            + OutboundConnectivityFailures.describe(connectivityFailure));
+                            + AwsClientConnectivity.describe(connectivityFailure));
         }
         if (utils.isApiGatewayV1Event(root)) {
             APIGatewayProxyRequestEvent event = utils.toAPIGatewayProxyRequestEvent(root);

@@ -27,8 +27,8 @@ import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.NetworkConnectivityFailures;
 import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
-import co.worklytics.psoxy.gateway.OutboundConnectivityFailures;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -108,7 +108,7 @@ public class HealthCheckRequestHandler {
         try {
             return buildHealthCheck(request);
         } catch (Throwable e) {
-            if (!OutboundConnectivityFailures.isConnectivityFailure(e)) {
+            if (!NetworkConnectivityFailures.isConnectivityFailure(e)) {
                 if (e instanceof Error error) {
                     throw error;
                 }
@@ -128,7 +128,7 @@ public class HealthCheckRequestHandler {
      * before the handler graph was built.
      */
     public static HttpEventResponse configStoreUnreachable(String callerIp, Throwable failure) {
-        String detail = OutboundConnectivityFailures.describe(failure);
+        String detail = NetworkConnectivityFailures.describe(failure);
         HealthCheckResult result = HealthCheckResult.builder()
                 .javaSourceCodeVersion(ProxyConstants.JAVA_SOURCE_CODE_VERSION)
                 .callerIp(callerIp)
@@ -167,7 +167,7 @@ public class HealthCheckRequestHandler {
     }
 
     private static void rethrowIfConnectivityFailure(Throwable e) {
-        if (!OutboundConnectivityFailures.isConnectivityFailure(e)) {
+        if (!NetworkConnectivityFailures.isConnectivityFailure(e)) {
             return;
         }
         if (e instanceof Error error) {

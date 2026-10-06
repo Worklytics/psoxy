@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ConfigStoreUnreachableException;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.TransientConfigException;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
@@ -147,6 +148,9 @@ public class SecretsManagerSecretStore implements SecretStore {
             // Same VPC/endpoint failure mode as SSM. Health checks map this to
             // CONFIG_STORE_UNREACHABLE; search CloudWatch for this line.
             log.log(Level.SEVERE, "Error reading configuration from Secrets Manager: " + e.getMessage(), e);
+            if (AwsClientConnectivity.isSdkHttpFailure(e)) {
+                throw new ConfigStoreUnreachableException(e.getMessage(), e);
+            }
             throw e;
         }
     }
