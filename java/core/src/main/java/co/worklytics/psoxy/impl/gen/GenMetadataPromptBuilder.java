@@ -80,7 +80,7 @@ class GenMetadataPromptBuilder {
         return """
             Task: %s
 
-            Return a JSON object that validates against this schema (instance, not the schema):
+            Return exactly one JSON value that validates against this schema (instance, not the schema):
             %s
 
             Input data to process:
