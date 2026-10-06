@@ -34,7 +34,7 @@ public class BedrockChatModelProvider implements GenMetadataChatModelProvider {
         return BedrockChatModel.builder()
             .modelId(config.getModelId())
             .timeout(Duration.ofSeconds(config.getTimeoutSeconds()))
-            .maxRetries(config.getMaxAttempts())
+            .maxRetries(Math.max(0, config.getMaxAttempts() - 1))
             .defaultRequestParameters(BedrockChatRequestParameters.builder()
                 .temperature(0.0)
                 .build())
