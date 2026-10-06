@@ -6,7 +6,7 @@ import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.augments.AugmentValidation;
 import com.avaulta.gateway.rules.augments.ClassifyProcessor;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
-import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
+import com.avaulta.gateway.rules.augments.TextMetadataProcessor;
 import com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,7 +65,7 @@ class RegexExtractAiAttributionAugmentTest {
         augmentProcessor = new AugmentProcessor(jsonConfiguration,
             new JsonSchemaValidationUtils(),
             objectMapper,
-            new SentenceMetadataProcessor(noModels),
+            new TextMetadataProcessor(noModels),
             genMetadataProcessor,
             classifyProcessor);
 
