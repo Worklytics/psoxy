@@ -556,7 +556,7 @@ public abstract class Augment {
                 }
                 int captureGroup = group != null ? group : 1;
                 if (captureGroup < 1 || captureGroup > matcher.groupCount()) {
-                    return matcher.group(0);
+                    return null;
                 }
                 String captured = matcher.group(captureGroup);
                 return captured == null ? null : captured.trim();
