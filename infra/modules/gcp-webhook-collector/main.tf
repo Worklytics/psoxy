@@ -71,14 +71,6 @@ resource "google_kms_crypto_key" "webhook_auth_key" {
   name     = "${var.environment_id_prefix}${var.instance_id}-webhook-auth-key"
   purpose  = "ASYMMETRIC_SIGN"
 
-  # Ordering only: a customer-supplied key ring has no resource edge to API enablement.
-  lifecycle {
-    precondition {
-      condition     = var.kms_api_service_id == null || var.kms_api_service_id != ""
-      error_message = "kms_api_service_id, when set, must be the cloudkms.googleapis.com service id."
-    }
-  }
-
   # just like aws, gcp will not auto-rotate ASYMMETRIC_SIGN keys; you will need to rotate them OUTSIDE of terraform, at your desired cadence
 
   version_template {

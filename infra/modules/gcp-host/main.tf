@@ -473,7 +473,6 @@ module "webhook_collector" {
   bucket_access_logs_destination     = var.bucket_access_logs_destination
   builder_sa_id                      = module.psoxy.builder_sa_id
   key_ring_id                        = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
-  kms_api_service_id                 = each.value.provision_auth_key != null ? module.psoxy.kms_api_enabled : null
   oidc_token_verifier_role_id        = module.psoxy.oidc_token_verifier_role_id
   provision_auth_key                 = each.value.provision_auth_key
   rules_file                         = try(local.webhook_collector_rules_file_paths[each.key], null)
