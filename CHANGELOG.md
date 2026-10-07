@@ -7,6 +7,8 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Unreleased
 
+- `aws`: new deployments name the caller IAM role `*SanitizedDataAccessor` instead of `*Caller`. Existing deployments retain the legacy role name via lifecycle `ignore_changes` until 1.0.
+
 ## [0.7.1](https://github.com/Worklytics/psoxy/releases/tag/v0.7.1)
 - TODO markdown files can be written with `./generate-todos.sh` (example roots are thin wrappers; the implementation is `tools/generate-todos.sh`, available under `.terraform/modules/psoxy/` after `terraform init`). The script reads the new `todo_files` output and prompts before overwriting an existing file. `terraform apply` still writes those files via `local_file` when `todos_as_local_files` is true (the default). Those `local_file` resources are deprecated and will be removed in 0.8.
 - Pseudonymize transforms: `includeReversible` is deprecated in favor of `includeEncrypted` (same behavior: return an encrypted form of the pseudonym alongside the hash). Existing rules that set `includeReversible` continue to work, including an explicit `false`. Setting both flags logs a warning and `includeEncrypted` takes precedence.

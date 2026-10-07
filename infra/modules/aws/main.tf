@@ -13,6 +13,9 @@ terraform {
 locals {
   api_function_name_prefix = coalesce(var.api_function_name_prefix, "${lower(var.deployment_id)}-")
 
+  # IAM role names are limited to 64 characters; SanitizedDataAccessor is 21 chars.
+  sanitized_data_accessor_role_deployment_id = substr(var.deployment_id, 0, 43)
+
   caller_and_test_aws_arns = distinct(concat(var.caller_aws_arns, var.test_aws_principal_arns))
 
   aws_caller_statements = [
@@ -77,7 +80,7 @@ data "aws_region" "current" {}
 
 # role that Worklytics user will use to call the API
 resource "aws_iam_role" "api-caller" {
-  name                 = "${var.deployment_id}SanitizedDataAccessor"
+  name                 = "${local.sanitized_data_accessor_role_deployment_id}SanitizedDataAccessor"
   description          = "role for AWS principals that may access sanitized data via proxy, either by reading from -sanitized buckets or invoking instances"
   permissions_boundary = var.iam_roles_permissions_boundary
 
