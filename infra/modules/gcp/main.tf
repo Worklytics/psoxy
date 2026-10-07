@@ -13,12 +13,14 @@ locals {
   ]
 
   # additional services required for webhook collectors.
-  # cloudkms.googleapis.com is separate (google_project_service.cloud_kms): only when a collector
-  # provisions an auth key, and the key ring in gcp-host must wait on that resource.
+  # cloudkms.googleapis.com is not in this list: it is enabled only when a collector provisions
+  # an auth key (var.enable_cloud_kms), and gcp-host waits on that one instance before creating a key ring.
   services_required_for_webhook_collectors = [
     "cloudscheduler.googleapis.com", # triggering batches
     "pubsub.googleapis.com",         # webhooks batched via pubsub
   ]
+
+  cloud_kms_service = "cloudkms.googleapis.com"
 
   # Artifact Registry repository IDs must be unique within a project/location; prefix with
   # environment_id_prefix so multiple psoxy instances can share a GCP project.
@@ -45,23 +47,13 @@ resource "google_project_service" "gcp_infra_api" {
     ],
     var.support_bulk_mode ? local.services_required_for_bulk_mode : [],
     var.support_webhook_collectors ? local.services_required_for_webhook_collectors : [],
+    var.enable_cloud_kms ? [local.cloud_kms_service] : [],
   ))
 
   service                    = each.key
   project                    = var.project_id
   disable_dependent_services = false
   disable_on_destroy         = false # disabling on destroy has potential to conflict with other uses of the project
-}
-
-# Own resource so gcp-host can wait on this API before creating a key ring. Not part of
-# gcp_infra_api: that set is enabled for every webhook, including ones that do not provision keys.
-resource "google_project_service" "cloud_kms" {
-  count = var.enable_cloud_kms ? 1 : 0
-
-  service                    = "cloudkms.googleapis.com"
-  project                    = var.project_id
-  disable_dependent_services = false
-  disable_on_destroy         = false
 }
 
 resource "google_artifact_registry_repository" "psoxy-functions-repo" {
@@ -626,7 +618,7 @@ output "artifact_repository" {
 }
 
 output "kms_api_enabled" {
-  value       = one(google_project_service.cloud_kms[*].id)
+  value       = try(google_project_service.gcp_infra_api[local.cloud_kms_service].id, null)
   description = "ID of the enabled cloudkms.googleapis.com service, or null when enable_cloud_kms is false. gcp-host waits on this before creating a KMS key ring."
 }
 
