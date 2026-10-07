@@ -62,7 +62,7 @@ public class APIGatewayV1Handler implements
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent invocationEvent,
             Context context) {
-        if (LambdaContainerStartup.failed()) {
+        if (LambdaContainerStartup.stillFailed(APIGatewayV1Handler::staticInit)) {
             return toApiGatewayResponse(
                     LambdaContainerStartup.response(callerIp(invocationEvent)), false);
         }
@@ -101,8 +101,7 @@ public class APIGatewayV1Handler implements
                     .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
             if (AwsClientConnectivity.isConnectivityFailure(e)) {
-                response = HealthCheckRequestHandler.configStoreUnreachable(
-                        callerIp(invocationEvent), AwsClientConnectivity.forHealthCheck(e));
+                response = HealthCheckRequestHandler.unreachable(callerIp(invocationEvent), e);
             } else {
                 response = HttpEventResponse.builder().statusCode(500)
                         .body("Unknown error: " + e.getClass().getName())

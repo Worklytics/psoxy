@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import com.google.api.gax.rpc.StatusCode;
+import com.google.api.gax.rpc.UnavailableException;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 import co.worklytics.psoxy.gateway.ConfigStoreUnreachableException;
@@ -36,5 +38,37 @@ class GcpConfigStoreResponsesTest {
         assertTrue(written.contains("203.0.113.9"));
         assertTrue(written.contains("secretmanager.googleapis.com"));
         assertTrue(written.contains("Error reading configuration from Secret Manager"));
+    }
+
+    @Test
+    void writesDependentServiceResponseForOtherTransportFailures() throws Exception {
+        HttpRequest request = mock(HttpRequest.class);
+        when(request.getHeaders()).thenReturn(Map.of());
+        HttpResponse response = mock(HttpResponse.class);
+        OutputStream body = new ByteArrayOutputStream();
+        when(response.getOutputStream()).thenReturn(body);
+
+        GcpConfigStoreResponses.write(request, response, new UnavailableException(
+                "io.grpc.StatusRuntimeException: UNAVAILABLE: www.googleapis.com",
+                new java.net.UnknownHostException("www.googleapis.com"),
+                new StatusCode() {
+                    @Override
+                    public Code getCode() {
+                        return Code.UNAVAILABLE;
+                    }
+
+                    @Override
+                    public Object getTransportCode() {
+                        return null;
+                    }
+                },
+                true));
+
+        verify(response).setStatusCode(503);
+        verify(response).appendHeader("X-Psoxy-Error", "DEPENDENT_SERVICE_UNREACHABLE");
+        String written = body.toString();
+        assertTrue(written.contains("DEPENDENT_SERVICE_UNREACHABLE"));
+        assertTrue(written.contains("www.googleapis.com"));
+        assertTrue(written.contains("dependent service"));
     }
 }

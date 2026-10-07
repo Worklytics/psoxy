@@ -1,5 +1,8 @@
 package co.worklytics.psoxy;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import com.google.common.annotations.VisibleForTesting;
@@ -8,33 +11,38 @@ import lombok.extern.java.Log;
 /**
  * Starts the GCP Dagger container once per function instance.
  *
- * <p>A Secret Manager transport failure is remembered so later invocations can return
- * {@code CONFIG_STORE_UNREACHABLE} without waiting out another client deadline. The factory runs
- * on at most one thread; after a failure it is not retried on this instance. Cloud Functions
- * recycles the instance after the network path is fixed.
+ * <p>A transport failure is remembered so later invocations can respond immediately, then retried
+ * after {@link #RETRY_AFTER}. Cloud Functions does not recycle an instance that keeps serving
+ * responses, so the cooldown retry is what recovers once the network path is fixed. Only one
+ * thread runs the factory.
  */
 @Log
 public final class GcpContainerStartup {
 
+    static final Duration RETRY_AFTER = Duration.ofSeconds(60);
+
     private volatile GcpContainer container;
     private volatile Throwable connectivityFailure;
+    private volatile Instant retryAfter = Instant.EPOCH;
+    private volatile Clock clock = Clock.systemUTC();
 
     public GcpContainer getOrCreate(Supplier<GcpContainer> factory) {
-        if (connectivityFailure != null) {
-            return null;
-        }
         if (container != null) {
             return container;
         }
+        if (connectivityFailure != null && clock.instant().isBefore(retryAfter)) {
+            return null;
+        }
         synchronized (this) {
-            if (connectivityFailure != null) {
-                return null;
-            }
             if (container != null) {
                 return container;
             }
+            if (connectivityFailure != null && clock.instant().isBefore(retryAfter)) {
+                return null;
+            }
             try {
                 container = factory.get();
+                connectivityFailure = null;
                 return container;
             } catch (Throwable e) {
                 if (!GcpClientConnectivity.isTransportFailure(e)) {
@@ -47,10 +55,9 @@ public final class GcpContainerStartup {
                     throw new IllegalStateException(e);
                 }
                 connectivityFailure = e;
+                retryAfter = clock.instant().plus(RETRY_AFTER);
                 log.log(Level.SEVERE,
-                        "Cloud Function initialization failed because Secret Manager is unreachable. "
-                                + "Health checks will report CONFIG_STORE_UNREACHABLE. "
-                                + "With VPC egress set to all traffic, enable Private Google Access or Cloud NAT. "
+                        "Cloud Function initialization failed to connect to a dependent service. "
                                 + "Underlying error: " + GcpClientConnectivity.describe(e),
                         e);
                 return null;
@@ -70,5 +77,12 @@ public final class GcpContainerStartup {
     void reset() {
         container = null;
         connectivityFailure = null;
+        retryAfter = Instant.EPOCH;
+        clock = Clock.systemUTC();
+    }
+
+    @VisibleForTesting
+    void setClock(Clock clock) {
+        this.clock = clock;
     }
 }

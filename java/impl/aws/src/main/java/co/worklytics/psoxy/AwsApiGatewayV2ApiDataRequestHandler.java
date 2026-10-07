@@ -62,7 +62,7 @@ public class AwsApiGatewayV2ApiDataRequestHandler implements
     @Override
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent,
             Context context) {
-        if (LambdaContainerStartup.failed()) {
+        if (LambdaContainerStartup.stillFailed(AwsApiGatewayV2ApiDataRequestHandler::staticInit)) {
             return toApiGatewayResponse(LambdaContainerStartup.response(callerIp(httpEvent)), false);
         }
         if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
@@ -114,8 +114,7 @@ public class AwsApiGatewayV2ApiDataRequestHandler implements
                     .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
             if (AwsClientConnectivity.isConnectivityFailure(e)) {
-                response = HealthCheckRequestHandler.configStoreUnreachable(
-                        callerIp(httpEvent), AwsClientConnectivity.forHealthCheck(e));
+                response = HealthCheckRequestHandler.unreachable(callerIp(httpEvent), e);
             } else {
                 response = HttpEventResponse.builder().statusCode(500)
                         .body("Unknown error: " + e.getClass().getName())

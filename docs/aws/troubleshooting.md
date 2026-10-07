@@ -149,7 +149,9 @@ A health check against a Lambda that cannot reach SSM Parameter Store or Secrets
 
 CloudWatch logs `Error reading configuration from SSM` or `Error reading configuration from Secrets Manager`.
 
-This is a network path problem. A parameter that does not exist, or that the execution role cannot read, is a different failure (`no value for PSOXY_SALT`); see [error reading SSM Parameters](#error-reading-ssm-parameters) below.
+This code is used only when the failure is identified as SSM or Secrets Manager. A connection failure to some other dependency (for example S3 or the source API) returns **HTTP 503** with `X-Psoxy-Error: DEPENDENT_SERVICE_UNREACHABLE`. That body and the CloudWatch log include the underlying client error, which is what identifies the service. A parameter that does not exist, or that the execution role cannot read, is a different failure (`no value for PSOXY_SALT`); see [error reading SSM Parameters](#error-reading-ssm-parameters) below.
+
+A failed initialization is remembered for about a minute so health checks are not stuck in another client timeout, then tried again. A warm environment can recover without a new cold start.
 
 On a VPC, check:
 

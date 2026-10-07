@@ -77,7 +77,8 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context)
             throws IOException {
-        if (LambdaContainerStartup.writeIfStartupFailed(input, output)) {
+        if (LambdaContainerStartup.stillFailed(AwsApiDataModeHybridHandler::staticInit)
+                && LambdaContainerStartup.writeIfStartupFailed(input, output)) {
             return;
         }
         // Read the full input stream into a tree
@@ -224,8 +225,8 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
                     .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
             if (AwsClientConnectivity.isConnectivityFailure(e)) {
-                return Pair.of(false, HealthCheckRequestHandler.configStoreUnreachable(
-                        LambdaContainerStartup.callerIp(request), AwsClientConnectivity.forHealthCheck(e)));
+                return Pair.of(false, HealthCheckRequestHandler.unreachable(
+                        LambdaContainerStartup.callerIp(request), e));
             }
             return Pair.of(false, HttpEventResponse.builder()
                     .statusCode(500)

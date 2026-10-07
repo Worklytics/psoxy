@@ -6,6 +6,7 @@ import co.worklytics.psoxy.HealthCheckResult;
 import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
+import co.worklytics.psoxy.gateway.ConfigStoreUnreachableException;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -201,8 +202,9 @@ public class HealthCheckRequestHandlerTest {
         when(request.getClientIp()).thenReturn(Optional.of("203.0.113.9"));
         when(apiModeConfig.getTargetHost()).thenReturn(Optional.of("host"));
         when(handler.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
-                .thenThrow(new UncheckedExecutionException(
-                        new UnknownHostException("ssm.us-east-1.amazonaws.com")));
+                .thenThrow(new UncheckedExecutionException(new ConfigStoreUnreachableException(
+                        "Unable to execute HTTP request: ssm.us-east-1.amazonaws.com",
+                        new UnknownHostException("ssm.us-east-1.amazonaws.com"))));
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
 
@@ -219,6 +221,31 @@ public class HealthCheckRequestHandlerTest {
                 .anyMatch(message -> message.contains("configuration store")
                         && message.contains("ssm.us-east-1.amazonaws.com")
                         && message.contains("Error reading configuration from SSM")));
+    }
+
+    @Test
+    void handleIfHealthCheck_reports_other_connectivity_failures_as_dependent_service() throws IOException {
+        when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
+                .thenReturn(Optional.of(""));
+        when(request.getClientIp()).thenReturn(Optional.of("203.0.113.9"));
+        when(apiModeConfig.getTargetHost()).thenReturn(Optional.of("host"));
+        when(handler.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
+                .thenThrow(new UncheckedExecutionException(
+                        new UnknownHostException("kms.googleapis.com")));
+
+        Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
+
+        assertTrue(response.isPresent());
+        assertEquals(HttpStatus.SC_SERVICE_UNAVAILABLE, response.get().getStatusCode());
+        assertEquals(ErrorCauses.DEPENDENT_SERVICE_UNREACHABLE.name(),
+                response.get().getHeaders().get(ProcessedDataMetadataFields.ERROR.getHttpHeader()));
+        HealthCheckResult result = handler.objectMapper.readValue(response.get().getBody(), HealthCheckResult.class);
+        assertEquals(ErrorCauses.DEPENDENT_SERVICE_UNREACHABLE.name(), result.getError());
+        assertTrue(result.getWarningMessages().stream()
+                .anyMatch(message -> message.contains("dependent service")
+                        && message.contains("kms.googleapis.com")));
+        assertTrue(result.getWarningMessages().stream()
+                .noneMatch(message -> message.contains("Error reading configuration from SSM")));
     }
 
     @Test

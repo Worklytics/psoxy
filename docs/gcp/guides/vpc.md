@@ -145,7 +145,7 @@ Your VPC must provide connectivity to all data sources you connect to. Google Wo
 
 ## Troubleshooting
 
-A health check that cannot reach Secret Manager returns **HTTP 503** with header `X-Psoxy-Error: CONFIG_STORE_UNREACHABLE` and a JSON body whose `error` field is the same code. `warningMessages` includes the client error (search the logs for `Error reading configuration from Secret Manager`). That response is also returned when container startup itself failed to reach Secret Manager, so the health check is not collapsed into a generic 500 from Cloud Functions.
+A health check that cannot reach Secret Manager returns **HTTP 503** with header `X-Psoxy-Error: CONFIG_STORE_UNREACHABLE` and a JSON body whose `error` field is the same code. `warningMessages` includes the client error (search the logs for `Error reading configuration from Secret Manager`). That response is also returned when container startup itself failed to reach Secret Manager, so the health check is not collapsed into a generic 500 from Cloud Functions. Connection failures to other Google APIs use `DEPENDENT_SERVICE_UNREACHABLE` and include the client error in the body and in the logs.
 
 VPC egress for these functions is **all traffic**, so Secret Manager is reached only through the VPC. The subnet needs Private Google Access, or Cloud NAT, and the firewall must allow HTTPS to that API. A missing secret or a missing IAM grant is a different error (`no value for PSOXY_SALT` or `Permission denied`).
 

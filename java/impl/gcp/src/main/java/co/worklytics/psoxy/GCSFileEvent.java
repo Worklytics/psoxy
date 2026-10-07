@@ -22,7 +22,7 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
        GcpContainer container = startup.getOrCreate(DaggerGcpContainer::create);
        if (startup.failed()) {
            throw new IllegalStateException(
-                   "Cloud Function failed to initialize because Secret Manager is unreachable: "
+                   "Cloud Function failed to initialize because a dependent service could not be reached: "
                            + GcpClientConnectivity.describe(startup.failure()),
                    startup.failure());
        }

@@ -228,7 +228,9 @@ A health check returns **HTTP 503** with header `X-Psoxy-Error: CONFIG_STORE_UNR
 
 Logs include `Error reading configuration from Secret Manager`.
 
-This is a network path problem. A secret that was never created is a different failure (`no value for PSOXY_SALT`), and a missing IAM grant is `Permission denied`, not this code.
+This code is used only when the failure is identified as Secret Manager. A connection failure to some other Google API (for example KMS while serving JWKS, or the source API) returns **HTTP 503** with `X-Psoxy-Error: DEPENDENT_SERVICE_UNREACHABLE`. That body and the logs include the underlying client error, which is what identifies the service. A secret that was never created is a different failure (`no value for PSOXY_SALT`), and a missing IAM grant is `Permission denied`, not either of these codes.
+
+A failed initialization is remembered for about a minute so health checks are not stuck in another client deadline, then tried again. A warm instance can recover without being recycled.
 
 Check:
 

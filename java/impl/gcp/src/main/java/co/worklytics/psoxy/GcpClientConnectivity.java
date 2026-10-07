@@ -3,7 +3,6 @@ package co.worklytics.psoxy;
 import org.apache.commons.lang3.StringUtils;
 import com.google.api.gax.rpc.ApiException;
 import com.google.api.gax.rpc.StatusCode;
-import co.worklytics.psoxy.gateway.ConfigStoreUnreachableException;
 import co.worklytics.psoxy.gateway.NetworkConnectivityFailures;
 import co.worklytics.psoxy.utils.LogSanitizationUtils;
 import io.grpc.Status;
@@ -15,10 +14,9 @@ import lombok.NoArgsConstructor;
  * Google client failures that mean the Cloud Function could not complete a call to a Google API
  * such as Secret Manager.
  *
- * <p>{@code UNAVAILABLE} and {@code DEADLINE_EXCEEDED} are the statuses the Secret Manager client
- * raises when DNS or TCP to {@code secretmanager.googleapis.com} fails. That happens when VPC
- * egress is set to all traffic and the subnet has neither Private Google Access nor Cloud NAT.
- * Permission denied and not-found are not transport failures.
+ * <p>{@code UNAVAILABLE} and {@code DEADLINE_EXCEEDED} mean the client could not finish the call.
+ * Callers decide whether that call was Secret Manager ({@code ConfigStoreUnreachableException})
+ * or some other dependency. Permission denied and not-found are not transport failures.
  *
  * <p>Stateless and safe to call from any thread.
  */
@@ -39,19 +37,6 @@ public final class GcpClientConnectivity {
             current = current.getCause();
         }
         return false;
-    }
-
-    /**
-     * Core health checks quote {@link ConfigStoreUnreachableException}. Translate a raw Google
-     * client failure into that type so the response still includes the client error text.
-     */
-    public static Throwable forHealthCheck(Throwable failure) {
-        if (failure == null
-                || failure instanceof ConfigStoreUnreachableException
-                || !isTransportFailure(failure)) {
-            return failure;
-        }
-        return new ConfigStoreUnreachableException(preferredMessage(failure), failure);
     }
 
     public static String describe(Throwable throwable) {

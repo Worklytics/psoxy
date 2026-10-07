@@ -3,6 +3,9 @@ package co.worklytics.psoxy.aws;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.logging.Level;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
@@ -25,15 +28,23 @@ import lombok.extern.java.Log;
  *
  * <p>Static initialization reads SSM (the pseudonym salt). If that call cannot reach SSM, the
  * exception used to fail class init and API Gateway turned the invocation into an opaque 500/502.
- * Catching it here lets the handler respond with {@code CONFIG_STORE_UNREACHABLE}.
+ * Catching it here lets the handler respond. A {@code ConfigStoreUnreachableException} is reported
+ * as {@code CONFIG_STORE_UNREACHABLE}; any other connectivity failure is
+ * {@code DEPENDENT_SERVICE_UNREACHABLE} and the client error is logged.
  *
- * <p>{@link #connectivityFailure} is written once during initialization and then only read.
- * The write happens before any request thread runs, except in tests.
+ * <p>A connectivity failure is remembered so later invocations can respond immediately, then
+ * retried after {@link #RETRY_AFTER}. A successful 503 does not recycle the execution environment,
+ * so the next attempt after the cooldown is what recovers once the network path is fixed.
+ * Only one thread runs that retry. The fields are written before request threads run, except in tests.
  */
 @Log
 public final class LambdaContainerStartup {
 
+    static final Duration RETRY_AFTER = Duration.ofSeconds(60);
+
     private static volatile Throwable connectivityFailure;
+    private static volatile Instant retryAfter = Instant.EPOCH;
+    private static volatile Clock clock = Clock.systemUTC();
 
     private LambdaContainerStartup() {
     }
@@ -41,6 +52,7 @@ public final class LambdaContainerStartup {
     public static void initialize(Runnable initializer) {
         try {
             initializer.run();
+            connectivityFailure = null;
         } catch (Throwable e) {
             if (!AwsClientConnectivity.isConnectivityFailure(e)) {
                 if (e instanceof Error error) {
@@ -52,11 +64,10 @@ public final class LambdaContainerStartup {
                 throw new ExceptionInInitializerError(e);
             }
             connectivityFailure = e;
+            retryAfter = clock.instant().plus(RETRY_AFTER);
             log.log(Level.SEVERE,
-                    "Lambda initialization failed because the configuration store is unreachable. "
-                            + "Health checks will report CONFIG_STORE_UNREACHABLE. "
-                            + "Check VPC endpoints, NAT, and security groups. Underlying error: "
-                            + AwsClientConnectivity.describe(e),
+                    "Lambda initialization failed to connect to a dependent service. "
+                            + "Underlying error: " + AwsClientConnectivity.describe(e),
                     e);
         }
     }
@@ -65,13 +76,35 @@ public final class LambdaContainerStartup {
         return connectivityFailure != null;
     }
 
+    /**
+     * @return true when the caller should return the cached startup failure now. After
+     * {@link #RETRY_AFTER}, {@code retry} runs once; a success clears the failure.
+     */
+    public static boolean stillFailed(Runnable retry) {
+        if (connectivityFailure == null) {
+            return false;
+        }
+        if (clock.instant().isBefore(retryAfter)) {
+            return true;
+        }
+        synchronized (LambdaContainerStartup.class) {
+            if (connectivityFailure == null) {
+                return false;
+            }
+            if (clock.instant().isBefore(retryAfter)) {
+                return true;
+            }
+            initialize(retry);
+            return connectivityFailure != null;
+        }
+    }
+
     public static HttpEventResponse response(String callerIp) {
         Throwable failure = connectivityFailure;
         if (failure == null) {
-            failure = new IllegalStateException("configuration store unreachable");
+            failure = new IllegalStateException("dependent service unreachable");
         }
-        return HealthCheckRequestHandler.configStoreUnreachable(
-                callerIp, AwsClientConnectivity.forHealthCheck(failure));
+        return HealthCheckRequestHandler.unreachable(callerIp, failure);
     }
 
     /**
@@ -88,7 +121,7 @@ public final class LambdaContainerStartup {
         LambdaEventUtils utils = new LambdaEventUtils(mapper);
         if (utils.isSQSEvent(root)) {
             throw new IllegalStateException(
-                    "Lambda failed to initialize because the configuration store is unreachable: "
+                    "Lambda failed to initialize because a dependent service could not be reached: "
                             + AwsClientConnectivity.describe(connectivityFailure));
         }
         if (utils.isApiGatewayV1Event(root)) {
@@ -113,5 +146,12 @@ public final class LambdaContainerStartup {
     @VisibleForTesting
     static void reset() {
         connectivityFailure = null;
+        retryAfter = Instant.EPOCH;
+        clock = Clock.systemUTC();
+    }
+
+    @VisibleForTesting
+    static void setClock(Clock clock) {
+        LambdaContainerStartup.clock = clock;
     }
 }

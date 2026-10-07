@@ -177,6 +177,11 @@ export default async function (options = {}) {
               'On GCP, a Cloud Function with VPC egress set to all traffic needs Private Google Access or Cloud NAT to reach Secret Manager. ' +
               'Search logs for "Error reading configuration from SSM" or "Error reading configuration from Secret Manager".';
             break;
+          case 'DEPENDENT_SERVICE_UNREACHABLE':
+            errorMessage =
+              'Failed to connect to a dependent service. This is not specifically the configuration store. ' +
+              'The response body and the function logs include the underlying client error, which names the service.';
+            break;
         }
       } else if (result.headers['x-amzn-errortype']) {
         errorMessage += ` AWS ${result.headers['x-amzn-errortype']}`;

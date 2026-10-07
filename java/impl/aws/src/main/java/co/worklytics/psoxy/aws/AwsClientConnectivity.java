@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.aws;
 
 import org.apache.commons.lang3.StringUtils;
-import co.worklytics.psoxy.gateway.ConfigStoreUnreachableException;
 import co.worklytics.psoxy.gateway.NetworkConnectivityFailures;
 import co.worklytics.psoxy.utils.LogSanitizationUtils;
 import lombok.AccessLevel;
@@ -36,21 +35,6 @@ public final class AwsClientConnectivity {
             current = current.getCause();
         }
         return false;
-    }
-
-    /**
-     * Core health checks quote {@link ConfigStoreUnreachableException}. Translate a raw SDK HTTP
-     * failure into that type so the response still includes the SDK error text.
-     */
-    public static Throwable forHealthCheck(Throwable failure) {
-        if (failure instanceof ConfigStoreUnreachableException || !isSdkHttpFailure(failure)) {
-            return failure;
-        }
-        String sdkMessage = sdkHttpMessage(failure);
-        if (sdkMessage == null) {
-            return failure;
-        }
-        return new ConfigStoreUnreachableException(sdkMessage, failure);
     }
 
     /**

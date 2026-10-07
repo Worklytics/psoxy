@@ -2,12 +2,16 @@ package co.worklytics.psoxy.aws;
 
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import co.worklytics.psoxy.ErrorCauses;
 import co.worklytics.psoxy.ProcessedDataMetadataFields;
+import co.worklytics.psoxy.gateway.ConfigStoreUnreachableException;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.NetworkConnectivityFailures;
 
@@ -31,10 +35,9 @@ class LambdaContainerStartupTest {
     @Test
     void initialize_recordsSsmConnectivityFailureForLaterHealthChecks() {
         LambdaContainerStartup.initialize(() -> {
-            throw SdkClientException.builder()
-                    .message("Unable to execute HTTP request: Connect to ssm.us-east-1.amazonaws.com:443 failed: connect timed out")
-                    .cause(new java.net.SocketTimeoutException("connect timed out"))
-                    .build();
+            throw new ConfigStoreUnreachableException(
+                    "Unable to execute HTTP request: Connect to ssm.us-east-1.amazonaws.com:443 failed: connect timed out",
+                    new java.net.SocketTimeoutException("connect timed out"));
         });
 
         assertTrue(LambdaContainerStartup.failed());
@@ -94,7 +97,7 @@ class LambdaContainerStartupTest {
         assertTrue(written);
         String body = output.toString(StandardCharsets.UTF_8);
         assertTrue(body.contains("503"));
-        assertTrue(body.contains(ErrorCauses.CONFIG_STORE_UNREACHABLE.name()));
+        assertTrue(body.contains(ErrorCauses.DEPENDENT_SERVICE_UNREACHABLE.name()));
         assertTrue(body.contains("198.51.100.8"));
     }
 
@@ -114,5 +117,23 @@ class LambdaContainerStartupTest {
         assertThrows(IllegalStateException.class, () -> LambdaContainerStartup.writeIfStartupFailed(
                 new java.io.ByteArrayInputStream(event.getBytes(StandardCharsets.UTF_8)),
                 new java.io.ByteArrayOutputStream()));
+    }
+
+    @Test
+    void stillFailed_retriesAfterTheCooldown() {
+        Clock start = Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC);
+        LambdaContainerStartup.setClock(start);
+        LambdaContainerStartup.initialize(() -> {
+            throw new RuntimeException(new UnknownHostException("ssm.us-east-1.amazonaws.com"));
+        });
+
+        assertTrue(LambdaContainerStartup.stillFailed(() -> {
+            throw new AssertionError("retried before the cooldown");
+        }));
+
+        LambdaContainerStartup.setClock(Clock.fixed(start.instant().plusSeconds(61), ZoneOffset.UTC));
+        assertFalse(LambdaContainerStartup.stillFailed(() -> {
+        }));
+        assertFalse(LambdaContainerStartup.failed());
     }
 }

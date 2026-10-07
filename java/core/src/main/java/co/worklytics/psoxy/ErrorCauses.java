@@ -60,6 +60,13 @@ public enum ErrorCauses {
     CONFIG_STORE_UNREACHABLE,
 
     /**
+     * the proxy could not connect to some service it depends on, and the failure was not identified
+     * as the configuration store. The response and logs include the underlying client error so the
+     * service can be identified from that message rather than from this code.
+     */
+    DEPENDENT_SERVICE_UNREACHABLE,
+
+    /**
      * timed out waiting for a response from the source API after the connection was established
      */
     SOURCE_API_READ_TIMEOUT,

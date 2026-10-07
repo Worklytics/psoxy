@@ -23,7 +23,6 @@ final class GcpConfigStoreResponses {
             }
         }
         GcpApiDataRequestHandler.fillGcpResponseFromGenericResponse(response,
-                HealthCheckRequestHandler.configStoreUnreachable(
-                        callerIp, GcpClientConnectivity.forHealthCheck(failure)));
+                HealthCheckRequestHandler.unreachable(callerIp, failure));
     }
 }
