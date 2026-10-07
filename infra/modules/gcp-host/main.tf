@@ -118,6 +118,7 @@ module "psoxy" {
   enable_remote_resources           = var.enable_remote_resources
   support_bulk_mode                 = length(var.bulk_connectors) > 0
   support_webhook_collectors        = length(var.webhook_collectors) > 0
+  enable_cloud_kms                  = length(local.webhook_collectors_needing_keys) > 0
   vpc_config                        = var.vpc_config
   bucket_force_destroy              = var.bucket_force_destroy
   tf_runner_iam_principal           = module.tf_runner.iam_principal
@@ -411,12 +412,25 @@ locals {
 # necessarily exclusive to that use-case
 # it's just a single resource, couple to single mode ... pushing it down in into the 'gcp' module would add a bunch of
 # variables/outputs, as well as going against the general "inversion of control / composition" patterned preferred by terraform
+# depends_on module.psoxy: that module enables cloudkms.googleapis.com (output kms_api_enabled). Without
+# this, a fresh project creates the key ring before the API is enabled and KMS returns 403.
 resource "google_kms_key_ring" "proxy_key_ring" {
   count = local.key_ring_needed ? 1 : 0
 
   project  = var.gcp_project_id
   name     = replace(replace(var.environment_name, "/[^a-zA-Z0-9_-]/", "-"), "/-+/", "-")
   location = var.gcp_region
+
+  depends_on = [
+    module.psoxy,
+  ]
+
+  lifecycle {
+    precondition {
+      condition     = module.psoxy.kms_api_enabled != null
+      error_message = "Cloud KMS API must be enabled before creating the webhook key ring."
+    }
+  }
 }
 
 resource "google_service_account" "webhook_collector" {
@@ -725,16 +739,10 @@ locals {
   }
 
   all_instances = merge(local.api_instances, local.bulk_instances, local.webhook_collector_instances)
-}
 
-# Static content only — discovers ./test-*.sh in the deployment directory (alphabetical).
-# Do not interpolate connector module outputs here; that created Terraform destroy cycles.
-resource "local_file" "test_all_script" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename        = "test-all.sh"
-  file_permission = "0770"
-  content         = <<-EOF
+  # Static content only — discovers ./test-*.sh in the deployment directory (alphabetical).
+  # Do not interpolate connector module outputs here; that created Terraform destroy cycles.
+  test_all_script = <<-EOF
 #!/bin/bash
 
 # Run all per-connector test-*.sh scripts in the current directory (alphabetical).
@@ -752,6 +760,16 @@ if [ "$found" -eq 0 ]; then
   exit 1
 fi
 EOF
+}
+
+# DEPRECATED: this local_file test script is deprecated and will be removed in 0.8.
+# Example todos.tf writes the same file from the test_script_files output.
+resource "local_file" "test_all_script" {
+  count = var.todos_as_local_files ? 1 : 0
+
+  filename        = "test-all.sh"
+  file_permission = "0770"
+  content         = local.test_all_script
 }
 
 output "secrets_to_provision" {

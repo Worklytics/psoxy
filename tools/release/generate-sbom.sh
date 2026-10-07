@@ -23,11 +23,15 @@ source "${CHECKOUT_ROOT}/tools/lib/maven-local-repo.sh"
 
 printf "Generating Software Bill of Materials (SBOM) for AWS and GCP implementations...\n\n"
 
-# Build AWS module with verify phase to generate SBOM
+# Build AWS module with verify phase to generate SBOM.
+# Verify from the parent reactor. `mvn -f impl/aws/pom.xml` resolves psoxy-core from Central.
 printf "${INFO}Building AWS module and generating SBOM...${NC}\n"
-${CHECKOUT_ROOT}/tools/build.sh -q aws "${CHECKOUT_ROOT}/java/"
+if ! ${CHECKOUT_ROOT}/tools/build.sh -q aws "${CHECKOUT_ROOT}/java/"; then
+  printf "${ERR}Failed to build AWS module. Exiting.${NC}\n"
+  exit 1
+fi
 mvn ${PSOXY_MAVEN_LOCAL_REPO:+-Dmaven.repo.local="$PSOXY_MAVEN_LOCAL_REPO"} \
-    -f "${CHECKOUT_ROOT}/java/impl/aws/pom.xml" clean verify -DskipTests -Dmaven.deploy.skip=false
+    -f "${CHECKOUT_ROOT}/java/pom.xml" clean verify -pl impl/aws -am -DskipTests -Dmaven.deploy.skip=false
 if [ $? -ne 0 ]; then
   printf "${ERR}Failed to build AWS module. Exiting.${NC}\n"
   exit 1
@@ -45,11 +49,14 @@ mkdir -p "${CHECKOUT_ROOT}/docs/aws"
 cp "${CHECKOUT_ROOT}/java/impl/aws/target/sbom.json" "${CHECKOUT_ROOT}/docs/aws/sbom.json"
 printf "AWS SBOM copied to ${INFO}docs/aws/sbom.json${NC}\n\n"
 
-# Build GCP module with verify phase to generate SBOM
+# Build GCP module with verify phase to generate SBOM.
 printf "${INFO}Building GCP module and generating SBOM...${NC}\n"
-${CHECKOUT_ROOT}/tools/build.sh -q gcp "${CHECKOUT_ROOT}/java/"
+if ! ${CHECKOUT_ROOT}/tools/build.sh -q gcp "${CHECKOUT_ROOT}/java/"; then
+  printf "${ERR}Failed to build GCP module. Exiting.${NC}\n"
+  exit 1
+fi
 mvn ${PSOXY_MAVEN_LOCAL_REPO:+-Dmaven.repo.local="$PSOXY_MAVEN_LOCAL_REPO"} \
-    -f "${CHECKOUT_ROOT}/java/impl/gcp/pom.xml" clean verify -DskipTests -Dmaven.deploy.skip=false
+    -f "${CHECKOUT_ROOT}/java/pom.xml" clean verify -pl impl/gcp -am -DskipTests -Dmaven.deploy.skip=false
 if [ $? -ne 0 ]; then
   printf "${ERR}Failed to build GCP module. Exiting.${NC}\n"
   exit 1

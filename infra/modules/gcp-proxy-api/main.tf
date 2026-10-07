@@ -556,6 +556,8 @@ Contact support@worklytics.co for assistance modifying the rules as needed.
 EOT
 }
 
+# DEPRECATED: this local_file test script is deprecated and will be removed in 0.8.
+# Example todos.tf writes the same file from the test_script_files output.
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
@@ -621,6 +623,13 @@ output "test_script" {
 
 output "test_script_content" {
   value = local.test_script
+}
+
+output "test_script_files" {
+  description = "Test script filename => content. Independent of the local_file resource, so a root module can write the file when todos_as_local_files is false."
+  value = {
+    (local.test_script_filename) = local.test_script
+  }
 }
 
 output "async_output_bucket_id" {
