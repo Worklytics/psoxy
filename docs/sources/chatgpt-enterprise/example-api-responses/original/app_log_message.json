@@ -1,0 +1,22 @@
+{
+  "event_id": "31c1b9b0-5b2d-4c2a-9e11-32d7b0c3e9aa",
+  "type": "APP_LOG",
+  "timestamp": "2025-11-15T20:12:24.551203Z",
+  "principal": {
+    "id": "be545252-ad04-4cfa-9ca5-deca58416151",
+    "type": "CHATGPT_WORKSPACE"
+  },
+  "actor": {
+    "type": "ACCOUNT_USER",
+    "user_id": "user-AbCdEf1234567890",
+    "user_email": "user@example.org"
+  },
+  "app_id": "conn-8f92d7c1",
+  "app_name": "gdrive",
+  "app_type": "SERVICE",
+  "conversation_id": "c-7cda9b2e",
+  "log_type": "request",
+  "input": {
+    "query": "List recent architecture decisions"
+  }
+}
