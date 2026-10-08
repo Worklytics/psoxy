@@ -2,6 +2,7 @@ package co.worklytics.psoxy;
 
 import java.security.Security;
 import java.time.Instant;
+import java.util.Optional;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -15,8 +16,6 @@ import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.LambdaContainerStartup;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
-import co.worklytics.psoxy.aws.AwsClientConnectivity;
-import co.worklytics.psoxy.gateway.impl.HealthCheckRequestHandler;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import lombok.SneakyThrows;
@@ -113,8 +112,10 @@ public class AwsApiGatewayV2ApiDataRequestHandler implements
             context.getLogger()
                     .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
-            if (AwsClientConnectivity.isConnectivityFailure(e)) {
-                response = HealthCheckRequestHandler.unreachable(callerIp(httpEvent), e);
+            Optional<HttpEventResponse> connectivityFailure = awsContainer.connectivityFailureResponses()
+                    .toResponse(callerIp(httpEvent), e, false, awsContainer.connectivityFailures());
+            if (connectivityFailure.isPresent()) {
+                response = connectivityFailure.get();
             } else {
                 response = HttpEventResponse.builder().statusCode(500)
                         .body("Unknown error: " + e.getClass().getName())

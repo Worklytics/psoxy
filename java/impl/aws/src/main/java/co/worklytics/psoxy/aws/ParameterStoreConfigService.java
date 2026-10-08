@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ConfigStoreUnreachableException;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.TransientConfigException;
@@ -161,9 +160,6 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
             // Health checks map this to CONFIG_STORE_UNREACHABLE; this line is what to search
             // for in CloudWatch.
             log.log(Level.SEVERE, "Error reading configuration from SSM: " + e.getMessage(), e);
-            if (AwsClientConnectivity.isSdkHttpFailure(e)) {
-                throw new ConfigStoreUnreachableException(e.getMessage(), e);
-            }
             throw e;
         }
     }

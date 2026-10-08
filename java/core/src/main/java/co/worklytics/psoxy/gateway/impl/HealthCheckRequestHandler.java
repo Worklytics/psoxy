@@ -15,20 +15,16 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import co.worklytics.psoxy.ControlHeader;
-import co.worklytics.psoxy.ErrorCauses;
 import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.HealthCheckResult;
 import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ConfigStoreUnreachableException;
+import co.worklytics.psoxy.gateway.ConnectivityFailureMatcher;
+import co.worklytics.psoxy.gateway.ConnectivityFailureResponses;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.NetworkConnectivityFailures;
 import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
@@ -69,6 +65,10 @@ public class HealthCheckRequestHandler {
     ProxyConstants proxyConstants;
     @Inject
     NetworkSecurityUtils networkSecurityUtils;
+    @Inject
+    ConnectivityFailureMatcher connectivityFailures;
+    @Inject
+    ConnectivityFailureResponses connectivityFailureResponses;
 
     volatile String piiSaltHash;
     private final Object $piiSaltHashLock = new Object[0];
@@ -93,121 +93,27 @@ public class HealthCheckRequestHandler {
         }
     }
 
-    private static final ObjectMapper STARTUP_OBJECT_MAPPER = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .registerModule(new Jdk8Module())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-
-    private static final String CONFIG_STORE_UNREACHABLE_SUMMARY =
-            "Unable to reach the configuration store. Outbound connectivity from this function is blocked. "
-                    + "On AWS, the VPC interface endpoint or NAT for SSM Parameter Store or Secrets Manager "
-                    + "is missing or unreachable, or a security group blocks HTTPS to it. "
-                    + "On GCP, a Cloud Function with VPC egress set to all traffic needs Private Google Access "
-                    + "or Cloud NAT to reach Secret Manager. "
-                    + "Search logs for \"Error reading configuration from SSM\" or "
-                    + "\"Error reading configuration from Secret Manager\".";
-
-    private static final String DEPENDENT_SERVICE_UNREACHABLE_SUMMARY =
-            "Failed to connect to a dependent service. The underlying error is included here and in the logs.";
-
     private HttpEventResponse handle(HttpEventRequest request) {
         try {
             return buildHealthCheck(request);
         } catch (Throwable e) {
-            if (!NetworkConnectivityFailures.isConnectivityFailure(e)) {
-                if (e instanceof Error error) {
-                    throw error;
-                }
-                if (e instanceof RuntimeException runtimeException) {
-                    throw runtimeException;
-                }
-                throw new RuntimeException(e);
+            Optional<HttpEventResponse> connectivityFailure = connectivityFailureResponses.toResponse(
+                    connectivityFailureResponses.callerIp(request), e, true, connectivityFailures);
+            if (connectivityFailure.isPresent()) {
+                return connectivityFailure.get();
             }
-            return unreachable(callerIp(request), e);
-        }
-    }
-
-    public static boolean isConfigStoreFailure(Throwable failure) {
-        Throwable current = failure;
-        while (current != null) {
-            if (current instanceof ConfigStoreUnreachableException) {
-                return true;
+            if (e instanceof Error error) {
+                throw error;
             }
-            current = current.getCause();
-        }
-        return false;
-    }
-
-    /**
-     * 503 health-check body. A {@link ConfigStoreUnreachableException} in the cause chain is
-     * {@code CONFIG_STORE_UNREACHABLE}. Any other connectivity failure is
-     * {@code DEPENDENT_SERVICE_UNREACHABLE}; the client error is logged and copied into the body
-     * so the dependency is identified from that message.
-     */
-    public static HttpEventResponse unreachable(String callerIp, Throwable failure) {
-        if (isConfigStoreFailure(failure)) {
-            log.log(Level.SEVERE, "Failed to reach the configuration store", failure);
-            return configStoreUnreachable(callerIp, failure);
-        }
-        log.log(Level.SEVERE, "Failed to connect to a dependent service", failure);
-        return dependentServiceUnreachable(callerIp, failure);
-    }
-
-    /**
-     * JSON health-check body plus {@code X-Psoxy-Error: CONFIG_STORE_UNREACHABLE}.
-     * Only for failures already identified as the configuration store.
-     */
-    public static HttpEventResponse configStoreUnreachable(String callerIp, Throwable failure) {
-        return connectivityResponse(callerIp, failure, ErrorCauses.CONFIG_STORE_UNREACHABLE,
-                CONFIG_STORE_UNREACHABLE_SUMMARY);
-    }
-
-    public static HttpEventResponse dependentServiceUnreachable(String callerIp, Throwable failure) {
-        return connectivityResponse(callerIp, failure, ErrorCauses.DEPENDENT_SERVICE_UNREACHABLE,
-                DEPENDENT_SERVICE_UNREACHABLE_SUMMARY);
-    }
-
-    private static HttpEventResponse connectivityResponse(String callerIp, Throwable failure,
-            ErrorCauses cause, String summary) {
-        String detail = NetworkConnectivityFailures.describe(failure);
-        HealthCheckResult result = HealthCheckResult.builder()
-                .javaSourceCodeVersion(ProxyConstants.JAVA_SOURCE_CODE_VERSION)
-                .callerIp(callerIp)
-                .nonDefaultSalt(false)
-                .missingConfigProperties(Set.of())
-                .error(cause.name())
-                .warningMessage(summary + " Underlying error: " + detail)
-                .build();
-
-        HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder()
-                .statusCode(HttpStatus.SC_SERVICE_UNAVAILABLE)
-                .header(HttpHeaders.CONTENT_TYPE,
-                        ContentType.APPLICATION_JSON.withCharset(StandardCharsets.UTF_8).getMimeType())
-                .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), cause.name());
-        try {
-            String json = STARTUP_OBJECT_MAPPER.writeValueAsString(result);
-            responseBuilder.body(json + "\r\n");
-            log.warning("Health check failed: " + json);
-        } catch (IOException e) {
-            log.log(Level.WARNING, "Failed to write connectivity health check details", e);
-            responseBuilder.body("{\"error\":\"" + cause.name() + "\"}\r\n");
-        }
-        return responseBuilder.build();
-    }
-
-    public static String callerIp(HttpEventRequest request) {
-        try {
-            if (request == null) {
-                return "unknown";
+            if (e instanceof RuntimeException runtimeException) {
+                throw runtimeException;
             }
-            return request.getClientIp().orElse("unknown");
-        } catch (RuntimeException e) {
-            return "unknown";
+            throw new RuntimeException(e);
         }
     }
 
-    private static void rethrowIfConnectivityFailure(Throwable e) {
-        if (!NetworkConnectivityFailures.isConnectivityFailure(e)) {
+    private void rethrowIfConnectivityFailure(Throwable e) {
+        if (connectivityFailures.match(e).isEmpty()) {
             return;
         }
         if (e instanceof Error error) {

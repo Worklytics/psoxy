@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Security;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.logging.Level;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,10 +27,9 @@ import co.worklytics.psoxy.aws.LambdaContainerStartup;
 import co.worklytics.psoxy.aws.request.APIGatewayV1ProxyEventRequestAdapter;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
 import co.worklytics.psoxy.aws.request.LambdaEventUtils;
+import co.worklytics.psoxy.gateway.ConnectivityFailureResponses;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.aws.AwsClientConnectivity;
-import co.worklytics.psoxy.gateway.impl.HealthCheckRequestHandler;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import lombok.extern.java.Log;
 
@@ -224,9 +224,11 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
             context.getLogger()
                     .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
-            if (AwsClientConnectivity.isConnectivityFailure(e)) {
-                return Pair.of(false, HealthCheckRequestHandler.unreachable(
-                        LambdaContainerStartup.callerIp(request), e));
+            ConnectivityFailureResponses responses = awsContainer.connectivityFailureResponses();
+            Optional<HttpEventResponse> connectivityFailure = responses.toResponse(
+                    responses.callerIp(request), e, false, awsContainer.connectivityFailures());
+            if (connectivityFailure.isPresent()) {
+                return Pair.of(false, connectivityFailure.get());
             }
             return Pair.of(false, HttpEventResponse.builder()
                     .statusCode(500)

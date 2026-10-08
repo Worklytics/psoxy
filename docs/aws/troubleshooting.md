@@ -145,11 +145,11 @@ NOTE: you likely need to change `outlook-mail` if your error is with a different
 
 ## Health check returns 503 `CONFIG_STORE_UNREACHABLE`
 
-A health check against a Lambda that cannot reach SSM Parameter Store or Secrets Manager returns **HTTP 503** with header `X-Psoxy-Error: CONFIG_STORE_UNREACHABLE`. The JSON body has the same value in `error`, and `warningMessages` includes the AWS SDK client error. The same response is returned when class initialization itself failed, so API Gateway does not collapse it into a generic 500/502.
+A health check against a Lambda that cannot reach SSM Parameter Store or Secrets Manager returns **HTTP 503** with header `X-Psoxy-Error: CONFIG_STORE_UNREACHABLE`. The JSON body has the same value in `error`. `warningMessages` is one sentence, such as `Unable to reach SSM Parameter Store. Check the logs.` The AWS SDK client error is not copied into the response. The same response is returned when class initialization itself failed, so API Gateway does not collapse it into a generic 500/502.
 
-CloudWatch logs `Error reading configuration from SSM` or `Error reading configuration from Secrets Manager`.
+CloudWatch logs `Error reading configuration from SSM` or `Error reading configuration from Secrets Manager`, with the client error.
 
-This code is used only when the failure is identified as SSM or Secrets Manager. A connection failure to some other dependency (for example S3 or the source API) returns **HTTP 503** with `X-Psoxy-Error: DEPENDENT_SERVICE_UNREACHABLE`. That body and the CloudWatch log include the underlying client error, which is what identifies the service. A parameter that does not exist, or that the execution role cannot read, is a different failure (`no value for PSOXY_SALT`); see [error reading SSM Parameters](#error-reading-ssm-parameters) below.
+This code is used when the failure is identified as SSM or Secrets Manager, and also when a health check or startup cannot tell which dependency failed. A connection failure to some other dependency (for example S3 or KMS) returns **HTTP 503** with `X-Psoxy-Error: DEPENDENT_SERVICE_UNREACHABLE` and a sentence such as `Unable to reach KMS. Check the logs.` The client error is only in CloudWatch. A parameter that does not exist, or that the execution role cannot read, is a different failure (`no value for PSOXY_SALT`); see [error reading SSM Parameters](#error-reading-ssm-parameters) below.
 
 A failed initialization is remembered for about a minute so health checks are not stuck in another client timeout, then tried again. A warm environment can recover without a new cold start.
 

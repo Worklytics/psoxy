@@ -61,8 +61,9 @@ public enum ErrorCauses {
 
     /**
      * the proxy could not connect to some service it depends on, and the failure was not identified
-     * as the configuration store. The response and logs include the underlying client error so the
-     * service can be identified from that message rather than from this code.
+     * as the configuration store. The response is a short sentence from the platform parser when
+     * it recognized the service, and tells the caller to check the logs. The client error itself
+     * is only in the logs.
      */
     DEPENDENT_SERVICE_UNREACHABLE,
 

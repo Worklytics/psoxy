@@ -179,8 +179,9 @@ export default async function (options = {}) {
             break;
           case 'DEPENDENT_SERVICE_UNREACHABLE':
             errorMessage =
-              'Failed to connect to a dependent service. This is not specifically the configuration store. ' +
-              'The response body and the function logs include the underlying client error, which names the service.';
+              'Failed to connect to a dependent service. This is below the application. ' +
+              'The response names that service in one sentence (SSM Parameter Store, Secrets Manager, Secret Manager, KMS, and similar). ' +
+              'Check the function logs for the client error.';
             break;
         }
       } else if (result.headers['x-amzn-errortype']) {

@@ -21,9 +21,14 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
     public void accept(GcsEvent gcsEvent, Context context) throws Exception {
        GcpContainer container = startup.getOrCreate(DaggerGcpContainer::create);
        if (startup.failed()) {
+           String service = startup.match(startup.failure())
+                   .map(failure -> failure.getService())
+                   .orElse(null);
+           String detail = service == null
+                   ? "a dependent service could not be reached. Check the logs."
+                   : service + " could not be reached. Check the logs.";
            throw new IllegalStateException(
-                   "Cloud Function failed to initialize because a dependent service could not be reached: "
-                           + GcpClientConnectivity.describe(startup.failure()),
+                   "Cloud Function failed to initialize because " + detail,
                    startup.failure());
        }
 

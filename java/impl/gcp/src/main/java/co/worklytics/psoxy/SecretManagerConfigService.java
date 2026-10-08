@@ -33,7 +33,7 @@ import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.FieldMask;
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ConfigStoreUnreachableException;
+import co.worklytics.psoxy.gateway.ConnectivityFailureMatcher;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.WritableConfigService;
@@ -63,6 +63,8 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
     EnvVarsConfigService envVarsConfigService;
     @Inject
     Clock clock;
+    @Inject
+    ConnectivityFailureMatcher connectivityFailures;
 
     /**
      * Namespace to use; it could be empty for accessing all the secrets or with some value will be used
@@ -348,17 +350,14 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
     }
 
     private void rethrowIfSecretManagerUnreachable(String paramName, Exception e) {
-        if (e instanceof ConfigStoreUnreachableException unreachable) {
-            throw unreachable;
-        }
-        if (!GcpClientConnectivity.isTransportFailure(e)) {
+        if (connectivityFailures.match(e).isEmpty()) {
             return;
         }
         log.log(Level.SEVERE, "Error reading configuration from Secret Manager: " + e.getMessage(), e);
-        String message = e.getMessage() != null
-                ? e.getMessage()
-                : "Error reading configuration from Secret Manager for " + paramName;
-        throw new ConfigStoreUnreachableException(message, e);
+        if (e instanceof RuntimeException runtimeException) {
+            throw runtimeException;
+        }
+        throw new IllegalStateException("Error reading configuration from Secret Manager for " + paramName, e);
     }
 
     private SecretName getLockSecret(String lockName) {

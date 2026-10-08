@@ -24,6 +24,9 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
+import co.worklytics.psoxy.gateway.ConnectivityFailureMatcher;
+import co.worklytics.psoxy.gateway.ConnectivityFailureResponses;
+import co.worklytics.psoxy.gateway.DependencyConnectivityFailure;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventRequestDto;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
@@ -49,6 +52,8 @@ public class GcpApiDataRequestHandler {
     final EnvVarsConfigService envVarsConfigService;
     final GoogleIdTokenVerifierFactory googleIdTokenVerifierFactory;
     final ObjectMapper objectMapper;
+    final ConnectivityFailureMatcher connectivityFailures;
+    final ConnectivityFailureResponses connectivityFailureResponses;
 
     // standard Bearer token prefix on Authorization header
     static final String BEARER_PREFIX = "Bearer ";
@@ -62,13 +67,17 @@ public class GcpApiDataRequestHandler {
         ApiDataRequestHandler requestHandler,
         EnvVarsConfigService envVarsConfigService,
         GoogleIdTokenVerifierFactory googleIdTokenVerifierFactory,
-        ObjectMapper objectMapper) {
+        ObjectMapper objectMapper,
+        ConnectivityFailureMatcher connectivityFailures,
+        ConnectivityFailureResponses connectivityFailureResponses) {
         this.requestHandler = requestHandler;
         this.gcpEnvironment = gcpEnvironment;
         this.gcpApiModeConfig = gcpApiModeConfig;
         this.envVarsConfigService = envVarsConfigService;
         this.googleIdTokenVerifierFactory = googleIdTokenVerifierFactory;
         this.objectMapper = objectMapper;
+        this.connectivityFailures = connectivityFailures;
+        this.connectivityFailureResponses = connectivityFailureResponses;
     }
 
     @SneakyThrows
@@ -140,8 +149,10 @@ public class GcpApiDataRequestHandler {
             // unhandled exception while handling request
             log.log(Level.SEVERE, "Error while handling request", e);
             try {
-                if (GcpClientConnectivity.isTransportFailure(e)) {
-                    GcpConfigStoreResponses.write(request, response, e);
+                Optional<DependencyConnectivityFailure> failure = connectivityFailures.match(e);
+                if (failure.isPresent()) {
+                    GcpConfigStoreResponses.write(request, response, connectivityFailureResponses,
+                            failure.get(), e, false);
                     return;
                 }
                 response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);

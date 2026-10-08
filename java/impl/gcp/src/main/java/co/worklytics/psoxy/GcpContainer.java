@@ -1,5 +1,7 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.ConnectivityFailureMatcher;
+import co.worklytics.psoxy.gateway.ConnectivityFailureResponses;
 import dagger.Component;
 
 import javax.inject.Singleton;
@@ -17,6 +19,12 @@ interface GcpContainer {
 
     @Singleton
     GcpApiDataRequestHandler httpRequestHandler();
+
+    @Singleton
+    ConnectivityFailureMatcher connectivityFailures();
+
+    @Singleton
+    ConnectivityFailureResponses connectivityFailureResponses();
 
     @Singleton
     GcsFileEventHandler gcsFileEventHandler();

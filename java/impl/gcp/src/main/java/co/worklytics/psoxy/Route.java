@@ -1,8 +1,10 @@
 package co.worklytics.psoxy;
 
+import java.util.Optional;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
+import co.worklytics.psoxy.gateway.DependencyConnectivityFailure;
 
 import lombok.extern.java.Log;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -27,7 +29,7 @@ public class Route implements HttpFunction {
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         GcpContainer container = startup.getOrCreate(DaggerGcpContainer::create);
         if (startup.failed()) {
-            GcpConfigStoreResponses.write(request, response, startup.failure());
+            startup.write(request, response);
             return;
         }
 
@@ -38,10 +40,12 @@ public class Route implements HttpFunction {
         try {
             container.httpRequestHandler().service(request, response);
         } catch (Throwable e) {
-            if (!GcpClientConnectivity.isTransportFailure(e)) {
+            Optional<DependencyConnectivityFailure> failure = container.connectivityFailures().match(e);
+            if (failure.isEmpty()) {
                 throw e;
             }
-            GcpConfigStoreResponses.write(request, response, e);
+            GcpConfigStoreResponses.write(request, response, container.connectivityFailureResponses(),
+                    failure.get(), e, false);
         }
     }
 

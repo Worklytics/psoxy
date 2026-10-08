@@ -34,6 +34,8 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.BulkModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ConnectivityFailures;
+import co.worklytics.psoxy.gateway.JavaNetConnectivityFailures;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
@@ -53,6 +55,7 @@ import dagger.Binds;
 import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.IntoSet;
 import dagger.multibindings.Multibinds;
 import lombok.extern.java.Log;
 
@@ -79,6 +82,10 @@ public class PsoxyModule {
 
         @Binds
         abstract GenMetadataBackend genMetadataBackend(LangChain4jGenMetadataBackend impl);
+
+        @Binds
+        @IntoSet
+        abstract ConnectivityFailures javaNetConnectivityFailures(JavaNetConnectivityFailures impl);
     }
 
 

@@ -11,9 +11,7 @@ import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import co.worklytics.psoxy.ErrorCauses;
 import co.worklytics.psoxy.ProcessedDataMetadataFields;
-import co.worklytics.psoxy.gateway.ConfigStoreUnreachableException;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.NetworkConnectivityFailures;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -35,9 +33,10 @@ class LambdaContainerStartupTest {
     @Test
     void initialize_recordsSsmConnectivityFailureForLaterHealthChecks() {
         LambdaContainerStartup.initialize(() -> {
-            throw new ConfigStoreUnreachableException(
-                    "Unable to execute HTTP request: Connect to ssm.us-east-1.amazonaws.com:443 failed: connect timed out",
-                    new java.net.SocketTimeoutException("connect timed out"));
+            throw SdkClientException.builder()
+                    .message("Unable to execute HTTP request: Connect to ssm.us-east-1.amazonaws.com:443 failed: connect timed out")
+                    .cause(new java.net.SocketTimeoutException("connect timed out"))
+                    .build();
         });
 
         assertTrue(LambdaContainerStartup.failed());
@@ -48,8 +47,10 @@ class LambdaContainerStartupTest {
         assertTrue(response.getBody().contains("\"error\" : \"" + ErrorCauses.CONFIG_STORE_UNREACHABLE.name() + "\"")
                 || response.getBody().contains("\"error\":\"" + ErrorCauses.CONFIG_STORE_UNREACHABLE.name() + "\""));
         assertTrue(response.getBody().contains("203.0.113.5"));
-        assertTrue(response.getBody().contains("Unable to execute HTTP request"));
-        assertTrue(response.getBody().contains("ssm.us-east-1.amazonaws.com"));
+        assertTrue(response.getBody().contains("Unable to reach SSM Parameter Store. Check the logs."));
+        assertFalse(response.getBody().contains("Unable to execute HTTP request"));
+        assertFalse(response.getBody().contains("ssm.us-east-1.amazonaws.com"));
+        assertFalse(response.getBody().contains("On AWS"));
     }
 
     @Test
@@ -58,20 +59,6 @@ class LambdaContainerStartupTest {
             throw new IllegalStateException("bug");
         }));
         assertFalse(LambdaContainerStartup.failed());
-    }
-
-    @Test
-    void sdkClientException_httpFailureIsConnectivity_credentialFailureIsNot() {
-        SdkClientException http = SdkClientException.builder()
-                .message("Unable to execute HTTP request: ssm.us-east-1.amazonaws.com")
-                .build();
-        assertTrue(AwsClientConnectivity.isSdkHttpFailure(http));
-        assertFalse(NetworkConnectivityFailures.isConnectivityFailure(http));
-
-        SdkClientException credentials = SdkClientException.builder()
-                .message("Unable to load credentials from any of the providers in the chain")
-                .build();
-        assertFalse(AwsClientConnectivity.isConnectivityFailure(credentials));
     }
 
     @Test
@@ -97,8 +84,10 @@ class LambdaContainerStartupTest {
         assertTrue(written);
         String body = output.toString(StandardCharsets.UTF_8);
         assertTrue(body.contains("503"));
-        assertTrue(body.contains(ErrorCauses.DEPENDENT_SERVICE_UNREACHABLE.name()));
+        assertTrue(body.contains(ErrorCauses.CONFIG_STORE_UNREACHABLE.name()));
+        assertTrue(body.contains("Unable to reach the configuration store. Check the logs."));
         assertTrue(body.contains("198.51.100.8"));
+        assertFalse(body.contains("ssm.us-east-1.amazonaws.com"));
     }
 
     @Test
@@ -114,9 +103,13 @@ class LambdaContainerStartupTest {
                   ]
                 }
                 """;
-        assertThrows(IllegalStateException.class, () -> LambdaContainerStartup.writeIfStartupFailed(
-                new java.io.ByteArrayInputStream(event.getBytes(StandardCharsets.UTF_8)),
-                new java.io.ByteArrayOutputStream()));
+        IllegalStateException failure = assertThrows(IllegalStateException.class,
+                () -> LambdaContainerStartup.writeIfStartupFailed(
+                        new java.io.ByteArrayInputStream(event.getBytes(StandardCharsets.UTF_8)),
+                        new java.io.ByteArrayOutputStream()));
+        assertTrue(failure.getMessage().contains("ssm"));
+        assertTrue(failure.getMessage().contains("Check the logs"));
+        assertFalse(failure.getMessage().contains("amazonaws.com"));
     }
 
     @Test

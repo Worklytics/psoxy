@@ -4,12 +4,18 @@ import java.net.UnknownHostException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.google.api.gax.rpc.PermissionDeniedException;
 import com.google.api.gax.rpc.StatusCode;
 import com.google.api.gax.rpc.UnavailableException;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.junit.jupiter.api.Test;
+import co.worklytics.psoxy.gateway.ConnectivityFailureMatcher;
+import co.worklytics.psoxy.gateway.DependencyConnectivityFailure;
+import co.worklytics.psoxy.gateway.DependencyServiceNames;
+import co.worklytics.psoxy.gateway.JavaNetConnectivityFailures;
 
 import static org.mockito.Mockito.mock;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,14 +24,23 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class GcpClientConnectivityTest {
+class GcpConnectivityFailuresTest {
+
+    private final DependencyServiceNames names = new DependencyServiceNames();
+    private final ConnectivityFailureMatcher matcher = new ConnectivityFailureMatcher(Set.of(
+            new JavaNetConnectivityFailures(names),
+            new GcpConnectivityFailures(names)));
 
     @Test
-    void unavailableSecretManagerCallIsATransportFailure() {
+    void unavailableSecretManagerCallNamesTheParsedService() {
         Throwable failure = new UncheckedExecutionException(unavailable("secretmanager.googleapis.com"));
 
-        assertTrue(GcpClientConnectivity.isTransportFailure(failure));
-        assertTrue(GcpClientConnectivity.describe(failure).contains("secretmanager.googleapis.com"));
+        Optional<DependencyConnectivityFailure> match = matcher.match(failure);
+
+        assertTrue(match.isPresent());
+        assertEquals("secretmanager", match.get().getService());
+        assertEquals("Unable to reach Secret Manager. Check the logs.", match.get().getClientMessage());
+        assertTrue(match.get().isConfigStore());
     }
 
     @Test
@@ -36,13 +51,16 @@ class GcpClientConnectivityTest {
                 status(StatusCode.Code.PERMISSION_DENIED),
                 false);
 
-        assertFalse(GcpClientConnectivity.isTransportFailure(denied));
+        assertFalse(matcher.match(denied).isPresent());
     }
 
     @Test
-    void javaNetFailureIsATransportFailure() {
-        assertTrue(GcpClientConnectivity.isTransportFailure(
-                new RuntimeException(new UnknownHostException("secretmanager.googleapis.com"))));
+    void unknownHostWithoutAKnownServiceHasNoToken() {
+        Optional<DependencyConnectivityFailure> match = matcher.match(
+                new RuntimeException(new UnknownHostException("www.googleapis.com")));
+
+        assertTrue(match.isPresent());
+        assertNull(match.get().getService());
     }
 
     @Test
@@ -62,6 +80,7 @@ class GcpClientConnectivityTest {
             return null;
         }));
         assertEquals(1, attempts.get());
+        assertEquals("secretmanager", startup.match(startup.failure()).orElseThrow().getService());
     }
 
     @Test
