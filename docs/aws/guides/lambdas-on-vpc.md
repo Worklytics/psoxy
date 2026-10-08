@@ -63,7 +63,7 @@ Alternatively, you modify `vpc.tf` to use a provision non-default VPC/subnet/sec
 
 ## AWS APIs the proxy calls
 
-Lambda in a VPC reaches AWS APIs through [VPC endpoints](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints.html). Interface endpoints need `private_dns_enabled` so the AWS SDK hostnames resolve to them, and their security group must allow inbound TCP 443 from the Lambda security group. The Lambda security group must allow outbound TCP 443. Add an interface endpoint network interface in each subnet where a Lambda ENI is placed.
+Lambda in a VPC can reach AWS APIs through the NAT path or through [VPC endpoints](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints.html). Interface endpoints need `private_dns_enabled` so the AWS SDK hostnames resolve to them, and their security group must allow inbound TCP 443 from the Lambda security group. The Lambda security group must allow outbound TCP 443. Select one endpoint subnet per Availability Zone where private access is needed; endpoint ENIs remain reachable from other subnets in the VPC, although cross-AZ access adds cost and reduces resilience.
 
 | Service | Endpoint | When the function calls it |
 | --- | --- | --- |
