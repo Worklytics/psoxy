@@ -1,15 +1,42 @@
-See ChatGPT documentation for the latest, but as of August 2025, you must create an API key and fill that as a secret in your host platform.
+***YMMV.*** *ChatGPT's APIs, like many other AI platforms, have been evolving rapidly. Our instructions may be out of date, or may reflect the behavior of a different subscription, tenant, or tier than yours. Please let us know if you encounter an issue.*
 
-1 - Create a new [OpenAI API Platform Portal](https://platform.openai.com/api-keys) on Settings ->  Default Project | All Permissions
-  - Note that this must be a new key.  Once the Compliance API scopes are granted, all other scopes are revoked.
-  - Reminder:  This key can only be viewed/copied once.
-2 - Copy the key immediately - you won’t see it again; then paste it as the `${path_to_instance_parameters}ACCESS_TOKEN` parameter value in the proxy's Secret Manager.
-3- Send an email to [support@openai.com](mailto:support@openai.com) with:
+See [Managing Admin keys in Admin Console](https://help.openai.com/en/articles/20001407-managing-admin-keys-in-admin-console) for the latest. A new key is created in the Admin Console. You do not email OpenAI to activate it. The older email step is under [Legacy Instructions: email OpenAI to activate the compliance scope](#legacy-instructions-email-openai-to-activate-the-compliance-scope).
+
+1. A workspace **Owner** opens [https://admin.openai.com](https://admin.openai.com), selects this **ChatGPT workspace** (the Credentials menu stays hidden while an organization is selected), then opens **Credentials → Admin keys → Create new admin key**.
+   - **Admin keys** are available on ChatGPT Enterprise, Edu, and Healthcare workspaces. If **Credentials** lists only **Access Tokens**, this workspace does not have Admin keys. An Access Token cannot authorize these compliance calls. Confirm the top-left selector is the ChatGPT workspace, not the organization, and that you are an Owner of that workspace.
+   - Choose **Custom** permissions.
+   - Set **Conversation messages** to **Read**. This is required. Only an Owner can grant it. Worklytics reads conversation usage from Compliance Logs with event type `CONVERSATION_MESSAGE`.
+   - If this workspace uses Codex, set **Codex logs** to **Read** (`CODEX_LOG`). That box is separate from **Codex analytics API**; leave analytics at None unless you are also connecting Codex Enterprise Analytics.
+   - Leave the other categories at None.
+   - The secret can only be viewed once. An Admin can grant categories such as audit, authentication, or app logs, and a key limited to those will not return conversation usage.
+   - This is a workspace Admin key. A [Platform API key](https://platform.openai.com/api-keys) and an API Platform organization Admin key (those call `/v1/organization/…`) are different credentials.
+2. Copy the key immediately, then paste it as the `${path_to_instance_parameters}ACCESS_TOKEN` parameter value in the proxy's Secret Manager.
+3. After your administrator deploys the Psoxy instance (`terraform apply`), follow the `TODO 3 - connect chatgpt-enterprise in Worklytics.md` file generated in your Terraform working directory. That file provides the **Psoxy Base URL** (your proxy/function endpoint) and **Bucket Name** (the async output bucket where sanitized API responses are stored), which you must enter in the Worklytics connector settings, along with your ChatGPT Enterprise **Workspace Id** (ChatGPT Admin console, https://chatgpt.com/admin, on the workspace settings page).
+4. On that Worklytics connection, set the fetch option `fetchProjects` to `false`.
+
+`/projects` is project-creation metadata. Conversation and Codex usage come from `/logs` and `/logs/{id}`. Worklytics still requests `GET /v1/compliance/workspaces/{workspaceId}/projects` before `/logs` when `fetchProjects` is left on. An Admin Console key granted only log categories does not include the single compliance `read` scope that the older emailed key had for that stateful endpoint. With `fetchProjects` set to `false`, Worklytics skips `/projects` and still requests the logs.
+
+If `fetchProjects` stays on, the projects status code decides whether the fetched window advances:
+
+- **404:** the reader records it and continues. The projects job counts as success with zero items, the log fetch runs, and the window is marked complete. Usage data is stored. Project-creation items are missing, and the job log has a severe "not retryable" line. The counter `VENDOR_EXCEPTION_NOT_FOUND` means the usage data is fine.
+- **403:** the projects job fails. The log fetch can still store items, but the combined fetch is a failure, so the window is not marked fetched. Later runs retry the same range, and the connection stays in a failed-fetch state. The counter `VENDOR_ERROR-FORBIDDEN` means the window will not advance until `fetchProjects` is `false` or the key can read `/projects`.
+
+A key without **Conversation messages** also fails `CONVERSATION_MESSAGE` log fetches, and that failure drops the usage data.
+
+## Legacy Instructions: email OpenAI to activate the compliance scope
+
+OpenAI's [ChatGPT Enterprise and Edu release notes](https://help.openai.com/en/articles/10128477-chatgpt-enterprise-and-edu-release-notes) for July 16, 2026 introduced workspace Admin keys under **Credentials → Admin keys** (group management, Spend Controls, cost reporting, and analytics). Current Compliance Platform documentation uses those Admin keys for compliance access. The July 16 note does not name compliance permissions; treat the Admin Console steps above as the current procedure, and these steps as the earlier one.
+
+These steps were the procedure in this file as of August 2025: create a Platform API key, then email OpenAI so they grant a single compliance `read` scope. A key already provisioned this way still matches the current Worklytics fetch, including `/projects`, and remains a valid fallback.
+
+1 - Create a new [OpenAI API Platform Portal](https://platform.openai.com/api-keys) key on Settings -> Default Project | All Permissions
+  - Note that this must be a new key. Once the Compliance API scopes are granted, all other scopes are revoked.
+  - Select the organization that corresponds to the administered workspace. Skip the owner's personal organization.
+  - Reminder: this key can only be viewed/copied once.
+2 - Copy the key immediately - you won't see it again; then paste it as the `${path_to_instance_parameters}ACCESS_TOKEN` parameter value in the proxy's Secret Manager.
+3 - Send an email to [support@openai.com](mailto:support@openai.com) with:
   - (1) the last 4 digits of the API key
   - (2) the Key Name
   - (3) the Created By Name, and
   - (4) the requested scope (`read`)
-ChatGPT team will verify the key and grant the requested Compliance API scopes
-
-4. After your administrator deploys the Psoxy instance (`terraform apply`), follow the `TODO 3 - connect chatgpt-enterprise in Worklytics.md` file generated in your Terraform working directory. That file provides the **Psoxy Base URL** (your proxy/function endpoint) and **Bucket Name** (the async output bucket where sanitized API responses are stored), which you must enter in the Worklytics connector settings, along with your ChatGPT Enterprise **Workspace Id**.
-
+ChatGPT team will verify the key and grant the requested Compliance API scopes.
