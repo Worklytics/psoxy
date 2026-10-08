@@ -214,14 +214,16 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         Collection<String> PII = Arrays.asList(
                 "octocat",
                 "13968776",
-                "some-business"
+                "some-business",
+                "saml-nameid-value",
+                "saml-username-value"
         );
 
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, "octocat", "13968776");
+        assertPseudonymized(sanitized, "octocat", "13968776", "saml-nameid-value", "saml-username-value");
 
         assertRedacted(sanitized,
                 "Update README.md",
@@ -248,14 +250,16 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         Collection<String> PII = Arrays.asList(
             "octocat",
             "13968776",
-            "some-business"
+            "some-business",
+            "saml-nameid-value",
+            "saml-username-value"
         );
 
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, "octocat", "13968776");
+        assertPseudonymized(sanitized, "octocat", "13968776", "saml-nameid-value", "saml-username-value");
 
         assertRedacted(sanitized,
             "Update README.md",
