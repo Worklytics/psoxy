@@ -156,6 +156,34 @@ class RegexExtractAiAttributionAugmentTest {
     }
 
     @Test
+    void commitList_gmailCoAuthor_doesNotClassifyAsOtherAi() {
+        List<Map<String, Object>> commits = List.of(
+            commit("gmail", "fix: typo\n\nCo-Authored-By: Jane <jane@gmail.com>"));
+
+        augmentProcessor.applyAugments(List.of(commitMessageAugment), commits);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> meta = (Map<String, Object>) ((Map<?, ?>) commits.get(0).get("commit"))
+            .get("+message:regexExtract");
+        assertEquals("fix", meta.get("commitType"));
+        assertFalse(meta.containsKey("aiAssistPlatform"));
+    }
+
+    @Test
+    void commitList_unknownAiBotCoAuthor_classifiedAsOtherAi() {
+        List<Map<String, Object>> commits = List.of(
+            commit("other-bot", "feat: assist\n\nCo-Authored-By: Demo Bot <bot@corp.example>"));
+
+        augmentProcessor.applyAugments(List.of(commitMessageAugment), commits);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> meta = (Map<String, Object>) ((Map<?, ?>) commits.get(0).get("commit"))
+            .get("+message:regexExtract");
+        assertEquals("Other AI", meta.get("aiAssistPlatform"));
+        assertEquals("feature", meta.get("commitType"));
+    }
+
+    @Test
     void commitList_noSignals_omitsAugmentProperty() {
         List<Map<String, Object>> commits = List.of(
             commit("plain", "update readme"));

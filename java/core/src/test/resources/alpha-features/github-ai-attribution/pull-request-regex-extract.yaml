@@ -36,7 +36,8 @@ extractions:
       value: "Copilot"
     - regex: "(?i)Co-Authored-By:\\s*(?:GitHub )?Copilot"
       value: "Copilot"
-    - regex: "(?i)Co-Authored-By:\\s*[^\\n<]+<[^>]*(?:bot|ai)[^>]*>"
+    # Word-boundary bot/ai inside the address (avoids false positives like gmail.com).
+    - regex: "(?i)Co-Authored-By:\\s*[^\\n<]+<[^>]*\\b(?:bot|ai)\\b[^>]*>"
       value: "Other AI"
   aiAssistModel:
     - regex: "(?i)model:\\s*([\\w./+-]+)"
