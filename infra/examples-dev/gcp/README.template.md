@@ -99,7 +99,7 @@ terraform plan
 terraform apply
 ```
 
-`terraform apply` still writes the `TODO *.md` instructions when `todos_as_local_files` is true (the default). `./generate-todos.sh` writes the same files from Terraform outputs and asks before overwriting one that already exists. The `local_file` resources are deprecated and will be removed in 0.8.
+When `todos_as_local_files` is true (the default), `terraform apply` writes the `TODO *.md` instructions and test scripts from `todos.tf`. The modules are called with that flag false, so they do not write the same files. `./generate-todos.sh` writes the same markdown from Terraform outputs and asks before overwriting a file that already exists. The `local_file` resources are deprecated and will be removed in 0.8.
 
 9. The above steps have created or modified various files that you should commit a code repository or otherwise preserve. In particular `terraform.tfvars`, `main.tf`, `terraform.tfstate` (if you ran `terraform` locally) and `.terraform.lock.hcl` should be preserved. Please do `git add` for each and then `git commit` to save your changes.
 

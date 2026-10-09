@@ -515,7 +515,9 @@ Then, based on your configuration, these are some example test calls you can try
 ```shell
 ${local.command_cli_call} --method POST \
  -u ${local.proxy_endpoint_url} \
+%{ if local.signing_key_id != null ~}
  --signing-key "gcp-kms:${local.signing_key_id}" \
+%{ endif ~}
  --identity-issuer ${local.proxy_endpoint_url} \
  --identity-subject '${var.example_identity}' \
  --body '${coalesce(var.example_payload, "{\"test\": \"body\"}")}' 
@@ -543,6 +545,8 @@ Contact support@worklytics.co for assistance modifying the rules as needed.
 EOT
 }
 
+# DEPRECATED: this local_file test script is deprecated and will be removed in 0.8.
+# Example todos.tf writes the same file from the test_script_files output.
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
@@ -592,6 +596,13 @@ output "test_script_filename" {
 output "test_script" {
   # Do not interpolate local_file.test_script (content replace then deletes the file).
   value = var.todos_as_local_files ? local.test_script_filename : null
+}
+
+output "test_script_files" {
+  description = "Test script filename => content. Independent of the local_file resource, so a root module can write the file when todos_as_local_files is false."
+  value = {
+    (local.test_script_filename) = local.test_script
+  }
 }
 
 output "output_sanitized_bucket_id" {

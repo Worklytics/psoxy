@@ -42,10 +42,8 @@ jobs:
           VERSION=$(xmllint --xpath "string(//*[local-name()='revision'])" pom.xml)
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
-          mvn clean -f pom.xml
-          mvn package install -f "gateway-core/pom.xml" -Dmaven.test.skip=true
-          mvn package install -f "core/pom.xml" -Dmaven.test.skip=true
-          mvn package -f "impl/cmd-line/pom.xml"
+          # Reactor build. Packaging impl/cmd-line alone resolves psoxy-core from Central.
+          mvn -f pom.xml clean package -pl impl/cmd-line -am -Dmaven.test.skip=true
       - name: Test processing with CLI
         working-directory: java/impl/cmd-line
         run: |

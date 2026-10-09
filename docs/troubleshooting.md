@@ -80,13 +80,11 @@ If you want to go step-by-step, you can run the following commands:
 
 ```bash
 # from the root of your checkout of the repository
-cd java/gateway-core
-mvn package install
-cd ../core
-mvn package install
-cd ../impl/aws
-mvn package
+cd java
+mvn clean package -pl impl/aws -am
 ```
+
+`psoxy-core` is not published to Maven Central. Building `java/impl/aws/pom.xml` (or `gcp`, or `cmd-line`) on its own looks there and fails with `Could not find artifact co.worklytics.psoxy:psoxy-core`. `-pl impl/aws -am` builds it from this repo in the same Maven run.
 
 Some problems we've seen:
 

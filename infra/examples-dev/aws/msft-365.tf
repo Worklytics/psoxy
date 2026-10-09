@@ -2,7 +2,7 @@
 
 module "worklytics_connectors_msft_365" {
   source = "../../modules/worklytics-connectors-msft-365"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-msft-365?ref=rc-v0.7.1"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-msft-365?ref=v0.7.1"
 
   msft_365_connector_settings = var.msft_365_connector_settings
 
@@ -20,7 +20,7 @@ module "worklytics_connectors_msft_365" {
   msft_teams_example_call_record_guid        = var.msft_teams_example_call_record_guid
   msft_connector_app_object_id               = var.msft_connector_app_object_id
   msft_teams_example_online_meeting_join_url = var.msft_teams_example_online_meeting_join_url
-  todos_as_local_files                       = var.todos_as_local_files
+  todos_as_local_files                       = false # root todos.tf writes these files
   todo_step                                  = 1
 }
 
@@ -52,7 +52,7 @@ module "cognito_identity_pool" {
   count = local.msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled
 
   source = "../../modules/aws-cognito-pool"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-cognito-pool?ref=rc-v0.7.1"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-cognito-pool?ref=v0.7.1"
 
   developer_provider_name = local.developer_provider_name
   name                    = "${local.env_qualifier}-azure-ad-federation"
@@ -75,7 +75,7 @@ module "cognito_identity" {
   count = local.msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled
 
   source = "../../modules/aws-cognito-identity-cli"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-cognito-identity-cli?ref=rc-v0.7.1"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-cognito-identity-cli?ref=v0.7.1"
 
 
   aws_region       = data.aws_region.current.region
@@ -113,7 +113,7 @@ module "msft_connection_auth_federation" {
   for_each = local.provision_entraid_apps ? local.enabled_to_entraid_object : local.shared_to_entraid_object
 
   source = "../../modules/azuread-federated-credentials"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=rc-v0.7.1"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=v0.7.1"
 
   application_id = each.value.connector_id
   display_name   = "${local.env_qualifier}AccessFromAWS"
