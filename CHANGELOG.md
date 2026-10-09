@@ -7,6 +7,8 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Unreleased
 
+- `aws`: new deployments name the caller IAM role `*SanitizedDataAccessor` instead of `*Caller`. Existing deployments retain the legacy role name via lifecycle `ignore_changes` until 1.0.
+
 ## [0.7.1](https://github.com/Worklytics/psoxy/releases/tag/v0.7.1)
 - `aws`: VPC example `vpc.tf` improved, public/private segmentation and security groups.
 - `chatgpt-enterprise`: improved documentation re setup instructions.
