@@ -17,7 +17,9 @@
 */terraform.tfstate**
 */.terraform.tfstate.lock.info
 */.terraform.lock.hcl
-*/TODO*
+# Generated instruction files ("TODO 1 - setup asana.md"). The space is required so this
+# does not also ignore todos.tf on case-insensitive checkouts.
+*/TODO *
 */test*
 
 

@@ -287,6 +287,12 @@ endpoints:
           - "$[?(@.actor.type =~ /account_user/i || @.message.author.type == 'user' || @.message.author.role == 'user')].message.annotations[*].quote_text"
           - "$.message.content.quote"
           - "$.event_details.prompt_text"
+          - "$.event_details.response_text"
+          - "$.input.query"
+          - "$.output[*].display_title"
+          - "$.event_details.invoker.user_message_text"
+          - "$.event_details.text"
+          - "$.event_details.release_description"
         keywords:
           - "generate image"
           - "create image"
@@ -420,18 +426,34 @@ endpoints:
       properties:
         actor:
           $ref: "#/definitions/Actor"
+        app_id:
+          type: "string"
+        app_name:
+          type: "string"
+        app_type:
+          type: "string"
         client_id:
           type: "string"
         conversation:
           $ref: "#/definitions/ConversationRef"
+        conversation_id:
+          type: "string"
         event_details:
-          $ref: "#/definitions/CodexEventDetails"
+          $ref: "#/definitions/AnyLogEventDetails"
         event_id:
           type: "string"
         event_type:
           type: "string"
+        input:
+          $ref: "#/definitions/AppInput"
+        log_type:
+          type: "string"
         message:
           $ref: "#/definitions/LogMessage"
+        output:
+          type: "array"
+          items:
+            $ref: "#/definitions/AppOutputItem"
         principal:
           $ref: "#/definitions/Principal"
         timestamp:
@@ -514,12 +536,19 @@ definitions:
   Actor:
     type: "object"
     properties:
+      agent_runtime:
+        $ref: "#/definitions/AgentRuntime"
       type:
         type: "string"
       user_email:
         type: "string"
       user_id:
         type: "string"
+  AgentRuntime:
+    type: "object"
+    properties:
+      delegator:
+        $ref: "#/definitions/Actor"
   Annotation:
     type: "object"
     properties:
@@ -528,6 +557,89 @@ definitions:
       quote_text:
         type: "string"
       type:
+        type: "string"
+  AnyLogEventDetails:
+    type: "object"
+    properties:
+      access_method:
+        type: "string"
+      access_token_id:
+        type: "string"
+      access_token_name:
+        type: "string"
+      agent_id:
+        type: "string"
+      call_id:
+        type: "string"
+      connector_id:
+        type: "string"
+      created_by_user_id:
+        type: "string"
+      detail_type:
+        type: "string"
+      environment_id:
+        type: "string"
+      expires_at:
+        type: "string"
+      failure_message:
+        type: "string"
+      invoker:
+        $ref: "#/definitions/LeanInvoker"
+      memory_path:
+        type: "string"
+      model:
+        type: "string"
+      plugin_creator_account_user_id:
+        type: "string"
+      plugin_display_name:
+        type: "string"
+      plugin_id:
+        type: "string"
+      plugin_name:
+        type: "string"
+      plugin_release_id:
+        type: "string"
+      plugin_scope:
+        type: "string"
+      plugin_version:
+        type: "string"
+      prompt_text:
+        type: "string"
+      reasoning_effort:
+        type: "string"
+      response_text:
+        type: "string"
+      run_id:
+        type: "string"
+      service_tier:
+        type: "string"
+      session_id:
+        type: "string"
+      skill_id:
+        type: "string"
+      status:
+        type: "string"
+      text:
+        type: "string"
+      token_usage:
+        $ref: "#/definitions/TokenUsage"
+      tool_name:
+        type: "string"
+      tool_type:
+        type: "string"
+      trigger_id:
+        type: "string"
+      turn_id:
+        type: "string"
+  AppInput:
+    type: "object"
+    properties:
+      query:
+        type: "string"
+  AppOutputItem:
+    type: "object"
+    properties:
+      display_title:
         type: "string"
   Author:
     type: "object"
@@ -561,57 +673,6 @@ definitions:
     type: "object"
     properties:
       id:
-        type: "string"
-  CodexEventDetails:
-    type: "object"
-    properties:
-      access_token_id:
-        type: "string"
-      access_token_name:
-        type: "string"
-      call_id:
-        type: "string"
-      created_by_user_id:
-        type: "string"
-      detail_type:
-        type: "string"
-      environment_id:
-        type: "string"
-      expires_at:
-        type: "string"
-      model:
-        type: "string"
-      plugin_creator_account_user_id:
-        type: "string"
-      plugin_display_name:
-        type: "string"
-      plugin_id:
-        type: "string"
-      plugin_name:
-        type: "string"
-      plugin_release_id:
-        type: "string"
-      plugin_scope:
-        type: "string"
-      plugin_version:
-        type: "string"
-      prompt_text:
-        type: "string"
-      reasoning_effort:
-        type: "string"
-      service_tier:
-        type: "string"
-      session_id:
-        type: "string"
-      status:
-        type: "string"
-      token_usage:
-        $ref: "#/definitions/TokenUsage"
-      tool_name:
-        type: "string"
-      tool_type:
-        type: "string"
-      turn_id:
         type: "string"
   Content:
     type: "object"
@@ -694,6 +755,13 @@ definitions:
       prompt:
         type: "string"
       schedule:
+        type: "string"
+  LeanInvoker:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+      user_message_text:
         type: "string"
   LogFile:
     type: "object"
