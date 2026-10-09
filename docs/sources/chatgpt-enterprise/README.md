@@ -4,6 +4,8 @@
 
 **Availability:** Beta
 
+***YMMV.*** *ChatGPT's APIs, like many other AI platforms, have been evolving rapidly. Our instructions may be out of date, or may reflect the behavior of a different subscription, tenant, or tier than yours. Please let us know if you encounter an issue.*
+
 ## ChatGPT Enterprise via Compliance API
 
 This API allows ChatGPT Enterprise administrators to observe and remove data from their ChatGPT Enterprise workspaces. It is intended for compliance, security, and data privacy use.  The get endpoints provide time-indexed access to ChatGPT Enterprise data.
@@ -11,23 +13,41 @@ Administrators can use it to retrieve this data for archival or Data Loss Preven
 
 This API is designed for regularly downloading data diffs to synchronize an offline database for data compliance, rather than mass export. The initial data sync will take longer, but subsequent syncs will be faster as only the diffs need to be downloaded.
 
-Owners can generate an API key in the [OpenAI API Platform Portal](https://platform.openai.com/api-keys).
-Note that the correct Organization must be selected when creating a key, corresponding to the  administered workspace.
-Do not select the owner's personal organization.
+A workspace **Owner** creates the key at [https://admin.openai.com](https://admin.openai.com): select the ChatGPT workspace, then **Credentials → Admin keys → Create new admin key**. Choose **Custom** and set **Conversation messages** to **Read**. If the workspace uses Codex, also set **Codex logs** to **Read**. See [Managing Admin keys in Admin Console](https://help.openai.com/en/articles/20001407-managing-admin-keys-in-admin-console) and the [Admin API reference](https://chatgpt.com/public/admin/api-reference#tag/Introduction) (authorization is in the Introduction). Only an Owner can grant Conversation messages. An Admin can grant categories such as audit, authentication, or app logs; those alone do not include conversation usage.
+
+**Admin keys** are available on ChatGPT Enterprise, Edu, and Healthcare workspaces. If **Credentials** lists only **Access Tokens**, this workspace does not have Admin keys. An Access Token cannot authorize these compliance calls. Confirm the top-left selector is the ChatGPT workspace, not the organization, and that you are an Owner of that workspace.
+
+That Admin key is a different credential from a [Platform API key](https://platform.openai.com/api-keys) and from an API Platform organization Admin key (those call `/v1/organization/…`).
 
 **Note on Message Authorship:** The specific encoding of `bot` vs `user` messages in the compliance API is currently undocumented by OpenAI. Psoxy rule datasets support the observed `author.type` field and the earlier best-guess `author.role` field for conditional filtering algorithms.
 
 **Note on legacy `conversations` endpoints:** OpenAI deprecated the synchronous `/conversations` and `/conversations/{CONVERSATION_ID}/messages` compliance API paths in favor of the `/logs` API (see [Example Rules](chatgpt-enterprise.yaml)). OpenAI reports those stateful routes were **removed on June 5, 2026**; confirm current status in [OpenAI's Compliance Platform documentation](https://help.openai.com/en/articles/9261474). Psoxy rules still allow the legacy paths so already-deployed proxies do not reject leftover traffic; new integrations should use the `/logs` endpoints only.
 
+Psoxy allow-lists the compliance paths below and sanitizes whatever Worklytics requests. It does not call ChatGPT on its own.
+
+For a Psoxy connection (a proxy output bucket is set), Worklytics reads usage from `GET /v1/compliance/workspaces/{workspaceId}/logs` and `GET .../logs/{id}`, with event types `CONVERSATION_MESSAGE` and `CODEX_LOG`. It also requests `GET .../projects` on every fetch unless the connection's `fetchProjects` option is `false`. `/projects` supplies project-creation items only.
+
 ## Instructions to Connect
 
 1. Add `chatgpt-enterprise` to `enabled_connectors` in `terraform.tfvars`, then run `terraform apply`.
-2. Complete source authorization per the `TODO 1 - chatgpt-enterprise` file (OpenAI Compliance API key; see [enterprise instructions template](https://github.com/Worklytics/psoxy/blob/main/infra/modules/worklytics-connector-specs/docs/chatgpt/enterprise/instructions.tftpl)).
+2. Complete source authorization per the `TODO 1 - chatgpt-enterprise` file. A workspace Owner opens [https://admin.openai.com](https://admin.openai.com), selects the ChatGPT workspace, then **Credentials → Admin keys → Create new admin key**. Choose **Custom**, set **Conversation messages** to **Read**, and set **Codex logs** to **Read** if the workspace uses Codex. Paste the secret as `PSOXY_CHATGPT_ENTERPRISE_ACCESS_TOKEN`. The same steps are in that TODO (generated from the [enterprise instructions template](https://github.com/Worklytics/psoxy/blob/main/infra/modules/worklytics-connector-specs/docs/chatgpt/enterprise/instructions.tftpl)).
 3. Run the proxy health checks in the `TODO 2 - chatgpt-enterprise` file generated by `terraform apply`.
 4. Create the **ChatGPT Enterprise via Psoxy** connection in Worklytics; see the `TODO 3 - connect chatgpt-enterprise in Worklytics.md` file generated by `terraform apply`. That file lists the values to enter in Worklytics, including:
    - **Psoxy Base URL** — your deployed proxy/function endpoint URL
    - **Bucket Name** — the async output bucket where sanitized API responses are written (this connector uses async processing)
-   - **Workspace Id** — your ChatGPT Enterprise workspace id
+   - **Workspace Id** — your ChatGPT Enterprise workspace id (ChatGPT Admin console, https://chatgpt.com/admin, workspace settings)
+5. Set this connection's fetch option `fetchProjects` to `false`.
+
+`/logs` is where conversation and Codex usage land. `/projects` runs first when `fetchProjects` is left on, and the log fetch waits for that job. An Admin key granted only log categories often cannot read that stateful endpoint. Leaving the option on:
+
+- **404:** the reader records it and continues. The projects job counts as success with zero items, the log fetch runs, and the window is marked complete. Usage data works. Project-creation items are missing, and the job log has a severe "not retryable" line. `VENDOR_EXCEPTION_NOT_FOUND` means the usage data is fine.
+- **403:** that counter fails the projects job. The log fetch can still store items, but the combined fetch is a failure, so the window is not marked fetched. Later runs retry the same range, and the connection stays in a failed-fetch state. `VENDOR_ERROR-FORBIDDEN` means the window will not advance until `fetchProjects` is `false` or the key can read `/projects`.
+
+## Links
+
+- [Admin API reference](https://chatgpt.com/public/admin/api-reference#tag/Introduction) — authorization and compliance endpoints
+- [Managing Admin keys in Admin Console](https://help.openai.com/en/articles/20001407-managing-admin-keys-in-admin-console)
+- [OpenAI Compliance Platform](https://help.openai.com/en/articles/9261474-openai-compliance-platform-for-enterprise-and-edu-customers)
 
 ## Examples
 

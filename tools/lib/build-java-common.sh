@@ -4,8 +4,8 @@
 # TODO (breaking change): unify CLI entry points — today argument order differs:
 #   - psoxy-package/build.sh:  build.sh [-sf] <JAVA_SOURCE_ROOT> <IMPLEMENTATION>
 #   - tools/build.sh:          build.sh [-qd] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>
-# TODO (breaking change): unify Maven invocations — psoxy-package uses sequential module
-#   builds; tools/build.sh uses the parent-POM reactor (-pl/-am). Align on one approach.
+# Maven: both entry points build via the parent reactor (-pl impl/<platform> -am).
+# Do not invoke impl/<platform>/pom.xml on its own; psoxy-core is not on Maven Central.
 # TODO (breaking change): unify deployment artifact path — psoxy-package expects
 #   impl/<platform>/target/psoxy-<platform>-<version>.jar (Terraform/Lambda upload);
 #   tools/build.sh with -Pdistribution reports impl/<platform>/target/deployment/*.jar.

@@ -384,12 +384,8 @@ resource "local_file" "todo_test_gcp_psoxy_bulk" {
   content  = local.test_todo_content
 }
 
-resource "local_file" "test_script" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename        = local.test_script_filename
-  file_permission = "755"
-  content         = <<EOT
+locals {
+  test_script = <<EOT
 #!/bin/bash
 FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
 BLUE='\e[0;34m'
@@ -442,7 +438,16 @@ done
 
 exit $FAILED
 EOT
+}
 
+# DEPRECATED: this local_file test script is deprecated and will be removed in 0.8.
+# Example todos.tf writes the same file from the test_script_files output.
+resource "local_file" "test_script" {
+  count = var.todos_as_local_files ? 1 : 0
+
+  filename        = local.test_script_filename
+  file_permission = "755"
+  content         = local.test_script
 }
 
 output "instance_id" {
@@ -491,6 +496,17 @@ output "test_script_filename" {
 output "test_script" {
   # Do not interpolate local_file.test_script (content replace then deletes the file).
   value = var.todos_as_local_files ? local.test_script_filename : null
+}
+
+output "test_script_content" {
+  value = local.test_script
+}
+
+output "test_script_files" {
+  description = "Test script filename => content. Independent of the local_file resource, so a root module can write the file when todos_as_local_files is false."
+  value = {
+    (local.test_script_filename) = local.test_script
+  }
 }
 
 output "todo" {

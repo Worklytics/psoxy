@@ -52,11 +52,11 @@ output "todo_filename" {
   value = local.todo_filename
 }
 
-# Keep this tied to the local_file resource. worklytics-connectors-msft-365 reads it so the
-# external-todo file is applied after this one and can overwrite the same path. Null when local
-# files are off, matching previous releases.
+# Do not interpolate local_file.todo (content replace then deletes the file).
+# worklytics-connectors-msft-365 reads todo_filename and turns this local_file off when it
+# writes the same path itself.
 output "filename" {
-  value = var.todos_as_local_files ? local_file.todo[0].filename : null
+  value = var.todos_as_local_files ? local.todo_filename : null
 }
 
 output "todo_files" {
