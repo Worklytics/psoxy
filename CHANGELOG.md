@@ -7,7 +7,6 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Unreleased
 
-- `aws`: new deployments name the caller IAM role `*SanitizedDataAccessor` instead of `*Caller`. Existing deployments retain the legacy role name via lifecycle `ignore_changes` until 1.0.
 
 ## [0.7.1](https://github.com/Worklytics/psoxy/releases/tag/v0.7.1)
 - `aws`: VPC example `vpc.tf` improved, public/private segmentation and security groups.
@@ -25,6 +24,8 @@ Changes to be including in future/planned release notes will be added here.
 - `salesforce`:
   - forward `Sforce-Limit-Info` and `Sforce-Query-Options` request headers to Salesforce on Task/Event/composite/query endpoints. Lets connections set a smaller `batchSize` via `Sforce-Query-Options` to mitigate `SocketTimeoutException`s on large query responses; previously these headers were silently dropped.
   - `salesforce`: removed the `/composite` (Task+Event batch) endpoint. It wasn't in use; Task and Event are already fetched via separate `queryAll` endpoints, and the combined-batch response made error handling for partial failures unreliable. The unrelated `/composite/sobjects/Account` (bulk-by-ID account lookup) endpoint is unaffected.
+- `github`, `github-copilot`, and `github-enterprise-server`: pseudonymize `external_identity_nameid` and `external_identity_username` on organization audit-log events, which seems to appear on some audit log entries.
+- `aws`: new deployments name the caller IAM role `*SanitizedDataAccessor` instead of `*Caller`. Existing deployments retain the legacy role name via lifecycle `ignore_changes` until 1.0.
 
 
 ## [0.7.0](https://github.com/Worklytics/psoxy/releases/tag/v0.7.0)

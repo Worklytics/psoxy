@@ -35,6 +35,8 @@
     "action":"pull_request.merge",
     "actor":"t~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM",
     "actor_id":"t~S3Nh4slc2XnLp5Qy1CD-pQew9-j0cePbX3U7-DE56Co",
+    "external_identity_nameid":"t~OUqLsq7V4ujGZ1IwCOXlMbgFb-q24p_6kocDJ5HIeAU",
+    "external_identity_username":"t~Ov6uY_710tJWJpRJ1ZKtX29ZM6Z1B0b2sVXRvqpFwJw",
     "actor_location":{
       "country_code":"ES"
     },

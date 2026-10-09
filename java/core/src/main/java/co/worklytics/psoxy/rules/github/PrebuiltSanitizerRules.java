@@ -268,6 +268,8 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..user_id")
                     .jsonPath("$..started_by")
                     .jsonPath("$..started_by_id")
+                    .jsonPath("$..external_identity_nameid")
+                    .jsonPath("$..external_identity_username")
                     .build())
             .build();
 
@@ -295,6 +297,8 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..user_id")
                     .jsonPath("$..started_by")
                     .jsonPath("$..started_by_id")
+                    .jsonPath("$..external_identity_nameid")
+                    .jsonPath("$..external_identity_username")
                     .build())
             .build();
 

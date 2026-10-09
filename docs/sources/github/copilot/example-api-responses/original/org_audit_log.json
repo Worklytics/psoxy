@@ -45,6 +45,8 @@
     "action": "pull_request.merge",
     "actor": "octocat",
     "actor_id": 13968776,
+    "external_identity_nameid": "saml-nameid-value",
+    "external_identity_username": "saml-username-value",
     "actor_location": {
       "country_code": "ES"
     },
