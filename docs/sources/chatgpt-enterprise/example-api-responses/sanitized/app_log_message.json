@@ -1,0 +1,22 @@
+{
+  "event_id":"31c1b9b0-5b2d-4c2a-9e11-32d7b0c3e9aa",
+  "type":"APP_LOG",
+  "timestamp":"2025-11-15T20:12:24.551203Z",
+  "principal":{
+    "id":"t~q4ZbwP7oZewMjKQPZfbr4a4vKfoRN-EBmeNkEBtydb4",
+    "type":"CHATGPT_WORKSPACE"
+  },
+  "actor":{
+    "type":"ACCOUNT_USER",
+    "user_id":"t~fUVTKRZ-Frlwhl0JUxDDXyr8lesv-i5ibDzD8vPzGsM",
+    "user_email":"t~lYdYuL_UqllXzNt0J3F59AjPRyBJzXQ8eKaypkZ8Iho@example.org"
+  },
+  "app_id":"conn-8f92d7c1",
+  "app_name":"gdrive",
+  "app_type":"SERVICE",
+  "conversation_id":"c-7cda9b2e",
+  "log_type":"request",
+  "input":{
+    "query":"{\"length\":34,\"word_count\":4}"
+  }
+}
