@@ -4,7 +4,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import com.avaulta.gateway.resources.ResourceService;
-import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
+import com.avaulta.gateway.rules.augments.TextMetadataProcessor;
 
 import co.worklytics.psoxy.gateway.impl.CompositeResourceService;
 import co.worklytics.psoxy.gateway.impl.LocalFileResourceService;
@@ -41,7 +41,7 @@ public class ResourceServiceBindingsModule {
 
     @Provides
     @Singleton
-    static SentenceMetadataProcessor sentenceMetadataProcessor(@Named("OpenNlp") ResourceService openNlpResourceService) {
-        return new SentenceMetadataProcessor(openNlpResourceService);
+    static TextMetadataProcessor textMetadataProcessor(@Named("OpenNlp") ResourceService openNlpResourceService) {
+        return new TextMetadataProcessor(openNlpResourceService);
     }
 }

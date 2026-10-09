@@ -538,6 +538,6 @@ variable "connector_settings" {
 
 variable "enable_remote_resources" {
   type        = bool
-  description = "**beta** Load rules / OpenNLP models from the artifacts GCS bucket at runtime. Default false; not required for genMetadata (Vertex). Set true only if rules are too large for Secret Manager / env, or you use sentenceMetadata."
+  description = "**beta** Load rules / OpenNLP models from the artifacts GCS bucket at runtime. Default false; not required for genMetadata (Vertex). Set true only if rules are too large for Secret Manager / env, or you use textMetadata."
   default     = false
 }

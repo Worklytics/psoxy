@@ -59,6 +59,8 @@
   * [GCP External Application Load Balancer (ALB) + Cloud Armor](development/gcp-external-alb.md)
   * [Alpha Features](development/alpha-features/README.md)
     * [genMetadata Augment](development/alpha-features/gen-metadata-augment.md)
+    * [Text Metadata Augments](development/alpha-features/text-metadata-augments.md)
+      * [Text Metadata Augment](development/alpha-features/text-metadata-augment.md)
     * [Webhook Collectors](development/alpha-features/webhook-collectors.md)
 * [Data Sources](sources/README.md)
   * [Anthropic](sources/anthropic/README.md)

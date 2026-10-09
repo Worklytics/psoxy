@@ -33,7 +33,7 @@ import java.util.TreeMap;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Augment.Classify.class, name = "classify"),
     @JsonSubTypes.Type(value = Augment.TextDigest.class, name = "textDigest"),
-    @JsonSubTypes.Type(value = Augment.SentenceMetadata.class, name = "sentenceMetadata"),
+    @JsonSubTypes.Type(value = Augment.TextMetadata.class, name = "textMetadata"),
     @JsonSubTypes.Type(value = Augment.GenMetadata.class, name = "genMetadata"),
 })
 @SuperBuilder(toBuilder = true)
@@ -195,7 +195,7 @@ public abstract class Augment {
     @AllArgsConstructor
     @Getter
     @EqualsAndHashCode(callSuper = true)
-    public static class SentenceMetadata extends Augment {
+    public static class TextMetadata extends Augment {
 
         static final List<String> DEFAULT_HEDGE_WORDS =
             List.of("maybe", "perhaps", "kind", "sort", "probably", "somewhat", "possibly");
@@ -222,12 +222,12 @@ public abstract class Augment {
 
         @Override
         public String getFunctionName() {
-            return "sentenceMetadata";
+            return "textMetadata";
         }
 
         @Override
         public Object compute(Object input) {
-            // Computed at runtime by AugmentProcessor via injected SentenceMetadataProcessor.
+            // Computed at runtime by AugmentProcessor via injected TextMetadataProcessor.
             return null;
         }
 
