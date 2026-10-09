@@ -1,8 +1,10 @@
 package co.worklytics.psoxy;
 
+import java.util.Optional;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
+import co.worklytics.psoxy.gateway.DependencyConnectivityFailure;
 import lombok.extern.java.Log;
 
 /**
@@ -12,22 +14,24 @@ import lombok.extern.java.Log;
 @Log
 public class GcpWebhookCollectorRoute implements HttpFunction {
 
-    volatile GcpContainer container;
-
+    final GcpContainerStartup startup = new GcpContainerStartup();
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
-        injectDependenciesIfNeeded();
-        container.gcpWebhookCollectionHandler().handle(request, response);
-    }
-
-    void injectDependenciesIfNeeded() {
-        if (container == null) {
-            synchronized (this) {
-                if (container == null) {
-                    container = DaggerGcpContainer.create();
-                }
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
+        GcpContainer container = startup.getOrCreate(DaggerGcpContainer::create);
+        if (startup.failed()) {
+            startup.write(request, response);
+            return;
+        }
+        try {
+            container.gcpWebhookCollectionHandler().handle(request, response);
+        } catch (Throwable e) {
+            Optional<DependencyConnectivityFailure> failure = container.connectivityFailures().match(e);
+            if (failure.isEmpty()) {
+                throw e;
             }
+            GcpConfigStoreResponses.write(request, response, container.connectivityFailureResponses(),
+                    failure.get(), e, false);
         }
     }
 }

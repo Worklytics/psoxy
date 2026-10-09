@@ -95,6 +95,12 @@ Check CloudWatch Logs for the Lambda. A timeout in the log stream means the func
 
 The proxy times out in the INIT phase when Parameter Store, KMS, or the configured secret store (Secrets Manager or Vault) is not reachable.
 
+A health check against that failure returns **HTTP 503** with header `X-Psoxy-Error: CONFIG_STORE_UNREACHABLE` and a JSON body whose `error` field is the same code. `warningMessages` is one sentence, such as `Unable to reach SSM Parameter Store. Check the logs.` Search CloudWatch for `Error reading configuration from SSM` or `Error reading configuration from Secrets Manager`; the client error is only there. That response is also returned when class initialization itself failed to reach the configuration store, so the health check is not collapsed into a generic 500/502 from API Gateway. Connection failures to other dependencies use `DEPENDENT_SERVICE_UNREACHABLE` and a sentence such as `Unable to reach KMS. Check the logs.` The client error stays in CloudWatch.
+
+See [AWS troubleshooting](../troubleshooting.md#health-check-returns-503-config_store_unreachable).
+
+Some potential causes of this:
+
 - Private DNS is off, or the VPC does not have DNS resolution and DNS hostnames enabled, so `ssm.<region>.amazonaws.com` does not resolve to the endpoint.
 - The interface endpoint is not in the Lambda subnet, so it has no IP there.
 - The security group does not allow inbound TCP 443 from itself. Outbound HTTPS alone does not let the Lambda connect to the interface endpoint.

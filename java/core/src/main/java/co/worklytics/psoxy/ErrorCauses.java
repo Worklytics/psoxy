@@ -52,6 +52,22 @@ public enum ErrorCauses {
     NETWORK_EGRESS_BLOCKED,
 
     /**
+     * the proxy could not reach its configuration store (AWS SSM Parameter Store or Secrets Manager).
+     * On Lambda, this is usually a VPC without a reachable interface endpoint or NAT gateway for that
+     * service, or a security group that blocks HTTPS to it. Distinct from {@link #NETWORK_EGRESS_BLOCKED},
+     * which is an ambiguous timeout talking to the data source API.
+     */
+    CONFIG_STORE_UNREACHABLE,
+
+    /**
+     * the proxy could not connect to some service it depends on, and the failure was not identified
+     * as the configuration store. The response is a short sentence from the platform parser when
+     * it recognized the service, and tells the caller to check the logs. The client error itself
+     * is only in the logs.
+     */
+    DEPENDENT_SERVICE_UNREACHABLE,
+
+    /**
      * timed out waiting for a response from the source API after the connection was established
      */
     SOURCE_API_READ_TIMEOUT,

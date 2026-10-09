@@ -155,7 +155,10 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
             }
             throw new IllegalStateException(String.format("failed to get config value: %s", paramName), e);
         } catch (SdkClientException e) {
-            // transient IO related errors reading from SSM? can't reproduce exactly
+            // Client-side failure talking to SSM (DNS, connect timeout, connection refused).
+            // Typical when a Lambda in a VPC cannot reach the SSM interface endpoint or NAT.
+            // Health checks map this to CONFIG_STORE_UNREACHABLE; this line is what to search
+            // for in CloudWatch.
             log.log(Level.SEVERE, "Error reading configuration from SSM: " + e.getMessage(), e);
             throw e;
         }

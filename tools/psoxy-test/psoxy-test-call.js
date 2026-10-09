@@ -170,6 +170,19 @@ export default async function (options = {}) {
               '2) Target API is unreachable or experiencing connectivity issues. ' +
               'If using VPC connector, verify: VPC connector is active, CIDR range is correct, firewall allows egress, Cloud NAT is configured.';
             break;
+          case 'CONFIG_STORE_UNREACHABLE':
+            errorMessage =
+              'Configuration store unreachable: the function cannot reach its configuration service. ' +
+              'On AWS, add a reachable interface endpoint (or NAT) for SSM Parameter Store or Secrets Manager and allow HTTPS from the Lambda security group. ' +
+              'On GCP, a Cloud Function with VPC egress set to all traffic needs Private Google Access or Cloud NAT to reach Secret Manager. ' +
+              'Search logs for "Error reading configuration from SSM" or "Error reading configuration from Secret Manager".';
+            break;
+          case 'DEPENDENT_SERVICE_UNREACHABLE':
+            errorMessage =
+              'Failed to connect to a dependent service. This is below the application. ' +
+              'The response names that service in one sentence (SSM Parameter Store, Secrets Manager, Secret Manager, KMS, and similar). ' +
+              'Check the function logs for the client error.';
+            break;
         }
       } else if (result.headers['x-amzn-errortype']) {
         errorMessage += ` AWS ${result.headers['x-amzn-errortype']}`;

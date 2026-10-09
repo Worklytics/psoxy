@@ -18,8 +18,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.HealthCheckResult;
+import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ConnectivityFailureMatcher;
+import co.worklytics.psoxy.gateway.ConnectivityFailureResponses;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
@@ -62,6 +65,10 @@ public class HealthCheckRequestHandler {
     ProxyConstants proxyConstants;
     @Inject
     NetworkSecurityUtils networkSecurityUtils;
+    @Inject
+    ConnectivityFailureMatcher connectivityFailures;
+    @Inject
+    ConnectivityFailureResponses connectivityFailureResponses;
 
     volatile String piiSaltHash;
     private final Object $piiSaltHashLock = new Object[0];
@@ -87,6 +94,38 @@ public class HealthCheckRequestHandler {
     }
 
     private HttpEventResponse handle(HttpEventRequest request) {
+        try {
+            return buildHealthCheck(request);
+        } catch (Throwable e) {
+            Optional<HttpEventResponse> connectivityFailure = connectivityFailureResponses.toResponse(
+                    connectivityFailureResponses.callerIp(request), e, true, connectivityFailures);
+            if (connectivityFailure.isPresent()) {
+                return connectivityFailure.get();
+            }
+            if (e instanceof Error error) {
+                throw error;
+            }
+            if (e instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void rethrowIfConnectivityFailure(Throwable e) {
+        if (connectivityFailures.match(e).isEmpty()) {
+            return;
+        }
+        if (e instanceof Error error) {
+            throw error;
+        }
+        if (e instanceof RuntimeException runtimeException) {
+            throw runtimeException;
+        }
+        throw new RuntimeException(e);
+    }
+
+    private HttpEventResponse buildHealthCheck(HttpEventRequest request) {
 
         Set<String> missing = new HashSet<>();
 
@@ -98,6 +137,7 @@ public class HealthCheckRequestHandler {
                     .map(ConfigService.ConfigProperty::name)
                     .collect(Collectors.toSet()));
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             // will fail if sourceAuthStrategy is not set up properly
             logInDev(e.getMessage(), e);
             missing = new HashSet<>();
@@ -114,6 +154,7 @@ public class HealthCheckRequestHandler {
                 missing.add(ApiModeConfig.ApiModeConfigProperty.TARGET_HOST.name());
             }
         } catch (Throwable ignored) {
+            rethrowIfConnectivityFailure(ignored);
             logInDev("Failed to add TARGET_HOST info to health check", ignored);
         }
 
@@ -142,6 +183,7 @@ public class HealthCheckRequestHandler {
                 .map(Boolean::parseBoolean)
                 .ifPresent(healthCheckResult::pseudonymizeAppIds);
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to add pseudonymizeAppIds to health check", e);
         }
 
@@ -165,6 +207,7 @@ public class HealthCheckRequestHandler {
                                     .map(metadata -> metadata.getLastModifiedDate().orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))
                                 .orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))));
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to fill 'configPropertiesLastModified' on health check", e);
         }
 
@@ -172,6 +215,7 @@ public class HealthCheckRequestHandler {
             apiModeConfig.getSourceAuthStrategyIdentifier()
                     .ifPresent(healthCheckResult::sourceAuthStrategy);
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to add sourceAuthStrategy to health check", e);
         }
 
@@ -179,6 +223,7 @@ public class HealthCheckRequestHandler {
             config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE)
                     .ifPresent(healthCheckResult::sourceAuthGrantType);
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to add sourceAuthGrantType to health check", e);
         }
 
@@ -186,6 +231,7 @@ public class HealthCheckRequestHandler {
             config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME)
                     .ifPresent(healthCheckResult::bundleFilename);
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to add bundleFilename to health check", e);
         }
 
@@ -199,8 +245,10 @@ public class HealthCheckRequestHandler {
                 config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES)
                         .ifPresent(healthCheckResult::rules);
             } catch (Throwable ignored) {
+                rethrowIfConnectivityFailure(ignored);
             }
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to add rules to health check", e);
         }
 
@@ -214,6 +262,7 @@ public class HealthCheckRequestHandler {
         try {
             sourceAuthStrategy.get().validateConfigValues().forEach(healthCheckResult::warningMessage);
         } catch (Throwable e) {
+            rethrowIfConnectivityFailure(e);
             logInDev("Failed to add warnings from sourceAuthStrategy to health check", e);
         }
 

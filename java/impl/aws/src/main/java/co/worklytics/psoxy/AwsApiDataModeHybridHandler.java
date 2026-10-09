@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.Security;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.logging.Level;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,9 +23,11 @@ import com.newrelic.opentracing.aws.LambdaTracing;
 import io.opentracing.util.GlobalTracer;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
+import co.worklytics.psoxy.aws.LambdaContainerStartup;
 import co.worklytics.psoxy.aws.request.APIGatewayV1ProxyEventRequestAdapter;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
 import co.worklytics.psoxy.aws.request.LambdaEventUtils;
+import co.worklytics.psoxy.gateway.ConnectivityFailureResponses;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
@@ -53,7 +56,7 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
     static LambdaEventUtils lambdaEventUtils;
 
     static {
-        staticInit();
+        LambdaContainerStartup.initialize(AwsApiDataModeHybridHandler::staticInit);
     }
 
     private static void staticInit() {
@@ -74,6 +77,10 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context)
             throws IOException {
+        if (LambdaContainerStartup.stillFailed(AwsApiDataModeHybridHandler::staticInit)
+                && LambdaContainerStartup.writeIfStartupFailed(input, output)) {
+            return;
+        }
         // Read the full input stream into a tree
         JsonNode rootNode = lambdaEventUtils.read(input);
 
@@ -217,6 +224,12 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
             context.getLogger()
                     .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
+            ConnectivityFailureResponses responses = awsContainer.connectivityFailureResponses();
+            Optional<HttpEventResponse> connectivityFailure = responses.toResponse(
+                    responses.callerIp(request), e, false, awsContainer.connectivityFailures());
+            if (connectivityFailure.isPresent()) {
+                return Pair.of(false, connectivityFailure.get());
+            }
             return Pair.of(false, HttpEventResponse.builder()
                     .statusCode(500)
                     .body("Unknown error: " + e.getClass().getName())
