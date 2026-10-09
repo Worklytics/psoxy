@@ -7,6 +7,8 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Unreleased
 
+- `chatgpt-enterprise`: document ChatGPT Admin Console Admin keys (Conversation messages, plus Codex logs when Codex is used) as the compliance credential, and link the [Admin API reference](https://chatgpt.com/public/admin/api-reference#tag/Introduction). Tell customers to set the Worklytics fetch option `fetchProjects` to `false` so a 403 on `/projects` does not block `/logs`.
+
 ## [0.7.1](https://github.com/Worklytics/psoxy/releases/tag/v0.7.1)
 - TODO markdown and test scripts: `gcp-host`, `aws-host`, and the connector modules still create `local_file` copies when `todos_as_local_files` is true (the module default). The AWS and GCP examples now pass `false` into those modules and write every TODO and test script once, from `infra/examples-dev/{aws,gcp}/todos.tf`, when the example variable of the same name is true (still the default). `worklytics-connector-specs` does not emit files; TODO 1 content is already on the connector modules' `todo_files` outputs (generic connectors, Google Workspace, Microsoft 365). TODO 2 is the host module (including `test_script_files` for `test-*.sh` and `test-all.sh`). TODO 3 is the Worklytics connection module. `./generate-todos.sh` still writes the markdown from the `todo_files` output. These `local_file` resources are deprecated and will be removed in 0.8.
 
