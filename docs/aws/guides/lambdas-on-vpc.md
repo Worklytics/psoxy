@@ -102,7 +102,7 @@ The proxy times out in the INIT phase when Parameter Store, KMS, or the configur
 
 A timeout calling a data-source host (Google Calendar, Microsoft Graph, Slack, and so on), after INIT has succeeded, is the NAT path. The NAT gateway must sit in the public subnet (`0.0.0.0/0` to the internet gateway). The Lambda must sit in the private subnet (`0.0.0.0/0` to the NAT). Pointing the public subnet's default route at the NAT removes the internet gateway route, and the NAT itself cannot reach the internet.
 
-S3 reads and writes use the gateway endpoint on the private route table. Webhook collectors also need an `sqs` interface endpoint. `enable_gen_metadata` needs `bedrock-runtime`.
+S3 reads and writes use the gateway endpoint on the private route table. To keep webhook collector SQS calls or `enable_gen_metadata` Bedrock calls on PrivateLink rather than the NAT path, add `sqs` or `bedrock-runtime`, respectively.
 
 ## Switching back from using a VPC
 
