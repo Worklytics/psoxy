@@ -174,11 +174,10 @@ module "psoxy" {
   enable_remote_resources              = var.enable_remote_resources
 
 
-  #  vpc_config = {
-  #    vpc_id             = aws_default_vpc.default.id
-  #    security_group_ids = [aws_security_group.default.id]
-  #    subnet_ids         = [aws_default_subnet.default.id]
-  #  }
+  vpc_config = {
+    security_group_ids = [aws_security_group.default.id]
+    subnet_ids         = [aws_subnet.private.id]
+  }
 }
 
 ## Worklytics connection configuration

@@ -7,57 +7,10 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Unreleased
 
-- `chatgpt-enterprise`: document ChatGPT Admin Console Admin keys (Conversation messages, plus Codex logs when Codex is used) as the compliance credential, and link the [Admin API reference](https://chatgpt.com/public/admin/api-reference#tag/Introduction). Tell customers to set the Worklytics fetch option `fetchProjects` to `false` so a 403 on `/projects` does not block `/logs`.
-
 ## [0.7.1](https://github.com/Worklytics/psoxy/releases/tag/v0.7.1)
-- TODO markdown and test scripts: `gcp-host`, `aws-host`, and the connector modules still create `local_file` copies when `todos_as_local_files` is true (the module default). The AWS and GCP examples now pass `false` into those modules and write every TODO and test script once, from `infra/examples-dev/{aws,gcp}/todos.tf`, when the example variable of the same name is true (still the default). `worklytics-connector-specs` does not emit files; TODO 1 content is already on the connector modules' `todo_files` outputs (generic connectors, Google Workspace, Microsoft 365). TODO 2 is the host module (including `test_script_files` for `test-*.sh` and `test-all.sh`). TODO 3 is the Worklytics connection module. `./generate-todos.sh` still writes the markdown from the `todo_files` output. These `local_file` resources are deprecated and will be removed in 0.8.
-
-  Microsoft 365 setup TODOs were deleted on apply: the grant module and `todo-with-external-todo` both wrote the same path, and the second filename was read from the first `local_file` (that read deletes the file when its content is replaced). One resource owns the path now, and AWS `test_script` outputs no longer read `local_file`.
-
-  Deployments that still pass `todos_as_local_files = true` into the modules are unchanged and must not also add `todos.tf` (two resources cannot own one path). To adopt the example layout, set the module arguments to `false` and add the file below. Setting the arguments to `false` without `todos.tf` removes the files and does not recreate them. `moved` blocks cannot be generated: instance keys differ (module address vs filename), so add one block per file already in state. A `from` address that is not in state is skipped. Filenames below are examples; use the filename that resource writes (`terraform state show` on the old address).
-
-  ```hcl
-  # todos.tf
-  locals {
-    todo_files = merge(concat(
-      [{}],
-      [module.worklytics_connectors.todo_files],
-      [module.worklytics_connectors_google_workspace.todo_files],
-      [module.worklytics_connectors_msft_365.todo_files],
-      [module.psoxy.todo_files],
-      [for connection in values(module.connection_in_worklytics) : connection.todo_files],
-    )...)
-  }
-
-  resource "local_file" "todo" {
-    for_each = var.todos_as_local_files ? local.todo_files : {}
-    filename = each.key
-    content  = each.value
-  }
-
-  resource "local_file" "test_script" {
-    for_each        = var.todos_as_local_files ? module.psoxy.test_script_files : {}
-    filename        = each.key
-    file_permission = "755"
-    content         = each.value
-  }
-
-  moved {
-    from = module.worklytics_connectors.module.source_token_external_todo["asana"].local_file.source_connection_instructions[0]
-    to   = local_file.todo["TODO 1 - setup asana.md"]
-  }
-
-  moved {
-    from = module.psoxy.module.api_connector["asana"].local_file.test_script[0]
-    to   = local_file.test_script["test-asana.sh"]
-  }
-
-  # GCP API test TODO is local_file.review; AWS is local_file.todo.
-  # GCP connection: module.connection_in_worklytics["asana"].local_file.todo_worklytics_connection[0]
-  # AWS connection: module.connection_in_worklytics["asana"].module.generic.local_file.todo_worklytics_connection[0]
-  ```
-
-  The same file, with more `moved` examples commented out, is `infra/examples-dev/aws/todos.tf` and `infra/examples-dev/gcp/todos.tf`. Point `output "todo_files"` at `local.todo_files` so it is not computed twice.
+- `aws`: VPC example `vpc.tf` improved, public/private segmentation and security groups.
+- `chatgpt-enterprise`: improved documentation re setup instructions.
+- TODO markdown and test scripts: disabled underneath as local files, but still present; legacy examples should continue to created; fresh copies of examples will create a top-level, from `todos.tf`.
 - Pseudonymize transforms: `includeReversible` is deprecated in favor of `includeEncrypted` (same behavior: return an encrypted form of the pseudonym alongside the hash). Existing rules that set `includeReversible` continue to work, including an explicit `false`. Setting both flags logs a warning and `includeEncrypted` takes precedence.
 - Google Workspace connectors: optional `api_client_auth_method = "workload_identity_federation"` (IAM `signJwt`, no downloaded SA keys). Opt in via `google_workspace_connector_settings` on the Google Workspace connectors module in `main.tf`. New example clones (`./init` / `init-tfvars.sh`) write that setting when Google Workspace sources are enabled; existing `terraform.tfvars` and the module default remain `service_account_key`. `psoxy-constants` now splits provisioner roles/permissions: Key Admin is only for the default `service_account_key` path; Workload Identity Pool Admin is only for AWS WIF. See [Google Workspace](docs/sources/google-workspace/README.md).
 - AWS GWS WIF: prefix the workload identity pool provider id and display names with `environment_id` (project-global IDs; `psoxy-` fallback when environment id is empty).
