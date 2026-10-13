@@ -66,6 +66,32 @@ output "builder_sa_id" {
   value = module.psoxy.builder_sa_id
 }
 
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. local_file copies are deprecated and will be removed in 0.8."
+  value = merge(concat(
+    [{}],
+    local.alb_managed_tls ? [{
+      "TODO ${var.todo_step} - configure DNS for API connector load balancer.md" = local.alb_dns_todo
+    }] : [],
+    [for connector in values(module.api_connector) : connector.todo_files],
+    [for connector in values(module.bulk_connector) : connector.todo_files],
+    [for connector in values(module.webhook_collector) : connector.todo_files],
+  )...)
+}
+
+output "test_script_files" {
+  description = "Test scripts (filename => content), including test-all.sh. Independent of the local_file resources, so a root module can write them when todos_as_local_files is false."
+  value = merge(
+    { "test-all.sh" = local.test_all_script },
+    merge(concat(
+      [{}],
+      [for connector in values(module.api_connector) : connector.test_script_files],
+      [for connector in values(module.bulk_connector) : connector.test_script_files],
+      [for connector in values(module.webhook_collector) : connector.test_script_files],
+    )...),
+  )
+}
+
 output "next_todo_step" {
   value = max(concat(
     values(module.api_connector)[*].next_todo_step,

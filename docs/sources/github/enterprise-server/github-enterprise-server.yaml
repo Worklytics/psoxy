@@ -500,6 +500,8 @@ endpoints:
           - "$..user_id"
           - "$..started_by"
           - "$..started_by_id"
+          - "$..external_identity_nameid"
+          - "$..external_identity_username"
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/api/{enterpriseServerVersion}/organizations/{installationId}/audit-log"
     allowedQueryParams:
@@ -533,6 +535,8 @@ endpoints:
           - "$..user_id"
           - "$..started_by"
           - "$..started_by_id"
+          - "$..external_identity_nameid"
+          - "$..external_identity_username"
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/api/{enterpriseServerVersion}/orgs/{org}/repos"
     allowedQueryParams:

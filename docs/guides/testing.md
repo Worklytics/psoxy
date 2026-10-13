@@ -4,6 +4,16 @@ By default, the Terraform examples provided by Worklytics install a NodeJS-based
 
 Full documentation of the test tool is available [here](psoxy-test-tool.md). And the code is located in the `tools` directory of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
+### Generating test scripts from Terraform outputs
+
+From the root of an AWS or GCP example, after `terraform init` and `terraform apply`:
+
+```shell
+./build-tests.sh
+```
+
+That wrapper prefers `tools/build-test-scripts-from-output.sh` from the repository clone Terraform downloaded under `.terraform/modules/`, falls back to the generator shipped in the example's `tools/` directory, and writes `test-*.sh` plus `test-all.sh` into the example directory. You can pass a repo path (`./build-tests.sh /path/to/psoxy`) to use an explicit checkout instead.
+
 ### Testing Pre-requisites
 
 Wherever you run this test tool from, your AWS or GCloud CLI _must_ be authenticated as an entity with permissions to invoke the Lambda functions / Cloud functions that you deployed for Psoxy.
@@ -28,8 +38,8 @@ If you're running the Terraform examples in a different location from where you 
 
 3. Get specific test commands for your deployment
 
-    - If you set the `todos_as_outputs` variable to `true`, your Terraform apply run should contain `todo2` output variable with testing instructions.
-    - If you set `todos_as_local_files` variable to `true`, your Terraform apply run should contain local files named `TODO 2 ...` with testing instructions.
+    - If you set the `todos_as_outputs` variable to `true`, your Terraform apply run should contain `todos_2` output variable with testing instructions. `./generate-todos.sh` writes each TODO file from the `todo_files` output (or, on older modules, `todos_1.md` / `todos_2.md` / `todos_3.md` from the joined outputs).
+    - If you set `todos_as_local_files` variable to `true` (the default), your Terraform apply run still writes local files named `TODO 2 ...` with testing instructions. That `local_file` behavior is deprecated and will be removed in 0.8. `./generate-todos.sh` writes the same files from outputs.
 
     In both cases, you will need to replace the test tool path included there with the path to your installation.
 
@@ -44,7 +54,7 @@ If you're running the Terraform examples in a different location from where you 
 
 ### Zoom meeting summaries
 
-`GET /v2/meetings/{meetingId}/meeting_summary` only works for a **past meeting instance** that generated a Zoom AI Companion meeting summary. Generated `test-zoom.sh` examples use a `{MEETING_ID}` placeholder; passing a numeric id from `GET /v2/users/{userId}/meetings` (scheduled meetings) typically returns Zoom error `300` / `Invalid meeting id`.
+`GET /v2/meetings/{MEETING_ID}/meeting_summary` only works for a **past meeting instance** that generated a Zoom AI Companion meeting summary. Generated `test-zoom.sh` examples use a `{MEETING_ID}` placeholder; passing a numeric id from `GET /v2/users/{USER_ID}/meetings` (scheduled meetings) typically returns Zoom error `300` / `Invalid meeting id`.
 
 `tools/psoxy-test/find-zoom-meeting-summary.js` uses the same HTTP helpers as `cli-call.js` to walk users → past meetings → instances until `has_meeting_summary` is true, then calls the summary endpoint. Pass the Zoom function **base URL** (no API path) plus the same flags as `test-zoom.sh`:
 
@@ -55,7 +65,7 @@ node tools/psoxy-test/find-zoom-meeting-summary.js -u https://us-central1-acme.c
 node tools/psoxy-test/find-zoom-meeting-summary.js -u https://acme.lambda-url.us-east-1.on.aws -r arn:aws:iam::310635719553:role/PsoxyApiCaller
 ```
 
-See [Zoom example API calls](../sources/zoom/example-api-calls.md) and the [Psoxy test tool](psoxy-test-tool.md) for details.
+See [Zoom example API calls](../sources/zoom/README.md#example-api-calls) and the [Psoxy test tool](psoxy-test-tool.md) for details.
 
 ### Microsoft Teams call records, online meetings, channels, and chats
 

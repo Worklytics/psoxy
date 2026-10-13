@@ -5,7 +5,12 @@ output "enabled_api_connectors" {
 
 output "todos" {
   description = "List of TODOS for enabled REST connectors"
-  value       = values(module.msft_365_grants)[*].todo
+  value       = values(local.msft_365_todos)
+}
+
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. The local_file copies are deprecated and will be removed in 0.8."
+  value       = local.todo_files
 }
 
 

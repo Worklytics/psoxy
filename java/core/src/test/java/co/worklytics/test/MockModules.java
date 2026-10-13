@@ -9,7 +9,7 @@ import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
 import co.worklytics.psoxy.gateway.output.OutputLocation;
 import com.avaulta.gateway.resources.ResourceService;
-import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
+import com.avaulta.gateway.rules.augments.TextMetadataProcessor;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -244,9 +244,9 @@ public class MockModules {
 
         @Provides
         @Singleton
-        static SentenceMetadataProcessor sentenceMetadataProcessor(
+        static TextMetadataProcessor textMetadataProcessor(
             @Named("OpenNlp") ResourceService openNlpResourceService) {
-            return new SentenceMetadataProcessor(openNlpResourceService);
+            return new TextMetadataProcessor(openNlpResourceService);
         }
     }
 

@@ -102,6 +102,8 @@ module "gate_instance" {
     aws_kms_key.auth_key[*].arn
   )
 
+  enable_bedrock = var.enable_bedrock
+
   environment_variables = merge(
     var.environment_variables,
     local.required_env_vars,
@@ -363,6 +365,8 @@ locals {
   })
 }
 
+# DEPRECATED: this local_file test script is deprecated and will be removed in 0.8.
+# Example todos.tf writes the same file from the test_script_files output.
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
@@ -403,7 +407,15 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = try(local_file.test_script[0].filename, null)
+  # Do not interpolate local_file.test_script (content replace then deletes the file).
+  value = var.todos_as_local_files ? "test-${var.instance_id}.sh" : null
+}
+
+output "test_script_files" {
+  description = "Test script filename => content. Independent of the local_file resource, so a root module can write the file when todos_as_local_files is false."
+  value = {
+    "test-${var.instance_id}.sh" = local.test_script
+  }
 }
 
 output "test_script_content" {
@@ -421,7 +433,7 @@ output "provisioned_auth_key_pairs" {
 }
 
 output "test_examples" {
-  value = try(var.example_payload, null) != null ? [{
+  value = (try(var.example_payload, null) != null || length(local.auth_key_arns_sorted) > 0 || try(var.example_identity, null) != null) ? [{
     content_base64 = try(var.example_payload, null) != null ? base64encode(var.example_payload) : null
     signing_key_id = length(local.auth_key_arns_sorted) > 0 ? "aws-kms:${element(local.auth_key_arns_sorted, length(local.auth_key_arns_sorted) - 1)}" : null
     identity       = try(var.example_identity, null)

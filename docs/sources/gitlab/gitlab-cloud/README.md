@@ -30,25 +30,35 @@ The following scope is required:
 
 ## Endpoints Used
 
+Example API call path parameters (uppercase placeholders in generated test calls; the rules use `{id}` for several of these segments):
+
+- `{GROUP_ID}`: a GitLab group id from `GET /api/v4/groups` (`connector_settings.gitlab_example_group_id`).
+- `{NAMESPACE_ID}`: use `{GROUP_ID}` for group namespaces (from `GET /api/v4/groups` `.id`, or `GET /api/v4/projects` `.namespace.id`). `/api/v4/namespaces` list is not allow-listed; generated examples reuse `gitlab_example_group_id`.
+- `{PROJECT_ID}`: a GitLab project id from `GET /api/v4/projects` (`connector_settings.gitlab_example_project_id`).
+- `{ISSUE_ID}` / `{MERGE_REQUEST_ID}`: **global** issue/MR ids from project list responses (`.id`, not `.iid`).
+- `{ISSUE_IID}` / `{MERGE_REQUEST_IID}`: project-scoped iids from those same list responses.
+- `{SHA}`: a commit SHA from `GET /api/v4/projects/{PROJECT_ID}/repository/commits`.
+
 | Endpoint                                                                       |
 |--------------------------------------------------------------------------------|
 | `/api/v4/groups`                                                               |
-| `/api/v4/groups/{id}/members/all`                                              |
-| `/api/v4/merge_requests/{id}`                                                  |
-| `/api/v4/namespaces/{id}`                                                      |
+| `/api/v4/groups/{GROUP_ID}/members/all`                                         |
+| `/api/v4/namespaces/{NAMESPACE_ID}`                                             |
+| `/api/v4/issues/{ISSUE_ID}`                                                     |
+| `/api/v4/merge_requests/{MERGE_REQUEST_ID}`                                      |
 | `/api/v4/projects`                                                             |
-| `/api/v4/projects/{id}/audit_events`                                           |
-| `/api/v4/projects/{id}/issues/{issueIid}/notes`                                |
-| `/api/v4/projects/{id}/issues/{issueIid}/resource_state_events`                |
-| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/commits`               |
-| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/notes`                 |
-| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/resource_state_events` |
-| `/api/v4/projects/{id}/repository/branches`                                    |
-| `/api/v4/projects/{id}/repository/commits`                                     |
-| `/api/v4/projects/{id}/repository/commits/{sha}`                               |
-| `/api/v4/projects/{id}/repository/commits/{sha}/discussions`                   |
-| `/api/v4/projects/{id}/issues`                                                 |
-| `/api/v4/projects/{id}/merge_requests`                                         |
+| `/api/v4/projects/{PROJECT_ID}/audit_events`                                    |
+| `/api/v4/projects/{PROJECT_ID}/issues/{ISSUE_IID}/notes`                         |
+| `/api/v4/projects/{PROJECT_ID}/issues/{ISSUE_IID}/resource_state_events`         |
+| `/api/v4/projects/{PROJECT_ID}/merge_requests/{MERGE_REQUEST_IID}/commits`        |
+| `/api/v4/projects/{PROJECT_ID}/merge_requests/{MERGE_REQUEST_IID}/notes`          |
+| `/api/v4/projects/{PROJECT_ID}/merge_requests/{MERGE_REQUEST_IID}/resource_state_events` |
+| `/api/v4/projects/{PROJECT_ID}/repository/branches`                             |
+| `/api/v4/projects/{PROJECT_ID}/repository/commits`                              |
+| `/api/v4/projects/{PROJECT_ID}/repository/commits/{SHA}`                        |
+| `/api/v4/projects/{PROJECT_ID}/repository/commits/{SHA}/discussions`            |
+| `/api/v4/projects/{PROJECT_ID}/issues`                                          |
+| `/api/v4/projects/{PROJECT_ID}/merge_requests`                                  |
 
 
 ### Setup

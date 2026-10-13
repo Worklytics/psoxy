@@ -7,6 +7,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.0"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = ">= 2.0"
+    }
   }
 
   # NOTE: Terraform backend block is configured in a separate 'backend.tf' file, as expect everyone
@@ -21,7 +25,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.7.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.7.1"
 
   enabled_connectors                       = var.enabled_connectors
   connector_settings                       = var.connector_settings
@@ -47,7 +51,7 @@ module "worklytics_connectors" {
   gong_instance_subdomain                  = var.gong_instance_subdomain
   glean_instance_subdomain                 = var.glean_instance_subdomain
   salesforce_example_account_id            = var.salesforce_example_account_id
-  todos_as_local_files                     = var.todos_as_local_files
+  todos_as_local_files                     = false # root todos.tf writes these files
   todo_step                                = 1
 }
 
@@ -121,7 +125,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.7.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.7.1"
 
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
@@ -166,15 +170,14 @@ module "psoxy" {
   custom_bulk_connector_arguments      = var.custom_bulk_connector_arguments
   custom_side_outputs                  = var.custom_side_outputs
   todo_step                            = local.max_auth_todo_step
-  todos_as_local_files                 = var.todos_as_local_files
-  enable_remote_resources              = true
+  todos_as_local_files                 = false # root todos.tf writes these files
+  enable_remote_resources              = var.enable_remote_resources
 
 
-  #  vpc_config = {
-  #    vpc_id             = aws_default_vpc.default.id
-  #    security_group_ids = [aws_security_group.default.id]
-  #    subnet_ids         = [aws_default_subnet.default.id]
-  #  }
+  vpc_config = {
+    security_group_ids = [aws_security_group.default.id]
+    subnet_ids         = [aws_subnet.private.id]
+  }
 }
 
 ## Worklytics connection configuration
@@ -200,7 +203,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=v0.7.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=v0.7.1"
 
   proxy_instance_id    = each.key
   worklytics_host      = var.worklytics_host
@@ -211,7 +214,7 @@ module "connection_in_worklytics" {
   connector_id         = try(local.all_connectors[each.key].worklytics_connector_id, "bulk-import-psoxy", "")
   display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${try(local.all_connectors[each.key].display_name, replace(each.key, "-", " "))} via Psoxy", "${replace(each.key, "-", " ")} via Psoxy")
   todo_step            = module.psoxy.next_todo_step
-  todos_as_local_files = var.todos_as_local_files
+  todos_as_local_files = false # root todos.tf writes these files
 
   connector_settings_to_provide = merge(
     try(each.value.settings_to_provide, {}),
@@ -234,23 +237,46 @@ output "api_connector_instances" {
 
 output "bulk_connector_instances" {
   value = { for k, v in module.psoxy.bulk_connector_instances : k => {
-    input_bucket     = try(v.input_bucket, null)
-    sanitized_bucket = v.sanitized_bucket
-    example_files    = try(v.example_files, [])
+    input_bucket                          = try(v.input_bucket, null)
+    sanitized_bucket                      = v.sanitized_bucket
+    example_files                         = try(v.example_files, [])
+    aws_principal_arn_when_testing        = try(v.aws_principal_arn_when_testing, null)
+    aws_write_role_to_assume_when_testing = try(v.aws_write_role_to_assume_when_testing, null)
   } }
 }
 
 output "webhook_collector_instances" {
   value = { for k, v in module.psoxy.webhook_collector_instances : k => {
-    endpoint_url     = try(v.endpoint_url, null)
-    sanitized_bucket = v.output_sanitized_bucket_id
-    test_examples    = try(v.test_examples, [])
+    endpoint_url               = try(v.endpoint_url, null)
+    sanitized_bucket           = v.output_sanitized_bucket_id
+    test_examples              = try(v.test_examples, [])
+    provisioned_auth_key_pairs = try(v.provisioned_auth_key_pairs, [])
   } }
+}
+
+output "deployment_platform" {
+  description = "Cloud platform for this deployment. Used when synthesizing test scripts."
+  value       = "aws"
 }
 
 output "caller_role_arn" {
   description = "ARN of the AWS role to impersonate when making API calls (AWS case)"
   value       = module.psoxy.caller_role_arn
+}
+
+output "webhook_test_caller_role_arn" {
+  description = "ARN of the role granted invoke, KMS, and bucket access for webhook collector tests."
+  value       = module.psoxy.webhook_test_caller_role_arn
+}
+
+output "aws_region" {
+  description = "AWS region where Psoxy is deployed."
+  value       = var.aws_region
+}
+
+output "repo_base_dir" {
+  description = "Absolute path to the repository root used to build test scripts (trailing slash)."
+  value       = var.psoxy_base_dir
 }
 
 output "todos_1" {
@@ -266,6 +292,11 @@ output "todos_2" {
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value       = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics)[*].todo) : null
+}
+
+output "todo_files" {
+  description = "TODO markdown files (filename => content). todos.tf writes them when todos_as_local_files is true. ./generate-todos.sh writes the same files from this output. These local_file resources are deprecated and will be removed in 0.8."
+  value       = local.todo_files
 }
 
 # although should be sensitive such that Terraform won't echo it to command line or expose it, leave

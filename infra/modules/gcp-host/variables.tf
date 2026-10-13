@@ -193,6 +193,7 @@ variable "api_connectors" {
     oauth_scopes_needed     = optional(list(string), [])
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -240,8 +241,9 @@ variable "webhook_collectors" {
     batch_processing_frequency_minutes = optional(number, 5)           # frequency (in minutes) at which to batch process webhooks
     output_path_prefix                 = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket
 
-    example_identity = optional(string, null) # example identity to use in test payloads
-    example_payload  = optional(string, null) # example payload content to use in test scripts
+    example_identity    = optional(string, null) # example identity to use in test payloads
+    example_payload     = optional(string, null) # example payload content to use in test scripts
+    enable_gen_metadata = optional(bool, false)  # ALPHA: !<classify> / !<genMetadata> in webhook rules (Vertex)
   }))
   default = {}
 
@@ -274,6 +276,7 @@ variable "bulk_connectors" {
     settings_to_provide   = optional(map(string), {})
     available_memory_mb   = optional(number)
     timeout_seconds       = optional(number)
+    enable_gen_metadata   = optional(bool, false)
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -480,7 +483,7 @@ variable "external_api_alb" {
     domain = optional(string)
   })
   description = <<-EOT
-    **beta** When non-null, provision a global external Application Load Balancer in front of API connectors (see docs/development/gcp-external-alb.md). Use `{}` for self-signed PoC on a reserved IP, or `{ domain = "proxy.example.com" }` for managed TLS. Cloud Armor allow/deny rules are added only when allowed_data_access_ip_blocks is non-null. Mutually exclusive with api_connector_external_lb_host.
+    **beta** When non-null, provision a global external Application Load Balancer in front of API connectors (see docs/gcp/guides/external-alb.md). Use `{}` for self-signed PoC on a reserved IP, or `{ domain = "proxy.example.com" }` for managed TLS. Cloud Armor allow/deny rules are added only when allowed_data_access_ip_blocks is non-null. Mutually exclusive with api_connector_external_lb_host.
   EOT
   default     = null
   nullable    = true
@@ -489,7 +492,7 @@ variable "external_api_alb" {
 variable "api_connector_external_lb_host" {
   type        = string
   description = <<-EOT
-    Hostname or IP of a **customer-provisioned** external Application Load Balancer that fronts API connectors (beta; see docs/development/gcp-external-alb.md). When non-null, API connectors use ingress ALLOW_INTERNAL_AND_GCLB and public endpoint URLs become https://<host>/<function-name>/. Does not provision an ALB — use external_api_alb to have gcp-host provision one. Mutually exclusive with external_api_alb. IP allowlisting via allowed_data_access_ip_blocks is independent.
+    Hostname or IP of a **customer-provisioned** external Application Load Balancer that fronts API connectors (beta; see docs/gcp/guides/external-alb.md). When non-null, API connectors use ingress ALLOW_INTERNAL_AND_GCLB and public endpoint URLs become https://<host>/<function-name>/. Does not provision an ALB — use external_api_alb to have gcp-host provision one. Mutually exclusive with external_api_alb. IP allowlisting via allowed_data_access_ip_blocks is independent.
   EOT
   default     = null
   nullable    = true

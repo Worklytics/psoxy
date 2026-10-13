@@ -12,12 +12,15 @@ locals {
     "pubsub.googleapis.com",   # needed for cloud run gen2
   ]
 
-  # additional services required for webhook collectors
+  # additional services required for webhook collectors.
+  # cloudkms.googleapis.com is not in this list: it is enabled only when a collector provisions
+  # an auth key (var.enable_cloud_kms), and gcp-host waits on that one instance before creating a key ring.
   services_required_for_webhook_collectors = [
-    "cloudkms.googleapis.com",       # signing webhooks
     "cloudscheduler.googleapis.com", # triggering batches
     "pubsub.googleapis.com",         # webhooks batched via pubsub
   ]
+
+  cloud_kms_service = "cloudkms.googleapis.com"
 
   # Artifact Registry repository IDs must be unique within a project/location; prefix with
   # environment_id_prefix so multiple psoxy instances can share a GCP project.
@@ -44,6 +47,7 @@ resource "google_project_service" "gcp_infra_api" {
     ],
     var.support_bulk_mode ? local.services_required_for_bulk_mode : [],
     var.support_webhook_collectors ? local.services_required_for_webhook_collectors : [],
+    var.enable_cloud_kms ? [local.cloud_kms_service] : [],
   ))
 
   service                    = each.key
@@ -277,22 +281,19 @@ module "test_tool" {
   psoxy_version = module.psoxy_package.version
 }
 
-# create custom role needed for any proxy use-case that writes output to a GCS bucket:
-# - bulk mode
-# - webhook collectors
-# - side output
-# - async mode
-# could condition creation of this on at least one of the above being used, but essentially EVERYONE uses at least one of those,
-# so not bothering with unnecessary complexity of that.
+# Least-privilege GCS writer for bulk / webhooks / side output / async.
+# roles/storage.objectCreator cannot overwrite or PATCH metadata.
+# roles/storage.objectUser also grants get/list/restore/multipart — more than these writers need.
 resource "google_project_iam_custom_role" "bucket_write" {
   project     = var.project_id
   role_id     = "${local.environment_id_role_prefix}writeAccess"
   title       = "${local.environment_id_prefix_display}Bucket Object Write/Update"
-  description = "Write and update support, because storage.objectCreator role only support creation - not update"
+  description = "Create, overwrite (delete+create), and PATCH object metadata. Narrower than roles/storage.objectUser (no get/list/restore)."
 
   permissions = [
     "storage.objects.create",
-    "storage.objects.delete"
+    "storage.objects.delete",
+    "storage.objects.update",
   ]
 }
 
@@ -614,6 +615,16 @@ output "artifact_repository" {
     # If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry., forbidden"
     google_project_service.gcp_infra_api
   ]
+}
+
+output "kms_api_enabled" {
+  value       = try(google_project_service.gcp_infra_api[local.cloud_kms_service].id, null)
+  description = "ID of the enabled cloudkms.googleapis.com service, or null when enable_cloud_kms is false. gcp-host waits on this before creating a KMS key ring."
+}
+
+output "enable_cloud_kms" {
+  value       = var.enable_cloud_kms
+  description = "Whether cloudkms.googleapis.com is enabled. Known at plan time; kms_api_enabled is not, because the service id is computed."
 }
 
 output "oidc_token_verifier_role_id" {

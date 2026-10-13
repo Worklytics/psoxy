@@ -25,9 +25,9 @@ import lombok.experimental.SuperBuilder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties({
     "title",
-    "required", // not relevant to 'filter' use case
-    "additionalProperties", // not currently supported
-    "$schema", // not helpful in filter use-case, although maybe should include in future
+    "$schema",
+    "required",
+    "additionalProperties",
 })
 public class JsonSchemaFilter {
 

@@ -1,0 +1,47 @@
+name: CI - GCP IAM permission constants
+
+# Confirms permission IDs exported by infra/modules/psoxy-constants are permissions
+# Google allows in a custom role. Uses gcloud against the project of the
+# Workload Identity service account.
+#
+# Required GitHub secrets (same as Publish GCP Bundle):
+#   - GCP_SERVICE_ACCOUNT
+#   - GCP_WORKLOAD_IDENTITY_PROVIDER
+#
+# The service account must be allowed to call
+# `gcloud iam list-testable-permissions` on its project.
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  check_gcp_iam_permissions:
+    name: check GCP IAM permission constants
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Check psoxy-constants permission IDs
+        run: ./tools/gcp/check-gcp-iam-permissions.sh

@@ -56,14 +56,14 @@ When API connectors are fronted by an external Application Load Balancer (ALB), 
 node cli-call.js -u https://203.0.113.10/myenv-outlook-cal/ -f gcp --allow-insecure-tls --health-check
 ```
 
-Generated test scripts from Terraform add these flags when an external LB base URL is set (`external_api_alb` on `gcp-host`, or BYO `api_connector_external_lb_host`). When `allowed_data_access_ip_blocks` is set, your client IP must be allowlisted (Cloud Armor + app layer) to reach the ALB. See [GCP External Application Load Balancer (ALB) + Cloud Armor](../development/gcp-external-alb.md).
+Generated test scripts from Terraform add these flags when an external LB base URL is set (`external_api_alb` on `gcp-host`, or BYO `api_connector_external_lb_host`). When `allowed_data_access_ip_blocks` is set, your client IP must be allowlisted (Cloud Armor + app layer) to reach the ALB. See [External Application Load Balancer](../gcp/guides/external-alb.md).
 
 **Common errors when testing through an external Application Load Balancer (ALB):**
 
 | Symptom | Likely cause | What to check |
 |---|---|---|
 | `ECONNRESET` / "socket disconnected before secure TLS connection was established" | ALB not ready yet, or transient propagation | Wait after `terraform apply`; confirm TLS with `curl -vk https://<alb-ip>/...`. Not usually fixed by changing the allowlist. Use `--allow-insecure-tls` for PoC self-signed certs. |
-| `403 Forbidden` with a minimal HTML page (`<title>403</title>`) | Cloud Armor blocked your source IP | Add the IP you dial **from** to `allowed_data_access_ip_blocks` (include **both** IPv4 and IPv6 if unsure). Verify with `curl -4/-6 ifconfig.me` and [troubleshooting in the ALB doc](../development/gcp-external-alb.md#403-forbidden-minimal-html-page-title403title403-forbidden). |
+| `403 Forbidden` with a minimal HTML page (`<title>403</title>`) | Cloud Armor blocked your source IP | Add the IP you dial **from** to `allowed_data_access_ip_blocks` (include **both** IPv4 and IPv6 if unsure). Verify with `curl -4/-6 ifconfig.me` and [troubleshooting in the load balancer guide](../gcp/guides/external-alb.md#403-forbidden). |
 
 (*) You can obtain it by running `gcloud auth print-identity-token` (using [Google Cloud SDK])
 
@@ -131,7 +131,7 @@ Notice how the URL changes, and any other option the Psoxy may need doesn't.
 
 ### Zoom: finding a meeting that has a summary
 
-`GET /v2/meetings/{meetingId}/meeting_summary` requires a past meeting instance UUID where Zoom AI Companion actually produced a meeting summary. Numeric IDs from `GET /v2/users/{userId}/meetings` are scheduled meetings and usually return `Invalid meeting id`.
+`GET /v2/meetings/{MEETING_ID}/meeting_summary` requires a past meeting instance UUID where Zoom AI Companion actually produced a meeting summary. Numeric IDs from `GET /v2/users/{USER_ID}/meetings` are scheduled meetings and usually return `Invalid meeting id`.
 
 `find-zoom-meeting-summary.js` (in `tools/psoxy-test/`, next to `cli-call.js`) walks users → past meetings → instances until `has_meeting_summary` is true, then fetches the summary. Pass the Zoom function **base URL** (no API path) and the same flags you use with `cli-call.js` / `test-zoom.sh`:
 
@@ -142,7 +142,7 @@ node find-zoom-meeting-summary.js -u https://us-central1-acme.cloudfunctions.net
 node find-zoom-meeting-summary.js -u https://acme.lambda-url.us-east-1.on.aws -r <ROLE>
 ```
 
-Useful flags: `--lookback-days 180` (report meetings are searched in 30-day windows), `--max-users 5`. See [Zoom example API calls](../sources/zoom/example-api-calls.md).
+Useful flags: `--lookback-days 180` (report meetings are searched in 30-day windows), `--max-users 5`. See [Zoom example API calls](../../docs/sources/zoom/README.md#example-api-calls).
 
 ### Microsoft Teams: finding a call record, online meeting, channel, or chat
 

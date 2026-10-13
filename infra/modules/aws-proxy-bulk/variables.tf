@@ -195,6 +195,18 @@ variable "psoxy_base_dir" {
   default     = "../../.."
 }
 
+variable "extra_lambda_role_iam_statements" {
+  type        = list(any)
+  description = "Additional IAM statements to add to the bulk Lambda execution role."
+  default     = []
+}
+
+variable "enable_bedrock" {
+  type        = bool
+  description = "Grant this Lambda Bedrock InvokeModel/Converse for genMetadata/classify augments, and set GEN_METADATA_BACKEND=bedrock."
+  default     = false
+}
+
 variable "environment_variables" {
   type        = map(string)
   description = "Non-sensitive values to add to functions environment variables"

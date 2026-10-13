@@ -123,7 +123,7 @@ resource "aws_iam_policy" "invoke_api" {
 }
 
 resource "aws_iam_role_policy_attachment" "invoke_api_policy_to_role" {
-  role       = "PsoxyCaller" # Name (not ARN) of the API caller role
+  role       = module.psoxy.caller_role_name # caller role name varies by deployment_id; legacy upgrades may retain *Caller
   policy_arn = aws_iam_policy.invoke_api.arn
 }
 

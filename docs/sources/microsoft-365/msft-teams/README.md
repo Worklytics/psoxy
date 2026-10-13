@@ -9,13 +9,17 @@ Connect Microsoft Teams data to Worklytics, enabling communication analysis and 
 Please review the [Microsoft 365 README](../README.md) for general information applicable to all Microsoft 365 connectors.
 
 ## Required Scopes
+
 - [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
 - [`Team.ReadBasic.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#teamreadbasicall)
 - [`Channel.ReadBasic.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#channelreadbasicall)
-- [`Chat.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#chatreadbasicall)
+- [`Chat.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#chatreadall)
 - [`ChannelMessage.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#channelmessagereadall)
 - [`CallRecords.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#callrecordsreadall)
 - [`OnlineMeetings.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#onlinemeetingsreadall)
+- [`OnlineMeetingArtifact.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#onlinemeetingartifactreadall)
+
+`OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` also require a tenant-wide application access policy. A Teams Administrator must create and grant that policy with the Microsoft Teams PowerShell module. Entra admin consent does not create it. See [Configure Access to Online Meetings](#configure-access-to-online-meetings).
 
 ## Authentication
 
@@ -25,34 +29,38 @@ See the [Microsoft 365 Authentication](../README.md#authentication) section of t
 
 See the [Microsoft 365 Authorization](../README.md#authorization) section of the main README.
 
-### Online Meetings support
+### Configure Access to Online Meetings
 
-Besides of having `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` scope defined in the application, you need to allow a new role and a policy on the application created for reading OnlineMeetings. You will need Powershell for this.
+Online meeting and meeting-artifact calls require an [application access policy](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy) in addition to the `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` application permissions. A Teams Administrator creates that policy with the [Microsoft Teams PowerShell module](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install) and grants it to the whole tenant, naming this connector's application (client) ID. Entra admin consent does not create the policy.
 
-Please follow the steps below:
+Until the policy is granted, those endpoints return `403 Forbidden` with message `No application access policy found for this app`. Policy changes can take up to 30 minutes to take effect.
 
-1. Ensure the user you are going to use for running the commands has the "Teams Administrator" role. You can add the role in the [Microsoft 365 Admin Center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users)
+1. Assign the **Teams Administrator** role to the account that will run the commands, in the [Microsoft 365 admin center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users) or in the Azure portal (Microsoft Entra ID → Users → Assign roles). The Teams Administrator role is sometimes missing from the Entra admin center even for an admin account; assign it in the Azure portal in that case.
 
-**NOTE**: It can be assigned through Entra Id portal in Azure portal OR in [https://admin.microsoft.com/AdminPortal/Home](https://admin.microsoft.com/AdminPortal/Home). It is possible that even login with an admin account in Entra Admin Center the Teams role is not available to assign to any user; if so, please do it through Azure Portal (Entra Id -> Users -> Assign roles)
+2. Install the [Microsoft Teams PowerShell module](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install).
 
-2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install) module.
-3. Run the following commands in Powershell terminal:
+3. Connect and sign in as that Teams Administrator:
 
-```shell
+```powershell
 Connect-MicrosoftTeams
 ```
 
-And use the user with the "Teams Administrator" for login it.
+4. Create a policy that includes the connector application's client ID. Terraform setup output fills this in; otherwise substitute the application (client) ID for `<application_id>`:
 
-4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
+```powershell
+New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds "<application_id>" -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
+```
 
-- Add a policy for the application created for the connector, providing its `application id`
-- Grant the policy to the whole tenant (NOT to any specific application or user)
+5. Grant that policy to the whole tenant, so the connector can read meetings organized by any user:
+
+```powershell
+Grant-CsApplicationAccessPolicy -PolicyName Teams-Policy-For-Worklytics -Global
+```
 
 **Issues**:
 
-- If you receive "access denied" is because no admin role for Teams has been detected. Please close and reopen the Powershell terminal after assigning the role.
-- Commands have been tested over a Powershell (7.4.0) terminal in Windows, installed from Microsoft Store and with Teams Module (5.8.0). It might not work on a different environment
+- `Access denied` means the signed-in account does not yet have the Teams Administrator role. Assign the role, then close and reopen PowerShell before connecting again.
+- These commands were verified on PowerShell 7.4.0 on Windows (Microsoft Store) with MicrosoftTeams module 5.8.0.
 
 ## Example Data
 
@@ -72,7 +80,8 @@ And use the user with the "Teams Administrator" for login it.
 | `/v1.0/users/{userId}/onlineMeetings`                                          | [original/Users_onlineMeetings_v1.0.json](example-api-responses/original/Users_onlineMeetings_v1.0.json)                                     | [sanitized/Users_onlineMeetings_v1.0.json](example-api-responses/sanitized/Users_onlineMeetings_v1.0.json)                                     |
 | `/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports`            | [original/Users_onlineMeetings_attendanceReports_v1.0.json](example-api-responses/original/Users_onlineMeetings_attendanceReports_v1.0.json) | [sanitized/Users_onlineMeetings_attendanceReports_v1.0.json](example-api-responses/sanitized/Users_onlineMeetings_attendanceReports_v1.0.json) |
 | `/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}` | [original/Users_onlineMeetings_attendanceReport_v1.0.json](example-api-responses/original/Users_onlineMeetings_attendanceReport_v1.0.json)   | [sanitized/Users_onlineMeetings_attendanceReport_v1.0.json](example-api-responses/sanitized/Users_onlineMeetings_attendanceReport_v1.0.json)   |
-|
+
+Terraform-generated example calls use uppercase placeholders: `{EXAMPLE_MSFT_USER_GUID}` / `{EXAMPLE_MSFT_TEAMS_TEAM_GUID}` / `{EXAMPLE_MSFT_TEAMS_CHANNEL_GUID}` / `{EXAMPLE_MSFT_TEAMS_CHAT_GUID}` from `GET /v1.0/users`, `GET /v1.0/teams`, `GET .../allChannels`, and `GET .../chats`. `{MEETING_ID}` is an onlineMeeting id from `GET /v1.0/users/{EXAMPLE_MSFT_USER_GUID}/onlineMeetings`. `{REPORT_ID}` is an attendance report id from `GET .../attendanceReports`. `{EXAMPLE_MSFT_TEAMS_CALL_GUID}` / `{EXAMPLE_MSFT_TEAMS_CALL_RECORD_GUID}` are GUIDs from `GET /v1.0/communications/calls/...` and `GET /v1.0/communications/callRecords` (`{EXAMPLE_MSFT_TEAMS_CALL_RECORD_GUID}` must be UUID-shaped). `{EXAMPLE_MSFT_TEAMS_ONLINE_MEETING_URL}` is the online-meeting join URL used as the `JoinWebUrl` filter.
 
 See more examples in the `docs/sources/microsoft-365/msft-teams/example-api-responses` folder of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 

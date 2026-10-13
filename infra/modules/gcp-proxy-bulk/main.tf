@@ -321,7 +321,9 @@ locals {
   # whether this connector needs set up
   need_setup = var.instructions_template != null
 
-  test_todo_step = var.todo_step + (local.need_setup ? 1 : 0)
+  test_todo_step      = var.todo_step + (local.need_setup ? 1 : 0)
+  todo_setup_filename = "TODO ${var.todo_step} - setup ${local.local_file_id}.md"
+  todo_test_filename  = "TODO ${local.test_todo_step} - test ${local.function_name}.md"
 
   setup_todo_content = var.instructions_template == null ? "" : templatefile("${var.instructions_template}", {
     input_bucket_url = "gcs://${google_storage_bucket.input_bucket.name}"
@@ -364,27 +366,26 @@ for a detailed description of all the different options.
 EOT
 }
 
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
 resource "local_file" "todo_setup" {
   count = (var.todos_as_local_files && local.need_setup) ? 1 : 0
 
-  filename = "TODO ${var.todo_step} - setup ${local.local_file_id}.md"
+  filename = local.todo_setup_filename
   content  = local.setup_todo_content
 }
 
-
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
 resource "local_file" "todo_test_gcp_psoxy_bulk" {
   count = var.todos_as_local_files ? 1 : 0
 
-  filename = "TODO ${local.test_todo_step} - test ${local.function_name}.md"
+  filename = local.todo_test_filename
   content  = local.test_todo_content
 }
 
-resource "local_file" "test_script" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename        = local.test_script_filename
-  file_permission = "755"
-  content         = <<EOT
+locals {
+  test_script = <<EOT
 #!/bin/bash
 FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
 BLUE='\e[0;34m'
@@ -437,7 +438,16 @@ done
 
 exit $FAILED
 EOT
+}
 
+# DEPRECATED: this local_file test script is deprecated and will be removed in 0.8.
+# Example todos.tf writes the same file from the test_script_files output.
+resource "local_file" "test_script" {
+  count = var.todos_as_local_files ? 1 : 0
+
+  filename        = local.test_script_filename
+  file_permission = "755"
+  content         = local.test_script
 }
 
 output "instance_id" {
@@ -488,12 +498,31 @@ output "test_script" {
   value = var.todos_as_local_files ? local.test_script_filename : null
 }
 
+output "test_script_content" {
+  value = local.test_script
+}
+
+output "test_script_files" {
+  description = "Test script filename => content. Independent of the local_file resource, so a root module can write the file when todos_as_local_files is false."
+  value = {
+    (local.test_script_filename) = local.test_script
+  }
+}
+
 output "todo" {
   value = local.todo_brief
 }
 
 output "todo_setup" {
   value = local.setup_todo_content
+}
+
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. The local_file copies are deprecated and will be removed in 0.8."
+  value = merge(
+    local.need_setup ? { (local.todo_setup_filename) = local.setup_todo_content } : {},
+    { (local.todo_test_filename) = local.test_todo_content },
+  )
 }
 
 output "next_todo_step" {

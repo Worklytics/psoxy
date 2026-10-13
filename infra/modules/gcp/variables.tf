@@ -119,6 +119,12 @@ variable "support_webhook_collectors" {
   default     = false
 }
 
+variable "enable_cloud_kms" {
+  type        = bool
+  description = "Enable cloudkms.googleapis.com. Set when a webhook collector provisions an auth key (created or customer-supplied key ring). Leave false when no collector needs a KMS key."
+  default     = false
+}
+
 variable "vpc_config" {
   type = object({
     network              = optional(string) # VPC network name or self-link (required for Direct VPC egress if `serverless_connector` is not provided)

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import co.worklytics.psoxy.rules.RESTRules;
 import lombok.NonNull;
@@ -59,6 +60,13 @@ public interface RESTApiSanitizer {
      */
     String sanitize(String httpMethod, URL url, String jsonResponse);
 
+    /**
+     * Warning codes from augment processing on the last {@link #sanitize} call for this thread.
+     * Suitable for {@link ProcessedDataMetadataFields#WARNING} response headers.
+     */
+    default List<String> getLastSanitizationWarnings() {
+        return List.of();
+    }
 
     Pseudonymizer getPseudonymizer();
 

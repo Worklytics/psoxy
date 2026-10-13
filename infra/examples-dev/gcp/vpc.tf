@@ -1,6 +1,6 @@
 # VPC egress (optional) — Direct VPC egress for Cloud Functions; outbound via NAT.
 #
-# Status: composition pattern only (not provisioned inside gcp-host). See docs/gcp/vpc.md.
+# Status: composition pattern only (not provisioned inside gcp-host). See docs/gcp/guides/vpc.md.
 #
 # Uncomment and adapt when data sources must allowlist a fixed egress IP. Then set:
 #   vpc_config = {

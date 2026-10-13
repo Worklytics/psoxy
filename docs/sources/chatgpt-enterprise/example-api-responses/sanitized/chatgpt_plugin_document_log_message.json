@@ -1,0 +1,24 @@
+{
+  "event_id":"7c1f2a3b-52e4-4f8a-9b1a-3c4d5e6f7a8b",
+  "type":"CHATGPT_PLUGIN_DOCUMENT",
+  "timestamp":"2026-07-31T15:12:04.882103Z",
+  "principal":{
+    "id":"t~q4ZbwP7oZewMjKQPZfbr4a4vKfoRN-EBmeNkEBtydb4",
+    "type":"CHATGPT_WORKSPACE"
+  },
+  "actor":{
+    "type":"ACCOUNT_USER",
+    "user_id":"t~qZezgH1590-X3vGc-FW7ztXDzNC_eNeiuaLPSmkpM1s",
+    "user_email":"t~lYdYuL_UqllXzNt0J3F59AjPRyBJzXQ8eKaypkZ8Iho@example.org"
+  },
+  "event_type":"PROMPT_SENT",
+  "client_id":"BASISPOINTS_WORD_ADDIN",
+  "workspace_id":"be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details":{
+    "detail_type":"PROMPT_SENT",
+    "session_id":"session-789",
+    "prompt_text":"{\"keywords\":{\"summary\":1},\"length\":49,\"word_count\":7}",
+    "model":"gpt-5.1",
+    "environment_id":null
+  }
+}

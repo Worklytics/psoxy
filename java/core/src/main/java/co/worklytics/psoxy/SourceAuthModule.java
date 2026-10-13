@@ -1,116 +1,99 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.AwsWifGoogleCloudProcessIdentity;
 import co.worklytics.psoxy.gateway.impl.BasicAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.ClaudeAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.GcpHostedProcessIdentity;
+import co.worklytics.psoxy.gateway.impl.GcpIamSignJwtAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.GoogleCloudPlatformServiceAccountKeyAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.GoogleCloudProcessIdentity;
 import co.worklytics.psoxy.gateway.impl.WindsurfServiceKeyAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.*;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
+import dagger.Binds;
 import dagger.Module;
-import dagger.Provides;
 import dagger.multibindings.IntoSet;
 
-/**
- *
- * q: can this be made abstract class, and all provider methods converted to `abstract + @Binds`??
- */
 @Module
-public class SourceAuthModule {
+public abstract class SourceAuthModule {
 
-    @Provides
+    @Binds
     @IntoSet
-    SourceAuthStrategy providesOAuthAccessTokenSourceAuthStrategy(
-        OAuthAccessTokenSourceAuthStrategy oAuthAccessTokenSourceAuthStrategy) {
-        return oAuthAccessTokenSourceAuthStrategy;
-    }
+    abstract SourceAuthStrategy oauthAccessTokenSourceAuthStrategy(
+        OAuthAccessTokenSourceAuthStrategy impl);
 
-    @Provides
+    @Binds
     @IntoSet
-    SourceAuthStrategy providesOAuthRefreshTokenSourceAuthStrategy(
-        OAuthRefreshTokenSourceAuthStrategy oAuthRefreshTokenSourceAuthStrategy) {
-        return oAuthRefreshTokenSourceAuthStrategy;
-    }
+    abstract SourceAuthStrategy oauthRefreshTokenSourceAuthStrategy(
+        OAuthRefreshTokenSourceAuthStrategy impl);
 
-    @Provides
+    @Binds
     @IntoSet
-    SourceAuthStrategy providesSourceAuthStrategy(
-        GoogleCloudPlatformServiceAccountKeyAuthStrategy googleCloudPlatformServiceAccountKeyAuthStrategy) {
-        return googleCloudPlatformServiceAccountKeyAuthStrategy;
-    }
+    abstract SourceAuthStrategy googleCloudPlatformServiceAccountKeyAuthStrategy(
+        GoogleCloudPlatformServiceAccountKeyAuthStrategy impl);
 
-    @Provides
+    @Binds
     @IntoSet
-    SourceAuthStrategy providesBasicAuthStrategy(BasicAuthStrategy basicAuthStrategy) {
-        return basicAuthStrategy;
-    }
+    abstract SourceAuthStrategy gcpIamSignJwtAuthStrategy(GcpIamSignJwtAuthStrategy impl);
 
-    @Provides
+    @Binds
     @IntoSet
-    SourceAuthStrategy providesClaudeAuthStrategy(ClaudeAuthStrategy strategy) {
-        return strategy;
-    }
+    abstract GoogleCloudProcessIdentity gcpHostedProcessIdentity(GcpHostedProcessIdentity impl);
 
-    @Provides
+    @Binds
     @IntoSet
-    SourceAuthStrategy providesWindsurfServiceKeyAuthStrategy(
-        WindsurfServiceKeyAuthStrategy windsurfServiceKeyAuthStrategy) {
-        return windsurfServiceKeyAuthStrategy;
-    }
+    abstract GoogleCloudProcessIdentity awsWifGoogleCloudProcessIdentity(
+        AwsWifGoogleCloudProcessIdentity impl);
 
-    @Provides
-    OAuth2CredentialsWithRefresh.OAuth2RefreshHandler providesOAuth2RefreshHandler(
-        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl refreshHandler) {
-        return refreshHandler;
-    }
-
-    @Provides
+    @Binds
     @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder refreshTokenPayloadBuilder(
-        RefreshTokenTokenRequestBuilder refreshTokenPayloadBuilder) {
-        return refreshTokenPayloadBuilder;
-    }
+    abstract SourceAuthStrategy basicAuthStrategy(BasicAuthStrategy impl);
 
-    @Provides
+    @Binds
     @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder refreshTokenRequestViaQueryParameterBuilder(
-        RefreshTokenRequestViaQueryParameterBuilder requestBuilder) {
-        return requestBuilder;
-    }
+    abstract SourceAuthStrategy claudeAuthStrategy(ClaudeAuthStrategy impl);
 
-    @Provides
+    @Binds
     @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder clientCredentialsGrantTokenRequestPayloadBuilder(
-        ClientCredentialsGrantTokenRequestBuilder clientCredentialsGrantTokenRequestBuilder) {
-        return clientCredentialsGrantTokenRequestBuilder;
-    }
+    abstract SourceAuthStrategy windsurfServiceKeyAuthStrategy(WindsurfServiceKeyAuthStrategy impl);
 
-    @Provides
+    @Binds
+    abstract OAuth2CredentialsWithRefresh.OAuth2RefreshHandler oauth2RefreshHandler(
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl impl);
+
+    @Binds
     @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder accountCredentialsGrantTokenRequestPayloadBuilder(
-        AccountCredentialsGrantTokenRequestBuilder refreshTokenPayloadBuilder) {
-        return refreshTokenPayloadBuilder;
-    }
+    abstract OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder refreshTokenTokenRequestBuilder(
+        RefreshTokenTokenRequestBuilder impl);
 
-    @Provides
+    @Binds
     @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder certificateCredentialsGrantTokenRequestPayloadBuilder(
-        CertificateGrantTokenRequestBuilder certificateGrantTokenRequestBuilder) {
-        return certificateGrantTokenRequestBuilder;
-    }
+    abstract OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder refreshTokenRequestViaQueryParameterBuilder(
+        RefreshTokenRequestViaQueryParameterBuilder impl);
 
-    @Provides
+    @Binds
     @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser tokenResponseParser(
-        OAuthRefreshTokenSourceAuthStrategy.TokenResponseParserImpl instance) {
-        return instance;
-    }
+    abstract OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder clientCredentialsGrantTokenRequestBuilder(
+        ClientCredentialsGrantTokenRequestBuilder impl);
 
-    @Provides
+    @Binds
     @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser githubResponseParser(
-        GithubAccessTokenResponseParserImpl instance) {
-        return instance;
-    }
+    abstract OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder accountCredentialsGrantTokenRequestBuilder(
+        AccountCredentialsGrantTokenRequestBuilder impl);
 
+    @Binds
+    @IntoSet
+    abstract OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder certificateGrantTokenRequestBuilder(
+        CertificateGrantTokenRequestBuilder impl);
+
+    @Binds
+    @IntoSet
+    abstract OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser tokenResponseParser(
+        OAuthRefreshTokenSourceAuthStrategy.TokenResponseParserImpl impl);
+
+    @Binds
+    @IntoSet
+    abstract OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser githubAccessTokenResponseParser(
+        GithubAccessTokenResponseParserImpl impl);
 }

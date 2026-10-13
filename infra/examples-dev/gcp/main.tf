@@ -9,6 +9,10 @@ terraform {
       source  = "hashicorp/tls"
       version = "~> 4.0"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = ">= 2.0"
+    }
   }
 
   # NOTE: Terraform backend block is configured in a separate 'backend.tf' file, as expect everyone
@@ -34,7 +38,7 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.7.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.7.1"
 
   base_dir                                 = var.psoxy_base_dir
   enabled_connectors                       = var.enabled_connectors
@@ -60,7 +64,7 @@ module "worklytics_connectors" {
   gong_instance_subdomain                  = var.gong_instance_subdomain
   glean_instance_subdomain                 = var.glean_instance_subdomain
   salesforce_example_account_id            = var.salesforce_example_account_id
-  todos_as_local_files                     = var.todos_as_local_files
+  todos_as_local_files                     = false # root todos.tf writes these files
   todo_step                                = 1
 }
 
@@ -108,7 +112,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.7.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.7.1"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
@@ -148,13 +152,13 @@ module "psoxy" {
   lookup_tables                   = var.lookup_tables
   custom_artifacts_bucket_name    = var.custom_artifacts_bucket_name
   custom_side_outputs             = var.custom_side_outputs
-  todos_as_local_files            = var.todos_as_local_files
+  todos_as_local_files            = false # root todos.tf writes these files
   todo_step                       = local.max_auth_todo_step
+  enable_remote_resources         = var.enable_remote_resources
   bucket_force_destroy            = var.bucket_force_destroy
   tf_gcp_principal_email          = var.gcp_terraform_sa_account_email
   provision_project_level_iam     = var.provision_project_level_iam
   bucket_access_logs_destination  = var.bucket_access_logs_destination
-  enable_remote_resources         = true
 }
 
 locals {
@@ -176,7 +180,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=v0.7.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=v0.7.1"
 
   host_platform_id     = local.host_platform_id
   proxy_instance_id    = each.key
@@ -184,7 +188,7 @@ module "connection_in_worklytics" {
   connector_id         = try(local.all_connectors[each.key].worklytics_connector_id, "bulk-import-psoxy", "")
   display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${try(local.all_connectors[each.key].display_name, replace(each.key, "-", " "))} via Psoxy", "${replace(each.key, "-", " ")} via Psoxy")
   todo_step            = module.psoxy.next_todo_step
-  todos_as_local_files = var.todos_as_local_files
+  todos_as_local_files = false # root todos.tf writes these files
 
   settings_to_provide = merge(
     # Source API case — endpoint_url is the ALB URL when external_api_alb / api_connector_external_lb_host is set
@@ -200,6 +204,11 @@ module "connection_in_worklytics" {
     }, {}),
     try(each.value.settings_to_provide, {}),
   try(local.all_connectors[each.key].settings_to_provide, {}))
+}
+
+output "deployment_platform" {
+  description = "Cloud platform for this deployment. Used when synthesizing test scripts."
+  value       = "gcp"
 }
 
 output "path_to_deployment_jar" {
@@ -233,12 +242,19 @@ output "webhook_collector_instances" {
     side_output_sanitized_bucket_id = try(v.side_output_sanitized_bucket_id, null)
     side_output_original_bucket_id  = try(v.side_output_original_bucket_id, null)
     test_examples                   = try(v.test_examples, [])
+    provisioned_auth_key_pairs      = try(v.provisioned_auth_key_pairs, [])
+    batch_scheduler_job_id          = try(v.batch_scheduler_job_id, null)
   } }
 }
 
 output "artifacts_bucket_id" {
   description = "The ID of the artifacts google_storage_bucket resource"
   value       = module.psoxy.artifacts_bucket_id
+}
+
+output "repo_base_dir" {
+  description = "Absolute path to the repository root used to build test scripts (trailing slash)."
+  value       = var.psoxy_base_dir
 }
 
 # Uncomment when using the **beta** external_api_alb (or BYO api_connector_external_lb_host) and you need these values:
@@ -266,6 +282,11 @@ output "todos_2" {
 output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value       = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics)[*].todo) : null
+}
+
+output "todo_files" {
+  description = "TODO markdown files (filename => content). todos.tf writes them when todos_as_local_files is true. ./generate-todos.sh writes the same files from this output. These local_file resources are deprecated and will be removed in 0.8."
+  value       = local.todo_files
 }
 
 # although should be sensitive such that Terraform won't echo it to command line or expose it, leave

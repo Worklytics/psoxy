@@ -945,6 +945,8 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].id"
+          - "$.first_id"
+          - "$.last_id"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
@@ -1275,6 +1277,8 @@ definitions:
         type: "string"
         format: "date-time"
       id:
+        type: "string"
+      model:
         type: "string"
       provenance:
         $ref: "#/definitions/Provenance"

@@ -88,6 +88,8 @@ terraform output -raw todos_3 > todos_3.md
 
 (This approach should also work with Terraform CLI running with `backend`, rather than `cloud`)
 
+The example root writes the individual `TODO *.md` files and test scripts from `todos.tf` when `todos_as_local_files` is true (the default). That example passes false into the connector, host, and Worklytics-connection modules, so they do not write the same paths. On Terraform Cloud set `todos_as_local_files` false (there is no local disk for `local_file`) and run `./generate-todos.sh` where you can read the outputs, or read `todo_files`. The `local_file` resources are deprecated and will be removed in 0.8. The joined `todos_1` / `todos_2` / `todos_3` outputs remain for the single-blob workflow above. Host and connector modules still honor `todos_as_local_files` when a configuration passes it through; this example does not.
+
 ## Testing Locally
 
 As Terraform Cloud runs remotely, the test tool we provide for testing your deployment will not be available by default on your local machine. You can install it locally and adapt the suggestions from the `todos_2` output variable of your terraform run to test your deployment from your local machine or another environment. See [testing.md](testing.md) for details.
