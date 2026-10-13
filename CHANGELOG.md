@@ -7,6 +7,8 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Unreleased
 
+- `slack-analytics`: promote connector from **alpha** to **beta**; clarify docs that `admin.analytics.messages.metadata` / `admin.analytics.messages.activity` provide message-level signals under `admin.analytics:read` without message body text.
+
 ## [0.7.1](https://github.com/Worklytics/psoxy/releases/tag/v0.7.1)
 - `aws`: VPC example `vpc.tf` improved, public/private segmentation and security groups.
 - `chatgpt-enterprise`: improved documentation re setup instructions.

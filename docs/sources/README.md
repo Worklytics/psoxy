@@ -48,7 +48,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `outlook-mail`             | [Outlook Mail](microsoft-365/outlook-mail/README.md)                        | API  | GA           |
 | `qualtrics`                | [Qualtrics](survey/README.md)                                               | Bulk | BETA         |
 | `salesforce`               | [Salesforce](salesforce/README.md)                                          | API  | GA           |
-| `slack-analytics`          | [Slack Analytics](slack/slack-analytics/README.md)                           | API  | ALPHA        |
+| `slack-analytics`          | [Slack Analytics](slack/slack-analytics/README.md)                           | API  | BETA         |
 | `slack-ai-analytics-bulk`  | [Slack AI Analytics Bulk](slack/slack-ai-bulk/README.md)                    | Bulk | ALPHA        |
 | `slack-discovery-api`      | [Slack via Discovery API](slack/slack-discovery-api/README.md)              | API  | GA           |
 | `survey`                   | [Survey](survey/README.md)                                                  | Bulk | GA           |
