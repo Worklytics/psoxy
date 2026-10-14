@@ -67,7 +67,7 @@ import co.worklytics.psoxy.RESTApiSanitizer;
 import co.worklytics.psoxy.RESTApiSanitizerFactory;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
-import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.InboundRequestPathNormalizer;
@@ -110,7 +110,7 @@ public class ApiDataRequestHandler {
     @Inject
     EnvVarsConfigService envVarsConfigService;
     @Inject
-    ConfigService config;
+    ProxyConfig proxyConfig;
     @Inject
     SecretStore secretStore;
     @Inject
@@ -208,7 +208,7 @@ public class ApiDataRequestHandler {
             synchronized ($writeLock) {
                 if (this.sanitizer == null) {
                     Pseudonymizer.ConfigurationOptions options =
-                            pseudonymizerImplFactory.buildOptions(config);
+                            pseudonymizerImplFactory.buildOptions(proxyConfig);
                     this.sanitizer = sanitizerFactory.create(rules.get(),
                             pseudonymizerImplFactory.create(options));
                 }
@@ -406,9 +406,7 @@ public class ApiDataRequestHandler {
             // URL that would reject an extra Authorization header; those connectors opt out via
             // FOLLOW_REDIRECTS=FALSE, and the async redirect block then GETs the Location without
             // source auth.
-            boolean followRedirects = config.getConfigPropertyAsOptional(ProxyConfigProperty.FOLLOW_REDIRECTS)
-                    .map(Boolean::parseBoolean)
-                    .orElse(true);
+            boolean followRedirects = apiModeConfig.isFollowRedirects();
 
             requestToSourceApi
                     .setThrowExceptionOnExecuteError(false)

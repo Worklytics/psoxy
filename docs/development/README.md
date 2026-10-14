@@ -13,7 +13,6 @@ This directory contains documentation for developers working on or with Psoxy.
 - [Security Scanning](security-scanning.md) - Security scanning tools and processes
 - [Webhook Collectors](webhook-collectors.md) - Webhook collector development
 - [Compression](compression.md) - Data compression handling
-- [Concrete configuration POJOs](concrete-config-pojos.md) - Injecting typed config instead of `ConfigService` in application code
 - [GCP Parameter Manager](gcp-parameter-manager.md) - Why GCP Parameter Manager is not used for configuration
 - [GCP External Application Load Balancer (ALB) + Cloud Armor](gcp-external-alb.md) - Beta first-class `gcp-host` option for public ALB + optional IP allowlist (not PSC)
 

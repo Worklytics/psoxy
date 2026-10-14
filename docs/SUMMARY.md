@@ -52,7 +52,6 @@
   * [Remote Resources](configuration/remote-resources.md)
 * [Development](development/README.md)
   * [Approaches for Example / Module design](development/terraform-architecture.md)
-  * [Concrete configuration POJOs](development/concrete-config-pojos.md)
   * [Create a private fork](development/private-fork.md)
   * [HTTP Compression](development/compression.md)
   * [Java Annotation Proccessing](development/intellij.md)
