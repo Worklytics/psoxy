@@ -1,6 +1,7 @@
 package com.avaulta.gateway.rules.augments;
 
 import com.avaulta.gateway.rules.JsonSchema;
+import com.avaulta.gateway.rules.KeywordMatcher;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -151,44 +152,26 @@ public abstract class Augment {
             result.put("length", text.length());
             result.put("word_count", text.trim().split("\\s+").length);
 
-            Set<String> keys = getSearchKeys();
-            if (!keys.isEmpty()) {
-                String[] wordTokens = text.toLowerCase().split("\\W+");
-                Map<String, Integer> matchedKeywords = new TreeMap<>();
-                for (String t : wordTokens) {
-                    if (keys.contains(t)) {
-                        matchedKeywords.put(t, matchedKeywords.getOrDefault(t, 0) + 1);
-                    }
-                }
-                if (!matchedKeywords.isEmpty()) {
-                    result.put("keywords", matchedKeywords);
-                }
+            Map<String, Integer> matchedKeywords = getKeywordMatcher().count(text);
+            if (!matchedKeywords.isEmpty()) {
+                result.put("keywords", matchedKeywords);
             }
             return result;
         }
 
         /**
-         * Lazily computed, thread-safe cache of lowercased keyword set.
-         * Volatile ensures visibility across threads; the set itself is
-         * effectively immutable once computed.
+         * Lazily built from {@link #keywords}. Volatile ensures visibility across threads; the
+         * matcher itself is immutable once built.
          */
-        private volatile Set<String> searchKeys;
+        private transient volatile KeywordMatcher keywordMatcher;
 
-        private Set<String> getSearchKeys() {
-            Set<String> keys = searchKeys;
-            if (keys == null) {
-                keys = new HashSet<>();
-                if (keywords != null) {
-                    for (String k : keywords) {
-                        if (StringUtils.isNotBlank(k)) {
-                           keys.add(k.toLowerCase());
-                        }
-                    }
-                }
-                keys = Set.copyOf(keys); // immutable snapshot
-                searchKeys = keys;
+        private KeywordMatcher getKeywordMatcher() {
+            KeywordMatcher matcher = keywordMatcher;
+            if (matcher == null) {
+                matcher = new KeywordMatcher(keywords);
+                keywordMatcher = matcher;
             }
-            return keys;
+            return matcher;
         }
     }
 

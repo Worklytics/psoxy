@@ -1,6 +1,7 @@
 package com.avaulta.gateway.rules.transforms;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.rules.KeywordMatcher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
@@ -11,11 +12,9 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeMap;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
@@ -527,19 +526,20 @@ public abstract class Transform {
                 .build();
         }
 
+        /**
+         * Lazily built from {@link #keywords}. Volatile, and only assigned once fully built, so
+         * concurrent requests never see a partial matcher; at worst two threads each build one.
+         */
         @JsonIgnore
-        private transient Set<String> searchKeys;
+        private transient volatile KeywordMatcher keywordMatcher;
 
-        private Set<String> getSearchKeys() {
-            if (searchKeys == null) {
-                searchKeys = new HashSet<>();
-                if (keywords != null) {
-                    for (String k : keywords) {
-                        searchKeys.add(k.toLowerCase());
-                    }
-                }
+        private KeywordMatcher getKeywordMatcher() {
+            KeywordMatcher matcher = keywordMatcher;
+            if (matcher == null) {
+                matcher = new KeywordMatcher(keywords);
+                keywordMatcher = matcher;
             }
-            return searchKeys;
+            return matcher;
         }
 
         public TreeMap<String, Object> generate(String text) {
@@ -550,18 +550,9 @@ public abstract class Transform {
                 result.put("length", text.length());
                 result.put("word_count", text.trim().split("\\s+").length);
 
-                Set<String> keys = getSearchKeys();
-                if (!keys.isEmpty()) {
-                    String[] wordTokens = text.toLowerCase().split("\\W+");
-                    Map<String, Integer> matchedKeywords = new TreeMap<>();
-                    for (String t : wordTokens) {
-                        if (keys.contains(t)) {
-                            matchedKeywords.put(t, matchedKeywords.getOrDefault(t, 0) + 1);
-                        }
-                    }
-                    if (!matchedKeywords.isEmpty()) {
-                        result.put("keywords", matchedKeywords);
-                    }
+                Map<String, Integer> matchedKeywords = getKeywordMatcher().count(text);
+                if (!matchedKeywords.isEmpty()) {
+                    result.put("keywords", matchedKeywords);
                 }
                 return result;
             }
