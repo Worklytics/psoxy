@@ -31,7 +31,7 @@
         <skipOpenNlpModelDownload>true</skipOpenNlpModelDownload>
         <dependency.langchain4j.version>1.22.0</dependency.langchain4j.version>
         <!-- Shared beta channel for langchain4j-* modules that are not yet GA (e.g. google-genai). -->
-        <dependency.langchain4j-beta.version>1.16.0-beta26</dependency.langchain4j-beta.version>
+        <dependency.langchain4j-beta.version>1.22.0-beta32</dependency.langchain4j-beta.version>
         <plugin.surefire.version>3.6.0</plugin.surefire.version>
         <dependency.bouncycastle.version>1.86</dependency.bouncycastle.version>
         <plugin.compiler.version>3.16.0</plugin.compiler.version>
