@@ -2,7 +2,7 @@
 
 **Connector ID:** `github-copilot`
 
-Availability: **ALPHA**
+**Availability:** Beta
 
 ## Authentication workflow
 

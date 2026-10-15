@@ -194,6 +194,7 @@ locals {
       enable_side_output : false
       example_api_calls : [
         "/v1.0/users",
+        "/v1.0/copilot/users/${local.example_msft_user_guid}/interactionHistory/getAllEnterpriseInteractions",
         "/beta/copilot/users/${local.example_msft_user_guid}/interactionHistory/getAllEnterpriseInteractions"
       ]
     }

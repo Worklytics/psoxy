@@ -555,7 +555,7 @@ EOT
     }
     github-copilot = {
       source_kind : "github-copilot",
-      availability : "alpha",
+      availability : "beta",
       enable_by_default : false,
       worklytics_connector_id : "github-copilot-psoxy"
       display_name : "Github Copilot"
@@ -1758,7 +1758,7 @@ EOT
     }
     "slack-ai-analytics-bulk" = {
       source_kind               = "slack-ai"
-      availability              = "alpha"
+      availability              = "beta"
       enable_by_default         = false
       worklytics_connector_id   = "slack-ai-analytics-bulk-psoxy"
       worklytics_connector_name = "Slack AI Analytics - Bulk via Psoxy"

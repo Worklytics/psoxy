@@ -8,6 +8,8 @@ Changes to be including in future/planned release notes will be added here.
 ## Unreleased
 
 - `slack-analytics`: promote connector from **alpha** to **beta**; clarify docs that `admin.analytics.messages.metadata` / `admin.analytics.messages.activity` provide message-level signals under `admin.analytics:read` without message body text.
+- `github-copilot`, `slack-ai-analytics-bulk`: promote connectors from **alpha** to **beta**.
+- `msft-copilot`: allow `GET /v1.0/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions` in addition to the existing `/beta/...` path (same sanitization rules).
 
 ## [0.7.1](https://github.com/Worklytics/psoxy/releases/tag/v0.7.1)
 - `aws`: VPC example `vpc.tf` improved, public/private segmentation and security groups.

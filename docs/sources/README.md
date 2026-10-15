@@ -26,7 +26,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `gemini-in-workspace-apps` | [Google Gemini in Workspace Apps](google-workspace/gemini-in-workspace-apps/README.md) | API  | BETA         |
 | `gemini-usage`             | [Gemini Usage](google-workspace/gemini-usage-bulk/README.md)                | Bulk | DEPRECATED   |
 | `github`                   | [GitHub Enterprise](github/github/README.md)                                | API  | GA           |
-| `github-copilot`           | [GitHub Copilot](github/copilot/README.md)                                  | API  | ALPHA        |
+| `github-copilot`           | [GitHub Copilot](github/copilot/README.md)                                  | API  | BETA         |
 | `github-enterprise-server` | [GitHub Enterprise Server](github/enterprise-server/README.md)              | API  | GA           |
 | `github-non-enterprise`    | [GitHub Free/Pro/Teams](github/github-non-enterprise/README.md)             | API  | GA           |
 | `gitlab-cloud`             | [GitLab Cloud](gitlab/gitlab-cloud/README.md)                               | API  | BETA         |
@@ -49,7 +49,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `qualtrics`                | [Qualtrics](survey/README.md)                                               | Bulk | BETA         |
 | `salesforce`               | [Salesforce](salesforce/README.md)                                          | API  | GA           |
 | `slack-analytics`          | [Slack Analytics](slack/slack-analytics/README.md)                           | API  | BETA         |
-| `slack-ai-analytics-bulk`  | [Slack AI Analytics Bulk](slack/slack-ai-bulk/README.md)                    | Bulk | ALPHA        |
+| `slack-ai-analytics-bulk`  | [Slack AI Analytics Bulk](slack/slack-ai-bulk/README.md)                    | Bulk | BETA         |
 | `slack-discovery-api`      | [Slack via Discovery API](slack/slack-discovery-api/README.md)              | API  | GA           |
 | `survey`                   | [Survey](survey/README.md)                                                  | Bulk | GA           |
 | `windsurf`                 | [Windsurf](windsurf/README.md)                                              | API  | DEPRECATED   |

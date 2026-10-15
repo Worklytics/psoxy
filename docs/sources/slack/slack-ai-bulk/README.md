@@ -2,7 +2,7 @@
 
 **Connector ID:** `slack-ai-analytics-bulk`
 
-**Availability:** Alpha
+**Availability:** Beta
 
 Psoxy can pseudonymize Slack AI Snapshot data for ingestion into Worklytics. Each export captures usage metrics (such as MAU and 30/90-day look-backs) as of a given date.
 

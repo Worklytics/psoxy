@@ -711,7 +711,11 @@ public class PrebuiltSanitizerRules {
         .withAdditionalEndpoints(ENTRA_ID_USERS_NO_APP_IDS)
         .withTransformByEndpoint(ENTRA_ID_REGEX_USERS_BY_PSEUDO, ENTRA_ID_USERS_NO_APP_IDS_TRANSFORM_RULE);
 
-    static final String MS_COPILOT_INTERACTIONS_PATH = "/beta/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions";
+    static final String MS_COPILOT_INTERACTIONS_PATH_V1 =
+        "/v1.0/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions";
+    static final String MS_COPILOT_INTERACTIONS_PATH_BETA =
+        "/beta/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions";
+    static final String MS_COPILOT_INTERACTIONS_PATH = MS_COPILOT_INTERACTIONS_PATH_BETA;
 
     static final Transform.Redact MS_COPILOT_INTERACTIONS_REDACT = Transform.Redact.builder()
         .jsonPath("$..displayName")
@@ -743,30 +747,34 @@ public class PrebuiltSanitizerRules {
         .jsonPath("$..attachments[*].content")
         .build();
 
-    static final Endpoint MS_COPILOT_INTERACTIONS = Endpoint.builder()
-        .pathTemplate(MS_COPILOT_INTERACTIONS_PATH)
-        .allowedQueryParams(List.of("$filter"))
-        .augment(MS_COPILOT_AUGMENT_ATTACHMENT)
-        .augment(MS_COPILOT_AUGMENT_BODY)
-        .transform(MS_COPILOT_PSEUDONYMIZE)
-        .transform(MS_COPILOT_INTERACTIONS_REDACT)
-        .transform(MS_COPILOT_CONTENT_REDACT)
-        .transform(REDACT_ODATA_CONTEXT)
-        .transform(REDACT_ODATA_COUNT)
-        .transform(REDACT_ODATA_TYPE)
-        .build();
+    static Endpoint msftCopilotInteractionsEndpoint(String pathTemplate) {
+        return Endpoint.builder()
+            .pathTemplate(pathTemplate)
+            .allowedQueryParams(List.of("$filter", "$top"))
+            .augment(MS_COPILOT_AUGMENT_ATTACHMENT)
+            .augment(MS_COPILOT_AUGMENT_BODY)
+            .transform(MS_COPILOT_PSEUDONYMIZE)
+            .transform(MS_COPILOT_INTERACTIONS_REDACT)
+            .transform(MS_COPILOT_CONTENT_REDACT)
+            .transform(REDACT_ODATA_CONTEXT)
+            .transform(REDACT_ODATA_COUNT)
+            .transform(REDACT_ODATA_TYPE)
+            .build();
+    }
 
     static final Rules2 MS_COPILOT_BASE = Rules2.builder()
-        .endpoint(MS_COPILOT_INTERACTIONS)
+        .endpoint(msftCopilotInteractionsEndpoint(MS_COPILOT_INTERACTIONS_PATH_V1))
+        .endpoint(msftCopilotInteractionsEndpoint(MS_COPILOT_INTERACTIONS_PATH_BETA))
         .build();
 
     static final Rules2 MS_COPILOT = MS_COPILOT_BASE
         .withAdditionalEndpoints(ENTRA_ID_USERS)
-        .withTransformByEndpointTemplate(MS_COPILOT_INTERACTIONS_PATH);
+        .withTransformByEndpointTemplate(MS_COPILOT_INTERACTIONS_PATH_V1)
+        .withTransformByEndpointTemplate(MS_COPILOT_INTERACTIONS_PATH_BETA);
 
     static final Rules2 MS_COPILOT_NO_USER_ID = Rules2.builder()
         .endpoint(Endpoint.builder()
-            .pathRegex("^/beta/copilot/users/(/p~[a-zA-Z0-9_-]+?)?[^/]*/interactionHistory/getAllEnterpriseInteractions(\\?.*)?")
+            .pathRegex("^/(v1\\.0|beta)/copilot/users/(/p~[a-zA-Z0-9_-]+?)?[^/]*/interactionHistory/getAllEnterpriseInteractions(\\?.*)?")
             .transforms(Arrays.asList(MS_COPILOT_PSEUDONYMIZE,
                 // id of the chat may contain MSFT user GUIDS
                 Transform.Tokenize.builder()
@@ -775,7 +783,7 @@ public class PrebuiltSanitizerRules {
                     .build(),
                 Transform.Tokenize.builder()
                     .jsonPath("$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']")
-                    .regex("^https://graph.microsoft.com/beta/copilot/users/([a-zA-Z0-9_-]+)/.*$")
+                    .regex("^https://graph.microsoft.com/(v1\\.0|beta)/copilot/users/([a-zA-Z0-9_-]+)/.*$")
                     .build(),
                 Transform.Pseudonymize.builder()
                     .jsonPath("$..from..[?(@.applicationIdentityType != \"bot\")].id")

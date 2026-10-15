@@ -10,7 +10,7 @@ insights based on collaboration via Microsoft 365 Copilot interaction. Includes 
 support fetching
 mailboxes from each account.
 
-**Note:** This connector uses a *beta* endpoint in the Microsoft Graph API.
+**Note:** Prefer the Graph **v1.0** Copilot interaction export API (`/v1.0/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions`). The proxy also allows the legacy **`/beta/...`** path with the same sanitization rules until downstream connections migrate.
 
 Please review the [Microsoft 365 README](../README.md) for general information applicable to
 all Microsoft 365 connectors.
@@ -28,8 +28,9 @@ See the [Microsoft 365 Authentication](../README.md#authentication) section of t
 
 | API Endpoint                                                               | Example Response                                                                                                      | Sanitized Example Response                                                                      |
 |----------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
-| `/beta/copilot/users/{EXAMPLE_MSFT_USER_GUID}/interactionHistory/getAllEnterpriseInteractions` | [original/response_beta.json](example-api-responses/original/response_beta.json)                                      | [sanitized/response_beta.json](example-api-responses/sanitized/response_beta.json)                   |
-| `/beta/copilot/users/{EXAMPLE_MSFT_USER_GUID}/interactionHistory/getAllEnterpriseInteractions` | [original/response_with_team_meeting_beta.json](example-api-responses/original/response_with_team_meeting_beta.json) | [sanitized/response_with_team_meeting_beta.json](example-api-responses/sanitized/response_with_team_meeting_beta.json) |
+| `/v1.0/copilot/users/{EXAMPLE_MSFT_USER_GUID}/interactionHistory/getAllEnterpriseInteractions` | [original/response_beta.json](example-api-responses/original/response_beta.json)                                      | [sanitized/response_beta.json](example-api-responses/sanitized/response_beta.json)                   |
+| `/v1.0/copilot/users/{EXAMPLE_MSFT_USER_GUID}/interactionHistory/getAllEnterpriseInteractions` | [original/response_with_team_meeting_beta.json](example-api-responses/original/response_with_team_meeting_beta.json) | [sanitized/response_with_team_meeting_beta.json](example-api-responses/sanitized/response_with_team_meeting_beta.json) |
+| `/beta/copilot/users/{EXAMPLE_MSFT_USER_GUID}/interactionHistory/getAllEnterpriseInteractions` | _(same response shape as v1.0; also supported)_ | _(same sanitization as v1.0)_ |
 
 
 `{EXAMPLE_MSFT_USER_GUID}` is an Entra user id (GUID) from `GET /v1.0/users`.

@@ -24,11 +24,11 @@ public class CopilotTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"beta"})
-    @Description("Test endpoint:" + PrebuiltSanitizerRules.MS_COPILOT_INTERACTIONS_PATH)
+    @ValueSource(strings = {"v1.0", "beta"})
+    @Description("Test Copilot interaction export on Graph v1.0 and beta paths")
     public void getAllEnterpriseInteractions(String apiVersion) {
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/copilot/users/some-user/interactionHistory/getAllEnterpriseInteractions";
-        String jsonResponse = asJson("response_" + apiVersion + ".json");
+        String jsonResponse = asJson("response_beta.json");
         assertNotSanitized(jsonResponse,
                 "fb8d773d-7ef8-4ec0-a117-179f88add510",
                 "4db02e4b-d144-400e-b194-53253a34c5be",
@@ -48,14 +48,14 @@ public class CopilotTests extends JavaRulesTestBaseCase {
 
     @Override
     public Stream<InvocationExample> getExamples() {
-        String apiVersion = "beta";
-        String baseEndpoint = "https://graph.microsoft.com/" + apiVersion;
+        String userPath =
+            "/copilot/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/interactionHistory/getAllEnterpriseInteractions";
 
         return Stream.of(
-                InvocationExample.of(baseEndpoint + "/copilot/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/interactionHistory/getAllEnterpriseInteractions",
-                    "response_" + apiVersion + ".json"),
-            InvocationExample.of(baseEndpoint + "/copilot/users/8b081ef6-4792-4def-b2c9-c363a1bf41d5/interactionHistory/getAllEnterpriseInteractions",
-                "response_with_team_meeting_" + apiVersion + ".json")
+            InvocationExample.of("https://graph.microsoft.com/v1.0" + userPath, "response_beta.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0" + userPath, "response_with_team_meeting_beta.json"),
+            InvocationExample.of("https://graph.microsoft.com/beta" + userPath, "response_beta.json"),
+            InvocationExample.of("https://graph.microsoft.com/beta" + userPath, "response_with_team_meeting_beta.json")
         );
     }
 }
