@@ -151,7 +151,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     }
 
     @Inject
-    ConfigService config;
+    OAuthRefreshTokenSourceAuthConfig oauthConfig;
     @Inject
     SecretStore secretStore;
     @Inject
@@ -257,18 +257,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     }
 
     boolean useSharedToken() {
-        Optional<String> useSharedTokenConfig =
-                config.getConfigPropertyAsOptional(ConfigProperty.USE_SHARED_TOKEN);
+        Optional<Boolean> useSharedTokenConfig = oauthConfig.getUseSharedToken();
 
         // legacy behavior was that tokens shared in account_credentials grant type
-        // see:
-        // https://github.com/Worklytics/psoxy/blob/v0.4.31/java/core/src/main/java/co/worklytics/psoxy/gateway/impl/oauth/AccountCredentialsGrantTokenRequestBuilder.java#L55-L57
-        // and Zoom was the only source that used account_credentials grant type at the time
-        boolean isClientCredentialsGrantType = config
-                .getConfigPropertyAsOptional(ConfigProperty.GRANT_TYPE)
+        boolean isAccountCredentialsGrantType = oauthConfig.getGrantType()
                 .map(AccountCredentialsGrantTokenRequestBuilder.GRANT_TYPE::equals).orElse(false);
 
-        return useSharedTokenConfig.map(Boolean::parseBoolean).orElse(isClientCredentialsGrantType);
+        return useSharedTokenConfig.orElse(isAccountCredentialsGrantType);
     }
 
     @VisibleForTesting
@@ -383,7 +378,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         static final int WRITE_RETRIES = 3;
 
         @Inject
-        ConfigService config;
+        OAuthRefreshTokenSourceAuthConfig oauthConfig;
         @Inject
         EnvVarsConfigService envVarsConfigService;
         @Inject
@@ -549,7 +544,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         private CanonicalOAuthAccessTokenResponseDto exchangeRefreshTokenForAccessToken()
                 throws IOException {
             URI refreshEndpoint = payloadBuilder.getEndpoint(
-                    config.getConfigPropertyOrError(ConfigProperty.REFRESH_ENDPOINT));
+                    oauthConfig.getRefreshEndpoint().orElseThrow(() -> new IllegalStateException(
+                        "Missing required config: " + ConfigProperty.REFRESH_ENDPOINT)));
 
             HttpRequest tokenRequest = httpRequestFactory.buildPostRequest(
                     new GenericUrl(refreshEndpoint), payloadBuilder.buildPayload());

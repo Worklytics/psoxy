@@ -44,8 +44,6 @@ public class CertificateGrantTokenRequestBuilder
     private final String grantType = GRANT_TYPE;
 
     @Inject
-    ConfigService config;
-    @Inject
     SecretStore secretStore;
 
     @Override
@@ -58,12 +56,13 @@ public class CertificateGrantTokenRequestBuilder
 
     @Override
     public void addHeaders(HttpHeaders httpHeaders) {
-        String oauthClientId =
-            config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID)
-                .orElseGet(() -> secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
+        String oauthClientId = oauthConfig.getClientId()
+                .orElseGet(() -> secretStore.getConfigPropertyOrError(
+                    OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
 
-        String tokenEndpoint =
-            config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
+        String tokenEndpoint = oauthConfig.getRefreshEndpoint().orElseThrow(() -> new IllegalStateException(
+            "Missing required config: "
+                + OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT));
 
         httpHeaders.setAuthorization("Bearer " + buildJwtAssertion(oauthClientId, tokenEndpoint));
     }

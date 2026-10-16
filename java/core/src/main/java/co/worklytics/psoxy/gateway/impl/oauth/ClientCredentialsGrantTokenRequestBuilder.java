@@ -63,7 +63,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
 
     public static final String GRANT_TYPE = "client_credentials";
 
-    enum ConfigProperty implements ConfigService.ConfigProperty {
+    public enum ConfigProperty implements ConfigService.ConfigProperty {
         PRIVATE_KEY_ID,
         PRIVATE_KEY,
         TOKEN_SCOPE,
@@ -73,7 +73,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
         CREDENTIALS_FLOW
     }
 
-    private enum CredentialFlowType {
+    enum CredentialFlowType {
         // https://www.rfc-editor.org/rfc/rfc6749
         CLIENT_SECRET,
         // https://www.rfc-editor.org/rfc/rfc7523
@@ -116,7 +116,9 @@ public class ClientCredentialsGrantTokenRequestBuilder
     final Duration DEFAULT_EXPIRATION_DURATION = Duration.ofMinutes(5);
 
     @Inject
-    ConfigService config;
+    OAuthRefreshTokenSourceAuthConfig oauthConfig;
+    @Inject
+    ClientCredentialsGrantConfig clientCredentialsGrantConfig;
     @Inject
     SecretStore secretStore;
     @Inject
@@ -218,12 +220,14 @@ public class ClientCredentialsGrantTokenRequestBuilder
 
         String oauthClientId = getClientId();
         String tokenEndpoint =
-            config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
+            oauthConfig.getRefreshEndpoint().orElseThrow(() -> new IllegalStateException(
+                "Missing required config: "
+                    + OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT));
 
         Map<String, String> data = new TreeMap<>();
         //https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
         data.put(PARAM_GRANT_TYPE, "client_credentials");
-        config.getConfigPropertyAsOptional(ConfigProperty.TOKEN_SCOPE)
+        clientCredentialsGrantConfig.getTokenScope()
                 .ifPresent(r -> data.put(PARAM_SCOPE, r)); // 'scope' param is optional, per RFC
 
         //https://datatracker.ietf.org/doc/html/rfc7521#section-4.2
@@ -367,13 +371,13 @@ public class ClientCredentialsGrantTokenRequestBuilder
 
 
     private CredentialFlowType getCredentialsType() {
-        return config.getConfigPropertyAsOptional(ConfigProperty.CREDENTIALS_FLOW)
-            .map(v -> CredentialFlowType.parse(v).orElse(CredentialFlowType.JWT_ASSERTION))
+        return clientCredentialsGrantConfig.getCredentialsFlow()
             .orElse(CredentialFlowType.JWT_ASSERTION);
     }
 
     private String getClientId() {
-        return config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID)
-            .orElseGet(() -> secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
+        return oauthConfig.getClientId()
+            .orElseGet(() -> secretStore.getConfigPropertyOrError(
+                OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
     }
 }

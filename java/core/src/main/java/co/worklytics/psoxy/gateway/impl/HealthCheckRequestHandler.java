@@ -23,7 +23,9 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthConfig;
 import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
@@ -46,6 +48,10 @@ public class HealthCheckRequestHandler {
     ApiModeConfig apiModeConfig;
     @Inject
     EnvVarsConfigService envVarsConfigService;
+    @Inject
+    ProxyConfig proxyConfig;
+    @Inject
+    OAuthRefreshTokenSourceAuthConfig oauthRefreshTokenSourceAuthConfig;
     @Inject
     ConfigService config;
     @Inject
@@ -120,10 +126,11 @@ public class HealthCheckRequestHandler {
         HealthCheckResult.HealthCheckResultBuilder healthCheckResult = HealthCheckResult.builder()
                 .javaSourceCodeVersion(ProxyConstants.JAVA_SOURCE_CODE_VERSION)
                 .userAgent(proxyConstants.getUserAgent())
-                .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
+                .configuredSource(proxyConfig.getSource().orElse(null))
                 .configuredHost(apiModeConfig.getTargetHost().orElse(null))
                 .nonDefaultSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
-                .pseudonymImplementation(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION).orElse(null))
+                .pseudonymImplementation(proxyConfig.getPseudonymImplementation()
+                    .map(Enum::name).orElse(null))
                 .missingConfigProperties(missing)
                 .callerIp(request.getClientIp().orElse("unknown"));
 
@@ -138,9 +145,7 @@ public class HealthCheckRequestHandler {
         }
 
         try {
-            config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYMIZE_APP_IDS)
-                .map(Boolean::parseBoolean)
-                .ifPresent(healthCheckResult::pseudonymizeAppIds);
+            healthCheckResult.pseudonymizeAppIds(proxyConfig.isPseudonymizeAppIds());
         } catch (Throwable e) {
             logInDev("Failed to add pseudonymizeAppIds to health check", e);
         }
@@ -176,27 +181,27 @@ public class HealthCheckRequestHandler {
         }
 
         try {
-            config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE)
+            oauthRefreshTokenSourceAuthConfig.getGrantType()
                     .ifPresent(healthCheckResult::sourceAuthGrantType);
         } catch (Throwable e) {
             logInDev("Failed to add sourceAuthGrantType to health check", e);
         }
 
         try {
-            config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME)
+            proxyConfig.getBundleFilename()
                     .ifPresent(healthCheckResult::bundleFilename);
         } catch (Throwable e) {
             logInDev("Failed to add bundleFilename to health check", e);
         }
 
         try {
-            rulesUtils.getRulesFromConfig(config, envVarsConfigService)
+            rulesUtils.getRulesFromConfig(proxyConfig, envVarsConfigService)
                     .ifPresent(rules -> healthCheckResult.rules(rulesUtils.asYaml(rules)));
         } catch (co.worklytics.psoxy.rules.InvalidRulesException e) {
             logInDev("Failed to add rules to health check: " + e.getMessage(), e);
             healthCheckResult.warningMessage("RULES configuration error: " + e.getErrorCause().name());
             try {
-                config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES)
+                proxyConfig.getRules()
                         .ifPresent(healthCheckResult::rules);
             } catch (Throwable ignored) {
             }

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,6 +45,12 @@ import dagger.Component;
 import lombok.SneakyThrows;
 
 class OAuthRefreshTokenSourceAuthStrategyTest {
+
+    private static OAuthRefreshTokenSourceAuthConfig mockOauthConfig() {
+        OAuthRefreshTokenSourceAuthConfig mock = mock(OAuthRefreshTokenSourceAuthConfig.class);
+        when(mock.getRefreshEndpoint()).thenReturn(Optional.of("https://token.example/oauth/token"));
+        return mock;
+    }
 
     @Inject
     ObjectMapper objectMapper;
@@ -162,10 +169,10 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     public void serializesAccessTokenDTO() {
         OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
         strategy.objectMapper = objectMapper;
-        strategy.config = MockModules.provideMock(ConfigService.class);
+        strategy.oauthConfig = mockOauthConfig();
         strategy.secretStore = MockModules.provideMock(SecretStore.class);
-        when(strategy.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
-            .thenReturn(Optional.of("true"));
+        when(strategy.oauthConfig.getUseSharedToken())
+            .thenReturn(Optional.of(true));
 
         Instant anyTime = Instant.parse("2021-12-15T00:00:00Z");
         strategy.clock = Clock.fixed(anyTime, ZoneOffset.UTC);
@@ -189,7 +196,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     public void deserializesAccessTokenDTO() {
         OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
         strategy.objectMapper = objectMapper;
-        strategy.config = MockModules.provideMock(ConfigService.class);
+        strategy.oauthConfig = mockOauthConfig();
         strategy.secretStore = MockModules.provideMock(SecretStore.class);
         when(strategy.secretStore.getAvailableVersions(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN, 5))
             .thenReturn(Arrays.asList(
@@ -199,8 +206,8 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
                     .build()
             ));
 
-        when(strategy.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
-            .thenReturn(Optional.of("true"));
+        when(strategy.oauthConfig.getUseSharedToken())
+            .thenReturn(Optional.of(true));
 
         Optional<AccessToken> accessToken = strategy.getSharedAccessTokenIfSupported();
         assertTrue(accessToken.isPresent());
@@ -218,14 +225,14 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         Instant now = Instant.parse("2025-01-01T00:00:00Z");
 
         OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
-        strategy.config = MockModules.provideMock(ConfigService.class);
+        strategy.oauthConfig = mockOauthConfig();
         strategy.randomNumberGenerator = this.randomNumberGenerator;
         AccessToken cachedToken =
             new AccessToken("cached-token", Date.from(now.plus(1, ChronoUnit.HOURS)));
         strategy.setCachedToken(cachedToken);
 
-        when(strategy.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
-            .thenReturn(Optional.of("false"));
+        when(strategy.oauthConfig.getUseSharedToken())
+            .thenReturn(Optional.of(false));
 
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler =
             new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
@@ -241,11 +248,11 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     public void choosesTokenByLatestExpiryThenVersion() {
         OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
         strategy.objectMapper = objectMapper;
-        strategy.config = MockModules.provideMock(ConfigService.class);
+        strategy.oauthConfig = mockOauthConfig();
         strategy.secretStore = MockModules.provideMock(SecretStore.class);
 
-        when(strategy.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
-            .thenReturn(Optional.of("true"));
+        when(strategy.oauthConfig.getUseSharedToken())
+            .thenReturn(Optional.of(true));
 
         // Build three versions: 1,2,3 with 2 having the furthest expiration
         long now = Instant.parse("2025-01-01T00:00:00Z").toEpochMilli();
@@ -272,11 +279,11 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     public void choosesTokenByVersionWhenNoExpiry() {
         OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
         strategy.objectMapper = objectMapper;
-        strategy.config = MockModules.provideMock(ConfigService.class);
+        strategy.oauthConfig = mockOauthConfig();
         strategy.secretStore = MockModules.provideMock(SecretStore.class);
 
-        when(strategy.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
-            .thenReturn(Optional.of("true"));
+        when(strategy.oauthConfig.getUseSharedToken())
+            .thenReturn(Optional.of(true));
 
         // Build three versions: 1,2,3 with no expiration dates -> pick highest version (3)
         String v1Json = objectMapper.writeValueAsString(new AccessTokenDto("t1", null));
@@ -311,12 +318,12 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @MethodSource
     public void refreshTokenNotRotated(String originalToken, String newToken, boolean shouldRotate) {
         OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
-        strategy.config = MockModules.provideMock(ConfigService.class);
+        strategy.oauthConfig = mockOauthConfig();
         strategy.secretStore = MockModules.provideMock(SecretStore.class);
         
         // Create a TokenRefreshHandlerImpl to access the storeRefreshTokenIfRotated method
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        tokenRefreshHandler.config = strategy.config;
+        tokenRefreshHandler.oauthConfig = strategy.oauthConfig;
         tokenRefreshHandler.secretStore = strategy.secretStore;
         tokenRefreshHandler.sourceAuthStrategy = strategy;
         
