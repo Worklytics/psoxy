@@ -24,6 +24,11 @@ jobs:
   check_gcp_iam_permissions:
     name: check GCP IAM permission constants
     runs-on: ubuntu-latest
+    # Dependabot pushes do not receive repo secrets; skip instead of failing in google-github-actions/auth.
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      secrets.GCP_WORKLOAD_IDENTITY_PROVIDER != '' &&
+      secrets.GCP_SERVICE_ACCOUNT != ''
     permissions:
       contents: read
       id-token: write
