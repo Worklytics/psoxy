@@ -8,6 +8,7 @@ Changes to be including in future/planned release notes will be added here.
 ## Unreleased
 
 - `aws`: example leaves VPC off by default. `vpc.tf` and the `vpc_config` block in `main.tf` are commented out, so Lambdas use function URLs and API Gateway stays off (`use_api_gateway_v2` defaults to `false`). Uncomment both to attach Lambdas to a VPC, which forces API Gateway v2.
+- `textDigest` (transform and augment) `keywords`: keywords made of several words (`pull request`, `code review`) or containing punctuation (`dall-e`, `e-mail`) now match. Previously the proxy compared one word at a time, so these never matched. Matching stays case-insensitive and whole-word. This affects `claude`, `chatgpt-enterprise` and `glean-customer-events-log-bulk`: the `keywords` counts in their sanitized output now include these phrases. Single-word keywords are unchanged.
 
 
 ## [0.7.1](https://github.com/Worklytics/psoxy/releases/tag/v0.7.1)
