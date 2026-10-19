@@ -21,14 +21,30 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  check_gcp_iam_permissions:
-    name: check GCP IAM permission constants
+  gcp_workload_identity_available:
+    name: detect GCP WIF credentials
     runs-on: ubuntu-latest
     # Dependabot pushes do not receive repo secrets; skip instead of failing in google-github-actions/auth.
-    if: >-
-      github.actor != 'dependabot[bot]' &&
-      secrets.GCP_WORKLOAD_IDENTITY_PROVIDER != '' &&
-      secrets.GCP_SERVICE_ACCOUNT != ''
+    if: github.actor != 'dependabot[bot]'
+    outputs:
+      available: ${{ steps.check.outputs.available }}
+    steps:
+      - id: check
+        env:
+          GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+        run: |
+          if [ -n "${GCP_WORKLOAD_IDENTITY_PROVIDER}" ] && [ -n "${GCP_SERVICE_ACCOUNT}" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  check_gcp_iam_permissions:
+    name: check GCP IAM permission constants
+    needs: gcp_workload_identity_available
+    if: needs.gcp_workload_identity_available.outputs.available == 'true'
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
