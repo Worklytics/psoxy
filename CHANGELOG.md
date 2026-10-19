@@ -7,6 +7,8 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Unreleased
 
+- `aws`: example leaves VPC off by default. `vpc.tf` and the `vpc_config` block in `main.tf` are commented out, so Lambdas use function URLs and API Gateway stays off (`use_api_gateway_v2` defaults to `false`). Uncomment both to attach Lambdas to a VPC, which forces API Gateway v2.
+
 
 ## [0.7.1](https://github.com/Worklytics/psoxy/releases/tag/v0.7.1)
 - `aws`: VPC example `vpc.tf` improved, public/private segmentation and security groups.

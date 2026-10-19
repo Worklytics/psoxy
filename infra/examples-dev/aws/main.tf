@@ -173,11 +173,12 @@ module "psoxy" {
   todos_as_local_files                 = false # root todos.tf writes these files
   enable_remote_resources              = var.enable_remote_resources
 
-
-  vpc_config = {
-    security_group_ids = [aws_security_group.default.id]
-    subnet_ids         = [aws_subnet.private.id]
-  }
+  # VPC off by default (Lambdas use function URLs). Uncomment this and the resources in vpc.tf
+  # to attach Lambdas to a VPC. That forces API Gateway v2.
+  # vpc_config = {
+  #   security_group_ids = [aws_security_group.default.id]
+  #   subnet_ids         = [aws_subnet.private.id]
+  # }
 }
 
 ## Worklytics connection configuration
