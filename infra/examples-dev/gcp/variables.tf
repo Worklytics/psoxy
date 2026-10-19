@@ -25,6 +25,17 @@ variable "environment_name" {
   }
 }
 
+variable "aws_account_id" {
+  type        = string
+  description = "AWS account ID that hosts the proxy when Google Workspace connectors use workload identity federation with host_platform_id AWS."
+  default     = null
+
+  validation {
+    condition     = var.aws_account_id == null || can(regex("^\\d{12}$", var.aws_account_id))
+    error_message = "The aws_account_id value should be 12-digit numeric string."
+  }
+}
+
 variable "config_parameter_prefix" {
   type        = string
   description = "A prefix to give to all config parameters (GCP Secret Manager Secrets) created/consumed by this module. If omitted, and `environment_id` provided, that will be used."
