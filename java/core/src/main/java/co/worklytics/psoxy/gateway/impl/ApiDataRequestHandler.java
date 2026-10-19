@@ -423,16 +423,21 @@ public class ApiDataRequestHandler {
             if (isSocketTimeoutException(e)) {
                 return buildConnectTimeoutErrorResponse(builder, e);
             }
-            
-            builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            builder.body("Failed to parse request; review logs");
+
+            log.log(Level.WARNING, e.getMessage(), e);
+
+            if (sourceAuthStrategy.isSourceAuthFailure(e)) {
+                // token exchange / credential refresh failed — not a malformed inbound request
+                log.log(Level.WARNING,
+                        "Confirm OAUTH_SCOPES environment variable matches scopes granted in data source");
+                builder.statusCode(HttpStatus.SC_UNAUTHORIZED);
+                builder.body(buildSourceAuthTokenFailureMessage(e));
+            } else {
+                builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+                builder.body("Failed to parse request; review logs");
+            }
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     ErrorCauses.CONNECTION_SETUP.name());
-            log.log(Level.WARNING, e.getMessage(), e);
-            // something like "Error getting access token for service account: 401 Unauthorized POST
-            // https://oauth2.googleapis.com/token,"
-            log.log(Level.WARNING,
-                    "Confirm OAUTH_SCOPES environment variable matches scopes granted in data source");
             return builder.build();
         } catch (co.worklytics.psoxy.gateway.TransientConfigException e) {
             // Config store was temporarily unreachable (e.g. credential rotation, AWS hiccup).
@@ -616,7 +621,20 @@ public class ApiDataRequestHandler {
                     } else {
                         proxyResponseContent = sanitizationResult.getContentAsString();
                         sanitizedApiResponseMetadata(sanitizationResult.getMetadata())
-                                .forEach((header, value) -> builder.header(header, value));
+                                .forEach((header, value) -> {
+                                    if (ProcessedDataMetadataFields.WARNING.getHttpHeader().equals(header)) {
+                                        return;
+                                    }
+                                    builder.header(header, value);
+                                });
+                        String warningCodes = sanitizationResult.getMetadata()
+                            .get(ProcessedDataMetadataFields.WARNING.getMetadataKey());
+                        if (warningCodes != null && !warningCodes.isEmpty()) {
+                            for (String code : warningCodes.split(",")) {
+                                builder.multivaluedHeader(
+                                    Pair.of(ProcessedDataMetadataFields.WARNING.getHttpHeader(), code));
+                            }
+                        }
                     }
 
 
@@ -682,7 +700,11 @@ public class ApiDataRequestHandler {
         metadata.put(ProcessedDataMetadataFields.PII_SALT_SHA256.getMetadataKey(),
                 healthCheckRequestHandler.piiSaltHash());
 
-        // q: add instance id to the metadata??
+        List<String> warnings = sanitizerForRequest.getLastSanitizationWarnings();
+        if (!warnings.isEmpty()) {
+            metadata.put(ProcessedDataMetadataFields.WARNING.getMetadataKey(), String.join(",", warnings));
+        }
+
         return ProcessedContent.builder()
                 .contentType(originalContent.getContentType())
                 .contentCharset(originalContent.getContentCharset())
@@ -1170,6 +1192,16 @@ public class ApiDataRequestHandler {
 
     private boolean isSocketTimeoutException(Throwable throwable) {
         return findSocketTimeoutException(throwable) != null;
+    }
+
+    @VisibleForTesting
+    static String buildSourceAuthTokenFailureMessage(IOException e) {
+        String detail = StringUtils.abbreviate(StringUtils.trimToEmpty(e.getMessage()), 500);
+        if (detail.isEmpty()) {
+            return "Failed to obtain access token for data source; review logs";
+        }
+        return "Failed to obtain access token for data source: "
+                + LogSanitizationUtils.redactPotentialPii(detail);
     }
 
     private SocketTimeoutException findSocketTimeoutException(Throwable throwable) {

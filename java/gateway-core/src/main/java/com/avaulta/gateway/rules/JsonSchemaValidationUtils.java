@@ -1,4 +1,3 @@
-
 package com.avaulta.gateway.rules;
 
 import java.nio.charset.StandardCharsets;
@@ -25,6 +24,8 @@ import tools.jackson.databind.json.JsonMapper;
 
 @Log
 public class JsonSchemaValidationUtils {
+
+    private static final int MAX_LOG_OUTPUT_CHARS = 2000;
 
     /**
      * 3.x validates Jackson 3 nodes ({@code tools.jackson}), not our Jackson 2

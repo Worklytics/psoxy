@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -244,9 +245,51 @@ public abstract class Transform {
 
     public interface PseudonymizationTransform {
 
+        String INCLUDE_ENCRYPTED_DESCRIPTION = "if true, an encrypted version of the pseudonym will be returned alongside the hashed version, to enable it to be used as a parameter in future requests; proxy instances will be able to decrypt this form - clients will not. rotating/destroying the ENCRYPTION_KEY (stored as a secret in your host environment) will render all previously generated encrypted values unusable.";
+
         Boolean getIncludeOriginal();
 
+        /**
+         * @deprecated use {@link #getIncludeEncrypted()}. Still accepted so existing rules keep the same behavior.
+         */
+        @Deprecated
         Boolean getIncludeReversible();
+
+        /**
+         * {@value #INCLUDE_ENCRYPTED_DESCRIPTION}
+         *
+         * Null when the property was not set. An explicit {@code false} is distinct from omitted.
+         */
+        default Boolean getIncludeEncrypted() {
+            return null;
+        }
+
+        /**
+         * True when {@code includeEncrypted} is explicitly set (including {@code false}), or, if that
+         * flag is omitted, when the deprecated {@code includeReversible} flag is true.
+         * An explicit {@code includeReversible: false} with {@code includeEncrypted} omitted does not
+         * include the encrypted form.
+         */
+        @SuppressWarnings("deprecation")
+        default boolean includesEncrypted() {
+            Boolean encrypted = getIncludeEncrypted();
+            if (encrypted != null) {
+                return encrypted;
+            }
+            return Boolean.TRUE.equals(getIncludeReversible());
+        }
+
+        /**
+         * @return warning when a rule explicitly sets both {@code includeEncrypted} and
+         * {@code includeReversible}; empty when at most one is set. {@code includeEncrypted} wins.
+         */
+        @SuppressWarnings("deprecation")
+        default Optional<String> encryptionFlagsConflict() {
+            if (getIncludeEncrypted() != null && getIncludeReversible() != null) {
+                return Optional.of("pseudonymize transform sets both includeEncrypted and includeReversible; includeEncrypted takes precedence. Remove includeReversible.");
+            }
+            return Optional.empty();
+        }
 
     }
 
@@ -272,11 +315,32 @@ public abstract class Transform {
         Boolean includeOriginal = false;
 
         /**
-         * whether to include reversible form of pseudonymized value in output
+         * whether to include an encrypted form of the pseudonymized value in the output.
+         *
+         * @deprecated use {@code includeEncrypted}. Still accepted so existing rules keep the same behavior.
          */
-        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-        @Builder.Default
-        Boolean includeReversible = false;
+        @Deprecated
+        @JsonPropertyDescription("Deprecated. Use includeEncrypted. If true, an encrypted form of the pseudonym is included in the output.")
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        Boolean includeReversible;
+
+        /**
+         * @deprecated use {@link #getIncludeEncrypted()}
+         */
+        @Deprecated
+        @Override
+        public Boolean getIncludeReversible() {
+            return includeReversible;
+        }
+
+        /**
+         * {@value PseudonymizationTransform#INCLUDE_ENCRYPTED_DESCRIPTION}
+         *
+         * Null when omitted. An explicit false is honored and is not treated as unset.
+         */
+        @JsonPropertyDescription(PseudonymizationTransform.INCLUDE_ENCRYPTED_DESCRIPTION)
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        Boolean includeEncrypted;
 
         /**
          * if provided, only values at this json path(es) will be pseudonymized
@@ -325,11 +389,32 @@ public abstract class Transform {
     @Getter
     public static class PseudonymizeRegexMatches extends Transform implements PseudonymizationTransform {
         /**
-         * whether to include reversible form of pseudonymized value in output
+         * whether to include an encrypted form of the pseudonymized value in the output.
+         *
+         * @deprecated use {@code includeEncrypted}. Still accepted so existing rules keep the same behavior.
          */
-        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-        @Builder.Default
-        Boolean includeReversible = false;
+        @Deprecated
+        @JsonPropertyDescription("Deprecated. Use includeEncrypted. If true, an encrypted form of the pseudonym is included in the output.")
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        Boolean includeReversible;
+
+        /**
+         * @deprecated use {@link #getIncludeEncrypted()}
+         */
+        @Deprecated
+        @Override
+        public Boolean getIncludeReversible() {
+            return includeReversible;
+        }
+
+        /**
+         * {@value PseudonymizationTransform#INCLUDE_ENCRYPTED_DESCRIPTION}
+         *
+         * Null when omitted. An explicit false is honored and is not treated as unset.
+         */
+        @JsonPropertyDescription(PseudonymizationTransform.INCLUDE_ENCRYPTED_DESCRIPTION)
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        Boolean includeEncrypted;
 
         /**
          * values at this json path(es) matching regex will be pseudonymized

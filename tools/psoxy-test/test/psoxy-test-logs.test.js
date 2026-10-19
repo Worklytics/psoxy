@@ -18,7 +18,7 @@ test.beforeEach(async (t) => {
 
 test.afterEach(() => td.reset());
 
-test('Psoxy Logs: invalid options', async (t) => {
+test.serial('Psoxy Logs: invalid options', async (t) => {
   await t.throwsAsync(async () => psoxyTestLogs({}),
     { message: (err) => err.startsWith('Invalid options') });
   // GCP: missing functionName
@@ -27,7 +27,7 @@ test('Psoxy Logs: invalid options', async (t) => {
   }), { message: (err) => err.startsWith('Invalid options') });
 });
 
-test('Psoxy Logs: GCP valid options', async (t) => {
+test.serial('Psoxy Logs: GCP valid options', async (t) => {
   const gcpOptions = {projectId: 'foo', functionName: 'bar'};
   td.when(gcp.getLogs(td.matchers.contains(gcpOptions))).thenResolve([]);
 
@@ -35,7 +35,7 @@ test('Psoxy Logs: GCP valid options', async (t) => {
   t.deepEqual(logs, []);
 });
 
-test('Psoxy Logs: AWS valid options', async (t) => {
+test.serial('Psoxy Logs: AWS valid options', async (t) => {
   const awsOptions = {role: 'foo', logGroupName: 'bar', region: 'baz'}
 
   td.when(aws.createCloudWatchClient(

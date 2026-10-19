@@ -46,6 +46,7 @@ import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.HashUtils;
+import co.worklytics.psoxy.impl.gen.GenMetadataTokenUsageAccumulator;
 import co.worklytics.psoxy.rules.RulesUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -107,6 +108,9 @@ public class StorageHandler {
 
     @Inject
     HashUtils hashUtils;
+
+    @Inject
+    GenMetadataTokenUsageAccumulator genMetadataTokenUsage;
 
     private volatile String piiSaltHash;
 
@@ -201,6 +205,15 @@ public class StorageHandler {
 
         // SHA-256 hash of the salt, to aid in detecting changes to the salt value
         SALT_SHA,
+
+        /** Aggregate genMetadata LLM input tokens for this sanitized object (when any calls ran). */
+        GEN_METADATA_INPUT_TOKENS,
+
+        /** Aggregate genMetadata LLM output tokens for this sanitized object (when any calls ran). */
+        GEN_METADATA_OUTPUT_TOKENS,
+
+        /** Number of genMetadata LLM calls for this sanitized object. */
+        GEN_METADATA_CALLS,
         ;
 
         // aws prepends `x-amz-meta-` to this; but per documentation, that's not visible via the
@@ -332,6 +345,16 @@ public class StorageHandler {
         String hash = piiSaltHash();
         if (StringUtils.isNotBlank(hash)) {
             metadata.put(BulkMetaData.SALT_SHA.getMetaDataKey(), hash);
+        }
+
+        GenMetadataTokenUsageAccumulator.Snapshot usage = genMetadataTokenUsage.snapshot();
+        if (usage.hasUsage()) {
+            metadata.put(BulkMetaData.GEN_METADATA_INPUT_TOKENS.getMetaDataKey(),
+                Long.toString(usage.getInputTokens()));
+            metadata.put(BulkMetaData.GEN_METADATA_OUTPUT_TOKENS.getMetaDataKey(),
+                Long.toString(usage.getOutputTokens()));
+            metadata.put(BulkMetaData.GEN_METADATA_CALLS.getMetaDataKey(),
+                Long.toString(usage.getCalls()));
         }
 
         return Collections.unmodifiableMap(metadata);
@@ -529,6 +552,10 @@ public class StorageHandler {
                  StorageHandler.ObjectTransform transform,
                  Supplier<InputStream> inputStreamSupplier,
                  Supplier<OutputStream> outputStreamSupplier) {
+        // Per-file token accounting (validate() also calls process — its usage is discarded when
+        // the full-file process resets again).
+        genMetadataTokenUsage.reset();
+
         int bufferSize = getBufferSize();
 
         try (
@@ -546,6 +573,15 @@ public class StorageHandler {
             BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
 
             fileHandler.sanitize(request, inputStream, outputStream, pseudonymizer);
+        }
+
+        GenMetadataTokenUsageAccumulator.Snapshot usage = genMetadataTokenUsage.snapshot();
+        if (usage.hasUsage()) {
+            log.info("genMetadata file aggregate"
+                + " calls=" + usage.getCalls()
+                + " inputTokens=" + usage.getInputTokens()
+                + " outputTokens=" + usage.getOutputTokens()
+                + " path=" + request.getSourceObjectPath());
         }
     }
 

@@ -24,11 +24,13 @@ locals {
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
-  # GCS object prefixes use '/' hierarchy. Secret IDs use config_parameter_prefix with a trailing
-  # '_' (e.g. psoxy-dev-erik_GCAL_SOURCE); bucket keys are psoxy-dev-erik/GCAL/rules.yaml.
-  shared_resource_path = "${trimsuffix(trimprefix(local.config_parameter_prefix, "/"), "_")}/"
+  # Object-key prefixes are siblings, not nested: shared is `{env}/` and instance is
+  # `{env}-{INSTANCE}/` so IAM `env/*` does not also match instance objects. Secret IDs still use
+  # config_parameter_prefix with a trailing '_' (e.g. psoxy-dev-erik_GCAL_SOURCE).
+  resource_path_root   = trimsuffix(trimprefix(local.config_parameter_prefix, "/"), "_")
+  shared_resource_path = "${local.resource_path_root}/"
   connector_instance_resource_path = { for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) :
-    k => "${local.shared_resource_path}${replace(upper(k), "-", "_")}/"
+    k => "${local.resource_path_root}-${replace(upper(k), "-", "_")}/"
   }
   remote_resources_enabled = var.enable_remote_resources && module.psoxy.artifacts_bucket_name != null
 
@@ -87,6 +89,7 @@ locals {
       try(local.api_connector_rules_raw[k], null) != null ? local.api_connector_rules_raw[k] : null
     )
   }
+
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -115,6 +118,7 @@ module "psoxy" {
   enable_remote_resources           = var.enable_remote_resources
   support_bulk_mode                 = length(var.bulk_connectors) > 0
   support_webhook_collectors        = length(var.webhook_collectors) > 0
+  enable_cloud_kms                  = length(local.webhook_collectors_needing_keys) > 0
   vpc_config                        = var.vpc_config
   bucket_force_destroy              = var.bucket_force_destroy
   tf_runner_iam_principal           = module.tf_runner.iam_principal
@@ -272,7 +276,8 @@ locals {
     try(var.external_api_alb.domain, null) != null ? var.external_api_alb.domain :
     google_compute_global_address.api_connector_alb[0].address
   )
-  api_connector_external_lb_enabled = local.api_connector_external_lb_host != null
+  # Plan-time signal only (do not derive from api_connector_external_lb_host when it is the reserved IP).
+  api_connector_external_lb_enabled = var.api_connector_external_lb_host != null || local.provision_external_api_alb
   # Shared LB base (no per-connector path); gcp-proxy-api appends /<function-name> for TODOs and endpoint_url
   api_connector_external_lb_base_url = local.api_connector_external_lb_enabled ? "https://${local.api_connector_external_lb_host}" : null
 }
@@ -334,6 +339,9 @@ module "api_connector" {
     var.api_connector_path_prefix_to_trim != null ? { REQUEST_PATH_PREFIX_TO_TRIM = var.api_connector_path_prefix_to_trim } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      GEN_METADATA_BACKEND = "vertex"
+    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
@@ -383,6 +391,8 @@ EOT
   alb_dns_todo         = local.alb_managed_tls ? local.alb_dns_todo_content : null
 }
 
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
 resource "local_file" "todo_alb_dns_setup" {
   count = var.todos_as_local_files && local.alb_managed_tls ? 1 : 0
 
@@ -402,12 +412,25 @@ locals {
 # necessarily exclusive to that use-case
 # it's just a single resource, couple to single mode ... pushing it down in into the 'gcp' module would add a bunch of
 # variables/outputs, as well as going against the general "inversion of control / composition" patterned preferred by terraform
+# depends_on module.psoxy: that module enables cloudkms.googleapis.com (output kms_api_enabled). Without
+# this, a fresh project creates the key ring before the API is enabled and KMS returns 403.
 resource "google_kms_key_ring" "proxy_key_ring" {
   count = local.key_ring_needed ? 1 : 0
 
   project  = var.gcp_project_id
   name     = replace(replace(var.environment_name, "/[^a-zA-Z0-9_-]/", "-"), "/-+/", "-")
   location = var.gcp_region
+
+  depends_on = [
+    module.psoxy,
+  ]
+
+  lifecycle {
+    precondition {
+      condition     = module.psoxy.kms_api_enabled != null
+      error_message = "Cloud KMS API must be enabled before creating the webhook key ring."
+    }
+  }
 }
 
 resource "google_service_account" "webhook_collector" {
@@ -468,6 +491,9 @@ module "webhook_collector" {
     },
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      GEN_METADATA_BACKEND = "vertex"
+    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
@@ -536,6 +562,9 @@ module "bulk_connector" {
     },
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.enable_gen_metadata, false) ? {
+      GEN_METADATA_BACKEND = "vertex"
+    } : {},
   )
 
   remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
@@ -548,6 +577,21 @@ module "bulk_connector" {
 }
 
 # END BULK CONNECTORS
+
+locals {
+  vertex_service_accounts = merge(
+    { for k, v in var.api_connectors : "api-${k}" => google_service_account.api_connectors[k].email if try(v.enable_gen_metadata, false) },
+    { for k, v in var.bulk_connectors : "bulk-${k}" => module.bulk_connector[k].instance_sa_email if try(v.enable_gen_metadata, false) },
+    { for k, v in var.webhook_collectors : "webhook-${k}" => google_service_account.webhook_collector[k].email if try(v.enable_gen_metadata, false) },
+  )
+}
+
+module "enable_vertex" {
+  source = "../../modules/gcp-enable-vertex"
+
+  project_id       = var.gcp_project_id
+  service_accounts = local.vertex_service_accounts
+}
 
 # BEGIN LOOKUP TABLES
 module "lookup_output" {
@@ -695,38 +739,37 @@ locals {
   }
 
   all_instances = merge(local.api_instances, local.bulk_instances, local.webhook_collector_instances)
+
+  # Static content only — discovers ./test-*.sh in the deployment directory (alphabetical).
+  # Do not interpolate connector module outputs here; that created Terraform destroy cycles.
+  test_all_script = <<-EOF
+#!/bin/bash
+
+# Run all per-connector test-*.sh scripts in the current directory (alphabetical).
+# Per-connector scripts are generated by Terraform when todos_as_local_files is true.
+
+found=0
+while IFS= read -r script; do
+  found=1
+  echo "Running $${script} ..."
+  "$${script}"
+done < <(find . -maxdepth 1 -type f -name 'test-*.sh' ! -name 'test-all.sh' | LC_ALL=C sort)
+
+if [ "$found" -eq 0 ]; then
+  echo "No per-connector test-*.sh scripts found."
+  exit 1
+fi
+EOF
 }
 
-# script to test ALL connectors
-# Use test_script_filename (computed local in each connector module). Do not interpolate
-# local_file.test_script via module outputs — gcp-host merges those outputs into api_instances,
-# Worklytics TODOs then depend on the file, and a content replace deletes it just after write.
+# DEPRECATED: this local_file test script is deprecated and will be removed in 0.8.
+# Example todos.tf writes the same file from the test_script_files output.
 resource "local_file" "test_all_script" {
   count = var.todos_as_local_files ? 1 : 0
 
   filename        = "test-all.sh"
   file_permission = "0770"
-  content         = <<EOF
-#!/bin/bash
-
-echo "Testing API Connectors ..."
-
-%{for test_script in values(module.api_connector)[*].test_script_filename~}
-./${test_script}
-%{endfor}
-
-echo "Testing Bulk Connectors ..."
-
-%{for test_script in values(module.bulk_connector)[*].test_script_filename~}
-./${test_script}
-%{endfor}
-
-echo "Testing Webhook Collectors ..."
-
-%{for test_script in values(module.webhook_collector)[*].test_script_filename~}
-./${test_script}
-%{endfor}
-EOF
+  content         = local.test_all_script
 }
 
 output "secrets_to_provision" {

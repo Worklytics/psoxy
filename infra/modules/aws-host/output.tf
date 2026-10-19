@@ -22,6 +22,11 @@ output "caller_role_arn" {
   value = module.psoxy.api_caller_role_arn
 }
 
+output "webhook_test_caller_role_arn" {
+  description = "ARN of the role granted invoke, KMS, and bucket access for webhook collector tests."
+  value       = module.psoxy.webhook_test_caller_role_arn
+}
+
 output "test_aws_principal_arns" {
   description = "AWS principal ARNs allowed to test the deployment when provision_testing_infra is enabled."
   value       = local.test_aws_principal_arns
@@ -75,6 +80,28 @@ output "setup_todos" {
   value       = values(module.bulk_connector)[*].todo_setup
 }
 
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. local_file copies are deprecated and will be removed in 0.8."
+  value = merge(concat(
+    [{}],
+    [for connector in values(module.api_connector) : connector.todo_files],
+    [for connector in values(module.bulk_connector) : connector.todo_files],
+  )...)
+}
+
+output "test_script_files" {
+  description = "Test scripts (filename => content), including test-all.sh. Independent of the local_file resources, so a root module can write them when todos_as_local_files is false."
+  value = merge(
+    { "test-all.sh" = local.test_all_script },
+    merge(concat(
+      [{}],
+      [for connector in values(module.api_connector) : connector.test_script_files],
+      [for connector in values(module.bulk_connector) : connector.test_script_files],
+      [for connector in values(module.webhook_collectors) : connector.test_script_files],
+    )...),
+  )
+}
+
 output "next_todo_step" {
   value = max(concat(
     values(module.api_connector)[*].next_todo_step,
@@ -82,3 +109,4 @@ output "next_todo_step" {
     [1]
   )...)
 }
+

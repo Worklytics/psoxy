@@ -39,9 +39,9 @@ resource "google_secret_manager_secret_iam_member" "grant_secretVersionAdder_on_
   role      = "roles/secretmanager.secretVersionAdder"
 }
 
-resource "local_file" "todo" {
-  filename = "TODO - create key for ${var.service_account_id}.md"
-  content  = <<EOT
+locals {
+  todo_filename = "TODO - create key for ${var.service_account_id}.md"
+  todo_content  = <<EOT
 Create a key for ${var.service_account_id} and upload it to Secret Manager. You can do this from the
 GCP console, or using the `gcloud` tool as described below:
 
@@ -62,4 +62,18 @@ Last, don't forget to destroy your local copy!
 rm key.json
 ```
 EOT
+}
+
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
+resource "local_file" "todo" {
+  filename = local.todo_filename
+  content  = local.todo_content
+}
+
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. The local_file copy is deprecated and will be removed in 0.8."
+  value = {
+    (local.todo_filename) = local.todo_content
+  }
 }

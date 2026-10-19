@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.impl;
 
+import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.ProcessedContent;
@@ -18,6 +19,7 @@ import org.apache.commons.lang3.ObjectUtils;
 
 import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +37,9 @@ public class WebhookSanitizerImpl implements WebhookSanitizer {
     SanitizerUtils sanitizerUtils;
     @Inject
     Configuration jsonConfiguration;
+
+    @Inject
+    AugmentProcessor augmentProcessor;
 
     final WebhookCollectionRules webhookRules;
 
@@ -174,17 +179,30 @@ public class WebhookSanitizerImpl implements WebhookSanitizer {
         WebhookCollectionRules.WebhookEndpoint endpoint = webhookRules.getEndpoints().get(0);
 
         String sanitizedContent = new String(request.getBody(), StandardCharsets.UTF_8); //just assume UTF-8, always
-        if (ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
+        List<String> augmentWarnings = List.of();
+        if (ObjectUtils.isNotEmpty(endpoint.getAugments())
+            || ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
             Object document = jsonConfiguration.jsonProvider().parse(request.getBody());
-            for (Transform transform : endpoint.getTransforms()) {
-                sanitizerUtils.applyTransform(pseudonymizer, transform, document, compiledTransforms);
+            if (ObjectUtils.isNotEmpty(endpoint.getAugments())) {
+                augmentWarnings = augmentProcessor.applyAugments(endpoint.getAugments(), document);
+            }
+            if (ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
+                for (Transform transform : endpoint.getTransforms()) {
+                    sanitizerUtils.applyTransform(pseudonymizer, transform, document, compiledTransforms);
+                }
             }
             sanitizedContent = jsonConfiguration.jsonProvider().toJson(document);
         }
 
-        return ProcessedContent.builder()
+        ProcessedContent.ProcessedContentBuilder builder = ProcessedContent.builder()
                 .content(sanitizedContent.getBytes(StandardCharsets.UTF_8))
-                .contentType(request.getHeader("Content-Type").orElse("application/json"))
-                .build();
+                .contentType(request.getHeader("Content-Type").orElse("application/json"));
+        if (!augmentWarnings.isEmpty()) {
+            Map<String, String> metadata = new HashMap<>();
+            metadata.put(ProcessedDataMetadataFields.WARNING.getMetadataKey(),
+                String.join(",", augmentWarnings));
+            builder.metadata(metadata);
+        }
+        return builder.build();
     }
 }

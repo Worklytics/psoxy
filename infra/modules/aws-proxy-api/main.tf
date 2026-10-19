@@ -214,7 +214,8 @@ module "psoxy_lambda" {
   sqs_trigger_queue_arns               = var.enable_async_processing ? [aws_sqs_queue.async_api_request_queue[0].arn] : []
   lambda_role_iam_statements = concat(
     var.enable_async_processing ? module.async_output_iam_statements[0].iam_statements : [],
-    local.sqs_iam_statements
+    local.sqs_iam_statements,
+    var.extra_lambda_role_iam_statements
   )
 
   environment_variables = merge(
@@ -239,6 +240,7 @@ module "psoxy_lambda" {
   remote_resource_bucket        = var.remote_resource_bucket
   remote_resource_instance_path = var.remote_resource_instance_path
   remote_resource_shared_path   = var.remote_resource_shared_path
+  enable_bedrock                = var.enable_bedrock
 }
 
 # if async processing is enabled, trigger the lambda from the SQS queue
@@ -469,10 +471,16 @@ Contact support@worklytics.co for assistance modifying the rules as needed.
 EOT
 }
 
+locals {
+  todo_filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
+}
+
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
 resource "local_file" "todo" {
   count = var.todos_as_local_files ? 1 : 0
 
-  filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
+  filename = local.todo_filename
   content  = local.todo_content
 }
 
@@ -489,6 +497,8 @@ locals {
   })
 }
 
+# DEPRECATED: this local_file test script is deprecated and will be removed in 0.8.
+# Example todos.tf writes the same file from the test_script_files output.
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
@@ -529,7 +539,15 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = try(local_file.test_script[0].filename, null)
+  # Do not interpolate local_file.test_script (content replace then deletes the file).
+  value = var.todos_as_local_files ? "test-${var.instance_id}.sh" : null
+}
+
+output "test_script_files" {
+  description = "Test script filename => content. Independent of the local_file resource, so a root module can write the file when todos_as_local_files is false."
+  value = {
+    "test-${var.instance_id}.sh" = local.test_script
+  }
 }
 
 output "test_script_content" {
@@ -553,6 +571,13 @@ output "side_output_sanitized_bucket_id" {
 
 output "todo" {
   value = local.todo_content
+}
+
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. The local_file copy is deprecated and will be removed in 0.8."
+  value = {
+    (local.todo_filename) = local.todo_content
+  }
 }
 
 output "next_todo_step" {

@@ -1,5 +1,7 @@
 # GitHub Enterprise Server
 
+**Connector ID:** `github-enterprise-server`
+
 Availability: **GA**
 
 ## Authentication workflow
@@ -12,6 +14,17 @@ The connector uses a GitHub App to authenticate and access the data. You must ge
 - Example Data:
   - [original/user.json](example-api-responses/original/user.json) |
     [sanitized/user.json](example-api-responses/sanitized/user.json)
+
+Example API call path parameters (uppercase placeholders in generated test calls):
+
+- `{ENTERPRISE_SERVER_VERSION}`: `github_enterprise_server_version` (default `v3`).
+- `{ORG}` / `{OWNER}`: first value in `github_organization`.
+- `{REPO}`: `github_example_repository`.
+- `{TEAM_SLUG}`: a team slug from `GET .../orgs/{ORG}/teams`.
+- `{ISSUE_NUMBER}` / `{PULL_NUMBER}`: numbers from issues/pulls lists.
+- `{REF}` / `{COMMIT_SHA}`: from `GET .../commits`.
+- `{COMMENT_ID}` / `{REVIEW_ID}`: from the matching comments/reviews lists.
+- `{USERNAME}`: **must** be a reversible-pseudonym token (`p~` + ≥43 base64url chars) of a `login` from `GET .../orgs/{ORG}/members`. GraphQL is `POST /api/graphql`.
 
 ## GitHub Enterprise Server: Steps to connect
 

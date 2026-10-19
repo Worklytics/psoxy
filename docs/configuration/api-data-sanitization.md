@@ -134,7 +134,8 @@ NOTE: these are implementations of `com.avaulta.gateway.rules.transforms.Transfo
 
 Options:
 
-- `includeReversible` (default: `false`): If `true`, an encrypted form of the original value will be included in the result. This value, if passed back to the proxy in a URL, will be decrypted back to the original value before the request is forward to the data source. This is useful for identifying values that are needed as parameters for subsequent API requests. This relies on symmetric encryption using the `ENCRYPTION_KEY` secret stored in the proxy; if `ENCRYPTION_KEY` is rotated, any 'reversible' value previously generated will no longer be able to be decrypted by the proxy.
+- `includeEncrypted` (default: `false`): if true, an encrypted version of the pseudonym will be returned alongside the hashed version, to enable it to be used as a parameter in future requests; proxy instances will be able to decrypt this form - clients will not. rotating/destroying the ENCRYPTION_KEY (stored as a secret in your host environment) will render all previously generated encrypted values unusable. The same option is accepted on `!<pseudonymizeRegexMatches>`.
+- `includeReversible` (default: `false`): **Deprecated.** Use `includeEncrypted`. Same behavior; still accepted so existing rules continue to work.
 - `encoding` (default: `JSON`): The encoding to use when serializing the pseudonym to a string.
   - `JSON` - a JSON object structure, with explicit fields
   - `URL_SAFE_TOKEN` - a string format that aims to be concise, URL-safe, and format-preserving for email case.

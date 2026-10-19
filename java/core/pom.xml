@@ -176,7 +176,14 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>10.9.1</version>
+            <version>10.10</version>
+        </dependency>
+
+        <!-- BETA genMetadata: LangChain4j ChatModel SPI (Bedrock/Vertex providers in platform modules). -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>${dependency.langchain4j.version}</version>
         </dependency>
 
         <dependency>

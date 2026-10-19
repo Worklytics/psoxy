@@ -311,11 +311,13 @@ deployment_bundle_offer_at_init() {
 
   printf "\n"
   printf "Psoxy can deploy using a ${SUCCESS}published prebuilt bundle${NC} (recommended) or by ${INFO}building the Java deployment bundle from source${NC} on this machine.\n"
-  printf "Prebuilt bundles avoid requiring Java and Maven locally; your cloud platform's runtime JRE is still used when the proxy runs.\n\n"
+  printf "Prebuilt bundles avoid requiring Java and Maven locally; your cloud platform's runtime JRE is still used when the proxy runs.\n"
+  printf "${WARN}Important:${NC} Declining the prebuilt bundle means ${ERR}Java JDK and Maven are REQUIRED${NC} on this machine before ${CODE}terraform apply${NC} can succeed.\n\n"
 
   read -p "Use a published prebuilt deployment bundle? [Y/n] " response
   if [[ -n "$response" && ! "$response" =~ ^[Yy]$ ]]; then
-    printf "\nYou chose to build from source. Java and Maven are required unless you build the bundle separately with ${CODE}./build.sh${NC} or ${CODE}./update-bundle${NC}.\n\n"
+    printf "\n${WARN}You chose to build from source.${NC} ${ERR}Java JDK and Maven are REQUIRED${NC} on this machine before you run ${CODE}terraform apply${NC}.\n"
+    printf "Run ${CODE}./check-prereqs${NC} to verify your environment, or build the bundle separately with ${CODE}./build.sh${NC} / ${CODE}./update-bundle${NC} first.\n\n"
     return 0
   fi
 
@@ -332,7 +334,7 @@ deployment_bundle_offer_at_init() {
     else
       printf "\n"
     fi
-    printf "Build from source with Java/Maven, or wait until the bundle is published for this version.\n\n"
+    printf "Build from source (${ERR}Java JDK and Maven REQUIRED${NC} on this machine; run ${CODE}./check-prereqs${NC}), or wait until the bundle is published for this version.\n\n"
     return 0
   fi
 

@@ -1,0 +1,28 @@
+{
+  "organization_id": "org_xyz",
+  "data": [
+    {
+      "actor": { "type": "user_actor", "user_id": "user_abc123", "email": "alice@example.com", "deleted": false },
+      "product": "claude-tag",
+      "model": null,
+      "context_window": null,
+      "inference_geo": null,
+      "speed": null,
+      "claude_tag_category": "engaged",
+      "claude_tag_user_id": "U0123ABCDEF",
+      "rbac_group_id": "rbac_group_012rppKaSVsmTo6NqRDXQXNF",
+      "slack_channel_id": "C0123ABCDEF",
+      "starting_at": "2026-06-01T00:00:00Z",
+      "ending_at": "2026-06-02T00:00:00Z",
+      "currency": "USD",
+      "amount": "3.75",
+      "list_amount": "4.20",
+      "cost_type": null,
+      "token_type": null,
+      "requests": 6
+    }
+  ],
+  "has_more": false,
+  "next_page": null,
+  "data_refreshed_at": "2026-06-08T06:00:00Z"
+}

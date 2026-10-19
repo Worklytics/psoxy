@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "sha": "a1b2c3",
+      "commit": {
+        "message": "fix(cache): evict on config change\n\nMade with Cursor",
+        "author": { "name": "Jane", "email": "jane@example.com", "date": "2026-10-01T12:00:00Z" }
+      }
+    },
+    {
+      "sha": "d4e5f6",
+      "commit": {
+        "message": "feat(api): add bulk export\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+        "author": { "name": "Bob", "email": "bob@example.com", "date": "2026-10-02T09:30:00Z" }
+      }
+    },
+    {
+      "sha": "789abc",
+      "commit": {
+        "message": "Merge branch 'main' into release",
+        "author": { "name": "Carol", "email": "carol@example.com", "date": "2026-10-03T16:45:00Z" }
+      }
+    }
+  ]
+}
