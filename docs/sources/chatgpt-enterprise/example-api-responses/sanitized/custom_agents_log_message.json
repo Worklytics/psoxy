@@ -1,0 +1,29 @@
+{
+  "event_id":"a51dfef7-44dd-4ef5-9ea8-1b118819f2e7",
+  "type":"CUSTOM_AGENTS_LOG",
+  "timestamp":"2026-03-10T18:15:21.120000Z",
+  "principal":{
+    "id":"t~q4ZbwP7oZewMjKQPZfbr4a4vKfoRN-EBmeNkEBtydb4",
+    "type":"CHATGPT_WORKSPACE"
+  },
+  "actor":{
+    "type":"AGENT",
+    "agent_runtime":{
+      "delegator":{
+        "type":"ACCOUNT_USER",
+        "user_id":"t~qZezgH1590-X3vGc-FW7ztXDzNC_eNeiuaLPSmkpM1s",
+        "user_email":"t~lYdYuL_UqllXzNt0J3F59AjPRyBJzXQ8eKaypkZ8Iho@example.org"
+      }
+    }
+  },
+  "event_type":"MEMORY_READ",
+  "client_id":"CHATGPT_WEB",
+  "workspace_id":"be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details":{
+    "detail_type":"MEMORY_READ",
+    "agent_id":"agent-123",
+    "run_id":"thread_019c9c87-1084-7ad1-b487-c2ee563367c4",
+    "memory_path":"customer-notes/q4.md",
+    "access_method":"read"
+  }
+}

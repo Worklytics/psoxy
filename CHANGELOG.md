@@ -5,11 +5,13 @@ in each release's notes.
 
 Changes to be including in future/planned release notes will be added here.
 
-## Unreleased
+## [0.7.2](https://github.com/Worklytics/psoxy/releases/tag/v0.7.2) - *planned*
 
 - AWS health checks that cannot reach SSM Parameter Store or Secrets Manager (typical of a Lambda in a VPC without a reachable interface endpoint or NAT) return HTTP 503, `X-Psoxy-Error: CONFIG_STORE_UNREACHABLE`, and a JSON body with the same `error` code, including when the failure happens during Lambda initialization. CloudWatch still logs `Error reading configuration from SSM`.
 - GCP health checks that cannot reach Secret Manager (typical of a Cloud Function whose VPC egress is all traffic, without Private Google Access or Cloud NAT) return the same HTTP 503 and `X-Psoxy-Error: CONFIG_STORE_UNREACHABLE`, including when container startup fails. Logs include `Error reading configuration from Secret Manager`.
 - Other connection failures (not the configuration store) return HTTP 503 and `X-Psoxy-Error: DEPENDENT_SERVICE_UNREACHABLE`. The response is one sentence from the platform parser, such as `Unable to reach KMS. Check the logs.` or `Unable to reach Cloud KMS. Check the logs.` The client error itself is only in the logs. A failed initialization is retried after about a minute instead of sticking for the life of the instance.
+- `aws`: example leaves VPC off by default. `vpc.tf` and the `vpc_config` block in `main.tf` are commented out, so Lambdas use function URLs and API Gateway stays off (`use_api_gateway_v2` defaults to `false`). Uncomment both to attach Lambdas to a VPC, which forces API Gateway v2.
+
 
 ## [0.7.1](https://github.com/Worklytics/psoxy/releases/tag/v0.7.1)
 - `aws`: VPC example `vpc.tf` improved, public/private segmentation and security groups.
@@ -27,6 +29,8 @@ Changes to be including in future/planned release notes will be added here.
 - `salesforce`:
   - forward `Sforce-Limit-Info` and `Sforce-Query-Options` request headers to Salesforce on Task/Event/composite/query endpoints. Lets connections set a smaller `batchSize` via `Sforce-Query-Options` to mitigate `SocketTimeoutException`s on large query responses; previously these headers were silently dropped.
   - `salesforce`: removed the `/composite` (Task+Event batch) endpoint. It wasn't in use; Task and Event are already fetched via separate `queryAll` endpoints, and the combined-batch response made error handling for partial failures unreliable. The unrelated `/composite/sobjects/Account` (bulk-by-ID account lookup) endpoint is unaffected.
+- `github`, `github-copilot`, and `github-enterprise-server`: pseudonymize `external_identity_nameid` and `external_identity_username` on organization audit-log events, which seems to appear on some audit log entries.
+- `aws`: new deployments name the caller IAM role `*SanitizedDataAccessor` instead of `*Caller`. Existing deployments retain the legacy role name via lifecycle `ignore_changes` until 1.0.
 
 
 ## [0.7.0](https://github.com/Worklytics/psoxy/releases/tag/v0.7.0)

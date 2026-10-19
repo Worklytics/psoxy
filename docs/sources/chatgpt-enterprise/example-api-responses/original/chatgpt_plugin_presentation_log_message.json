@@ -1,0 +1,31 @@
+{
+  "event_id": "c4adb681-80d7-4cf4-989f-95464389134a",
+  "type": "CHATGPT_PLUGIN_PRESENTATION",
+  "timestamp": "2026-07-31T14:43:59.112392Z",
+  "principal": {
+    "id": "be545252-ad04-4cfa-9ca5-deca58416151",
+    "type": "CHATGPT_WORKSPACE"
+  },
+  "actor": {
+    "type": "ACCOUNT_USER",
+    "user_id": "user-TUvqhBX7HbQPRgHyEBt5WRcI",
+    "user_email": "user@example.org"
+  },
+  "event_type": "PROMPT_RESPONSE_RECEIVED",
+  "client_id": "BASISPOINTS_POWERPOINT_ADDIN",
+  "workspace_id": "be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details": {
+    "detail_type": "PROMPT_RESPONSE_RECEIVED",
+    "session_id": "session-456",
+    "response_text": "The presentation focuses on growth, margin expansion, and execution priorities.",
+    "status": "completed",
+    "model": "gpt-5.1",
+    "token_usage": {
+      "input_tokens": 120,
+      "output_tokens": 58,
+      "cached_input_tokens": 0,
+      "reasoning_output_tokens": 0
+    },
+    "environment_id": null
+  }
+}

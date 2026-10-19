@@ -115,6 +115,38 @@ class AugmentProcessorTest {
 
     @SneakyThrows
     @Test
+    void applyAugments_regexExtract_addsProperty() {
+        Augment.RegexExtract augment = Augment.RegexExtract.builder()
+            .jsonPath("$.commit.message")
+            .extraction("aiAssistPlatform", List.of(
+                Augment.RegexExtract.ExtractionRule.builder()
+                    .regex("(?i)Made with Cursor")
+                    .value("Cursor")
+                    .build()))
+            .extraction("commitType", List.of(
+                Augment.RegexExtract.ExtractionRule.builder()
+                    .regex("(?i)^fix(?:\\(|:|\\s)")
+                    .value("fix")
+                    .build()))
+            .build();
+
+        Map<String, Object> commit = new LinkedHashMap<>();
+        commit.put("message", "fix: lint\n\nMade with Cursor");
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("commit", commit);
+
+        augmentProcessor.applyAugments(List.of(augment), document);
+
+        assertEquals("fix: lint\n\nMade with Cursor", commit.get("message"));
+        assertTrue(commit.containsKey("+message:regexExtract"));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> extracted = (Map<String, Object>) commit.get("+message:regexExtract");
+        assertEquals("Cursor", extracted.get("aiAssistPlatform"));
+        assertEquals("fix", extracted.get("commitType"));
+    }
+
+    @SneakyThrows
+    @Test
     void applyAugments_textDigest_withKeywords() {
         Augment.TextDigest augment = Augment.TextDigest.builder()
             .jsonPath("$.body.content")

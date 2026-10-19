@@ -1,0 +1,31 @@
+{
+  "event_id":"cc36621d-37f9-405c-8b77-8b4d1a3a90b9",
+  "type":"CHATGPT_PLUGIN_SPREADSHEET",
+  "timestamp":"2026-02-08T23:43:59.112392Z",
+  "principal":{
+    "id":"t~q4ZbwP7oZewMjKQPZfbr4a4vKfoRN-EBmeNkEBtydb4",
+    "type":"CHATGPT_WORKSPACE"
+  },
+  "actor":{
+    "type":"ACCOUNT_USER",
+    "user_id":"t~qZezgH1590-X3vGc-FW7ztXDzNC_eNeiuaLPSmkpM1s",
+    "user_email":"t~lYdYuL_UqllXzNt0J3F59AjPRyBJzXQ8eKaypkZ8Iho@example.org"
+  },
+  "event_type":"PROMPT_RESPONSE_RECEIVED",
+  "client_id":"BASISPOINTS_EXCEL_ADDIN",
+  "workspace_id":"be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details":{
+    "detail_type":"PROMPT_RESPONSE_RECEIVED",
+    "session_id":"session-123",
+    "response_text":"{\"length\":44,\"word_count\":8}",
+    "status":"completed",
+    "model":"gpt-5.1",
+    "token_usage":{
+      "input_tokens":120,
+      "output_tokens":58,
+      "cached_input_tokens":0,
+      "reasoning_output_tokens":0
+    },
+    "environment_id":null
+  }
+}

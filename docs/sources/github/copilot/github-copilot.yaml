@@ -528,6 +528,8 @@ endpoints:
           - "$..user_id"
           - "$..started_by"
           - "$..started_by_id"
+          - "$..external_identity_nameid"
+          - "$..external_identity_username"
         encoding: "URL_SAFE_TOKEN"
     queryParamSchemas:
       phrase:
@@ -570,6 +572,8 @@ endpoints:
           - "$..user_id"
           - "$..started_by"
           - "$..started_by_id"
+          - "$..external_identity_nameid"
+          - "$..external_identity_username"
         encoding: "URL_SAFE_TOKEN"
     queryParamSchemas:
       phrase:
