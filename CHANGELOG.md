@@ -7,6 +7,7 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Unreleased
 
+- **Breaking, `atlassian` (`jira-cloud`, `confluence-cloud`):** switched from user-delegated OAuth 2.0 (3LO) `refresh_token` auth to [Atlassian OAuth 2.0 credentials for service accounts](https://support.atlassian.com/user-management/docs/create-oauth-2-0-credential-for-service-accounts/) (`client_credentials` grant, reusing the existing `ClientCredentialsGrantTokenRequestBuilder`/`CREDENTIALS_FLOW=client_secret` path already used by `salesforce` - no Java code changes). The prior 3LO flow required re-running an interactive browser-consent flow at least annually, since Atlassian caps a 3LO "token family" at a 1-year max lifetime; the service-account credential has no refresh token and no stated expiration on the `CLIENT_SECRET` itself. `REFRESH_TOKEN` is no longer a configured secret for these connectors - existing deployments must create a service account + OAuth 2.0 credential (see updated docs) and repopulate `CLIENT_ID`/`CLIENT_SECRET` before applying this change. See [Jira Cloud](docs/sources/atlassian/jira/README.md) and [Confluence Cloud](docs/sources/atlassian/confluence/README.md).
 - `aws`: example leaves VPC off by default. `vpc.tf` and the `vpc_config` block in `main.tf` are commented out, so Lambdas use function URLs and API Gateway stays off (`use_api_gateway_v2` defaults to `false`). Uncomment both to attach Lambdas to a VPC, which forces API Gateway v2.
 
 
