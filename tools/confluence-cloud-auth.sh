@@ -1,8 +1,15 @@
 #!/bin/bash
 
-# a script to simplify the process of creating oauth app in Confluence Cloud, authorizing it for the
-# the required scopes, and obtaining authentication credentials that can be used by the proxy
-# connector (similar to https://github.com/Worklytics/psoxy-oauth-setup-tool)
+# a script to simplify obtaining Confluence Cloud authentication credentials for the proxy connector,
+# using Atlassian's OAuth 2.0 credentials for service accounts (client_credentials grant).
+# See https://support.atlassian.com/user-management/docs/create-oauth-2-0-credential-for-service-accounts/
+#
+# Prerequisite: an org admin must have already created a service account (admin.atlassian.com >
+# Directory > Service accounts), granted it product access to the Confluence site, and created an
+# OAuth 2.0 credential for it with these granular scopes:
+#   read:blogpost:confluence, read:comment:confluence, read:group:confluence, read:space:confluence,
+#   read:attachment:confluence, read:page:confluence, read:user:confluence, read:task:confluence,
+#   read:content-details:confluence
 
 # Prefer printf over echo for compatibility and formatting
 # Use colors for output
@@ -13,79 +20,16 @@ else
     ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
 fi
 
+# shellcheck source=lib/atlassian-service-account-auth.sh
+source "$(dirname "$0")/lib/atlassian-service-account-auth.sh"
+
 PREFIX="${1:-PSOXY_}"
 
-# Check if jq is installed
-if ! command -v jq &> /dev/null
-then
-    printf "${ERR}jq is not installed.${NC}\n"
-    printf "Please install jq to proceed. For example:\n"
-    printf "macOS: ${WARN}brew install jq${NC}\n"
-    printf "Linux: ${WARN}sudo apt-get install jq${NC} or ${WARN}sudo yum install jq${NC}\n"
-    exit 1
-fi
+printf "Before continuing, in ${WARN}https://admin.atlassian.com${NC}, an org admin must have:\n"
+printf "  1. Created a service account (Directory > Service accounts) with product access to your Confluence site.\n"
+printf "  2. Created an OAuth 2.0 credential for that service account (Settings/API keys > OAuth 2.0 credentials), with granular scopes:\n"
+printf "     ${CODE}read:blogpost:confluence${NC}, ${CODE}read:comment:confluence${NC}, ${CODE}read:group:confluence${NC}, ${CODE}read:space:confluence${NC},\n"
+printf "     ${CODE}read:attachment:confluence${NC}, ${CODE}read:page:confluence${NC}, ${CODE}read:user:confluence${NC}, ${CODE}read:task:confluence${NC},\n"
+printf "     ${CODE}read:content-details:confluence${NC}\n\n"
 
-printf "${SUCCESS}This script will guide you through the process of creating an OAuth app in Confluence Cloud, authorizing it for the required scopes, and obtaining authentication credentials that can be used by the proxy connector.${NC}\n"
-
-printf "1. Go to https://developer.atlassian.com/console/myapps/ and click on \"Create\" and choose \"OAuth 2.0 Integration\"\n"
-printf "2. Then click \"Authorization\" and \"Add\" on \`OAuth 2.0 (3L0)\`, adding \`http://localhost\` as callback URI. It can be any URL     that matches the URL format and it is required to be populated, but the proxy instance workflow will not use it.\n"
-printf "3. Now navigate to \"Permissions\" and click on \"Add\" for \`Jira API\`. Once added, click on \"Configure\".
-  Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Scopes\` and then selecting them:
-    - \`read:blogpost:confluence\`
-    - \`read:comment:confluence\`
-    - \`read:group:confluence\`
-    - \`read:space:confluence\`
-    - \`read:attachment:confluence\`
-    - \`read:page:confluence\`
-    - \`read:user:confluence\`
-    - \`read:task:confluence\`
-    - \`read:content-details:confluence\`
-\n"
-
-printf "4. Once Configured, go to \"Settings\" and copy the \"Client Id\" and \"Secret\". You will use these to
-  obtain an OAuth \`refresh_token\`.\n"
-
-# Prompt for Jira client ID and secret
-printf "Enter your Confluence Client ID: "
-read -r CLIENT_ID
-printf "Enter your Confluence Client Secret: "
-read -r CLIENT_SECRET
-
-# Open authorization URL in user's browser
-AUTH_URL="https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${CLIENT_ID}&scope=offline_access%20read%3Atask%3Aconfluence%20read%3Ablogpost%3Aconfluence%20read%3Acomment%3Aconfluence%20read%3Agroup%3Aconfluence%20read%3Aspace%3Aconfluence%20read%3Aattachment%3Aconfluence%20read%3Apage%3Aconfluence%20read%3Auser%3Aconfluence%20read%3Atask%3Aconfluence%20read%3Acontent-details%3Aconfluence%20&redirect_uri=http%3A%2F%2Flocalhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent"
-printf "${SUCCESS}Opening the following URL in your default browser:${NC}\n"
-echo $AUTH_URL
-open "${AUTH_URL}" || xdg-open "${AUTH_URL}"
-
-# Prompt for authorization code
-printf "After accepting access on the Confluence site, paste the full redirect URL here (then press Enter):\n"
-if read -e -r REDIRECT_URL; then
-  :
-else
-  read -r REDIRECT_URL
-fi
-AUTH_CODE=$(echo "$REDIRECT_URL" | sed -n 's/.*[?&]code=\([^&]*\).*/\1/p')
-
-# Use the authorization code to request access and refresh tokens
-DATA="{\"grant_type\": \"authorization_code\",\"client_id\": \"${CLIENT_ID}\",\"client_secret\": \"${CLIENT_SECRET}\", \"code\": \"${AUTH_CODE}\", \"redirect_uri\": \"http://localhost\"}"
-echo $DATA
-#exit 1
-RESPONSE=$(echo $DATA | curl --silent -X POST --data-binary @- https://auth.atlassian.com/oauth/token -H 'Content-Type: application/json')
-# Parse access token and refresh token
-echo $RESPONSE
-ACCESS_TOKEN=$(echo "${RESPONSE}" | jq -r '.access_token')
-REFRESH_TOKEN=$(echo "${RESPONSE}" | jq -r '.refresh_token')
-
-# Use access token to get cloud ID
-CLOUD_ID_RESPONSE=$(curl --silent --header "Authorization: Bearer ${ACCESS_TOKEN}" --url 'https://api.atlassian.com/oauth/token/accessible-resources')
-CLOUD_ID=$(echo "${CLOUD_ID_RESPONSE}" | jq -r '.[0].id')
-
-# Instructions for user
-printf "${SUCCESS}Use the following values in the secret manager choosen for your host platform:${NC}\n"
-
-printf "${WARN}${PREFIX}CONFLUENCE_CLOUD_REFRESH_TOKEN${NC}: ${REFRESH_TOKEN}\n"
-printf "${WARN}${PREFIX}CONFLUENCE_CLOUD_CLIENT_ID${NC}: ${CLIENT_ID}\n"
-printf "${WARN}${PREFIX}CONFLUENCE_CLOUD_CLIENT_SECRET${NC}: ${CLIENT_SECRET}\n"
-
-printf "And set the cloud ID (${WARN}${CLOUD_ID}${NC}) as the value of ${WARN}confluence_example_cloud_id${NC} in your ${WARN}terraform.tfvars${NC} file.\n"
-
+atlassian_service_account_auth "Confluence" "CONFLUENCE_CLOUD" "confluence_example_cloud_id" "${PREFIX}"
