@@ -4,7 +4,7 @@
   "serialNumber" : "urn:uuid:88b5fe85-996c-3dc0-a79d-16482f3988eb",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2026-10-13T20:53:49Z",
+    "timestamp" : "2026-10-20T17:53:43Z",
     "lifecycles" : [
       {
         "phase" : "build"
@@ -92,35 +92,35 @@
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "e39709a35f37d6db9aa35909bf3a2a7a"
+          "content" : "b2ed7c265b7723a143dbcf72870dda37"
         },
         {
           "alg" : "SHA-1",
-          "content" : "e2b1b273d192a09cb5410a6e6f23c66603af9254"
+          "content" : "3d3926c17e6df591148f4f226e09fb0bcda02ffc"
         },
         {
           "alg" : "SHA-256",
-          "content" : "979ad92aaf2e6db57ecb1b786e6eeccd722fe3f65da908b0bfa3186e31a68b70"
+          "content" : "6c91e5168e9c3fe2032c2cb4fcdaa2b3df4a86f89d9f67f1329048f6ecbcba7c"
         },
         {
           "alg" : "SHA-512",
-          "content" : "c707622db8eaba021fcf86e76104628d354b5e38d30f2dc088a98064a21a225a0eef1736396126add2d95da2a48de5ea0c6a3e30f695ba7260f98186e50a4ec3"
+          "content" : "f4ef445d77dd0414988604203edec073410f71bcb62069df074ac5dc843bd481c0985bd73d2c61d53dae3947cc780d5a5c6c3b333db3e417f22b911fe8a425d9"
         },
         {
           "alg" : "SHA-384",
-          "content" : "d6f1076c30cc431a4a744b91b29795a1cb0daf4af764277394aa320002d6a840df2d389b3fdb00125d83cfbe5b923247"
+          "content" : "fb1d8802b96df1ec831abc419e1d8046069e125bfbcaf11b7a69512464ec6eefffa52f87a1410ded559437f442c043a8"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "beaa043605de0651a8d9ea617fb7a9e5b4a923e104be3206d95c98a4a45d396b0dd39d9f7bbd2dc2fa4566fa1e8f3c14"
+          "content" : "a155a8889fa51f13b8ff18c0c9850cc0aba1575c313afc9fb4477f9794f3e6e7aab06408060f0ae870c92ed4c12740c9"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "c187ea56695f90d311957ae474fa73036b38151eb39e660350236ee4320155e8"
+          "content" : "8846ab334263649942920b5ef516b7754b9edb8653cb1a91ba456dbc0bc572c1"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "9760a1c41d2486d05b03509995076b98a9709ec6149667e392da0171545c9197c6832914e848c8c9862e2239721e99a35cab28936921fa0b880402d5e96a47aa"
+          "content" : "28fd1188c6f3da7c9f8fcbddff4e04cc96fb14e754cfbbcfe2b4213794c28cdd451e2b80a48ec577f8b1412f82e8b3c6186314cf107f95f5e9ff7c9ab6750590"
         }
       ],
       "licenses" : [
@@ -143,35 +143,35 @@
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "4bd069a261c873090f08ecc0e1406cd0"
+          "content" : "3260b72a3cb37d9f3d39658cf99f99f8"
         },
         {
           "alg" : "SHA-1",
-          "content" : "be20d5414b2aab90a88ee30faf2b276c997d6420"
+          "content" : "489952e794d7cc8464c6f89056a05aa3763e9d84"
         },
         {
           "alg" : "SHA-256",
-          "content" : "0e373fe4a8f0753cf71a708aad020e044e55fcb9c025d9b9276e8a1e011a63d9"
+          "content" : "8de6c6ee4c7368ff25d508ef0fdcd5b5817c3dcb7f472622508576d3317515df"
         },
         {
           "alg" : "SHA-512",
-          "content" : "6541c3cb8afaf5d3a2f16ba179016672caf89ab107ca1b7f61de01cd6e40f30bc5435f02d73ae1e60d6a581fbb715b80086add23530c4e3cda1b234d444204fa"
+          "content" : "a73198ad714415a29b9ff6cbee8029cb560f17633dfc0d25254c989955dabf0656921dcea9be44256d21ce63c00b521caf97feddcdbda98a1726c2da6a433121"
         },
         {
           "alg" : "SHA-384",
-          "content" : "5afa529da02016d6b9f2b6fe486e67913aaa3fad6a5e7aacf0bf22d1f04985bb443c5ce007bc3f3c98d7595c55735fdc"
+          "content" : "a0b7038554071272801c463cd7feaae88f8a0349ec6f7f53db8394d5194263042c9156dc48dc7a223f03e6a852d1cb45"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "13f370323ef385d34ba89178d156a6c5393929138a7f2c1354e9c84012788fcb32ffdec961fa308a80048a392c6606bd"
+          "content" : "dd113e95513570e665169f4634c089bc30cc2d70da06d945cb5ae2c186d054341b254ffc85a76a4564e29c9dcc307f02"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "bb52d301a4d86d4f03853f9a4dde9d16394258097c82564f8bdf0180e3c8d5ce"
+          "content" : "89d8caddb07e3c5c61402db7c534e7b9a5be6d9c68b3e6bc0b8cf59fc7db9b53"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "95b7b365b558d29f222682c7c6bea6e58ecf53f796c86b8d02a0c4f2d5cc73e7e3d032ceaed56174dee3f5fd6ddaec147f8ddf871e4a02be498ce7e3e2778281"
+          "content" : "b79412226bb647b4760ffd30df51eea21d64455d32e5e8016bf9795c7da24bd453359048939c566b158e0ed03761fc700233fe7513e4acf650cff1c3dab4cf69"
         }
       ],
       "licenses" : [
@@ -186,44 +186,44 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.networknt/json-schema-validator@3.0.7?type=jar",
+      "bom-ref" : "pkg:maven/com.networknt/json-schema-validator@3.0.8?type=jar",
       "group" : "com.networknt",
       "name" : "json-schema-validator",
-      "version" : "3.0.7",
+      "version" : "3.0.8",
       "description" : "A json schema validator that supports draft v4, v6, v7, v2019-09 and v2020-12",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "bc40b1ae0b880a3bc94179ad6ddce1d5"
+          "content" : "0d3c9dcf38dbc710a57a419c65265812"
         },
         {
           "alg" : "SHA-1",
-          "content" : "5e755525565bf48be0049c129b4005c2ca6a43eb"
+          "content" : "89981e0d1f6798f6c2a64c399b377f18102c4ad1"
         },
         {
           "alg" : "SHA-256",
-          "content" : "27b90bce60845f353b203b735cda2e0cb9a32c4962550e249141a2b065b9be5c"
+          "content" : "d3f4c61ba35c3543bdf1ab42462bf89721542f4adea5b092ee7b430dfd467181"
         },
         {
           "alg" : "SHA-512",
-          "content" : "aace0c5b7eb64e404201a713d1621ca8728392150fa98fda007ae819041742b602aa406cbfa28b54fb2a985cee71bee87ed2184a2818a4d4332c52a36e127e09"
+          "content" : "6af48f54074995e83f116e7fb43ca89f01ab65d7c23c9976deb2a05d2b3be9e2f3256c97b6c486f1a71baaac4d3d5ae553efb7f2f22f11235a9943ec200fe9d5"
         },
         {
           "alg" : "SHA-384",
-          "content" : "0f5870dd4404fa98ff6cf680a71d1d883b63938cae71da62339d6ab740ea7d4ec7eb2488f56128055f23f50bdcee09ab"
+          "content" : "45c84641e8b476ebaf7727bd8754dd3a3aede2b1ab5be97348dc0a6375c3d23816e053238b40680e8967b243f753e0e3"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "e43e19226409aa060879001c273db23394cdd37cde59829724442d1b7594852ddb2e97233e31d6675a1ced8496814f87"
+          "content" : "dbfdfcf7aad2cb0bb6b8413a692833e24e24c226946ca8da9e07bd169e95d0e374106d20ece16ab759387f14444fee00"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "770af0ca389bce3803911ed669784629cc3267256afaf9831536c5908c62f998"
+          "content" : "8c52c2fa0a8254333221903d98b70ea5acbf0bdcf7552efd28b778fd016eea6f"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "d63d1754c21bc282a82d0481398183c3f14a22c4f44163980394152c02170c5ac33674d6a57b6352515c8ef7cc8c3bd26966c782058cc85fb71c68681fb813e1"
+          "content" : "f681bc5ca65983f7c2e4beac954eac6b79bc88866fde6d3bc26cb5d7e522e9311f87d71d4284b5505a38cf87811c187b70061c96a885e5f8a000b41851a69538"
         }
       ],
       "licenses" : [
@@ -238,7 +238,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.networknt/json-schema-validator@3.0.7?type=jar",
+      "purl" : "pkg:maven/com.networknt/json-schema-validator@3.0.8?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -330,45 +330,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/tools.jackson.core/jackson-databind@3.2.1?type=jar",
+      "bom-ref" : "pkg:maven/tools.jackson.core/jackson-databind@3.2.3?type=jar",
       "publisher" : "FasterXML",
       "group" : "tools.jackson.core",
       "name" : "jackson-databind",
-      "version" : "3.2.1",
+      "version" : "3.2.3",
       "description" : "General data-binding functionality for Jackson: works on core streaming API",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "a5f8a8e60591bcc61a3c521317b3293c"
+          "content" : "60c5fc1b2ac506e9acfde1662aa8fbaf"
         },
         {
           "alg" : "SHA-1",
-          "content" : "363dc46ceb44a97cba68cb0e9da4a3cb5bf723d4"
+          "content" : "edb121f17d1a441732b15919f531e529c5cc76ec"
         },
         {
           "alg" : "SHA-256",
-          "content" : "8d005c5626b1839e2eea6bd33a437287e7a24d54e1bb3746b8f861193262b519"
+          "content" : "235b72436af983857e44efa42449f4f0a2c571e69d6c5d9dd1253ae7d192dcf2"
         },
         {
           "alg" : "SHA-512",
-          "content" : "5ef9ee43b5b55b3e3b3618fe8c35ec674005957ac2a0d90298e67ff6b82495016d2c8c07da6e1efe9a91dbd29dc9fb86c2470728f425111cffc3362e60dead29"
+          "content" : "72f4e366e0dc6fca769070d98131946fa79a45ba8d7c15be03916d8f2bfd5541ef90896b78bfdf36ad999e2f42d06d337b296b5996bb0fc0cccc6acb69e2514e"
         },
         {
           "alg" : "SHA-384",
-          "content" : "299e007edf092b6d49e57d9e4e24a4d2e4784f1cf2770ce0293e2ccd07f82d0b549d1b29391565ebbe5df7a34be3c154"
+          "content" : "12b53583bb5680904ea191a68f32ad7190847c7de806cae78de046d8df0df9c3cb46ed0c88a4131a01062eafcedbe0e5"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "8899110cde40b0f8a80819bd8c992080ec891e3e152e361459b70e7cfefdc1ad6174d0b0db9cd3a36e661f0ae1a55588"
+          "content" : "3ffbfcaec1f312e450e64f7dac6117de4c716c8d136fd30236dcb47e2830b55ff1bcbd06331c60d5e6df1f0ad85927dd"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "f049f33f716b8c7e94afbebde9761f21cd871dd906f7b97ffde52f5b8748aa4e"
+          "content" : "0f77f46f5862cb6fb7874c3bd6286dc365f3e37ac7a241762bdeb89b4cba63ac"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "54b30829f60d8249df73a868839e505ebf510c197800f7a8b8f2513d80b67ffd16a904ea4874ceb958d111f4dc5ca46a90cd0e685c1b6ef5766e523d27eec2d5"
+          "content" : "32c39b0c82a5b4994387e76b3096f8b6b75240a07ce442d2f66b74f014c47dad14e4b0b5c17ec866c450a9717a6be34dc1b3ad2201e244006a8378522468e388"
         }
       ],
       "licenses" : [
@@ -383,7 +383,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/tools.jackson.core/jackson-databind@3.2.1?type=jar",
+      "purl" : "pkg:maven/tools.jackson.core/jackson-databind@3.2.3?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -405,45 +405,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/tools.jackson.core/jackson-core@3.2.1?type=jar",
+      "bom-ref" : "pkg:maven/tools.jackson.core/jackson-core@3.2.3?type=jar",
       "publisher" : "FasterXML",
       "group" : "tools.jackson.core",
       "name" : "jackson-core",
-      "version" : "3.2.1",
+      "version" : "3.2.3",
       "description" : "Core Jackson processing abstractions (aka Streaming API), implementation for JSON",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "7fb8949692eb2d7ee38d07d8fd245c0e"
+          "content" : "2422ba3b4c39dc4a954620be4d6337df"
         },
         {
           "alg" : "SHA-1",
-          "content" : "5bff2a525073cff8a8206751f6f6bc4650b81b94"
+          "content" : "94d7dab7ac8e336a4c7a5ce36b8ca206bfde18c5"
         },
         {
           "alg" : "SHA-256",
-          "content" : "2688aaa60b207403287e16a71fb5644bf2f9cfc464cc601ae95c6c86a5af1f94"
+          "content" : "a0c17e7e665a5e95c82f5fb45c0fec2ae3dc556c80f0016452c9c84cd23f3817"
         },
         {
           "alg" : "SHA-512",
-          "content" : "e9fe35e4e3806932904204e9d96bf040b38dc0761ccfbc112e48fc24a1fc7c9c60d65cce6bf46876c4a815688ef225fb90c4a94cefa364225fd67e5b760f0a36"
+          "content" : "052e1b0422e66a713c127dc47839d35c9b4b64edf230051608a3d05d4ae83f0dff84cdf845d2115d0a47f59b693abd368b3ef2be613a8545b64f80290cef8d1d"
         },
         {
           "alg" : "SHA-384",
-          "content" : "1713f31a2b2e2aec42109cddd0c1fcafa0d7d4f1fa86e5b31ddd28c050044bfb4bd7a2299ac17c7d0a8884b68b2f32ce"
+          "content" : "70c2fba9a91785dc098432dd6b6aa666454f2230234308c3a6d822122026cbc85e48f94c26c3945b6bb6171f4d33be0f"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "6c6361cf59d850ef6c33fa90da76b09c39894352826fcb06829f3c21f66c8bb4243a37141b5d767b1dac736436861d20"
+          "content" : "c7b9a2e46ee2a3d14e02325ca9a48b786fbe9b9024b66d4afa27488e8eef467fd28046795c424a70c817d1df312e5470"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "eeb15c37e503c4e49ee87148586092d414ec0d4708dfe83117201629bde48515"
+          "content" : "356b07d732d69d00fbd72876285cfbe4c5c0098113be3ca8151f82f32fa6dbba"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "f8b6b62b4d08ad3d0ac492245fe9218ea4d8d372b9e388e71d2d04e716ce7bb13a71b560caa0fef6551f307967378439c1e13332e5b90c906f004513a11b29c0"
+          "content" : "c6f11c9a9da0bce87f80b47d9f9763bb222e7cd06dfbd803c8c41cc5426cc87b4fa45c88b618ed612d34897c73ec04c8b5876927f28dc2ac1e156772bfb3ace0"
         }
       ],
       "licenses" : [
@@ -458,7 +458,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/tools.jackson.core/jackson-core@3.2.1?type=jar",
+      "purl" : "pkg:maven/tools.jackson.core/jackson-core@3.2.3?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -625,45 +625,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.4?type=jar",
+      "bom-ref" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.5?type=jar",
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.httpcomponents.client5",
       "name" : "httpclient5",
-      "version" : "5.6.4",
+      "version" : "5.6.5",
       "description" : "Apache HttpComponents Client",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "42f90ff32bc3f72cb8bdfdf235e28328"
+          "content" : "d8cc8b781781dc447050138b9cd7bf68"
         },
         {
           "alg" : "SHA-1",
-          "content" : "2a8ff1366303ac253e0ea64dab1e5abb5b7687bd"
+          "content" : "4540cf4269d2e4a713a434a01e195af29e1ef9e1"
         },
         {
           "alg" : "SHA-256",
-          "content" : "bdef5f8841145cd76c4c605ff301bc840eea0d5292332b7b892a93316c0d8ee1"
+          "content" : "a10b555f7c85a720d1011a086d679d854b155816cde91a40198cc98c2b0867e8"
         },
         {
           "alg" : "SHA-512",
-          "content" : "2acc897cde347dc33d7c180f2b8c9b255f1fb687f6afc75e271b037998cf248d69648f1c92225c2ed1ba370ef212ad08ff36a1b90d5faad2cddb3bcc7129b0cf"
+          "content" : "d31ba483b5de27071efe116b3a94913f90d0f410e71809c68d3142cf4968f289cb7dabe423320770d6bdc56acfe8d2943f8850b338e73d61afd4182bf700ffb8"
         },
         {
           "alg" : "SHA-384",
-          "content" : "43856479fa74a1d193930d26f37fefeb4eadef0dd480c4e840cdaabae6138304ba8aecdaed6a8940d0e971d82c597dd7"
+          "content" : "91514a155a1ba9e4ca14f39f408acbca061efe3602fe3a7875ab8200589bff72adec28eace8460379b7e7aeef6459d18"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "1684a4ccb7c533cc531d96274fc8f6ff33106840f0f1523655b4313393a952ed376b83004d5e0217213ece2035005ee3"
+          "content" : "c4f5791a47f959530943619c01381ced385910caad4a3e3389f5cbcaa30ac752f0d5c361ca55d9b14296a6747392c18a"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "ab2b8fd38edd948d38fbcc23baa8e6e2437e25610c16bb1df7bbe7d95453bbcd"
+          "content" : "00ae74969636542a25131300b1da43702daa0a22e446aeb07b2a088d0290882f"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "9503f6ec6318d2aecae0e68e3eabbfaa012c512141b89e52d12fa4f13450114482508ef2ded7e9a3262fd7c4b5f08e7f1bfe4fa343b870dae81d5c04acaac6eb"
+          "content" : "1b730aca7330167292d6325c27f2ec6964d751fa7d1fb84b170ca3fc635ee2ad0a97102be01b1328d7f2ed6f996576ba98bbc321f0e3be561ee864749679a63b"
         }
       ],
       "licenses" : [
@@ -678,11 +678,11 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.4?type=jar",
+      "purl" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.5?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
-          "url" : "https://hc.apache.org/httpcomponents-client-5.6.x/5.6.4/httpclient5/"
+          "url" : "https://hc.apache.org/httpcomponents-client-5.6.x/5.6.5/httpclient5/"
         },
         {
           "type" : "distribution-intake",
@@ -698,51 +698,51 @@
         },
         {
           "type" : "vcs",
-          "url" : "https://github.com/apache/httpcomponents-client/tree/5.6.4/httpclient5"
+          "url" : "https://github.com/apache/httpcomponents-client/tree/5.6.5/httpclient5"
         }
       ]
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.3?type=jar",
+      "bom-ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.4?type=jar",
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.httpcomponents.core5",
       "name" : "httpcore5-h2",
-      "version" : "5.4.3",
+      "version" : "5.4.4",
       "description" : "Apache HttpComponents HTTP/2 Core Components",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "4b9da0d3e87ed769ef6a162223f2265c"
+          "content" : "8f56560c50101d9422ca597c48973c9b"
         },
         {
           "alg" : "SHA-1",
-          "content" : "33bcd37d645539d27c65e17420843fd7f6c0ebf4"
+          "content" : "90c30ff56e226bdb96cf5c987aebc42e1a8a9f45"
         },
         {
           "alg" : "SHA-256",
-          "content" : "c7db7026b8e2dea39132b04a6069f6671e2858309b20a146ec5c7dd6ed73a0b6"
+          "content" : "9a61441889f9b222ce99581977cc549b4dfca7ac9d2841582c1e57a31fa65b48"
         },
         {
           "alg" : "SHA-512",
-          "content" : "0bde9a7579cba0dbb6322c8a25eefd0bdb80bd907b4e66c20570ce23558fd57daf9ae5233a571546171456b9f7da6e970507cde971a1155d1bce011c62b281af"
+          "content" : "6fd81dffd73dee36e85d676f587738d7a31c5b35bfc2ece82fd749cca9894b997ad1b9264bfd9ce4a92ffeba5751d0eaee4b106b03ce7ef4110e6bb4f3bb8eee"
         },
         {
           "alg" : "SHA-384",
-          "content" : "31c865c7c4fd4975d1a60223478b1aa9a8c374e77e23f46c3033f9f88a4fa774850c5f7c4974ee6c98a8f0ac031ed843"
+          "content" : "28a1970490d83c9ebaba10d31ea9a933563f2d99db7eb800264e9f7da61e9d80b19ae9ea898bd2457577c0c8daa3cd1c"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "06cf3bffe6edd2fc68630b79d041cc1af328f83f55356d75e69ebed85057edcd3c3f1319d5d7c777878807122ed9c86b"
+          "content" : "b47195f8b614c9225471dd05cad344ccab47d5716141807e5414894af4cbcb70e22095694fc59d85b36dbef637f8c509"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "d9e78aa4f4420d006a5df8b339df2c58d5fc680e5c344d746bdb39ecf4af1791"
+          "content" : "408ac7a375ebf2de02ace34081f259d8f62188ff32514e38a754ee717843ef4f"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "63557025bcf6a3b28d85a62d06840290d5587e10b35cf41f4b4a640c29d09f1cc96bba26a3aec0cc0de37098edfb42c53de401ce94cbf32680f6e1143cd091a4"
+          "content" : "db379c65037f375bc79c74a017815af3a83c296bdeec3c2654688b3f354eb16d4a669870201078112aa9975a7088bec36d80a727c937b84d1d78536a9a715770"
         }
       ],
       "licenses" : [
@@ -757,11 +757,11 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.3?type=jar",
+      "purl" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.4?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
-          "url" : "https://hc.apache.org/httpcomponents-core-5.4.x/5.4.3/httpcore5-h2/"
+          "url" : "https://hc.apache.org/httpcomponents-core-5.4.x/5.4.4/httpcore5-h2/"
         },
         {
           "type" : "distribution-intake",
@@ -777,7 +777,7 @@
         },
         {
           "type" : "vcs",
-          "url" : "https://github.com/apache/httpcomponents-core/tree/5.4.3/httpcore5-h2"
+          "url" : "https://github.com/apache/httpcomponents-core/tree/5.4.4/httpcore5-h2"
         }
       ]
     },
@@ -2877,45 +2877,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
       "publisher" : "Google",
       "group" : "com.google.auth",
       "name" : "google-auth-library-oauth2-http",
-      "version" : "1.53.0",
+      "version" : "1.54.0",
       "description" : "Client libraries providing authentication and authorization to enable calling Google APIs.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "c12d61efe0e497bb98e32f25cabe3515"
+          "content" : "389c3ce3b969bbb90aaf721cf5d296f6"
         },
         {
           "alg" : "SHA-1",
-          "content" : "3de9f3eae8aab187b75ad4d5b832c42519d73816"
+          "content" : "b2f8b90295f07340bee6b99b8b07d20156e2780e"
         },
         {
           "alg" : "SHA-256",
-          "content" : "54e811f5fa463a8d462a707a7d70c841d09fdc4eb4b4bbd1822977e3812d585d"
+          "content" : "03cb8e07cd40b20307494b640abb08c0a91d455b96681e55bc7cf817634d91d4"
         },
         {
           "alg" : "SHA-512",
-          "content" : "232dbbc961aa5e71fb018e3116fc553c320ad337cdcb5c08d01a8472ae4222ebbe54be56933a1ecd0e9c2c8972fc0a67e7d0d86b9cfa3d6e16ceeabd2e1f1da7"
+          "content" : "8206c1a594c80991a7f2cdde4500bef4c85bccbdf9f072b580dce47de5d78e8550fcb7ff4c8c781d02849d5e3048e10cbb03be5551237a3da74a3d9ef9fb2f0e"
         },
         {
           "alg" : "SHA-384",
-          "content" : "17be70791da377d2b3b102b6cef4a55929c6ce128bcc7b1dab51b4f18452755b10869e390e69231f09b2f401271aa807"
+          "content" : "a8c41d19155c5c98c43d6aae4055677a9e758835457a59bdb88d250620ac83bd96cd1794c63e7be7984809ed988579ed"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "f8b7866d19bda68f70a3327f8f2a000e4d36bd8e8c34becc5dd0aa80f0532f1812f6482b6a8585c74e3f69b0686be2cf"
+          "content" : "aaf73fcbf185641de2a1fe859304d6da712823bd2459582a6926bc0947e2a8934222f5531c3cdceb1fe10a680572e2b1"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "43ff6aea72ec6493491f899300c325ed4612d846a5bc9dc245d52e64a880d523"
+          "content" : "96c5817003fd2074d12a04a4eb47f44acdd2d5766cdefd16a226d6d68bde0cb8"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "299f3d993246dbd9201c2a573dd2cd2322f6271670f8a20ae090afaeeb70f11ece8288b436468c55b9d19dd1661fd7312ce01b59ad03e0a698d0db2b495b8cc5"
+          "content" : "332bd000a324009a1a43a2af75de3649f6ad0f641aaaf4913504db25273ad9a10ec936b36a4c0200a6a86ee7863c163eb791c8f25ef365ea678ed78c31d2aac7"
         }
       ],
       "licenses" : [
@@ -2931,7 +2931,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
+      "purl" : "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -2953,45 +2953,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.3?type=jar",
+      "bom-ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.4?type=jar",
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.httpcomponents.core5",
       "name" : "httpcore5",
-      "version" : "5.4.3",
+      "version" : "5.4.4",
       "description" : "Apache HttpComponents HTTP/1.1 core components",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "40cba87d4704bc9e1691f340fb8042cf"
+          "content" : "1d7150db6792387e1f39dd626060c746"
         },
         {
           "alg" : "SHA-1",
-          "content" : "32a0699fbcb103f5621c00983ee8f5aac080e4a6"
+          "content" : "fb236f682f1eaae1abec9b60e940158ac369f15b"
         },
         {
           "alg" : "SHA-256",
-          "content" : "18bfbbabb478dfb67f31aeaf428c387f3c3df654582e1309f708ee1f3086830a"
+          "content" : "b08e3c3a440fec2029e89980134c7c787dd6796454641ad1eafb81478d7e8b0b"
         },
         {
           "alg" : "SHA-512",
-          "content" : "2ae04ae83015c46314a502a0973bec86312680cb548f0ae68002af4f5fd958deb60c702ad9dcae72c23561e2e0954518bb0355a1496096f7e9b9a2efbb7c9bae"
+          "content" : "9c341b5529705d56e13d74c4ed91b3b3afdd2add5b4783ebc0488f7c5c1299b12eaa827b92b1ebcedf4fd2516fb5cae96f8becbe604749fa47a928d42b999bab"
         },
         {
           "alg" : "SHA-384",
-          "content" : "09312cfbd7b33c3c8712405aff437ef7b93260a07a625b7cc491d3e2fa0d65852d72f4f6701ef707c4cae52caadcddd0"
+          "content" : "dc2cc35dfaf7dc67ebc776ccbe4300f580f587db0c192d9c177f0020b7ecca0c9dc5e2932d260daac052b302336da012"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "419f9608bec952746b274a3510bc0f0dbdb6cc4b1269c9bd89c218894a42fda0dfd7b46912b57cc722b3d76b7f11c07b"
+          "content" : "af970fe47d3244c602bc966c727ebbf67073c4fee4c7ee0b957cbcfb840b692b9f2a1f8c318870179bb8d033e8700535"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "8cb162e60b804205084fcc8e562f6eb47f5c13eefa42208cf6accab1d28e0ba2"
+          "content" : "3f80bf2a9c2120c21f955e8c5976e591c55dff53a0915e65ba46e981c7164ea7"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "eccc71fecc0525c6fca46ca9e19eaecf26d646f3e71528796e8dcc0f16cb0882d485ceffa1c48e14e60eb8b429ae0fd5935274bb8907c2869ab54cb76e931abd"
+          "content" : "8b85ec771c37aaaecf35b275f1933d799024be69546a3568bfa85b2db3ba3738bccf8c5624f1412785a8d907bc2ca740beb3779238a72b20761c8c78c59bf1c9"
         }
       ],
       "licenses" : [
@@ -3006,11 +3006,11 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.3?type=jar",
+      "purl" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.4?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
-          "url" : "https://hc.apache.org/httpcomponents-core-5.4.x/5.4.3/httpcore5/"
+          "url" : "https://hc.apache.org/httpcomponents-core-5.4.x/5.4.4/httpcore5/"
         },
         {
           "type" : "distribution-intake",
@@ -3026,7 +3026,7 @@
         },
         {
           "type" : "vcs",
-          "url" : "https://github.com/apache/httpcomponents-core/tree/5.4.3/httpcore5"
+          "url" : "https://github.com/apache/httpcomponents-core/tree/5.4.4/httpcore5"
         }
       ]
     },
@@ -3301,44 +3301,44 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j@1.16.0?type=jar",
+      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j@1.22.0?type=jar",
       "group" : "dev.langchain4j",
       "name" : "langchain4j",
-      "version" : "1.16.0",
+      "version" : "1.22.0",
       "description" : "Build LLM-powered applications in Java: chatbots, agents, RAG, and much more",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "1e0113d57c0516ddbfbcd8bf6bde8630"
+          "content" : "4d60a0629ef9e039851d68e2e78672e8"
         },
         {
           "alg" : "SHA-1",
-          "content" : "e711c7ba1bb8507c44ef9ad570a62bad95d3d03a"
+          "content" : "6b180bb45537c75bb2f71b554718913081f9f491"
         },
         {
           "alg" : "SHA-256",
-          "content" : "bb3cec8b2b99fd50301d406b7c751108141693c8cba22aa7338dcb5be9ab5324"
+          "content" : "e056822cf525cfa4b1669ca918398d728fd2be984ff6e74c315a9a2cf8739c07"
         },
         {
           "alg" : "SHA-512",
-          "content" : "9ab0e8ee0b9912de94ae4c43075859080acf4a89f5d956c5e5af58cb150543b2d06b925924c752817f31ad93980761433e2d0cc6a248ffff351719552636a16b"
+          "content" : "c9c005952795a6d5a0bbe3effe6b548ad87d73190524f755f910767a9c83b699d6dc0a0b002fcbe01ec1ee31cf51b85cdf996a3dcf10a4b400938371f8ba59e8"
         },
         {
           "alg" : "SHA-384",
-          "content" : "0bac6defe2c57f4ce5d7b896eb1a0543ebaca6a32d0c61af099b071b122b5f9899487368948806a21f50c4083d4d4c9e"
+          "content" : "eccc40d7894f73aefebe940f6217329782703e36844d54e8bf7768e5f8abb0f58d9e17c8804120739c1013f891b56cb8"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "bff0a7c97fade266c152c7985a8be2b851837cac7137fdefebb75f7d3dfb9b8c45af7c1266bdf123ccfb812ca2095c4d"
+          "content" : "3c8ed6b32ac0cbd6349da6582d60bd94f343f50747d6eb010755df632e59a2f075fcca592065341c9ccbbb47dd4cf56a"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "126c48a1c8e6b8eaf17e5d4e03c396a8762144de31b6e21839af7fcb5fe45a3e"
+          "content" : "9d8fe85ae1cb4867b08d02f8970f3985738a1de30caecfab5c335b44339a16c7"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "da59fb25c56cd959cf1bfed154123f6d169ca255857c036ad827ced9d9eb0fca060f518fa6ab2d7298665c03b11d27b5b0ea50de70564d15d8eb7f5c56bb9b4d"
+          "content" : "a26f2d11f59d86a3b169cff637c52f63cf9b266a7e725181bc9e3bb254310bfae12018a23b609d178e829b517623702cb0dd99c79b17e92ab685f72539fbe315"
         }
       ],
       "licenses" : [
@@ -3353,7 +3353,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/dev.langchain4j/langchain4j@1.16.0?type=jar",
+      "purl" : "pkg:maven/dev.langchain4j/langchain4j@1.22.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3362,6 +3362,81 @@
         {
           "type" : "vcs",
           "url" : "https://github.com/langchain4j/langchain4j/tree/main/langchain4j"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.smallrye.reactive/mutiny-zero@1.3.1?type=jar",
+      "publisher" : "SmallRye",
+      "group" : "io.smallrye.reactive",
+      "name" : "mutiny-zero",
+      "version" : "1.3.1",
+      "description" : "Mutiny Zero is a minimal API for creating reactive-streams compliant publishers",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "bf44e987be8b5c6722db05ab7ddc49d2"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "c8bb468cec476ba245188f7292802749158c44bb"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "10455d395ca9e3d8256bb216672684ad9482288d331efc48db4196eba804273b"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "5ef24dd74b756947efc09f7f1f7446396a04ca1a0cf12f2ada174dd6cacea8cbb47e57d75e093ed6489b799409e82b06fd5c58a8b7329e01bb7071cc0d1a2964"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "b517bd0a9b3aae5e76a0f9fc2c937b0e94549c5aeae3eba8ed9dae367160ed1881f7e1e9bf6acd5af19ef101920e5c84"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "805d2f1ed399bf3f89e9ed8fd55f721d5ddb391e59246bcc15beecab4a4e5721b6b4726e123f096865c12f380f2bf91e"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "e74f63e15143b44df8f196fa1117fb55b61c6ac79de454c6ff75bb778e0b146e"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "9e51a309b7caafb1e1e27f31b3f30af2e767e07cf7ca33f1c25174aefbb0849c9dc613207829ecd15a6b463741d98253ab3198312223c9d8ed781a0aa712c465"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0",
+            "text" : {
+              "contentType" : "plain/text",
+              "encoding" : "base64",
+              "content" : "QXBhY2hlIExpY2Vuc2UKVmVyc2lvbiAyLjAsIEphbnVhcnkgMjAwNApodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvCgpURVJNUyBBTkQgQ09ORElUSU9OUyBGT1IgVVNFLCBSRVBST0RVQ1RJT04sIEFORCBESVNUUklCVVRJT04KCjEuIERlZmluaXRpb25zLgoKIkxpY2Vuc2UiIHNoYWxsIG1lYW4gdGhlIHRlcm1zIGFuZCBjb25kaXRpb25zIGZvciB1c2UsIHJlcHJvZHVjdGlvbiwgYW5kIGRpc3RyaWJ1dGlvbiBhcyBkZWZpbmVkIGJ5IFNlY3Rpb25zIDEgdGhyb3VnaCA5IG9mIHRoaXMgZG9jdW1lbnQuCgoiTGljZW5zb3IiIHNoYWxsIG1lYW4gdGhlIGNvcHlyaWdodCBvd25lciBvciBlbnRpdHkgYXV0aG9yaXplZCBieSB0aGUgY29weXJpZ2h0IG93bmVyIHRoYXQgaXMgZ3JhbnRpbmcgdGhlIExpY2Vuc2UuCgoiTGVnYWwgRW50aXR5IiBzaGFsbCBtZWFuIHRoZSB1bmlvbiBvZiB0aGUgYWN0aW5nIGVudGl0eSBhbmQgYWxsIG90aGVyIGVudGl0aWVzIHRoYXQgY29udHJvbCwgYXJlIGNvbnRyb2xsZWQgYnksIG9yIGFyZSB1bmRlciBjb21tb24gY29udHJvbCB3aXRoIHRoYXQgZW50aXR5LiBGb3IgdGhlIHB1cnBvc2VzIG9mIHRoaXMgZGVmaW5pdGlvbiwgImNvbnRyb2wiIG1lYW5zIChpKSB0aGUgcG93ZXIsIGRpcmVjdCBvciBpbmRpcmVjdCwgdG8gY2F1c2UgdGhlIGRpcmVjdGlvbiBvciBtYW5hZ2VtZW50IG9mIHN1Y2ggZW50aXR5LCB3aGV0aGVyIGJ5IGNvbnRyYWN0IG9yIG90aGVyd2lzZSwgb3IgKGlpKSBvd25lcnNoaXAgb2YgZmlmdHkgcGVyY2VudCAoNTAlKSBvciBtb3JlIG9mIHRoZSBvdXRzdGFuZGluZyBzaGFyZXMsIG9yIChpaWkpIGJlbmVmaWNpYWwgb3duZXJzaGlwIG9mIHN1Y2ggZW50aXR5LgoKIllvdSIgKG9yICJZb3VyIikgc2hhbGwgbWVhbiBhbiBpbmRpdmlkdWFsIG9yIExlZ2FsIEVudGl0eSBleGVyY2lzaW5nIHBlcm1pc3Npb25zIGdyYW50ZWQgYnkgdGhpcyBMaWNlbnNlLgoKIlNvdXJjZSIgZm9ybSBzaGFsbCBtZWFuIHRoZSBwcmVmZXJyZWQgZm9ybSBmb3IgbWFraW5nIG1vZGlmaWNhdGlvbnMsIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gc29mdHdhcmUgc291cmNlIGNvZGUsIGRvY3VtZW50YXRpb24gc291cmNlLCBhbmQgY29uZmlndXJhdGlvbiBmaWxlcy4KCiJPYmplY3QiIGZvcm0gc2hhbGwgbWVhbiBhbnkgZm9ybSByZXN1bHRpbmcgZnJvbSBtZWNoYW5pY2FsIHRyYW5zZm9ybWF0aW9uIG9yIHRyYW5zbGF0aW9uIG9mIGEgU291cmNlIGZvcm0sIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gY29tcGlsZWQgb2JqZWN0IGNvZGUsIGdlbmVyYXRlZCBkb2N1bWVudGF0aW9uLCBhbmQgY29udmVyc2lvbnMgdG8gb3RoZXIgbWVkaWEgdHlwZXMuCgoiV29yayIgc2hhbGwgbWVhbiB0aGUgd29yayBvZiBhdXRob3JzaGlwLCB3aGV0aGVyIGluIFNvdXJjZSBvciBPYmplY3QgZm9ybSwgbWFkZSBhdmFpbGFibGUgdW5kZXIgdGhlIExpY2Vuc2UsIGFzIGluZGljYXRlZCBieSBhIGNvcHlyaWdodCBub3RpY2UgdGhhdCBpcyBpbmNsdWRlZCBpbiBvciBhdHRhY2hlZCB0byB0aGUgd29yayAoYW4gZXhhbXBsZSBpcyBwcm92aWRlZCBpbiB0aGUgQXBwZW5kaXggYmVsb3cpLgoKIkRlcml2YXRpdmUgV29ya3MiIHNoYWxsIG1lYW4gYW55IHdvcmssIHdoZXRoZXIgaW4gU291cmNlIG9yIE9iamVjdCBmb3JtLCB0aGF0IGlzIGJhc2VkIG9uIChvciBkZXJpdmVkIGZyb20pIHRoZSBXb3JrIGFuZCBmb3Igd2hpY2ggdGhlIGVkaXRvcmlhbCByZXZpc2lvbnMsIGFubm90YXRpb25zLCBlbGFib3JhdGlvbnMsIG9yIG90aGVyIG1vZGlmaWNhdGlvbnMgcmVwcmVzZW50LCBhcyBhIHdob2xlLCBhbiBvcmlnaW5hbCB3b3JrIG9mIGF1dGhvcnNoaXAuIEZvciB0aGUgcHVycG9zZXMgb2YgdGhpcyBMaWNlbnNlLCBEZXJpdmF0aXZlIFdvcmtzIHNoYWxsIG5vdCBpbmNsdWRlIHdvcmtzIHRoYXQgcmVtYWluIHNlcGFyYWJsZSBmcm9tLCBvciBtZXJlbHkgbGluayAob3IgYmluZCBieSBuYW1lKSB0byB0aGUgaW50ZXJmYWNlcyBvZiwgdGhlIFdvcmsgYW5kIERlcml2YXRpdmUgV29ya3MgdGhlcmVvZi4KCiJDb250cmlidXRpb24iIHNoYWxsIG1lYW4gYW55IHdvcmsgb2YgYXV0aG9yc2hpcCwgaW5jbHVkaW5nIHRoZSBvcmlnaW5hbCB2ZXJzaW9uIG9mIHRoZSBXb3JrIGFuZCBhbnkgbW9kaWZpY2F0aW9ucyBvciBhZGRpdGlvbnMgdG8gdGhhdCBXb3JrIG9yIERlcml2YXRpdmUgV29ya3MgdGhlcmVvZiwgdGhhdCBpcyBpbnRlbnRpb25hbGx5IHN1Ym1pdHRlZCB0byBMaWNlbnNvciBmb3IgaW5jbHVzaW9uIGluIHRoZSBXb3JrIGJ5IHRoZSBjb3B5cmlnaHQgb3duZXIgb3IgYnkgYW4gaW5kaXZpZHVhbCBvciBMZWdhbCBFbnRpdHkgYXV0aG9yaXplZCB0byBzdWJtaXQgb24gYmVoYWxmIG9mIHRoZSBjb3B5cmlnaHQgb3duZXIuIEZvciB0aGUgcHVycG9zZXMgb2YgdGhpcyBkZWZpbml0aW9uLCAic3VibWl0dGVkIiBtZWFucyBhbnkgZm9ybSBvZiBlbGVjdHJvbmljLCB2ZXJiYWwsIG9yIHdyaXR0ZW4gY29tbXVuaWNhdGlvbiBzZW50IHRvIHRoZSBMaWNlbnNvciBvciBpdHMgcmVwcmVzZW50YXRpdmVzLCBpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVkIHRvIGNvbW11bmljYXRpb24gb24gZWxlY3Ryb25pYyBtYWlsaW5nIGxpc3RzLCBzb3VyY2UgY29kZSBjb250cm9sIHN5c3RlbXMsIGFuZCBpc3N1ZSB0cmFja2luZyBzeXN0ZW1zIHRoYXQgYXJlIG1hbmFnZWQgYnksIG9yIG9uIGJlaGFsZiBvZiwgdGhlIExpY2Vuc29yIGZvciB0aGUgcHVycG9zZSBvZiBkaXNjdXNzaW5nIGFuZCBpbXByb3ZpbmcgdGhlIFdvcmssIGJ1dCBleGNsdWRpbmcgY29tbXVuaWNhdGlvbiB0aGF0IGlzIGNvbnNwaWN1b3VzbHkgbWFya2VkIG9yIG90aGVyd2lzZSBkZXNpZ25hdGVkIGluIHdyaXRpbmcgYnkgdGhlIGNvcHlyaWdodCBvd25lciBhcyAiTm90IGEgQ29udHJpYnV0aW9uLiIKCiJDb250cmlidXRvciIgc2hhbGwgbWVhbiBMaWNlbnNvciBhbmQgYW55IGluZGl2aWR1YWwgb3IgTGVnYWwgRW50aXR5IG9uIGJlaGFsZiBvZiB3aG9tIGEgQ29udHJpYnV0aW9uIGhhcyBiZWVuIHJlY2VpdmVkIGJ5IExpY2Vuc29yIGFuZCBzdWJzZXF1ZW50bHkgaW5jb3Jwb3JhdGVkIHdpdGhpbiB0aGUgV29yay4KCjIuIEdyYW50IG9mIENvcHlyaWdodCBMaWNlbnNlLiBTdWJqZWN0IHRvIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZiB0aGlzIExpY2Vuc2UsIGVhY2ggQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBwZXJwZXR1YWwsIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8tY2hhcmdlLCByb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlIGNvcHlyaWdodCBsaWNlbnNlIHRvIHJlcHJvZHVjZSwgcHJlcGFyZSBEZXJpdmF0aXZlIFdvcmtzIG9mLCBwdWJsaWNseSBkaXNwbGF5LCBwdWJsaWNseSBwZXJmb3JtLCBzdWJsaWNlbnNlLCBhbmQgZGlzdHJpYnV0ZSB0aGUgV29yayBhbmQgc3VjaCBEZXJpdmF0aXZlIFdvcmtzIGluIFNvdXJjZSBvciBPYmplY3QgZm9ybS4KCjMuIEdyYW50IG9mIFBhdGVudCBMaWNlbnNlLiBTdWJqZWN0IHRvIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZiB0aGlzIExpY2Vuc2UsIGVhY2ggQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBwZXJwZXR1YWwsIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8tY2hhcmdlLCByb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlIChleGNlcHQgYXMgc3RhdGVkIGluIHRoaXMgc2VjdGlvbikgcGF0ZW50IGxpY2Vuc2UgdG8gbWFrZSwgaGF2ZSBtYWRlLCB1c2UsIG9mZmVyIHRvIHNlbGwsIHNlbGwsIGltcG9ydCwgYW5kIG90aGVyd2lzZSB0cmFuc2ZlciB0aGUgV29yaywgd2hlcmUgc3VjaCBsaWNlbnNlIGFwcGxpZXMgb25seSB0byB0aG9zZSBwYXRlbnQgY2xhaW1zIGxpY2Vuc2FibGUgYnkgc3VjaCBDb250cmlidXRvciB0aGF0IGFyZSBuZWNlc3NhcmlseSBpbmZyaW5nZWQgYnkgdGhlaXIgQ29udHJpYnV0aW9uKHMpIGFsb25lIG9yIGJ5IGNvbWJpbmF0aW9uIG9mIHRoZWlyIENvbnRyaWJ1dGlvbihzKSB3aXRoIHRoZSBXb3JrIHRvIHdoaWNoIHN1Y2ggQ29udHJpYnV0aW9uKHMpIHdhcyBzdWJtaXR0ZWQuIElmIFlvdSBpbnN0aXR1dGUgcGF0ZW50IGxpdGlnYXRpb24gYWdhaW5zdCBhbnkgZW50aXR5IChpbmNsdWRpbmcgYSBjcm9zcy1jbGFpbSBvciBjb3VudGVyY2xhaW0gaW4gYSBsYXdzdWl0KSBhbGxlZ2luZyB0aGF0IHRoZSBXb3JrIG9yIGEgQ29udHJpYnV0aW9uIGluY29ycG9yYXRlZCB3aXRoaW4gdGhlIFdvcmsgY29uc3RpdHV0ZXMgZGlyZWN0IG9yIGNvbnRyaWJ1dG9yeSBwYXRlbnQgaW5mcmluZ2VtZW50LCB0aGVuIGFueSBwYXRlbnQgbGljZW5zZXMgZ3JhbnRlZCB0byBZb3UgdW5kZXIgdGhpcyBMaWNlbnNlIGZvciB0aGF0IFdvcmsgc2hhbGwgdGVybWluYXRlIGFzIG9mIHRoZSBkYXRlIHN1Y2ggbGl0aWdhdGlvbiBpcyBmaWxlZC4KCjQuIFJlZGlzdHJpYnV0aW9uLiBZb3UgbWF5IHJlcHJvZHVjZSBhbmQgZGlzdHJpYnV0ZSBjb3BpZXMgb2YgdGhlIFdvcmsgb3IgRGVyaXZhdGl2ZSBXb3JrcyB0aGVyZW9mIGluIGFueSBtZWRpdW0sIHdpdGggb3Igd2l0aG91dCBtb2RpZmljYXRpb25zLCBhbmQgaW4gU291cmNlIG9yIE9iamVjdCBmb3JtLCBwcm92aWRlZCB0aGF0IFlvdSBtZWV0IHRoZSBmb2xsb3dpbmcgY29uZGl0aW9uczoKCiAgICAgKGEpIFlvdSBtdXN0IGdpdmUgYW55IG90aGVyIHJlY2lwaWVudHMgb2YgdGhlIFdvcmsgb3IgRGVyaXZhdGl2ZSBXb3JrcyBhIGNvcHkgb2YgdGhpcyBMaWNlbnNlOyBhbmQKCiAgICAgKGIpIFlvdSBtdXN0IGNhdXNlIGFueSBtb2RpZmllZCBmaWxlcyB0byBjYXJyeSBwcm9taW5lbnQgbm90aWNlcyBzdGF0aW5nIHRoYXQgWW91IGNoYW5nZWQgdGhlIGZpbGVzOyBhbmQKCiAgICAgKGMpIFlvdSBtdXN0IHJldGFpbiwgaW4gdGhlIFNvdXJjZSBmb3JtIG9mIGFueSBEZXJpdmF0aXZlIFdvcmtzIHRoYXQgWW91IGRpc3RyaWJ1dGUsIGFsbCBjb3B5cmlnaHQsIHBhdGVudCwgdHJhZGVtYXJrLCBhbmQgYXR0cmlidXRpb24gbm90aWNlcyBmcm9tIHRoZSBTb3VyY2UgZm9ybSBvZiB0aGUgV29yaywgZXhjbHVkaW5nIHRob3NlIG5vdGljZXMgdGhhdCBkbyBub3QgcGVydGFpbiB0byBhbnkgcGFydCBvZiB0aGUgRGVyaXZhdGl2ZSBXb3JrczsgYW5kCgogICAgIChkKSBJZiB0aGUgV29yayBpbmNsdWRlcyBhICJOT1RJQ0UiIHRleHQgZmlsZSBhcyBwYXJ0IG9mIGl0cyBkaXN0cmlidXRpb24sIHRoZW4gYW55IERlcml2YXRpdmUgV29ya3MgdGhhdCBZb3UgZGlzdHJpYnV0ZSBtdXN0IGluY2x1ZGUgYSByZWFkYWJsZSBjb3B5IG9mIHRoZSBhdHRyaWJ1dGlvbiBub3RpY2VzIGNvbnRhaW5lZCB3aXRoaW4gc3VjaCBOT1RJQ0UgZmlsZSwgZXhjbHVkaW5nIHRob3NlIG5vdGljZXMgdGhhdCBkbyBub3QgcGVydGFpbiB0byBhbnkgcGFydCBvZiB0aGUgRGVyaXZhdGl2ZSBXb3JrcywgaW4gYXQgbGVhc3Qgb25lIG9mIHRoZSBmb2xsb3dpbmcgcGxhY2VzOiB3aXRoaW4gYSBOT1RJQ0UgdGV4dCBmaWxlIGRpc3RyaWJ1dGVkIGFzIHBhcnQgb2YgdGhlIERlcml2YXRpdmUgV29ya3M7IHdpdGhpbiB0aGUgU291cmNlIGZvcm0gb3IgZG9jdW1lbnRhdGlvbiwgaWYgcHJvdmlkZWQgYWxvbmcgd2l0aCB0aGUgRGVyaXZhdGl2ZSBXb3Jrczsgb3IsIHdpdGhpbiBhIGRpc3BsYXkgZ2VuZXJhdGVkIGJ5IHRoZSBEZXJpdmF0aXZlIFdvcmtzLCBpZiBhbmQgd2hlcmV2ZXIgc3VjaCB0aGlyZC1wYXJ0eSBub3RpY2VzIG5vcm1hbGx5IGFwcGVhci4gVGhlIGNvbnRlbnRzIG9mIHRoZSBOT1RJQ0UgZmlsZSBhcmUgZm9yIGluZm9ybWF0aW9uYWwgcHVycG9zZXMgb25seSBhbmQgZG8gbm90IG1vZGlmeSB0aGUgTGljZW5zZS4gWW91IG1heSBhZGQgWW91ciBvd24gYXR0cmlidXRpb24gbm90aWNlcyB3aXRoaW4gRGVyaXZhdGl2ZSBXb3JrcyB0aGF0IFlvdSBkaXN0cmlidXRlLCBhbG9uZ3NpZGUgb3IgYXMgYW4gYWRkZW5kdW0gdG8gdGhlIE5PVElDRSB0ZXh0IGZyb20gdGhlIFdvcmssIHByb3ZpZGVkIHRoYXQgc3VjaCBhZGRpdGlvbmFsIGF0dHJpYnV0aW9uIG5vdGljZXMgY2Fubm90IGJlIGNvbnN0cnVlZCBhcyBtb2RpZnlpbmcgdGhlIExpY2Vuc2UuCgogICAgIFlvdSBtYXkgYWRkIFlvdXIgb3duIGNvcHlyaWdodCBzdGF0ZW1lbnQgdG8gWW91ciBtb2RpZmljYXRpb25zIGFuZCBtYXkgcHJvdmlkZSBhZGRpdGlvbmFsIG9yIGRpZmZlcmVudCBsaWNlbnNlIHRlcm1zIGFuZCBjb25kaXRpb25zIGZvciB1c2UsIHJlcHJvZHVjdGlvbiwgb3IgZGlzdHJpYnV0aW9uIG9mIFlvdXIgbW9kaWZpY2F0aW9ucywgb3IgZm9yIGFueSBzdWNoIERlcml2YXRpdmUgV29ya3MgYXMgYSB3aG9sZSwgcHJvdmlkZWQgWW91ciB1c2UsIHJlcHJvZHVjdGlvbiwgYW5kIGRpc3RyaWJ1dGlvbiBvZiB0aGUgV29yayBvdGhlcndpc2UgY29tcGxpZXMgd2l0aCB0aGUgY29uZGl0aW9ucyBzdGF0ZWQgaW4gdGhpcyBMaWNlbnNlLgoKNS4gU3VibWlzc2lvbiBvZiBDb250cmlidXRpb25zLiBVbmxlc3MgWW91IGV4cGxpY2l0bHkgc3RhdGUgb3RoZXJ3aXNlLCBhbnkgQ29udHJpYnV0aW9uIGludGVudGlvbmFsbHkgc3VibWl0dGVkIGZvciBpbmNsdXNpb24gaW4gdGhlIFdvcmsgYnkgWW91IHRvIHRoZSBMaWNlbnNvciBzaGFsbCBiZSB1bmRlciB0aGUgdGVybXMgYW5kIGNvbmRpdGlvbnMgb2YgdGhpcyBMaWNlbnNlLCB3aXRob3V0IGFueSBhZGRpdGlvbmFsIHRlcm1zIG9yIGNvbmRpdGlvbnMuIE5vdHdpdGhzdGFuZGluZyB0aGUgYWJvdmUsIG5vdGhpbmcgaGVyZWluIHNoYWxsIHN1cGVyc2VkZSBvciBtb2RpZnkgdGhlIHRlcm1zIG9mIGFueSBzZXBhcmF0ZSBsaWNlbnNlIGFncmVlbWVudCB5b3UgbWF5IGhhdmUgZXhlY3V0ZWQgd2l0aCBMaWNlbnNvciByZWdhcmRpbmcgc3VjaCBDb250cmlidXRpb25zLgoKNi4gVHJhZGVtYXJrcy4gVGhpcyBMaWNlbnNlIGRvZXMgbm90IGdyYW50IHBlcm1pc3Npb24gdG8gdXNlIHRoZSB0cmFkZSBuYW1lcywgdHJhZGVtYXJrcywgc2VydmljZSBtYXJrcywgb3IgcHJvZHVjdCBuYW1lcyBvZiB0aGUgTGljZW5zb3IsIGV4Y2VwdCBhcyByZXF1aXJlZCBmb3IgcmVhc29uYWJsZSBhbmQgY3VzdG9tYXJ5IHVzZSBpbiBkZXNjcmliaW5nIHRoZSBvcmlnaW4gb2YgdGhlIFdvcmsgYW5kIHJlcHJvZHVjaW5nIHRoZSBjb250ZW50IG9mIHRoZSBOT1RJQ0UgZmlsZS4KCjcuIERpc2NsYWltZXIgb2YgV2FycmFudHkuIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgTGljZW5zb3IgcHJvdmlkZXMgdGhlIFdvcmsgKGFuZCBlYWNoIENvbnRyaWJ1dG9yIHByb3ZpZGVzIGl0cyBDb250cmlidXRpb25zKSBvbiBhbiAiQVMgSVMiIEJBU0lTLCBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZCwgaW5jbHVkaW5nLCB3aXRob3V0IGxpbWl0YXRpb24sIGFueSB3YXJyYW50aWVzIG9yIGNvbmRpdGlvbnMgb2YgVElUTEUsIE5PTi1JTkZSSU5HRU1FTlQsIE1FUkNIQU5UQUJJTElUWSwgb3IgRklUTkVTUyBGT1IgQSBQQVJUSUNVTEFSIFBVUlBPU0UuIFlvdSBhcmUgc29sZWx5IHJlc3BvbnNpYmxlIGZvciBkZXRlcm1pbmluZyB0aGUgYXBwcm9wcmlhdGVuZXNzIG9mIHVzaW5nIG9yIHJlZGlzdHJpYnV0aW5nIHRoZSBXb3JrIGFuZCBhc3N1bWUgYW55IHJpc2tzIGFzc29jaWF0ZWQgd2l0aCBZb3VyIGV4ZXJjaXNlIG9mIHBlcm1pc3Npb25zIHVuZGVyIHRoaXMgTGljZW5zZS4KCjguIExpbWl0YXRpb24gb2YgTGlhYmlsaXR5LiBJbiBubyBldmVudCBhbmQgdW5kZXIgbm8gbGVnYWwgdGhlb3J5LCB3aGV0aGVyIGluIHRvcnQgKGluY2x1ZGluZyBuZWdsaWdlbmNlKSwgY29udHJhY3QsIG9yIG90aGVyd2lzZSwgdW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IChzdWNoIGFzIGRlbGliZXJhdGUgYW5kIGdyb3NzbHkgbmVnbGlnZW50IGFjdHMpIG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzaGFsbCBhbnkgQ29udHJpYnV0b3IgYmUgbGlhYmxlIHRvIFlvdSBmb3IgZGFtYWdlcywgaW5jbHVkaW5nIGFueSBkaXJlY3QsIGluZGlyZWN0LCBzcGVjaWFsLCBpbmNpZGVudGFsLCBvciBjb25zZXF1ZW50aWFsIGRhbWFnZXMgb2YgYW55IGNoYXJhY3RlciBhcmlzaW5nIGFzIGEgcmVzdWx0IG9mIHRoaXMgTGljZW5zZSBvciBvdXQgb2YgdGhlIHVzZSBvciBpbmFiaWxpdHkgdG8gdXNlIHRoZSBXb3JrIChpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVkIHRvIGRhbWFnZXMgZm9yIGxvc3Mgb2YgZ29vZHdpbGwsIHdvcmsgc3RvcHBhZ2UsIGNvbXB1dGVyIGZhaWx1cmUgb3IgbWFsZnVuY3Rpb24sIG9yIGFueSBhbmQgYWxsIG90aGVyIGNvbW1lcmNpYWwgZGFtYWdlcyBvciBsb3NzZXMpLCBldmVuIGlmIHN1Y2ggQ29udHJpYnV0b3IgaGFzIGJlZW4gYWR2aXNlZCBvZiB0aGUgcG9zc2liaWxpdHkgb2Ygc3VjaCBkYW1hZ2VzLgoKOS4gQWNjZXB0aW5nIFdhcnJhbnR5IG9yIEFkZGl0aW9uYWwgTGlhYmlsaXR5LiBXaGlsZSByZWRpc3RyaWJ1dGluZyB0aGUgV29yayBvciBEZXJpdmF0aXZlIFdvcmtzIHRoZXJlb2YsIFlvdSBtYXkgY2hvb3NlIHRvIG9mZmVyLCBhbmQgY2hhcmdlIGEgZmVlIGZvciwgYWNjZXB0YW5jZSBvZiBzdXBwb3J0LCB3YXJyYW50eSwgaW5kZW1uaXR5LCBvciBvdGhlciBsaWFiaWxpdHkgb2JsaWdhdGlvbnMgYW5kL29yIHJpZ2h0cyBjb25zaXN0ZW50IHdpdGggdGhpcyBMaWNlbnNlLiBIb3dldmVyLCBpbiBhY2NlcHRpbmcgc3VjaCBvYmxpZ2F0aW9ucywgWW91IG1heSBhY3Qgb25seSBvbiBZb3VyIG93biBiZWhhbGYgYW5kIG9uIFlvdXIgc29sZSByZXNwb25zaWJpbGl0eSwgbm90IG9uIGJlaGFsZiBvZiBhbnkgb3RoZXIgQ29udHJpYnV0b3IsIGFuZCBvbmx5IGlmIFlvdSBhZ3JlZSB0byBpbmRlbW5pZnksIGRlZmVuZCwgYW5kIGhvbGQgZWFjaCBDb250cmlidXRvciBoYXJtbGVzcyBmb3IgYW55IGxpYWJpbGl0eSBpbmN1cnJlZCBieSwgb3IgY2xhaW1zIGFzc2VydGVkIGFnYWluc3QsIHN1Y2ggQ29udHJpYnV0b3IgYnkgcmVhc29uIG9mIHlvdXIgYWNjZXB0aW5nIGFueSBzdWNoIHdhcnJhbnR5IG9yIGFkZGl0aW9uYWwgbGlhYmlsaXR5LgoKRU5EIE9GIFRFUk1TIEFORCBDT05ESVRJT05TCgpBUFBFTkRJWDogSG93IHRvIGFwcGx5IHRoZSBBcGFjaGUgTGljZW5zZSB0byB5b3VyIHdvcmsuCgpUbyBhcHBseSB0aGUgQXBhY2hlIExpY2Vuc2UgdG8geW91ciB3b3JrLCBhdHRhY2ggdGhlIGZvbGxvd2luZyBib2lsZXJwbGF0ZSBub3RpY2UsIHdpdGggdGhlIGZpZWxkcyBlbmNsb3NlZCBieSBicmFja2V0cyAiW10iIHJlcGxhY2VkIHdpdGggeW91ciBvd24gaWRlbnRpZnlpbmcgaW5mb3JtYXRpb24uIChEb24ndCBpbmNsdWRlIHRoZSBicmFja2V0cyEpICBUaGUgdGV4dCBzaG91bGQgYmUgZW5jbG9zZWQgaW4gdGhlIGFwcHJvcHJpYXRlIGNvbW1lbnQgc3ludGF4IGZvciB0aGUgZmlsZSBmb3JtYXQuIFdlIGFsc28gcmVjb21tZW5kIHRoYXQgYSBmaWxlIG9yIGNsYXNzIG5hbWUgYW5kIGRlc2NyaXB0aW9uIG9mIHB1cnBvc2UgYmUgaW5jbHVkZWQgb24gdGhlIHNhbWUgInByaW50ZWQgcGFnZSIgYXMgdGhlIGNvcHlyaWdodCBub3RpY2UgZm9yIGVhc2llciBpZGVudGlmaWNhdGlvbiB3aXRoaW4gdGhpcmQtcGFydHkgYXJjaGl2ZXMuCgpDb3B5cmlnaHQgW3l5eXldIFtuYW1lIG9mIGNvcHlyaWdodCBvd25lcl0KCkxpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSAiTGljZW5zZSIpOwp5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCllvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdAoKaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCgpVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlCmRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCldJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLgpTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kCmxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgo="
+            }
+          }
+        }
+      ],
+      "purl" : "pkg:maven/io.smallrye.reactive/mutiny-zero@1.3.1?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://smallrye.io"
+        },
+        {
+          "type" : "distribution-intake",
+          "url" : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+        },
+        {
+          "type" : "issue-tracker",
+          "url" : "https://github.com/smallrye/smallrye-mutiny-zero/issues"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/smallrye/smallrye-mutiny-zero/mutiny-zero"
         }
       ]
     },
@@ -4997,45 +5072,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-storage@2.74.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-storage@2.75.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.cloud",
       "name" : "google-cloud-storage",
-      "version" : "2.74.0",
+      "version" : "2.75.0",
       "description" : "Java idiomatic client for Google Cloud Storage.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "ddf66715db2b43f7ca530cc1c100f42f"
+          "content" : "cfd4c57e7a8d1153a128f2df52f6c9ce"
         },
         {
           "alg" : "SHA-1",
-          "content" : "d0b733f2e9f2205cef7cc17c2af075e71b601ea9"
+          "content" : "21c88172c6ae6ca68f0da108bdda7cd1d054aaf3"
         },
         {
           "alg" : "SHA-256",
-          "content" : "658a11b81473bd7e8aa49a740283735e33ad9dafdd80c439cc101c2a6530e851"
+          "content" : "af9360c461ef5163ac74e7e168fd21bec79091b4382c80612c4507a3ec8b667a"
         },
         {
           "alg" : "SHA-512",
-          "content" : "b3973c5db993660934ea196c6e09de40dbd839be6feaafa4309099e8b5835a06188e1b9d3f5d7131d0e04b6e08e7c8656e7aed17df424b7c7c6f5243bf56661c"
+          "content" : "96a066051e6f8448267948268feceab10fdfccfce812cbee6e3724782273b9449a92a858944cfad3fb1fccdd0bf10b2968ae2b9106bb4620083256cb2e59a452"
         },
         {
           "alg" : "SHA-384",
-          "content" : "1e2ce912e56af11018c40ac925be36ca5d209053fc5110317a12c74fc3819995aa1c7e51d0fa1281581dd281f55287cd"
+          "content" : "bc6927ac9042e026e59ea672c8838c5c0f79949899f7c61f6e2f06a8f615b1061827a1ed0d8ce1462b92f9d6ce01da0e"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "697ac24444766810a960aab60dc37685bfd0276f7f4a543d29938636baa0428aa0a3e25def3a9401b559258b745f562f"
+          "content" : "a1fb9f144037558ff1f40924f2252de6f737b8d2cfd87f1e7e74f7c84f104412c0825140db13711cd839d8b0336c3d04"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "b4e3d2d5d6eec27db7162d773b207d9f0244c5745ee0b7102beee668150bb7d2"
+          "content" : "827c5aa469720d930f63e82292286c953b2dd1925cb6d0c7d0a3e4d14527dc1c"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "014419c1835f0d986db81364bf626b70914a7157c4b426c51c51a2bbb81edf25725c0646b666327038ec3414d0fcb8a9a7322c43e35e92672cb69cfa8de47f2a"
+          "content" : "932af2b0ffd6c1ac174f9bcc3d3ead16651595f4efc1dc50918ef279795fd845f126dbd9983292e19392fe2154db91da805aa47fb1a95458fc1f764a19bb5f34"
         }
       ],
       "licenses" : [
@@ -5051,7 +5126,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.cloud/google-cloud-storage@2.74.0?type=jar",
+      "purl" : "pkg:maven/com.google.cloud/google-cloud-storage@2.75.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -6475,45 +6550,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-core@2.76.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-core@2.77.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.cloud",
       "name" : "google-cloud-core",
-      "version" : "2.76.0",
+      "version" : "2.77.0",
       "description" : "Core module for the google-cloud.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "45b504fa0280965180c3e5b4c61ce4b2"
+          "content" : "08c7732fc5abf9d6eddb5d747e16ca56"
         },
         {
           "alg" : "SHA-1",
-          "content" : "b97ec950315bbea8132a02c643d5b8f39556a2f5"
+          "content" : "22833b1c9e4ff074813ec688c859ee4720d6dd4b"
         },
         {
           "alg" : "SHA-256",
-          "content" : "579db0e9a00491f4e44e3d9e692db44c1be8f4dc3cfd0dae109fb736586ee5ce"
+          "content" : "4c966d696939f33970ceec79a2cb00a5004c15da97ae0fb0ec469b8bab7d90a4"
         },
         {
           "alg" : "SHA-512",
-          "content" : "1af0d3344a3d26147eff82983e863914460e05e9dbd1ffd114b94dd3bf67bff949721554bb9697f0beecbf157b71f5e4c447f7d5e7bc150bedec0d0beb34f5d5"
+          "content" : "4f2bce8cd848d154dd9a2251b07af917a040aa9ac10b5850b035d84e73442980cae9368e7d70391095342bb65bfeb12b75115099e62b2c0f1e35976fa5ae8a3d"
         },
         {
           "alg" : "SHA-384",
-          "content" : "f8692f73e18c1ec1809e271e51915031591e777211f5d5525ad6bd3b8864bd35fff9a9bbee0fc8c7ed7407a36f6968b8"
+          "content" : "c4038f8be1ab701290d1d5b2d6b2c02685e05f5afeb4c6c00bc3b85514aa8a3d27f36e169985d725ffee3485b429b397"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "5021770e63a4f130ae7732d4d16a70f19ff5fb012c2609f66c68372ebe26da389e37a48cf1fcb2b6849a00fbccba374d"
+          "content" : "2f5c5dc6f973050cdd631fcc10b877ec83e69a4c08704b1a60991c98bcd4a7531101150c8de8574e9554dfd09ff32c26"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "4583d6b932c19a898767ab2d7b151c581754b55da5e1ac82479f25a5cd62e330"
+          "content" : "ec49e55a317ecdda35e3ce08d08c5f8608dd4a5d7d6481f780970467622c3461"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "90da6ad0e7984d786c6d1492a92f4e0dcac3e955c70a48b029056db6335b82e6e7262561ec17015b6aa7f37242ddb78ab17126ea67b2a9aa1a0df69c4b983ea4"
+          "content" : "b2f94520e38aa045cf50b689e8bc827944673985e6dca151861b800fe34fd267125cff9bba98e508642af9a5a99d8d37aaef0ee60b999c529358b59eada8177a"
         }
       ],
       "licenses" : [
@@ -6529,7 +6604,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.cloud/google-cloud-core@2.76.0?type=jar",
+      "purl" : "pkg:maven/com.google.cloud/google-cloud-core@2.77.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -6626,45 +6701,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-core-http@2.76.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-core-http@2.77.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.cloud",
       "name" : "google-cloud-core-http",
-      "version" : "2.76.0",
+      "version" : "2.77.0",
       "description" : "Core http module for the google-cloud.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "9ed289e42bc51ac05274ccdf2f4b8ccd"
+          "content" : "6be693540727b02174e7bef68999e1a0"
         },
         {
           "alg" : "SHA-1",
-          "content" : "4923f5ad79f21e24264d0ed65a2a834c9cab8eb1"
+          "content" : "e998a61ce7b83ef69aea74a2c8a29cf17cd8781f"
         },
         {
           "alg" : "SHA-256",
-          "content" : "b61235f7e316f251d65712038d4d9a26aad933c0f5dd17c7f95c512b54af5bef"
+          "content" : "0ca16da51ca18536824fd4d52513da4375061e2eb73f84417ac488b11a0c28af"
         },
         {
           "alg" : "SHA-512",
-          "content" : "559e90de56512013a9ed048d675e9007a805da75f1e1bfc390010c85469f9fe0906cb69e33b4d16a79d666b999981648a3c2c54aa4eb88de45833434853cc6c1"
+          "content" : "3e4ce6b2f96dded34cabe4947382205dc09f9ad2c508725cbb894e337ed55292160119629da7a097cc68350299c0af74ab2fed8825cdfb2ef0a66a2c8fca080f"
         },
         {
           "alg" : "SHA-384",
-          "content" : "3d0cf248b024ea0853b7be58d35bf92e6319247c315a2d822e035181140404dabe0a994ee8093399451e8a0dcce5f594"
+          "content" : "9231400fcc4fcf04f887e2777821d06c0e7836b1fd93af3d0dc147cafcea68d94918b55e8f5ea057a91e84986998914e"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "d673013ad7a60b791a1959e4d1e3b869b158bc703670345b2c2c8951168eb9569689de7df0c61a63c61e5935a61f90a5"
+          "content" : "25b67f7324e6c6f52c3aac5770f3ce20e3b3200ff535a3dbed79dba5584411023b865223a161d53ccdad3a291145499c"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "a972dd87e8f9a9976a814a6aeb3484f8fa4a15bc1395e3762555e594f106f07c"
+          "content" : "269d1e9b440691b5f4278515a2aabac990b40b56299ba519f423ded335642576"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "8efc500e41a0c241e08778043ac179106ca333ebcf2ce131cac5452c763629997048b12e1b8299fae5bcfe2ac02a663661fb008d8e4c7b01ac3f889eda4fd237"
+          "content" : "a55bac26137a51205597a380dea3f2fa3ba3a2dd99e0da122c2843e1a894be7a4f8a7f8d7188414c353799618f95e9d0a9ea85ac1e18c902993948660e4bcfb6"
         }
       ],
       "licenses" : [
@@ -6680,7 +6755,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.cloud/google-cloud-core-http@2.76.0?type=jar",
+      "purl" : "pkg:maven/com.google.cloud/google-cloud-core-http@2.77.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -6777,45 +6852,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api/gax-httpjson@2.86.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api/gax-httpjson@2.87.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api",
       "name" : "gax-httpjson",
-      "version" : "2.86.0",
+      "version" : "2.87.0",
       "description" : "Google Api eXtensions for Java (HTTP JSON)",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "74d58f303551ce5855240f8cfc34b893"
+          "content" : "7f9249feafd2bf2bdd734a53626b006a"
         },
         {
           "alg" : "SHA-1",
-          "content" : "892ce729a0471fa8d84168e6087b507416c9b2ae"
+          "content" : "c17ce324a62283917208a2d8229dcae975d5ca4f"
         },
         {
           "alg" : "SHA-256",
-          "content" : "2bfa6386a3a3269e553d3332ff2b1722e2d2a250a259e0c2085550d3652e08f3"
+          "content" : "4ff68de3b2c15844860c8dd82377c83103196d4a4e01949c2beebfbc77730b0e"
         },
         {
           "alg" : "SHA-512",
-          "content" : "7cf4658838b5b4aa3df1fa9fc397fa9e338ee7945dab9b8ec9f968e0ea346d022883ad01fe73c39b95fd6b6e366fc184115d6768fadd533672f12db669730572"
+          "content" : "430c25d63214c0e9d2755fe57d54fe11206dd280f5de8f18c63a2f7ee0291ecf7655819ffc4832a69487e37522273abf4e4c77b157a6043ebb3021a9fdfb02b1"
         },
         {
           "alg" : "SHA-384",
-          "content" : "000daa7569bb0f0c5cfe7f49752f283791f59919e2c14c71cd5681fc306d8a46ca4d197d1687dbaca0a95171d521737a"
+          "content" : "b06758dff17a4176f45884d249110ae109900e9a73f6114ff1b75547a00f8b652e9d9f1e2b2e352579c3186d31c94dcb"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "c8f1cb786a1d424c89a84d4312dc64ea07be876fab4fd604d5d85e73efa15bedb116b7de3797658edd94f7b32f75adca"
+          "content" : "b3717b1630f91b807e790fb5ae0ba81a84d62e84f897733cb252f2e43803ded28e4b0270d9849be0f8df49ee521753f5"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "07344b207b5f4424f70d9903d7e4ca7569df273250d280ce1eee0e18f8e0362e"
+          "content" : "b564dab5dab725e9e391c998c1da60e85265a023aafdd40b492a30046a73cee7"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "004812e3a5b41161905538414feaa05c5f7fa202cc6d2baef31c5fda9a735029d196b214a0b63e73cf242605559d9753d4404996097970ba4a8b23fa02bc10bc"
+          "content" : "1141dd0c658bdbc1332e0ef12a0fc4a493c12a6c2ef9eab5287a898a7ef480416d12845776de7c92fdbaae02f2955eb51ef6958d5c00135c1338c05b255e6805"
         }
       ],
       "licenses" : [
@@ -6831,7 +6906,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api/gax-httpjson@2.86.0?type=jar",
+      "purl" : "pkg:maven/com.google.api/gax-httpjson@2.87.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -6919,45 +6994,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-core-grpc@2.76.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-core-grpc@2.77.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.cloud",
       "name" : "google-cloud-core-grpc",
-      "version" : "2.76.0",
+      "version" : "2.77.0",
       "description" : "Core gRPC module for the google-cloud.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "72da0dc30655daad5118f562561f2b4a"
+          "content" : "40771214d6a93d6c9a262dadba9a0911"
         },
         {
           "alg" : "SHA-1",
-          "content" : "1bef4abea1e7169c71c1ba6dc6f4b24e9a8d0087"
+          "content" : "8e6c02efcc7e8bdf09f51062f160828473584404"
         },
         {
           "alg" : "SHA-256",
-          "content" : "601c33f4a8fa0ba02083d8bee77e241c458a1b0d2f5eed5cac383eba2a4d012a"
+          "content" : "53a0930a1eb4670c9a7cf297c6ca2bbed011f6b04f68822c6dde88ff3fbf3c48"
         },
         {
           "alg" : "SHA-512",
-          "content" : "369a9c4c0fb460ca5ff400f65f2bbddf807c7b1b7f07f52f82d181764a4f8d70c2393b85d0e5f0883bb3bc69ee6c9c5678f72ff7eacd10b0f90e9f92213f1acb"
+          "content" : "c642eab55ca080bcd93fea3a8b892639700b547a273b3d38da3fc8144e7575b32c0dcdf481d36e3889c7e93f2a8eab52b76647eff55ed320f3e76d5d45e79794"
         },
         {
           "alg" : "SHA-384",
-          "content" : "5afd050ccc582c9a3001c1154157e59ee87f1e0a515cd85b4ad10322d7969924dcf2fb08fba4c1fc2ac47745c4ba99aa"
+          "content" : "c1909fe31558a4e132922905fcaffdcce4dd0ecb2d8f402b427cc9a0f976046bd27d2e18afa174b5c471f3ebba100cc5"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "0354a585f68b8d796b828f68bad2a081335d741e0e4bd95f064ba3703f8dfa79fd2314a0321f7d7e5bc821aef39ad63c"
+          "content" : "644d87a559ae1092d1b69b84f969b2213f2d2a452f93e185ebbfb4cf3d89adcda96c249740789389c601e22e699b6ccc"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "3b1e97b9d73e2dd432c2c88351ac8b88e1ce0c2e61f26a66286e15daa30a6282"
+          "content" : "a50976b7088240f2d58ecd694b99a11ceebe07af78e5d3ee12d782f15ac9caa2"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "366f7d20b8877b17d79a4e3f1756f969d0072ca9248bbe0dedc9029f2948a43c7b6c7894e61018736182abbf57668b15768f07081c7a63a27ec007580d075317"
+          "content" : "9bade3fafafe639dc33d5f9b0ebc1a87b69cb4047914535abd5dcd570905fcb3ecd50228db7b9b04011e3b6d4baf34c6a921ef4df76db103d0dca03dcf1fa98b"
         }
       ],
       "licenses" : [
@@ -6973,7 +7048,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.cloud/google-cloud-core-grpc@2.76.0?type=jar",
+      "purl" : "pkg:maven/com.google.cloud/google-cloud-core-grpc@2.77.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -6995,45 +7070,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api/gax@2.86.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api/gax@2.87.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api",
       "name" : "gax",
-      "version" : "2.86.0",
+      "version" : "2.87.0",
       "description" : "Google Api eXtensions for Java (Core)",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "e8bf38b5be731587198349d875410c4f"
+          "content" : "e5ea9751ebc6b43fb860b325d3fa4dee"
         },
         {
           "alg" : "SHA-1",
-          "content" : "9eaff23b8721ff55d753300fb09840cb4f7d86bc"
+          "content" : "8cbc1c5cde179346a2d03a6caca403728902f3fd"
         },
         {
           "alg" : "SHA-256",
-          "content" : "785351fbf8456431393079db9f1e44cf9f8048793c4b0c054b6ef72b8b85ac1d"
+          "content" : "10bde9666f7e7b68a12907b1ba9f82b27b0347dc7d9e21d134791e4e6b83755e"
         },
         {
           "alg" : "SHA-512",
-          "content" : "742d010b5f1d0b7b66e4f205a4a0610d8d1748ff463205de621967062d6cf5ae1281157b65ae92ed4e8e7cb58fe10cfba45c63d43a6ff8f722341219817a0966"
+          "content" : "18394251751d6bb9b936ad00283651f520cb85ef472bdaf0238f8b1d108d148fe8cf914c064a78cfb5cce933f43f0c744a7302026e60b41fec52dd21ad562f94"
         },
         {
           "alg" : "SHA-384",
-          "content" : "34528e9700270d881ec507acb5d50d5aff86eb0f45748614b7594b27275ec5ee3f22c150f3ed15bf79d6ba60a2fd41be"
+          "content" : "b8ee72f7f74113530d011442c1ec5ee812386bf041579f95dc85e80eee0e460a546f346cd2f0360d9b8de9cc92428750"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "5839822c341771864a6ec83f603e188b74f9df4a26afdcdaedf0aed3670e85e176d74bd1d86a57fe95d1920762206b45"
+          "content" : "c6ca9ba6f7b264eda331ae891b2e1524f7225cfdee406016751baf7077f0da167f93d7e1835024619b1b1c16bcdbb9cf"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "4586338df84dfc23b9fa8ac61b29041e6eacbecdf5123b3c2ec9d899616baef9"
+          "content" : "ce57a979bc8ed40cca98b51d39be42c4576afa071cdfd9eed79c1118d47297fc"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "01a4d1d0f8ff0c28af76b61804b270dff56f4cc6563358bfced4e4abb6293dc088fbca2c2fcc2afaf721f3ce5c96397d6762385ba2948d69c5896b4a6598cc80"
+          "content" : "1913bf37eed645b004acfa296293dca04aa7f93367260643c216326f85fc7481486d7efaa1be9ab0c6b3f53276fc466587936dea82cc513744e63cc121ff7f3c"
         }
       ],
       "licenses" : [
@@ -7049,7 +7124,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api/gax@2.86.0?type=jar",
+      "purl" : "pkg:maven/com.google.api/gax@2.87.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -7071,45 +7146,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api/gax-grpc@2.86.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api/gax-grpc@2.87.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api",
       "name" : "gax-grpc",
-      "version" : "2.86.0",
+      "version" : "2.87.0",
       "description" : "Google Api eXtensions for Java (gRPC)",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "2a1f0e39f846d2a012357a9577980bc3"
+          "content" : "28e31ff1f8fcbfe09dcc86c3d0e23fc3"
         },
         {
           "alg" : "SHA-1",
-          "content" : "cb32aa6b9724a6d71d41be8e22468da7e9ec9119"
+          "content" : "0bcaba1b324dc204fc1db4afdc3146c3d3fa1e13"
         },
         {
           "alg" : "SHA-256",
-          "content" : "63fd0e32746571bada819dbf44db07c8255564f623779a1c12b6539b7d824bed"
+          "content" : "b6314159e4aab7e0ba6d94635418d4b3119eca51428e4aa50c44722bd1452e16"
         },
         {
           "alg" : "SHA-512",
-          "content" : "c1aba0c926ca369241b14a4cbaf7bed6998b0a54bc7c11343d65700ebc16a5f5fb7378dafb3ca0b2a5e7b4ad646bef0668e4cc39d73c3a8bb19070dc64a4328f"
+          "content" : "b90e804e77d455c4c78d37ae2cdd11fde3f9b51010c0ec2eef040ebacfc211b6989c15151203a0d57b1bb082d2814cdb9661960cae99a1a44babdb2ce209edcb"
         },
         {
           "alg" : "SHA-384",
-          "content" : "42e08de09cc90c3d087911e5631eec23e9197521026a390fd0e3dbfb5b922242dcad9d8fcbdbb2264ca0ba962b9c5c3c"
+          "content" : "1b02fb6348c45a128c43c02fe2d5feeb715630ecf02ac5c4b06b3d2ad893649dfaf2f0ceacc349e27543579cb08bbc81"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "ddbee849e49b8321ced2a7ca8e33043bfdacc5dfdcef4dc80ac54a301e75fa0f923da65f1040512d637ff7825bfb07d7"
+          "content" : "7f31f2478bde707f88b120f785d74881665ae4c9e290cca2f5a5246cf271dceeef800732a3a44e0df1b7ae6abdd6f2f5"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "6df478064822b2fde8d583e8be2a7fbe8b24f375d3574b8e0d77f34f1f925ba0"
+          "content" : "75cfcba073ad61f3f45f2439af160a814ddc82bb5328ddade69757f13776b658"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "0da6fb717c595a9cd7cc7d55c869134f719fc499daf257eebeb0445b2b8e84df77638073ccc2113cffc13d3f34b3e262022a6b063aba69d238cbd69490db60c5"
+          "content" : "3226e424fdf82e947592878610ec0a5574162ed8e3f78682e74a659ccc0bf5bc7ac7ccac73b8d3b8da818ecfb8c04b0c126117f0ae0161c196187dbaf67b0a19"
         }
       ],
       "licenses" : [
@@ -7125,7 +7200,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api/gax-grpc@2.86.0?type=jar",
+      "purl" : "pkg:maven/com.google.api/gax-grpc@2.87.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -7345,45 +7420,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.auth/google-auth-library-credentials@1.53.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
       "publisher" : "Google",
       "group" : "com.google.auth",
       "name" : "google-auth-library-credentials",
-      "version" : "1.53.0",
+      "version" : "1.54.0",
       "description" : "Client libraries providing authentication and authorization to enable calling Google APIs.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "612242120e0fe4dca5f2f8f422706187"
+          "content" : "0302f519dd543c22c9f9e9bb418cbe28"
         },
         {
           "alg" : "SHA-1",
-          "content" : "9c411f231ef75d343ea6b1ed32f951527e1180bc"
+          "content" : "adf39b1bb4ce262297420e154ca3b645bc642b3e"
         },
         {
           "alg" : "SHA-256",
-          "content" : "9acd6f9032c0d7e5da290df40824be986d4d440bc8c82e0a7b83246862744a28"
+          "content" : "47c36c6201c4c0336e0275aecfbba155a46d63aa07d416176a790774c9ecdca9"
         },
         {
           "alg" : "SHA-512",
-          "content" : "d6bb191bc159f3a8bd5ce11022b88088fc4b3d4f4eb5ea095395c5f38d88da1b666a377fe6e9805ec61498d9bec52b2ee3bc32450bf9947a504cd2f4f8febef1"
+          "content" : "15829148a64200589eca13f91f262ab0891c3fa88677bb640d51612db2b44528089bffe5cbc14b59a137a473fd480eab4f094378c61378ee94004fe2c915042c"
         },
         {
           "alg" : "SHA-384",
-          "content" : "f34e862beffd3dcc7129126604e16477c15e095ceb9ed3ce7073801cd73184e16ce06a939efb5d28498282482158dbb0"
+          "content" : "035dc148cc65b23f3f5d97c14874be7ddc39f4e9e5b767fab8ffc0475d50d8da34bcf2f6ea318d30e77e4bfe59f9f8e4"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "587c6ae2bdf644674cc1866d4316a33986b35580283be574f4405e00c633fb1cfcc177a8e4dca5704c2cc679607dd171"
+          "content" : "f7c3c33a5893f67d5fd4343eed45473fded4d1b38bdc40e137559a116be88e71cd168f420a8d5e364fa0d2a992e2596f"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "392f225d043fa61cdca172896e31e69dd5eaa7cc7e585f1a5f0f0e35c0e3bcc6"
+          "content" : "205b463b6aed45b0a7dfab2c0f7c91f4a0b6abfb30f52503859df8516f4c1982"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "f1cb63f504c9e03afc7900f88cadd9303a0fc31275c642db908c386700b51876e5f69fe572735a84043421106bc2495546b0f0258a4c828d61b6fe45f04a53db"
+          "content" : "aecb47b48d28677d6f2024404ee1a5f46d7cc4af77554e6e0e51bb9dc83171267b1b8e648e6e6ab5c788a37e773e46f282dd90ed98de45774269049133751245"
         }
       ],
       "licenses" : [
@@ -7399,7 +7474,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.auth/google-auth-library-credentials@1.53.0?type=jar",
+      "purl" : "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -7421,45 +7496,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api",
       "name" : "api-common",
-      "version" : "2.69.0",
+      "version" : "2.70.0",
       "description" : "Common utilities for Google APIs in Java",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "08b507c9334236e5f7ad6cc779a6e430"
+          "content" : "17384a8d86466b5cb9d7494c5536177f"
         },
         {
           "alg" : "SHA-1",
-          "content" : "51fea91b8d604fdb389049d8c8b9897214b3e577"
+          "content" : "134bba6d6f20eee43fe86abf7e166a6a5d799b59"
         },
         {
           "alg" : "SHA-256",
-          "content" : "9095977e5decd6c6dd7e087c1886a294e6152574e1263a08ceb0d08cbcde62b0"
+          "content" : "18477eead80b20e0c3a747f084d8a0b10cd123d6349b7e989ae176c7854efaf5"
         },
         {
           "alg" : "SHA-512",
-          "content" : "6c678d33b08dbd77b0f24ba6dddbd03a4e439bb65fdc9a6d576b4e8971ec374126f11b2d6d403f89572f923b230393c9a43722fe8bff359db95246c556c76f0e"
+          "content" : "c4b867bf8b8e10f6e6e28f853e2b494db4ba930c0fddae45697ecc5e1106b0ee5a8d68e80b2f3447053889dff765c8a88a5c79568fb46db12a774b16c5576c68"
         },
         {
           "alg" : "SHA-384",
-          "content" : "69e33901b61bfe9178def4142a4d6ff291c6505befec9286fba548e498bd39fdc605ea6f27f2544eab649846c79f589b"
+          "content" : "471a0be692058dc07f56ec3098da5c619b6414f746893a9ac7870b81e55ab73ecaa4958bdc4467a7af3f4e490ef7eb88"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "985397b60b41e9dc19e84a0c8599f076b7dc8f75f11e4f1a6991384672ff89e5f2b019f7a103e4fa9ed9ab036aa8c060"
+          "content" : "be933452ed1b445fa6b22465ebf4bbbdd085dd6805a975bc8bf23fd0b3257b388372af48b279e094e7c5d2435fe5aa27"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "f9d28e035779e5bd3519025f437e0853a9b08518df8fbe619d9acf62a919840c"
+          "content" : "fb9b4d435749dc920e697efa25ce0ddb02bb29977375dc5a3379505a8738dd3a"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "59deaea4b92a7597671263693f361124e261237884c596e06809921831d991e3dba959a37294246f7f231eeba95def3999ac8366202b4609fdf2fe3f51c5b537"
+          "content" : "6c5b0f4bfa632b6bb9d1d3403ede444af82428be338ee0d89a87edc028ec9cbaf6b8477e5833287fa7e7035c3d1f8f0c515092f05252d0126546796b7e41148c"
         }
       ],
       "licenses" : [
@@ -7475,7 +7550,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+      "purl" : "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -7687,45 +7762,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.72.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.73.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api.grpc",
       "name" : "proto-google-iam-v1",
-      "version" : "1.72.0",
+      "version" : "1.73.0",
       "description" : "PROTO library for proto-google-iam-v1",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "5ca5e214246c574ebaeaa6e7113e9c87"
+          "content" : "62a35cc7587411febf3fdc7b454899fd"
         },
         {
           "alg" : "SHA-1",
-          "content" : "6bbeb5d8e8bf27b44803c5852779a5110794d8b8"
+          "content" : "828a59a2dc62652160dce29d51defb424c687308"
         },
         {
           "alg" : "SHA-256",
-          "content" : "de8bc04eef6a53f8e988e0ff49d1038b5dbbc81731c22eb03097ac4c6144583b"
+          "content" : "be52dd77ab76333d4a6e46bbe7ffdff5d1c8666e8faa2673dc18aace343a27db"
         },
         {
           "alg" : "SHA-512",
-          "content" : "c495d2a8ebb0aef8dda7eac3b1feb167294e5368d23d04efd94369b9f525e134d846862d9668a7034fe3ee504c45a2b378d67f8af8f518f6e054cf601e77e175"
+          "content" : "90baf9283f8533c061d07cb24227e752c382624489eb14d3cb970363a748a0f7e71349b329adf908b3fc9f799862ce3a1c94a810f4941bbfc055f44360c666dc"
         },
         {
           "alg" : "SHA-384",
-          "content" : "98fba873a8fc592dc134311acc4294dd46dcf50d3c5567f5a8a1c71303303322677aa71f9f45eabe1b2e57838a370f3b"
+          "content" : "19375be8d299bafcca2ffb2c86ea652ebeb5c1c1f52ba660f4328e79b6d8f183c90b1f9456b578461c98d25fab798e2e"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "a91cc0d532bce3b779c14c23b37d54f676722d75b37fed537ecfa8ed23953d7805c3fcffd77b8fd99962ef3bd56ca34e"
+          "content" : "d3fd87098d3d911fafa2cce144f790ba2fd8fdb842878972e201deb8cd39c2618d008176339f3116ba8b08ee4d81d9c2"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "4311a2e42b1972ad3a9d0c0aad6e38fecfd2603877c3627b67ca899d183f5933"
+          "content" : "63b605cdba7f5b1012754c3f9981f723049e63cd630bea3f40069a8e79216cfa"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "2a2c38fe3afd190c1adfbc2cdb2deeb36141ddf89cb4eaf1e08d8cd81f6b1916c80bcbde3055dee7d933abd97a04265b69e3865521d03cfc13c404dcf22a022a"
+          "content" : "a4ac72a65132d25280dc96cc0063960e43a9368e01f347ec872f3a7fdf3aafdc850dffcdc1c1b0dc6160036b45c2af48814ed408e6d65348ed452716d2e2d608"
         }
       ],
       "licenses" : [
@@ -7741,7 +7816,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.72.0?type=jar",
+      "purl" : "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.73.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -8323,45 +8398,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.77.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.78.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api.grpc",
       "name" : "proto-google-common-protos",
-      "version" : "2.77.0",
+      "version" : "2.78.0",
       "description" : "PROTO library for proto-google-common-protos",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "ca48f70b9a1adf866e5085cc1e8b962f"
+          "content" : "69e3f299307c2e50ada2062e1a8567f1"
         },
         {
           "alg" : "SHA-1",
-          "content" : "a7bfca9e709c8c12e81f38b22f713bec0bb64b9c"
+          "content" : "2286f640c5d12d9cadc8268c33f8bcaddfefb2d9"
         },
         {
           "alg" : "SHA-256",
-          "content" : "9f46ab73a16d642ea4d1271e42f27e7877607924b2fcec3fb56b3b7eb506b539"
+          "content" : "31048b6ce4bf3e68776e3e7adb4c7a133964fa170c135fea0a9d4e09ea33b221"
         },
         {
           "alg" : "SHA-512",
-          "content" : "4660f6a88257be84337ba96d8b791ded9490c169a29a71e26267bbc564f0eeb65cb303a3beef0c989c3b280470d283c8fd755498bff7b496f174e6b0125f932f"
+          "content" : "c9acb529c7ad32a07f307e0cc93e2b0936457a5acb3c15ca64a73b381e468be4cc1ba364b39ed5a496958d95ac0acfb5a6c09072dba43ee50e40bc0b341b138d"
         },
         {
           "alg" : "SHA-384",
-          "content" : "b642680418376a23d97be842fd8269da389e030fedafec264202843c288d2a2d9201933211b4292be7d97cbd30f40ca7"
+          "content" : "d6378795225f41e595550b9ce36e8714366b1be336ebf10dd729408e384a38a29f4a71f0023af368c3e0f8b7972c0cba"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "78a206054000f9d115e73f0c021577eb87b6e8a6ab5e40a1ad04dca099427df4c684646f17e1691d8b636c47984f0bf5"
+          "content" : "c16bfa293d7b1a6f57c9c12c7d0a10467306196102b0ebcbdf192e88dd3ca4a6d4a41084208bdc805bda7cfa7dd46eb0"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "b94f0c0d2d4f9306248da8a7a62807ea413f3e011352264e747be13d3da42310"
+          "content" : "ef7c9108339ff4dfae7b7927d8e87349245e115e9cb191098ce6b3a676283b40"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "a04d4ba21f6fecfdd748a9fac9e40112c37becae251c45fd42414d7d012ac0076349ed80e44a2c73251f4ec6aae2f15196d941cdd9670486943457cab773d0b8"
+          "content" : "a586756e1e62b7e5effed29a57da4ac1641f7d8f1484c332300330ff52b44de3dbe85ac0dad57e14d76c2ce822abd92c9e22bfff62dabeb61e405ccd862f4e2f"
         }
       ],
       "licenses" : [
@@ -8377,7 +8452,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.77.0?type=jar",
+      "purl" : "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.78.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -8479,45 +8554,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-storage-v2@2.74.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-storage-v2@2.75.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api.grpc",
       "name" : "proto-google-cloud-storage-v2",
-      "version" : "2.74.0",
+      "version" : "2.75.0",
       "description" : "PROTO library for proto-google-cloud-storage-v2",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "a31e425af43b1b622456ae06dc5f4a66"
+          "content" : "d55f9ff0b4b909238139ae473b130a47"
         },
         {
           "alg" : "SHA-1",
-          "content" : "c6e1e3e9959ecb7cf35f230a3afcd57f5174b464"
+          "content" : "3f730d5a40a3a378d5353848c0d2cb9031c3f33c"
         },
         {
           "alg" : "SHA-256",
-          "content" : "ff6e557882f944ab332fac3f574b8ef0a03ab4b7c3d4df85956712136485143d"
+          "content" : "e0439640598b961f6d9db18dd2df698215dd275458c11ec5dabf1f781a8d9975"
         },
         {
           "alg" : "SHA-512",
-          "content" : "b1bf02dc2eebedb665b24589d061e974447f77eacce3ad7f879199ac1f1c15f07cb2a98e1016cd39f2183632ee1c930b026a7a20e6d2ee583cc1750f62ab406e"
+          "content" : "f453216b25796c5aabaa20afaf19eac90783b673a2feee768de7bd76e2eb836759dc7ac5636454781abf281a0314af896ecb95d8609555b399d2a1aae5faf770"
         },
         {
           "alg" : "SHA-384",
-          "content" : "fac68a4fa9c46c1b94e38c8bcfa0bf0207a860e15aca5b0849c58c9f012a59f825be762cf3cd4fa21889c80599a258b9"
+          "content" : "26095f824f33b93b9762f3fc9aaf49a18f4c8ef9c550da43ffb708ec7314f76c6fd2692c9911805677cb8c5a5046a640"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "c2843895177a3b182722e82c5ebe9842e85587b816b31c0682a7dd6a447321ff455ec745ec8e215bb693b096a3bfac4e"
+          "content" : "4522dd005327ec2d70b8d8c64afbb28d81a89ee33275e14fe69f4b6889826c07e13ed576af881e63e60d4b0d126a6fc5"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "985dceb962f0b6ae6f58283c4f820ad2a67fef3e5f974ce1dd8eecb155fbf61a"
+          "content" : "e3f3465125ca807ac6fc24ca07f8c26d84396974190dfb8705016bd506afe927"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "a87f52919c4583ba13726ffbfa49597f5fe396cd50c63dde95ace86348cc67a3031849fd333ab44014cb44fb58b7e5ee08a1970eed2d1069fa65b0243dc3f86f"
+          "content" : "07643d5a7667a459203d97e39677cf29539239e1b23447b8e46f9d1f63613c87d440f57d0d38465bda99b8342b894f381a638094de01380dd9e17f7763d6a63e"
         }
       ],
       "licenses" : [
@@ -8533,7 +8608,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-storage-v2@2.74.0?type=jar",
+      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-storage-v2@2.75.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -8555,45 +8630,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api.grpc/grpc-google-cloud-storage-v2@2.74.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api.grpc/grpc-google-cloud-storage-v2@2.75.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api.grpc",
       "name" : "grpc-google-cloud-storage-v2",
-      "version" : "2.74.0",
+      "version" : "2.75.0",
       "description" : "GRPC library for grpc-google-cloud-storage-v2",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "061c97f30bf18035d3b3fc1f10bb2309"
+          "content" : "bf283b31865eb2dc67bafe6f69debcdb"
         },
         {
           "alg" : "SHA-1",
-          "content" : "3bd43e90e1b6c2370aaa98ad78b632f38bca7a5f"
+          "content" : "d5e7861c54b1b32b1d5e921a3a77790534eb03e6"
         },
         {
           "alg" : "SHA-256",
-          "content" : "2535f442f7504671098534d21ba7f981934b962067640f8f07bccb09d5598595"
+          "content" : "6cd99b99f31b31d6df577fa3e023aa46af0a9afd83c09b6b84e44039f1fbc133"
         },
         {
           "alg" : "SHA-512",
-          "content" : "cef3514684c84813399aa5eca4660a5da81fd026c85ce50dc9636ea04af15685eeec55446f715139dc9c8e4750ca05b0e2a98f68af14a49f2787371e6481e127"
+          "content" : "e3397a1065ab62db1fdb943b13bfc14c57d16b8d36b5e12dc93722c00101aadb22768fb19aee43bfda14085f33590dd20f81884d0ac33edfb51fca054bf6764e"
         },
         {
           "alg" : "SHA-384",
-          "content" : "65bd0d29453026e8fc6c38f6ddb1f600150b66ee4bd30c1cc506677378efb9428b181aad3fd287152b8fb38d5f692961"
+          "content" : "a278b8775e415271d1d4b4303ebd37bed22dca4a7911b4477b9828f502fc6b6163d5a1ab2ed52954528696dad357a229"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "6f11accdf974d52bc1d629f152266fb664783415c5c3f9b10cc978035697fecfa87ab0ebd60e58954def5e467056b91e"
+          "content" : "91014f227d3dff30476492bea7beee2cb2515e394a161366617d110e2e55a2c9b6099dd015bd916a52d431cec73a67e7"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "cac618f1d3abddc88701f90c6549d3dd6d83af901d26a3f6f8b5fce3104a00fd"
+          "content" : "9928303d89c41070919f918b34984cf88acd610b1207264719246419490e9199"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "66f40c155cb3daaef9a498ab018b35ae2f95e24690d33b927df69bff62600167a3e35a2eb08384223e3cf7b127428f74e3ab7e33d222d3de1046dbd6b1df42d6"
+          "content" : "feb9430a965d941b387786716c0a1c8cba8565a1dc3efbfb0e5e084c4dc9c953e00a219830cb2b1b0b4e0d626aa5a40ba86b65a1df1133b7d520e0d57091e1fd"
         }
       ],
       "licenses" : [
@@ -8609,7 +8684,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api.grpc/grpc-google-cloud-storage-v2@2.74.0?type=jar",
+      "purl" : "pkg:maven/com.google.api.grpc/grpc-google-cloud-storage-v2@2.75.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -8631,45 +8706,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api.grpc/gapic-google-cloud-storage-v2@2.74.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api.grpc/gapic-google-cloud-storage-v2@2.75.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api.grpc",
       "name" : "gapic-google-cloud-storage-v2",
-      "version" : "2.74.0",
+      "version" : "2.75.0",
       "description" : "GRPC library for gapic-google-cloud-storage-v2",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "a183208cf22629d9f26ebd875c803584"
+          "content" : "1b89fe7a6c62e5974da2d9d1dd13c783"
         },
         {
           "alg" : "SHA-1",
-          "content" : "610c0a16e9db77c05d60d4d0d2bec252c8a59e9c"
+          "content" : "d8df9c78273a289d99f3b79eba025b91c64df48c"
         },
         {
           "alg" : "SHA-256",
-          "content" : "e80ff7ec907f600699b19ba7244b06f0cf43ea625626b438b88f87d76d42f80d"
+          "content" : "d24115616af75a3d3374172c623cea2f20ad65e229ad2fbca3d69c8f1b3febf9"
         },
         {
           "alg" : "SHA-512",
-          "content" : "ab76371979d32f08e8a78e4f007b16db7437949bc0a26072613bedb563a9ce3019598e00fed2b75e116f8a5bd0e7f60409f239b931114a24b3b627d0c2b49f21"
+          "content" : "e198e92df6f3386075a29b84d445ef37e752698cfd4d3645e39e1a52fd9b4745d031720013cd72e577edaee8ab8699e57b05b0c26e7e4982bfa423d7ac5dd030"
         },
         {
           "alg" : "SHA-384",
-          "content" : "121068daede60a0f45af17b17e7694966fb6321d39b2e0743138ce52ee9607b0fa3c36fe46e38ea966863c20fb2204ef"
+          "content" : "6c49f78024ff527651b7c9ab59fa3c0fa06a35f6b7940a00fb780c150c1c5abc5fe5fed6a6f99ca4ab6a4b322e2852c1"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "01a80e5872c73df3b474a6cb6e9650f7ad97c3c80191acfe2801afbf0f0f73013737264576dca74b4cdba4214758fee7"
+          "content" : "a80916e8c5562d8e552e3748eae7840f7f9602ae02002bc01e491b4288f838c102219893a6304d8ad7c58ddce7ef4a85"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "0a7338616999d3e7caa12fc21c0e8bf5c72e203334501ae2b0cca7ea763cd992"
+          "content" : "36891e2d2a4a34b5a694264eea9b0146851e80b8bccd5d82e99da2e51acdf0e2"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "3565921c2a164fbb71610ca2ed10317dcb396cf7e05c3580e475d24ab8367f862484cf816045d26df09db6bd3bcdb24bf764a357a80cd72a3483eb1e41da24ba"
+          "content" : "00bb37629fff380ca1ae692849831bd208814bfb095551b5a046b7f26f1df31709a4ba34666bd050a4b75240b937b8dc89a6ffc0e95739e87638f8e04ee64286"
         }
       ],
       "licenses" : [
@@ -8685,7 +8760,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api.grpc/gapic-google-cloud-storage-v2@2.74.0?type=jar",
+      "purl" : "pkg:maven/com.google.api.grpc/gapic-google-cloud-storage-v2@2.75.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -9407,45 +9482,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-monitoring@3.99.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-monitoring@3.100.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.cloud",
       "name" : "google-cloud-monitoring",
-      "version" : "3.99.0",
+      "version" : "3.100.0",
       "description" : "Java idiomatic client for Stackdriver Monitoring",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "dda4d608e9224a0b2ee44295b6576949"
+          "content" : "6b46eddea4938348a0ad538ea9824675"
         },
         {
           "alg" : "SHA-1",
-          "content" : "2d8e6c35d8c78a1d8804b97377daeac3ccd8b0e1"
+          "content" : "7987072c463011a40ebf3fe22d3a3554a5de83aa"
         },
         {
           "alg" : "SHA-256",
-          "content" : "9fe90056267dd37fb220555fa961057116e204c442a3fcfab76881c5c0256292"
+          "content" : "9f93340ca06c3c13adf6c49686d73c4db9c72f352ad53148e9e58d531c2c2492"
         },
         {
           "alg" : "SHA-512",
-          "content" : "c57c6d376b5a992c1b0ef8a0cf5d496b8b9419770126dab40fe2101da5cceb34258aea6f7804d04c4774fe564a5ef52db4e19d59982d75272c2bed2c6aa2d64b"
+          "content" : "c57ca8d123614db5b1115e661c580577643916654459503a3b4868c9ec37ac2545f8d2d9a7d36612b32a6f712c3244d40e8b13c79a283f78a9d7325cc1fc587c"
         },
         {
           "alg" : "SHA-384",
-          "content" : "1a88ffe790c438205c158181cf0861866f0a31ce830f82d251d01effda0ee176c27f2f7d4a073af9721876a93e67ee10"
+          "content" : "4f6df3855a0617c2857b79293f1269fdac778769b866345e5a3852c4e0011f8d7159c4d3ab71d4bd52f2c40adc349023"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "a501f0f7600ce2c46a16cf426cf9e4a3db586412448fb9a68e6c5e25d1f8929a8e902aaf4231877e172f833c022e5546"
+          "content" : "da43660ea95c5d464f00f754907e92878c254b9bf47bb4c596004a65016c8932cc81bf967bf563c5791dd1331fca010e"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "b70a58cdf84382b701a61419103962b2ddf58eee06d3d63c0265a634fbeed1b0"
+          "content" : "8ba1903046df14a1f0e4bf237779aa63fc798ae4415ed15edef9bc85f48c39c4"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "c82d03238b127b2527d40fa36d0b376fa49a9d7c6a0a18160c699720e20e85c1b2c5385b5173f02444a4af305654e6d8a971b5f5ad077b3750da0780132acd3a"
+          "content" : "4e293234b3ffe4a79b77a8aa11db540d3b804886b21cfa84eca056cadfc42ccad856e0f9e144d0ca1d149ae2a49fdba838daa40e3cbebf39cfe7d045ba71a4c1"
         }
       ],
       "licenses" : [
@@ -9461,7 +9536,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.cloud/google-cloud-monitoring@3.99.0?type=jar",
+      "purl" : "pkg:maven/com.google.cloud/google-cloud-monitoring@3.100.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -9483,45 +9558,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-monitoring-v3@3.99.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-monitoring-v3@3.100.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api.grpc",
       "name" : "proto-google-cloud-monitoring-v3",
-      "version" : "3.99.0",
+      "version" : "3.100.0",
       "description" : "PROTO library for proto-google-cloud-monitoring-v3",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "48e0712d8e57b57d2e544e6bcb0e2108"
+          "content" : "e754026f88ab2c744aa27c5cfa5483c5"
         },
         {
           "alg" : "SHA-1",
-          "content" : "cbcadaddcb5ba102e71190303ef4207cd968d081"
+          "content" : "60f46e23b2c404eb4a200866267d8c604c5f7165"
         },
         {
           "alg" : "SHA-256",
-          "content" : "d3287af234696d9e3d5c309619482cfa70430a32ff2927fd239f519930058489"
+          "content" : "87612a30db7e00fe4fe72bc00f6fe4258beed4417bb4d4e766842cddf130c4a7"
         },
         {
           "alg" : "SHA-512",
-          "content" : "2309bfee41e8b199005b11c439a61e574c49d4039aae6c4b598e13780977eebe8f55fc0d0c89280c56d02eca708476dbd79d50eb6ef83af150567f739cf73cb1"
+          "content" : "87db839691df98a6a032005f2a69c8c7b51e306c42155c4ce29804b64e340413212d91a5af5b7cbb1b8549af9d3b345751cdca188e879a1430d983e3c6304027"
         },
         {
           "alg" : "SHA-384",
-          "content" : "588fe9e144ecf342b039bed582ffeb47624bdb00fe9ffd214ac8f9c6242326f019a899bbcfd38c121252e5d24a1a3dcd"
+          "content" : "28deb4b4711aa0d22751b0bd6b7d6a8483349310a24d3ee7e583d4a71fc72922c147162ed62bebcf68d3c25b66334471"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "5e1d1607ec8dab4d00fc547685cc25ddfbdbdf816edf001592790db617bcb1a127e1cbd732aea1e8bfcce4474d5e19fe"
+          "content" : "127c1e5af5afae2997dddcd3c334637a99df1f4d4858fea5125b18c1bc45e713e0fa825e3a527a812d98563ac8f761df"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "d8482aac42c78c6a56dbe240b69e27202dc891242493b233e03372da77c40e3c"
+          "content" : "dad0045fc11fb6f7364d639b7787f3753dc51f02aa5c60c6e594c8ddbb3298e4"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "37104e66d356e9b497187a1031130b41b62872b17940ed553735b5345ef2de8260d40bfff01a4bc24f9ecc53bac45a2d9d9022713673d06fa15515ea89a0ceca"
+          "content" : "ec7697247252f3eee9d5b3d4033ba58fd529299e4fde8482c3b05e5828493c036a24174f94529744074f22be904f3349ea01734342871c47a1b28466080cb6dc"
         }
       ],
       "licenses" : [
@@ -9537,7 +9612,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-monitoring-v3@3.99.0?type=jar",
+      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-monitoring-v3@3.100.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -9753,44 +9828,44 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.cloud.opentelemetry/detector-resources-support@0.33.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.cloud.opentelemetry/detector-resources-support@0.31.0?type=jar",
       "group" : "com.google.cloud.opentelemetry",
       "name" : "detector-resources-support",
-      "version" : "0.33.0",
+      "version" : "0.31.0",
       "description" : "Support library for Google Cloud Resource Detector",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "c86b0b8da14c6907ac363cea25f48987"
+          "content" : "6dab3d8126fd5b7e0afaab208a9c56f2"
         },
         {
           "alg" : "SHA-1",
-          "content" : "a6ba22e47f6234179803b5bab5030ebede575b6e"
+          "content" : "4e8e5e2346b44492ae69920e6d7cb192797d93b7"
         },
         {
           "alg" : "SHA-256",
-          "content" : "94b0def27754083ceaa67b56a4d483d294e9f17066493df3ef7e81ec5c3bb2c0"
+          "content" : "6252d6a872563933a3f5b522d7e59bd31576ddfd6ed4d1d43d671408185c81ad"
         },
         {
           "alg" : "SHA-512",
-          "content" : "1c7de201b8f124677c127ef5b9ca344adf6973320bcdb94ddee871bb9b297fe9cec204f5a88e37bfede55f9b0b408a4745dc8b1589ee0bb946075ccea118cf86"
+          "content" : "7462d4040e7f3da926f68ec667eafd3e7ca13089544cae83bbfcdb2c6f1735199499013d6a6e3df63c23ef7feb87ef0f967f1e747f41f5e20b795a6ed5391776"
         },
         {
           "alg" : "SHA-384",
-          "content" : "9e0d7248eb0124f8530d72455d85a5df0b20b92bc29aaf00c5910d13ebaae4588ba67d4a5687885a25bd5092168d1550"
+          "content" : "16e8aa78f9e866b1fa8c7d4b9f13b62d55a76f453a256f46f083c8278f34fe3879067cdf8c060d0d35f016610801021f"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "a68f94401fbbd638a1e88652138770be84f63cf7beed7a2371dc421d2978df3cf7006789bec79ed193fbf6ef1e3e081f"
+          "content" : "3f640799e498bc7a0d2953a0c7b990a3831466f9b1d9326ad63a510c9ce7d625b610b4b558330a35a94f782c97f22aec"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "e3ad2a4e77246c68c2adb3f92adbab712f4cb2596b91ce6e4cd6d6dc01f36014"
+          "content" : "a1be9b30643271067c9ed31f621359a88af0aa29b69fda2155f84146cbbfc902"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "457844301e4902083bfda6950c110e6a3b550e5e67f73e9f1e0e7f8ce9767baa41ffcedc5911d50bfc6060411d349d29543f85354a2498c251c55879f9396291"
+          "content" : "93b518ef9d5091da2eaba9985e814cd0f029f83b42dc5aa94562a407b91abb068538867b9c4b6e431c2b24bac1cc0584a30a2794dd27d6d5ba3ddada3dbffe62"
         }
       ],
       "licenses" : [
@@ -9805,7 +9880,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.cloud.opentelemetry/detector-resources-support@0.33.0?type=jar",
+      "purl" : "pkg:maven/com.google.cloud.opentelemetry/detector-resources-support@0.31.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -10764,45 +10839,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-secretmanager@2.98.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-secretmanager@2.99.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.cloud",
       "name" : "google-cloud-secretmanager",
-      "version" : "2.98.0",
+      "version" : "2.99.0",
       "description" : "Java idiomatic client for Google Cloud Secret Manager",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "ecfda3f5c407da83275b1895dd946dbc"
+          "content" : "66c1ef4d6d55814216b58630e08b10d2"
         },
         {
           "alg" : "SHA-1",
-          "content" : "b9e85164ea58f0892de1831f6ad892cbc3a797bd"
+          "content" : "1a0aea45f1edac2719925f49be9dad2473ee55a1"
         },
         {
           "alg" : "SHA-256",
-          "content" : "134b6f75b1aeb8ac1709b36d0ab440a12caae67e5c618dffc6181aa09395bb0e"
+          "content" : "33bf418b5be33d0bd06ad6b06e93f8d993c646bf90c36a57cba425beab2779b5"
         },
         {
           "alg" : "SHA-512",
-          "content" : "6f9abbb44f2ddf45901f49c9d7016139c07c2cac15504c598d8b847673c428bc990a9b41d6cae696bd64cf19cfd41b01092e9bbc7b40276fbd702061cad2f5d7"
+          "content" : "b658468fbbcbde9d9ea65df4e4d355621956a0eab85d5c53eaf781eaf960d0e1db7c24d3c8771f3b6a5521fb300d600fd5d98ddd8017838820797ee15eb0c7ac"
         },
         {
           "alg" : "SHA-384",
-          "content" : "f622ac4a5c866b99890f7a4e968847e88490a208b6919e8756afd171964e0d199fb9c5f35887f501bc620d67a64fa682"
+          "content" : "3aa580083240fa0948278e058b17a6f6410489ab71f22cb2c35b88449fb71bd911494e6e9b11c9a967e9c3dc9e650532"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "668411e1cb2e2857c50d1e6e2fe5f8072faac5df252eb1d1ee2684d79d29eceec664932241c8002ac87676aff7ce2c8b"
+          "content" : "2c7587e3b7edfb34f98a03c35f7e9974b9c77ec1cf4f2cd8a2fbdf5891aecd4e288d52fe52899705d47e9dd0749e0a4f"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "a5060385be6720a498c21b4e8cd3ebdc7f63bd5467bdc1595d3350912bb99d1f"
+          "content" : "ce278a8f65cb967467988f7cfdede7154ea4ac55d7b7466db199ebbc8c352fd8"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "0142fa93c2a8788d3e5dd4dc4f956314fc12d30aeedbc8cae9f815c431ffcf56ad43e96767bb13261e0f35fb20ea6cf2c19078dba5b3e98a120c127e5a53ab50"
+          "content" : "d22650b6ed9feb7eaba3309ff99329edbc1edbfd9324d4817feb1b21c1a610b0ed9917f048db6c9610f2b64941e2bfd4196c5923d3110681db81882bdc620fbc"
         }
       ],
       "licenses" : [
@@ -10818,7 +10893,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.cloud/google-cloud-secretmanager@2.98.0?type=jar",
+      "purl" : "pkg:maven/com.google.cloud/google-cloud-secretmanager@2.99.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -10840,45 +10915,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta1@2.98.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta1@2.99.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api.grpc",
       "name" : "proto-google-cloud-secretmanager-v1beta1",
-      "version" : "2.98.0",
+      "version" : "2.99.0",
       "description" : "Proto library for google-cloud-secretmanager",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "966d0500bedfca77c0bb0e9411c25ce3"
+          "content" : "93521cb68d954cffb658f0bcc1f47a62"
         },
         {
           "alg" : "SHA-1",
-          "content" : "fddd5eb852be41fee2c3f18b42e97f4d287a5fbe"
+          "content" : "017316dcdebca02cdef4a02bc3c6f59a32b4e6ce"
         },
         {
           "alg" : "SHA-256",
-          "content" : "5e8edb5ad0df1b1ec51c6a812b792984f7605604a330317995c5f1154c26e8b3"
+          "content" : "0a13f7d09a6db12bea4999e2d6448b933a2bd85d40284dac787a49d5b09bdf8e"
         },
         {
           "alg" : "SHA-512",
-          "content" : "5dff409392da01675e370cc27b7c7ce9c99ad8342f86980048839d3965548d0637f6f43959ae345c7a83bd557da3d72ad2f2b1385c295de6820072b71ee84b41"
+          "content" : "2eebb96e85d60d136dea67f6adaebf82a6733da71f1dac1deb54dc4fedab529bce4b789b500a22d6f93e1cb3c47b6e020dcbb4a614b557a19ecebfdbfd518e92"
         },
         {
           "alg" : "SHA-384",
-          "content" : "b8e287ebe88b7bd20c6cbc4bb59770aa2d261111944bb64674207208155205d431b5fa8835ff57095daba49a9c0e0d35"
+          "content" : "12ab7574f7544c87708398a5bcb68b78406ca827e885057654d839c9503b0297814c9941cfe2f5d05a59b34d36d68cfd"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "1c092cd91a4b983c8f0ca5fdc8987eac2252e3920aee3eeafab86186577a26f296a5e5dd810ca318f59e388e98b1bff6"
+          "content" : "bbd38dce10bdd6f5ab136d55c81f95bcf4fb15c6d2ed21e7ff42e51745d42440fbd9ec4062ae9b09882adb312b1339e0"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "05df9431767133f4bc5d80ecd5a9bb0b7192473530ac2fe8b3b6c4b8444a9d18"
+          "content" : "cdb3969eb13a678b23328e04eaef51520ff43fbd9f1207edfebed0ecbdce6772"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "3db0651b5161ad4aeaef35bc58114994fe3004b70d69677b224cd900076d7257a3f4cccdd56a8417da72e898257afca849ca5c09288e51167458ef65a1812837"
+          "content" : "762b3196c0476f6b5b05a1b63c522d7a0c42059c500702c3014732dd1331f38f3c04849be85a1690590caf30b2c6467273dfe06237fe6f68634adba6f0edfe41"
         }
       ],
       "licenses" : [
@@ -10894,7 +10969,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta1@2.98.0?type=jar",
+      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta1@2.99.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -10916,45 +10991,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta2@2.98.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta2@2.99.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api.grpc",
       "name" : "proto-google-cloud-secretmanager-v1beta2",
-      "version" : "2.98.0",
+      "version" : "2.99.0",
       "description" : "Proto library for google-cloud-secretmanager",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "b44b23c5ee4c27883c0f4dc6ed0041e1"
+          "content" : "f1396b20e9be781d622a00d6f484aed5"
         },
         {
           "alg" : "SHA-1",
-          "content" : "755840f3d951f9549b928ded9206782fc72956cf"
+          "content" : "613b82d22d0ea0b1666d0fd89d72ddbb68b7e3cf"
         },
         {
           "alg" : "SHA-256",
-          "content" : "d4e02c41c1b765c66296d10466ec3d86066bbb9ebdee44fc206353c75d14976c"
+          "content" : "7d90e31cd0c879ba60e180c36cdd2922a69d220e6627f26449a2dd03eac6f1fe"
         },
         {
           "alg" : "SHA-512",
-          "content" : "eac6e8b9a597409be9dba8df5e63c82117fd753041e1487659ddb76587dcbfb7cc295d7f24a3eb02a41898d247547898d29d43075bb96cc4d37d6d00444a779e"
+          "content" : "af982d172dafde60a4afab7ecad87efa73ceb9af459aef474ebf7ba4a015753adb97080490d78170f39c2683dbc038608219c4991bf8e68bb6d980c5a87838ff"
         },
         {
           "alg" : "SHA-384",
-          "content" : "d761722f0c494ac8615886830bea5227ce65dfbe0782234aa99bd1646fb0d679a9ab3d37de0eeb47b12b149d598dbb84"
+          "content" : "da307e11498aebc09fc3d4cbd6f595b04dc5396a0f94a3a322048da98910f1f9b709edeb442d010972dc208d219e2f14"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "e57fcaa10af5853c2253ca4b609b3da4a325e2db78051852625d05682a7791260952b7ef932f099b9450e5052e63be63"
+          "content" : "d558badc3a1ab1ec6dbe59e5c83e846168919e594c2d00cf83a5f210790176add6da7b4204896f7d48de79b84926122a"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "df5bc520300c87308428c00a3061cdd2d662217779d93047c5a177b8dd1fd2c3"
+          "content" : "555b9ac8bb8130818ec585cb36f9db835424a67d30b87fe9d6ba9326ad093518"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "ac260151858313af97ffe85f1626a45f8dbb06db106c6b668f01d9e97ded8d2cfc7e47b76ff816834531035a63a0a4b42857a59d45830d73dc18258e05d80bd3"
+          "content" : "7e3351d98f180045313d929a75bd9fe78522346e3ec43845d88584c0cea39636cb6b827c5e9ddc992c29042dc48f4fc5fe3f8a5853f2a1f0f8b51b280a90a5a2"
         }
       ],
       "licenses" : [
@@ -10970,7 +11045,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta2@2.98.0?type=jar",
+      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta2@2.99.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -10992,45 +11067,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1@2.98.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1@2.99.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api.grpc",
       "name" : "proto-google-cloud-secretmanager-v1",
-      "version" : "2.98.0",
+      "version" : "2.99.0",
       "description" : "PROTO library for proto-google-cloud-secretmanager-v1",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "ba66955457be1e123dab917b0daba6ae"
+          "content" : "b539d2eeeddff71238a7abee78e4c2b5"
         },
         {
           "alg" : "SHA-1",
-          "content" : "12ded06b461e214446b768050b74fb593a93a2c1"
+          "content" : "a58201ec5ad9fc4f055a471f479fa224b0e9c7b1"
         },
         {
           "alg" : "SHA-256",
-          "content" : "858f9b28275a148124403e4cb5a37621d57d9765a0f978e960a66cf1258b2127"
+          "content" : "3b071981c5d1a01ce9584f65fb9899ebb5967100eee6a8d0fb18f4afc2d1ae37"
         },
         {
           "alg" : "SHA-512",
-          "content" : "87632d09b71e1920db8ba8603bd6d7f50cd24afcc8489f336fce9c9cf75d8dcbfd19cbff61d66901a9e8f76f5d3b3f27e72acd1a294935e3e0d75fd88ebfbe4f"
+          "content" : "510325ec9e8a9d6133b4472569ae93603201f5cd537d01486c4fc63c476a91bb103a4c8f5b2992787389002d53af19ddef6df1fbe33603b428dbd6d265ebcf4e"
         },
         {
           "alg" : "SHA-384",
-          "content" : "680c93ea6590690fcdadcea8f0c46a46ade8acde1c445f5643e15999e2394b82095ad55dc29436de90eefed47a4414e0"
+          "content" : "bc55fac32dea566cb374fc4326143add09333e670ad037d2e8fce87233923fa11f283b2711baf343be8f074f0704d870"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "5a07f7f0b7c20e039d84367468d928984a31be3df832f893fba60d08833159c24e12db3e3b8585a2e5e79595ff31fd04"
+          "content" : "9ebf239cef5ff83d7bcb59fba7acccde4be6077aae3107a9370426ec03d29b098a843835ff71bb096a7768eef569ca35"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "a8f1db47d32528fa8208ae9f40787cf31c863748459a5f7ae749230f2d3692f6"
+          "content" : "95e053ad752d5f59ef8e0e0eff9eec449903b5cec42b4fabf5361da0e3199a26"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "7a063e759efe4868207c7d5a648bf7d86983ecb9a77aa345da56d1c676f3b4c389e8620000c3b95eb0e69438324bf89a1222cf5abdc6a18f0b93c0fec0ee2980"
+          "content" : "b13ccfdaddaa844fc029f7c35e0fab30c0fd2dcfaf3975cd3fe9f63ce12d7221344cb7623ce50faab3a2e01600235615e83f7184b1af9e937e0a2914933044ee"
         }
       ],
       "licenses" : [
@@ -11046,7 +11121,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1@2.98.0?type=jar",
+      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1@2.99.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -11068,45 +11143,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-pubsub@1.156.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-pubsub@1.157.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.cloud",
       "name" : "google-cloud-pubsub",
-      "version" : "1.156.0",
+      "version" : "1.157.0",
       "description" : "Java idiomatic client for Google Cloud Pub/Sub",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "e9a98ca9b335b832ad8cc2b9d05d1d5a"
+          "content" : "740548d0d4e943689fe8ec72019b9c14"
         },
         {
           "alg" : "SHA-1",
-          "content" : "1f1df4cbcaae914689f30125e16c15f5be0febf1"
+          "content" : "cc740e06f9e8e864e06d5afee75342b19e395f93"
         },
         {
           "alg" : "SHA-256",
-          "content" : "5d23b59da3cded6ec2a46f51f55089dade16c8a4dc288b27df3e586432c12ea2"
+          "content" : "a8d219ce81eb1a3464f453d3efb6cf67620828bd8c73abb42a25c85e199106b5"
         },
         {
           "alg" : "SHA-512",
-          "content" : "34765426dc58c3f5db1f5f421a99cd4bebefce50e4073d011b47fde2798d98fc89a036193c8e77c8a1f4e5e4a3005e8797756ed35913f0353cc14c51b721c067"
+          "content" : "bd3751e7d0fe22ee1beed904fd7f242ab5fe487e885df510d089ddd315645b5995118ac5ff8e3fcf1ec83e965bc4ec51b732a4938a466504a624ca08c6450288"
         },
         {
           "alg" : "SHA-384",
-          "content" : "9a14b3c9816175435516060824085919ff1edc7a21765f20558f553e4c28cc01d1643cecd73274a2cb16711dba25aa47"
+          "content" : "2a5aab739f1fef773a476f32e27becb9f0cf1762b5eb9beb79d1a592ba6dba9dd8d5600b3f3a9b55b6b6e2684f2ce09a"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "aee649e27588bcee35cd64324edf028c2871e3a219adfe840fbd0ad08935684cc5c256b922c92a9f2c1bb30fe5abde93"
+          "content" : "3ad5980d306516fe36e8fd57af693f0ae42031bbefb641a3efb6579e9d0ba3ebe8aa719375fe7797e208f5e8e3896210"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "72a6306f319d122e07f2add82d24a1d288338e550cad78b3d350ec56ff129ebf"
+          "content" : "a602833040cf4539452579dc9a4652bdf4a61d905166ef40ed27dc568ff12b73"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "cdae3f63eff7b95703eaa7d86cac4c1672fa5674d40b0210c2eb31c7ee564241084a058bf3336a2f0ffb021fae2933491c2113c28a7920172175b0adb970c61b"
+          "content" : "771b9fa66ebb350f544a41aa011a92c2305487ac536afdc010921146769c61489b394a3ee497eb4686142ee195d431d1f6f2a3ab001d715c68e3f95aedc60f35"
         }
       ],
       "licenses" : [
@@ -11122,7 +11197,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.cloud/google-cloud-pubsub@1.156.0?type=jar",
+      "purl" : "pkg:maven/com.google.cloud/google-cloud-pubsub@1.157.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -11144,45 +11219,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-pubsub-v1@1.156.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-pubsub-v1@1.157.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api.grpc",
       "name" : "proto-google-cloud-pubsub-v1",
-      "version" : "1.156.0",
+      "version" : "1.157.0",
       "description" : "PROTO library for proto-google-cloud-pubsub-v1",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "eb73141cedf9e884f70ee8482cfa8059"
+          "content" : "d86e477a26ecc7aebcbcaec15712610f"
         },
         {
           "alg" : "SHA-1",
-          "content" : "328ecc2490b8c7d5246cc7fa93c00f36913f4221"
+          "content" : "4fcd472364d571adc85e1c0e503eb2525350276c"
         },
         {
           "alg" : "SHA-256",
-          "content" : "7ab1f3168e8e5d87c5711f1d68a483ac3279a82ba6ce09049fddb4134e939146"
+          "content" : "dfc31a80cf4ccb108094f8264a1ebe0bf839775831ec397a75b8d3a8cffc78be"
         },
         {
           "alg" : "SHA-512",
-          "content" : "0770a5ff26bcbd1aa938fdc0af1024dd277d5b512de7be6a147753663f9c12b823eac4125db466c8a9b3fc06290a760abafaa3fed4cfb17d88cc17c56ef4f620"
+          "content" : "baeb4edd76506c7a57b4fee5b4f471a43de55bc29cdedfeebe7a2659a146395f7f36dc51e0bc40647a64b23539e4cebba3bc6192c9695fb69bdc3f397e80c186"
         },
         {
           "alg" : "SHA-384",
-          "content" : "17481085d3c22245214ea9e5d3d5fbe3df0778ca2edd4c94d8d0d40904883a4e891c8ded8d611588bc43c8f9ed3143c4"
+          "content" : "430f562e91a36d3eb0e8a433839895003eefaeec9b3a40c8407ec157c0a7e9b3ce08742620889cea1b05497e796af9e1"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "7585665e4fb9ded6c56bbffba89b9b243d1c5a4c0af37dc4efa8a23620e11aa2c43d97849da9db72b8d410391829c4ec"
+          "content" : "896c493a9d26387b9354dc1f13652b3c0901a3bb0d504eced1ad749d4dfad7cb2a027bb6c248878bb3b8fe3666824153"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "9b10f73d3578d248a59731cfc96d21c855a7f02fe5db584e83a644e62ea07eff"
+          "content" : "cea20de8ee570cd917356bf5fde09ac57a916cbc66ae60d5dc2d01b320baad54"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "d5c1dd305767d90dded66ae8e7c01650691e4f852fc2296c0f3cea6234fb5c0dc51d7dd960e32dcab437b2c77bfbe81634c4870435af56834593339a7e4d7a7b"
+          "content" : "80cb2bd57f09f4cbdc7b69e74011dcae56cc0af54c3c40b4e6e229829392c4c5eb8b3e3f1290240c0affea78ef589689e590abaa0470830fa217471dc525c3ac"
         }
       ],
       "licenses" : [
@@ -11198,7 +11273,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-pubsub-v1@1.156.0?type=jar",
+      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-pubsub-v1@1.157.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -11292,45 +11367,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-kms@2.101.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.cloud/google-cloud-kms@2.102.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.cloud",
       "name" : "google-cloud-kms",
-      "version" : "2.101.0",
+      "version" : "2.102.0",
       "description" : "Java idiomatic client for Google Cloud KMS",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "107c3cca6b0f66253f405251a78a5be6"
+          "content" : "9cb28a5733efb5cffd82fdef40575260"
         },
         {
           "alg" : "SHA-1",
-          "content" : "161dd867596295489dc3d51b7924cdbbd36b3baf"
+          "content" : "cbe0a3707a707f09996ccd8eafcecbf71f93fb58"
         },
         {
           "alg" : "SHA-256",
-          "content" : "b7dcefff9bbbbd5a889029081e1cfec87001fdb586a1d87c088a471c9b07de83"
+          "content" : "95f8f985ce1b1f3042dbf42f02ce6b3928c906c2db5d9fc2d946a2b26d27551e"
         },
         {
           "alg" : "SHA-512",
-          "content" : "35011baa9f42802b4b16428e58e582034817ec9df2b318ab91340f5b248b720ed83726163fa376451eed7a306980e3157075b5860a4c25d8c1a258bea027c29b"
+          "content" : "5c7f0fe1d1da5d692b724561190924c67c7b19257bd5223c17b2b107089e3b66c342eea930f530ad9a33a051322e2bedb75461dc2edc4a4bddc19db05d7e56f0"
         },
         {
           "alg" : "SHA-384",
-          "content" : "3f10dcc9ea81d14a9c76018468fb1c94405b2618a9c1eacde4fcc245d7f0f73197548d5a28a49c9a8c443975a4a66560"
+          "content" : "9c55837f389cf578573ebc9c5647b84730c1adc75740e45e09608468fd2d9fef84343dbf5770293426e6fad4d7ee051d"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "1a676534c6109730e459940dc57c3c83173255ed1072bd8eb532d4ca0738f78cb9a41659e4808971e580a2830bb0bb7e"
+          "content" : "447d82acc6f4c6e55c47ab7150cb881d05e615521e4417f56ff247157298acd04f5b1185c6cb5971e9d97431e7a2019a"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "7292bc0c57e1b9f775bdb8c6d085e1a272580011e2f6a28b41a88f8c07b66d2a"
+          "content" : "f946a93b25bb6e14c46d0ebf54ad439681bb568b5f09f04c846b6ad426f8371a"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "cee782e42eec8d80ebaeb48861f1c575ec8f780c57f1b20a06cc765d4283f53125dd54c5456df096e552c0a44aa5d82a1d3b6f0bb33c0e069a6986572ed2ccc8"
+          "content" : "c95791f2ceec35578e24f32b5e8d45e60002e4d9fdec78264f60898f1664e61af448de2071a86d42af7e5543c4bf0aeff767d3e09a8931bcc639b815db5dcd50"
         }
       ],
       "licenses" : [
@@ -11346,7 +11421,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.cloud/google-cloud-kms@2.101.0?type=jar",
+      "purl" : "pkg:maven/com.google.cloud/google-cloud-kms@2.102.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -11368,45 +11443,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-kms-v1@2.101.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-kms-v1@2.102.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api.grpc",
       "name" : "proto-google-cloud-kms-v1",
-      "version" : "2.101.0",
+      "version" : "2.102.0",
       "description" : "PROTO library for proto-google-cloud-kms-v1",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "fc0f91e787c7fbf5bd543b85f8357c89"
+          "content" : "7972af8e5a5242fc3d43b64604b57555"
         },
         {
           "alg" : "SHA-1",
-          "content" : "ba207eba2e34abd43454762123a93d18519ee8c2"
+          "content" : "95d147462df550c3cd6c6d1121945c0216431b71"
         },
         {
           "alg" : "SHA-256",
-          "content" : "c0aa4e2607e45e41f02bc12369b0b53c9cb72e9d53172260289d8940b324327e"
+          "content" : "fa01fec151d1b6203703c00bad3b4868c8b47b187c69088a859c0815714e6b08"
         },
         {
           "alg" : "SHA-512",
-          "content" : "6f1124faf110b2dfbb973335e613d422ae0a90fef6c64b0f3eba3315059bffff7cf9039d064d1b0a9d5cb79577b5d0618490cc7f4f771355145ed0710e297fc7"
+          "content" : "ff20397bef9ea34c15386da884652645e2740ff14520bed3ff7eee32564c74044ae3d273f3efd596424cdb3232b264799c985fca7b6185b5e458a172ca3bd450"
         },
         {
           "alg" : "SHA-384",
-          "content" : "0800917198d55a5a335f2ee053b3135b511ad2994519b7cb84fbc2df68cf5cf923792a03a7be18a8075f94c3fe7e6639"
+          "content" : "0524062b0b6ba44f88572da6524108b962da59321562900e9973dbd163b0a77f7005bd87859694752c59f30d3b2811f8"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "6b1608c0abffe1836e068e621cb18f0076cd6cf9d2657adafaebb528d21952cc0e9cafff98994c0d005d9f24f432ba5e"
+          "content" : "ef9bfaed9e87fb498e3f56cc3732c8f53f412b228aefa284540570a26c9a793895f2fe51d2279ba7e9fdc4971414c17b"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "ec35a1080597a97a667ac8c63caaa89be1021293c5d083b6c9298e07404a504a"
+          "content" : "e1c2d4fecacd834d53471ed13de616c44642cfbbadcb6aa9e4308f6007b8fced"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "df1f59cdcc9626f0181189e9da89e607716667537cfc3c4ced20f1fbc838f808bba974a3c48f5bb7a6e377dff30652eb00023c14df3a405382b2f4006c871568"
+          "content" : "7b72fba1fe8389fe3a4be1284c860a5f6d391fd2ae832440e18df73ea03b2cad940d6e43612d75ac1fe1bec4a82445de66406fdd389a55b965df12f5d608c02f"
         }
       ],
       "licenses" : [
@@ -11422,7 +11497,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-kms-v1@2.101.0?type=jar",
+      "purl" : "pkg:maven/com.google.api.grpc/proto-google-cloud-kms-v1@2.102.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -11444,44 +11519,44 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j-google-genai@1.16.0-beta26?type=jar",
+      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j-google-genai@1.22.0-beta32?type=jar",
       "group" : "dev.langchain4j",
       "name" : "langchain4j-google-genai",
-      "version" : "1.16.0-beta26",
+      "version" : "1.22.0-beta32",
       "description" : "LangChain4j :: Integration :: Google GenAI",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "44b7482276b16ea5dae5d2e7ed013d8f"
+          "content" : "dbe7cb8311e243082af5614d469b1f2e"
         },
         {
           "alg" : "SHA-1",
-          "content" : "036786d0c16cbe3a6d00be3917515e0a3654054f"
+          "content" : "284a493612cf5fb204db7e3eb77de48f98bb6d37"
         },
         {
           "alg" : "SHA-256",
-          "content" : "1d024abacda592590bec81c061dbbc70505922d855f2706cafbe237bcb827229"
+          "content" : "e656b14af024b2549f5ab28d8f665eef81b0f82597f61f94b5d252434605782f"
         },
         {
           "alg" : "SHA-512",
-          "content" : "4ec287b517e06d9e6a540fcf28a332135a45267bf467a33320db3a1ddd9631d8cc734eb7a4f8d90f8c98ff94750611e729ca2d17229015d94edaea6d9bab92a0"
+          "content" : "ca5114999b1432ee120bf43edf6674c78b9b5dbf87e05a2b532487f1ee9cd772f840f92fa2c831032d63136a4708a27550bdb6eb2fc2cc84a40563c2df3d2b4b"
         },
         {
           "alg" : "SHA-384",
-          "content" : "96914a10198bb2f022bb6a146516d5af0921cdf9d495f195e591886b2a631c182ff3670bb1fb7740d2ae4ab396fcf371"
+          "content" : "35f9e132da373ec16220d02dd4e95b9791504ac3a1a5483b271c1299181bf4c1bedaf395e00a6a2121256df2be48c0ca"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "48590ba8c192452a030d5c8f1e15de66e7fe2e06ced1ed6a256cca8cd6b7c4710cfb27cc58a5edc709ac00b5cf14eafd"
+          "content" : "11549eea9f0039efeaa59f1314785f61cd9add99e81487a89d37af133c826281b1cf079b3cac92519e7a870ae86fba6b"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "4079fb93f074d1a12d9805f730d577952e16b5fdf51c4ad7bc86424a3465ca8d"
+          "content" : "f405af4dbd5acf0dd672ffdb07aacb5ba4002e0c6daf563dd47c41d0da764b6b"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "3991588d85fc1597a7edeb84c6c54f5187b0532b15bd4a1f7297591327ca146e8c0243767a7f4b2840b94b7edee0bbcdacadd9b96433de5e4a56816c8d645fca"
+          "content" : "ed6d6b4f00d54da106cd2b8f539b44c6fe2e176841564e648cfc9550f02d72dcc8e578d3f0e43e89fe2629035a7abe8c191d6ae305098345e49b8fca3d866f61"
         }
       ],
       "licenses" : [
@@ -11496,7 +11571,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/dev.langchain4j/langchain4j-google-genai@1.16.0-beta26?type=jar",
+      "purl" : "pkg:maven/dev.langchain4j/langchain4j-google-genai@1.22.0-beta32?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -11510,45 +11585,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.genai/google-genai@1.57.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.genai/google-genai@1.71.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.genai",
       "name" : "google-genai",
-      "version" : "1.57.0",
+      "version" : "1.71.0",
       "description" : "Java idiomatic SDK for the Gemini Developer APIs and Vertex AI APIs.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "53f79a71671b50132a7875e972cfdf98"
+          "content" : "af291ba73c5e336719af2a05c8a86351"
         },
         {
           "alg" : "SHA-1",
-          "content" : "92499748896578afd5f130f2c2812d92a28ed3a4"
+          "content" : "d4856d7297253ec57f6c35df8578f7c38f2701dc"
         },
         {
           "alg" : "SHA-256",
-          "content" : "48877e2af91143fe6681d477cefab9e45f209b0c76f9aa389632ffeb7755d6d6"
+          "content" : "a7f4188ae174fd1988728eae556a791eb71bde1e81faab1b6fbdae518e17cbad"
         },
         {
           "alg" : "SHA-512",
-          "content" : "9a76d851854d0f8b4bf922b8d1e4dd9786c84fae7a6af535e9cd821c6fe77c3bdddbc476ac48c436d87d537b0e3a5648aa81372a8b9ab1eb8cfc9d9b03d114f3"
+          "content" : "819b6f2851fb6a979bf40d5859c16a849ac5032b6ae86ffa08fec62c4b79a178f0c3015dba9bb00df2e76cceae79c03eb8cba4ee06d432c14a8cb5371bf41afe"
         },
         {
           "alg" : "SHA-384",
-          "content" : "eeb0ac6a2b0060616c234e015be5c2e5cd1296e5fd6229436041952262f1e6b65205f138b93efb27d3828beffcbdb5d8"
+          "content" : "28bf79953d25270bb69058b5c961e4339df1ca8505b5aeb86b88a7980c16b0d1263b0679a59ce0e6d90537aefa790cb0"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "5bc6083bcd53570f22650d3b72582672bf85570ac044ea2d252d453984ddfafde6e4509571ff8c0d5919d78e2c709a32"
+          "content" : "d23a78870dc33fe2ea4a51b84966c4f36402235ca5e2606d148a01af34598b74b8f9cae50ef6b528a508d22021c5e127"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "c0281ed32327f8eb0e256060e4c71e0aac3ad3e4e2c973c23652f8f3cc1827fd"
+          "content" : "290a4a5a81ef801505fdd9a17a8e36fcf36baf697df1360c55b614e6591e9ad9"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "d0e4a39573e2174642a7bb9ea2aa84acb3e966632d3ab9bb0a772c07a4a379826fad7236cf8ed1d6795fc54c5a82d6f5fdd294410f25b82d9494934d27d92bc1"
+          "content" : "77f379cefd21870b973e67bf896440b66da27b21b290950eb553f5e7f43ea079288a9006196ae54b51516d3c675d68dfbab2123d2541f808511025a08a0ad737"
         }
       ],
       "licenses" : [
@@ -11563,7 +11638,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.genai/google-genai@1.57.0?type=jar",
+      "purl" : "pkg:maven/com.google.genai/google-genai@1.71.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -11576,81 +11651,6 @@
         {
           "type" : "issue-tracker",
           "url" : "https://github.com/googleapis/java-shared-config/issues"
-        }
-      ]
-    },
-    {
-      "type" : "library",
-      "bom-ref" : "pkg:maven/org.java-websocket/Java-WebSocket@1.6.0?type=jar",
-      "group" : "org.java-websocket",
-      "name" : "Java-WebSocket",
-      "version" : "1.6.0",
-      "description" : "A barebones WebSocket client and server implementation written 100% in Java",
-      "scope" : "required",
-      "hashes" : [
-        {
-          "alg" : "MD5",
-          "content" : "2e6a31808c31c8f55483b3f21f8fd8a7"
-        },
-        {
-          "alg" : "SHA-1",
-          "content" : "52d7f6dc1b06607d4d12e438c840c25f1a0bb854"
-        },
-        {
-          "alg" : "SHA-256",
-          "content" : "eae29213e4f16515639c28957200f011b3967fffcada1962cf0255d24919c22f"
-        },
-        {
-          "alg" : "SHA-512",
-          "content" : "03a21b3e1f63e7f4d35db7eb5de6f5f25d03fa82b4d3bf4ddf78ddc4a665b83c772f3f4519c38aa92bb81551feb3fe04287ee0a7590dffec1f125b06520a0fc4"
-        },
-        {
-          "alg" : "SHA-384",
-          "content" : "249354cf1a6addb9cd67d657fad6bdb1f56aac8f5002a7235a11847d0468143f8989481e98b7d633977bcbfe7ea222c8"
-        },
-        {
-          "alg" : "SHA3-384",
-          "content" : "2245fd4b465b3ddda25be56c68045c68304fcee295bb1fd58f1b87d5db11a655ee59dbcd5b6df260bfffc5562c6ec0f9"
-        },
-        {
-          "alg" : "SHA3-256",
-          "content" : "aa1065eebe08dc99a4fabade99535843eb799285e376539f3846170926123790"
-        },
-        {
-          "alg" : "SHA3-512",
-          "content" : "f749f1efe583f03bcaf2840b27fdc4bf10335549343521d9f5cdd32542061cc7687cab34ea773b3017676097c297d626c14f2457388879ccd9360388c182fea5"
-        }
-      ],
-      "licenses" : [
-        {
-          "license" : {
-            "id" : "MIT",
-            "text" : {
-              "contentType" : "plain/text",
-              "encoding" : "base64",
-              "content" : "TUlUIExpY2Vuc2UKCkNvcHlyaWdodCAoYykgPHllYXI+IDxjb3B5cmlnaHQgaG9sZGVycz4KClBlcm1pc3Npb24gaXMgaGVyZWJ5IGdyYW50ZWQsIGZyZWUgb2YgY2hhcmdlLCB0byBhbnkgcGVyc29uIG9idGFpbmluZyBhIGNvcHkgb2YgdGhpcyBzb2Z0d2FyZSBhbmQgYXNzb2NpYXRlZCBkb2N1bWVudGF0aW9uIGZpbGVzICh0aGUgIlNvZnR3YXJlIiksIHRvIGRlYWwgaW4gdGhlIFNvZnR3YXJlIHdpdGhvdXQgcmVzdHJpY3Rpb24sIGluY2x1ZGluZyB3aXRob3V0IGxpbWl0YXRpb24gdGhlIHJpZ2h0cyB0byB1c2UsIGNvcHksIG1vZGlmeSwgbWVyZ2UsIHB1Ymxpc2gsIGRpc3RyaWJ1dGUsIHN1YmxpY2Vuc2UsIGFuZC9vciBzZWxsIGNvcGllcyBvZiB0aGUgU29mdHdhcmUsIGFuZCB0byBwZXJtaXQgcGVyc29ucyB0byB3aG9tIHRoZSBTb2Z0d2FyZSBpcyBmdXJuaXNoZWQgdG8gZG8gc28sIHN1YmplY3QgdG8gdGhlIGZvbGxvd2luZyBjb25kaXRpb25zOgoKVGhlIGFib3ZlIGNvcHlyaWdodCBub3RpY2UgYW5kIHRoaXMgcGVybWlzc2lvbiBub3RpY2Ugc2hhbGwgYmUgaW5jbHVkZWQgaW4gYWxsIGNvcGllcyBvciBzdWJzdGFudGlhbCBwb3J0aW9ucyBvZiB0aGUgU29mdHdhcmUuCgpUSEUgU09GVFdBUkUgSVMgUFJPVklERUQgIkFTIElTIiwgV0lUSE9VVCBXQVJSQU5UWSBPRiBBTlkgS0lORCwgRVhQUkVTUyBPUiBJTVBMSUVELCBJTkNMVURJTkcgQlVUIE5PVCBMSU1JVEVEIFRPIFRIRSBXQVJSQU5USUVTIE9GIE1FUkNIQU5UQUJJTElUWSwgRklUTkVTUyBGT1IgQSBQQVJUSUNVTEFSIFBVUlBPU0UgQU5EIE5PTklORlJJTkdFTUVOVC4gSU4gTk8gRVZFTlQgU0hBTEwgVEhFIEFVVEhPUlMgT1IgQ09QWVJJR0hUIEhPTERFUlMgQkUgTElBQkxFIEZPUiBBTlkgQ0xBSU0sIERBTUFHRVMgT1IgT1RIRVIgTElBQklMSVRZLCBXSEVUSEVSIElOIEFOIEFDVElPTiBPRiBDT05UUkFDVCwgVE9SVCBPUiBPVEhFUldJU0UsIEFSSVNJTkcgRlJPTSwgT1VUIE9GIE9SIElOIENPTk5FQ1RJT04gV0lUSCBUSEUgU09GVFdBUkUgT1IgVEhFIFVTRSBPUiBPVEhFUiBERUFMSU5HUyBJTiBUSEUgU09GVFdBUkUuCg=="
-            },
-            "url" : "https://opensource.org/license/mit/"
-          }
-        }
-      ],
-      "purl" : "pkg:maven/org.java-websocket/Java-WebSocket@1.6.0?type=jar",
-      "externalReferences" : [
-        {
-          "type" : "website",
-          "url" : "https://github.com/TooTallNate/Java-WebSocket"
-        },
-        {
-          "type" : "distribution-intake",
-          "url" : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-        },
-        {
-          "type" : "issue-tracker",
-          "url" : "https://github.com/TooTallNate/Java-WebSocket/issues"
-        },
-        {
-          "type" : "vcs",
-          "url" : "https://github.com/TooTallNate/Java-WebSocket"
         }
       ]
     },
@@ -11920,44 +11920,133 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j-core@1.16.0?type=jar",
+      "bom-ref" : "pkg:maven/jakarta.annotation/jakarta.annotation-api@2.1.1?type=jar",
+      "publisher" : "Eclipse Foundation",
+      "group" : "jakarta.annotation",
+      "name" : "jakarta.annotation-api",
+      "version" : "2.1.1",
+      "description" : "Jakarta Annotations API",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "5dac2f68e8288d0add4dc92cb161711d"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "48b9bda22b091b1f48b13af03fe36db3be6e1ae3"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "5f65fdaf424eee2b55e1d882ba9bb376be93fb09b37b808be6e22e8851c909fe"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "eabe8b855b735663684052ec4cc357cc737936fa57cebf144eb09f70b3b6c600db7fa6f1c93a4f36c5994b1b37dad2dfcec87a41448872e69552accfd7f52af6"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "798597a6b80b423844d70609c54b00d725a357031888da7e5c3efd3914d1770be69aa7135de13ddb89a4420a5550e35b"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "9629b8ca82f61674f5573723bbb3c137060e1442062eb52fa9c90fc8f57ea7d836eb2fb765d160ec8bf300bcb6b820be"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "f71ffc2a2c2bd1a00dfc00c4be67dbe5f374078bd50d5b24c0b29fbcc6634ecb"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "aa4e29025a55878db6edb0d984bd3a0633f3af03fa69e1d26c97c87c6d29339714003c96e29ff0a977132ce9c2729d0e27e36e9e245a7488266138239bdba15e"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "EPL-2.0",
+            "text" : {
+              "contentType" : "plain/text",
+              "encoding" : "base64",
+              "content" : "RWNsaXBzZSBQdWJsaWMgTGljZW5zZSAtIHYgMi4wClRIRSBBQ0NPTVBBTllJTkcgUFJPR1JBTSBJUyBQUk9WSURFRCBVTkRFUiBUSEUgVEVSTVMgT0YgVEhJUyBFQ0xJUFNFIFBVQkxJQyBMSUNFTlNFICjigJxBR1JFRU1FTlTigJ0pLiBBTlkgVVNFLCBSRVBST0RVQ1RJT04gT1IgRElTVFJJQlVUSU9OIE9GIFRIRSBQUk9HUkFNIENPTlNUSVRVVEVTIFJFQ0lQSUVOVCdTIEFDQ0VQVEFOQ0UgT0YgVEhJUyBBR1JFRU1FTlQuCgoxLiBERUZJTklUSU9OUwrigJxDb250cmlidXRpb27igJ0gbWVhbnM6CgphKSBpbiB0aGUgY2FzZSBvZiB0aGUgaW5pdGlhbCBDb250cmlidXRvciwgdGhlIGluaXRpYWwgY29udGVudCBEaXN0cmlidXRlZCB1bmRlciB0aGlzIEFncmVlbWVudCwgYW5kCmIpIGluIHRoZSBjYXNlIG9mIGVhY2ggc3Vic2VxdWVudCBDb250cmlidXRvcjoKaSkgY2hhbmdlcyB0byB0aGUgUHJvZ3JhbSwgYW5kCmlpKSBhZGRpdGlvbnMgdG8gdGhlIFByb2dyYW07CndoZXJlIHN1Y2ggY2hhbmdlcyBhbmQvb3IgYWRkaXRpb25zIHRvIHRoZSBQcm9ncmFtIG9yaWdpbmF0ZSBmcm9tIGFuZCBhcmUgRGlzdHJpYnV0ZWQgYnkgdGhhdCBwYXJ0aWN1bGFyIENvbnRyaWJ1dG9yLiBBIENvbnRyaWJ1dGlvbiDigJxvcmlnaW5hdGVz4oCdIGZyb20gYSBDb250cmlidXRvciBpZiBpdCB3YXMgYWRkZWQgdG8gdGhlIFByb2dyYW0gYnkgc3VjaCBDb250cmlidXRvciBpdHNlbGYgb3IgYW55b25lIGFjdGluZyBvbiBzdWNoIENvbnRyaWJ1dG9yJ3MgYmVoYWxmLiBDb250cmlidXRpb25zIGRvIG5vdCBpbmNsdWRlIGNoYW5nZXMgb3IgYWRkaXRpb25zIHRvIHRoZSBQcm9ncmFtIHRoYXQgYXJlIG5vdCBNb2RpZmllZCBXb3Jrcy4K4oCcQ29udHJpYnV0b3LigJ0gbWVhbnMgYW55IHBlcnNvbiBvciBlbnRpdHkgdGhhdCBEaXN0cmlidXRlcyB0aGUgUHJvZ3JhbS4KCuKAnExpY2Vuc2VkIFBhdGVudHPigJ0gbWVhbiBwYXRlbnQgY2xhaW1zIGxpY2Vuc2FibGUgYnkgYSBDb250cmlidXRvciB3aGljaCBhcmUgbmVjZXNzYXJpbHkgaW5mcmluZ2VkIGJ5IHRoZSB1c2Ugb3Igc2FsZSBvZiBpdHMgQ29udHJpYnV0aW9uIGFsb25lIG9yIHdoZW4gY29tYmluZWQgd2l0aCB0aGUgUHJvZ3JhbS4KCuKAnFByb2dyYW3igJ0gbWVhbnMgdGhlIENvbnRyaWJ1dGlvbnMgRGlzdHJpYnV0ZWQgaW4gYWNjb3JkYW5jZSB3aXRoIHRoaXMgQWdyZWVtZW50LgoK4oCcUmVjaXBpZW504oCdIG1lYW5zIGFueW9uZSB3aG8gcmVjZWl2ZXMgdGhlIFByb2dyYW0gdW5kZXIgdGhpcyBBZ3JlZW1lbnQgb3IgYW55IFNlY29uZGFyeSBMaWNlbnNlIChhcyBhcHBsaWNhYmxlKSwgaW5jbHVkaW5nIENvbnRyaWJ1dG9ycy4KCuKAnERlcml2YXRpdmUgV29ya3PigJ0gc2hhbGwgbWVhbiBhbnkgd29yaywgd2hldGhlciBpbiBTb3VyY2UgQ29kZSBvciBvdGhlciBmb3JtLCB0aGF0IGlzIGJhc2VkIG9uIChvciBkZXJpdmVkIGZyb20pIHRoZSBQcm9ncmFtIGFuZCBmb3Igd2hpY2ggdGhlIGVkaXRvcmlhbCByZXZpc2lvbnMsIGFubm90YXRpb25zLCBlbGFib3JhdGlvbnMsIG9yIG90aGVyIG1vZGlmaWNhdGlvbnMgcmVwcmVzZW50LCBhcyBhIHdob2xlLCBhbiBvcmlnaW5hbCB3b3JrIG9mIGF1dGhvcnNoaXAuCgrigJxNb2RpZmllZCBXb3Jrc+KAnSBzaGFsbCBtZWFuIGFueSB3b3JrIGluIFNvdXJjZSBDb2RlIG9yIG90aGVyIGZvcm0gdGhhdCByZXN1bHRzIGZyb20gYW4gYWRkaXRpb24gdG8sIGRlbGV0aW9uIGZyb20sIG9yIG1vZGlmaWNhdGlvbiBvZiB0aGUgY29udGVudHMgb2YgdGhlIFByb2dyYW0sIGluY2x1ZGluZywgZm9yIHB1cnBvc2VzIG9mIGNsYXJpdHkgYW55IG5ldyBmaWxlIGluIFNvdXJjZSBDb2RlIGZvcm0gdGhhdCBjb250YWlucyBhbnkgY29udGVudHMgb2YgdGhlIFByb2dyYW0uIE1vZGlmaWVkIFdvcmtzIHNoYWxsIG5vdCBpbmNsdWRlIHdvcmtzIHRoYXQgY29udGFpbiBvbmx5IGRlY2xhcmF0aW9ucywgaW50ZXJmYWNlcywgdHlwZXMsIGNsYXNzZXMsIHN0cnVjdHVyZXMsIG9yIGZpbGVzIG9mIHRoZSBQcm9ncmFtIHNvbGVseSBpbiBlYWNoIGNhc2UgaW4gb3JkZXIgdG8gbGluayB0bywgYmluZCBieSBuYW1lLCBvciBzdWJjbGFzcyB0aGUgUHJvZ3JhbSBvciBNb2RpZmllZCBXb3JrcyB0aGVyZW9mLgoK4oCcRGlzdHJpYnV0ZeKAnSBtZWFucyB0aGUgYWN0cyBvZiBhKSBkaXN0cmlidXRpbmcgb3IgYikgbWFraW5nIGF2YWlsYWJsZSBpbiBhbnkgbWFubmVyIHRoYXQgZW5hYmxlcyB0aGUgdHJhbnNmZXIgb2YgYSBjb3B5LgoK4oCcU291cmNlIENvZGXigJ0gbWVhbnMgdGhlIGZvcm0gb2YgYSBQcm9ncmFtIHByZWZlcnJlZCBmb3IgbWFraW5nIG1vZGlmaWNhdGlvbnMsIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gc29mdHdhcmUgc291cmNlIGNvZGUsIGRvY3VtZW50YXRpb24gc291cmNlLCBhbmQgY29uZmlndXJhdGlvbiBmaWxlcy4KCuKAnFNlY29uZGFyeSBMaWNlbnNl4oCdIG1lYW5zIGVpdGhlciB0aGUgR05VIEdlbmVyYWwgUHVibGljIExpY2Vuc2UsIFZlcnNpb24gMi4wLCBvciBhbnkgbGF0ZXIgdmVyc2lvbnMgb2YgdGhhdCBsaWNlbnNlLCBpbmNsdWRpbmcgYW55IGV4Y2VwdGlvbnMgb3IgYWRkaXRpb25hbCBwZXJtaXNzaW9ucyBhcyBpZGVudGlmaWVkIGJ5IHRoZSBpbml0aWFsIENvbnRyaWJ1dG9yLgoKMi4gR1JBTlQgT0YgUklHSFRTCmEpIFN1YmplY3QgdG8gdGhlIHRlcm1zIG9mIHRoaXMgQWdyZWVtZW50LCBlYWNoIENvbnRyaWJ1dG9yIGhlcmVieSBncmFudHMgUmVjaXBpZW50IGEgbm9uLWV4Y2x1c2l2ZSwgd29ybGR3aWRlLCByb3lhbHR5LWZyZWUgY29weXJpZ2h0IGxpY2Vuc2UgdG8gcmVwcm9kdWNlLCBwcmVwYXJlIERlcml2YXRpdmUgV29ya3Mgb2YsIHB1YmxpY2x5IGRpc3BsYXksIHB1YmxpY2x5IHBlcmZvcm0sIERpc3RyaWJ1dGUgYW5kIHN1YmxpY2Vuc2UgdGhlIENvbnRyaWJ1dGlvbiBvZiBzdWNoIENvbnRyaWJ1dG9yLCBpZiBhbnksIGFuZCBzdWNoIERlcml2YXRpdmUgV29ya3MuCmIpIFN1YmplY3QgdG8gdGhlIHRlcm1zIG9mIHRoaXMgQWdyZWVtZW50LCBlYWNoIENvbnRyaWJ1dG9yIGhlcmVieSBncmFudHMgUmVjaXBpZW50IGEgbm9uLWV4Y2x1c2l2ZSwgd29ybGR3aWRlLCByb3lhbHR5LWZyZWUgcGF0ZW50IGxpY2Vuc2UgdW5kZXIgTGljZW5zZWQgUGF0ZW50cyB0byBtYWtlLCB1c2UsIHNlbGwsIG9mZmVyIHRvIHNlbGwsIGltcG9ydCBhbmQgb3RoZXJ3aXNlIHRyYW5zZmVyIHRoZSBDb250cmlidXRpb24gb2Ygc3VjaCBDb250cmlidXRvciwgaWYgYW55LCBpbiBTb3VyY2UgQ29kZSBvciBvdGhlciBmb3JtLiBUaGlzIHBhdGVudCBsaWNlbnNlIHNoYWxsIGFwcGx5IHRvIHRoZSBjb21iaW5hdGlvbiBvZiB0aGUgQ29udHJpYnV0aW9uIGFuZCB0aGUgUHJvZ3JhbSBpZiwgYXQgdGhlIHRpbWUgdGhlIENvbnRyaWJ1dGlvbiBpcyBhZGRlZCBieSB0aGUgQ29udHJpYnV0b3IsIHN1Y2ggYWRkaXRpb24gb2YgdGhlIENvbnRyaWJ1dGlvbiBjYXVzZXMgc3VjaCBjb21iaW5hdGlvbiB0byBiZSBjb3ZlcmVkIGJ5IHRoZSBMaWNlbnNlZCBQYXRlbnRzLiBUaGUgcGF0ZW50IGxpY2Vuc2Ugc2hhbGwgbm90IGFwcGx5IHRvIGFueSBvdGhlciBjb21iaW5hdGlvbnMgd2hpY2ggaW5jbHVkZSB0aGUgQ29udHJpYnV0aW9uLiBObyBoYXJkd2FyZSBwZXIgc2UgaXMgbGljZW5zZWQgaGVyZXVuZGVyLgpjKSBSZWNpcGllbnQgdW5kZXJzdGFuZHMgdGhhdCBhbHRob3VnaCBlYWNoIENvbnRyaWJ1dG9yIGdyYW50cyB0aGUgbGljZW5zZXMgdG8gaXRzIENvbnRyaWJ1dGlvbnMgc2V0IGZvcnRoIGhlcmVpbiwgbm8gYXNzdXJhbmNlcyBhcmUgcHJvdmlkZWQgYnkgYW55IENvbnRyaWJ1dG9yIHRoYXQgdGhlIFByb2dyYW0gZG9lcyBub3QgaW5mcmluZ2UgdGhlIHBhdGVudCBvciBvdGhlciBpbnRlbGxlY3R1YWwgcHJvcGVydHkgcmlnaHRzIG9mIGFueSBvdGhlciBlbnRpdHkuIEVhY2ggQ29udHJpYnV0b3IgZGlzY2xhaW1zIGFueSBsaWFiaWxpdHkgdG8gUmVjaXBpZW50IGZvciBjbGFpbXMgYnJvdWdodCBieSBhbnkgb3RoZXIgZW50aXR5IGJhc2VkIG9uIGluZnJpbmdlbWVudCBvZiBpbnRlbGxlY3R1YWwgcHJvcGVydHkgcmlnaHRzIG9yIG90aGVyd2lzZS4gQXMgYSBjb25kaXRpb24gdG8gZXhlcmNpc2luZyB0aGUgcmlnaHRzIGFuZCBsaWNlbnNlcyBncmFudGVkIGhlcmV1bmRlciwgZWFjaCBSZWNpcGllbnQgaGVyZWJ5IGFzc3VtZXMgc29sZSByZXNwb25zaWJpbGl0eSB0byBzZWN1cmUgYW55IG90aGVyIGludGVsbGVjdHVhbCBwcm9wZXJ0eSByaWdodHMgbmVlZGVkLCBpZiBhbnkuIEZvciBleGFtcGxlLCBpZiBhIHRoaXJkIHBhcnR5IHBhdGVudCBsaWNlbnNlIGlzIHJlcXVpcmVkIHRvIGFsbG93IFJlY2lwaWVudCB0byBEaXN0cmlidXRlIHRoZSBQcm9ncmFtLCBpdCBpcyBSZWNpcGllbnQncyByZXNwb25zaWJpbGl0eSB0byBhY3F1aXJlIHRoYXQgbGljZW5zZSBiZWZvcmUgZGlzdHJpYnV0aW5nIHRoZSBQcm9ncmFtLgpkKSBFYWNoIENvbnRyaWJ1dG9yIHJlcHJlc2VudHMgdGhhdCB0byBpdHMga25vd2xlZGdlIGl0IGhhcyBzdWZmaWNpZW50IGNvcHlyaWdodCByaWdodHMgaW4gaXRzIENvbnRyaWJ1dGlvbiwgaWYgYW55LCB0byBncmFudCB0aGUgY29weXJpZ2h0IGxpY2Vuc2Ugc2V0IGZvcnRoIGluIHRoaXMgQWdyZWVtZW50LgplKSBOb3R3aXRoc3RhbmRpbmcgdGhlIHRlcm1zIG9mIGFueSBTZWNvbmRhcnkgTGljZW5zZSwgbm8gQ29udHJpYnV0b3IgbWFrZXMgYWRkaXRpb25hbCBncmFudHMgdG8gYW55IFJlY2lwaWVudCAob3RoZXIgdGhhbiB0aG9zZSBzZXQgZm9ydGggaW4gdGhpcyBBZ3JlZW1lbnQpIGFzIGEgcmVzdWx0IG9mIHN1Y2ggUmVjaXBpZW50J3MgcmVjZWlwdCBvZiB0aGUgUHJvZ3JhbSB1bmRlciB0aGUgdGVybXMgb2YgYSBTZWNvbmRhcnkgTGljZW5zZSAoaWYgcGVybWl0dGVkIHVuZGVyIHRoZSB0ZXJtcyBvZiBTZWN0aW9uIDMpLgozLiBSRVFVSVJFTUVOVFMKMy4xIElmIGEgQ29udHJpYnV0b3IgRGlzdHJpYnV0ZXMgdGhlIFByb2dyYW0gaW4gYW55IGZvcm0sIHRoZW46CgphKSB0aGUgUHJvZ3JhbSBtdXN0IGFsc28gYmUgbWFkZSBhdmFpbGFibGUgYXMgU291cmNlIENvZGUsIGluIGFjY29yZGFuY2Ugd2l0aCBzZWN0aW9uIDMuMiwgYW5kIHRoZSBDb250cmlidXRvciBtdXN0IGFjY29tcGFueSB0aGUgUHJvZ3JhbSB3aXRoIGEgc3RhdGVtZW50IHRoYXQgdGhlIFNvdXJjZSBDb2RlIGZvciB0aGUgUHJvZ3JhbSBpcyBhdmFpbGFibGUgdW5kZXIgdGhpcyBBZ3JlZW1lbnQsIGFuZCBpbmZvcm1zIFJlY2lwaWVudHMgaG93IHRvIG9idGFpbiBpdCBpbiBhIHJlYXNvbmFibGUgbWFubmVyIG9uIG9yIHRocm91Z2ggYSBtZWRpdW0gY3VzdG9tYXJpbHkgdXNlZCBmb3Igc29mdHdhcmUgZXhjaGFuZ2U7IGFuZApiKSB0aGUgQ29udHJpYnV0b3IgbWF5IERpc3RyaWJ1dGUgdGhlIFByb2dyYW0gdW5kZXIgYSBsaWNlbnNlIGRpZmZlcmVudCB0aGFuIHRoaXMgQWdyZWVtZW50LCBwcm92aWRlZCB0aGF0IHN1Y2ggbGljZW5zZToKaSkgZWZmZWN0aXZlbHkgZGlzY2xhaW1zIG9uIGJlaGFsZiBvZiBhbGwgb3RoZXIgQ29udHJpYnV0b3JzIGFsbCB3YXJyYW50aWVzIGFuZCBjb25kaXRpb25zLCBleHByZXNzIGFuZCBpbXBsaWVkLCBpbmNsdWRpbmcgd2FycmFudGllcyBvciBjb25kaXRpb25zIG9mIHRpdGxlIGFuZCBub24taW5mcmluZ2VtZW50LCBhbmQgaW1wbGllZCB3YXJyYW50aWVzIG9yIGNvbmRpdGlvbnMgb2YgbWVyY2hhbnRhYmlsaXR5IGFuZCBmaXRuZXNzIGZvciBhIHBhcnRpY3VsYXIgcHVycG9zZTsKaWkpIGVmZmVjdGl2ZWx5IGV4Y2x1ZGVzIG9uIGJlaGFsZiBvZiBhbGwgb3RoZXIgQ29udHJpYnV0b3JzIGFsbCBsaWFiaWxpdHkgZm9yIGRhbWFnZXMsIGluY2x1ZGluZyBkaXJlY3QsIGluZGlyZWN0LCBzcGVjaWFsLCBpbmNpZGVudGFsIGFuZCBjb25zZXF1ZW50aWFsIGRhbWFnZXMsIHN1Y2ggYXMgbG9zdCBwcm9maXRzOwppaWkpIGRvZXMgbm90IGF0dGVtcHQgdG8gbGltaXQgb3IgYWx0ZXIgdGhlIHJlY2lwaWVudHMnIHJpZ2h0cyBpbiB0aGUgU291cmNlIENvZGUgdW5kZXIgc2VjdGlvbiAzLjI7IGFuZAppdikgcmVxdWlyZXMgYW55IHN1YnNlcXVlbnQgZGlzdHJpYnV0aW9uIG9mIHRoZSBQcm9ncmFtIGJ5IGFueSBwYXJ0eSB0byBiZSB1bmRlciBhIGxpY2Vuc2UgdGhhdCBzYXRpc2ZpZXMgdGhlIHJlcXVpcmVtZW50cyBvZiB0aGlzIHNlY3Rpb24gMy4KMy4yIFdoZW4gdGhlIFByb2dyYW0gaXMgRGlzdHJpYnV0ZWQgYXMgU291cmNlIENvZGU6CgphKSBpdCBtdXN0IGJlIG1hZGUgYXZhaWxhYmxlIHVuZGVyIHRoaXMgQWdyZWVtZW50LCBvciBpZiB0aGUgUHJvZ3JhbSAoaSkgaXMgY29tYmluZWQgd2l0aCBvdGhlciBtYXRlcmlhbCBpbiBhIHNlcGFyYXRlIGZpbGUgb3IgZmlsZXMgbWFkZSBhdmFpbGFibGUgdW5kZXIgYSBTZWNvbmRhcnkgTGljZW5zZSwgYW5kIChpaSkgdGhlIGluaXRpYWwgQ29udHJpYnV0b3IgYXR0YWNoZWQgdG8gdGhlIFNvdXJjZSBDb2RlIHRoZSBub3RpY2UgZGVzY3JpYmVkIGluIEV4aGliaXQgQSBvZiB0aGlzIEFncmVlbWVudCwgdGhlbiB0aGUgUHJvZ3JhbSBtYXkgYmUgbWFkZSBhdmFpbGFibGUgdW5kZXIgdGhlIHRlcm1zIG9mIHN1Y2ggU2Vjb25kYXJ5IExpY2Vuc2VzLCBhbmQKYikgYSBjb3B5IG9mIHRoaXMgQWdyZWVtZW50IG11c3QgYmUgaW5jbHVkZWQgd2l0aCBlYWNoIGNvcHkgb2YgdGhlIFByb2dyYW0uCjMuMyBDb250cmlidXRvcnMgbWF5IG5vdCByZW1vdmUgb3IgYWx0ZXIgYW55IGNvcHlyaWdodCwgcGF0ZW50LCB0cmFkZW1hcmssIGF0dHJpYnV0aW9uIG5vdGljZXMsIGRpc2NsYWltZXJzIG9mIHdhcnJhbnR5LCBvciBsaW1pdGF0aW9ucyBvZiBsaWFiaWxpdHkgKOKAmG5vdGljZXPigJkpIGNvbnRhaW5lZCB3aXRoaW4gdGhlIFByb2dyYW0gZnJvbSBhbnkgY29weSBvZiB0aGUgUHJvZ3JhbSB3aGljaCB0aGV5IERpc3RyaWJ1dGUsIHByb3ZpZGVkIHRoYXQgQ29udHJpYnV0b3JzIG1heSBhZGQgdGhlaXIgb3duIGFwcHJvcHJpYXRlIG5vdGljZXMuCgo0LiBDT01NRVJDSUFMIERJU1RSSUJVVElPTgpDb21tZXJjaWFsIGRpc3RyaWJ1dG9ycyBvZiBzb2Z0d2FyZSBtYXkgYWNjZXB0IGNlcnRhaW4gcmVzcG9uc2liaWxpdGllcyB3aXRoIHJlc3BlY3QgdG8gZW5kIHVzZXJzLCBidXNpbmVzcyBwYXJ0bmVycyBhbmQgdGhlIGxpa2UuIFdoaWxlIHRoaXMgbGljZW5zZSBpcyBpbnRlbmRlZCB0byBmYWNpbGl0YXRlIHRoZSBjb21tZXJjaWFsIHVzZSBvZiB0aGUgUHJvZ3JhbSwgdGhlIENvbnRyaWJ1dG9yIHdobyBpbmNsdWRlcyB0aGUgUHJvZ3JhbSBpbiBhIGNvbW1lcmNpYWwgcHJvZHVjdCBvZmZlcmluZyBzaG91bGQgZG8gc28gaW4gYSBtYW5uZXIgd2hpY2ggZG9lcyBub3QgY3JlYXRlIHBvdGVudGlhbCBsaWFiaWxpdHkgZm9yIG90aGVyIENvbnRyaWJ1dG9ycy4gVGhlcmVmb3JlLCBpZiBhIENvbnRyaWJ1dG9yIGluY2x1ZGVzIHRoZSBQcm9ncmFtIGluIGEgY29tbWVyY2lhbCBwcm9kdWN0IG9mZmVyaW5nLCBzdWNoIENvbnRyaWJ1dG9yICjigJxDb21tZXJjaWFsIENvbnRyaWJ1dG9y4oCdKSBoZXJlYnkgYWdyZWVzIHRvIGRlZmVuZCBhbmQgaW5kZW1uaWZ5IGV2ZXJ5IG90aGVyIENvbnRyaWJ1dG9yICjigJxJbmRlbW5pZmllZCBDb250cmlidXRvcuKAnSkgYWdhaW5zdCBhbnkgbG9zc2VzLCBkYW1hZ2VzIGFuZCBjb3N0cyAoY29sbGVjdGl2ZWx5IOKAnExvc3Nlc+KAnSkgYXJpc2luZyBmcm9tIGNsYWltcywgbGF3c3VpdHMgYW5kIG90aGVyIGxlZ2FsIGFjdGlvbnMgYnJvdWdodCBieSBhIHRoaXJkIHBhcnR5IGFnYWluc3QgdGhlIEluZGVtbmlmaWVkIENvbnRyaWJ1dG9yIHRvIHRoZSBleHRlbnQgY2F1c2VkIGJ5IHRoZSBhY3RzIG9yIG9taXNzaW9ucyBvZiBzdWNoIENvbW1lcmNpYWwgQ29udHJpYnV0b3IgaW4gY29ubmVjdGlvbiB3aXRoIGl0cyBkaXN0cmlidXRpb24gb2YgdGhlIFByb2dyYW0gaW4gYSBjb21tZXJjaWFsIHByb2R1Y3Qgb2ZmZXJpbmcuIFRoZSBvYmxpZ2F0aW9ucyBpbiB0aGlzIHNlY3Rpb24gZG8gbm90IGFwcGx5IHRvIGFueSBjbGFpbXMgb3IgTG9zc2VzIHJlbGF0aW5nIHRvIGFueSBhY3R1YWwgb3IgYWxsZWdlZCBpbnRlbGxlY3R1YWwgcHJvcGVydHkgaW5mcmluZ2VtZW50LiBJbiBvcmRlciB0byBxdWFsaWZ5LCBhbiBJbmRlbW5pZmllZCBDb250cmlidXRvciBtdXN0OiBhKSBwcm9tcHRseSBub3RpZnkgdGhlIENvbW1lcmNpYWwgQ29udHJpYnV0b3IgaW4gd3JpdGluZyBvZiBzdWNoIGNsYWltLCBhbmQgYikgYWxsb3cgdGhlIENvbW1lcmNpYWwgQ29udHJpYnV0b3IgdG8gY29udHJvbCwgYW5kIGNvb3BlcmF0ZSB3aXRoIHRoZSBDb21tZXJjaWFsIENvbnRyaWJ1dG9yIGluLCB0aGUgZGVmZW5zZSBhbmQgYW55IHJlbGF0ZWQgc2V0dGxlbWVudCBuZWdvdGlhdGlvbnMuIFRoZSBJbmRlbW5pZmllZCBDb250cmlidXRvciBtYXkgcGFydGljaXBhdGUgaW4gYW55IHN1Y2ggY2xhaW0gYXQgaXRzIG93biBleHBlbnNlLgoKRm9yIGV4YW1wbGUsIGEgQ29udHJpYnV0b3IgbWlnaHQgaW5jbHVkZSB0aGUgUHJvZ3JhbSBpbiBhIGNvbW1lcmNpYWwgcHJvZHVjdCBvZmZlcmluZywgUHJvZHVjdCBYLiBUaGF0IENvbnRyaWJ1dG9yIGlzIHRoZW4gYSBDb21tZXJjaWFsIENvbnRyaWJ1dG9yLiBJZiB0aGF0IENvbW1lcmNpYWwgQ29udHJpYnV0b3IgdGhlbiBtYWtlcyBwZXJmb3JtYW5jZSBjbGFpbXMsIG9yIG9mZmVycyB3YXJyYW50aWVzIHJlbGF0ZWQgdG8gUHJvZHVjdCBYLCB0aG9zZSBwZXJmb3JtYW5jZSBjbGFpbXMgYW5kIHdhcnJhbnRpZXMgYXJlIHN1Y2ggQ29tbWVyY2lhbCBDb250cmlidXRvcidzIHJlc3BvbnNpYmlsaXR5IGFsb25lLiBVbmRlciB0aGlzIHNlY3Rpb24sIHRoZSBDb21tZXJjaWFsIENvbnRyaWJ1dG9yIHdvdWxkIGhhdmUgdG8gZGVmZW5kIGNsYWltcyBhZ2FpbnN0IHRoZSBvdGhlciBDb250cmlidXRvcnMgcmVsYXRlZCB0byB0aG9zZSBwZXJmb3JtYW5jZSBjbGFpbXMgYW5kIHdhcnJhbnRpZXMsIGFuZCBpZiBhIGNvdXJ0IHJlcXVpcmVzIGFueSBvdGhlciBDb250cmlidXRvciB0byBwYXkgYW55IGRhbWFnZXMgYXMgYSByZXN1bHQsIHRoZSBDb21tZXJjaWFsIENvbnRyaWJ1dG9yIG11c3QgcGF5IHRob3NlIGRhbWFnZXMuCgo1LiBOTyBXQVJSQU5UWQpFWENFUFQgQVMgRVhQUkVTU0xZIFNFVCBGT1JUSCBJTiBUSElTIEFHUkVFTUVOVCwgQU5EIFRPIFRIRSBFWFRFTlQgUEVSTUlUVEVEIEJZIEFQUExJQ0FCTEUgTEFXLCBUSEUgUFJPR1JBTSBJUyBQUk9WSURFRCBPTiBBTiDigJxBUyBJU+KAnSBCQVNJUywgV0lUSE9VVCBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgQU5ZIEtJTkQsIEVJVEhFUiBFWFBSRVNTIE9SIElNUExJRUQgSU5DTFVESU5HLCBXSVRIT1VUIExJTUlUQVRJT04sIEFOWSBXQVJSQU5USUVTIE9SIENPTkRJVElPTlMgT0YgVElUTEUsIE5PTi1JTkZSSU5HRU1FTlQsIE1FUkNIQU5UQUJJTElUWSBPUiBGSVRORVNTIEZPUiBBIFBBUlRJQ1VMQVIgUFVSUE9TRS4gRWFjaCBSZWNpcGllbnQgaXMgc29sZWx5IHJlc3BvbnNpYmxlIGZvciBkZXRlcm1pbmluZyB0aGUgYXBwcm9wcmlhdGVuZXNzIG9mIHVzaW5nIGFuZCBkaXN0cmlidXRpbmcgdGhlIFByb2dyYW0gYW5kIGFzc3VtZXMgYWxsIHJpc2tzIGFzc29jaWF0ZWQgd2l0aCBpdHMgZXhlcmNpc2Ugb2YgcmlnaHRzIHVuZGVyIHRoaXMgQWdyZWVtZW50LCBpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVkIHRvIHRoZSByaXNrcyBhbmQgY29zdHMgb2YgcHJvZ3JhbSBlcnJvcnMsIGNvbXBsaWFuY2Ugd2l0aCBhcHBsaWNhYmxlIGxhd3MsIGRhbWFnZSB0byBvciBsb3NzIG9mIGRhdGEsIHByb2dyYW1zIG9yIGVxdWlwbWVudCwgYW5kIHVuYXZhaWxhYmlsaXR5IG9yIGludGVycnVwdGlvbiBvZiBvcGVyYXRpb25zLgoKNi4gRElTQ0xBSU1FUiBPRiBMSUFCSUxJVFkKRVhDRVBUIEFTIEVYUFJFU1NMWSBTRVQgRk9SVEggSU4gVEhJUyBBR1JFRU1FTlQsIEFORCBUTyBUSEUgRVhURU5UIFBFUk1JVFRFRCBCWSBBUFBMSUNBQkxFIExBVywgTkVJVEhFUiBSRUNJUElFTlQgTk9SIEFOWSBDT05UUklCVVRPUlMgU0hBTEwgSEFWRSBBTlkgTElBQklMSVRZIEZPUiBBTlkgRElSRUNULCBJTkRJUkVDVCwgSU5DSURFTlRBTCwgU1BFQ0lBTCwgRVhFTVBMQVJZLCBPUiBDT05TRVFVRU5USUFMIERBTUFHRVMgKElOQ0xVRElORyBXSVRIT1VUIExJTUlUQVRJT04gTE9TVCBQUk9GSVRTKSwgSE9XRVZFUiBDQVVTRUQgQU5EIE9OIEFOWSBUSEVPUlkgT0YgTElBQklMSVRZLCBXSEVUSEVSIElOIENPTlRSQUNULCBTVFJJQ1QgTElBQklMSVRZLCBPUiBUT1JUIChJTkNMVURJTkcgTkVHTElHRU5DRSBPUiBPVEhFUldJU0UpIEFSSVNJTkcgSU4gQU5ZIFdBWSBPVVQgT0YgVEhFIFVTRSBPUiBESVNUUklCVVRJT04gT0YgVEhFIFBST0dSQU0gT1IgVEhFIEVYRVJDSVNFIE9GIEFOWSBSSUdIVFMgR1JBTlRFRCBIRVJFVU5ERVIsIEVWRU4gSUYgQURWSVNFRCBPRiBUSEUgUE9TU0lCSUxJVFkgT0YgU1VDSCBEQU1BR0VTLgoKNy4gR0VORVJBTApJZiBhbnkgcHJvdmlzaW9uIG9mIHRoaXMgQWdyZWVtZW50IGlzIGludmFsaWQgb3IgdW5lbmZvcmNlYWJsZSB1bmRlciBhcHBsaWNhYmxlIGxhdywgaXQgc2hhbGwgbm90IGFmZmVjdCB0aGUgdmFsaWRpdHkgb3IgZW5mb3JjZWFiaWxpdHkgb2YgdGhlIHJlbWFpbmRlciBvZiB0aGUgdGVybXMgb2YgdGhpcyBBZ3JlZW1lbnQsIGFuZCB3aXRob3V0IGZ1cnRoZXIgYWN0aW9uIGJ5IHRoZSBwYXJ0aWVzIGhlcmV0bywgc3VjaCBwcm92aXNpb24gc2hhbGwgYmUgcmVmb3JtZWQgdG8gdGhlIG1pbmltdW0gZXh0ZW50IG5lY2Vzc2FyeSB0byBtYWtlIHN1Y2ggcHJvdmlzaW9uIHZhbGlkIGFuZCBlbmZvcmNlYWJsZS4KCklmIFJlY2lwaWVudCBpbnN0aXR1dGVzIHBhdGVudCBsaXRpZ2F0aW9uIGFnYWluc3QgYW55IGVudGl0eSAoaW5jbHVkaW5nIGEgY3Jvc3MtY2xhaW0gb3IgY291bnRlcmNsYWltIGluIGEgbGF3c3VpdCkgYWxsZWdpbmcgdGhhdCB0aGUgUHJvZ3JhbSBpdHNlbGYgKGV4Y2x1ZGluZyBjb21iaW5hdGlvbnMgb2YgdGhlIFByb2dyYW0gd2l0aCBvdGhlciBzb2Z0d2FyZSBvciBoYXJkd2FyZSkgaW5mcmluZ2VzIHN1Y2ggUmVjaXBpZW50J3MgcGF0ZW50KHMpLCB0aGVuIHN1Y2ggUmVjaXBpZW50J3MgcmlnaHRzIGdyYW50ZWQgdW5kZXIgU2VjdGlvbiAyKGIpIHNoYWxsIHRlcm1pbmF0ZSBhcyBvZiB0aGUgZGF0ZSBzdWNoIGxpdGlnYXRpb24gaXMgZmlsZWQuCgpBbGwgUmVjaXBpZW50J3MgcmlnaHRzIHVuZGVyIHRoaXMgQWdyZWVtZW50IHNoYWxsIHRlcm1pbmF0ZSBpZiBpdCBmYWlscyB0byBjb21wbHkgd2l0aCBhbnkgb2YgdGhlIG1hdGVyaWFsIHRlcm1zIG9yIGNvbmRpdGlvbnMgb2YgdGhpcyBBZ3JlZW1lbnQgYW5kIGRvZXMgbm90IGN1cmUgc3VjaCBmYWlsdXJlIGluIGEgcmVhc29uYWJsZSBwZXJpb2Qgb2YgdGltZSBhZnRlciBiZWNvbWluZyBhd2FyZSBvZiBzdWNoIG5vbmNvbXBsaWFuY2UuIElmIGFsbCBSZWNpcGllbnQncyByaWdodHMgdW5kZXIgdGhpcyBBZ3JlZW1lbnQgdGVybWluYXRlLCBSZWNpcGllbnQgYWdyZWVzIHRvIGNlYXNlIHVzZSBhbmQgZGlzdHJpYnV0aW9uIG9mIHRoZSBQcm9ncmFtIGFzIHNvb24gYXMgcmVhc29uYWJseSBwcmFjdGljYWJsZS4gSG93ZXZlciwgUmVjaXBpZW50J3Mgb2JsaWdhdGlvbnMgdW5kZXIgdGhpcyBBZ3JlZW1lbnQgYW5kIGFueSBsaWNlbnNlcyBncmFudGVkIGJ5IFJlY2lwaWVudCByZWxhdGluZyB0byB0aGUgUHJvZ3JhbSBzaGFsbCBjb250aW51ZSBhbmQgc3Vydml2ZS4KCkV2ZXJ5b25lIGlzIHBlcm1pdHRlZCB0byBjb3B5IGFuZCBkaXN0cmlidXRlIGNvcGllcyBvZiB0aGlzIEFncmVlbWVudCwgYnV0IGluIG9yZGVyIHRvIGF2b2lkIGluY29uc2lzdGVuY3kgdGhlIEFncmVlbWVudCBpcyBjb3B5cmlnaHRlZCBhbmQgbWF5IG9ubHkgYmUgbW9kaWZpZWQgaW4gdGhlIGZvbGxvd2luZyBtYW5uZXIuIFRoZSBBZ3JlZW1lbnQgU3Rld2FyZCByZXNlcnZlcyB0aGUgcmlnaHQgdG8gcHVibGlzaCBuZXcgdmVyc2lvbnMgKGluY2x1ZGluZyByZXZpc2lvbnMpIG9mIHRoaXMgQWdyZWVtZW50IGZyb20gdGltZSB0byB0aW1lLiBObyBvbmUgb3RoZXIgdGhhbiB0aGUgQWdyZWVtZW50IFN0ZXdhcmQgaGFzIHRoZSByaWdodCB0byBtb2RpZnkgdGhpcyBBZ3JlZW1lbnQuIFRoZSBFY2xpcHNlIEZvdW5kYXRpb24gaXMgdGhlIGluaXRpYWwgQWdyZWVtZW50IFN0ZXdhcmQuIFRoZSBFY2xpcHNlIEZvdW5kYXRpb24gbWF5IGFzc2lnbiB0aGUgcmVzcG9uc2liaWxpdHkgdG8gc2VydmUgYXMgdGhlIEFncmVlbWVudCBTdGV3YXJkIHRvIGEgc3VpdGFibGUgc2VwYXJhdGUgZW50aXR5LiBFYWNoIG5ldyB2ZXJzaW9uIG9mIHRoZSBBZ3JlZW1lbnQgd2lsbCBiZSBnaXZlbiBhIGRpc3Rpbmd1aXNoaW5nIHZlcnNpb24gbnVtYmVyLiBUaGUgUHJvZ3JhbSAoaW5jbHVkaW5nIENvbnRyaWJ1dGlvbnMpIG1heSBhbHdheXMgYmUgRGlzdHJpYnV0ZWQgc3ViamVjdCB0byB0aGUgdmVyc2lvbiBvZiB0aGUgQWdyZWVtZW50IHVuZGVyIHdoaWNoIGl0IHdhcyByZWNlaXZlZC4gSW4gYWRkaXRpb24sIGFmdGVyIGEgbmV3IHZlcnNpb24gb2YgdGhlIEFncmVlbWVudCBpcyBwdWJsaXNoZWQsIENvbnRyaWJ1dG9yIG1heSBlbGVjdCB0byBEaXN0cmlidXRlIHRoZSBQcm9ncmFtIChpbmNsdWRpbmcgaXRzIENvbnRyaWJ1dGlvbnMpIHVuZGVyIHRoZSBuZXcgdmVyc2lvbi4KCkV4Y2VwdCBhcyBleHByZXNzbHkgc3RhdGVkIGluIFNlY3Rpb25zIDIoYSkgYW5kIDIoYikgYWJvdmUsIFJlY2lwaWVudCByZWNlaXZlcyBubyByaWdodHMgb3IgbGljZW5zZXMgdG8gdGhlIGludGVsbGVjdHVhbCBwcm9wZXJ0eSBvZiBhbnkgQ29udHJpYnV0b3IgdW5kZXIgdGhpcyBBZ3JlZW1lbnQsIHdoZXRoZXIgZXhwcmVzc2x5LCBieSBpbXBsaWNhdGlvbiwgZXN0b3BwZWwgb3Igb3RoZXJ3aXNlLiBBbGwgcmlnaHRzIGluIHRoZSBQcm9ncmFtIG5vdCBleHByZXNzbHkgZ3JhbnRlZCB1bmRlciB0aGlzIEFncmVlbWVudCBhcmUgcmVzZXJ2ZWQuIE5vdGhpbmcgaW4gdGhpcyBBZ3JlZW1lbnQgaXMgaW50ZW5kZWQgdG8gYmUgZW5mb3JjZWFibGUgYnkgYW55IGVudGl0eSB0aGF0IGlzIG5vdCBhIENvbnRyaWJ1dG9yIG9yIFJlY2lwaWVudC4gTm8gdGhpcmQtcGFydHkgYmVuZWZpY2lhcnkgcmlnaHRzIGFyZSBjcmVhdGVkIHVuZGVyIHRoaXMgQWdyZWVtZW50LgoKRXhoaWJpdCBBIOKAkyBGb3JtIG9mIFNlY29uZGFyeSBMaWNlbnNlcyBOb3RpY2UK4oCcVGhpcyBTb3VyY2UgQ29kZSBtYXkgYWxzbyBiZSBtYWRlIGF2YWlsYWJsZSB1bmRlciB0aGUgZm9sbG93aW5nIFNlY29uZGFyeSBMaWNlbnNlcyB3aGVuIHRoZSBjb25kaXRpb25zIGZvciBzdWNoIGF2YWlsYWJpbGl0eSBzZXQgZm9ydGggaW4gdGhlIEVjbGlwc2UgUHVibGljIExpY2Vuc2UsIHYuIDIuMCBhcmUgc2F0aXNmaWVkOiB7bmFtZSBsaWNlbnNlKHMpLCB2ZXJzaW9uKHMpLCBhbmQgZXhjZXB0aW9ucyBvciBhZGRpdGlvbmFsIHBlcm1pc3Npb25zIGhlcmV9LuKAnQoKU2ltcGx5IGluY2x1ZGluZyBhIGNvcHkgb2YgdGhpcyBBZ3JlZW1lbnQsIGluY2x1ZGluZyB0aGlzIEV4aGliaXQgQSBpcyBub3Qgc3VmZmljaWVudCB0byBsaWNlbnNlIHRoZSBTb3VyY2UgQ29kZSB1bmRlciBTZWNvbmRhcnkgTGljZW5zZXMuCgpJZiBpdCBpcyBub3QgcG9zc2libGUgb3IgZGVzaXJhYmxlIHRvIHB1dCB0aGUgbm90aWNlIGluIGEgcGFydGljdWxhciBmaWxlLCB0aGVuIFlvdSBtYXkgaW5jbHVkZSB0aGUgbm90aWNlIGluIGEgbG9jYXRpb24gKHN1Y2ggYXMgYSBMSUNFTlNFIGZpbGUgaW4gYSByZWxldmFudCBkaXJlY3RvcnkpIHdoZXJlIGEgcmVjaXBpZW50IHdvdWxkIGJlIGxpa2VseSB0byBsb29rIGZvciBzdWNoIGEgbm90aWNlLgoKWW91IG1heSBhZGQgYWRkaXRpb25hbCBhY2N1cmF0ZSBub3RpY2VzIG9mIGNvcHlyaWdodCBvd25lcnNoaXAuCg=="
+            }
+          }
+        },
+        {
+          "license" : {
+            "id" : "GPL-2.0-with-classpath-exception",
+            "text" : {
+              "contentType" : "plain/text",
+              "encoding" : "base64",
+              "content" : "NDA0OiBOb3QgRm91bmQ="
+            }
+          }
+        }
+      ],
+      "purl" : "pkg:maven/jakarta.annotation/jakarta.annotation-api@2.1.1?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://projects.eclipse.org/projects/ee4j.ca"
+        },
+        {
+          "type" : "distribution-intake",
+          "url" : "https://jakarta.oss.sonatype.org/service/local/staging/deploy/maven2/"
+        },
+        {
+          "type" : "issue-tracker",
+          "url" : "https://github.com/eclipse-ee4j/common-annotations-api/issues"
+        },
+        {
+          "type" : "mailing-list",
+          "url" : "https://dev.eclipse.org/mhonarc/lists/ca-dev"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/eclipse-ee4j/common-annotations-api"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j-core@1.22.0?type=jar",
       "group" : "dev.langchain4j",
       "name" : "langchain4j-core",
-      "version" : "1.16.0",
+      "version" : "1.22.0",
       "description" : "Core classes and interfaces of LangChain4j",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "31a0eabb0dc8d5684b81358794f913ad"
+          "content" : "9448e68d05722bc3918119ab12dee985"
         },
         {
           "alg" : "SHA-1",
-          "content" : "7aef857d622497af7b9dcde64103a6f622c7ee32"
+          "content" : "88666984e95e71c0465728a959665d8fa4d52267"
         },
         {
           "alg" : "SHA-256",
-          "content" : "5649d0b715c2a6e6644ad0657c7119e92cf0fe4cb0e84b3a4e423e1e42b00e4c"
+          "content" : "e06b7cdda44070a3c9213a9bd96bd52791d86fdd4b3dfc05a37300d6182d7c8b"
         },
         {
           "alg" : "SHA-512",
-          "content" : "b07cd7db7996c5821b660335abd0771bbc194b071ff03f6b5f421dc5d8992887706cfa4e62b3ef17b9b7fb86c903a7137f89202a5652dec206b122892bd9756a"
+          "content" : "222b44831f0f7317eb930458ad51389bd20ed4b7299a437989efbec56943918923db97b17dd49eb075fe5a87f50029e2c2d9756f5e6d0054c2c5c68542d766b4"
         },
         {
           "alg" : "SHA-384",
-          "content" : "021f6f227944df1ca7377f26eadddd9ef9d36a2a841bc45f0611c743983fb371eb66984ead2154ccc518acde6e6c1859"
+          "content" : "cf4e7100c3e9d21b7f5b60b18c9f5cb29c17201ba7a8d1968106bf3733d4b8dba51d130ccb5ef4a462662e0f16715ac7"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "1e0c0b365e3366b42365235157bfb07793226a4c649eb67d3a8fbf40527d6c27f228e65cdae19d8d0e19bae905b9676d"
+          "content" : "b9bf4361cb9d100d06d1765e38b90f9c3f7d00c3b89b97cf17eae87cdffe33d07b95605ae53ed804d4f9d425cae1c459"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "f7e4fe4a646f7c6db27dfa70f81536b2c2fdb3a49ab77e0e60402cdd3cc14654"
+          "content" : "c6509e4fd02d0936cf9025abcae80f25ea1e90dad37d546f3d52018a51f62e26"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "8185c727f50ef609bff47c9db2c6ee01adb2bf28c1b362a15e2c56da439ca18edfac782d314de65f7415a10cef57b9242defbf8c410bb2cc095200465767513a"
+          "content" : "f0530a5139949f22d632f4a2c157aa1765b1c869ddcc0ac3a4d70dd164498d8e22eb56e2ca7c4671902b4fd1db2b72feecfbbb23ed368454a25358b61dbddd91"
         }
       ],
       "licenses" : [
@@ -11972,7 +12061,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/dev.langchain4j/langchain4j-core@1.16.0?type=jar",
+      "purl" : "pkg:maven/dev.langchain4j/langchain4j-core@1.22.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -12070,11 +12159,11 @@
         "pkg:maven/com.google.dagger/dagger-compiler@2.60.1?type=jar",
         "pkg:maven/org.apache.commons/commons-lang3@3.20.0?type=jar",
         "pkg:maven/com.google.cloud.functions/functions-framework-api@2.0.2?type=jar",
-        "pkg:maven/com.google.cloud/google-cloud-storage@2.74.0?type=jar",
-        "pkg:maven/com.google.cloud/google-cloud-secretmanager@2.98.0?type=jar",
-        "pkg:maven/com.google.cloud/google-cloud-pubsub@1.156.0?type=jar",
-        "pkg:maven/com.google.cloud/google-cloud-kms@2.101.0?type=jar",
-        "pkg:maven/dev.langchain4j/langchain4j-google-genai@1.16.0-beta26?type=jar"
+        "pkg:maven/com.google.cloud/google-cloud-storage@2.75.0?type=jar",
+        "pkg:maven/com.google.cloud/google-cloud-secretmanager@2.99.0?type=jar",
+        "pkg:maven/com.google.cloud/google-cloud-pubsub@1.157.0?type=jar",
+        "pkg:maven/com.google.cloud/google-cloud-kms@2.102.0?type=jar",
+        "pkg:maven/dev.langchain4j/langchain4j-google-genai@1.22.0-beta32?type=jar"
       ]
     },
     {
@@ -12097,12 +12186,12 @@
         "pkg:maven/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml@2.22.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jdk8@2.22.3?type=jar",
         "pkg:maven/com.google.http-client/google-http-client@2.2.0?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
-        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.3?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
+        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.4?type=jar",
         "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.86?type=jar",
         "pkg:maven/org.bouncycastle/bcpkix-jdk18on@1.86?type=jar",
         "pkg:maven/com.nimbusds/nimbus-jose-jwt@10.10?type=jar",
-        "pkg:maven/dev.langchain4j/langchain4j@1.16.0?type=jar"
+        "pkg:maven/dev.langchain4j/langchain4j@1.22.0?type=jar"
       ]
     },
     {
@@ -12116,9 +12205,9 @@
         "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml@2.22.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr310@2.22.3?type=jar",
-        "pkg:maven/com.networknt/json-schema-validator@3.0.7?type=jar",
+        "pkg:maven/com.networknt/json-schema-validator@3.0.8?type=jar",
         "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
-        "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.4?type=jar",
+        "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.5?type=jar",
         "pkg:maven/org.apache.opennlp/opennlp-tools@2.5.12?type=jar"
       ]
     },
@@ -12173,10 +12262,10 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.networknt/json-schema-validator@3.0.7?type=jar",
+      "ref" : "pkg:maven/com.networknt/json-schema-validator@3.0.8?type=jar",
       "dependsOn" : [
         "pkg:maven/com.ethlo.time/itu@1.14.0?type=jar",
-        "pkg:maven/tools.jackson.core/jackson-databind@3.2.1?type=jar",
+        "pkg:maven/tools.jackson.core/jackson-databind@3.2.3?type=jar",
         "pkg:maven/tools.jackson.dataformat/jackson-dataformat-yaml@3.2.1?type=jar",
         "pkg:maven/org.slf4j/slf4j-api@2.0.16?type=jar"
       ]
@@ -12186,21 +12275,21 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/tools.jackson.core/jackson-databind@3.2.1?type=jar",
+      "ref" : "pkg:maven/tools.jackson.core/jackson-databind@3.2.3?type=jar",
       "dependsOn" : [
         "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.22?type=jar",
-        "pkg:maven/tools.jackson.core/jackson-core@3.2.1?type=jar"
+        "pkg:maven/tools.jackson.core/jackson-core@3.2.3?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/tools.jackson.core/jackson-core@3.2.1?type=jar",
+      "ref" : "pkg:maven/tools.jackson.core/jackson-core@3.2.3?type=jar",
       "dependsOn" : [ ]
     },
     {
       "ref" : "pkg:maven/tools.jackson.dataformat/jackson-dataformat-yaml@3.2.1?type=jar",
       "dependsOn" : [
-        "pkg:maven/tools.jackson.core/jackson-core@3.2.1?type=jar",
-        "pkg:maven/tools.jackson.core/jackson-databind@3.2.1?type=jar",
+        "pkg:maven/tools.jackson.core/jackson-core@3.2.3?type=jar",
+        "pkg:maven/tools.jackson.core/jackson-databind@3.2.3?type=jar",
         "pkg:maven/org.snakeyaml/snakeyaml-engine@3.0.1?type=jar"
       ]
     },
@@ -12243,20 +12332,20 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.4?type=jar",
+      "ref" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.5?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.3?type=jar",
-        "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.3?type=jar"
+        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.4?type=jar",
+        "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.4?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.3?type=jar",
+      "ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.4?type=jar",
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.3?type=jar",
+      "ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.4?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.3?type=jar"
+        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.4?type=jar"
       ]
     },
     {
@@ -12428,17 +12517,17 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
+      "ref" : "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
       "dependsOn" : [
         "pkg:maven/org.jspecify/jspecify@1.0.0?type=jar",
         "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-credentials@1.53.0?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
         "pkg:maven/com.google.http-client/google-http-client@2.2.0?type=jar",
         "pkg:maven/com.google.http-client/google-http-client-gson@2.2.0?type=jar",
         "pkg:maven/com.google.errorprone/error_prone_annotations@2.50.0?type=jar",
-        "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+        "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
         "pkg:maven/com.google.code.gson/gson@2.14.0?type=jar"
       ]
     },
@@ -12447,7 +12536,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.auth/google-auth-library-credentials@1.53.0?type=jar",
+      "ref" : "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
       "dependsOn" : [ ]
     },
     {
@@ -12455,7 +12544,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+      "ref" : "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
       "dependsOn" : [ ]
     },
     {
@@ -12483,23 +12572,30 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/dev.langchain4j/langchain4j@1.16.0?type=jar",
+      "ref" : "pkg:maven/dev.langchain4j/langchain4j@1.22.0?type=jar",
       "dependsOn" : [
-        "pkg:maven/dev.langchain4j/langchain4j-core@1.16.0?type=jar",
+        "pkg:maven/dev.langchain4j/langchain4j-core@1.22.0?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.22?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.22.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.3?type=jar",
         "pkg:maven/org.apache.opennlp/opennlp-tools@2.5.12?type=jar",
-        "pkg:maven/org.slf4j/slf4j-api@2.0.16?type=jar"
+        "pkg:maven/org.slf4j/slf4j-api@2.0.16?type=jar",
+        "pkg:maven/io.smallrye.reactive/mutiny-zero@1.3.1?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/dev.langchain4j/langchain4j-core@1.16.0?type=jar",
+      "ref" : "pkg:maven/dev.langchain4j/langchain4j-core@1.22.0?type=jar",
       "dependsOn" : [
         "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.22?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.22.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.3?type=jar",
         "pkg:maven/org.slf4j/slf4j-api@2.0.16?type=jar",
+        "pkg:maven/org.jspecify/jspecify@1.0.0?type=jar"
+      ]
+    },
+    {
+      "ref" : "pkg:maven/io.smallrye.reactive/mutiny-zero@1.3.1?type=jar",
+      "dependsOn" : [
         "pkg:maven/org.jspecify/jspecify@1.0.0?type=jar"
       ]
     },
@@ -12615,7 +12711,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.cloud/google-cloud-storage@2.74.0?type=jar",
+      "ref" : "pkg:maven/com.google.cloud/google-cloud-storage@2.75.0?type=jar",
       "dependsOn" : [
         "pkg:maven/com.fasterxml.jackson.dataformat/jackson-dataformat-xml@2.22.3?type=jar",
         "pkg:maven/org.codehaus.woodstox/stax2-api@4.2.2?type=jar",
@@ -12641,25 +12737,25 @@
         "pkg:maven/com.google.http-client/google-http-client-apache-v2@2.2.0?type=jar",
         "pkg:maven/com.google.apis/google-api-services-storage@v1-rev20260524-2.0.0?type=jar",
         "pkg:maven/com.google.code.gson/gson@2.14.0?type=jar",
-        "pkg:maven/com.google.cloud/google-cloud-core@2.76.0?type=jar",
+        "pkg:maven/com.google.cloud/google-cloud-core@2.77.0?type=jar",
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
-        "pkg:maven/com.google.cloud/google-cloud-core-http@2.76.0?type=jar",
+        "pkg:maven/com.google.cloud/google-cloud-core-http@2.77.0?type=jar",
         "pkg:maven/com.google.http-client/google-http-client-appengine@2.2.0?type=jar",
-        "pkg:maven/com.google.api/gax-httpjson@2.86.0?type=jar",
+        "pkg:maven/com.google.api/gax-httpjson@2.87.0?type=jar",
         "pkg:maven/org.conscrypt/conscrypt-openjdk-uber@2.6.2?type=jar",
-        "pkg:maven/com.google.cloud/google-cloud-core-grpc@2.76.0?type=jar",
-        "pkg:maven/com.google.api/gax@2.86.0?type=jar",
-        "pkg:maven/com.google.api/gax-grpc@2.86.0?type=jar",
+        "pkg:maven/com.google.cloud/google-cloud-core-grpc@2.77.0?type=jar",
+        "pkg:maven/com.google.api/gax@2.87.0?type=jar",
+        "pkg:maven/com.google.api/gax-grpc@2.87.0?type=jar",
         "pkg:maven/io.grpc/grpc-inprocess@1.83.0?type=jar",
         "pkg:maven/io.grpc/grpc-alts@1.83.0?type=jar",
         "pkg:maven/io.grpc/grpc-auth@1.83.0?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-credentials@1.53.0?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
-        "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
+        "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
         "pkg:maven/io.opencensus/opencensus-api@0.31.1?type=jar",
         "pkg:maven/io.opentelemetry/opentelemetry-context@1.62.0?type=jar",
         "pkg:maven/io.opentelemetry/opentelemetry-common@1.62.0?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.72.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.73.0?type=jar",
         "pkg:maven/com.google.protobuf/protobuf-java@4.33.6?type=jar",
         "pkg:maven/com.google.protobuf/protobuf-java-util@4.33.6?type=jar",
         "pkg:maven/io.grpc/grpc-core@1.83.0?type=jar",
@@ -12668,11 +12764,11 @@
         "pkg:maven/io.perfmark/perfmark-api@0.27.0?type=jar",
         "pkg:maven/io.grpc/grpc-protobuf@1.83.0?type=jar",
         "pkg:maven/io.grpc/grpc-protobuf-lite@1.83.0?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.77.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.78.0?type=jar",
         "pkg:maven/org.threeten/threetenbp@1.7.0?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-cloud-storage-v2@2.74.0?type=jar",
-        "pkg:maven/com.google.api.grpc/grpc-google-cloud-storage-v2@2.74.0?type=jar",
-        "pkg:maven/com.google.api.grpc/gapic-google-cloud-storage-v2@2.74.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-cloud-storage-v2@2.75.0?type=jar",
+        "pkg:maven/com.google.api.grpc/grpc-google-cloud-storage-v2@2.75.0?type=jar",
+        "pkg:maven/com.google.api.grpc/gapic-google-cloud-storage-v2@2.75.0?type=jar",
         "pkg:maven/io.opentelemetry/opentelemetry-sdk@1.62.0?type=jar",
         "pkg:maven/io.opentelemetry/opentelemetry-sdk-trace@1.62.0?type=jar",
         "pkg:maven/io.opentelemetry/opentelemetry-sdk-logs@1.62.0?type=jar",
@@ -12684,12 +12780,12 @@
         "pkg:maven/io.opentelemetry.semconv/opentelemetry-semconv@1.29.0-alpha?type=jar",
         "pkg:maven/com.google.cloud.opentelemetry/exporter-metrics@0.33.0?type=jar",
         "pkg:maven/org.slf4j/slf4j-api@2.0.16?type=jar",
-        "pkg:maven/com.google.cloud/google-cloud-monitoring@3.99.0?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-cloud-monitoring-v3@3.99.0?type=jar",
+        "pkg:maven/com.google.cloud/google-cloud-monitoring@3.100.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-cloud-monitoring-v3@3.100.0?type=jar",
         "pkg:maven/io.grpc/grpc-grpclb@1.83.0?type=jar",
         "pkg:maven/com.google.cloud.opentelemetry/shared-resourcemapping@0.33.0?type=jar",
         "pkg:maven/io.opentelemetry.contrib/opentelemetry-gcp-resources@1.37.0-alpha?type=jar",
-        "pkg:maven/com.google.cloud.opentelemetry/detector-resources-support@0.33.0?type=jar",
+        "pkg:maven/com.google.cloud.opentelemetry/detector-resources-support@0.31.0?type=jar",
         "pkg:maven/org.checkerframework/checker-qual@3.49.0?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.22.3?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
@@ -12742,11 +12838,11 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.cloud/google-cloud-core@2.76.0?type=jar",
+      "ref" : "pkg:maven/com.google.cloud/google-cloud-core@2.77.0?type=jar",
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.cloud/google-cloud-core-http@2.76.0?type=jar",
+      "ref" : "pkg:maven/com.google.cloud/google-cloud-core-http@2.77.0?type=jar",
       "dependsOn" : [ ]
     },
     {
@@ -12754,7 +12850,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.api/gax-httpjson@2.86.0?type=jar",
+      "ref" : "pkg:maven/com.google.api/gax-httpjson@2.87.0?type=jar",
       "dependsOn" : [ ]
     },
     {
@@ -12762,15 +12858,15 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.cloud/google-cloud-core-grpc@2.76.0?type=jar",
+      "ref" : "pkg:maven/com.google.cloud/google-cloud-core-grpc@2.77.0?type=jar",
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.api/gax@2.86.0?type=jar",
+      "ref" : "pkg:maven/com.google.api/gax@2.87.0?type=jar",
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.api/gax-grpc@2.86.0?type=jar",
+      "ref" : "pkg:maven/com.google.api/gax-grpc@2.87.0?type=jar",
       "dependsOn" : [ ]
     },
     {
@@ -12794,7 +12890,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.72.0?type=jar",
+      "ref" : "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.73.0?type=jar",
       "dependsOn" : [ ]
     },
     {
@@ -12830,7 +12926,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.77.0?type=jar",
+      "ref" : "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.78.0?type=jar",
       "dependsOn" : [ ]
     },
     {
@@ -12838,7 +12934,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-storage-v2@2.74.0?type=jar",
+      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-storage-v2@2.75.0?type=jar",
       "dependsOn" : [
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
@@ -12849,14 +12945,14 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.api.grpc/grpc-google-cloud-storage-v2@2.74.0?type=jar",
+      "ref" : "pkg:maven/com.google.api.grpc/grpc-google-cloud-storage-v2@2.75.0?type=jar",
       "dependsOn" : [
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
         "pkg:maven/com.google.errorprone/error_prone_annotations@2.50.0?type=jar",
         "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.27?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.77.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.78.0?type=jar",
         "pkg:maven/io.grpc/grpc-protobuf-lite@1.83.0?type=jar",
-        "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+        "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
         "pkg:maven/com.google.guava/failureaccess@1.0.3?type=jar",
         "pkg:maven/com.google.guava/listenablefuture@9999.0-empty-to-avoid-conflict-with-guava?type=jar",
@@ -12864,19 +12960,19 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.api.grpc/gapic-google-cloud-storage-v2@2.74.0?type=jar",
+      "ref" : "pkg:maven/com.google.api.grpc/gapic-google-cloud-storage-v2@2.75.0?type=jar",
       "dependsOn" : [
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
         "pkg:maven/com.google.errorprone/error_prone_annotations@2.50.0?type=jar",
         "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.27?type=jar",
         "pkg:maven/io.grpc/grpc-protobuf-lite@1.83.0?type=jar",
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-credentials@1.53.0?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
         "pkg:maven/com.google.protobuf/protobuf-java-util@4.33.6?type=jar",
         "pkg:maven/org.threeten/threetenbp@1.7.0?type=jar",
         "pkg:maven/io.opencensus/opencensus-api@0.31.1?type=jar",
         "pkg:maven/io.grpc/grpc-context@1.83.0?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
         "pkg:maven/com.google.code.gson/gson@2.14.0?type=jar",
         "pkg:maven/com.google.http-client/google-http-client-gson@2.2.0?type=jar",
         "pkg:maven/com.google.http-client/google-http-client@2.2.0?type=jar",
@@ -12987,7 +13083,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.cloud/google-cloud-monitoring@3.99.0?type=jar",
+      "ref" : "pkg:maven/com.google.cloud/google-cloud-monitoring@3.100.0?type=jar",
       "dependsOn" : [
         "pkg:maven/dev.cel/runtime@0.13.0?type=jar",
         "pkg:maven/dev.cel/common@0.13.0?type=jar",
@@ -12997,7 +13093,7 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-monitoring-v3@3.99.0?type=jar",
+      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-monitoring-v3@3.100.0?type=jar",
       "dependsOn" : [
         "pkg:maven/org.jspecify/jspecify@1.0.0?type=jar"
       ]
@@ -13015,7 +13111,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.cloud.opentelemetry/detector-resources-support@0.33.0?type=jar",
+      "ref" : "pkg:maven/com.google.cloud.opentelemetry/detector-resources-support@0.31.0?type=jar",
       "dependsOn" : [ ]
     },
     {
@@ -13035,7 +13131,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.cloud/google-cloud-secretmanager@2.98.0?type=jar",
+      "ref" : "pkg:maven/com.google.cloud/google-cloud-secretmanager@2.99.0?type=jar",
       "dependsOn" : [
         "pkg:maven/io.grpc/grpc-api@1.83.0?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
@@ -13044,24 +13140,24 @@
         "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.27?type=jar",
         "pkg:maven/io.grpc/grpc-protobuf@1.83.0?type=jar",
         "pkg:maven/io.grpc/grpc-protobuf-lite@1.83.0?type=jar",
-        "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+        "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
         "pkg:maven/com.google.protobuf/protobuf-java@4.33.6?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.77.0?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta1@2.98.0?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta2@2.98.0?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1@2.98.0?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.72.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.78.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta1@2.99.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta2@2.99.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1@2.99.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.73.0?type=jar",
         "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
         "pkg:maven/com.google.guava/failureaccess@1.0.3?type=jar",
         "pkg:maven/com.google.guava/listenablefuture@9999.0-empty-to-avoid-conflict-with-guava?type=jar",
         "pkg:maven/com.google.j2objc/j2objc-annotations@3.1?type=jar",
-        "pkg:maven/com.google.api/gax@2.86.0?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-credentials@1.53.0?type=jar",
+        "pkg:maven/com.google.api/gax@2.87.0?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
         "pkg:maven/com.google.protobuf/protobuf-java-util@4.33.6?type=jar",
         "pkg:maven/io.opencensus/opencensus-api@0.31.1?type=jar",
         "pkg:maven/io.grpc/grpc-context@1.83.0?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
         "pkg:maven/com.google.code.gson/gson@2.14.0?type=jar",
         "pkg:maven/com.google.http-client/google-http-client-gson@2.2.0?type=jar",
         "pkg:maven/com.google.http-client/google-http-client@2.2.0?type=jar",
@@ -13069,7 +13165,7 @@
         "pkg:maven/commons-codec/commons-codec@1.18.0?type=jar",
         "pkg:maven/org.apache.httpcomponents/httpcore@4.4.16?type=jar",
         "pkg:maven/io.opencensus/opencensus-contrib-http-util@0.31.1?type=jar",
-        "pkg:maven/com.google.api/gax-grpc@2.86.0?type=jar",
+        "pkg:maven/com.google.api/gax-grpc@2.87.0?type=jar",
         "pkg:maven/io.grpc/grpc-inprocess@1.83.0?type=jar",
         "pkg:maven/io.grpc/grpc-core@1.83.0?type=jar",
         "pkg:maven/com.google.android/annotations@4.1.1.4?type=jar",
@@ -13086,14 +13182,14 @@
         "pkg:maven/dev.cel/common@0.13.0?type=jar",
         "pkg:maven/org.threeten/threeten-extra@1.8.0?type=jar",
         "pkg:maven/dev.cel/protobuf@0.13.0?type=jar",
-        "pkg:maven/com.google.api/gax-httpjson@2.86.0?type=jar",
+        "pkg:maven/com.google.api/gax-httpjson@2.87.0?type=jar",
         "pkg:maven/org.conscrypt/conscrypt-openjdk-uber@2.6.2?type=jar",
         "pkg:maven/org.threeten/threetenbp@1.7.0?type=jar",
         "pkg:maven/org.jspecify/jspecify@1.0.0?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta1@2.98.0?type=jar",
+      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta1@2.99.0?type=jar",
       "dependsOn" : [
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
@@ -13104,7 +13200,7 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta2@2.98.0?type=jar",
+      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta2@2.99.0?type=jar",
       "dependsOn" : [
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
@@ -13115,7 +13211,7 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1@2.98.0?type=jar",
+      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1@2.99.0?type=jar",
       "dependsOn" : [
         "pkg:maven/com.google.guava/failureaccess@1.0.3?type=jar",
         "pkg:maven/com.google.guava/listenablefuture@9999.0-empty-to-avoid-conflict-with-guava?type=jar",
@@ -13126,29 +13222,29 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.cloud/google-cloud-pubsub@1.156.0?type=jar",
+      "ref" : "pkg:maven/com.google.cloud/google-cloud-pubsub@1.157.0?type=jar",
       "dependsOn" : [
         "pkg:maven/io.grpc/grpc-api@1.83.0?type=jar",
         "pkg:maven/io.grpc/grpc-stub@1.83.0?type=jar",
         "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.27?type=jar",
         "pkg:maven/io.grpc/grpc-protobuf@1.83.0?type=jar",
         "pkg:maven/io.grpc/grpc-protobuf-lite@1.83.0?type=jar",
-        "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+        "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
         "pkg:maven/com.google.protobuf/protobuf-java@4.33.6?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.77.0?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-credentials@1.53.0?type=jar",
-        "pkg:maven/com.google.http-client/google-http-client-gson@2.2.0?type=jar",
+        "pkg:maven/com.google.protobuf/protobuf-java-util@4.33.6?type=jar",
         "pkg:maven/com.google.code.gson/gson@2.14.0?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-cloud-pubsub-v1@1.156.0?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.72.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.78.0?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
+        "pkg:maven/com.google.http-client/google-http-client-gson@2.2.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-cloud-pubsub-v1@1.157.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.73.0?type=jar",
         "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
         "pkg:maven/com.google.guava/failureaccess@1.0.3?type=jar",
         "pkg:maven/com.google.guava/listenablefuture@9999.0-empty-to-avoid-conflict-with-guava?type=jar",
         "pkg:maven/com.google.j2objc/j2objc-annotations@3.1?type=jar",
-        "pkg:maven/com.google.api/gax@2.86.0?type=jar",
-        "pkg:maven/com.google.protobuf/protobuf-java-util@4.33.6?type=jar",
-        "pkg:maven/com.google.api/gax-grpc@2.86.0?type=jar",
+        "pkg:maven/com.google.api/gax@2.87.0?type=jar",
+        "pkg:maven/com.google.api/gax-grpc@2.87.0?type=jar",
         "pkg:maven/io.grpc/grpc-inprocess@1.83.0?type=jar",
         "pkg:maven/io.grpc/grpc-core@1.83.0?type=jar",
         "pkg:maven/com.google.android/annotations@4.1.1.4?type=jar",
@@ -13165,7 +13261,7 @@
         "pkg:maven/dev.cel/common@0.13.0?type=jar",
         "pkg:maven/org.threeten/threeten-extra@1.8.0?type=jar",
         "pkg:maven/dev.cel/protobuf@0.13.0?type=jar",
-        "pkg:maven/com.google.api/gax-httpjson@2.86.0?type=jar",
+        "pkg:maven/com.google.api/gax-httpjson@2.87.0?type=jar",
         "pkg:maven/org.conscrypt/conscrypt-openjdk-uber@2.6.2?type=jar",
         "pkg:maven/org.threeten/threetenbp@1.7.0?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
@@ -13186,7 +13282,7 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-pubsub-v1@1.156.0?type=jar",
+      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-pubsub-v1@1.157.0?type=jar",
       "dependsOn" : [
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
@@ -13197,7 +13293,7 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.cloud/google-cloud-kms@2.101.0?type=jar",
+      "ref" : "pkg:maven/com.google.cloud/google-cloud-kms@2.102.0?type=jar",
       "dependsOn" : [
         "pkg:maven/io.grpc/grpc-api@1.83.0?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
@@ -13206,17 +13302,17 @@
         "pkg:maven/org.codehaus.mojo/animal-sniffer-annotations@1.27?type=jar",
         "pkg:maven/io.grpc/grpc-protobuf@1.83.0?type=jar",
         "pkg:maven/io.grpc/grpc-protobuf-lite@1.83.0?type=jar",
-        "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+        "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
         "pkg:maven/com.google.protobuf/protobuf-java@4.33.6?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.77.0?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-cloud-kms-v1@2.101.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.78.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-cloud-kms-v1@2.102.0?type=jar",
         "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
         "pkg:maven/com.google.guava/failureaccess@1.0.3?type=jar",
         "pkg:maven/com.google.guava/listenablefuture@9999.0-empty-to-avoid-conflict-with-guava?type=jar",
         "pkg:maven/com.google.j2objc/j2objc-annotations@3.1?type=jar",
-        "pkg:maven/com.google.api/gax@2.86.0?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-credentials@1.53.0?type=jar",
+        "pkg:maven/com.google.api/gax@2.87.0?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
         "pkg:maven/com.google.protobuf/protobuf-java-util@4.33.6?type=jar",
         "pkg:maven/io.opencensus/opencensus-api@0.31.1?type=jar",
         "pkg:maven/io.grpc/grpc-context@1.83.0?type=jar",
@@ -13227,7 +13323,7 @@
         "pkg:maven/commons-codec/commons-codec@1.18.0?type=jar",
         "pkg:maven/org.apache.httpcomponents/httpcore@4.4.16?type=jar",
         "pkg:maven/io.opencensus/opencensus-contrib-http-util@0.31.1?type=jar",
-        "pkg:maven/com.google.api/gax-grpc@2.86.0?type=jar",
+        "pkg:maven/com.google.api/gax-grpc@2.87.0?type=jar",
         "pkg:maven/io.grpc/grpc-inprocess@1.83.0?type=jar",
         "pkg:maven/io.grpc/grpc-core@1.83.0?type=jar",
         "pkg:maven/com.google.android/annotations@4.1.1.4?type=jar",
@@ -13243,17 +13339,17 @@
         "pkg:maven/dev.cel/common@0.13.0?type=jar",
         "pkg:maven/org.threeten/threeten-extra@1.8.0?type=jar",
         "pkg:maven/dev.cel/protobuf@0.13.0?type=jar",
-        "pkg:maven/com.google.api/gax-httpjson@2.86.0?type=jar",
+        "pkg:maven/com.google.api/gax-httpjson@2.87.0?type=jar",
         "pkg:maven/org.conscrypt/conscrypt-openjdk-uber@2.6.2?type=jar",
         "pkg:maven/org.threeten/threetenbp@1.7.0?type=jar",
         "pkg:maven/io.grpc/grpc-auth@1.83.0?type=jar",
-        "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.72.0?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
+        "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.73.0?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
         "pkg:maven/org.jspecify/jspecify@1.0.0?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-kms-v1@2.101.0?type=jar",
+      "ref" : "pkg:maven/com.google.api.grpc/proto-google-cloud-kms-v1@2.102.0?type=jar",
       "dependsOn" : [
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
@@ -13264,33 +13360,25 @@
       ]
     },
     {
-      "ref" : "pkg:maven/dev.langchain4j/langchain4j-google-genai@1.16.0-beta26?type=jar",
+      "ref" : "pkg:maven/dev.langchain4j/langchain4j-google-genai@1.22.0-beta32?type=jar",
       "dependsOn" : [
-        "pkg:maven/com.google.genai/google-genai@1.57.0?type=jar",
-        "pkg:maven/dev.langchain4j/langchain4j-core@1.16.0?type=jar",
-        "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.22.3?type=jar",
-        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.3?type=jar",
+        "pkg:maven/com.google.genai/google-genai@1.71.0?type=jar",
+        "pkg:maven/dev.langchain4j/langchain4j-core@1.22.0?type=jar",
         "pkg:maven/com.fasterxml.jackson.module/jackson-module-kotlin@2.22.3?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.genai/google-genai@1.57.0?type=jar",
+      "ref" : "pkg:maven/com.google.genai/google-genai@1.71.0?type=jar",
       "dependsOn" : [
-        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
-        "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
+        "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jdk8@2.22.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr310@2.22.3?type=jar",
-        "pkg:maven/org.java-websocket/Java-WebSocket@1.6.0?type=jar",
         "pkg:maven/com.squareup.okhttp3/okhttp@4.12.0?type=jar",
         "pkg:maven/com.google.protobuf/protobuf-java@4.33.6?type=jar",
-        "pkg:maven/org.jspecify/jspecify@1.0.0?type=jar"
-      ]
-    },
-    {
-      "ref" : "pkg:maven/org.java-websocket/Java-WebSocket@1.6.0?type=jar",
-      "dependsOn" : [
-        "pkg:maven/org.slf4j/slf4j-api@2.0.16?type=jar"
+        "pkg:maven/org.jspecify/jspecify@1.0.0?type=jar",
+        "pkg:maven/jakarta.annotation/jakarta.annotation-api@2.1.1?type=jar"
       ]
     },
     {
@@ -13315,6 +13403,10 @@
     },
     {
       "ref" : "pkg:maven/org.jetbrains.kotlin/kotlin-stdlib-common@1.9.10?type=jar",
+      "dependsOn" : [ ]
+    },
+    {
+      "ref" : "pkg:maven/jakarta.annotation/jakarta.annotation-api@2.1.1?type=jar",
       "dependsOn" : [ ]
     },
     {
