@@ -10,127 +10,102 @@ NOTE: These instructions are derived from [worklytics-connector-specs](../../../
 
 ## Prerequisites
 
-As of this version, Jira Cloud through Psoxy authenticates using an [Atlassian OAuth 2.0 credential
-for a service account](https://support.atlassian.com/user-management/docs/create-oauth-2-0-credential-for-service-accounts/)
-(a "2LO"/`client_credentials` grant) rather than a user-delegated OAuth 2.0 (3LO) `refresh_token`.
-This requires:
+Jira Cloud through Psoxy authenticates using an [Atlassian OAuth 2.0 credential for a service
+account](https://support.atlassian.com/user-management/docs/create-oauth-2-0-credential-for-service-accounts/)
+(a "2LO"/`client_credentials` grant). This requires:
 
 - Your Atlassian organization must be on the **centralized user management** experience
   (`admin.atlassian.com`). Org admin access is required to create the service account and its
   credential.
 - A **service account** (orgs get 5 free; more available via Atlassian Guard/Enterprise) granted
-  product access to the Jira site you want to connect, with a role sufficient for the scopes below.
+  the `User` role on the Jira site you want to connect.
 
-The OAuth 2.0 credential uses following classical scopes:
-- `read:jira-user`: for getting [users](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-users/#api-rest-api-3-users-search-get)
-- `read:jira-work`: for getting information about [issue](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-get), [issue search](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get), [changelogs](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-changelog-get), [comments](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-get), [projects](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-projects/#api-rest-api-3-project-search-get) and [worklogs](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-worklogs/#api-rest-api-3-issue-issueidorkey-worklog-get)
+Granting the service account the `User` role on Jira grants an OAuth 2.0 credential created for it
+the following scopes, which is what Psoxy needs:
 
-And following granular scopes:
-- `read:user:jira`: for retrieving [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
-- `read:group:jira`: for retrieving [groups](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-bulk-get) and [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
-- `read:avatar:jira`: for retrieving [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
+| Scope | Purpose |
+| --- | --- |
+| `read:jira-user` | for getting [users](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-users/#api-rest-api-3-users-search-get) |
+| `read:jira-work` | for getting information about [issues](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-get), [issue search](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get), [changelogs](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-changelog-get), [comments](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-get), [projects](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-projects/#api-rest-api-3-project-search-get) and [worklogs](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-worklogs/#api-rest-api-3-issue-issueidorkey-worklog-get) |
+| `read:group:jira` | for retrieving [groups](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-bulk-get) |
+| `read:user:jira` | for retrieving [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get) |
+| `read:avatar:jira` | for retrieving avatars referenced in the above |
 
-You will need a web browser (for the one-time service account/credential setup in
-`admin.atlassian.com`) and a terminal with `curl` and `jq` available (such as macOS terminal,
-Linux, an AWS Cloud Shell, [Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/install), etc).
-
-> **NOTE:** This connector previously used a user-delegated OAuth 2.0 (3LO) `refresh_token` flow,
-> which required re-authorizing (repeating the browser-consent steps) at least annually because
-> Atlassian caps a 3LO "token family" at a 1-year max lifetime. The service-account flow below
-> avoids that: there's no refresh token, and Atlassian's docs don't state an expiration for the
-> `CLIENT_SECRET` itself.
+You will need a web browser for the one-time service account/credential setup in
+`admin.atlassian.com`.
 
 ## Setup Instructions
 
 1. Go to [https://admin.atlassian.com](https://admin.atlassian.com), select your organization, then
    "Directory" > "Service accounts".
-2. Create a new service account (or select an existing one) and grant it product access to Jira on
-   the site you want to connect, with a role sufficient for the scopes below (read-only access is
-   enough for all scopes used by Psoxy).
+
+   ![Service accounts](../img/admin_service_accounts.png)
+
+2. Click "Create a service account". Give it a name (6-30 characters, e.g. `proxy_sa`) and an
+   optional description, then continue to "Select app roles".
+
+   ![Name service account](../img/admin_new_service_account.png)
 
    **NOTE** You can't change a service account's email after creation, and orgs get 5 free service
    accounts before requiring Atlassian Guard/Enterprise - plan the account name accordingly.
 
-3. From the service account's page, go to "Settings" (or "API keys") > "OAuth 2.0 credentials" and
-   create a new OAuth 2.0 credential. Select scopes for "Jira":
-   - Classic scopes: `read:jira-user`, `read:jira-work`
-   - Granular scopes: `read:group:jira`, `read:avatar:jira`, `read:user:jira`
+3. In the app roles table, find "Jira" and set its role to `User`. (If you also plan to connect
+   [Confluence Cloud](../confluence/README.md) with this same service account, set its role too.)
+   Finish creating the account.
 
-   **NOTE** Scopes are immutable once the credential is created; to change them later, you must
-   revoke the credential and create a new one.
+   ![Select app role](../img/admin_roles_for_sa.png)
 
-4. Save the credential and copy the "Client ID" and "Secret" - the secret is **shown only once**.
+4. From the service account's page, click "Create credentials".
 
-### Recommended: use the setup script
+   ![Service account created](../img/admin_created_service_account.png)
 
-With the Client ID and Secret from step 4, run [`tools/jira-cloud-auth.sh`](../../../../tools/jira-cloud-auth.sh)
-from your Psoxy repo checkout. It exchanges them for an access token, looks up your Jira Cloud ID,
-and prints the exact `CLIENT_ID`/`CLIENT_SECRET`/Cloud ID values to use below - no need to run the
-`curl` commands in [Manual steps](#manual-steps) yourself.
+5. Choose "OAuth 2.0" as the authentication type (the recommended option) and continue.
 
-### Manual steps
+   ![Choose authentication type](../img/admin_auth2_type.png)
 
-If you'd rather not run the script, do the following yourself:
+6. On the review screen, confirm the listed scopes match the list in Prerequisites above - granting
+   the `User` role on Jira alone produces exactly this set.
 
-5. Obtain an access token directly (no browser/consent step needed - this is a machine-to-machine
-   `client_credentials` exchange):
+   ![Review OAuth credential](../img/admin_oauth_credentials_jira.png)
+
+   **NOTE** Scopes are set by the app role(s) granted in step 3; you can't hand-pick scopes here, and
+   once the credential is created you can't modify it - revoke and re-create it if you need to
+   change the role/scopes later.
+
+7. Create the credential, then immediately copy the "Client ID" and "Client secret" - they are
+   **shown only once** and can't be recovered afterwards.
+
+   ![Client ID and secret](../img/admin_oauth_credentials_id_and_secret.png)
+
+8. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if
+   default implementation):
+   - `PSOXY_JIRA_CLOUD_CLIENT_ID` with the "Client ID" value.
+   - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with the "Client secret" value.
+
+That's all that's needed to run the connector - no refresh token, and no further interaction with
+Atlassian is required afterwards (Psoxy exchanges the client ID/secret for short-lived access
+tokens automatically, as needed).
+
+### Optional: Cloud ID, for generating example/test API call URLs
+
+The Jira Cloud ID is **not** required for the connector to authenticate or run - it's only used by
+Terraform to generate example/test API call URLs. If you want those, run
+[`tools/jira-cloud-id.sh`](../../../../tools/jira-cloud-id.sh) (give it your site's URL,
+e.g. `https://your-site.atlassian.net`) and set the Cloud ID it prints as the value of the
+`jira_cloud_id` variable in your `connector_settings` in `terraform.tfvars` (e.g.
+`connector_settings = { jira_cloud_id = "..." }`).
+
+If you'd rather not use the script, you can get the same value yourself - no credentials needed:
 
 ```shell
-curl --request POST --url 'https://auth.atlassian.com/oauth/token' \
-  --header 'Content-Type: application/x-www-form-urlencoded' \
-  --data-urlencode 'grant_type=client_credentials' \
-  --data-urlencode 'client_id=YOUR_CLIENT_ID' \
-  --data-urlencode 'client_secret=YOUR_CLIENT_SECRET'
+curl https://your-site.atlassian.net/_edge/tenant_info
 ```
 
-   You should see a JSON response like:
-
-```json
-{
-	"access_token": "some short-lived access token",
-	"expires_in": 3600,
-	"token_type": "Bearer"
-}
-```
-
-   (No `refresh_token` is returned or needed - request a new access token the same way whenever you
-   need one; Psoxy does this automatically.)
-
-6. Obtain the "Cloud ID" of your Jira instance. Use the following command, with the `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
-
-`curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
-
-And its response will be something like:
-
-```json
-[
-	{
-		"id": "SOME UUID",
-		"url": "https://your-site.atlassian.net",
-		"name": "your-site-name",
-		"scopes": ["read:jira-user", "read:jira-work"],
-		"avatarUrl": "https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/rocket.png"
-	}
-]
-```
-
-   Alternatively, an unauthenticated `GET https://your-site.atlassian.net/_edge/tenant_info` also
-   returns the Cloud ID (`cloudId` field) for a given site, if you'd rather skip the token exchange
-   just to look this up.
-
-### Finishing up
-
-Whether obtained via the script or manually, set the following variables in AWS System Manager
-parameters store / GCP Cloud Secrets (if default implementation):
-- `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
-- `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
-
-Do **not** set `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` - it's no longer used by this connector.
-
-In your Terraform configuration's `terraform.tfvars` file, set the `jira_cloud_id` variable in your `connector_settings` to the Cloud ID (the `id` value from step 6, or printed by the script) (e.g. `connector_settings = { jira_cloud_id = "..." }`). This will ensure that all **test URLs** are generated with the correct value, targeting a valid Jira Cloud instance.
+which returns `{"cloudId": "SOME-UUID", ...}` (or just open that URL in a browser). Use the
+`cloudId` value the same way as above.
 
 Example API call path parameters (uppercase placeholders in generated test calls):
 
-- `{CLOUD_ID}`: the Jira Cloud id from `GET /oauth/token/accessible-resources` (`connector_settings.jira_cloud_id`).
+- `{CLOUD_ID}`: the Jira Cloud id (`connector_settings.jira_cloud_id`, see above).
 - `{ISSUE_ID}`: a Jira issue key or id (`connector_settings.jira_example_issue_id`), e.g. `ETV-12`.
 - `{GROUP_ID}`: a group id from `GET .../group/bulk` (query param on `/group/member`).

@@ -14,7 +14,8 @@ NOTE: These instructions are derived from [worklytics-connector-specs](../../../
 
 Example API call path parameters (uppercase placeholders in generated test calls):
 
-- `{CLOUD_ID}`: Confluence Cloud id from `GET /oauth/token/accessible-resources` (`connector_settings.confluence_example_cloud_id`).
+- `{CLOUD_ID}`: Confluence Cloud id (`connector_settings.confluence_example_cloud_id`, see
+  [Optional: Cloud ID](#optional-cloud-id-for-generating-exampletest-api-call-urls) below).
 - `{GROUP_ID}`: a group id from `GET .../wiki/rest/api/group`.
 - `{ATTACHMENT_ID}`: an attachment id from content search / v2 APIs (the attachments-versions rule names this path param `{pageId}`; fill it with the attachment id).
 - `{BLOGPOST_ID}` / `{PAGE_ID}` / `{CUSTOM_CONTENT_ID}` / `{COMMENT_ID}`: ids of the corresponding Confluence objects whose versions you want to list. `{version}` in the rules is `v2` in the examples.
@@ -24,132 +25,105 @@ of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 ## Prerequisites
 
-As of this version, Confluence Cloud through Psoxy authenticates using an [Atlassian OAuth 2.0
-credential for a service account](https://support.atlassian.com/user-management/docs/create-oauth-2-0-credential-for-service-accounts/)
-(a "2LO"/`client_credentials` grant) rather than a user-delegated OAuth 2.0 (3LO) `refresh_token`.
-This requires:
+Confluence Cloud through Psoxy authenticates using an [Atlassian OAuth 2.0 credential for a service
+account](https://support.atlassian.com/user-management/docs/create-oauth-2-0-credential-for-service-accounts/)
+(a "2LO"/`client_credentials` grant). This requires:
 
 - Your Atlassian organization must be on the **centralized user management** experience
   (`admin.atlassian.com`). Org admin access is required to create the service account and its
   credential.
-- A **service account** (orgs get 5 free; more available via Atlassian Guard/Enterprise) granted
-  product access to the Confluence site you want to connect, with a role sufficient for the scopes
+- A **service account** (orgs get 5 free; more available via Atlassian Guard/Enterprise) granted a
+  role (e.g. `User`) on the Confluence site you want to connect, sufficient to produce the scopes
   below.
 
-The OAuth 2.0 credential uses the following granular scopes:
-- `read:blogpost:confluence`: for getting [blogposts and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-blogposts-id-versions-get)
-- `read:comment:confluence`: for getting [footer-comments](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-footer-comments-id-versions-get) and [inline-comments](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-inline-comments-id-versions-get) and their versions
-- `read:group:confluence`: for getting [groups](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-group/#api-wiki-rest-api-group-get)
-- `read:user:confluence`: for getting [users from groups](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-group/#api-wiki-rest-api-group-groupid-membersbygroupid-get)
-- `read:space:confluence`: for getting [spaces](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-space/#api-spaces-get)
-- `read:attachment:confluence`: for getting [attachments and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-attachments-id-versions-get)
-- `read:page:confluence`: for getting [pages and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-pages-id-versions-get)
-- `read:task:confluence`: for getting [tasks](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-task/#api-tasks-get)
-- `read:content-details:confluence`: for using [content search endpoint](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-search/#api-wiki-rest-api-search-get)
+Granting the service account a role on Confluence grants an OAuth 2.0 credential created for it a
+set of scopes, which should include the following (used by Psoxy) - confirm this on the review
+screen when creating the credential (step 6 below), since available roles/scopes can vary by plan:
+| Scope | Purpose |
+| --- | --- |
+| `read:blogpost:confluence` | for getting [blogposts and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-blogposts-id-versions-get) |
+| `read:comment:confluence` | for getting [footer-comments](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-footer-comments-id-versions-get) and [inline-comments](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-inline-comments-id-versions-get) and their versions |
+| `read:group:confluence` | for getting [groups](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-group/#api-wiki-rest-api-group-get) |
+| `read:user:confluence` | for getting [users from groups](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-group/#api-wiki-rest-api-group-groupid-membersbygroupid-get) |
+| `read:space:confluence` | for getting [spaces](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-space/#api-spaces-get) |
+| `read:attachment:confluence` | for getting [attachments and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-attachments-id-versions-get) |
+| `read:page:confluence` | for getting [pages and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-pages-id-versions-get) |
+| `read:task:confluence` | for getting [tasks](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-task/#api-tasks-get) |
+| `read:content-details:confluence` | for using [content search endpoint](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-search/#api-wiki-rest-api-search-get) |
 
-> **NOTE:** This connector previously used a user-delegated OAuth 2.0 (3LO) `refresh_token` flow
-> (via the [Psoxy OAuth setup tool](https://github.com/Worklytics/psoxy-oauth-setup-tool) or manual
-> browser-consent steps), which required re-authorizing at least annually because Atlassian caps a
-> 3LO "token family" at a 1-year max lifetime. The service-account flow below avoids that: there's
-> no refresh token, and Atlassian's docs don't state an expiration for the `CLIENT_SECRET` itself.
+You will need a web browser for the one-time service account/credential setup in
+`admin.atlassian.com`.
 
 ## Setup Instructions
 
 1. Go to [https://admin.atlassian.com](https://admin.atlassian.com), select your organization, then
    "Directory" > "Service accounts".
-2. Create a new service account (or select an existing one) and grant it product access to
-   Confluence on the site you want to connect, with a role sufficient for the scopes above
-   (read-only access is enough for all scopes used by Psoxy).
+
+   ![Service accounts](../img/admin_service_accounts.png)
+
+2. Click "Create a service account" (or re-use an existing one, e.g. if you've already set one up
+   for [Jira Cloud](../jira/README.md)). Give it a name (6-30 characters, e.g. `proxy_sa`) and an
+   optional description, then continue to "Select app roles".
+
+   ![Name service account](../img/admin_new_service_account.png)
 
    **NOTE** You can't change a service account's email after creation, and orgs get 5 free service
    accounts before requiring Atlassian Guard/Enterprise - plan the account name accordingly.
 
-3. From the service account's page, go to "Settings" (or "API keys") > "OAuth 2.0 credentials" and
-   create a new OAuth 2.0 credential. Select scopes for "Confluence" matching the list above.
+3. In the app roles table, find "Confluence" and set its role (e.g. `User`). Finish creating the
+   account.
 
-   **NOTE** Scopes are immutable once the credential is created; to change them later, you must
-   revoke the credential and create a new one.
+   ![Select app role](../img/admin_roles_for_sa.png)
 
-4. Save the credential and copy the "Client ID" and "Secret" - the secret is **shown only once**.
+4. From the service account's page, click "Create credentials".
 
-### Recommended: use the setup script
+   ![Service account created](../img/admin_created_service_account.png)
 
-With the Client ID and Secret from step 4, run [`tools/confluence-cloud-auth.sh`](../../../../tools/confluence-cloud-auth.sh)
-from your Psoxy repo checkout. It exchanges them for an access token, looks up your Confluence
-Cloud ID, and prints the exact `CLIENT_ID`/`CLIENT_SECRET`/Cloud ID values to use below - no need to
-run the `curl` commands in [Manual steps](#manual-steps) yourself.
+5. Choose "OAuth 2.0" as the authentication type (the recommended option) and continue.
 
-### Manual steps
+   ![Choose authentication type](../img/admin_auth2_type.png)
 
-If you'd rather not run the script, do the following yourself:
+6. On the review screen, confirm the listed scopes match the list in Prerequisites above. (The
+   screenshot below is from the Jira flow, shown as an illustration of the review step - yours will
+   read "Credentials for Confluence" and list the Confluence scopes instead.)
 
-5. Obtain an access token directly (no browser/consent step needed - this is a machine-to-machine
-   `client_credentials` exchange):
+   ![Review OAuth credential (illustrative)](../img/admin_oauth_credentials_jira.png)
+
+   **NOTE** Scopes are set by the app role granted in step 3; you can't hand-pick scopes here, and
+   once the credential is created you can't modify it - revoke and re-create it if you need to
+   change the role/scopes later.
+
+7. Create the credential, then immediately copy the "Client ID" and "Client secret" - they are
+   **shown only once** and can't be recovered afterwards.
+
+   ![Client ID and secret](../img/admin_oauth_credentials_id_and_secret.png)
+
+8. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if
+   default implementation):
+   - `PSOXY_CONFLUENCE_CLOUD_CLIENT_ID` with the "Client ID" value.
+   - `PSOXY_CONFLUENCE_CLOUD_CLIENT_SECRET` with the "Client secret" value.
+
+That's all that's needed to run the connector - no refresh token, and no further interaction with
+Atlassian is required afterwards (Psoxy exchanges the client ID/secret for short-lived access
+tokens automatically, as needed).
+
+### Optional: Cloud ID, for generating example/test API call URLs
+
+The Confluence Cloud ID is **not** required for the connector to authenticate or run - it's only
+used by Terraform to generate example/test API call URLs. If you want those, run
+[`tools/confluence-cloud-id.sh`](../../../../tools/confluence-cloud-id.sh) (give it your site's URL,
+e.g. `https://your-site.atlassian.net`) and set the Cloud ID it prints as the value of the
+`confluence_example_cloud_id` variable in your `connector_settings` in `terraform.tfvars` (e.g.
+`connector_settings = { confluence_example_cloud_id = "..." }`).
+
+If you'd rather not use the script, you can get the same value yourself - no credentials needed:
 
 ```shell
-curl --request POST --url 'https://auth.atlassian.com/oauth/token' \
-  --header 'Content-Type: application/x-www-form-urlencoded' \
-  --data-urlencode 'grant_type=client_credentials' \
-  --data-urlencode 'client_id=YOUR_CLIENT_ID' \
-  --data-urlencode 'client_secret=YOUR_CLIENT_SECRET'
+curl https://your-site.atlassian.net/_edge/tenant_info
 ```
 
-   You should see a JSON response like:
-
-```json
-{
-  "access_token": "some short-lived access token",
-  "expires_in": 3600,
-  "token_type": "Bearer"
-}
-```
-
-   (No `refresh_token` is returned or needed - request a new access token the same way whenever you
-   need one; Psoxy does this automatically.)
-
-6. Obtain the "Cloud ID" of your Confluence instance. Use the following command, with the
-   `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
-   `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
-   And its response will be something like:
-   ```json
-   [
-     {
-       "id":"SOME UUID",
-       "url":"https://your-site.atlassian.net",
-       "name":"your-site-name",
-        "scopes": [
-            "read:attachment:confluence",
-            "read:blogpost:confluence",
-            "read:comment:confluence",
-            "read:content-details:confluence",
-            "read:content:confluence",
-            "read:group:confluence",
-            "read:page:confluence",
-            "read:space:confluence",
-            "read:user:confluence"
-        ],
-       "avatarUrl":"https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/rocket.png"
-     }
-   ]
-   ```
-
-   Alternatively, an unauthenticated `GET https://your-site.atlassian.net/_edge/tenant_info` also
-   returns the Cloud ID (`cloudId` field) for a given site, if you'd rather skip the token exchange
-   just to look this up.
-
-### Finishing up
-
-Whether obtained via the script or manually, set the following variables in AWS System Manager
-parameters store / GCP Cloud Secrets (if default implementation):
-- `PSOXY_CONFLUENCE_CLOUD_CLIENT_ID` with `Client Id` value.
-- `PSOXY_CONFLUENCE_CLOUD_CLIENT_SECRET` with `Client Secret` value.
-
-Do **not** set `PSOXY_CONFLUENCE_CLOUD_REFRESH_TOKEN` - it's no longer used by this connector.
-
-Add the Cloud ID (the `id` value from step 6, or printed by the script) as the value of the
-`confluence_example_cloud_id` variable in your `connector_settings` in the `terraform.tfvars` file
-of your Terraform configuration (e.g. `connector_settings = { confluence_example_cloud_id = "..." }`).
-This will generate all the test URLs with a proper value.
+which returns `{"cloudId": "SOME-UUID", ...}` (or just open that URL in a browser). Use the
+`cloudId` value the same way as above.
 
 ### Troubleshooting
 
