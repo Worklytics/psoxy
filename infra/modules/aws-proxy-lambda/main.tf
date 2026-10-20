@@ -393,6 +393,7 @@ output "function_arn" {
 }
 
 output "function_name" {
+  # TODO(v0.8): revisit with invoke permissions wired to function_arn (see aws-proxy-bulk / aws-proxy-api)
   value = aws_lambda_function.instance.function_name
 }
 

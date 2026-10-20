@@ -188,13 +188,17 @@ resource "aws_apigatewayv2_route" "collect" {
 resource "aws_lambda_permission" "api_gateway" {
   statement_id  = "Allow${module.gate_instance.function_name}Invoke"
   action        = "lambda:InvokeFunction"
-  function_name = module.gate_instance.function_arn
+  function_name = module.gate_instance.function_name
+  # TODO(v0.8): use function ARN (provider `function_name` accepts ARN) and remove `depends_on` below
+  # function_name = module.gate_instance.function_arn
   principal     = "apigateway.amazonaws.com"
 
   # The /*/*/ part allows invocation from any stage, method and resource path
   # within API Gateway REST API.
   # TODO: limit by http method here too?  for webhooks, would need POST, OPTIONS at min
   source_arn = "${var.api_gateway_v2.execution_arn}/*/*/${module.gate_instance.function_name}/*"
+
+  depends_on = [module.gate_instance] # TODO(v0.8): remove once invoke permissions use function_arn
 }
 
 
