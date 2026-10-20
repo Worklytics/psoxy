@@ -88,7 +88,7 @@
             "content":{
               "object":"compliance.workspace.conversation.message.content",
               "type":"text",
-              "value":"{\"length\":39,\"word_count\":9}"
+              "value":"{\"keywords\":{\"what are\":1},\"length\":39,\"word_count\":9}"
             }
           }
         ]
