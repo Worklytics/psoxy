@@ -27,7 +27,9 @@ locals {
 
   http_methods = var.http_methods # Use http_methods directly without adding OPTIONS
 
-  auth_issuer = "${var.api_gateway_v2.stage_invoke_url}/${module.gate_instance.function_name}"
+  # plan-time name (matches aws-proxy-lambda local.function_name); do not use module.gate_instance.function_name here—would cycle via AUTH_ISSUER env var once that output depends on the Lambda resource (v0.8)
+  gate_function_name = "${module.env_id.id}-${var.instance_id}"
+  auth_issuer        = "${var.api_gateway_v2.stage_invoke_url}/${local.gate_function_name}"
 
   collection_path = "/collect"
 }
