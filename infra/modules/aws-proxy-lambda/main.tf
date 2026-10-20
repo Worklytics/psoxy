@@ -393,7 +393,7 @@ output "function_arn" {
 }
 
 output "function_name" {
-  value = local.function_name
+  value = aws_lambda_function.instance.function_name
 }
 
 output "iam_role_for_lambda_arn" {
