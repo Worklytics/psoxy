@@ -1329,12 +1329,6 @@ EOT
           sensitive : true
           value_managed_by_tf : false
         },
-        {
-          name : "REFRESH_TOKEN"
-          writable : true
-          sensitive : true
-          value_managed_by_tf : false
-        },
         local.standard_config_values.oauth_refresh_token_lock,
         {
           name : "CLIENT_ID"
@@ -1349,9 +1343,15 @@ EOT
           value_managed_by_tf : false
         }
       ],
+      # Atlassian OAuth 2.0 credentials for service accounts (2LO/client_credentials). Replaces the
+      # prior 3LO `refresh_token` flow (see CHANGELOG, Unreleased, "atlassian" entry) - no interactive
+      # browser consent, no REFRESH_TOKEN, and (per Atlassian's docs) no stated expiration on the
+      # CLIENT_SECRET itself, vs the 1-year max lifetime of a 3LO "token family".
       environment_variables : {
-        GRANT_TYPE : "refresh_token"
+        GRANT_TYPE : "client_credentials"
+        CREDENTIALS_FLOW : "client_secret"
         REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
+        ACCESS_TOKEN_CACHEABLE : "true"
         USE_SHARED_TOKEN : "TRUE"
       }
       settings_to_provide = {
@@ -1438,12 +1438,6 @@ EOT
           sensitive : true
           value_managed_by_tf : false
         },
-        {
-          name : "REFRESH_TOKEN"
-          writable : true
-          sensitive : true
-          value_managed_by_tf : false
-        },
         local.standard_config_values.oauth_refresh_token_lock,
         {
           name : "CLIENT_ID"
@@ -1458,9 +1452,15 @@ EOT
           value_managed_by_tf : false
         }
       ],
+      # Atlassian OAuth 2.0 credentials for service accounts (2LO/client_credentials). Replaces the
+      # prior 3LO `refresh_token` flow (see CHANGELOG, Unreleased, "atlassian" entry) - no interactive
+      # browser consent, no REFRESH_TOKEN, and (per Atlassian's docs) no stated expiration on the
+      # CLIENT_SECRET itself, vs the 1-year max lifetime of a 3LO "token family".
       environment_variables : {
-        GRANT_TYPE : "refresh_token"
+        GRANT_TYPE : "client_credentials"
+        CREDENTIALS_FLOW : "client_secret"
         REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
+        ACCESS_TOKEN_CACHEABLE : "true"
         USE_SHARED_TOKEN : "TRUE"
       }
       settings_to_provide = {
