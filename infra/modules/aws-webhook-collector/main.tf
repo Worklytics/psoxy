@@ -188,7 +188,7 @@ resource "aws_apigatewayv2_route" "collect" {
 resource "aws_lambda_permission" "api_gateway" {
   statement_id  = "Allow${module.gate_instance.function_name}Invoke"
   action        = "lambda:InvokeFunction"
-  function_name = module.gate_instance.function_name
+  function_name = module.gate_instance.function_arn
   principal     = "apigateway.amazonaws.com"
 
   # The /*/*/ part allows invocation from any stage, method and resource path

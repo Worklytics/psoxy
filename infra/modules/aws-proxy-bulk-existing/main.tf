@@ -41,7 +41,8 @@ data "aws_s3_bucket" "input" {
 resource "aws_lambda_permission" "allow_input_bucket" {
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
-  function_name = module.psoxy_lambda.function_name
+  # provider argument is `function_name`, but value must be the function ARN to depend on the Lambda resource
+  function_name = module.psoxy_lambda.function_arn
   principal     = "s3.amazonaws.com"
   source_arn    = data.aws_s3_bucket.input.arn
 }

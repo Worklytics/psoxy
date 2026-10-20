@@ -297,7 +297,7 @@ resource "aws_lambda_permission" "api_gateway" {
 
   statement_id  = "Allow${module.psoxy_lambda.function_name}Invoke"
   action        = "lambda:InvokeFunction"
-  function_name = module.psoxy_lambda.function_name
+  function_name = module.psoxy_lambda.function_arn
   principal     = "apigateway.amazonaws.com"
 
 
