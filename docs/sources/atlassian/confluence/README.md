@@ -72,6 +72,17 @@ The OAuth 2.0 credential uses the following granular scopes:
 
 4. Save the credential and copy the "Client ID" and "Secret" - the secret is **shown only once**.
 
+### Recommended: use the setup script
+
+With the Client ID and Secret from step 4, run [`tools/confluence-cloud-auth.sh`](../../../../tools/confluence-cloud-auth.sh)
+from your Psoxy repo checkout. It exchanges them for an access token, looks up your Confluence
+Cloud ID, and prints the exact `CLIENT_ID`/`CLIENT_SECRET`/Cloud ID values to use below - no need to
+run the `curl` commands in [Manual steps](#manual-steps) yourself.
+
+### Manual steps
+
+If you'd rather not run the script, do the following yourself:
+
 5. Obtain an access token directly (no browser/consent step needed - this is a machine-to-machine
    `client_credentials` exchange):
 
@@ -96,13 +107,7 @@ curl --request POST --url 'https://auth.atlassian.com/oauth/token' \
    (No `refresh_token` is returned or needed - request a new access token the same way whenever you
    need one; Psoxy does this automatically.)
 
-6. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-    - `PSOXY_CONFLUENCE_CLOUD_CLIENT_ID` with `Client Id` value.
-    - `PSOXY_CONFLUENCE_CLOUD_CLIENT_SECRET` with `Client Secret` value.
-
-   Do **not** set `PSOXY_CONFLUENCE_CLOUD_REFRESH_TOKEN` - it's no longer used by this connector.
-
-7. Optional, obtain the "Cloud ID" of your Confluence instance. Use the following command, with the
+6. Obtain the "Cloud ID" of your Confluence instance. Use the following command, with the
    `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
    `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
    And its response will be something like:
@@ -132,9 +137,19 @@ curl --request POST --url 'https://auth.atlassian.com/oauth/token' \
    returns the Cloud ID (`cloudId` field) for a given site, if you'd rather skip the token exchange
    just to look this up.
 
-Add the `id` value from that JSON response as the value of the `confluence_example_cloud_id` variable in your `connector_settings` in the
-`terraform.tfvars` file of your Terraform configuration (e.g. `connector_settings = { confluence_example_cloud_id = "..." }`). This will generate all the test URLs with
-a proper value.
+### Finishing up
+
+Whether obtained via the script or manually, set the following variables in AWS System Manager
+parameters store / GCP Cloud Secrets (if default implementation):
+- `PSOXY_CONFLUENCE_CLOUD_CLIENT_ID` with `Client Id` value.
+- `PSOXY_CONFLUENCE_CLOUD_CLIENT_SECRET` with `Client Secret` value.
+
+Do **not** set `PSOXY_CONFLUENCE_CLOUD_REFRESH_TOKEN` - it's no longer used by this connector.
+
+Add the Cloud ID (the `id` value from step 6, or printed by the script) as the value of the
+`confluence_example_cloud_id` variable in your `connector_settings` in the `terraform.tfvars` file
+of your Terraform configuration (e.g. `connector_settings = { confluence_example_cloud_id = "..." }`).
+This will generate all the test URLs with a proper value.
 
 ### Troubleshooting
 

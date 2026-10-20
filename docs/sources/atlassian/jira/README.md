@@ -30,10 +30,9 @@ And following granular scopes:
 - `read:group:jira`: for retrieving [groups](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-bulk-get) and [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
 - `read:avatar:jira`: for retrieving [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
 
-You will need a web browser and a terminal with `curl` and `jq` available (such as macOS terminal,
+You will need a web browser (for the one-time service account/credential setup in
+`admin.atlassian.com`) and a terminal with `curl` and `jq` available (such as macOS terminal,
 Linux, an AWS Cloud Shell, [Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/install), etc).
-Alternatively, use [`tools/jira-cloud-auth.sh`](../../../../tools/jira-cloud-auth.sh), which automates
-all the steps below other than creating the service account itself.
 
 > **NOTE:** This connector previously used a user-delegated OAuth 2.0 (3LO) `refresh_token` flow,
 > which required re-authorizing (repeating the browser-consent steps) at least annually because
@@ -62,6 +61,17 @@ all the steps below other than creating the service account itself.
 
 4. Save the credential and copy the "Client ID" and "Secret" - the secret is **shown only once**.
 
+### Recommended: use the setup script
+
+With the Client ID and Secret from step 4, run [`tools/jira-cloud-auth.sh`](../../../../tools/jira-cloud-auth.sh)
+from your Psoxy repo checkout. It exchanges them for an access token, looks up your Jira Cloud ID,
+and prints the exact `CLIENT_ID`/`CLIENT_SECRET`/Cloud ID values to use below - no need to run the
+`curl` commands in [Manual steps](#manual-steps) yourself.
+
+### Manual steps
+
+If you'd rather not run the script, do the following yourself:
+
 5. Obtain an access token directly (no browser/consent step needed - this is a machine-to-machine
    `client_credentials` exchange):
 
@@ -86,13 +96,7 @@ curl --request POST --url 'https://auth.atlassian.com/oauth/token' \
    (No `refresh_token` is returned or needed - request a new access token the same way whenever you
    need one; Psoxy does this automatically.)
 
-6. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-   - `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
-   - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
-
-   Do **not** set `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` - it's no longer used by this connector.
-
-7. Obtain the "Cloud ID" of your Jira instance. Use the following command, with the `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
+6. Obtain the "Cloud ID" of your Jira instance. Use the following command, with the `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
 
 `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
 
@@ -114,7 +118,16 @@ And its response will be something like:
    returns the Cloud ID (`cloudId` field) for a given site, if you'd rather skip the token exchange
    just to look this up.
 
-In your Terraform configuration's `terraform.tfvars` file, set the `jira_cloud_id` variable in your `connector_settings` to the `id` value from the JSON response (e.g. `connector_settings = { jira_cloud_id = "..." }`). This will ensure that all **test URLs** are generated with the correct value, targeting a valid Jira Cloud instance.
+### Finishing up
+
+Whether obtained via the script or manually, set the following variables in AWS System Manager
+parameters store / GCP Cloud Secrets (if default implementation):
+- `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
+- `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
+
+Do **not** set `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` - it's no longer used by this connector.
+
+In your Terraform configuration's `terraform.tfvars` file, set the `jira_cloud_id` variable in your `connector_settings` to the Cloud ID (the `id` value from step 6, or printed by the script) (e.g. `connector_settings = { jira_cloud_id = "..." }`). This will ensure that all **test URLs** are generated with the correct value, targeting a valid Jira Cloud instance.
 
 Example API call path parameters (uppercase placeholders in generated test calls):
 
