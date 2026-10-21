@@ -29,7 +29,7 @@ The proxy **authenticates** itself for calls to the data source using one of the
 In particular, a quick overview for common sources:
   - Google Workspace sources authenticate via Client Credentials (a GCP Service Account key)
   - GitHub authenticates via Client Credentials (a GitHub App client id + key)
-  - Jira and Confluence Cloud authenticate via Client Credentials (an Atlassian OAuth 2.0 service account client id + secret)
+  - Jira and Confluence Cloud authenticate via a user-delegated OAuth 2.0 (3LO) `refresh_token` (`jira-cloud`/`confluence-cloud`, deprecated) or, in the newer `jira-cloud-service-account`/`confluence-cloud-service-account` connectors, via Client Credentials (an Atlassian OAuth 2.0 service account client id + secret)
   - Microsoft 365 sources authenticate via Workload Identity Federation (OIDC trust federation between AWS/GCP and Microsoft Entra ID)
   - Salesforce authenticates via Client Credentials (a Salesforce App client id + secret)
   - Slack authenticates via Client Credentials (a Slack App token)
