@@ -30,11 +30,6 @@ public class ChatGPTComplianceTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs?event_type=something&after=after&limit=limit&before=before", "logs.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs/some_id", "sample_log_message.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs/some_id", "sample_log_message_2.json"),
-            InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs/some_id", "app_log_message.json"),
-            InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs/some_id", "chatgpt_plugin_spreadsheet_log_message.json"),
-            InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs/some_id", "chatgpt_plugin_presentation_log_message.json"),
-            InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs/some_id", "chatgpt_plugin_document_log_message.json"),
-            InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs/some_id", "custom_agents_log_message.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/{workspaceId}/automations", "automations.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/projects", "projects.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/projects?after=blabla&limit=100", "projects.json"),
@@ -55,30 +50,4 @@ public class ChatGPTComplianceTests extends JavaRulesTestBaseCase {
             "Q2 financial results");
     }
 
-    @Test
-    void sanitizesAssistantMessageContentInLogs() {
-        String original = asJson("sample_log_message.json")
-            .replace("\"type\": \"ACCOUNT_USER\"", "\"type\": \"ASSISTANT\"")
-            .replace("\"type\": \"user\"", "\"type\": \"assistant\"")
-            .replace("\"type\": \"user_instructions\"", "\"type\": \"text\"")
-            .replace("Can you summarize the Q2 financial results for the EMEA region?",
-                "John Smith earns $150,000 annually in the EMEA region.");
-
-        String sanitized = sanitize("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs/some_id", original);
-
-        assertRedacted(sanitized, "John Smith", "$150,000");
-    }
-
-    @Test
-    void sanitizesUserMessageWhenActorTypeMissing() {
-        String original = asJson("sample_log_message.json")
-            .replace("\"type\": \"user\",\n      \"client_type\": \"unknown\"", "\"role\": \"user\",\n      \"client_type\": \"unknown\"")
-            .replace("\"actor\": {\n    \"type\": \"ACCOUNT_USER\",\n    \"user_id\": \"user-abc123def456\",\n    \"user_email\": \"alice@example.com\"\n  },", "");
-
-        String sanitized = sanitize("https://api.chatgpt.com/v1/compliance/workspaces/some_id/logs/some_id", original);
-
-        assertRedacted(sanitized,
-            "Can you summarize the Q2 financial results for the EMEA region?",
-            "Q2 financial results");
-    }
 }

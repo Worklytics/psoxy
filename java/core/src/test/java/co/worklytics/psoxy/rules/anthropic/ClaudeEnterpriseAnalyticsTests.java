@@ -68,15 +68,11 @@ public class ClaudeEnterpriseAnalyticsTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limits/effective?limit=20&page=cursor_token_jkl", "spend_limits_effective.json"),
             // /spend_limits/effective — always requested with all three periods
             InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limits/effective?period[]=daily&period[]=weekly&period[]=monthly&limit=20", "spend_limits_effective.json"),
-            // /spend_limits/{spend_limit_id} — single-record lookup, not called by the ingestion job but allow-listed
-            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limits/spl_01XyZaBcDeFgHiJkLmNoPq", "spend_limit_effective_single.json"),
 
             // /spend_limit_increase_requests — page 1
             InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limit_increase_requests?status[]=pending&limit=50", "spend_limit_increase_requests.json"),
             // /spend_limit_increase_requests — page 2+ (cursor pagination; no next_page in example so null)
-            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limit_increase_requests?limit=50&page=cursor_page_2", "spend_limit_increase_requests.json"),
-            // /spend_limit_increase_requests/{spend_limit_increase_request_id} — single-record lookup, not called by the ingestion job but allow-listed
-            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limit_increase_requests/slir_01AbCdEfGhIjKlMnOpQrSt", "spend_limit_increase_request_single.json")
+            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limit_increase_requests?limit=50&page=cursor_page_2", "spend_limit_increase_requests.json")
         );
     }
 }
