@@ -17,8 +17,8 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `claude-enterprise-analytics` | [Claude Enterprise Analytics](anthropic/claude-enterprise-analytics/README.md) | API  | BETA         |
 | `claude-code`              | [Claude Code](anthropic/claude-code/README.md)                              | API  | BETA         |
 | `codex-enterprise-analytics` | [Codex Enterprise Analytics](codex-enterprise-analytics/README.md)        | API  | BETA         |
-| `confluence-cloud`         | [Confluence Cloud](atlassian/confluence/README.md)                          | API  | DEPRECATED   |
-| `confluence-cloud-service-account` | [Confluence Cloud (Service Account)](atlassian/confluence/service-account.md) | API  | BETA         |
+| `confluence-cloud`         | [Confluence Cloud (deprecated)](atlassian/confluence/README.md#deprecated-confluence-cloud-3lo) | API  | DEPRECATED   |
+| `confluence-cloud-service-account` | [Confluence Cloud](atlassian/confluence/README.md) | API  | BETA         |
 | `cursor`                   | [Cursor](cursor/README.md)                                                  | API  | BETA         |
 | `dropbox-business`         | [Dropbox Business](dropbox-business/README.md)                              | API  | DEPRECATED   |
 | `gcal`                     | [Google Calendar](google-workspace/calendar/README.md)                      | API  | GA           |
@@ -38,8 +38,8 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `google-chat`              | [Google Chat](google-workspace/google-chat/README.md)                       | API  | GA           |
 | `google-meet`              | [Google Meet](google-workspace/meet/README.md)                              | API  | GA           |
 | `hris`                     | [HRIS](hris/README.md)                                                      | Bulk | GA           |
-| `jira-cloud`               | [Jira Cloud](atlassian/jira/README.md)                                      | API  | DEPRECATED   |
-| `jira-cloud-service-account` | [Jira Cloud (Service Account)](atlassian/jira/service-account.md)         | API  | GA           |
+| `jira-cloud`               | [Jira Cloud (deprecated)](atlassian/jira/README.md#deprecated-jira-cloud-3lo) | API  | DEPRECATED   |
+| `jira-cloud-service-account` | [Jira Cloud](atlassian/jira/README.md)                                    | API  | GA           |
 | `jira-server`              | [Jira Server / Data Center](atlassian/jira/jira-server.md)                  | API  | GA           |
 | `metrics`                  | [Metrics](metrics/README.md)                                                | Bulk | BETA         |
 | `msft-copilot`             | [Microsoft 365 Copilot](microsoft-365/msft-copilot/README.md)               | API  | ALPHA        |
