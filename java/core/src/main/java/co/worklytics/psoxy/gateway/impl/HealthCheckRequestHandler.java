@@ -130,7 +130,7 @@ public class HealthCheckRequestHandler {
                 .configuredHost(apiModeConfig.getTargetHost().orElse(null))
                 .nonDefaultSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
                 .pseudonymImplementation(proxyConfig.getPseudonymImplementation()
-                    .map(Enum::name).orElse(null))
+                    .map(implementation -> implementation.getHttpHeaderValue()).orElse(null))
                 .missingConfigProperties(missing)
                 .callerIp(request.getClientIp().orElse("unknown"));
 
