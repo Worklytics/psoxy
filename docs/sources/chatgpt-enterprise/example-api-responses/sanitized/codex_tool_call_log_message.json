@@ -1,5 +1,5 @@
 {
-  "event_id":"evt_20260520_abc123def456",
+  "event_id":"e2b1a3c4-52b7-4e20-a901-2ddb2bf9c332",
   "type":"CODEX_LOG",
   "principal":{
     "id":"t~TDhE_IAxxWoLdspQg3HZYlI9IEx8ylVhXguQIRJb7vc",
@@ -10,23 +10,17 @@
     "user_id":"t~QNybpbKvUYf4HL8gqEZfPRwjlz4FbGlr4mKOaduViYc",
     "user_email":"t~knxWE5tapsutcz6pLWSC3wfb5t34lCrXNZsKnhwyVXk@example.com"
   },
-  "event_type":"PROMPT_SENT",
+  "event_type":"TOOL_CALL_COMPLETED",
   "client_id":"CODEX_CLI",
   "workspace_id":"be545252-ad04-4cfa-9ca5-deca58416151",
   "event_details":{
-    "detail_type":"PROMPT_SENT",
+    "detail_type":"TOOL_CALL_COMPLETED",
     "session_id":"session-abc123",
-    "prompt_text":"{\"keywords\":{\"review\":1,\"summarize\":1},\"length\":72,\"word_count\":13}",
     "status":"completed",
-    "model":"gpt-5.1-codex-max",
-    "service_tier":"default",
-    "reasoning_effort":"medium",
-    "token_usage":{
-      "input_tokens":45,
-      "output_tokens":38,
-      "cached_input_tokens":12,
-      "reasoning_output_tokens":0
-    },
-    "environment_id":null
+    "call_id":"call-002",
+    "tool_name":"shell",
+    "tool_type":"local",
+    "tool_input":"{\"keywords\":{\"summarize\":1},\"length\":53,\"word_count\":8}",
+    "tool_call_id":"toolcall-001"
   }
 }

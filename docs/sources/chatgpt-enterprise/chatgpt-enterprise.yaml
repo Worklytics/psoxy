@@ -1,488 +1,542 @@
 ---
 endpoints:
-  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/automations"
-    allowedQueryParams:
-      - "after"
-      - "limit"
-    transforms:
-      - !<textDigest>
-        jsonPaths:
-          - "$.data[*].title"
-          - "$.data[*].prompt"
-    responseSchema:
-      type: "object"
-      properties:
-        data:
-          type: "array"
-          items:
-            $ref: "#/definitions/ExportAutomation"
-        has_more:
-          type: "boolean"
-        last_end_time:
-          type: "string"
-          format: "date-time"
-        last_id:
-          type: "string"
-        object:
-          type: "string"
-  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/conversations"
-    allowedQueryParams:
-      - "since_timestamp"
-      - "after"
-      - "limit"
-      - "users"
-      - "file_format"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.data[*].user_email"
-          - "$.data[*].user_id"
-      - !<redact>
-        jsonPaths:
-          - "$.data[*]..files[*].name"
-          - "$.data[*]..files[*].download_url"
-      - !<textDigest>
-        jsonPaths:
-          - "$.data[*]..title"
-          - "$.data[*]..messages.data[?(@.author.role == 'user')]..content.value"
-        keywords:
-          - "python"
-          - "javascript"
-          - "typescript"
-          - "java"
-          - "sql"
-          - "html"
-          - "react"
-          - "bash"
-          - "css"
-          - "docker"
-          - "ruby"
-          - "golang"
-          - "kotlin"
-          - "php"
-          - "node"
-          - "angular"
-          - "vue"
-          - "swift"
-          - "npm"
-          - "github"
-          - "git"
-          - "function"
-          - "error"
-          - "api"
-          - "debug"
-          - "implement"
-          - "bug"
-          - "deploy"
-          - "script"
-          - "class"
-          - "method"
-          - "array"
-          - "exception"
-          - "refactor"
-          - "compile"
-          - "callback"
-          - "const"
-          - "async"
-          - "await"
-          - "pull request"
-          - "code review"
-          - "unit test"
-          - "stack trace"
-          - "code"
-          - "generate image"
-          - "create image"
-          - "draw image"
-          - "make image"
-          - "design image"
-          - "picture of"
-          - "illustration of"
-          - "visual of"
-          - "render"
-          - "generate graphic"
-          - "create graphic"
-          - "dall-e"
-          - "dalle"
-          - "email"
-          - "e-mail"
-          - "mail"
-          - "summarize"
-          - "summarise"
-          - "summary"
-          - "pivot table"
-          - "bar chart"
-          - "line chart"
-          - "pie chart"
-          - "data analysis"
-          - "vlookup"
-          - "financials"
-          - "accounting"
-          - "payroll"
-          - "breakeven"
-          - "cashflow"
-          - "nps"
-          - "tableau"
-          - "snowflake"
-          - "analyze"
-          - "chart"
-          - "pivot"
-          - "write"
-          - "draft"
-          - "compose"
-          - "craft"
-          - "design"
-          - "draw"
-          - "rewrite"
-          - "proofread"
-          - "redline"
-          - "review"
-          - "translate to"
-          - "report"
-          - "proposal"
-          - "blog"
-          - "article"
-          - "presentation"
-          - "slides"
-          - "brief"
-          - "newsletter"
-          - "linkedin"
-          - "memo"
-          - "deck"
-          - "outline"
-          - "contract"
-          - "nda"
-          - "what is"
-          - "what are"
-          - "how does"
-          - "how do"
-          - "how to"
-          - "explain how"
-          - "explain why"
-          - "explain what"
-          - "why does"
-          - "why is"
-          - "difference between"
-          - "best practices"
-          - "compared to"
-          - "brainstorm"
-          - "alternatives"
-          - "versus"
-          - "tradeoffs"
-          - "explain"
-          - "compared"
-      - !<textDigest>
-        jsonPaths:
-          - "$.data[*]..messages.data[?(@.author.role != 'user')]..content.value"
-    responseSchema:
-      type: "object"
-      properties:
-        data:
-          type: "array"
-          items:
-            $ref: "#/definitions/Conversation"
-        has_more:
-          type: "boolean"
-        last_end_time:
-          type: "string"
-          format: "date-time"
-        last_id:
-          type: "string"
-        object:
-          type: "string"
-  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/conversations/{conversationId}/messages"
-    allowedQueryParams:
-      - "after"
-      - "limit"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.data[*].user_email"
-      - !<textDigest>
-        jsonPaths:
-          - "$.data[*].content.value"
-    responseSchema:
-      type: "object"
-      properties:
-        data:
-          type: "array"
-          items:
-            $ref: "#/definitions/Message"
-        has_more:
-          type: "boolean"
-        last_end_time:
-          type: "string"
-          format: "date-time"
-        last_id:
-          type: "string"
-        object:
-          type: "string"
-  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/logs"
-    allowedQueryParams:
-      - "event_type"
-      - "limit"
-      - "after"
-      - "before"
-    responseSchema:
-      type: "object"
-      properties:
-        data:
-          type: "array"
-          items:
-            $ref: "#/definitions/LogFile"
-        has_more:
-          type: "boolean"
-        last_end_time:
-          type: "string"
-          format: "date-time"
-        last_id:
-          type: "string"
-        object:
-          type: "string"
-  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/logs/{logFileId}"
-    allowedQueryParams: []
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.principal.id"
-          - "$..email"
-          - "$..user_id"
-          - "$..user_email"
-          - "$.event_details.created_by_user_id"
-          - "$.event_details.plugin_creator_account_user_id"
-      - !<textDigest>
-        jsonPaths:
-          - "$.conversation.title"
-          - "$[?(@.actor.type =~ /account_user/i)].message.content.value"
-          - "$[?(@.actor.type =~ /account_user/i)].message.annotations[*].quote_text"
-          - "$.message.content.quote"
-          - "$.event_details.prompt_text"
-        keywords:
-          - "python"
-          - "javascript"
-          - "typescript"
-          - "java"
-          - "sql"
-          - "html"
-          - "react"
-          - "bash"
-          - "css"
-          - "docker"
-          - "ruby"
-          - "golang"
-          - "kotlin"
-          - "php"
-          - "node"
-          - "angular"
-          - "vue"
-          - "swift"
-          - "npm"
-          - "github"
-          - "git"
-          - "function"
-          - "error"
-          - "api"
-          - "debug"
-          - "implement"
-          - "bug"
-          - "deploy"
-          - "script"
-          - "class"
-          - "method"
-          - "array"
-          - "exception"
-          - "refactor"
-          - "compile"
-          - "callback"
-          - "const"
-          - "async"
-          - "await"
-          - "pull request"
-          - "code review"
-          - "unit test"
-          - "stack trace"
-          - "code"
-          - "generate image"
-          - "create image"
-          - "draw image"
-          - "make image"
-          - "design image"
-          - "picture of"
-          - "illustration of"
-          - "visual of"
-          - "render"
-          - "generate graphic"
-          - "create graphic"
-          - "dall-e"
-          - "dalle"
-          - "email"
-          - "e-mail"
-          - "mail"
-          - "summarize"
-          - "summarise"
-          - "summary"
-          - "pivot table"
-          - "bar chart"
-          - "line chart"
-          - "pie chart"
-          - "data analysis"
-          - "vlookup"
-          - "financials"
-          - "accounting"
-          - "payroll"
-          - "breakeven"
-          - "cashflow"
-          - "nps"
-          - "tableau"
-          - "snowflake"
-          - "analyze"
-          - "chart"
-          - "pivot"
-          - "write"
-          - "draft"
-          - "compose"
-          - "craft"
-          - "design"
-          - "draw"
-          - "rewrite"
-          - "proofread"
-          - "redline"
-          - "review"
-          - "translate to"
-          - "report"
-          - "proposal"
-          - "blog"
-          - "article"
-          - "presentation"
-          - "slides"
-          - "brief"
-          - "newsletter"
-          - "linkedin"
-          - "memo"
-          - "deck"
-          - "outline"
-          - "contract"
-          - "nda"
-          - "what is"
-          - "what are"
-          - "how does"
-          - "how do"
-          - "how to"
-          - "explain how"
-          - "explain why"
-          - "explain what"
-          - "why does"
-          - "why is"
-          - "difference between"
-          - "best practices"
-          - "compared to"
-          - "brainstorm"
-          - "alternatives"
-          - "versus"
-          - "tradeoffs"
-          - "explain"
-          - "compared"
-    responseSchema:
-      type: "object"
-      properties:
-        actor:
-          $ref: "#/definitions/Actor"
-        client_id:
-          type: "string"
-        conversation:
-          $ref: "#/definitions/ConversationRef"
-        event_details:
-          $ref: "#/definitions/CodexEventDetails"
-        event_id:
-          type: "string"
-        event_type:
-          type: "string"
-        message:
-          $ref: "#/definitions/LogMessage"
-        principal:
-          $ref: "#/definitions/Principal"
-        timestamp:
-          type: "string"
-          format: "date-time"
-        type:
-          type: "string"
-        workspace_id:
-          type: "string"
-  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/projects"
-    allowedQueryParams:
-      - "after"
-      - "limit"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.data[*].owner_email"
-          - "$.data[*].owner_id"
-          - "$..email"
-          - "$.data[*].sharing.recipients[*].id"
-      - !<redact>
-        jsonPaths:
-          - "$.data[*].latest_config[*].name"
-          - "$.data[*].latest_config[*].description"
-      - !<textDigest>
-        jsonPaths:
-          - "$..conversation_starters[*]"
-          - "$..instructions"
-    responseSchema:
-      type: "object"
-      properties:
-        data:
-          type: "array"
-          items:
-            $ref: "#/definitions/Project"
-        has_more:
-          type: "boolean"
-        last_end_time:
-          type: "string"
-          format: "date-time"
-        last_id:
-          type: "string"
-        object:
-          type: "string"
-  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/users"
-    allowedQueryParams:
-      - "after"
-      - "limit"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.data[*].email"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.data[*].id"
-        includeReversible: true
-      - !<redact>
-        jsonPaths:
-          - "$.data[*].display_name"
-    responseSchema:
-      type: "object"
-      properties:
-        data:
-          type: "array"
-          items:
-            $ref: "#/definitions/WorkspaceUser"
-        has_more:
-          type: "boolean"
-        last_end_time:
-          type: "string"
-          format: "date-time"
-        last_id:
-          type: "string"
-        object:
-          type: "string"
+- pathTemplate: "/v1/compliance/workspaces/{workspaceId}/automations"
+  allowedQueryParams:
+  - "after"
+  - "limit"
+  transforms:
+  - !<textDigest>
+    jsonPaths:
+    - "$.data[*].title"
+    - "$.data[*].prompt"
+  responseSchema:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/ExportAutomation"
+      has_more:
+        type: "boolean"
+      last_end_time:
+        type: "string"
+        format: "date-time"
+      last_id:
+        type: "string"
+      object:
+        type: "string"
+- pathTemplate: "/v1/compliance/workspaces/{workspaceId}/conversations"
+  allowedQueryParams:
+  - "since_timestamp"
+  - "after"
+  - "limit"
+  - "users"
+  - "file_format"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.data[*].user_email"
+    - "$.data[*].user_id"
+    encoding: "URL_SAFE_TOKEN"
+  - !<redact>
+    jsonPaths:
+    - "$.data[*]..files[*].name"
+    - "$.data[*]..files[*].download_url"
+  - !<textDigest>
+    jsonPaths:
+    - "$.data[*]..title"
+    - "$.data[*]..messages.data[?(@.author.role == 'user')]..content.value"
+    keywords:
+    - "python"
+    - "javascript"
+    - "typescript"
+    - "java"
+    - "sql"
+    - "html"
+    - "react"
+    - "bash"
+    - "css"
+    - "docker"
+    - "ruby"
+    - "golang"
+    - "kotlin"
+    - "php"
+    - "node"
+    - "angular"
+    - "vue"
+    - "swift"
+    - "npm"
+    - "github"
+    - "git"
+    - "function"
+    - "error"
+    - "api"
+    - "debug"
+    - "implement"
+    - "bug"
+    - "deploy"
+    - "script"
+    - "class"
+    - "method"
+    - "array"
+    - "exception"
+    - "refactor"
+    - "compile"
+    - "callback"
+    - "const"
+    - "async"
+    - "await"
+    - "pull request"
+    - "code review"
+    - "unit test"
+    - "stack trace"
+    - "code"
+    - "generate image"
+    - "create image"
+    - "draw image"
+    - "make image"
+    - "design image"
+    - "picture of"
+    - "illustration of"
+    - "visual of"
+    - "render"
+    - "generate graphic"
+    - "create graphic"
+    - "dall-e"
+    - "dalle"
+    - "email"
+    - "e-mail"
+    - "mail"
+    - "summarize"
+    - "summarise"
+    - "summary"
+    - "pivot table"
+    - "bar chart"
+    - "line chart"
+    - "pie chart"
+    - "data analysis"
+    - "vlookup"
+    - "financials"
+    - "accounting"
+    - "payroll"
+    - "breakeven"
+    - "cashflow"
+    - "nps"
+    - "tableau"
+    - "snowflake"
+    - "analyze"
+    - "chart"
+    - "pivot"
+    - "write"
+    - "draft"
+    - "compose"
+    - "craft"
+    - "design"
+    - "draw"
+    - "rewrite"
+    - "proofread"
+    - "redline"
+    - "review"
+    - "translate to"
+    - "report"
+    - "proposal"
+    - "blog"
+    - "article"
+    - "presentation"
+    - "slides"
+    - "brief"
+    - "newsletter"
+    - "linkedin"
+    - "memo"
+    - "deck"
+    - "outline"
+    - "contract"
+    - "nda"
+    - "what is"
+    - "what are"
+    - "how does"
+    - "how do"
+    - "how to"
+    - "explain how"
+    - "explain why"
+    - "explain what"
+    - "why does"
+    - "why is"
+    - "difference between"
+    - "best practices"
+    - "compared to"
+    - "brainstorm"
+    - "alternatives"
+    - "versus"
+    - "tradeoffs"
+    - "explain"
+    - "compared"
+  - !<textDigest>
+    jsonPaths:
+    - "$.data[*]..messages.data[?(@.author.role != 'user')]..content.value"
+  responseSchema:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/Conversation"
+      has_more:
+        type: "boolean"
+      last_end_time:
+        type: "string"
+        format: "date-time"
+      last_id:
+        type: "string"
+      object:
+        type: "string"
+- pathTemplate: "/v1/compliance/workspaces/{workspaceId}/conversations/{conversationId}/messages"
+  allowedQueryParams:
+  - "after"
+  - "limit"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.data[*].user_email"
+    encoding: "URL_SAFE_TOKEN"
+  - !<textDigest>
+    jsonPaths:
+    - "$.data[*].content.value"
+  responseSchema:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/Message"
+      has_more:
+        type: "boolean"
+      last_end_time:
+        type: "string"
+        format: "date-time"
+      last_id:
+        type: "string"
+      object:
+        type: "string"
+- pathTemplate: "/v1/compliance/workspaces/{workspaceId}/logs"
+  allowedQueryParams:
+  - "event_type"
+  - "limit"
+  - "after"
+  - "before"
+  responseSchema:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/LogFile"
+      has_more:
+        type: "boolean"
+      last_end_time:
+        type: "string"
+        format: "date-time"
+      last_id:
+        type: "string"
+      object:
+        type: "string"
+- pathTemplate: "/v1/compliance/workspaces/{workspaceId}/logs/{logFileId}"
+  allowedQueryParams: []
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.principal.id"
+    - "$..email"
+    - "$..user_id"
+    - "$..user_email"
+    - "$.event_details.created_by_user_id"
+    - "$.event_details.plugin_creator_account_user_id"
+    encoding: "URL_SAFE_TOKEN"
+  - !<textDigest>
+    jsonPaths:
+    - "$.conversation.title"
+    - "$[?(@.actor.type =~ /account_user/i)].message.content.value"
+    - "$[?(@.actor.type =~ /account_user/i)].message.annotations[*].quote_text"
+    - "$.message.content.quote"
+    - "$.message.content.file_name"
+    - "$.message.content.annotations[*].files[*].name"
+    - "$.message.author.applied_custom_instructions"
+    - "$.event_details.prompt_text"
+    - "$.event_details.response_text"
+    - "$.event_details.tool_input"
+    - "$.event_details.result_preview"
+    - "$.input.query"
+    - "$.output[*].display_title"
+    - "$.event_details.invoker.user_message_text"
+    - "$.event_details.text"
+    - "$.event_details.release_description"
+    - "$.event_details.release_name"
+    keywords:
+    - "python"
+    - "javascript"
+    - "typescript"
+    - "java"
+    - "sql"
+    - "html"
+    - "react"
+    - "bash"
+    - "css"
+    - "docker"
+    - "ruby"
+    - "golang"
+    - "kotlin"
+    - "php"
+    - "node"
+    - "angular"
+    - "vue"
+    - "swift"
+    - "npm"
+    - "github"
+    - "git"
+    - "function"
+    - "error"
+    - "api"
+    - "debug"
+    - "implement"
+    - "bug"
+    - "deploy"
+    - "script"
+    - "class"
+    - "method"
+    - "array"
+    - "exception"
+    - "refactor"
+    - "compile"
+    - "callback"
+    - "const"
+    - "async"
+    - "await"
+    - "pull request"
+    - "code review"
+    - "unit test"
+    - "stack trace"
+    - "code"
+    - "generate image"
+    - "create image"
+    - "draw image"
+    - "make image"
+    - "design image"
+    - "picture of"
+    - "illustration of"
+    - "visual of"
+    - "render"
+    - "generate graphic"
+    - "create graphic"
+    - "dall-e"
+    - "dalle"
+    - "email"
+    - "e-mail"
+    - "mail"
+    - "summarize"
+    - "summarise"
+    - "summary"
+    - "pivot table"
+    - "bar chart"
+    - "line chart"
+    - "pie chart"
+    - "data analysis"
+    - "vlookup"
+    - "financials"
+    - "accounting"
+    - "payroll"
+    - "breakeven"
+    - "cashflow"
+    - "nps"
+    - "tableau"
+    - "snowflake"
+    - "analyze"
+    - "chart"
+    - "pivot"
+    - "write"
+    - "draft"
+    - "compose"
+    - "craft"
+    - "design"
+    - "draw"
+    - "rewrite"
+    - "proofread"
+    - "redline"
+    - "review"
+    - "translate to"
+    - "report"
+    - "proposal"
+    - "blog"
+    - "article"
+    - "presentation"
+    - "slides"
+    - "brief"
+    - "newsletter"
+    - "linkedin"
+    - "memo"
+    - "deck"
+    - "outline"
+    - "contract"
+    - "nda"
+    - "what is"
+    - "what are"
+    - "how does"
+    - "how do"
+    - "how to"
+    - "explain how"
+    - "explain why"
+    - "explain what"
+    - "why does"
+    - "why is"
+    - "difference between"
+    - "best practices"
+    - "compared to"
+    - "brainstorm"
+    - "alternatives"
+    - "versus"
+    - "tradeoffs"
+    - "explain"
+    - "compared"
+  responseSchema:
+    type: "object"
+    properties:
+      actor:
+        $ref: "#/definitions/Actor"
+      agent:
+        $ref: "#/definitions/AgentAttribution"
+      app_id:
+        type: "string"
+      app_name:
+        type: "string"
+      app_type:
+        type: "string"
+      client_id:
+        type: "string"
+      conversation:
+        $ref: "#/definitions/ConversationRef"
+      conversation_id:
+        type: "string"
+      event_details:
+        $ref: "#/definitions/AnyLogEventDetails"
+      event_id:
+        type: "string"
+      event_type:
+        type: "string"
+      input:
+        $ref: "#/definitions/AppInput"
+      log_type:
+        type: "string"
+      message:
+        $ref: "#/definitions/LogMessage"
+      output:
+        type: "array"
+        items:
+          $ref: "#/definitions/AppOutputItem"
+      previous_message_id:
+        type: "string"
+      principal:
+        $ref: "#/definitions/Principal"
+      timestamp:
+        type: "string"
+        format: "date-time"
+      type:
+        type: "string"
+      workspace_id:
+        type: "string"
+- pathTemplate: "/v1/compliance/workspaces/{workspaceId}/projects"
+  allowedQueryParams:
+  - "after"
+  - "limit"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.data[*].owner_email"
+    - "$.data[*].owner_id"
+    - "$..email"
+    - "$.data[*].sharing.recipients[*].id"
+    encoding: "URL_SAFE_TOKEN"
+  - !<redact>
+    jsonPaths:
+    - "$.data[*].latest_config[*].name"
+    - "$.data[*].latest_config[*].description"
+  - !<textDigest>
+    jsonPaths:
+    - "$..conversation_starters[*]"
+    - "$..instructions"
+  responseSchema:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/Project"
+      has_more:
+        type: "boolean"
+      last_end_time:
+        type: "string"
+        format: "date-time"
+      last_id:
+        type: "string"
+      object:
+        type: "string"
+- pathTemplate: "/v1/compliance/workspaces/{workspaceId}/users"
+  allowedQueryParams:
+  - "after"
+  - "limit"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.data[*].email"
+    encoding: "URL_SAFE_TOKEN"
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.data[*].id"
+    includeReversible: true
+    encoding: "URL_SAFE_TOKEN"
+  - !<redact>
+    jsonPaths:
+    - "$.data[*].display_name"
+  responseSchema:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/WorkspaceUser"
+      has_more:
+        type: "boolean"
+      last_end_time:
+        type: "string"
+        format: "date-time"
+      last_id:
+        type: "string"
+      object:
+        type: "string"
 definitions:
   Actor:
     type: "object"
     properties:
+      agent_runtime:
+        $ref: "#/definitions/AgentRuntime"
       type:
         type: "string"
       user_email:
         type: "string"
       user_id:
         type: "string"
+  AgentAttribution:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      name:
+        type: "string"
+      type:
+        type: "string"
+  AgentRuntime:
+    type: "object"
+    properties:
+      delegator:
+        $ref: "#/definitions/Actor"
   Annotation:
     type: "object"
     properties:
@@ -492,14 +546,135 @@ definitions:
         type: "string"
       type:
         type: "string"
+  AnyLogEventDetails:
+    type: "object"
+    properties:
+      access_method:
+        type: "string"
+      access_token_id:
+        type: "string"
+      access_token_name:
+        type: "string"
+      agent_id:
+        type: "string"
+      call_id:
+        type: "string"
+      connector_id:
+        type: "string"
+      connector_name:
+        type: "string"
+      created_by_user_id:
+        type: "string"
+      decision:
+        type: "string"
+      deployment_id:
+        type: "string"
+      detail_type:
+        type: "string"
+      environment_id:
+        type: "string"
+      environment_revision:
+        type: "string"
+      expires_at:
+        type: "string"
+      failure_message:
+        type: "string"
+      invoker:
+        $ref: "#/definitions/LeanInvoker"
+      launch_span_id:
+        type: "string"
+      launch_trace_id:
+        type: "string"
+      memory_path:
+        type: "string"
+      model:
+        type: "string"
+      plugin_creator_account_user_id:
+        type: "string"
+      plugin_display_name:
+        type: "string"
+      plugin_id:
+        type: "string"
+      plugin_name:
+        type: "string"
+      plugin_release_id:
+        type: "string"
+      plugin_scope:
+        type: "string"
+      plugin_version:
+        type: "string"
+      project_id:
+        type: "string"
+      prompt_text:
+        type: "string"
+      reasoning_effort:
+        type: "string"
+      release_name:
+        type: "string"
+      response_text:
+        type: "string"
+      result_preview:
+        type: "string"
+      run_id:
+        type: "string"
+      service_tier:
+        type: "string"
+      session_id:
+        type: "string"
+      site_url:
+        type: "string"
+      skill_id:
+        type: "string"
+      skill_name:
+        type: "string"
+      slug:
+        type: "string"
+      source:
+        type: "string"
+      status:
+        type: "string"
+      text:
+        type: "string"
+      token_usage:
+        $ref: "#/definitions/TokenUsage"
+      tool_call_id:
+        type: "string"
+      tool_input:
+        type: "string"
+      tool_name:
+        type: "string"
+      tool_type:
+        type: "string"
+      trigger_id:
+        type: "string"
+      turn_id:
+        type: "string"
+      version_number:
+        type: "integer"
+  AppInput:
+    type: "object"
+    properties:
+      query:
+        type: "string"
+  AppOutputItem:
+    type: "object"
+    properties:
+      display_title:
+        type: "string"
   Author:
     type: "object"
     properties:
+      applied_custom_instructions:
+        type: "string"
       client_type:
         type: "string"
       model:
         type: "string"
       skills_used:
+        type: "array"
+        items:
+          type: "string"
+      skills_used_names:
         type: "array"
         items:
           type: "string"
@@ -523,56 +698,7 @@ definitions:
     properties:
       id:
         type: "string"
-  CodexEventDetails:
-    type: "object"
-    properties:
-      access_token_id:
-        type: "string"
-      access_token_name:
-        type: "string"
-      call_id:
-        type: "string"
-      created_by_user_id:
-        type: "string"
-      detail_type:
-        type: "string"
-      environment_id:
-        type: "string"
-      expires_at:
-        type: "string"
-      model:
-        type: "string"
-      plugin_creator_account_user_id:
-        type: "string"
-      plugin_display_name:
-        type: "string"
-      plugin_id:
-        type: "string"
-      plugin_name:
-        type: "string"
-      plugin_release_id:
-        type: "string"
-      plugin_scope:
-        type: "string"
-      plugin_version:
-        type: "string"
-      prompt_text:
-        type: "string"
-      reasoning_effort:
-        type: "string"
-      service_tier:
-        type: "string"
-      session_id:
-        type: "string"
-      status:
-        type: "string"
-      token_usage:
-        $ref: "#/definitions/TokenUsage"
-      tool_name:
-        type: "string"
-      tool_type:
-        type: "string"
-      turn_id:
+      name:
         type: "string"
   Content:
     type: "object"
@@ -582,6 +708,8 @@ definitions:
         items:
           $ref: "#/definitions/ContentAnnotation"
       file_id:
+        type: "string"
+      file_name:
         type: "string"
       quote:
         type: "string"
@@ -635,10 +763,14 @@ definitions:
         type: "string"
       id:
         type: "string"
+      is_locked_chat:
+        type: "boolean"
       is_pinned:
         type: "boolean"
       is_temporary_chat:
         type: "boolean"
+      mode:
+        type: "string"
       project_id:
         type: "string"
       project_name:
@@ -655,6 +787,13 @@ definitions:
       prompt:
         type: "string"
       schedule:
+        type: "string"
+  LeanInvoker:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+      user_message_text:
         type: "string"
   LogFile:
     type: "object"
