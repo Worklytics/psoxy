@@ -25,7 +25,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.7.2"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.7.2"
 
   enabled_connectors                       = var.enabled_connectors
   connector_settings                       = var.connector_settings
@@ -125,7 +125,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=rc-v0.7.2"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.7.2"
 
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
@@ -173,11 +173,12 @@ module "psoxy" {
   todos_as_local_files                 = false # root todos.tf writes these files
   enable_remote_resources              = var.enable_remote_resources
 
-
-  vpc_config = {
-    security_group_ids = [aws_security_group.default.id]
-    subnet_ids         = [aws_subnet.private.id]
-  }
+  # VPC off by default (Lambdas use function URLs). Uncomment this and the resources in vpc.tf
+  # to attach Lambdas to a VPC. That forces API Gateway v2.
+  # vpc_config = {
+  #   security_group_ids = [aws_security_group.default.id]
+  #   subnet_ids         = [aws_subnet.private.id]
+  # }
 }
 
 ## Worklytics connection configuration
@@ -203,7 +204,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=rc-v0.7.2"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=v0.7.2"
 
   proxy_instance_id    = each.key
   worklytics_host      = var.worklytics_host
