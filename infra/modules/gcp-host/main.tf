@@ -644,6 +644,7 @@ resource "google_secret_manager_secret_version" "additional_transforms" {
     for k, v in var.lookup_tables : {
       destinationBucketName : module.lookup_output[k].bucket_name
       rules : {
+        pseudonymFormat : "URL_SAFE_HASH_ONLY"
         columnsToDuplicate : {
           (v.join_key_column) : "${v.join_key_column}_pseudonym"
         },

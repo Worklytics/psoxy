@@ -488,7 +488,9 @@ resource "aws_ssm_parameter" "additional_transforms" {
   type = "String"
   value = yamlencode([for k, v in var.lookup_table_builders : {
     destinationBucketName : module.lookup_output[k].output_bucket
-    rules : v.rules
+    rules : merge(v.rules, {
+      pseudonymFormat = coalesce(try(v.rules.pseudonymFormat, null), "URL_SAFE_HASH_ONLY")
+    })
     compressOutput : v.compress_output
   } if v.input_connector_id == each.key])
 }

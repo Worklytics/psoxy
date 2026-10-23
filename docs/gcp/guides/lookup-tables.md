@@ -39,7 +39,7 @@ If your input file follows the [standard HRIS schema](https://docs.worklytics.co
 
 Every time a new hris snapshot is uploaded to the hris `-input` bucket, TWO copies of it will be created: a sanitized copy in the bucket accessible Worklytics, and the lookup variant in the lookup bucket referenced above (not accessible to Worklytics).
 
-The lookup table CSV is **not** limited to only two columns. Terraform generates lookup rules that emit the HRIS columns from your source file (unless you restrict them; see [Advanced](#advanced)), and **add** a `{join_key_column}_pseudonym` column by duplicating your join key and pseudonymizing that copy. With the default `join_key_column = "employee_id"`, `EMPLOYEE_ID` retains the original HRIS value and `EMPLOYEE_ID_PSEUDONYM` holds the pseudonym that appears as `employeeId` in Worklytics exports.
+The lookup table CSV is **not** limited to only two columns. Terraform generates lookup rules that emit the HRIS columns from your source file (unless you restrict them; see [Advanced](#advanced)), and **add** a `{join_key_column}_pseudonym` column by duplicating your join key and pseudonymizing that copy. With the default `join_key_column = "employee_id"`, `EMPLOYEE_ID` retains the original HRIS value and `EMPLOYEE_ID_PSEUDONYM` holds the pseudonym that appears as `employeeId` in Worklytics exports (encoded as `URL_SAFE_HASH_ONLY`, matching weekly aggregate export joins).
 
 If you load this into your Data Warehouse, you can JOIN it with the data you export from Worklytics.
 
