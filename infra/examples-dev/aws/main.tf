@@ -255,6 +255,11 @@ output "webhook_collector_instances" {
   } }
 }
 
+output "lookup_tables" {
+  description = "S3 bucket names for lookup table outputs (lookup_table_builders keys). Empty map when lookup tables are not configured."
+  value       = module.psoxy.lookup_tables
+}
+
 output "deployment_platform" {
   description = "Cloud platform for this deployment. Used when synthesizing test scripts."
   value       = "aws"
