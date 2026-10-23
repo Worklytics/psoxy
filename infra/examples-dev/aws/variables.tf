@@ -281,6 +281,8 @@ variable "custom_api_connectors" {
     [])
     settings_to_provide = optional(map(string), {})
     rules_file          = optional(string, null)
+    rules_raw           = optional(string, null)
+    timeout_seconds     = optional(number)
   }))
 
   description = "map of custom API connectors to provision"
@@ -343,11 +345,13 @@ variable "custom_bulk_connectors" {
         transforms = optional(list(map(string)), [])
       })), {})
     }))
-    memory_size_mb      = optional(number, null)
-    enable_gen_metadata = optional(bool, false)
-    settings_to_provide = optional(map(string), {})
-    example_file        = optional(string)
-    example_files       = optional(list(string), [])
+    memory_size_mb        = optional(number, null)
+    enable_gen_metadata   = optional(bool, false)
+    environment_variables = optional(map(string), {})
+    rules_raw             = optional(string, null)
+    settings_to_provide   = optional(map(string), {})
+    example_file          = optional(string)
+    example_files         = optional(list(string), [])
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -435,7 +439,8 @@ variable "webhook_collectors" {
     keep_warm_instances  = optional(number, null)        # if set to 1+, keeps that many Lambda instances warm to eliminate cold starts; adds cost (~$11/month per instance) but improves reliability
     example_payload_file = optional(string, null)        # path to example payload file to use for testing; if provided, will be used in the test script
     example_identity     = optional(string, null)        # example identity to use for testing; if provided, will be used to test the collector
-    enable_gen_metadata  = optional(bool, false)         # ALPHA: !<classify> / !<genMetadata> in webhook rules (Bedrock)
+    enable_gen_metadata   = optional(bool, false)         # ALPHA: !<classify> / !<genMetadata> in webhook rules (Bedrock)
+    environment_variables = optional(map(string), {})
   }))
 
   default = {}
@@ -464,7 +469,7 @@ variable "lookup_table_builders" {
     #        # ADD LIST OF NAMES OF YOUR AWS ROLES WHICH CAN READ LOOKUP TABLE
     #      ],
     #      rules       = {
-    #        pseudonym_format = "URL_SAFE_TOKEN"
+    #        pseudonymFormat = "URL_SAFE_TOKEN"
     #        columnsToRedact       = [
     #          "employee_email",
     #          "manager_id",

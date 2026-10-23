@@ -252,6 +252,11 @@ output "artifacts_bucket_id" {
   value       = module.psoxy.artifacts_bucket_id
 }
 
+output "lookup_tables" {
+  description = "GCS bucket names for lookup table outputs (lookup_tables keys). Empty map when lookup tables are not configured."
+  value       = module.psoxy.lookup_tables
+}
+
 output "repo_base_dir" {
   description = "Absolute path to the repository root used to build test scripts (trailing slash)."
   value       = var.psoxy_base_dir
