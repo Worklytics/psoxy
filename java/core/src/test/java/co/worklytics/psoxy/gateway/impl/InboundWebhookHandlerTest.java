@@ -1,8 +1,11 @@
 package co.worklytics.psoxy.gateway.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
@@ -19,7 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -30,6 +35,8 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.SignedJWT;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
@@ -52,6 +59,68 @@ class InboundWebhookHandlerTest {
             new NetworkSecurityUtils(
                     ApiModeConfig.builder().build(),
                     webhookConfig),
+            Collections.emptySet(),
+            fixedClock);
+    }
+
+    @Test
+    void handle_refusesCollectionWhenDisabled() {
+        HttpEventRequest request = requestWithMethod("POST");
+        HttpEventResponse response = handlerFor(WebhookCollectorModeConfig.builder()
+            .collectionEnabled(false)
+            .build()).handle(request);
+
+        assertEquals(HttpStatus.SC_FORBIDDEN, response.getStatusCode());
+        assertEquals(InboundWebhookHandler.COLLECTION_DISABLED_BODY, response.getBody());
+    }
+
+    @Test
+    void handle_allowsCorsPreflightWhenCollectionDisabled() {
+        HttpEventRequest request = requestWithMethod("OPTIONS");
+        HttpEventResponse response = handlerFor(WebhookCollectorModeConfig.builder()
+            .collectionEnabled(false)
+            .build()).handle(request);
+
+        assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    void handle_requiresAuthorizationWhenCollectionEnabled() {
+        HttpEventRequest request = requestWithMethod("POST");
+        when(request.getClientIp()).thenReturn(Optional.empty());
+
+        HttpEventResponse response = handlerFor(WebhookCollectorModeConfig.builder()
+            .collectionEnabled(true)
+            .build()).handle(request);
+
+        assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatusCode());
+    }
+
+    private HttpEventRequest requestWithMethod(String method) {
+        HttpEventRequest request = mock(HttpEventRequest.class);
+        when(request.getHttpMethod()).thenReturn(method);
+        when(request.getHeader(anyString())).thenReturn(Optional.empty());
+        return request;
+    }
+
+    private InboundWebhookHandler handlerFor(WebhookCollectorModeConfig config) {
+        ConfigService configService = new ConfigService() {
+            @Override
+            public String getConfigPropertyOrError(ConfigService.ConfigProperty property) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Optional<String> getConfigPropertyAsOptional(ConfigService.ConfigProperty property) {
+                return Optional.empty();
+            }
+        };
+        return new InboundWebhookHandler(
+            mock(Lazy.class),
+            new NoOutput(),
+            configService,
+            config,
+            new NetworkSecurityUtils(ApiModeConfig.builder().build(), config),
             Collections.emptySet(),
             fixedClock);
     }

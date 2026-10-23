@@ -50,6 +50,7 @@
   * [TLS Version](configuration/tls.md)
   * [New Relic Monitoring](configuration/new-relic-monitoring.md)
   * [Remote Resources](configuration/remote-resources.md)
+  * [Webhook Collectors](configuration/webhook-collectors.md)
 * [Development](development/README.md)
   * [Approaches for Example / Module design](development/terraform-architecture.md)
   * [Create a private fork](development/private-fork.md)

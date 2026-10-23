@@ -10,6 +10,7 @@ OPENID_CONFIG_RC=$?
 ${command_cli_call} -u "${collector_endpoint_url}/.well-known/jwks.json"
 JWKS_RC=$?
 
+%{ if collection_enabled ~}
 ${command_cli_call} -u "${collector_endpoint_url}${collection_path}" --method POST \
 %{ if signing_key_arn != null ~}
 --signing-key "aws-kms:${signing_key_arn}" \
@@ -21,6 +22,10 @@ ${command_cli_call} -u "${collector_endpoint_url}${collection_path}" --method PO
 --verify-collection "${sanitized_bucket_name}" \
 --body '${example_payload}'
 COLLECTION_RC=$?
+%{ else ~}
+echo "collection_enabled is false for ${function_name}. Discovery URLs above should respond. Set collection_enabled = true, apply again, then re-run this script before sending webhook data."
+COLLECTION_RC=0
+%{ endif ~}
 
 exit $(( OPENID_CONFIG_RC + JWKS_RC + COLLECTION_RC ))
 

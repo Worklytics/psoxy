@@ -220,6 +220,7 @@ locals {
     ALLOW_ORIGINS      = "*" # TODO make configurable
     # AUTH_ISSUER                  = ""  # TODO: URL to collector itself, to be used to produce OpenID Connect Discovery Document
     REQUIRE_AUTHORIZATION_HEADER     = "true"
+    COLLECTION_ENABLED               = "true" # GCP authorizes inside the function, so collection stays on.
     WEBHOOK_OUTPUT                   = "https://pubsub.googleapis.com/${google_pubsub_topic.webhook_topic.id}"
     BATCH_MERGE_SUBSCRIPTION         = google_pubsub_subscription.webhook_subscription.id
     BATCH_SIZE                       = local.batch_size
@@ -515,9 +516,9 @@ Then, based on your configuration, these are some example test calls you can try
 ```shell
 ${local.command_cli_call} --method POST \
  -u ${local.proxy_endpoint_url} \
-%{ if local.signing_key_id != null ~}
+%{if local.signing_key_id != null~}
  --signing-key "gcp-kms:${local.signing_key_id}" \
-%{ endif ~}
+%{endif~}
  --identity-issuer ${local.proxy_endpoint_url} \
  --identity-subject '${var.example_identity}' \
  --body '${coalesce(var.example_payload, "{\"test\": \"body\"}")}' 

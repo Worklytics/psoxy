@@ -113,6 +113,7 @@ module "gate_instance" {
       WEBHOOK_OUTPUT               = aws_sqs_queue.sanitized_webhooks_to_batch.url
       WEBHOOK_BATCH_OUTPUT         = "s3://${module.sanitized_output.bucket_id}/${var.output_path_prefix}"
       REQUIRE_AUTHORIZATION_HEADER = length(local.accepted_auth_keys) > 0
+      COLLECTION_ENABLED           = var.collection_enabled ? "true" : "false"
       ALLOW_ORIGINS                = join(",", var.allow_origins)
       CUSTOM_RULES_SHA             = module.rules_parameter.rules_hash
     },
@@ -145,7 +146,11 @@ resource "aws_apigatewayv2_integration" "map" {
   timeout_milliseconds   = 30000 # ideally would be 55 or 60, but docs say limit is 30s
 }
 
+# AWS fetches {issuer}/.well-known/openid-configuration when this authorizer is created.
+# Omit it until a prior apply has deployed the discovery route (collection_enabled = false).
 resource "aws_apigatewayv2_authorizer" "jwt" {
+  count = var.collection_enabled ? 1 : 0
+
   name             = "jwt-authorizer"
   api_id           = var.api_gateway_v2.id
   authorizer_type  = "JWT"
@@ -161,7 +166,8 @@ resource "aws_apigatewayv2_authorizer" "jwt" {
 
   depends_on = [
     aws_apigatewayv2_integration.map,
-    aws_apigatewayv2_route.well_known # potential circular dependency here? seems that in order to provision the authorizer, AWS checks that issuer responds at .well-known
+    aws_apigatewayv2_route.well_known,
+    aws_lambda_permission.api_gateway,
   ]
 }
 
@@ -177,13 +183,14 @@ resource "aws_apigatewayv2_route" "well_known" {
 
 
 // q: change this route to /collect instead of /{proxy+}?  any need for {proxy+} here?
+// Created with the JWT authorizer, only after collection_enabled is true.
 resource "aws_apigatewayv2_route" "collect" {
-  for_each = toset(local.http_methods) # q: should we just limit this to POST??
+  for_each = var.collection_enabled ? toset(local.http_methods) : toset([]) # q: should we just limit this to POST??
 
   api_id             = var.api_gateway_v2.id
   route_key          = "${each.key} /${module.gate_instance.function_name}${local.collection_path}"
   target             = "integrations/${aws_apigatewayv2_integration.map.id}"
-  authorizer_id      = aws_apigatewayv2_authorizer.jwt.id
+  authorizer_id      = aws_apigatewayv2_authorizer.jwt[0].id
   authorization_type = "JWT"
 }
 
@@ -193,7 +200,7 @@ resource "aws_lambda_permission" "api_gateway" {
   function_name = module.gate_instance.function_name
   # TODO(v0.8): use function ARN (provider `function_name` accepts ARN) and remove `depends_on` below
   # function_name = module.gate_instance.function_arn
-  principal     = "apigateway.amazonaws.com"
+  principal = "apigateway.amazonaws.com"
 
   # The /*/*/ part allows invocation from any stage, method and resource path
   # within API Gateway REST API.
@@ -298,6 +305,8 @@ resource "aws_kms_alias" "auth_key_alias" {
 
 
 locals {
+  todo_filename = "TODO ${var.todo_step} - webhook ${var.instance_id}.md"
+
   proxy_endpoint_url = "${var.api_gateway_v2.stage_invoke_url}/${module.gate_instance.function_name}"
 
   # don't want to *require* assumption of a role for testing; while we expect it in usual case
@@ -309,7 +318,27 @@ locals {
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} --region \"${data.aws_region.current.region}\""
   command_test_logs   = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} --region \"${data.aws_region.current.region}\" -l \"${module.gate_instance.log_group}\""
 
-  todo_content = <<EOT
+  enable_collection_todo = <<EOT
+
+## Enable collection for ${var.instance_id}
+
+1. Confirm the OpenID discovery document responds:
+
+```shell
+curl -fsS "${local.proxy_endpoint_url}/.well-known/openid-configuration"
+```
+
+2. Set `collection_enabled = true` for `${var.instance_id}` in `webhook_collectors`.
+
+3. Run `terraform apply` again.
+
+4. Send webhooks to `${local.proxy_endpoint_url}${local.collection_path}` only after that apply succeeds.
+
+Until `collection_enabled` is true, this collector does not store webhook payloads. The JWT authorizer is created on the apply that sets `collection_enabled` to true.
+
+EOT
+
+  test_todo_content = <<EOT
 
 ## Testing ${var.instance_id}
 
@@ -356,6 +385,8 @@ for a detailed description of all the different options.
 Contact support@worklytics.co for assistance modifying the rules as needed.
 
 EOT
+
+  todo_content = var.collection_enabled ? local.test_todo_content : local.enable_collection_todo
 }
 
 locals {
@@ -368,6 +399,7 @@ locals {
     example_identity       = var.example_identity
     collection_path        = local.collection_path
     sanitized_bucket_name  = module.sanitized_output.bucket_id
+    collection_enabled     = var.collection_enabled
   })
 }
 
@@ -379,6 +411,15 @@ resource "local_file" "test_script" {
   filename        = "test-${var.instance_id}.sh"
   file_permission = "755"
   content         = local.test_script
+}
+
+# DEPRECATED: this local_file TODO is deprecated and will be removed in 0.8.
+# Write the same file with ./generate-todos.sh, which reads it from terraform output.
+resource "local_file" "todo" {
+  count = var.todos_as_local_files ? 1 : 0
+
+  filename = local.todo_filename
+  content  = local.todo_content
 }
 
 output "endpoint_url" {
@@ -449,6 +490,13 @@ output "test_examples" {
 
 output "todo" {
   value = local.todo_content
+}
+
+output "todo_files" {
+  description = "TODO markdown files (filename => content) for ./generate-todos.sh. The local_file copy is deprecated and will be removed in 0.8."
+  value = {
+    (local.todo_filename) = local.todo_content
+  }
 }
 
 output "provisioned_concurrency" {

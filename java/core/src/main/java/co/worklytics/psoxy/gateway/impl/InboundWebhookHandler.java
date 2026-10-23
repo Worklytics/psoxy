@@ -47,6 +47,8 @@ import lombok.extern.java.Log;
 @Log
 public class InboundWebhookHandler implements JwtAuthorizedResource {
 
+    static final String COLLECTION_DISABLED_BODY = "Webhook collection is disabled.";
+
     // main point of this is to ensure that servers haven't issued super-long-lived tokens by mistake
     // for example, by setting `exp` in milliseconds since epoch, instead of seconds since epoch
     static final Duration MAX_FUTURE_TOKEN_EXPIRATION = Duration.ofDays(365); // 1 year
@@ -124,6 +126,16 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
                 .header("Access-Control-Allow-Origin", webhookCollectorModeConfig.getAllowOrigins()) // q: configurable? what's the use-case to restrict this? if auth is based on Authorization header, no way for a malicious site to obtain and forge that, right?
                 .header("Access-Control-Allow-Methods", "POST, OPTIONS") // TODO: make this configurable
                 .header("Access-Control-Allow-Headers", "*")  // TODO: make this explicit?
+                .build();
+        }
+
+        // Well-known discovery is served before this handler. While collection is off, refuse
+        // payloads so a route without a JWT authorizer cannot store unauthenticated data.
+        // Once collection is on, API Gateway (AWS) has already authorized the request.
+        if (!webhookCollectorModeConfig.getCollectionEnabled()) {
+            return HttpEventResponse.builder()
+                .statusCode(HttpStatus.SC_FORBIDDEN)
+                .body(COLLECTION_DISABLED_BODY)
                 .build();
         }
 

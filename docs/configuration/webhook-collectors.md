@@ -20,6 +20,7 @@ Webhook collector mode is configured via the following environment variables:
 | Property | Default | Description |
 |----------|---------|-------------|
 | `REQUIRE_AUTHORIZATION_HEADER` | `true` | Whether to require and validate `Authorization` headers on webhook requests |
+| `COLLECTION_ENABLED` | `false` | Whether to store webhook payloads. Discovery (`/.well-known/*`) is served either way. AWS sets this from `collection_enabled`. GCP modules set it to `true`. |
 | `ACCEPTED_AUTH_KEYS` | _(none)_ | CSV of public keys/KMS references for verifying JWT signatures |
 | `ALLOW_ORIGINS` | `*` | CORS origins allowed to send webhooks (CSV) |
 | `AUTH_ISSUER` | _(none)_ | Expected issuer (`iss` claim) in JWT tokens; typically the collector endpoint URL |
@@ -191,6 +192,40 @@ webhook_collectors = {
 - **`allow_origins`** (optional, default: `["*"]`): List of origins allowed for CORS (e.g., `["https://my-app.com"]`)
 - **`example_payload_file`** (optional): Path to example payload file for testing
 - **`example_identity`** (optional): Example identity to use for testing
+- **`collection_enabled`** (optional, AWS only, default: `false`): Whether this collector stores webhook payloads and has a JWT authorizer. See [AWS: two applies](#aws-two-applies-before-collection).
+
+### AWS: two applies before collection
+
+On AWS, the collector's API Gateway JWT authorizer is created only after `GET {collector}/.well-known/openid-configuration` responds. That URL is served by the collector, so the authorizer cannot be created in the same apply that first deploys it.
+
+`collection_enabled` defaults to `false`.
+
+1. Apply with `collection_enabled = false` (the default). This deploys the collector, including `/.well-known/*`, and does not create the JWT authorizer. The collector responds to discovery requests and refuses to store webhook payloads (`COLLECTION_ENABLED=false`).
+2. Confirm the discovery document responds:
+
+```shell
+curl -fsS "${COLLECTOR_URL}/.well-known/openid-configuration"
+```
+
+3. Set `collection_enabled = true` for that collector and apply again. This creates the JWT authorizer on `POST /{function-name}/collect` and sets `COLLECTION_ENABLED=true`.
+
+```hcl
+webhook_collectors = {
+  "llm-portal" = {
+    rules_file         = "work-events.yaml"
+    collection_enabled = true
+    provision_auth_key = {
+      rotation_days = 2
+    }
+  }
+}
+```
+
+4. Send webhooks to `{collector}/collect` only after that second apply succeeds. Requests that reach the collector have passed the JWT authorizer.
+
+Terraform writes `TODO {n} - webhook {id}.md` with these steps while `collection_enabled` is false. The generated `test-{id}.sh` checks discovery only until you enable collection, then posts a sample payload.
+
+GCP collectors are unaffected. The GCP module sets `COLLECTION_ENABLED=true`.
 
 ### Rules File Format
 
