@@ -267,7 +267,7 @@ public class BulkDataSanitizerImplTest {
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"))));
 
-        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(co.worklytics.psoxy.gateway.ProxyConfig.fromConfigService(config), new EnvVarsConfigService()).orElseThrow();
 
         File inputFile = new File(getClass().getResource(exampleFile).getFile());
         columnarFileSanitizerImpl.setRules(rules);
@@ -292,7 +292,7 @@ public class BulkDataSanitizerImplTest {
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"))));
 
-        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(co.worklytics.psoxy.gateway.ProxyConfig.fromConfigService(config), new EnvVarsConfigService()).orElseThrow();
 
         File inputFile = new File(getClass().getResource(TEST_EXAMPLE_FILE).getFile());
         columnarFileSanitizerImpl.setRules(rules);
@@ -325,7 +325,7 @@ public class BulkDataSanitizerImplTest {
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"))));
 
-        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(co.worklytics.psoxy.gateway.ProxyConfig.fromConfigService(config), new EnvVarsConfigService()).orElseThrow();
 
         File inputFile = new File(getClass().getResource(TEST_EXAMPLE_FILE).getFile());
         columnarFileSanitizerImpl.setRules(rules);
@@ -353,7 +353,7 @@ public class BulkDataSanitizerImplTest {
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"))));
 
-        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(co.worklytics.psoxy.gateway.ProxyConfig.fromConfigService(config), new EnvVarsConfigService()).orElseThrow();
 
         File inputFile = new File(getClass().getResource("/csv/hris-default-rules_padded-employee-id.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
@@ -936,7 +936,7 @@ User Name,Email,Action,Feature used,Department,\r
                     "  - \"User Name\"\n" +
                     "  - \"Email\"\n").getBytes(StandardCharsets.UTF_8))));
 
-        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(co.worklytics.psoxy.gateway.ProxyConfig.fromConfigService(config), new EnvVarsConfigService()).orElseThrow();
 
         File inputFile = new File(getClass().getResource(TEST_EXAMPLE_FILE).getFile());
         columnarFileSanitizerImpl.setRules(rules);

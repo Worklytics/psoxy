@@ -1,6 +1,7 @@
 package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.ApiModeConfig;
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
@@ -10,6 +11,7 @@ import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import java.time.Clock;
@@ -102,7 +104,28 @@ public class TestModules {
             when(m.getAsyncOutputDestination()).thenReturn(Optional.empty());
             when(m.getAllowedDataAccessIpBlocks()).thenReturn(Collections.emptyList());
             when(m.getRequestPathPrefixToTrim()).thenReturn(Optional.empty());
+            when(m.isFollowRedirects()).thenReturn(true);
             return m;
+        }
+    }
+
+    @Module
+    public interface ForProxyConfig {
+        @Provides
+        @Singleton
+        static co.worklytics.psoxy.gateway.ProxyConfig proxyConfig(ConfigService configService) {
+            return co.worklytics.psoxy.gateway.ProxyConfig.fromConfigService(configService);
+        }
+    }
+
+    @Module
+    public interface ForBulkModeConfig {
+        @Provides
+        @Singleton
+        static co.worklytics.psoxy.gateway.BulkModeConfig bulkModeConfig(
+                ConfigService configService,
+                @Named("ForYAML") com.fasterxml.jackson.databind.ObjectMapper yamlMapper) {
+            return co.worklytics.psoxy.gateway.BulkModeConfig.fromConfigService(configService, yamlMapper);
         }
     }
 

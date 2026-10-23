@@ -173,6 +173,13 @@ public interface GcpModule {
 
     @Provides
     @Singleton
+    static GcpWorkloadIdentityFederationGrantConfig gcpWorkloadIdentityFederationGrantConfig(
+            ConfigService configService) {
+        return GcpWorkloadIdentityFederationGrantConfig.fromConfigService(configService);
+    }
+
+    @Provides
+    @Singleton
     static GenMetadataConfig genMetadataConfig(ConfigService configService) {
         return VertexGenMetadataConfig.from(configService);
     }
