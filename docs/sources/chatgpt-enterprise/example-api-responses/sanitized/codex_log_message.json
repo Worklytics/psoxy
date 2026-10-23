@@ -12,6 +12,11 @@
   },
   "event_type":"PROMPT_SENT",
   "client_id":"CODEX_CLI",
+  "agent":{
+    "type":"workspace_agent",
+    "id":"agent-456",
+    "name":"Repo Assistant"
+  },
   "workspace_id":"be545252-ad04-4cfa-9ca5-deca58416151",
   "event_details":{
     "detail_type":"PROMPT_SENT",
