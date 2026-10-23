@@ -82,6 +82,27 @@ FROM
 ```
 
 ### Advanced
+
 You can add some addition configuration to the `lookup_tables` variable to control the behavior of the lookup table generation:
    - `expiration_days` - to expire the lookup table files after this number of days
    - `output_bucket_name` - to override the value of the bucket name that the Terraform modules will create, if you have your own naming convention
+   - `columns_to_include` - optional list of **additional** HRIS columns to retain in the lookup output (see below)
+
+#### Minimal lookup table (join key columns only)
+
+If you want the lookup CSV to contain **only** the cleartext join key and its pseudonymized duplicate (for example `EMPLOYEE_ID` and `EMPLOYEE_ID_PSEUDONYM`), set `columns_to_include` to an empty list. The `gcp-host` module always appends `join_key_column` and `{join_key_column}_pseudonym` to `columns_to_include` when it is set, so an empty list limits output to those two columns.
+
+```hcl
+lookup_tables = {
+  "hris-lookup" = {
+    source_connector_id = "hris",
+    join_key_column     = "employee_id",
+    columns_to_include  = [],
+    sanitized_accessor_principals = [
+      # ...
+    ],
+  }
+}
+```
+
+This differs from the AWS lookup-table pattern, which pseudonymizes `EMPLOYEE_ID` and adds `EMPLOYEE_ID_ORIG` for the original value. On GCP, `EMPLOYEE_ID` stays as the original HRIS value and `EMPLOYEE_ID_PSEUDONYM` is the value that matches `employeeId` in Worklytics exports.

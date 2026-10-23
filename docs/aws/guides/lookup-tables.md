@@ -104,3 +104,21 @@ FROM
 Within the `lookup_table_builders` map, you can specify the following fields:
   - `input_connector_id` - usually `hris`; this corresponds the whatever bulk connector you want to build the lookup table for.
   - `rules` - this follows the rules structure for the bulk connector case. The example above is suited for HRIS data following the schema expected by Worklytics. If you modify this, be sure to review our documentation or contact support to ensure you don't break your lookup table.
+
+#### Minimal lookup table (join key columns only)
+
+If you want the lookup CSV to contain **only** the pseudonymized join key and the original join key (for example `EMPLOYEE_ID` and `EMPLOYEE_ID_ORIG`), set `columnsToInclude` in the lookup builder `rules` to the source join key column. The duplicate target column (`employee_id_orig` in the example) is still added by `columnsToDuplicate` even when it is omitted from `columnsToInclude`. See [bulk file sanitization rules](../../configuration/bulk-file-sanitization.md) for general `columnsToInclude` behavior.
+
+```hcl
+      columnsToDuplicate = {
+        "employee_id" = "employee_id_orig"
+      }
+      columnsToPseudonymize = [
+        "employee_id",
+      ]
+      columnsToInclude = [
+        "employee_id",
+      ]
+```
+
+With this configuration, other HRIS columns are omitted from the lookup output while `EMPLOYEE_ID_ORIG` is still present for re-identification.
