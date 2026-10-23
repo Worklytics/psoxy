@@ -349,6 +349,8 @@ variable "custom_side_outputs" {
 #                       enables columnsToInclude; the module always merges in join_key_column and
 #                       `{join_key_column}_pseudonym`. List only extra HRIS columns to retain; use []
 #                       for join-key pair only (no employee_id_orig on GCP; see lookup table docs).
+#   - `pseudonym_format` optional; maps to rules.pseudonymFormat for the pseudonym column. Omit for
+#                       proxy default (JSON). TODO(0.8): default URL_SAFE_HASH_ONLY in this module.
 #   - `sanitized_accessor_names` is an optional list of GCP principals, by email with qualifier, eg:
 #                       `user:alice@worklytics`, `group:analysts@worklytics.co`, or
 #                        `serviceAccount:sa@worklytics.google-service-accounts.com`
@@ -357,6 +359,7 @@ variable "lookup_tables" {
     source_connector_id           = string
     join_key_column               = string
     columns_to_include            = optional(list(string))
+    pseudonym_format              = optional(string) # maps to rules.pseudonymFormat; omit for proxy default (JSON). TODO(0.8): default URL_SAFE_HASH_ONLY here.
     sanitized_accessor_principals = optional(list(string))
     expiration_days               = optional(number, 5 * 365)
     compress_output               = optional(bool)

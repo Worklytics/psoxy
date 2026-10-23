@@ -16,12 +16,15 @@ lookup_tables = {
       # ADD LIST OF GCP PRINCIPALS HERE
       # eg, "serviceAccount:datawarehouse-ingestion@my-project.googleserviceaccount.com"
     ],
-    join_key_column = "EMPLOYEE_ID"
+    join_key_column  = "EMPLOYEE_ID"
+    pseudonym_format = "URL_SAFE_HASH_ONLY" # recommended for JOIN with Worklytics exports (see below)
   }
 }
 ```
 
 Set `join_key_column` to the join column **as named in your HRIS CSV** (for the standard schema below, `EMPLOYEE_ID`). Terraform names the pseudonym column `{join_key_column}_pseudonym` (for example `EMPLOYEE_ID_pseudonym`).
+
+Set `pseudonym_format` on each lookup table entry to control encoding of `{join_key_column}_pseudonym`. Use `URL_SAFE_HASH_ONLY` so values match `employeeId` in [Worklytics weekly aggregates](https://docs.worklytics.co/knowledge-base/data-export/weekly-aggregates) exports (base64url SHA-256, no `t~` prefix). `URL_SAFE_TOKEN` is also supported if your export uses that encoding instead. If you omit `pseudonym_format`, the proxy falls back to its historical columnar default (`JSON`), which is **not** suitable for joining to Worklytics exports—set `pseudonym_format` explicitly for new deployments. A future `gcp-host` release will change the Terraform default to `URL_SAFE_HASH_ONLY`.
 
 In `sanitized_accessor_principals`, add the name of whatever GCP principal running ingestion of your lookup table from GCS to your data warehouse will assume. You can add additional principals as needed. Alternatively, you can use an IAM policy created outside our Terraform module to grant access to the lookup table CSVs within the bucket.
 
@@ -43,7 +46,7 @@ Every time a new hris snapshot is uploaded to the hris `-input` bucket, TWO copi
 
 The lookup table CSV is **not** limited to only two columns. Terraform generates lookup rules that emit the HRIS columns from your source file (unless you restrict them; see [Advanced](#advanced)), and **add** a `{join_key_column}_pseudonym` column by duplicating your join key and pseudonymizing that copy.
 
-With `join_key_column = "EMPLOYEE_ID"` and `columns_to_include = []` (see [Minimal lookup table](#minimal-lookup-table-join-key-columns-only)), each row has only:
+With `join_key_column = "EMPLOYEE_ID"`, `pseudonym_format = "URL_SAFE_HASH_ONLY"`, and `columns_to_include = []` (see [Minimal lookup table](#minimal-lookup-table-join-key-columns-only)), each row has only:
 
 | `EMPLOYEE_ID` | `EMPLOYEE_ID_pseudonym` |
 | --- | --- |
@@ -117,6 +120,7 @@ lookup_tables = {
   "hris-lookup" = {
     source_connector_id = "hris",
     join_key_column     = "EMPLOYEE_ID",
+    pseudonym_format    = "URL_SAFE_HASH_ONLY",
     columns_to_include  = [], # no extra HRIS columns; module still adds EMPLOYEE_ID + EMPLOYEE_ID_pseudonym
     sanitized_accessor_principals = [
       # ...

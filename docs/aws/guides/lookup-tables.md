@@ -18,7 +18,7 @@ lookup_table_builders = {
       # ADD LIST OF NAMES OF YOUR AWS ROLES WHICH CAN READ LOOKUP TABLE
     ],
     rules = {
-      pseudonymFormat = "URL_SAFE_HASH_ONLY"
+      pseudonymFormat = "URL_SAFE_HASH_ONLY" # use for JOIN with Worklytics exports; URL_SAFE_TOKEN if your export uses that encoding
       columnsToRedact = [
         "employee_email",
         "manager_id",
@@ -57,7 +57,7 @@ If your input file follows the [standard HRIS schema](https://docs.worklytics.co
 
 Every time a new hris snapshot is uploaded to the hris `-input` bucket, TWO copies of it will be created: a sanitized copy in the bucket accessible Worklytics, and the lookup variant in the lookup bucket referenced above (not accessible to Worklytics).
 
-The lookup table CSV is **not** limited to only `EMPLOYEE_ID` and `EMPLOYEE_ID_ORIG`. It is produced by the lookup builder's `rules` (the same rule structure as a bulk connector). Those rules emit the HRIS columns that are not redacted or otherwise excluded, and `columnsToDuplicate` **adds** `EMPLOYEE_ID_ORIG` with the original employee ID from your source file. In the example configuration, `EMPLOYEE_ID` holds the pseudonymized identifier that appears as `employeeId` in Worklytics exports (`URL_SAFE_HASH_ONLY` encoding; applied by `aws-host` when `pseudonymFormat` is omitted from lookup `rules`).
+The lookup table CSV is **not** limited to only `EMPLOYEE_ID` and `EMPLOYEE_ID_ORIG`. It is produced by the lookup builder's `rules` (the same rule structure as a bulk connector). Those rules emit the HRIS columns that are not redacted or otherwise excluded, and `columnsToDuplicate` **adds** `EMPLOYEE_ID_ORIG` with the original employee ID from your source file. In the example configuration, `EMPLOYEE_ID` holds the pseudonymized identifier that appears as `employeeId` in Worklytics exports. Set `pseudonymFormat` in lookup `rules` to match your export encoding (`URL_SAFE_HASH_ONLY` is typical for weekly aggregates).
 
 If you load this into your Data Warehouse, you can JOIN it with the data you export from Worklytics.
 

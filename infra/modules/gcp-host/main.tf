@@ -643,8 +643,7 @@ resource "google_secret_manager_secret_version" "additional_transforms" {
   secret_data = yamlencode([
     for k, v in var.lookup_tables : {
       destinationBucketName : module.lookup_output[k].bucket_name
-      rules : {
-        pseudonymFormat : "URL_SAFE_HASH_ONLY"
+      rules : merge({
         columnsToDuplicate : {
           (v.join_key_column) : "${v.join_key_column}_pseudonym"
         },
@@ -652,7 +651,7 @@ resource "google_secret_manager_secret_version" "additional_transforms" {
         columnsToInclude : try(concat(v.columns_to_include, [
           v.join_key_column, "${v.join_key_column}_pseudonym"
         ]), null)
-      }
+      }, v.pseudonym_format != null ? { pseudonymFormat : v.pseudonym_format } : {})
       compressOutput : v.compress_output
     } if v.source_connector_id == each.key
   ])

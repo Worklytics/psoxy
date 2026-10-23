@@ -418,7 +418,7 @@ variable "lookup_table_builders" {
     #        # ADD LIST OF NAMES OF YOUR AWS ROLES WHICH CAN READ LOOKUP TABLE
     #      ],
     #      rules       = {
-    #        pseudonymFormat = "URL_SAFE_HASH_ONLY" # default applied by module when omitted
+    #        pseudonymFormat = "URL_SAFE_TOKEN"
     #        columnsToRedact       = [
     #          "employee_email",
     #          "manager_id",

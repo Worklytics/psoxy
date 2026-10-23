@@ -445,6 +445,7 @@ variable "custom_side_outputs" {
 #                       enables columnsToInclude; the module always merges in join_key_column and
 #                       `{join_key_column}_pseudonym`. List only extra HRIS columns to retain; use []
 #                       for join-key pair only (see docs/gcp/guides/lookup-tables.md).
+#   - `pseudonym_format` optional; recommended URL_SAFE_HASH_ONLY for Worklytics export JOINs (see docs).
 #   - `sanitized_accessor_names` is an optional list of GCP principals, by email with qualifier, eg:
 #                       `user:alice@worklytics`, `group:analysts@worklytics.co`, or
 #                        `serviceAccount:sa@worklytics.google-service-accounts.com`
@@ -453,6 +454,7 @@ variable "lookup_tables" {
     source_connector_id           = string
     join_key_column               = string
     columns_to_include            = optional(list(string))
+    pseudonym_format              = optional(string)
     sanitized_accessor_principals = optional(list(string))
     expiration_days               = optional(number)
     output_bucket_name            = optional(string) # allow override of default bucket name
