@@ -1,0 +1,22 @@
+{
+  "event_id":"70dfe00c-2852-43f4-a52b-8f61113f16c9",
+  "type":"CODEX_LOG",
+  "principal":{
+    "id":"t~TDhE_IAxxWoLdspQg3HZYlI9IEx8ylVhXguQIRJb7vc",
+    "type":"CHATGPT_WORKSPACE"
+  },
+  "actor":{
+    "type":"ACCOUNT_USER",
+    "user_id":"t~QNybpbKvUYf4HL8gqEZfPRwjlz4FbGlr4mKOaduViYc",
+    "user_email":"t~knxWE5tapsutcz6pLWSC3wfb5t34lCrXNZsKnhwyVXk@example.com"
+  },
+  "event_type":"APP_MCP_RESULT",
+  "client_id":"CODEX_CLI",
+  "workspace_id":"be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details":{
+    "detail_type":"APP_MCP_RESULT",
+    "call_id":"call_123",
+    "status":"success",
+    "result_preview":"{\"length\":49,\"word_count\":8}"
+  }
+}
