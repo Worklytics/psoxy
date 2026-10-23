@@ -388,6 +388,7 @@ module "webhook_collectors" {
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   test_caller_role_arn                 = module.psoxy.webhook_test_caller_role_arn
   rules_file                           = try(local.webhook_collector_rules_file_paths[each.key], null)
+  collection_enabled                   = each.value.collection_enabled
   webhook_auth_public_keys             = each.value.auth_public_keys
   provision_auth_key                   = each.value.provision_auth_key
   output_path_prefix                   = each.value.output_path_prefix
@@ -396,6 +397,7 @@ module "webhook_collectors" {
   example_identity                     = try(each.value.example_identity, null)
 
   todos_as_local_files      = var.todos_as_local_files
+  todo_step                 = var.todo_step
   allowed_webhook_ip_blocks = var.allowed_webhook_ip_blocks
 
   enable_bedrock = try(each.value.enable_gen_metadata, false)

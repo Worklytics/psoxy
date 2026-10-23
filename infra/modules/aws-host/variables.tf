@@ -377,7 +377,8 @@ variable "custom_side_outputs" {
 
 variable "webhook_collectors" {
   type = map(object({
-    rules_file = string
+    rules_file         = string
+    collection_enabled = optional(bool, false)     # leave false for the first apply; set true and apply again to create the JWT authorizer and accept webhooks
     provision_auth_key = optional(object({         # whether to provision auth keys for webhook collector; if not provided, will not provision any
       rotation_days = optional(number, null)       # null means no rotation; if > 0, will rotate every N days
       key_spec      = optional(string, "RSA_2048") # RSA_2048, RSA_3072, or RSA_4096; defaults to RSA_2048, which should be sufficient this use-case

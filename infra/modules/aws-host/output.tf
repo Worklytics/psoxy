@@ -86,6 +86,7 @@ output "todo_files" {
     [{}],
     [for connector in values(module.api_connector) : connector.todo_files],
     [for connector in values(module.bulk_connector) : connector.todo_files],
+    [for connector in values(module.webhook_collectors) : connector.todo_files],
   )...)
 }
 

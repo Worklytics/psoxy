@@ -425,9 +425,10 @@ variable "webhook_collectors" {
     display_name              = optional(string, "Webhooks Collected via Psoxy")
     source_kind               = optional(string, "work-event") # source kind for this webhook collector, used for labeling and categorization
     rules_file                = string
-    provision_auth_key = optional(object({         # whether to provision auth keys for webhook collector; if not provided, will not provision any
-      rotation_days = optional(number, null)       # null means no rotation; if > 0, will rotate every N days
-      key_spec      = optional(string, "RSA_2048") # RSA_2048, RSA_3072, or RSA_4096; defaults to RSA_2048, which should be sufficient this use-case
+    collection_enabled        = optional(bool, false) # leave false for the first apply; set true and apply again to create the JWT authorizer and accept webhooks
+    provision_auth_key = optional(object({            # whether to provision auth keys for webhook collector; if not provided, will not provision any
+      rotation_days = optional(number, null)          # null means no rotation; if > 0, will rotate every N days
+      key_spec      = optional(string, "RSA_2048")    # RSA_2048, RSA_3072, or RSA_4096; defaults to RSA_2048, which should be sufficient this use-case
     }), null)
     auth_public_keys     = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
     allow_origins        = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)

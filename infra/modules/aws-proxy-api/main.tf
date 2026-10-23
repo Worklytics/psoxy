@@ -182,6 +182,23 @@ locals {
       ]
     }
   ] : []
+
+  # S3 statements use a 2-element Resource tuple; SQS uses 1. Terraform 1.14
+  # concat() panics unless Action and Resource are lists, not fixed tuples.
+  lambda_role_iam_statements = flatten([
+    for statements in [
+      var.enable_async_processing ? module.async_output_iam_statements[0].iam_statements : [],
+      local.sqs_iam_statements,
+      var.extra_lambda_role_iam_statements,
+      ] : [
+      for stmt in statements : {
+        Sid      = stmt.Sid
+        Effect   = stmt.Effect
+        Action   = tolist(stmt.Action)
+        Resource = tolist(stmt.Resource)
+      }
+    ]
+  ])
 }
 
 module "psoxy_lambda" {
@@ -212,11 +229,7 @@ module "psoxy_lambda" {
   side_output_original                 = local.provision_side_output_original_bucket ? "s3://${module.side_output_original[0].bucket_id}" : try(var.side_output_original.bucket, null)
   side_output_sanitized                = local.provision_side_output_sanitized_bucket ? "s3://${module.side_output_sanitized[0].bucket_id}" : try(var.side_output_sanitized.bucket, null)
   sqs_trigger_queue_arns               = var.enable_async_processing ? [aws_sqs_queue.async_api_request_queue[0].arn] : []
-  lambda_role_iam_statements = concat(
-    var.enable_async_processing ? module.async_output_iam_statements[0].iam_statements : [],
-    local.sqs_iam_statements,
-    var.extra_lambda_role_iam_statements
-  )
+  lambda_role_iam_statements           = local.lambda_role_iam_statements
 
   environment_variables = merge(
     var.environment_variables,

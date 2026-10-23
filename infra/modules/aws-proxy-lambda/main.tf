@@ -344,21 +344,32 @@ locals {
     ]
   }] : []
 
-  policy_statements = concat(
-    local.global_ssm_param_statements,
-    local.global_secretsmanager_statements,
-    local.local_ssm_param_statements,
-    local.local_secrets_manager_statements,
-    local.key_statements,
-    local.sqs_consume_statements,
-    local.sqs_send_statements,
-    local.s3_write_statements,
-    local.remote_resource_bucket_statements,
-    local.aws_kms_public_key_statements,
-    local.bedrock_invoke_statements,
-    flatten(values(module.side_output_iam_statements)[*].iam_statements),
-    var.lambda_role_iam_statements,
-  )
+  # Action/Resource tuple lengths differ across groups (for example S3 Resource
+  # has two ARNs, SSM has one). Terraform 1.14 concat() panics on that.
+  policy_statements = flatten([
+    for statements in [
+      local.global_ssm_param_statements,
+      local.global_secretsmanager_statements,
+      local.local_ssm_param_statements,
+      local.local_secrets_manager_statements,
+      local.key_statements,
+      local.sqs_consume_statements,
+      local.sqs_send_statements,
+      local.s3_write_statements,
+      local.remote_resource_bucket_statements,
+      local.aws_kms_public_key_statements,
+      local.bedrock_invoke_statements,
+      flatten(values(module.side_output_iam_statements)[*].iam_statements),
+      var.lambda_role_iam_statements,
+      ] : [
+      for stmt in statements : {
+        Sid      = stmt.Sid
+        Effect   = stmt.Effect
+        Action   = tolist(stmt.Action)
+        Resource = tolist(stmt.Resource)
+      }
+    ]
+  ])
 }
 
 # what the lambda function needs to operate (fulfill its use-case)
