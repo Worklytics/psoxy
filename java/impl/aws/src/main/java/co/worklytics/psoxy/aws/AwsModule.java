@@ -7,6 +7,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.ConnectivityFailures;
 import co.worklytics.psoxy.gateway.CompositeSecretStore;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
@@ -296,5 +297,7 @@ public interface AwsModule {
         @Binds @IntoSet
         abstract GenMetadataChatModelProvider bedrockChatModelProvider(BedrockChatModelProvider impl);
 
+        @Binds @IntoSet
+        abstract ConnectivityFailures awsConnectivityFailures(AwsConnectivityFailures impl);
     }
 }

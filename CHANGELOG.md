@@ -5,8 +5,11 @@ in each release's notes.
 
 Changes to be including in future/planned release notes will be added here.
 
-## Unreleased
+## [0.7.2](https://github.com/Worklytics/psoxy/releases/tag/v0.7.2) - *planned*
 
+- AWS health checks that cannot reach SSM Parameter Store or Secrets Manager (typical of a Lambda in a VPC without a reachable interface endpoint or NAT) return HTTP 503, `X-Psoxy-Error: CONFIG_STORE_UNREACHABLE`, and a JSON body with the same `error` code, including when the failure happens during Lambda initialization. CloudWatch still logs `Error reading configuration from SSM`.
+- GCP health checks that cannot reach Secret Manager (typical of a Cloud Function whose VPC egress is all traffic, without Private Google Access or Cloud NAT) return the same HTTP 503 and `X-Psoxy-Error: CONFIG_STORE_UNREACHABLE`, including when container startup fails. Logs include `Error reading configuration from Secret Manager`.
+- Other connection failures (not the configuration store) return HTTP 503 and `X-Psoxy-Error: DEPENDENT_SERVICE_UNREACHABLE`. The response is one sentence from the platform parser, such as `Unable to reach KMS. Check the logs.` or `Unable to reach Cloud KMS. Check the logs.` The client error itself is only in the logs. A failed initialization is retried after about a minute instead of sticking for the life of the instance.
 - `aws`: example leaves VPC off by default. `vpc.tf` and the `vpc_config` block in `main.tf` are commented out, so Lambdas use function URLs and API Gateway stays off (`use_api_gateway_v2` defaults to `false`). Uncomment both to attach Lambdas to a VPC, which forces API Gateway v2.
 - health check: `version` now reports `javaSourceCodeVersion` when available, falling back to the bundle filename; filename parsing also handles prebuilt `.zip` bundles (eg, `psoxy-gcp-0.7.0.zip` -> `0.7.0`), which were previously returned unparsed.
 - `textDigest` (transform and augment) `keywords`: keywords made of several words (`pull request`, `code review`) or containing punctuation (`dall-e`, `e-mail`) now match. Previously the proxy compared one word at a time, so these never matched. Matching stays case-insensitive and whole-word. This affects `claude`, `chatgpt-enterprise` and `glean-customer-events-log-bulk`: the `keywords` counts in their sanitized output now include these phrases. Single-word keywords are unchanged, except that letters with accents now count as part of a word (`code` no longer matches `Codeänderung`).
