@@ -305,6 +305,7 @@ variable "bulk_connectors" {
     memory_size_mb        = optional(number)
     settings_to_provide   = optional(map(string), {})
     enable_gen_metadata   = optional(bool, false)
+    environment_variables = optional(map(string), {})
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -389,6 +390,7 @@ variable "webhook_collectors" {
     example_identity    = optional(string, null)        # example identity to use in test payloads
     example_payload     = optional(string, null)        # example payload content to use in test scripts
     enable_gen_metadata = optional(bool, false)         # ALPHA: !<classify> / !<genMetadata> in webhook rules (Bedrock)
+    environment_variables = optional(map(string), {})
   }))
   default = {}
 

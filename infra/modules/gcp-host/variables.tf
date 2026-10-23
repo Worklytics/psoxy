@@ -244,6 +244,7 @@ variable "webhook_collectors" {
     example_identity    = optional(string, null) # example identity to use in test payloads
     example_payload     = optional(string, null) # example payload content to use in test scripts
     enable_gen_metadata = optional(bool, false)  # ALPHA: !<classify> / !<genMetadata> in webhook rules (Vertex)
+    environment_variables = optional(map(string), {})
   }))
   default = {}
 
@@ -277,6 +278,7 @@ variable "bulk_connectors" {
     available_memory_mb   = optional(number)
     timeout_seconds       = optional(number)
     enable_gen_metadata   = optional(bool, false)
+    environment_variables = optional(map(string), {})
   }))
 
   description = "map of connector id  => bulk connectors to provision"
