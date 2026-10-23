@@ -86,18 +86,27 @@ FROM
 You can add some addition configuration to the `lookup_tables` variable to control the behavior of the lookup table generation:
    - `expiration_days` - to expire the lookup table files after this number of days
    - `output_bucket_name` - to override the value of the bucket name that the Terraform modules will create, if you have your own naming convention
-   - `columns_to_include` - optional list of **additional** HRIS columns to retain in the lookup output (see below)
+   - `columns_to_include` - optional on `lookup_tables`; controls column filtering for lookup output (see below)
+
+#### `columns_to_include` behavior
+
+This field is exposed on the `lookup_tables` variable in `gcp-host` (and in our GCP examples as `lookup_tables` in `terraform.tfvars`).
+
+- **Omitted or `null`:** no `columnsToInclude` rule is applied, so lookup output keeps all HRIS columns (plus the generated `{join_key_column}_pseudonym` column).
+- **Any non-null list:** the module turns on `columnsToInclude` and **always** adds `join_key_column` and `{join_key_column}_pseudonym` to whatever you list. Your list is therefore **extra** HRIS columns to keep alongside that join pair, not the full output schema.
+
+GCP lookup tables do **not** add `employee_id_orig`. With the default `join_key_column = "employee_id"`, the join pair is cleartext `EMPLOYEE_ID` (original HRIS value) and `EMPLOYEE_ID_PSEUDONYM` (matches `employeeId` in Worklytics exports). That differs from the [AWS lookup pattern](../../aws/guides/lookup-tables.md), which pseudonymizes `EMPLOYEE_ID` and adds `EMPLOYEE_ID_ORIG` for the original value.
 
 #### Minimal lookup table (join key columns only)
 
-If you want the lookup CSV to contain **only** the cleartext join key and its pseudonymized duplicate (for example `EMPLOYEE_ID` and `EMPLOYEE_ID_PSEUDONYM`), set `columns_to_include` to an empty list. The `gcp-host` module always appends `join_key_column` and `{join_key_column}_pseudonym` to `columns_to_include` when it is set, so an empty list limits output to those two columns.
+To emit only `EMPLOYEE_ID` and `EMPLOYEE_ID_PSEUDONYM`, enable filtering with a non-null `columns_to_include` and list **no** extra HRIS columns. An empty list means “join pair only”; you do not put `employee_id` or `employee_id_pseudonym` in `terraform.tfvars`—the module injects them into the sanitization rules.
 
 ```hcl
 lookup_tables = {
   "hris-lookup" = {
     source_connector_id = "hris",
     join_key_column     = "employee_id",
-    columns_to_include  = [],
+    columns_to_include  = [], # no extra HRIS columns; module still adds employee_id + employee_id_pseudonym
     sanitized_accessor_principals = [
       # ...
     ],
@@ -105,4 +114,8 @@ lookup_tables = {
 }
 ```
 
-This differs from the AWS lookup-table pattern, which pseudonymizes `EMPLOYEE_ID` and adds `EMPLOYEE_ID_ORIG` for the original value. On GCP, `EMPLOYEE_ID` stays as the original HRIS value and `EMPLOYEE_ID_PSEUDONYM` is the value that matches `employeeId` in Worklytics exports.
+To keep the join pair plus other HRIS fields (for example, to filter re-identification by department), list only those extras:
+
+```hcl
+    columns_to_include = ["department"]
+```

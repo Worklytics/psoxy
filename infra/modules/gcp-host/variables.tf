@@ -345,9 +345,10 @@ variable "custom_side_outputs" {
 
 # build lookup tables to JOIN data you receive back from Worklytics with your original data.
 #   - `join_key_column` should be the column you expect to JOIN on, usually 'employee_id'
-#   - `columns_to_include` is an optional a list of columns to include in the lookup table,
-#                       e.g. if the data you're exporting TO worklytics contains more columns than
-#                       you want to have in the lookup table, you can limit to an explicit list
+#   - `columns_to_include` when null, lookup output includes all HRIS columns. When set (including []),
+#                       enables columnsToInclude; the module always merges in join_key_column and
+#                       `{join_key_column}_pseudonym`. List only extra HRIS columns to retain; use []
+#                       for join-key pair only (no employee_id_orig on GCP; see lookup table docs).
 #   - `sanitized_accessor_names` is an optional list of GCP principals, by email with qualifier, eg:
 #                       `user:alice@worklytics`, `group:analysts@worklytics.co`, or
 #                        `serviceAccount:sa@worklytics.google-service-accounts.com`
