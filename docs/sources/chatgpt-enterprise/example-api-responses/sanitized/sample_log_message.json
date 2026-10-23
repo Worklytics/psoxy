@@ -11,13 +11,18 @@
     "user_email":"t~knxWE5tapsutcz6pLWSC3wfb5t34lCrXNZsKnhwyVXk@example.com"
   },
   "timestamp":"2026-05-20T12:47:09.501218Z",
+  "previous_message_id":"msg_xyz789abc122",
   "message":{
     "id":"msg_xyz789abc123",
     "parent_id":null,
     "created_at":"2026-05-20T12:47:09.501218Z",
     "author":{
       "type":"user",
-      "client_type":"unknown"
+      "client_type":"desktop_web",
+      "skills_used_names":[
+        "pdfs"
+      ],
+      "applied_custom_instructions":"{\"length\":31,\"word_count\":5}"
     },
     "content":{
       "type":"user_instructions",
@@ -41,8 +46,14 @@
   "conversation":{
     "id":"conv_def456ghi789",
     "title":"{\"length\":21,\"word_count\":3}",
+    "gpt_id":"g-ExampleGPT123",
+    "gpt_name":"Financial Analyst GPT",
+    "project_id":"proj-ExampleProject456",
+    "project_name":"Finance Team",
     "created_at":"2026-05-20T12:47:09.501218Z",
     "is_pinned":false,
-    "is_temporary_chat":false
+    "is_temporary_chat":false,
+    "mode":"chat",
+    "is_locked_chat":false
   }
 }

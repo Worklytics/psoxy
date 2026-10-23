@@ -177,7 +177,7 @@ Eg, the following redacts all headers that have a name value other than those ex
 
 Options:
 
-- `keywords` (BETA - behavior subject to change) - an optional list of keyword strings to search for within the text. If provided, the original text is tokenized into words and a frequency count is generated. The resulting JSON object will include a `keywords` property, containing a map of the configured keywords that were found in the text along with their occurrence counts.
+- `keywords` (BETA - behavior subject to change) - an optional list of keyword strings to search for within the text. If provided, the original text is tokenized into words and a frequency count is generated. The resulting JSON object will include a `keywords` property, containing a map of the configured keywords that were found in the text along with their occurrence counts. A keyword can be several words, such as `pull request`, or contain punctuation, such as `dall-e`. Matching is case-insensitive, but the keyword must appear as written and as whole words: `how do` matches `How do I`, but not `how does`, and `pull request` does not match `pull-request`. Letters with accents count as part of a word, so `code` does not match `Codeänderung`. Each keyword is counted on its own, so `explain` and `explain how` both count in `Explain how it works`.
 
 Use case are values that _may_ be sensitive, but are opaque. For example, page tokens in Microsoft Graph API do not have a defined structure, but in practice contain PII.
 
