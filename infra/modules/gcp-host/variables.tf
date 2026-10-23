@@ -344,7 +344,7 @@ variable "custom_side_outputs" {
 
 
 # build lookup tables to JOIN data you receive back from Worklytics with your original data.
-#   - `join_key_column` should be the column you expect to JOIN on, usually 'employee_id'
+#   - `join_key_column` should match the join column name in your HRIS CSV (usually 'EMPLOYEE_ID'); pseudonym output is `{join_key_column}_pseudonym`
 #   - `columns_to_include` when null, lookup output includes all HRIS columns. When set (including []),
 #                       enables columnsToInclude; the module always merges in join_key_column and
 #                       `{join_key_column}_pseudonym`. List only extra HRIS columns to retain; use []
