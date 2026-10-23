@@ -39,7 +39,7 @@ If your input file follows the [standard HRIS schema](https://docs.worklytics.co
 
 Every time a new hris snapshot is uploaded to the hris `-input` bucket, TWO copies of it will be created: a sanitized copy in the bucket accessible Worklytics, and the lookup variant in the lookup bucket referenced above (not accessible to Worklytics).
 
-The lookup table CSV file will have the following columns: `EMPLOYEE_ID,EMPLOYEE_ID_ORIG`
+The lookup table CSV is **not** limited to only two columns. Terraform generates lookup rules that emit the HRIS columns from your source file (unless you restrict them; see [Advanced](#advanced)), and **add** a `{join_key_column}_pseudonym` column by duplicating your join key and pseudonymizing that copy. With the default `join_key_column = "employee_id"`, `EMPLOYEE_ID` retains the original HRIS value and `EMPLOYEE_ID_PSEUDONYM` holds the pseudonym that appears as `employeeId` in Worklytics exports.
 
 If you load this into your Data Warehouse, you can JOIN it with the data you export from Worklytics.
 
@@ -50,10 +50,10 @@ Then the following query will give re-identified aggregate data:
 ```sql
 SELECT
     acmecom_ANONYMIZED_AGGREGATES.* EXCEPT (employeeId),
-    lookup_hris.employee_id_orig AS employeeId
+    lookup_hris.employee_id AS employeeId
 FROM
     acmecom_ANONYMIZED_AGGREGATES JOIN lookup_hris
-        ON acmecom_ANONYMIZED_AGGREGATES.employeeId = lookup_hris.employee_id
+        ON acmecom_ANONYMIZED_AGGREGATES.employeeId = lookup_hris.employee_id_pseudonym
 ```
 
 The `employeeId` column in the result set will be the original employee ID from your HRIS system.
@@ -75,10 +75,10 @@ WITH allowed_for_reidentification AS (
 )
 SELECT
     acmecom_ANONYMIZED_AGGREGATES.* EXCEPT (employeeId),
-    allowed_for_reidentification.employee_id_orig AS employeeId
+    allowed_for_reidentification.employee_id AS employeeId
 FROM
     acmecom_ANONYMIZED_AGGREGATES JOIN allowed_for_reidentification
-        ON acmecom_ANONYMIZED_AGGREGATES.employeeId = allowed_for_reidentification.employee_id
+        ON acmecom_ANONYMIZED_AGGREGATES.employeeId = allowed_for_reidentification.employee_id_pseudonym
 ```
 
 ### Advanced
