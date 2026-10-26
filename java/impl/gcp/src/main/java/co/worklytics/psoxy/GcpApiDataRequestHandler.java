@@ -45,7 +45,6 @@ public class GcpApiDataRequestHandler {
 
     final GcpEnvironment gcpEnvironment;
     final Lazy<GcpEnvironment.GcpApiModeConfig> gcpApiModeConfig; // lazy to avoid circular dependency issues
-    final GcpEnvironment.ClientIpConfig clientIpConfig;
     final ApiDataRequestHandler requestHandler;
     final EnvVarsConfigService envVarsConfigService;
     final GoogleIdTokenVerifierFactory googleIdTokenVerifierFactory;
@@ -60,7 +59,6 @@ public class GcpApiDataRequestHandler {
     public GcpApiDataRequestHandler(
         GcpEnvironment gcpEnvironment,
         Lazy<GcpEnvironment.GcpApiModeConfig> gcpApiModeConfig,
-        GcpEnvironment.ClientIpConfig clientIpConfig,
         ApiDataRequestHandler requestHandler,
         EnvVarsConfigService envVarsConfigService,
         GoogleIdTokenVerifierFactory googleIdTokenVerifierFactory,
@@ -68,7 +66,6 @@ public class GcpApiDataRequestHandler {
         this.requestHandler = requestHandler;
         this.gcpEnvironment = gcpEnvironment;
         this.gcpApiModeConfig = gcpApiModeConfig;
-        this.clientIpConfig = clientIpConfig;
         this.envVarsConfigService = envVarsConfigService;
         this.googleIdTokenVerifierFactory = googleIdTokenVerifierFactory;
         this.objectMapper = objectMapper;
@@ -112,7 +109,7 @@ public class GcpApiDataRequestHandler {
 
     void handleSyncCase(HttpRequest request, HttpResponse response) {
         // sync case
-        CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request, clientIpConfig.getXForwardedForOffset());
+        CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request, gcpApiModeConfig.get().getClientIpXForwardedForOffset());
 
         try {
             if (envVarsConfigService.isDevelopment()) {

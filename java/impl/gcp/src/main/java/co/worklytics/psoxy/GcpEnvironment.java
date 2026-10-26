@@ -22,6 +22,9 @@ public class GcpEnvironment implements HostEnvironment {
         ;
     }
 
+    /** Last hop. Used when {@code CLIENT_IP_X_FORWARDED_FOR_OFFSET} is unset. */
+    static final int DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET = -1;
+
     /**
      * GCP-specific URLs/topics for the API data connector (distinct from core {@link co.worklytics.psoxy.gateway.ApiModeConfig}).
      */
@@ -41,11 +44,19 @@ public class GcpEnvironment implements HostEnvironment {
          */
         Optional<String> asyncPubSubQueue;
 
+        /**
+         * Negative offset from the end of {@code X-Forwarded-For} for the optional IP allowlist.
+         * {@code -1} is the last address.
+         */
+        @Builder.Default
+        int clientIpXForwardedForOffset = DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET;
+
         @VisibleForTesting
         enum GcpApiModeConfigProperty implements co.worklytics.psoxy.gateway.ConfigService.ConfigProperty {
 
             ASYNC_PUB_SUB_QUEUE,
             SERVICE_URL,
+            CLIENT_IP_X_FORWARDED_FOR_OFFSET,
         }
 
         static GcpApiModeConfig fromConfigService(ConfigService configService) {
@@ -56,6 +67,8 @@ public class GcpEnvironment implements HostEnvironment {
             return GcpApiModeConfig.builder()
                 .serviceUrl(configService.getConfigPropertyAsOptional(GcpApiModeConfigProperty.SERVICE_URL))
                 .asyncPubSubQueue(configService.getConfigPropertyAsOptional(GcpApiModeConfigProperty.ASYNC_PUB_SUB_QUEUE))
+                .clientIpXForwardedForOffset(clientIpXForwardedForOffset(
+                    configService, GcpApiModeConfigProperty.CLIENT_IP_X_FORWARDED_FOR_OFFSET))
                 .build();
         }
     }
@@ -91,6 +104,13 @@ public class GcpEnvironment implements HostEnvironment {
          */
         int batchInvocationTimeoutSeconds;
 
+        /**
+         * Negative offset from the end of {@code X-Forwarded-For} for the optional IP allowlist.
+         * {@code -1} is the last address.
+         */
+        @Builder.Default
+        int clientIpXForwardedForOffset = DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET;
+
         private enum GcpWebhookCollectorModeConfigProperty implements co.worklytics.psoxy.gateway.ConfigService.ConfigProperty {
 
             BATCH_MERGE_SUBSCRIPTION,
@@ -100,6 +120,8 @@ public class GcpEnvironment implements HostEnvironment {
             BATCH_INVOCATION_TIMEOUT_SECONDS,
 
             SERVICE_URL,
+
+            CLIENT_IP_X_FORWARDED_FOR_OFFSET,
         }
 
         static GcpWebhookCollectorModeConfig fromConfigService(ConfigService configService) {
@@ -116,56 +138,31 @@ public class GcpEnvironment implements HostEnvironment {
                                 GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_INVOCATION_TIMEOUT_SECONDS,
                                 value))
                         .orElse(60))
+                .clientIpXForwardedForOffset(clientIpXForwardedForOffset(
+                    configService, GcpWebhookCollectorModeConfigProperty.CLIENT_IP_X_FORWARDED_FOR_OFFSET))
                 .build();
         }
     }
 
-    /**
-     * Which {@code X-Forwarded-For} hop the optional IP allowlist reads.
-     * Shared by API connectors and webhook collectors.
-     */
-    @Builder
-    @Value
-    static class ClientIpConfig {
+    private static int clientIpXForwardedForOffset(ConfigService configService, ConfigService.ConfigProperty property) {
+        return configService.getConfigPropertyAsOptional(property)
+            .map(value -> parseClientIpXForwardedForOffset(property, value))
+            .orElse(DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET);
+    }
 
-        /** Last hop. Used when {@link ClientIpConfigProperty#CLIENT_IP_X_FORWARDED_FOR_OFFSET} is unset. */
-        static final int DEFAULT_X_FORWARDED_FOR_OFFSET = -1;
-
-        /**
-         * Negative offset from the end of {@code X-Forwarded-For}. {@code -1} is the last address.
-         */
-        @Builder.Default
-        int xForwardedForOffset = DEFAULT_X_FORWARDED_FOR_OFFSET;
-
-        @VisibleForTesting
-        enum ClientIpConfigProperty implements ConfigService.ConfigProperty {
-
-            CLIENT_IP_X_FORWARDED_FOR_OFFSET,
+    private static int parseClientIpXForwardedForOffset(ConfigService.ConfigProperty property, String value) {
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET;
         }
-
-        static ClientIpConfig fromConfigService(ConfigService configService) {
-            int offset = configService.getConfigPropertyAsOptional(ClientIpConfigProperty.CLIENT_IP_X_FORWARDED_FOR_OFFSET)
-                .map(ClientIpConfig::parseOffset)
-                .orElse(DEFAULT_X_FORWARDED_FOR_OFFSET);
-            return ClientIpConfig.builder()
-                .xForwardedForOffset(offset)
-                .build();
+        int offset = ConfigService.parseIntValue(property, trimmed);
+        if (offset >= 0) {
+            throw new IllegalArgumentException(
+                property.name()
+                    + " must be a negative offset from the end of X-Forwarded-For (for example -1), not '"
+                    + value + "'.");
         }
-
-        private static int parseOffset(String value) {
-            String trimmed = value.trim();
-            if (trimmed.isEmpty()) {
-                return DEFAULT_X_FORWARDED_FOR_OFFSET;
-            }
-            int offset = ConfigService.parseIntValue(ClientIpConfigProperty.CLIENT_IP_X_FORWARDED_FOR_OFFSET, trimmed);
-            if (offset >= 0) {
-                throw new IllegalArgumentException(
-                    ClientIpConfigProperty.CLIENT_IP_X_FORWARDED_FOR_OFFSET.name()
-                        + " must be a negative offset from the end of X-Forwarded-For (for example -1), not '"
-                        + value + "'.");
-            }
-            return offset;
-        }
+        return offset;
     }
 
     @Override
