@@ -1313,14 +1313,89 @@ all the operations for the connector:
 
 EOT
     },
-    confluence-cloud = {
+    # GA - uses Atlassian OAuth 2.0 credentials for service accounts (2LO/`client_credentials`); see
+    # https://support.atlassian.com/user-management/docs/create-oauth-2-0-credential-for-service-accounts/
+    # No refresh token, no interactive browser consent, and (per Atlassian's docs) no stated
+    # expiration on the `CLIENT_SECRET` itself. Recommended for new connections; shares
+    # `worklytics_connector_id`/rules/example calls with the deprecated `confluence-cloud` below, so
+    # it deep-links to the same Worklytics-side connector definition.
+    confluence-cloud-service-account = {
       source_kind : "confluence"
       availability : "beta"
       enable_by_default : false
       worklytics_connector_id : "confluence-cloud-psoxy"
       target_host : "api.atlassian.com"
       source_auth_strategy : "oauth2_refresh_token"
-      display_name : "Confluence Cloud"
+      display_name : "Confluence Cloud (Service Account)"
+      worklytics_connector_name : "Confluence Cloud via Psoxy"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        local.standard_config_values.oauth_refresh_token_lock,
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : true # not really, but simpler this way; and some may want it treated as sensitive, since would be req'd to brute-force app tokens or something
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_SECRET"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      environment_variables : {
+        GRANT_TYPE : "client_credentials"
+        CREDENTIALS_FLOW : "client_secret"
+        REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
+        ACCESS_TOKEN_CACHEABLE : "true"
+        USE_SHARED_TOKEN : "TRUE"
+      }
+      settings_to_provide = {
+      }
+      reserved_concurrent_executions : null
+      enable_side_output : false
+      example_api_calls_user_to_impersonate : null
+      # `{CLOUD_ID}`: Confluence Cloud id from GET /oauth/token/accessible-resources (connector_settings.confluence_example_cloud_id).
+      # `{GROUP_ID}`: a group id from GET .../wiki/rest/api/group (connector_settings.confluence_example_group_id).
+      # `{ATTACHMENT_ID}`: an attachment id (YAML path param is `{pageId}` on the attachments versions route).
+      # `{BLOGPOST_ID}`: a blogpost id. `{PAGE_ID}`: a page id. `{COMMENT_ID}`: a footer- or inline-comment id.
+      # `{CUSTOM_CONTENT_ID}`: a custom-content id.
+      example_api_calls : [
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/group",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/group/${local.confluence_example_group_id}/membersByGroupId",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/content/search?cql=lastmodified>=${formatdate("YYYY-MM-DD", timeadd(var.example_api_calls_sample_date, "-720h"))}%20AND%20lastmodified<=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}&limit=30&expand=body.atlas_doc_format,ancestors,version,history,history.previousVersion&includeArchivedSpaces=true",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/spaces",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/attachments/{ATTACHMENT_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/blogposts/{BLOGPOST_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/pages/{PAGE_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/custom-content/{CUSTOM_CONTENT_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/footer-comments/{COMMENT_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/inline-comments/{COMMENT_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/tasks",
+        "/oauth/token/accessible-resources", # obtain Confluence Cloud ID from here
+      ],
+      external_token_todo : templatefile("${path.module}/docs/atlassian/confluence-service-account-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_CONFLUENCE_CLOUD_SERVICE_ACCOUNT"
+      })
+    }
+    # DEPRECATED - to be removed (or have its auth scheme replaced) in the next major version; see
+    # CHANGELOG. Uses a user-delegated OAuth 2.0 (3LO) `refresh_token`, which requires re-authorizing
+    # at least annually (Atlassian caps a 3LO "token family" at a 1-year max lifetime). New
+    # connections should use `confluence-cloud-service-account` above instead.
+    confluence-cloud = {
+      source_kind : "confluence"
+      availability : "deprecated"
+      enable_by_default : false
+      worklytics_connector_id : "confluence-cloud-psoxy"
+      target_host : "api.atlassian.com"
+      source_auth_strategy : "oauth2_refresh_token"
+      display_name : "(Deprecated, use Confluence Cloud (Service Account) instead) Confluence Cloud"
       worklytics_connector_name : "Confluence Cloud via Psoxy"
       secured_variables : [
         {
@@ -1422,14 +1497,85 @@ EOT
         path_to_instance_parameters = "PSOXY_JIRA_SERVER"
       })
     }
-    jira-cloud = {
+    # GA - uses Atlassian OAuth 2.0 credentials for service accounts (2LO/`client_credentials`); see
+    # https://support.atlassian.com/user-management/docs/create-oauth-2-0-credential-for-service-accounts/
+    # No refresh token, no interactive browser consent, and (per Atlassian's docs) no stated
+    # expiration on the `CLIENT_SECRET` itself. Recommended for new connections; shares
+    # `worklytics_connector_id`/rules/example calls with the deprecated `jira-cloud` below, so it
+    # deep-links to the same Worklytics-side connector definition.
+    jira-cloud-service-account = {
       source_kind : "jira-cloud"
       availability : "ga"
       enable_by_default : false
       worklytics_connector_id : "jira-cloud-psoxy"
       target_host : "api.atlassian.com"
       source_auth_strategy : "oauth2_refresh_token"
-      display_name : "Jira REST API"
+      display_name : "Jira REST API (Service Account)"
+      worklytics_connector_name : "Jira REST API via Psoxy"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        local.standard_config_values.oauth_refresh_token_lock,
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : true # not really, but simpler this way; and some may want it treated as sensitive, since would be req'd to brute-force app tokens or something
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_SECRET"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      environment_variables : {
+        GRANT_TYPE : "client_credentials"
+        CREDENTIALS_FLOW : "client_secret"
+        REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
+        ACCESS_TOKEN_CACHEABLE : "true"
+        USE_SHARED_TOKEN : "TRUE"
+      }
+      settings_to_provide = {
+      }
+      reserved_concurrent_executions : null
+      enable_side_output : false
+      example_api_calls_user_to_impersonate : null
+      # `{CLOUD_ID}`: Jira Cloud id from GET /oauth/token/accessible-resources (connector_settings.jira_cloud_id).
+      # `{ISSUE_ID}`: a Jira issue key or id (connector_settings.jira_example_issue_id), e.g. ETV-12.
+      # `{GROUP_ID}`: a group id from GET .../group/bulk (query param on /group/member).
+      example_api_calls : [
+        "/oauth/token/accessible-resources", # obtain Atlassian Cloud ID from here
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/users",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/group/bulk",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/group/member?groupId={GROUP_ID}&maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/search/jql?jql=updated>=-30d&maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/comment?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/project/search?maxResults=25",
+      ],
+      external_token_todo : templatefile("${path.module}/docs/atlassian/jira-cloud-service-account-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_JIRA_CLOUD_SERVICE_ACCOUNT"
+      })
+    }
+    # DEPRECATED - to be removed (or have its auth scheme replaced) in the next major version; see
+    # CHANGELOG. Uses a user-delegated OAuth 2.0 (3LO) `refresh_token`, which requires re-authorizing
+    # at least annually (Atlassian caps a 3LO "token family" at a 1-year max lifetime). New
+    # connections should use `jira-cloud-service-account` above instead.
+    jira-cloud = {
+      source_kind : "jira-cloud"
+      availability : "deprecated"
+      enable_by_default : false
+      worklytics_connector_id : "jira-cloud-psoxy"
+      target_host : "api.atlassian.com"
+      source_auth_strategy : "oauth2_refresh_token"
+      display_name : "(Deprecated, use Jira Cloud (Service Account) instead) Jira REST API"
       worklytics_connector_name : "Jira REST API via Psoxy"
       secured_variables : [
         {
