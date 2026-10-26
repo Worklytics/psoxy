@@ -17,8 +17,47 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(staticName = "of")
 public class CloudFunctionRequest implements HttpEventRequest {
 
+    /**
+     * Negative offset from the end of {@code X-Forwarded-For}. {@code -1} is the last hop.
+     * Unset means {@link #CLIENT_X_FORWARDED_FOR_POSITION_DIRECT}.
+     */
+    static final String ENV_CLIENT_X_FORWARDED_FOR_POSITION = "CLIENT_X_FORWARDED_FOR_POSITION";
+
+    /** Direct Cloud Run URL. The last hop is the address Cloud Run appended. */
+    static final int CLIENT_X_FORWARDED_FOR_POSITION_DIRECT = -1;
+
+    /**
+     * External Application Load Balancer. The load balancer appends the client it observed and then
+     * the forwarding-rule address, so the client is the second-to-last hop.
+     */
+    static final int CLIENT_X_FORWARDED_FOR_POSITION_EXTERNAL_ALB = -2;
+
     @NonNull
     final HttpRequest request;
+
+    /** Negative offset from the end of {@code X-Forwarded-For}. */
+    final int clientXForwardedForPosition;
+
+    static int clientXForwardedForPosition(String value) {
+        if (value == null || value.isBlank()) {
+            return CLIENT_X_FORWARDED_FOR_POSITION_DIRECT;
+        }
+        int position;
+        try {
+            position = Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                "Invalid " + ENV_CLIENT_X_FORWARDED_FOR_POSITION + ": '" + value
+                    + "'. Use a negative offset from the end of X-Forwarded-For, such as -1 (direct) or -2 (external load balancer).",
+                e);
+        }
+        if (position >= 0) {
+            throw new IllegalArgumentException(
+                ENV_CLIENT_X_FORWARDED_FOR_POSITION + " must be a negative offset from the end of X-Forwarded-For (for example -1 or -2), not '"
+                    + value + "'.");
+        }
+        return position;
+    }
 
     private Map<String, List<String>> caseInsensitiveHeaders;
 
@@ -92,17 +131,16 @@ public class CloudFunctionRequest implements HttpEventRequest {
     @Override
     public Optional<String> getClientIp() {
         return getHeader(HttpEventRequest.HTTP_HEADER_X_FORWARDED_FOR)
-            .flatMap(CloudFunctionRequest::trustedGcpClientIp);
+            .flatMap(value -> clientIpAtPosition(value, clientXForwardedForPosition));
     }
 
-    private static Optional<String> trustedGcpClientIp(String xForwardedFor) {
+    private static Optional<String> clientIpAtPosition(String xForwardedFor, int positionFromEnd) {
         List<String> hops = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(xForwardedFor);
-        if (hops.isEmpty()) {
+        int index = hops.size() + positionFromEnd;
+        if (index < 0 || index >= hops.size()) {
             return Optional.empty();
         }
-        // GCP HTTP(S) load balancers append the observed client IP and then the load balancer IP.
-        // Existing left-side values can be client-supplied and must not drive IP allowlist checks.
-        return Optional.of(hops.get(hops.size() >= 2 ? hops.size() - 2 : 0));
+        return Optional.of(hops.get(index));
     }
 
     @Override

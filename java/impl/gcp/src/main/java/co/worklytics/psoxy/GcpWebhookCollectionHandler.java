@@ -118,7 +118,7 @@ public class GcpWebhookCollectionHandler {
             // request SHOULD Contain Authorization header, which handleBatch should check
             handleBatch(request, response);
         } else {
-            CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request);
+            CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request, gcpEnvironment.getClientXForwardedForPosition());
             HttpEventResponse genericResponse;
             if (request.getPath().startsWith("/" + JwksDecorator.PATH_TO_RESOURCE)) {
                 // JWKS resources are *publically* accessible

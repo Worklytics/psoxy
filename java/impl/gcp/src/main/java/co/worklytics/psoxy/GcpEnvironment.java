@@ -125,6 +125,14 @@ public class GcpEnvironment implements HostEnvironment {
         return System.getenv(GcpEnvironment.RuntimeEnvironmentVariables.K_SERVICE.name());
     }
 
+    /**
+     * @return negative offset into {@code X-Forwarded-For} for the optional IP allowlist
+     */
+    public int getClientXForwardedForPosition() {
+        return CloudFunctionRequest.clientXForwardedForPosition(
+            System.getenv(CloudFunctionRequest.ENV_CLIENT_X_FORWARDED_FOR_POSITION));
+    }
+
 
     @Override
     public Set<String> getSupportedOutputKinds() {

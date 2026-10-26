@@ -323,6 +323,7 @@ module "api_connector" {
   timeout_seconds                       = coalesce(try(each.value.timeout_seconds, null), 180)
   ingress_settings                      = local.api_connector_external_lb_enabled ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
   external_lb_base_url                  = local.api_connector_external_lb_base_url
+  x_forwarded_for_deployment            = local.api_connector_external_lb_enabled ? "external_alb" : "direct"
 
 
   environment_variables = merge(

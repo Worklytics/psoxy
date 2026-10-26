@@ -20,6 +20,15 @@ You can obtain the identity of your Worklytics tenant's GCP service account from
 
 When `allowed_data_access_ip_blocks` or `allowed_webhook_ip_blocks` is set in Terraform, the proxy enforces allowlists **inside the Cloud Function** via `ALLOWED_DATA_ACCESS_IP_BLOCKS` and `ALLOWED_WEBHOOK_IP_BLOCKS` environment variables. The shipped modules do **not** add source-IP IAM conditions on Cloud Run invoker bindings (GCP does not support that pattern on `roles/run.invoker`).
 
+Do not rely on this allowlist for authentication. The proxy supports it only as an optional control that increases the complexity of an attack. The address comes from `X-Forwarded-For`, which is not trustworthy in every deployment, and client IP addresses can be spoofed. Authentication remains GCP IAM.
+
+`x_forwarded_for_deployment` selects which hop is compared to the allowlist, via `CLIENT_X_FORWARDED_FOR_POSITION` (a negative offset from the end of the header):
+
+- `direct` (default) — `-1`, the last hop. This is the address Cloud Run appended on a direct function URL. Webhook collectors use this unless you change the variable.
+- `external_alb` — `-2`, the second-to-last hop. An external Application Load Balancer appends the client it observed and then its forwarding-rule address. `gcp-host` sets this when an external Application Load Balancer fronts API connectors.
+
+If the header does not contain that hop, the client address is unknown and the allowlist rejects the request. Use the allowlist only in addition to IAM.
+
 Worklytics can ensure fixed egress IP addresses for outbound requests from your tenant as a paid add-on. Contact [sales@worklytics.co](mailto:sales@worklytics.co) for details.
 
 For network ingress filtering in front of Cloud Run (for example Cloud Armor on a load balancer), see [External Application Load Balancer (ALB)](guides/external-alb.md) (beta). That path requires Cloud Run custom audiences so identity tokens minted for the load balancer URL are accepted. See also [GCP Private Service Connect and connectivity options](../development/gcp-private-service-connect.md#enhancing-public-internet-options-with-ip-allowlisting).

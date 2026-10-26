@@ -356,6 +356,9 @@ resource "google_cloudfunctions2_function" "function" {
         PATH_TO_INSTANCE_CONFIG = local.path_to_instance_config_parameters
       },
       var.allowed_webhook_ip_blocks != null ? { ALLOWED_WEBHOOK_IP_BLOCKS = join(",", var.allowed_webhook_ip_blocks) } : {},
+      {
+        CLIENT_X_FORWARDED_FOR_POSITION = var.x_forwarded_for_deployment == "external_alb" ? "-2" : "-1"
+      },
       local.side_output_env_vars,
       var.remote_resource_bucket != null ? { REMOTE_RESOURCE_BUCKET = var.remote_resource_bucket } : {},
       var.remote_resource_instance_path != null ? { INSTANCE_RESOURCE_PATH = var.remote_resource_instance_path } : {},
