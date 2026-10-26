@@ -120,17 +120,57 @@ public class GcpEnvironment implements HostEnvironment {
         }
     }
 
+    /**
+     * Which {@code X-Forwarded-For} hop the optional IP allowlist reads.
+     * Shared by API connectors and webhook collectors.
+     */
+    @Builder
+    @Value
+    static class ClientIpConfig {
+
+        /** Last hop. Used when {@link ClientIpConfigProperty#CLIENT_IP_X_FORWARDED_FOR_OFFSET} is unset. */
+        static final int DEFAULT_X_FORWARDED_FOR_OFFSET = -1;
+
+        /**
+         * Negative offset from the end of {@code X-Forwarded-For}. {@code -1} is the last address.
+         */
+        @Builder.Default
+        int xForwardedForOffset = DEFAULT_X_FORWARDED_FOR_OFFSET;
+
+        @VisibleForTesting
+        enum ClientIpConfigProperty implements ConfigService.ConfigProperty {
+
+            CLIENT_IP_X_FORWARDED_FOR_OFFSET,
+        }
+
+        static ClientIpConfig fromConfigService(ConfigService configService) {
+            int offset = configService.getConfigPropertyAsOptional(ClientIpConfigProperty.CLIENT_IP_X_FORWARDED_FOR_OFFSET)
+                .map(ClientIpConfig::parseOffset)
+                .orElse(DEFAULT_X_FORWARDED_FOR_OFFSET);
+            return ClientIpConfig.builder()
+                .xForwardedForOffset(offset)
+                .build();
+        }
+
+        private static int parseOffset(String value) {
+            String trimmed = value.trim();
+            if (trimmed.isEmpty()) {
+                return DEFAULT_X_FORWARDED_FOR_OFFSET;
+            }
+            int offset = ConfigService.parseIntValue(ClientIpConfigProperty.CLIENT_IP_X_FORWARDED_FOR_OFFSET, trimmed);
+            if (offset >= 0) {
+                throw new IllegalArgumentException(
+                    ClientIpConfigProperty.CLIENT_IP_X_FORWARDED_FOR_OFFSET.name()
+                        + " must be a negative offset from the end of X-Forwarded-For (for example -1), not '"
+                        + value + "'.");
+            }
+            return offset;
+        }
+    }
+
     @Override
     public String getInstanceId() {
         return System.getenv(GcpEnvironment.RuntimeEnvironmentVariables.K_SERVICE.name());
-    }
-
-    /**
-     * @return negative offset into {@code X-Forwarded-For} for the optional IP allowlist
-     */
-    public int getClientIpXForwardedForOffset() {
-        return CloudFunctionRequest.clientIpXForwardedForOffset(
-            System.getenv(CloudFunctionRequest.ENV_CLIENT_IP_X_FORWARDED_FOR_OFFSET));
     }
 
 

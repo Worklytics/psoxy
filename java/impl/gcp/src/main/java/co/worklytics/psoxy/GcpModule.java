@@ -191,6 +191,12 @@ public interface GcpModule {
 
     @Provides
     @Singleton
+    static GcpEnvironment.ClientIpConfig clientIpConfig(ConfigService configService) {
+        return GcpEnvironment.ClientIpConfig.fromConfigService(configService);
+    }
+
+    @Provides
+    @Singleton
     static ExecutorService providesExecutorService() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 

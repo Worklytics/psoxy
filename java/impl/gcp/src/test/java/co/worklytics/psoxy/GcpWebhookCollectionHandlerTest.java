@@ -101,7 +101,8 @@ class GcpWebhookCollectionHandlerTest {
             mockConfigService,
             WebhookCollectorModeConfig.builder().build(),
             mockEnvVarsConfigService,
-            () -> webhookCollectorModeConfig
+            () -> webhookCollectorModeConfig,
+            GcpEnvironment.ClientIpConfig.builder().build()
         );
     }
 

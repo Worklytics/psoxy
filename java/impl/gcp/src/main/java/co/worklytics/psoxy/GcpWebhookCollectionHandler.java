@@ -46,6 +46,7 @@ public class GcpWebhookCollectionHandler {
     JwksDecorator jwksResource;
     EnvVarsConfigService envVarsConfigService;
     Lazy<GcpEnvironment.GcpWebhookCollectorModeConfig> gcpWebhookCollectorModeConfig;
+    GcpEnvironment.ClientIpConfig clientIpConfig;
 
     // standard Bearer token prefix on Authorization header
     static final String BEARER_PREFIX = "Bearer ";
@@ -59,7 +60,8 @@ public class GcpWebhookCollectionHandler {
                                        ConfigService configService,
                                        WebhookCollectorModeConfig webhookCollectorModeConfig,
                                        EnvVarsConfigService envVarsConfigService,
-                                       Lazy<GcpEnvironment.GcpWebhookCollectorModeConfig> gcpWebhookCollectorModeConfig) {
+                                       Lazy<GcpEnvironment.GcpWebhookCollectorModeConfig> gcpWebhookCollectorModeConfig,
+                                       GcpEnvironment.ClientIpConfig clientIpConfig) {
         this.gcpEnvironment = gcpEnvironment;
         this.inboundWebhookHandler = inboundWebhookHandler;
         this.googleIdTokenVerifierFactory = googleIdTokenVerifierFactory;
@@ -69,6 +71,7 @@ public class GcpWebhookCollectionHandler {
         this.webhookCollectorModeConfig = webhookCollectorModeConfig;
         this.envVarsConfigService = envVarsConfigService;
         this.gcpWebhookCollectorModeConfig = gcpWebhookCollectorModeConfig;
+        this.clientIpConfig = clientIpConfig;
 
         
         // Pre-warm the public key cache during function initialization
@@ -118,7 +121,7 @@ public class GcpWebhookCollectionHandler {
             // request SHOULD Contain Authorization header, which handleBatch should check
             handleBatch(request, response);
         } else {
-            CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request, gcpEnvironment.getClientIpXForwardedForOffset());
+            CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request, clientIpConfig.getXForwardedForOffset());
             HttpEventResponse genericResponse;
             if (request.getPath().startsWith("/" + JwksDecorator.PATH_TO_RESOURCE)) {
                 // JWKS resources are *publically* accessible

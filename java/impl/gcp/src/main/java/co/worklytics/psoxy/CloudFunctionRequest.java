@@ -17,41 +17,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(staticName = "of")
 public class CloudFunctionRequest implements HttpEventRequest {
 
-    /**
-     * Negative offset from the end of {@code X-Forwarded-For}. {@code -1} is the last hop.
-     * Unset means {@link #DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET}.
-     */
-    static final String ENV_CLIENT_IP_X_FORWARDED_FOR_OFFSET = "CLIENT_IP_X_FORWARDED_FOR_OFFSET";
-
-    /** Last hop. Used when the offset is unset. */
-    static final int DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET = -1;
-
     @NonNull
     final HttpRequest request;
 
     /** Negative offset from the end of {@code X-Forwarded-For}. */
     final int clientIpXForwardedForOffset;
-
-    static int clientIpXForwardedForOffset(String value) {
-        if (value == null || value.isBlank()) {
-            return DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET;
-        }
-        int offset;
-        try {
-            offset = Integer.parseInt(value.trim());
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(
-                "Invalid " + ENV_CLIENT_IP_X_FORWARDED_FOR_OFFSET + ": '" + value
-                    + "'. Use a negative offset from the end of X-Forwarded-For, such as -1.",
-                e);
-        }
-        if (offset >= 0) {
-            throw new IllegalArgumentException(
-                ENV_CLIENT_IP_X_FORWARDED_FOR_OFFSET + " must be a negative offset from the end of X-Forwarded-For (for example -1), not '"
-                    + value + "'.");
-        }
-        return offset;
-    }
 
     private Map<String, List<String>> caseInsensitiveHeaders;
 
