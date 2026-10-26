@@ -34,7 +34,9 @@ locals {
   bucket_name_instance_id            = local.bucket_provisioning_required ? trim(substr(var.instance_id, 0, max(0, local.bucket_name_instance_id_max_length)), "-") : ""
   bucket_name_prefix                 = local.bucket_provisioning_required ? "${local.bucket_name_environment_id_prefix}${local.bucket_name_instance_id}${local.bucket_name_prefix_random_suffix}" : null
 
-  # Missing offset with an allowlist defaults to -1 (last hop). A later release will require an explicit offset when an allowlist is set.
+  # Missing offset with an allowlist defaults to -1 (last hop on a direct Cloud Run URL).
+  # CLIENT_IP_X_FORWARDED_FOR_OFFSET is reserved and cannot be set via environment_variables.
+  # A later release will require an explicit offset when an allowlist is set.
   client_ip_x_forwarded_for_offset = (
     var.client_ip_x_forwarded_for_offset != null ? var.client_ip_x_forwarded_for_offset :
     (var.allowed_data_access_ip_blocks != null ? -1 : null)

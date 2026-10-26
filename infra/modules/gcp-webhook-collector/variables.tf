@@ -100,6 +100,11 @@ variable "environment_variables" {
   type        = map(string)
   description = "Non-sensitive values to add to functions environment variables"
   default     = {}
+
+  validation {
+    condition     = !contains(keys(var.environment_variables), "CLIENT_IP_X_FORWARDED_FOR_OFFSET")
+    error_message = "CLIENT_IP_X_FORWARDED_FOR_OFFSET cannot be set via environment_variables; use client_ip_x_forwarded_for_offset instead."
+  }
 }
 
 variable "source_kind" {
@@ -320,7 +325,9 @@ variable "client_ip_x_forwarded_for_offset" {
 
     Null (default) with an allowlist uses -1. A future release will require an explicit offset whenever an allowlist is set.
 
-    X-Forwarded-For is not trustworthy in every deployment. IP allowlisting is optional and only increases attack complexity. Do not rely on it for authentication; authenticate with GCP IAM.
+    X-Forwarded-For can be spoofed in whole or in part. IP allowlisting is optional and only increases attack complexity. Do not rely on it for authentication. Authenticate and authorize with a reliable scheme, such as GCP IAM, OIDC or JWT signatures, or mTLS. This collector grants roles/run.invoker to allUsers and authenticates webhooks by verifying a JWT signature.
+
+    CLIENT_IP_X_FORWARDED_FOR_OFFSET is reserved. Set it with this variable, not environment_variables.
   EOT
   default     = null
   nullable    = true

@@ -356,6 +356,7 @@ resource "google_cloudfunctions2_function" "function" {
         PATH_TO_INSTANCE_CONFIG = local.path_to_instance_config_parameters
       },
       var.allowed_webhook_ip_blocks != null ? { ALLOWED_WEBHOOK_IP_BLOCKS = join(",", var.allowed_webhook_ip_blocks) } : {},
+      # Reserved. Null with an allowlist is -1. Not taken from environment_variables.
       var.client_ip_x_forwarded_for_offset != null || var.allowed_webhook_ip_blocks != null ? {
         CLIENT_IP_X_FORWARDED_FOR_OFFSET = tostring(var.client_ip_x_forwarded_for_offset != null ? var.client_ip_x_forwarded_for_offset : -1)
       } : {},
