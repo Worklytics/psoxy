@@ -128,9 +128,9 @@ public class GcpEnvironment implements HostEnvironment {
     /**
      * @return negative offset into {@code X-Forwarded-For} for the optional IP allowlist
      */
-    public int getClientXForwardedForPosition() {
-        return CloudFunctionRequest.clientXForwardedForPosition(
-            System.getenv(CloudFunctionRequest.ENV_CLIENT_X_FORWARDED_FOR_POSITION));
+    public int getClientIpXForwardedForOffset() {
+        return CloudFunctionRequest.clientIpXForwardedForOffset(
+            System.getenv(CloudFunctionRequest.ENV_CLIENT_IP_X_FORWARDED_FOR_OFFSET));
     }
 
 

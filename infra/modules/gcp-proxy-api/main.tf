@@ -34,8 +34,11 @@ locals {
   bucket_name_instance_id            = local.bucket_provisioning_required ? trim(substr(var.instance_id, 0, max(0, local.bucket_name_instance_id_max_length)), "-") : ""
   bucket_name_prefix                 = local.bucket_provisioning_required ? "${local.bucket_name_environment_id_prefix}${local.bucket_name_instance_id}${local.bucket_name_prefix_random_suffix}" : null
 
-  # Negative offset from the end of X-Forwarded-For. See var.x_forwarded_for_deployment.
-  client_x_forwarded_for_position = var.x_forwarded_for_deployment == "external_alb" ? "-2" : "-1"
+  # Missing offset with an allowlist defaults to -1 (last hop). A later release will require an explicit offset when an allowlist is set.
+  client_ip_x_forwarded_for_offset = (
+    var.client_ip_x_forwarded_for_offset != null ? var.client_ip_x_forwarded_for_offset :
+    (var.allowed_data_access_ip_blocks != null ? -1 : null)
+  )
 }
 
 resource "random_string" "bucket_name_random_sequence" {
@@ -286,9 +289,7 @@ resource "google_cloudfunctions2_function" "function" {
       var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
       var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
       var.allowed_data_access_ip_blocks != null ? { ALLOWED_DATA_ACCESS_IP_BLOCKS = join(",", var.allowed_data_access_ip_blocks) } : {},
-      {
-        CLIENT_X_FORWARDED_FOR_POSITION = local.client_x_forwarded_for_position
-      },
+      local.client_ip_x_forwarded_for_offset != null ? { CLIENT_IP_X_FORWARDED_FOR_OFFSET = tostring(local.client_ip_x_forwarded_for_offset) } : {},
       local.side_output_env_vars,
       var.enable_async_processing ? { ASYNC_OUTPUT_DESTINATION = "gs://${module.async_output[0].bucket_name}" } : {},
       var.remote_resource_bucket != null ? { REMOTE_RESOURCE_BUCKET = var.remote_resource_bucket } : {},

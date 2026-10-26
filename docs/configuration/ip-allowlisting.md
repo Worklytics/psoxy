@@ -48,12 +48,11 @@ Each API connector and webhook collector receives:
 
 The proxy rejects requests with HTTP 403 when lockdown is enabled and the client IP cannot be determined or does not match an exact IP or CIDR entry. IPv4 and IPv6 are supported.
 
-On **AWS**, the client address is API Gateway's `sourceIp` when that field is present. On **GCP**, the address is one hop from `X-Forwarded-For`, selected by `CLIENT_X_FORWARDED_FOR_POSITION` (a negative offset from the end of the header). `x_forwarded_for_deployment` on the GCP function module sets that value:
+On **AWS**, the client address is API Gateway's `sourceIp` when that field is present. On **GCP**, the address is one hop from `X-Forwarded-For`, selected by `client_ip_x_forwarded_for_offset` (a negative offset from the end of the header, passed through as `CLIENT_IP_X_FORWARDED_FOR_OFFSET`). `-1` is the last address. The function module does not decide which hop a given deployment appends; you pass the offset that matches the proxies in front of the function. When the offset is omitted and an allowlist is set, the modules currently use `-1`. A future release will require an explicit offset whenever an allowlist is set.
 
-- `direct` (the default, including webhook collectors) sets `-1`, the last hop. On a direct Cloud Run URL that is the address Cloud Run appended.
-- `external_alb` sets `-2`, the second-to-last hop. An external Application Load Balancer appends the client it observed and then the forwarding-rule address. `gcp-host` sets this when an external Application Load Balancer fronts the API connectors.
+`gcp-host` passes `-2` when an external Application Load Balancer fronts API connectors, because that load balancer appends the client it observed and then the forwarding-rule address. A direct Cloud Run URL leaves the offset unset, so an allowlist uses the last hop, which is the address Cloud Run appended. Webhook collectors are the same unless you set the offset.
 
-`X-Forwarded-For` is not trustworthy in every deployment. Entries other than the configured hop can be supplied by the caller. If the header does not contain that hop, the client address is unknown and an allowlist rejects the request. See [FAQ - Security](../faq-security.md) and [Authentication and Authorization in GCP](../gcp/authentication-authorization.md).
+`X-Forwarded-For` can be spoofed, in whole or in part. The offset only selects which entry the allowlist reads. If the header does not contain that entry, the client address is unknown and an allowlist rejects the request. See [FAQ - Security](../faq-security.md) and [Authentication and Authorization in GCP](../gcp/authentication-authorization.md).
 
 Health checks are not subject to this gate (they run before IP enforcement) but still report `callerIp` in the response for verification.
 

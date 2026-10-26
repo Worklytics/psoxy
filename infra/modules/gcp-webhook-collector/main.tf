@@ -356,9 +356,9 @@ resource "google_cloudfunctions2_function" "function" {
         PATH_TO_INSTANCE_CONFIG = local.path_to_instance_config_parameters
       },
       var.allowed_webhook_ip_blocks != null ? { ALLOWED_WEBHOOK_IP_BLOCKS = join(",", var.allowed_webhook_ip_blocks) } : {},
-      {
-        CLIENT_X_FORWARDED_FOR_POSITION = var.x_forwarded_for_deployment == "external_alb" ? "-2" : "-1"
-      },
+      var.client_ip_x_forwarded_for_offset != null || var.allowed_webhook_ip_blocks != null ? {
+        CLIENT_IP_X_FORWARDED_FOR_OFFSET = tostring(var.client_ip_x_forwarded_for_offset != null ? var.client_ip_x_forwarded_for_offset : -1)
+      } : {},
       local.side_output_env_vars,
       var.remote_resource_bucket != null ? { REMOTE_RESOURCE_BUCKET = var.remote_resource_bucket } : {},
       var.remote_resource_instance_path != null ? { INSTANCE_RESOURCE_PATH = var.remote_resource_instance_path } : {},
@@ -518,9 +518,9 @@ Then, based on your configuration, these are some example test calls you can try
 ```shell
 ${local.command_cli_call} --method POST \
  -u ${local.proxy_endpoint_url} \
-%{ if local.signing_key_id != null ~}
+%{if local.signing_key_id != null~}
  --signing-key "gcp-kms:${local.signing_key_id}" \
-%{ endif ~}
+%{endif~}
  --identity-issuer ${local.proxy_endpoint_url} \
  --identity-subject '${var.example_identity}' \
  --body '${coalesce(var.example_payload, "{\"test\": \"body\"}")}' 

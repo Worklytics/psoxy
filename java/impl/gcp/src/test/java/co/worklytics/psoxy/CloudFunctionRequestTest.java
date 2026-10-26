@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static co.worklytics.psoxy.CloudFunctionRequest.CLIENT_X_FORWARDED_FOR_POSITION_DIRECT;
-import static co.worklytics.psoxy.CloudFunctionRequest.CLIENT_X_FORWARDED_FOR_POSITION_EXTERNAL_ALB;
+import static co.worklytics.psoxy.CloudFunctionRequest.DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -23,7 +22,7 @@ class CloudFunctionRequestTest {
             "UC-Foo", Lists.newArrayList("barUC")
         ));
 
-        CloudFunctionRequest request = CloudFunctionRequest.of(nativeRequest, CLIENT_X_FORWARDED_FOR_POSITION_DIRECT);
+        CloudFunctionRequest request = CloudFunctionRequest.of(nativeRequest, DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET);
 
         assertEquals("bar", request.getHeader("foo").get());
         assertEquals("bar", request.getHeader("Foo").get());
@@ -42,7 +41,7 @@ class CloudFunctionRequestTest {
             "x-forwarded-proto", Lists.newArrayList("https")
         ));
 
-        CloudFunctionRequest request = CloudFunctionRequest.of(nativeRequest, CLIENT_X_FORWARDED_FOR_POSITION_DIRECT);
+        CloudFunctionRequest request = CloudFunctionRequest.of(nativeRequest, DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET);
 
         assertTrue(request.isHttps().get());
     }
@@ -51,7 +50,7 @@ class CloudFunctionRequestTest {
     void getClientIp_positionMinusOne_usesLastHop() {
         CloudFunctionRequest request = requestWithForwardedFor(
             "10.0.0.5, 203.0.113.10",
-            CLIENT_X_FORWARDED_FOR_POSITION_DIRECT);
+            DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET);
 
         assertEquals("203.0.113.10", request.getClientIp().get());
     }
@@ -60,7 +59,7 @@ class CloudFunctionRequestTest {
     void getClientIp_positionMinusOne_singleHopIsThatAddress() {
         CloudFunctionRequest request = requestWithForwardedFor(
             "203.0.113.10",
-            CLIENT_X_FORWARDED_FOR_POSITION_DIRECT);
+            DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET);
 
         assertEquals("203.0.113.10", request.getClientIp().get());
     }
@@ -69,7 +68,7 @@ class CloudFunctionRequestTest {
     void getClientIp_positionMinusTwo_usesSecondToLastHop() {
         CloudFunctionRequest request = requestWithForwardedFor(
             "203.0.113.10, 198.51.100.7",
-            CLIENT_X_FORWARDED_FOR_POSITION_EXTERNAL_ALB);
+            -2);
 
         assertEquals("203.0.113.10", request.getClientIp().get());
     }
@@ -78,7 +77,7 @@ class CloudFunctionRequestTest {
     void getClientIp_positionMinusTwo_ignoresPrefixBeforeTheSelectedHop() {
         CloudFunctionRequest request = requestWithForwardedFor(
             "10.0.0.5, 198.51.100.7, 203.0.113.10",
-            CLIENT_X_FORWARDED_FOR_POSITION_EXTERNAL_ALB);
+            -2);
 
         assertEquals("198.51.100.7", request.getClientIp().get());
     }
@@ -87,25 +86,25 @@ class CloudFunctionRequestTest {
     void getClientIp_positionBeyondHeader_isEmpty() {
         CloudFunctionRequest request = requestWithForwardedFor(
             "203.0.113.10",
-            CLIENT_X_FORWARDED_FOR_POSITION_EXTERNAL_ALB);
+            -2);
 
         assertTrue(request.getClientIp().isEmpty());
     }
 
     @Test
-    void clientXForwardedForPosition_defaultsAndRejectsNonNegative() {
-        assertEquals(CLIENT_X_FORWARDED_FOR_POSITION_DIRECT,
-            CloudFunctionRequest.clientXForwardedForPosition(null));
-        assertEquals(CLIENT_X_FORWARDED_FOR_POSITION_DIRECT,
-            CloudFunctionRequest.clientXForwardedForPosition("  "));
-        assertEquals(CLIENT_X_FORWARDED_FOR_POSITION_DIRECT,
-            CloudFunctionRequest.clientXForwardedForPosition("-1"));
-        assertEquals(CLIENT_X_FORWARDED_FOR_POSITION_EXTERNAL_ALB,
-            CloudFunctionRequest.clientXForwardedForPosition("-2"));
+    void clientIpXForwardedForOffset_defaultsAndRejectsNonNegative() {
+        assertEquals(DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET,
+            CloudFunctionRequest.clientIpXForwardedForOffset(null));
+        assertEquals(DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET,
+            CloudFunctionRequest.clientIpXForwardedForOffset("  "));
+        assertEquals(DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET,
+            CloudFunctionRequest.clientIpXForwardedForOffset("-1"));
+        assertEquals(-2,
+            CloudFunctionRequest.clientIpXForwardedForOffset("-2"));
         assertThrows(IllegalArgumentException.class,
-            () -> CloudFunctionRequest.clientXForwardedForPosition("1"));
+            () -> CloudFunctionRequest.clientIpXForwardedForOffset("1"));
         assertThrows(IllegalArgumentException.class,
-            () -> CloudFunctionRequest.clientXForwardedForPosition("nope"));
+            () -> CloudFunctionRequest.clientIpXForwardedForOffset("nope"));
     }
 
     private static CloudFunctionRequest requestWithForwardedFor(String forwardedFor, int positionFromEnd) {

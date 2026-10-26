@@ -307,22 +307,17 @@ variable "ingress_settings" {
   }
 }
 
-variable "x_forwarded_for_deployment" {
-  type        = string
+variable "client_ip_x_forwarded_for_offset" {
+  type        = number
   description = <<-EOT
-    How this function is exposed to callers. This sets CLIENT_X_FORWARDED_FOR_POSITION, a negative offset from the end of X-Forwarded-For, which the optional IP allowlist reads.
+    Negative offset from the end of X-Forwarded-For for the optional IP allowlist. -1 is the last address. This module does not interpret how proxies in front of the function append that header; pass the offset that matches the deployment. Sets CLIENT_IP_X_FORWARDED_FOR_OFFSET.
 
-    - direct (default) — Cloud Run / Cloud Functions URL. Position -1, the last hop, which is the address Cloud Run appended.
-    - external_alb — external Application Load Balancer. Position -2, the second-to-last hop: the client the load balancer observed, followed by the forwarding-rule address.
+    Null (default) with an allowlist uses -1. A future release will require an explicit offset whenever an allowlist is set.
 
     X-Forwarded-For is not trustworthy in every deployment. IP allowlisting is optional and only increases attack complexity. Do not rely on it for authentication; authenticate with GCP IAM.
   EOT
-  default     = "direct"
-
-  validation {
-    condition     = contains(["direct", "external_alb"], var.x_forwarded_for_deployment)
-    error_message = "x_forwarded_for_deployment must be \"direct\" or \"external_alb\"."
-  }
+  default     = null
+  nullable    = true
 }
 
 variable "external_lb_base_url" {

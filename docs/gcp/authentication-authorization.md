@@ -20,12 +20,11 @@ You can obtain the identity of your Worklytics tenant's GCP service account from
 
 When `allowed_data_access_ip_blocks` or `allowed_webhook_ip_blocks` is set in Terraform, the proxy enforces allowlists **inside the Cloud Function** via `ALLOWED_DATA_ACCESS_IP_BLOCKS` and `ALLOWED_WEBHOOK_IP_BLOCKS` environment variables. The shipped modules do **not** add source-IP IAM conditions on Cloud Run invoker bindings (GCP does not support that pattern on `roles/run.invoker`).
 
-Do not rely on this allowlist for authentication. The proxy supports it only as an optional control that increases the complexity of an attack. The address comes from `X-Forwarded-For`, which is not trustworthy in every deployment, and client IP addresses can be spoofed. Authentication remains GCP IAM.
+Do not rely on this allowlist for authentication. The proxy supports it only as an optional control that increases the complexity of an attack. The address comes from `X-Forwarded-For`, which can be spoofed in whole or in part. Authentication remains GCP IAM.
 
-`x_forwarded_for_deployment` selects which hop is compared to the allowlist, via `CLIENT_X_FORWARDED_FOR_POSITION` (a negative offset from the end of the header):
+`client_ip_x_forwarded_for_offset` is the hop compared to the allowlist: a negative offset from the end of `X-Forwarded-For`, passed through as `CLIENT_IP_X_FORWARDED_FOR_OFFSET`. `-1` is the last address. The function modules do not interpret how a deployment appends that header. When the offset is omitted and an allowlist is set, they currently use `-1`. A future release will require an explicit offset whenever an allowlist is set.
 
-- `direct` (default) — `-1`, the last hop. This is the address Cloud Run appended on a direct function URL. Webhook collectors use this unless you change the variable.
-- `external_alb` — `-2`, the second-to-last hop. An external Application Load Balancer appends the client it observed and then its forwarding-rule address. `gcp-host` sets this when an external Application Load Balancer fronts API connectors.
+`gcp-host` passes `-2` when an external Application Load Balancer fronts API connectors, because that load balancer appends the client it observed and then the forwarding-rule address. A direct function URL, including webhook collectors, leaves the offset unset.
 
 If the header does not contain that hop, the client address is unknown and the allowlist rejects the request. Use the allowlist only in addition to IAM.
 
