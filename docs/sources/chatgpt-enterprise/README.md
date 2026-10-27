@@ -36,6 +36,7 @@ For a Psoxy connection (a proxy output bucket is set), Worklytics reads usage fr
    - **Psoxy Base URL** — your deployed proxy/function endpoint URL
    - **Bucket Name** — the async output bucket where sanitized API responses are written (this connector uses async processing)
    - **Workspace Id** — your ChatGPT Enterprise workspace id (ChatGPT Admin console, https://chatgpt.com/admin, workspace settings)
+   - **Organization Id** *(optional)* — your ChatGPT organization id, to also collect cost/usage data; see [Organization Id](#organization-id-costusage-data) above
 5. Set this connection's fetch option `fetchProjects` to `false`.
 
 `/logs` is where conversation and Codex usage land. `/projects` runs first when `fetchProjects` is left on, and the log fetch waits for that job. An Admin key granted only log categories often cannot read that stateful endpoint. Leaving the option on:
@@ -54,12 +55,15 @@ For a Psoxy connection (a proxy output bucket is set), Worklytics reads usage fr
 - [Example Rules](chatgpt-enterprise.yaml)
 - Example Data : [original/sample_log_message.json](example-api-responses/original/sample_log_message.json) |
   [sanitized/sample_log_message.json](example-api-responses/sanitized/sample_log_message.json)
+- Example Data (cost/usage) : [original/cost_log_message.json](example-api-responses/original/cost_log_message.json) |
+  [sanitized/cost_log_message.json](example-api-responses/sanitized/cost_log_message.json)
 
 Example API call path parameters (uppercase placeholders in generated test calls):
 
 - `{WORKSPACE_ID}`: your ChatGPT Enterprise workspace id (Worklytics "Workspace Id" / `connector_settings.chat_gpt_enterprise_example_workspace_id`).
 - `{CONVERSATION_ID}`: a conversation id from `GET /v1/compliance/workspaces/{WORKSPACE_ID}/conversations`.
-- `{LOG_FILE_ID}`: a log file id from `GET /v1/compliance/workspaces/{WORKSPACE_ID}/logs`.
+- `{LOG_FILE_ID}`: a log file id from `GET /v1/compliance/workspaces/{WORKSPACE_ID}/logs` (or `GET /v1/compliance/organizations/{ORGANIZATION_ID}/logs` for `COSTS` log files).
+- `{ORGANIZATION_ID}`: your ChatGPT organization id (Worklytics "Organization Id" / `connector_settings.chat_gpt_enterprise_example_organization_id`); optional, only needed for cost/usage (`COSTS`) data.
 
 See more examples in the `docs/sources/chatgpt-enterprise/example-api-responses` folder
 of the [Psoxy repository](https://github.com/Worklytics/psoxy).
