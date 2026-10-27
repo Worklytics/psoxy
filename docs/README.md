@@ -353,7 +353,7 @@ For testing your Psoxy instance, you will need:
 | Tool                                                               | Version                           | Test Command      |
 |--------------------------------------------------------------------|-----------------------------------|-------------------|
 | [Node.js](https://nodejs.org/en/)                                  | 22+ (ideally, latest LTS version) | `node --version`  |
-| [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+                                | `npm --version`   |
+| [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 10+                               | `npm --version`   |
 
 NOTE: Node.js v20 and earlier are unmaintained (no security fixes), so **we recommend the latest LTS version (currently v24)**. _Some Node.js versions (e.g. v21) may display warning messages when running the test scripts_.
 
