@@ -36,7 +36,7 @@ For a Psoxy connection (a proxy output bucket is set), Worklytics reads usage fr
    - **Psoxy Base URL** — your deployed proxy/function endpoint URL
    - **Bucket Name** — the async output bucket where sanitized API responses are written (this connector uses async processing)
    - **Workspace Id** — your ChatGPT Enterprise workspace id (ChatGPT Admin console, https://chatgpt.com/admin, workspace settings)
-   - **Organization Id** *(optional)* — your ChatGPT organization id, to also collect cost/usage data; see [Organization Id](#organization-id-costusage-data) above
+   - **Organization Id** *(optional)* — your ChatGPT organization id (ChatGPT Admin console, https://chatgpt.com/admin), distinct from the Workspace Id above; only needed to also collect cost/usage (`COSTS`) data. Leave blank to skip cost/usage collection.
 5. Set this connection's fetch option `fetchProjects` to `false`.
 
 `/logs` is where conversation and Codex usage land. `/projects` runs first when `fetchProjects` is left on, and the log fetch waits for that job. An Admin key granted only log categories often cannot read that stateful endpoint. Leaving the option on:

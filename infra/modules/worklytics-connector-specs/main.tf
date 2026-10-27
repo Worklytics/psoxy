@@ -51,8 +51,11 @@ locals {
     "anthropic-version" = "2023-06-01"
   }
 
-  chat_gpt_enterprise_example_workspace_id    = coalesce(var.chat_gpt_enterprise_example_workspace_id, try(var.connector_settings["chat_gpt_enterprise_example_workspace_id"], null), "YOUR_WORKSPACEID")
-  chat_gpt_enterprise_example_organization_id = coalesce(try(var.connector_settings["chat_gpt_enterprise_example_organization_id"], null), "YOUR_ORGANIZATIONID")
+  chat_gpt_enterprise_example_workspace_id = coalesce(var.chat_gpt_enterprise_example_workspace_id, try(var.connector_settings["chat_gpt_enterprise_example_workspace_id"], null), "YOUR_WORKSPACEID")
+  # Organization Id is optional (COSTS collection only); keep it `null` when unconfigured so
+  # `settings_to_provide` leaves the Worklytics field blank rather than autofilling an invalid id.
+  chat_gpt_enterprise_organization_id         = try(var.connector_settings["chat_gpt_enterprise_example_organization_id"], null)
+  chat_gpt_enterprise_example_organization_id = coalesce(local.chat_gpt_enterprise_organization_id, "YOUR_ORGANIZATIONID")
   confluence_example_cloud_id                 = coalesce(var.confluence_example_cloud_id, try(var.connector_settings["confluence_example_cloud_id"], null), "YOUR_confluence_example_cloud_id")
   confluence_example_group_id                 = coalesce(var.confluence_example_group_id, try(var.connector_settings["confluence_example_group_id"], null), "YOUR_confluence_example_group_id")
   jira_example_cloud_id                       = coalesce(var.jira_cloud_id, try(var.connector_settings["jira_cloud_id"], null), "YOUR_JIRA_CLOUD_ID")
@@ -158,7 +161,7 @@ EOT
       ],
       settings_to_provide = {
         "Workspace Id"    = local.chat_gpt_enterprise_example_workspace_id
-        "Organization Id" = local.chat_gpt_enterprise_example_organization_id
+        "Organization Id" = local.chat_gpt_enterprise_organization_id
       }
       reserved_concurrent_executions : null
       enable_async_processing : true
