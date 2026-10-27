@@ -352,10 +352,10 @@ For testing your Psoxy instance, you will need:
 
 | Tool                                                               | Version                           | Test Command      |
 |--------------------------------------------------------------------|-----------------------------------|-------------------|
-| [Node.js](https://nodejs.org/en/)                                  | 16+ (ideally, latest LTS version) | `node --version`  |
+| [Node.js](https://nodejs.org/en/)                                  | 22+ (ideally, latest LTS version) | `node --version`  |
 | [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+                                | `npm --version`   |
 
-NOTE: Node.js v16 is unmaintained since Oct 2023, so **we recommend a newer version: v20, v22, v24, etc ...**. _Some Node.js versions (e.g. v21) may display warning messages when running the test scripts_.
+NOTE: Node.js v20 and earlier are unmaintained (no security fixes), so **we recommend the latest LTS version (currently v24)**. _Some Node.js versions (e.g. v21) may display warning messages when running the test scripts_.
 
 We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](https://github.com/Worklytics/psoxy/tree/main/tools/check-prereqs.sh). That script has no dependencies itself, so should be able to run on any plain POSIX-compliant shell (eg,`bash`, `zsh`, etc) that we'd expect you to find on most Linux, MacOS, or even Windows with Subsystem for Linux (WSL) platforms.
 
