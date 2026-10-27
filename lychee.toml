@@ -24,6 +24,7 @@ exclude = [
   '^\\./',
   '^\\.\\./',
   '^mailto:',
-  # GCP Console deep links require a browser session; lychee often fails with HTTP/2 protocol errors in CI.
-  '^https://console\\.cloud\\.google\\.com/',
+  # GCP Console deep links need a browser. Lychee in CI gets HTTP/2 protocol errors from this host.
+  # Single-quoted TOML is literal, so this is one backslash per dot. Two backslashes never match.
+  '^https://console\.cloud\.google\.com/',
 ]
