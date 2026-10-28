@@ -23,6 +23,9 @@ public class ChatGPTComplianceTests extends JavaRulesTestBaseCase {
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
+            InvocationExample.of("https://api.chatgpt.com/v1/compliance/organizations/some_id/logs", "logs.json"),
+            InvocationExample.of("https://api.chatgpt.com/v1/compliance/organizations/some_id/logs?event_type=COSTS&after=after&limit=limit&before=before", "logs.json"),
+            InvocationExample.of("https://api.chatgpt.com/v1/compliance/organizations/some_id/logs/some_id", "cost_log_message.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/conversations", "conversations.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/conversations/some_id/messages", "conversation-messages.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/conversations?after=blabla&limit=100", "conversations.json"),
