@@ -306,6 +306,9 @@ variable "bulk_connectors" {
     settings_to_provide   = optional(map(string), {})
     enable_gen_metadata   = optional(bool, false)
     environment_variables = optional(map(string), {})
+    file_prefix           = optional(string) # S3 notification filter; only matching keys invoke the bulk Lambda
+    file_suffix           = optional(string) # S3 notification filter; only matching keys invoke the bulk Lambda
+    file_pattern          = optional(string) # EventBridge wildcard on object key; enables EventBridge trigger (mutually exclusive with file_prefix/file_suffix)
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -360,10 +363,22 @@ variable "custom_bulk_connector_rules" {
 variable "custom_bulk_connector_arguments" {
   type = map(object({
     memory_size_mb = optional(number)
+    file_prefix    = optional(string) # overrides bulk_connectors / custom_bulk_connectors value for this connector id
+    file_suffix    = optional(string)
+    file_pattern   = optional(string)
   }))
 
   description = "map of connector id --> arguments object"
   default     = {}
+
+  validation {
+    condition = alltrue([
+      for k, args in var.custom_bulk_connector_arguments :
+      (args.file_pattern == null ? true : trimspace(args.file_pattern) == "")
+      || (args.file_prefix == null && args.file_suffix == null)
+    ])
+    error_message = "custom_bulk_connector_arguments: file_pattern cannot be set together with file_prefix or file_suffix for the same connector id."
+  }
 }
 
 variable "custom_side_outputs" {

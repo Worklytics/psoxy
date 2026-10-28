@@ -31,8 +31,18 @@ module "env_id" {
 
 locals {
   bucket_name_prefix = "${module.env_id.id}-${replace(var.instance_id, "_", "-")}"
+
+  use_eventbridge_trigger = var.file_pattern == null ? false : trimspace(var.file_pattern) != ""
+  # Prefix matches bulk Lambda name (${module.env_id.id}-${instance_id}) so rules sort with other env resources
+  eventbridge_rule_name = substr("${module.env_id.id}-${replace(var.instance_id, "_", "-")}-bulk-s3", 0, 64)
 }
 
+check "file_pattern_exclusive_with_prefix_suffix" {
+  assert {
+    condition     = !local.use_eventbridge_trigger || (var.file_prefix == null && var.file_suffix == null)
+    error_message = "Set either file_pattern (EventBridge trigger) or file_prefix/file_suffix (native S3 notification trigger), not both."
+  }
+}
 
 module "psoxy_lambda" {
   source = "../aws-proxy-lambda"
@@ -155,6 +165,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "expire_sanitized_files" {
 }
 
 resource "aws_lambda_permission" "allow_input_bucket" {
+  count = local.use_eventbridge_trigger ? 0 : 1
+
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
   function_name = module.psoxy_lambda.function_name
@@ -166,15 +178,61 @@ resource "aws_lambda_permission" "allow_input_bucket" {
   depends_on = [module.psoxy_lambda] # TODO(v0.8): remove once invoke permissions use function_arn
 }
 
+resource "aws_lambda_permission" "allow_eventbridge" {
+  count = local.use_eventbridge_trigger ? 1 : 0
+
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = module.psoxy_lambda.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.bulk_s3_object_created[0].arn
+
+  depends_on = [module.psoxy_lambda]
+}
+
+resource "aws_cloudwatch_event_rule" "bulk_s3_object_created" {
+  count = local.use_eventbridge_trigger ? 1 : 0
+
+  name        = local.eventbridge_rule_name
+  description = "Invoke bulk Psoxy Lambda for S3 Object Created events matching file_pattern (${var.instance_id})"
+  event_pattern = jsonencode({
+    source      = ["aws.s3"]
+    detail-type = ["Object Created"]
+    detail = {
+      bucket = {
+        name = [aws_s3_bucket.input.bucket]
+      }
+      object = {
+        key = [{ wildcard = var.file_pattern }]
+      }
+    }
+  })
+}
+
+resource "aws_cloudwatch_event_target" "bulk_s3_lambda" {
+  count = local.use_eventbridge_trigger ? 1 : 0
+
+  rule      = aws_cloudwatch_event_rule.bulk_s3_object_created[0].name
+  target_id = "bulk-lambda"
+  arn       = module.psoxy_lambda.function_arn
+}
+
 resource "aws_s3_bucket_notification" "bucket_notification" {
   bucket = aws_s3_bucket.input.id
 
-  lambda_function {
-    lambda_function_arn = module.psoxy_lambda.function_arn
-    events              = ["s3:ObjectCreated:*"]
+  eventbridge = local.use_eventbridge_trigger
+
+  dynamic "lambda_function" {
+    for_each = local.use_eventbridge_trigger ? [] : [1]
+    content {
+      lambda_function_arn = module.psoxy_lambda.function_arn
+      events              = ["s3:ObjectCreated:*"]
+      filter_prefix       = var.file_prefix != null ? var.file_prefix : ""
+      filter_suffix       = var.file_suffix != null ? var.file_suffix : ""
+    }
   }
 
-  depends_on = [aws_lambda_permission.allow_input_bucket]
+  depends_on = [module.psoxy_lambda, aws_lambda_permission.allow_input_bucket, aws_lambda_permission.allow_eventbridge]
 }
 
 # the lambda function needs to get single objects from the input bucket
