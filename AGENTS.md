@@ -41,7 +41,7 @@ Release orchestration (cut RC, QA examples-dev, rc→main, tag/publish) lives in
 When modifying code in this repository, you should ensure that your changes pass our standardized tests. 
 
 ### Terraform Testing
-Terraform changes should be validated against multiple versions. CI tests against Terraform versions from `~1.7.0` up to `~1.14.0` and `latest`. In practice, testing with `latest` is OK for local / pre-commit testing.
+Terraform changes should be validated against multiple versions. CI matrices Terraform from `~1.7.0` through the current latest minor and `latest` in `.github/workflows/ci-terraform-*.yaml` (1.7.x–1.10.x legs planned for removal in psoxy v0.8 when min TF becomes ~> 1.11). In practice, testing with `latest` is OK for local / pre-commit testing.
 
 To validate terraform changes locally:
 1. Navigate to the example directories (`infra/examples-dev/aws` and `infra/examples-dev/gcp`)
