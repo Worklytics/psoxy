@@ -37,6 +37,13 @@ locals {
   eventbridge_rule_name = substr("${module.env_id.id}-${replace(var.instance_id, "_", "-")}-bulk-s3", 0, 64)
 }
 
+check "file_pattern_exclusive_with_prefix_suffix" {
+  assert {
+    condition     = !local.use_eventbridge_trigger || (var.file_prefix == null && var.file_suffix == null)
+    error_message = "Set either file_pattern (EventBridge trigger) or file_prefix/file_suffix (native S3 notification trigger), not both."
+  }
+}
+
 module "psoxy_lambda" {
   source = "../aws-proxy-lambda"
 

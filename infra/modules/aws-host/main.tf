@@ -293,6 +293,26 @@ module "api_connector_rules_raw" {
   content = each.value
 }
 
+locals {
+  bulk_connector_s3_triggers = {
+    for k, v in var.bulk_connectors : k => {
+      file_pattern = try(var.custom_bulk_connector_arguments[k].file_pattern, v.file_pattern, null)
+      file_prefix  = try(var.custom_bulk_connector_arguments[k].file_prefix, v.file_prefix, null)
+      file_suffix  = try(var.custom_bulk_connector_arguments[k].file_suffix, v.file_suffix, null)
+    }
+  }
+}
+
+check "bulk_connector_s3_trigger_options_exclusive" {
+  assert {
+    condition = alltrue([
+      for k, t in local.bulk_connector_s3_triggers :
+      t.file_pattern == null || trimspace(t.file_pattern) == "" || (t.file_prefix == null && t.file_suffix == null)
+    ])
+    error_message = "Bulk connector S3 trigger: use file_pattern (EventBridge) OR file_prefix/file_suffix (native S3 notification), not both. Check custom_bulk_connector_arguments and bulk_connectors / custom_bulk_connectors."
+  }
+}
+
 module "bulk_connector" {
   for_each = var.bulk_connectors
 

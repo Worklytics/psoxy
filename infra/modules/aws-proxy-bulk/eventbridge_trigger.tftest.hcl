@@ -64,6 +64,6 @@ run "plan_rejects_pattern_with_prefix" {
   }
 
   expect_failures = [
-    var.file_pattern,
+    check.file_pattern_exclusive_with_prefix_suffix,
   ]
 }

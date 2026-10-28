@@ -312,20 +312,6 @@ variable "bulk_connectors" {
   }))
 
   description = "map of connector id  => bulk connectors to provision"
-
-  validation {
-    condition = alltrue([
-      for k, v in var.bulk_connectors : (
-        try(var.custom_bulk_connector_arguments[k].file_pattern, v.file_pattern, null) == null
-        || trimspace(try(var.custom_bulk_connector_arguments[k].file_pattern, v.file_pattern, "")) == ""
-        || (
-          try(var.custom_bulk_connector_arguments[k].file_prefix, v.file_prefix, null) == null
-          && try(var.custom_bulk_connector_arguments[k].file_suffix, v.file_suffix, null) == null
-        )
-      )
-    ])
-    error_message = "Bulk connector S3 trigger: use file_pattern (EventBridge) OR file_prefix/file_suffix (native S3 notification), not both. Applies to merged custom_bulk_connector_arguments and bulk_connectors / custom_bulk_connectors."
-  }
 }
 
 variable "bulk_input_expiration_days" {

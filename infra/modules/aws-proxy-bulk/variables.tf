@@ -367,13 +367,4 @@ variable "file_pattern" {
   description = "Optional EventBridge wildcard pattern for S3 object keys that should invoke this Lambda (e.g. `exports/*/psoxy/*.csv`). When set, the module enables S3 EventBridge notifications and invokes the Lambda via an EventBridge rule instead of a direct S3→Lambda notification. Cannot be combined with `file_prefix` or `file_suffix`."
   default     = null
   nullable    = true
-
-  validation {
-    condition = (
-      var.file_pattern == null
-      || trimspace(var.file_pattern) == ""
-      || (var.file_prefix == null && var.file_suffix == null)
-    )
-    error_message = "Set either file_pattern (EventBridge trigger) or file_prefix/file_suffix (native S3 notification trigger), not both."
-  }
 }
