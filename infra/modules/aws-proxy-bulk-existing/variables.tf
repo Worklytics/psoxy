@@ -200,7 +200,23 @@ variable "file_prefix" {
 
 variable "file_suffix" {
   type        = string
-  description = "Optional S3 object key suffix filter for the input bucket notification that invokes this Lambda. Only `s3:ObjectCreated` events for keys ending with this suffix will trigger processing. Omit or leave null to invoke on all new objects."
+  description = "Optional S3 object key suffix filter for the input bucket notification that invokes this Lambda. Cannot be combined with `file_pattern`."
   default     = null
   nullable    = true
+}
+
+variable "file_pattern" {
+  type        = string
+  description = "Optional EventBridge wildcard pattern for S3 object keys that should invoke this Lambda. When set, enables S3 EventBridge notifications and an EventBridge rule target on this Lambda. Cannot be combined with `file_prefix` or `file_suffix`."
+  default     = null
+  nullable    = true
+
+  validation {
+    condition = (
+      var.file_pattern == null
+      || trimspace(var.file_pattern) == ""
+      || (var.file_prefix == null && var.file_suffix == null)
+    )
+    error_message = "Set either file_pattern (EventBridge trigger) or file_prefix/file_suffix (native S3 notification trigger), not both."
+  }
 }

@@ -2,6 +2,19 @@
 # TODO: highly duplicative with regular `aws-proxy-bulk` case, and could likely be unified in future
 # version
 
+module "env_id" {
+  source = "../env-id"
+
+  environment_name          = var.environment_name
+  supported_word_delimiters = ["-"]
+  preferred_word_delimiter  = "-"
+}
+
+locals {
+  use_eventbridge_trigger = var.file_pattern != null && trimspace(var.file_pattern) != ""
+  eventbridge_rule_name   = substr("${module.env_id.id}-${replace(var.instance_id, "_", "-")}-bulk-s3", 0, 64)
+}
+
 module "psoxy_lambda" {
   source = "../aws-proxy-lambda"
 
@@ -39,6 +52,8 @@ data "aws_s3_bucket" "input" {
 }
 
 resource "aws_lambda_permission" "allow_input_bucket" {
+  count = local.use_eventbridge_trigger ? 0 : 1
+
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
   function_name = module.psoxy_lambda.function_name
@@ -50,18 +65,62 @@ resource "aws_lambda_permission" "allow_input_bucket" {
   depends_on = [module.psoxy_lambda] # TODO(v0.8): remove once invoke permissions use function_arn
 }
 
+resource "aws_lambda_permission" "allow_eventbridge" {
+  count = local.use_eventbridge_trigger ? 1 : 0
+
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = module.psoxy_lambda.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.bulk_s3_object_created[0].arn
+
+  depends_on = [module.psoxy_lambda]
+}
+
+resource "aws_cloudwatch_event_rule" "bulk_s3_object_created" {
+  count = local.use_eventbridge_trigger ? 1 : 0
+
+  name        = local.eventbridge_rule_name
+  description = "Invoke bulk Psoxy Lambda for S3 Object Created events matching file_pattern (${var.instance_id})"
+  event_pattern = jsonencode({
+    source      = ["aws.s3"]
+    detail-type = ["Object Created"]
+    detail = {
+      bucket = {
+        name = [data.aws_s3_bucket.input.bucket]
+      }
+      object = {
+        key = [{ wildcard = var.file_pattern }]
+      }
+    }
+  })
+}
+
+resource "aws_cloudwatch_event_target" "bulk_s3_lambda" {
+  count = local.use_eventbridge_trigger ? 1 : 0
+
+  rule      = aws_cloudwatch_event_rule.bulk_s3_object_created[0].name
+  target_id = "bulk-lambda"
+  arn       = module.psoxy_lambda.function_arn
+}
+
 resource "aws_s3_bucket_notification" "bucket_notification" {
 
   bucket = var.input_bucket
 
-  lambda_function {
-    lambda_function_arn = module.psoxy_lambda.function_arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = var.file_prefix != null ? var.file_prefix : ""
-    filter_suffix       = var.file_suffix != null ? var.file_suffix : ""
+  eventbridge = local.use_eventbridge_trigger
+
+  dynamic "lambda_function" {
+    for_each = local.use_eventbridge_trigger ? [] : [1]
+    content {
+      lambda_function_arn = module.psoxy_lambda.function_arn
+      events              = ["s3:ObjectCreated:*"]
+      filter_prefix       = var.file_prefix != null ? var.file_prefix : ""
+      filter_suffix       = var.file_suffix != null ? var.file_suffix : ""
+    }
   }
 
-  depends_on = [aws_lambda_permission.allow_input_bucket]
+  depends_on = [module.psoxy_lambda, aws_lambda_permission.allow_input_bucket, aws_lambda_permission.allow_eventbridge]
 }
 
 

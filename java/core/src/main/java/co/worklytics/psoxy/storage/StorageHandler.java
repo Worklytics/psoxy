@@ -235,6 +235,14 @@ public class StorageHandler {
                                        Supplier<InputStream> inputStreamSupplier,
                                        Supplier<OutputStream> outputStreamSupplier) {
 
+        String objectPath = formatObjectPath(request.getSourceBucketName(), request.getSourceObjectPath());
+
+        if (getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isEmpty()) {
+            log.info("skipped " + objectPath + " - no applicable rules");
+            return null;
+        }
+
+        log.info("Processing object " + objectPath);
 
         this.validate(request, transform, inputStreamSupplier);
 
@@ -447,6 +455,11 @@ public class StorageHandler {
     }
 
 
+    /** Bucket and object key as logged for bulk storage events (e.g. {@code my-bucket/path/to/file.csv}). */
+    public static String formatObjectPath(String bucketName, String objectKey) {
+        return bucketName + "/" + objectKey;
+    }
+
     /**
      * get applicable rules, if any
      *
@@ -505,6 +518,10 @@ public class StorageHandler {
     void validate(StorageEventRequest request,
                   StorageHandler.ObjectTransform transform,
                   Supplier<InputStream> inputStreamSupplier) {
+
+        if (getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isEmpty()) {
+            return;
+        }
         
         // Skip validation for binary formats like Parquet, as text-based validation corrupts/fails
         if (isSupportedBinaryType(request)) {
@@ -556,19 +573,19 @@ public class StorageHandler {
         // the full-file process resets again).
         genMetadataTokenUsage.reset();
 
+        Optional<BulkDataRules> applicableRules =
+            getApplicableRules(transform.getRules(), request.getSourceObjectPath());
+
+        if (applicableRules.isEmpty()) {
+            return;
+        }
+
         int bufferSize = getBufferSize();
 
         try (
             InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
             OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier)
         ) {
-
-            Optional<BulkDataRules> applicableRules =
-                getApplicableRules(transform.getRules(), request.getSourceObjectPath());
-
-            if (applicableRules.isEmpty()) {
-                throw new IllegalArgumentException("No applicable rules found for " + request.getSourceObjectPath());
-            }
 
             BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
 

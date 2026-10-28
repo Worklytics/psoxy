@@ -350,14 +350,30 @@ variable "remote_resource_shared_path" {
 
 variable "file_prefix" {
   type        = string
-  description = "Optional S3 object key prefix filter for the input bucket notification that invokes this Lambda. Only `s3:ObjectCreated` events for keys starting with this prefix will trigger processing. Omit or leave null to invoke on all new objects."
+  description = "Optional S3 object key prefix filter for the input bucket notification that invokes this Lambda. Only `s3:ObjectCreated` events for keys starting with this prefix will trigger processing. Omit or leave null to invoke on all new objects. Cannot be combined with `file_pattern`."
   default     = null
   nullable    = true
 }
 
 variable "file_suffix" {
   type        = string
-  description = "Optional S3 object key suffix filter for the input bucket notification that invokes this Lambda. Only `s3:ObjectCreated` events for keys ending with this suffix will trigger processing. Omit or leave null to invoke on all new objects."
+  description = "Optional S3 object key suffix filter for the input bucket notification that invokes this Lambda. Only `s3:ObjectCreated` events for keys ending with this suffix will trigger processing. Omit or leave null to invoke on all new objects. Cannot be combined with `file_pattern`."
   default     = null
   nullable    = true
+}
+
+variable "file_pattern" {
+  type        = string
+  description = "Optional EventBridge wildcard pattern for S3 object keys that should invoke this Lambda (e.g. `exports/*/psoxy/*.csv`). When set, the module enables S3 EventBridge notifications and invokes the Lambda via an EventBridge rule instead of a direct S3→Lambda notification. Cannot be combined with `file_prefix` or `file_suffix`."
+  default     = null
+  nullable    = true
+
+  validation {
+    condition = (
+      var.file_pattern == null
+      || trimspace(var.file_pattern) == ""
+      || (var.file_prefix == null && var.file_suffix == null)
+    )
+    error_message = "Set either file_pattern (EventBridge trigger) or file_prefix/file_suffix (native S3 notification trigger), not both."
+  }
 }

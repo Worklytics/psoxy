@@ -8,6 +8,7 @@
 * [AWS](aws/README.md)
   * [Getting Started](aws/getting-started.md)
   * [Authentication and Authorization](aws/authentication-authorization.md)
+  * [Bulk input triggers (S3)](aws/bulk-s3-triggers.md)
   * [Getting Started with Cloud Shell](aws/cloud-shell.md)
   * [Encryption Keys in AWS](aws/encryption-keys.md)
   * [Protips](aws/protips.md)

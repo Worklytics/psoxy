@@ -329,8 +329,9 @@ module "bulk_connector" {
   path_to_shared_ssm_parameters        = local.path_to_shared_secrets
   ssm_kms_key_ids                      = local.ssm_key_ids
   memory_size_mb                       = coalesce(try(var.custom_bulk_connector_arguments[each.key].memory_size_mb, null), each.value.memory_size_mb, 1024)
-  file_prefix                          = coalesce(try(var.custom_bulk_connector_arguments[each.key].file_prefix, null), try(each.value.file_prefix, null))
-  file_suffix                          = coalesce(try(var.custom_bulk_connector_arguments[each.key].file_suffix, null), try(each.value.file_suffix, null))
+  file_prefix                          = try(var.custom_bulk_connector_arguments[each.key].file_prefix, each.value.file_prefix, null)
+  file_suffix                          = try(var.custom_bulk_connector_arguments[each.key].file_suffix, each.value.file_suffix, null)
+  file_pattern                         = try(var.custom_bulk_connector_arguments[each.key].file_pattern, each.value.file_pattern, null)
   sanitized_expiration_days            = var.bulk_sanitized_expiration_days
   input_expiration_days                = var.bulk_input_expiration_days
   example_file                         = each.value.example_file

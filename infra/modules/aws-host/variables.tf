@@ -308,9 +308,24 @@ variable "bulk_connectors" {
     environment_variables = optional(map(string), {})
     file_prefix           = optional(string) # S3 notification filter; only matching keys invoke the bulk Lambda
     file_suffix           = optional(string) # S3 notification filter; only matching keys invoke the bulk Lambda
+    file_pattern          = optional(string) # EventBridge wildcard on object key; enables EventBridge trigger (mutually exclusive with file_prefix/file_suffix)
   }))
 
   description = "map of connector id  => bulk connectors to provision"
+
+  validation {
+    condition = alltrue([
+      for k, v in var.bulk_connectors : (
+        try(var.custom_bulk_connector_arguments[k].file_pattern, v.file_pattern, null) == null
+        || trimspace(try(var.custom_bulk_connector_arguments[k].file_pattern, v.file_pattern, "")) == ""
+        || (
+          try(var.custom_bulk_connector_arguments[k].file_prefix, v.file_prefix, null) == null
+          && try(var.custom_bulk_connector_arguments[k].file_suffix, v.file_suffix, null) == null
+        )
+      )
+    ])
+    error_message = "Bulk connector S3 trigger: use file_pattern (EventBridge) OR file_prefix/file_suffix (native S3 notification), not both. Applies to merged custom_bulk_connector_arguments and bulk_connectors / custom_bulk_connectors."
+  }
 }
 
 variable "bulk_input_expiration_days" {
@@ -364,10 +379,21 @@ variable "custom_bulk_connector_arguments" {
     memory_size_mb = optional(number)
     file_prefix    = optional(string) # overrides bulk_connectors / custom_bulk_connectors value for this connector id
     file_suffix    = optional(string)
+    file_pattern   = optional(string)
   }))
 
   description = "map of connector id --> arguments object"
   default     = {}
+
+  validation {
+    condition = alltrue([
+      for k, args in var.custom_bulk_connector_arguments :
+      args.file_pattern == null
+      || trimspace(args.file_pattern) == ""
+      || (args.file_prefix == null && args.file_suffix == null)
+    ])
+    error_message = "custom_bulk_connector_arguments: file_pattern cannot be set together with file_prefix or file_suffix for the same connector id."
+  }
 }
 
 variable "custom_side_outputs" {
