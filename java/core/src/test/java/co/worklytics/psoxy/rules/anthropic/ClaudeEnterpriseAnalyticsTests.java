@@ -47,8 +47,6 @@ public class ClaudeEnterpriseAnalyticsTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.anthropic.com/v1/organizations/analytics/user_usage_report?starting_at=2026-06-01&ending_at=2026-06-08&models[]=claude-opus-4-5&order=desc&order_by=total_tokens", "user_usage_report.json"),
             // /user_usage_report — with exclude_deleted_users
             InvocationExample.of("https://api.anthropic.com/v1/organizations/analytics/user_usage_report?starting_at=2026-06-01&ending_at=2026-06-08&exclude_deleted_users=true&bucket_width=1d", "user_usage_report.json"),
-            // /user_usage_report — bucket_width=1d, one request covering many days instead of one request per day, plus the new Claude Tag/RBAC/Slack filter and group_by params
-            InvocationExample.of("https://api.anthropic.com/v1/organizations/analytics/user_usage_report?starting_at=2026-06-01&ending_at=2026-06-02&bucket_width=1d&group_by[]=claude_tag_category&group_by[]=claude_tag_user_id&group_by[]=rbac_group_id&group_by[]=slack_channel_id&claude_tag_categories[]=engaged&claude_tag_user_ids[]=U0123ABCDEF&rbac_group_ids[]=rbac_group_012rppKaSVsmTo6NqRDXQXNF&slack_channel_ids[]=C0123ABCDEF", "user_usage_report_bucketed.json"),
 
             // /user_cost_report — page 1
             InvocationExample.of("https://api.anthropic.com/v1/organizations/analytics/user_cost_report?starting_at=2026-06-01&ending_at=2026-06-08", "user_cost_report.json"),
@@ -59,8 +57,6 @@ public class ClaudeEnterpriseAnalyticsTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.anthropic.com/v1/organizations/analytics/user_cost_report?starting_at=2026-06-01&ending_at=2026-06-08&products[]=claude&order=asc&order_by=amount", "user_cost_report.json"),
             // /user_cost_report — with exclude_deleted_users
             InvocationExample.of("https://api.anthropic.com/v1/organizations/analytics/user_cost_report?starting_at=2026-06-01&ending_at=2026-06-08&exclude_deleted_users=true", "user_cost_report.json"),
-            // /user_cost_report — bucket_width=1d, one request covering many days instead of one request per day, plus the new Claude Tag/RBAC/Slack filter and group_by params
-            InvocationExample.of("https://api.anthropic.com/v1/organizations/analytics/user_cost_report?starting_at=2026-06-01&ending_at=2026-06-02&bucket_width=1d&group_by[]=claude_tag_category&group_by[]=claude_tag_user_id&group_by[]=rbac_group_id&group_by[]=slack_channel_id&claude_tag_categories[]=engaged&claude_tag_user_ids[]=U0123ABCDEF&rbac_group_ids[]=rbac_group_012rppKaSVsmTo6NqRDXQXNF&slack_channel_ids[]=C0123ABCDEF", "user_cost_report_bucketed.json"),
 
             // /spend_limits/effective — page 1
             InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limits/effective?limit=20", "spend_limits_effective.json"),
@@ -68,15 +64,11 @@ public class ClaudeEnterpriseAnalyticsTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limits/effective?limit=20&page=cursor_token_jkl", "spend_limits_effective.json"),
             // /spend_limits/effective — always requested with all three periods
             InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limits/effective?period[]=daily&period[]=weekly&period[]=monthly&limit=20", "spend_limits_effective.json"),
-            // /spend_limits/{spend_limit_id} — single-record lookup, not called by the ingestion job but allow-listed
-            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limits/spl_01XyZaBcDeFgHiJkLmNoPq", "spend_limit_effective_single.json"),
 
             // /spend_limit_increase_requests — page 1
             InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limit_increase_requests?status[]=pending&limit=50", "spend_limit_increase_requests.json"),
             // /spend_limit_increase_requests — page 2+ (cursor pagination; no next_page in example so null)
-            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limit_increase_requests?limit=50&page=cursor_page_2", "spend_limit_increase_requests.json"),
-            // /spend_limit_increase_requests/{spend_limit_increase_request_id} — single-record lookup, not called by the ingestion job but allow-listed
-            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limit_increase_requests/slir_01AbCdEfGhIjKlMnOpQrSt", "spend_limit_increase_request_single.json")
+            InvocationExample.of("https://api.anthropic.com/v1/organizations/spend_limit_increase_requests?limit=50&page=cursor_page_2", "spend_limit_increase_requests.json")
         );
     }
 }

@@ -26,7 +26,6 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 import co.worklytics.psoxy.GcpWebhookCollectionHandler.AuthorizationException;
-import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import lombok.SneakyThrows;
@@ -40,9 +39,6 @@ class GcpWebhookCollectionHandlerTest {
     
     @Mock
     private HttpResponse mockResponse;
-    
-    @Mock
-    private ConfigService mockConfigService;
     
     @Mock
     private EnvVarsConfigService mockEnvVarsConfigService;
@@ -77,8 +73,6 @@ class GcpWebhookCollectionHandlerTest {
             .thenReturn(mockGoogleIdTokenVerifier);
         when(mockGoogleIdTokenVerifier.getJsonFactory())
             .thenReturn(new GsonFactory());
-        when(mockConfigService.getConfigPropertyOrError(any()))
-            .thenReturn(EXPECTED_AUDIENCE);
         when(mockGcpEnvironment.getInternalServiceAuthIssuer())
             .thenReturn(EXPECTED_ISSUER);
         when(mockEnvVarsConfigService.isDevelopment())
@@ -98,8 +92,7 @@ class GcpWebhookCollectionHandlerTest {
             mockGcpEnvironment,
             null, // batchMergeHandler - not needed for these tests
             null, // jwksDecoratorFactory - not needed for these tests
-            mockConfigService,
-            WebhookCollectorModeConfig.builder().build(),
+            WebhookCollectorModeConfig.builder().authIssuer(EXPECTED_AUDIENCE).build(),
             mockEnvVarsConfigService,
             () -> webhookCollectorModeConfig
         );

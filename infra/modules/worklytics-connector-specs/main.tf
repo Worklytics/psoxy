@@ -52,21 +52,25 @@ locals {
   }
 
   chat_gpt_enterprise_example_workspace_id = coalesce(var.chat_gpt_enterprise_example_workspace_id, try(var.connector_settings["chat_gpt_enterprise_example_workspace_id"], null), "YOUR_WORKSPACEID")
-  confluence_example_cloud_id              = coalesce(var.confluence_example_cloud_id, try(var.connector_settings["confluence_example_cloud_id"], null), "YOUR_confluence_example_cloud_id")
-  confluence_example_group_id              = coalesce(var.confluence_example_group_id, try(var.connector_settings["confluence_example_group_id"], null), "YOUR_confluence_example_group_id")
-  jira_example_cloud_id                    = coalesce(var.jira_cloud_id, try(var.connector_settings["jira_cloud_id"], null), "YOUR_JIRA_CLOUD_ID")
-  jira_server_url                          = coalesce(var.jira_server_url, try(var.connector_settings["jira_server_url"], null), "YOUR_JIRA_SERVER_URL")
-  jira_example_issue_id                    = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, try(var.connector_settings["jira_example_issue_id"], null), "YOUR_JIRA_EXAMPLE_ISSUE_ID")
-  atlassian_organization_id                = coalesce(var.atlassian_organization_id, try(var.connector_settings["atlassian_organization_id"], null), "YOUR_ATLASSIAN_ORG_ID")
-  github_installation_id                   = coalesce(var.github_installation_id, try(var.connector_settings["github_installation_id"], null), "YOUR_GITHUB_INSTALLATION_ID")
-  github_copilot_installation_id           = coalesce(var.github_copilot_installation_id, try(var.connector_settings["github_copilot_installation_id"], null), "YOUR_GITHUB_COPILOT_INSTALLATION_ID")
-  github_enterprise_server_host            = coalesce(var.github_api_host, var.github_enterprise_server_host != "" ? var.github_enterprise_server_host : null, try(var.connector_settings["github_enterprise_server_host"], null), "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
-  github_enterprise_server_version         = var.github_enterprise_server_version != "v3" ? var.github_enterprise_server_version : try(var.connector_settings["github_enterprise_server_version"], "v3")
-  github_organization                      = coalesce(var.github_organization, try(var.connector_settings["github_organization"], null), "YOUR_GITHUB_ORGANIZATION_NAME")
-  github_first_organization                = split(",", local.github_organization)[0]
-  github_example_repository                = coalesce(var.github_example_repository, try(var.connector_settings["github_example_repository"], null), "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
-  gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, try(var.connector_settings["gitlab_example_group_id"], null), "YOUR_GITLAB_GROUP_ID")
-  gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, try(var.connector_settings["gitlab_example_project_id"], null), "YOUR_GITLAB_PROJECT_ID")
+  # Organization Id is optional (COSTS collection only); keep it `null` when unconfigured so
+  # `settings_to_provide` leaves the Worklytics field blank rather than autofilling an invalid id.
+  chat_gpt_enterprise_organization_id         = try(var.connector_settings["chat_gpt_enterprise_example_organization_id"], null)
+  chat_gpt_enterprise_example_organization_id = coalesce(local.chat_gpt_enterprise_organization_id, "YOUR_ORGANIZATIONID")
+  confluence_example_cloud_id                 = coalesce(var.confluence_example_cloud_id, try(var.connector_settings["confluence_example_cloud_id"], null), "YOUR_confluence_example_cloud_id")
+  confluence_example_group_id                 = coalesce(var.confluence_example_group_id, try(var.connector_settings["confluence_example_group_id"], null), "YOUR_confluence_example_group_id")
+  jira_example_cloud_id                       = coalesce(var.jira_cloud_id, try(var.connector_settings["jira_cloud_id"], null), "YOUR_JIRA_CLOUD_ID")
+  jira_server_url                             = coalesce(var.jira_server_url, try(var.connector_settings["jira_server_url"], null), "YOUR_JIRA_SERVER_URL")
+  jira_example_issue_id                       = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, try(var.connector_settings["jira_example_issue_id"], null), "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  atlassian_organization_id                   = coalesce(var.atlassian_organization_id, try(var.connector_settings["atlassian_organization_id"], null), "YOUR_ATLASSIAN_ORG_ID")
+  github_installation_id                      = coalesce(var.github_installation_id, try(var.connector_settings["github_installation_id"], null), "YOUR_GITHUB_INSTALLATION_ID")
+  github_copilot_installation_id              = coalesce(var.github_copilot_installation_id, try(var.connector_settings["github_copilot_installation_id"], null), "YOUR_GITHUB_COPILOT_INSTALLATION_ID")
+  github_enterprise_server_host               = coalesce(var.github_api_host, var.github_enterprise_server_host != "" ? var.github_enterprise_server_host : null, try(var.connector_settings["github_enterprise_server_host"], null), "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
+  github_enterprise_server_version            = var.github_enterprise_server_version != "v3" ? var.github_enterprise_server_version : try(var.connector_settings["github_enterprise_server_version"], "v3")
+  github_organization                         = coalesce(var.github_organization, try(var.connector_settings["github_organization"], null), "YOUR_GITHUB_ORGANIZATION_NAME")
+  github_first_organization                   = split(",", local.github_organization)[0]
+  github_example_repository                   = coalesce(var.github_example_repository, try(var.connector_settings["github_example_repository"], null), "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
+  gitlab_example_group_id                     = coalesce(var.gitlab_example_group_id, try(var.connector_settings["gitlab_example_group_id"], null), "YOUR_GITLAB_GROUP_ID")
+  gitlab_example_project_id                   = coalesce(var.gitlab_example_project_id, try(var.connector_settings["gitlab_example_project_id"], null), "YOUR_GITLAB_PROJECT_ID")
 
   # Shared GraphQL example for GitHub connectors. GraphQL `variables.org` uses github_first_organization
   # (first value when github_organization is comma-separated). REST `/users/{USERNAME}` placeholders are
@@ -156,7 +160,8 @@ EOT
         }
       ],
       settings_to_provide = {
-        "Workspace Id" = local.chat_gpt_enterprise_example_workspace_id
+        "Workspace Id"    = local.chat_gpt_enterprise_example_workspace_id
+        "Organization Id" = local.chat_gpt_enterprise_organization_id
       }
       reserved_concurrent_executions : null
       enable_async_processing : true
@@ -172,6 +177,8 @@ EOT
       # Legacy `/conversations` paths below remain allow-listed for existing deployments, but OpenAI reports
       # the stateful API was removed on June 5, 2026 — generated test calls may fail; prefer `/logs` for new integrations.
       # `{CONVERSATION_ID}`: only meaningful if your tenant still serves the legacy conversations API.
+      # `{ORGANIZATION_ID}`: ChatGPT organization id (Worklytics "Organization Id" / connector_settings.chat_gpt_enterprise_example_organization_id);
+      #   optional - only needed to collect COSTS (usage/billing) data via the organization-scoped `/logs` route below.
       example_api_calls : [
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/users",
@@ -180,9 +187,12 @@ EOT
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/automations",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/logs",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/logs/{LOG_FILE_ID}",
+        "/v1/compliance/organizations/${local.chat_gpt_enterprise_example_organization_id}/logs?event_type=COSTS&after=${time_static.deployment.unix - 86400 * 30}",
+        "/v1/compliance/organizations/${local.chat_gpt_enterprise_example_organization_id}/logs/{LOG_FILE_ID}",
       ]
       external_token_todo : templatefile("${path.module}/docs/chatgpt/enterprise/instructions.tftpl", {
         workspace_id                = local.chat_gpt_enterprise_example_workspace_id,
+        organization_id             = local.chat_gpt_enterprise_example_organization_id,
         path_to_instance_parameters = "PSOXY_CHATGPT_ENTERPRISE_"
       })
     }
@@ -1313,14 +1323,89 @@ all the operations for the connector:
 
 EOT
     },
-    confluence-cloud = {
+    # GA - uses Atlassian OAuth 2.0 credentials for service accounts (2LO/`client_credentials`); see
+    # https://support.atlassian.com/user-management/docs/create-oauth-2-0-credential-for-service-accounts/
+    # No refresh token, no interactive browser consent, and (per Atlassian's docs) no stated
+    # expiration on the `CLIENT_SECRET` itself. Recommended for new connections; shares
+    # `worklytics_connector_id`/rules/example calls with the deprecated `confluence-cloud` below, so
+    # it deep-links to the same Worklytics-side connector definition.
+    confluence-cloud-service-account = {
       source_kind : "confluence"
       availability : "beta"
       enable_by_default : false
       worklytics_connector_id : "confluence-cloud-psoxy"
       target_host : "api.atlassian.com"
       source_auth_strategy : "oauth2_refresh_token"
-      display_name : "Confluence Cloud"
+      display_name : "Confluence Cloud (Service Account)"
+      worklytics_connector_name : "Confluence Cloud via Psoxy"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        local.standard_config_values.oauth_refresh_token_lock,
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : true # not really, but simpler this way; and some may want it treated as sensitive, since would be req'd to brute-force app tokens or something
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_SECRET"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      environment_variables : {
+        GRANT_TYPE : "client_credentials"
+        CREDENTIALS_FLOW : "client_secret"
+        REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
+        ACCESS_TOKEN_CACHEABLE : "true"
+        USE_SHARED_TOKEN : "TRUE"
+      }
+      settings_to_provide = {
+      }
+      reserved_concurrent_executions : null
+      enable_side_output : false
+      example_api_calls_user_to_impersonate : null
+      # `{CLOUD_ID}`: Confluence Cloud id from GET /oauth/token/accessible-resources (connector_settings.confluence_example_cloud_id).
+      # `{GROUP_ID}`: a group id from GET .../wiki/rest/api/group (connector_settings.confluence_example_group_id).
+      # `{ATTACHMENT_ID}`: an attachment id (YAML path param is `{pageId}` on the attachments versions route).
+      # `{BLOGPOST_ID}`: a blogpost id. `{PAGE_ID}`: a page id. `{COMMENT_ID}`: a footer- or inline-comment id.
+      # `{CUSTOM_CONTENT_ID}`: a custom-content id.
+      example_api_calls : [
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/group",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/group/${local.confluence_example_group_id}/membersByGroupId",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/content/search?cql=lastmodified>=${formatdate("YYYY-MM-DD", timeadd(var.example_api_calls_sample_date, "-720h"))}%20AND%20lastmodified<=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}&limit=30&expand=body.atlas_doc_format,ancestors,version,history,history.previousVersion&includeArchivedSpaces=true",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/spaces",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/attachments/{ATTACHMENT_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/blogposts/{BLOGPOST_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/pages/{PAGE_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/custom-content/{CUSTOM_CONTENT_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/footer-comments/{COMMENT_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/inline-comments/{COMMENT_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/tasks",
+        "/oauth/token/accessible-resources", # obtain Confluence Cloud ID from here
+      ],
+      external_token_todo : templatefile("${path.module}/docs/atlassian/confluence-service-account-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_CONFLUENCE_CLOUD_SERVICE_ACCOUNT"
+      })
+    }
+    # DEPRECATED - to be removed (or have its auth scheme replaced) in the next major version; see
+    # CHANGELOG. Uses a user-delegated OAuth 2.0 (3LO) `refresh_token`, which requires re-authorizing
+    # at least annually (Atlassian caps a 3LO "token family" at a 1-year max lifetime). New
+    # connections should use `confluence-cloud-service-account` above instead.
+    confluence-cloud = {
+      source_kind : "confluence"
+      availability : "deprecated"
+      enable_by_default : false
+      worklytics_connector_id : "confluence-cloud-psoxy"
+      target_host : "api.atlassian.com"
+      source_auth_strategy : "oauth2_refresh_token"
+      display_name : "(Deprecated, use Confluence Cloud (Service Account) instead) Confluence Cloud"
       worklytics_connector_name : "Confluence Cloud via Psoxy"
       secured_variables : [
         {
@@ -1422,14 +1507,85 @@ EOT
         path_to_instance_parameters = "PSOXY_JIRA_SERVER"
       })
     }
-    jira-cloud = {
+    # GA - uses Atlassian OAuth 2.0 credentials for service accounts (2LO/`client_credentials`); see
+    # https://support.atlassian.com/user-management/docs/create-oauth-2-0-credential-for-service-accounts/
+    # No refresh token, no interactive browser consent, and (per Atlassian's docs) no stated
+    # expiration on the `CLIENT_SECRET` itself. Recommended for new connections; shares
+    # `worklytics_connector_id`/rules/example calls with the deprecated `jira-cloud` below, so it
+    # deep-links to the same Worklytics-side connector definition.
+    jira-cloud-service-account = {
       source_kind : "jira-cloud"
       availability : "ga"
       enable_by_default : false
       worklytics_connector_id : "jira-cloud-psoxy"
       target_host : "api.atlassian.com"
       source_auth_strategy : "oauth2_refresh_token"
-      display_name : "Jira REST API"
+      display_name : "Jira REST API (Service Account)"
+      worklytics_connector_name : "Jira REST API via Psoxy"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        local.standard_config_values.oauth_refresh_token_lock,
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : true # not really, but simpler this way; and some may want it treated as sensitive, since would be req'd to brute-force app tokens or something
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_SECRET"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      environment_variables : {
+        GRANT_TYPE : "client_credentials"
+        CREDENTIALS_FLOW : "client_secret"
+        REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
+        ACCESS_TOKEN_CACHEABLE : "true"
+        USE_SHARED_TOKEN : "TRUE"
+      }
+      settings_to_provide = {
+      }
+      reserved_concurrent_executions : null
+      enable_side_output : false
+      example_api_calls_user_to_impersonate : null
+      # `{CLOUD_ID}`: Jira Cloud id from GET /oauth/token/accessible-resources (connector_settings.jira_cloud_id).
+      # `{ISSUE_ID}`: a Jira issue key or id (connector_settings.jira_example_issue_id), e.g. ETV-12.
+      # `{GROUP_ID}`: a group id from GET .../group/bulk (query param on /group/member).
+      example_api_calls : [
+        "/oauth/token/accessible-resources", # obtain Atlassian Cloud ID from here
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/users",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/group/bulk",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/group/member?groupId={GROUP_ID}&maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/search/jql?jql=updated>=-30d&maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/comment?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/project/search?maxResults=25",
+      ],
+      external_token_todo : templatefile("${path.module}/docs/atlassian/jira-cloud-service-account-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_JIRA_CLOUD_SERVICE_ACCOUNT"
+      })
+    }
+    # DEPRECATED - to be removed (or have its auth scheme replaced) in the next major version; see
+    # CHANGELOG. Uses a user-delegated OAuth 2.0 (3LO) `refresh_token`, which requires re-authorizing
+    # at least annually (Atlassian caps a 3LO "token family" at a 1-year max lifetime). New
+    # connections should use `jira-cloud-service-account` above instead.
+    jira-cloud = {
+      source_kind : "jira-cloud"
+      availability : "deprecated"
+      enable_by_default : false
+      worklytics_connector_id : "jira-cloud-psoxy"
+      target_host : "api.atlassian.com"
+      source_auth_strategy : "oauth2_refresh_token"
+      display_name : "(Deprecated, use Jira Cloud (Service Account) instead) Jira REST API"
       worklytics_connector_name : "Jira REST API via Psoxy"
       secured_variables : [
         {

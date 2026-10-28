@@ -1,0 +1,26 @@
+{
+  "event_id": "e8h7g9c0-52b7-4e20-a901-2ddb2bf9c338",
+  "type": "CODEX_LOG",
+  "principal": {
+    "id": "workspace_abc123",
+    "type": "CHATGPT_WORKSPACE"
+  },
+  "actor": {
+    "type": "ACCOUNT_USER",
+    "user_id": "user-abc123def456",
+    "user_email": "alice@example.com"
+  },
+  "event_type": "SITE_DEPLOYMENT_COMPLETED",
+  "client_id": "CODEX_WEB",
+  "workspace_id": "be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details": {
+    "detail_type": "SITE_DEPLOYMENT_COMPLETED",
+    "project_id": "site-proj-001",
+    "slug": "internal-dashboard",
+    "version_number": 3,
+    "deployment_id": "deploy-001",
+    "environment_revision": "rev-7",
+    "status": "success",
+    "site_url": "https://internal-dashboard.example.chatgpt.com"
+  }
+}

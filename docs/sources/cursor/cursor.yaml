@@ -9,7 +9,6 @@ endpoints:
         jsonPaths:
           - "$.data[*].email"
           - "$.data[*].userId"
-        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
@@ -29,7 +28,6 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.usageEvents[*].userEmail"
-        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
@@ -53,7 +51,6 @@ endpoints:
           - "$.teamMembers[*].email"
           - "$.teamMembers[*].id"
         includeReversible: true
-        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:

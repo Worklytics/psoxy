@@ -12,6 +12,7 @@ import co.worklytics.psoxy.RESTApiSanitizerFactory;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
@@ -662,7 +663,7 @@ class ApiDataRequestHandlerTest {
     void sanitizedApiResponseMetadata_includesOnlyProcessedDataFields() {
         Map<String, String> metadata = Map.of(
             ProcessedDataMetadataFields.RULES_SHA.getMetadataKey(), "abc123",
-            ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(), "v0.7.1",
+            ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(), "v0.7.2",
             ApiDataOutputUtils.OutputObjectMetadata.REQUEST_BODY.name(), "base64body",
             ApiDataOutputUtils.OutputObjectMetadata.QUERY_STRING.name(), "foo=bar",
             ApiDataOutputUtils.OutputObjectMetadata.PATH.name(), "users/me"
@@ -673,7 +674,7 @@ class ApiDataRequestHandlerTest {
 
         assertEquals("abc123",
             responseMetadata.get(ProcessedDataMetadataFields.RULES_SHA.getHttpHeader()));
-        assertEquals("v0.7.1",
+        assertEquals("v0.7.2",
             responseMetadata.get(ProcessedDataMetadataFields.PROXY_VERSION.getHttpHeader()));
         assertEquals(2, responseMetadata.size());
         assertFalse(responseMetadata.containsKey(
@@ -772,8 +773,7 @@ class ApiDataRequestHandlerTest {
         when(handler.secretStore
             .getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
             .thenReturn(Optional.of("salt"));
-        when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
-            .thenReturn(source);
+        handler.proxyConfig = ProxyConfig.builder().source(source).build();
         handler.apiModeConfig = ApiModeConfig.builder().targetHost(host).build();
 
         reversibleTokenizationStrategy =
@@ -908,9 +908,10 @@ class ApiDataRequestHandlerTest {
     @SneakyThrows
     void handleShouldFollowRedirectManuallyInAsyncMode() {
         setup("gmail", "google.apis.com");
-
-        when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.FOLLOW_REDIRECTS)))
-            .thenReturn(Optional.of("false"));
+        handler.apiModeConfig = ApiModeConfig.builder()
+            .targetHost("google.apis.com")
+            .followRedirects(false)
+            .build();
 
         ApiDataRequestHandler spy = spy(handler);
 

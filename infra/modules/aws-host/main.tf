@@ -406,6 +406,7 @@ module "webhook_collectors" {
       ##CUSTOM_RULES_SHA       = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     },
+    try(each.value.environment_variables, {}),
     var.general_environment_variables,
   )
 
