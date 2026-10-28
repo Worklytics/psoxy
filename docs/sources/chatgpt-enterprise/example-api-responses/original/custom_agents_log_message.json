@@ -33,8 +33,6 @@
     "version_id": "version-7",
     "run_id": "thread_019c9c87-1084-7ad1-b487-c2ee563367c4",
     "memory_path": "customer-notes/q4.md",
-    "access_method": "read",
-    "connector_name": "Salesforce",
-    "skill_name": "crm-guide"
+    "access_method": "read"
   }
 }

@@ -12,6 +12,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..actor['email_address', 'user_id', 'unauthenticated_email_address', 'api_key_id']"
+        encoding: "URL_SAFE_TOKEN"
       - !<hashIp>
         jsonPaths:
           - "$..ip_address"
@@ -43,6 +44,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['id','email']"
+        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
@@ -69,8 +71,6 @@ definitions:
       email_address:
         type: "string"
       ip_address:
-        type: "string"
-      service_account_id:
         type: "string"
       type:
         type: "string"

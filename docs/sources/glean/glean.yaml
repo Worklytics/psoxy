@@ -1,61 +1,64 @@
 ---
 endpoints:
-- pathTemplate: "/rest/api/v1/insights"
-  allowedMethods:
-  - "POST"
-  allowedQueryParams: []
-  allowedRequestHeaders:
-  - "X-Glean-ActAs"
-  transforms:
-  - !<pseudonymize>
-    jsonPaths:
-    - "$..obfuscatedId"
-    - "$..emailAddress"
-  responseSchema:
-    type: "object"
-    properties:
-      agentsResponse:
-        $ref: "#/definitions/AgentsResponse"
-      assistantResponse:
-        $ref: "#/definitions/AssistantResponse"
-      overviewResponse:
-        $ref: "#/definitions/OverviewResponse"
-- pathTemplate: "/rest/api/v1/listentities"
-  allowedMethods:
-  - "POST"
-  allowedQueryParams: []
-  allowedRequestHeaders:
-  - "X-Glean-ActAs"
-  transforms:
-    - !<pseudonymize>
-      jsonPaths:
-        - "$..aliasEmails[*]"
-    - !<pseudonymize>
-      jsonPaths:
-        - "$..email"
-        - "$..obfuscatedId"
-      includeReversible: true
-  responseSchema:
-    type: "object"
-    properties:
-      cursor:
-        type: "string"
-      hasMoreResults:
-        type: "boolean"
-      results:
-        type: "array"
-        items:
-          $ref: "#/definitions/Person"
-      sortOptions:
-        type: "array"
-        items:
+  - pathTemplate: "/rest/api/v1/insights"
+    allowedMethods:
+      - "POST"
+    allowedQueryParams: []
+    allowedRequestHeaders:
+      - "X-Glean-ActAs"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..obfuscatedId"
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        agentsResponse:
+          $ref: "#/definitions/AgentsResponse"
+        assistantResponse:
+          $ref: "#/definitions/AssistantResponse"
+        overviewResponse:
+          $ref: "#/definitions/OverviewResponse"
+  - pathTemplate: "/rest/api/v1/listentities"
+    allowedMethods:
+      - "POST"
+    allowedQueryParams: []
+    allowedRequestHeaders:
+      - "X-Glean-ActAs"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..aliasEmails[*]"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+          - "$..obfuscatedId"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        cursor:
           type: "string"
-      teamResults:
-        type: "array"
-        items:
-          $ref: "#/definitions/Team"
-      totalCount:
-        type: "integer"
+        hasMoreResults:
+          type: "boolean"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/Person"
+        sortOptions:
+          type: "array"
+          items:
+            type: "string"
+        teamResults:
+          type: "array"
+          items:
+            $ref: "#/definitions/Team"
+        totalCount:
+          type: "integer"
 definitions:
   AgentUserInsight:
     type: "object"

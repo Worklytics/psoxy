@@ -11,9 +11,12 @@ endpoints:
     jsonPaths:
     - "$.data[*].user_id"
     - "$.data[*].actor['user_id','email']"
+    encoding: "URL_SAFE_TOKEN"
   responseSchema:
     type: "object"
     properties:
+      object:
+        type: "string"
       data:
         type: "array"
         items:
@@ -21,8 +24,6 @@ endpoints:
       has_more:
         type: "boolean"
       next_page:
-        type: "string"
-      object:
         type: "string"
 definitions:
   AccountUserActor:
