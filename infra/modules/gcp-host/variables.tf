@@ -244,6 +244,7 @@ variable "webhook_collectors" {
     example_identity    = optional(string, null) # example identity to use in test payloads
     example_payload     = optional(string, null) # example payload content to use in test scripts
     enable_gen_metadata = optional(bool, false)  # ALPHA: !<classify> / !<genMetadata> in webhook rules (Vertex)
+    environment_variables = optional(map(string), {})
   }))
   default = {}
 
@@ -277,6 +278,7 @@ variable "bulk_connectors" {
     available_memory_mb   = optional(number)
     timeout_seconds       = optional(number)
     enable_gen_metadata   = optional(bool, false)
+    environment_variables = optional(map(string), {})
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -342,10 +344,13 @@ variable "custom_side_outputs" {
 
 
 # build lookup tables to JOIN data you receive back from Worklytics with your original data.
-#   - `join_key_column` should be the column you expect to JOIN on, usually 'employee_id'
-#   - `columns_to_include` is an optional a list of columns to include in the lookup table,
-#                       e.g. if the data you're exporting TO worklytics contains more columns than
-#                       you want to have in the lookup table, you can limit to an explicit list
+#   - `join_key_column` should match the join column name in your HRIS CSV (usually 'EMPLOYEE_ID'); pseudonym output is `{join_key_column}_pseudonym`
+#   - `columns_to_include` when null, lookup output includes all HRIS columns. When set (including []),
+#                       enables columnsToInclude; the module always merges in join_key_column and
+#                       `{join_key_column}_pseudonym`. List only extra HRIS columns to retain; use []
+#                       for join-key pair only (no employee_id_orig on GCP; see lookup table docs).
+#   - `pseudonym_format` optional; maps to rules.pseudonymFormat for the pseudonym column. Omit for
+#                       proxy default (JSON). TODO(0.8): default URL_SAFE_HASH_ONLY in this module.
 #   - `sanitized_accessor_names` is an optional list of GCP principals, by email with qualifier, eg:
 #                       `user:alice@worklytics`, `group:analysts@worklytics.co`, or
 #                        `serviceAccount:sa@worklytics.google-service-accounts.com`
@@ -354,6 +359,7 @@ variable "lookup_tables" {
     source_connector_id           = string
     join_key_column               = string
     columns_to_include            = optional(list(string))
+    pseudonym_format              = optional(string) # maps to rules.pseudonymFormat; omit for proxy default (JSON). TODO(0.8): default URL_SAFE_HASH_ONLY here.
     sanitized_accessor_principals = optional(list(string))
     expiration_days               = optional(number, 5 * 365)
     compress_output               = optional(bool)

@@ -30,12 +30,17 @@ public class HealthCheckResult {
     //q: terraform module version?? (eg, have terraform deployment set its version number as ENV
     // variable, and then psoxy can read it and report it here)
 
+    private static final Pattern BUNDLE_FILENAME_VERSION = Pattern.compile("psoxy-[^-]*-(.*)\\.(jar|zip)");
+
+    /**
+     * @return javaSourceCodeVersion if available; otherwise version inferred from bundle filename
+     *    (eg, "psoxy-gcp-0.7.0.zip" -> "0.7.0")
+     */
     public String getVersion() {
-        if (bundleFilename == null) {
+        if (javaSourceCodeVersion != null || bundleFilename == null) {
             return javaSourceCodeVersion;
         } else {
-            return Pattern.compile("psoxy-[^-]*-(.*).jar").matcher(bundleFilename)
-                .replaceAll("$1");
+            return BUNDLE_FILENAME_VERSION.matcher(bundleFilename).replaceAll("$1");
         }
     }
 

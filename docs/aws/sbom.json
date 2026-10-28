@@ -4,7 +4,7 @@
   "serialNumber" : "urn:uuid:0a71197c-f24a-3514-82a0-01450826c85d",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2026-10-13T20:52:57Z",
+    "timestamp" : "2026-10-20T17:53:00Z",
     "lifecycles" : [
       {
         "phase" : "build"
@@ -92,35 +92,35 @@
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "ce60a1a29e5c25d328ed72fe344b6fc8"
+          "content" : "12a1c9608eb60126d08a12b35978fcaf"
         },
         {
           "alg" : "SHA-1",
-          "content" : "bfb298d1d1fa11480050764eb8b36d3a88d270a0"
+          "content" : "346301e28932d9e93ab1cc470c0847e117f2d455"
         },
         {
           "alg" : "SHA-256",
-          "content" : "95ba771c1f6d8f4589edf66672aa82c5f8a88032d1d939077be71fa21b304fff"
+          "content" : "f859aaddd8a814309746d4faed9b5ca14cb3ee36e3f98eb4edba94cb5ab55c7e"
         },
         {
           "alg" : "SHA-512",
-          "content" : "df17d841fbc5ff4262618a755919a3e1e227578050f81c8a475661654eb09ea47ce0ad73ce72b3c5fecf90c698130e6a5f7ac4596c816bfea276ae303d00f824"
+          "content" : "4fe4dca313f49dc403c11d02dcaffdef7e77451e7744070c734c524aee3cfd568fe840e576fa9e8ca8e0c8e851eb9c9f9df4a903b309b04fba24d9261a914916"
         },
         {
           "alg" : "SHA-384",
-          "content" : "f14c5276284bfe597f61d3672e752a42bcb004cdada1d4659a40e09982628f4a3bf9964c9be5600cd7a444e7a302cc1b"
+          "content" : "ae41d5c2b05cefa6f2dd7109f0d3ef12d710d58b32495ac15014ad8479ee49ac5fc8e684e7681fa05317d0a4505fcd17"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "d37ed9f6202162c508daf4507c2a94201007deb2aa575f1cd4c0a34408b2f64d7a45c1b29043b60253ccdb0e58f0ff70"
+          "content" : "9c3058974dda2a27669e12f4b1919c9fcaf419a1df3c9c86235fad8ba34e21bc24e7c0dc3e761f216e9ed55734fe1d9c"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "9d0e1716c808a798e92d791c356e00e43a152c76a510a4ad1bb108c4ca9d8820"
+          "content" : "15e648d03f7b8188000be5198901a590bd6e231ec41638a545df113c22c3c045"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "2915c28123ff9bd254e1c87b8e42d92f6fe352bd6f9ec94cc7974aa3651147d4c0ecda1af8734756f0238e33d92b7b7a4152e9e0bd77a41e422c51da95df7459"
+          "content" : "b81cecd395a35fd434c5cef86157210717eab49d74b6bd06ce0b8fbb00c7bd4d4f630cc1deb54a1d1fd18e8bc0f644d5f60634cf600cbc3d5aa4434cead34879"
         }
       ],
       "licenses" : [
@@ -143,35 +143,35 @@
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "92169eb8039afa1342c90e48fd0a17a6"
+          "content" : "a5ad45f6540c2329098eb51370ba776f"
         },
         {
           "alg" : "SHA-1",
-          "content" : "0c405cf361630a9d9971c80b7856ec9f726f4e5e"
+          "content" : "f2b7b2f4667521e061d42c48c2cc5cec57f2f56c"
         },
         {
           "alg" : "SHA-256",
-          "content" : "e8289632e86ccd04dc81f90dc86ab8e7c0e1a8dde8dda124c0463528778d5916"
+          "content" : "3f79a336c06a46dba72350b1fb874becaa50ed1bf7886c8d581bd7951e08097a"
         },
         {
           "alg" : "SHA-512",
-          "content" : "55dda5030e36b3ca1d2fe99af4de64dd4484ef885f8c67c12b8226580933e741d4d97d28917d4c75f16d146dff557eba4580944f0a9993124c6c54de64409ade"
+          "content" : "da914869196119c48415220e9d81a63b095690a5d3942037ade3a638ce66d1db9d902bab6b9c66121930d8630daeeb804679cc4f719c2534e9c6c8c3444d0708"
         },
         {
           "alg" : "SHA-384",
-          "content" : "90147084d4e114790d649a1b90e4daac097397ffd6eb7c7a81cc434756b5a230fa37b67f3bbf52f88c2a2a3be9d8ef29"
+          "content" : "f90d08e7af3683548dc894f354555c018e1cace2242e51acb25627d275f6876622c2527588eb2484dc97c4e58798854b"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "470594488011f36e8003463ada6666fa165636604ce8fe9f97f824e51ec65dcfbeb75b61fd3abddfa6aae6cac59e6ed1"
+          "content" : "a87fdc33d028438e09c46c37948b9e854dbb3fdf9697e8e1b64d4252cf843078c217cbaf7c9400575ca4fa1b499144bf"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "aa167d877692a68c03380258a7a027c2a4046a12310b379629d64072d622f615"
+          "content" : "e6933a0600af4cca0efceed818740bf69b803563ca003380bf117105bf5eb74d"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "bcc482fe8a7d166e3011adcf888c20545ecf504122665a0b5ca07023ae09b9292601558d2322ded4e742b32a23f9795d9e07a1b979f480f9be7f8fc162249679"
+          "content" : "b4b4a9aa35acbaba38dc95c195f3c9a24564be2632736f5393fe635f8f775b5c4319a8f07e65b93d34e99a3753e50a5a64ce73ecaaab9c21d80ad47745f9e6f3"
         }
       ],
       "licenses" : [
@@ -186,45 +186,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/commons-codec/commons-codec@1.22.1?type=jar",
+      "bom-ref" : "pkg:maven/commons-codec/commons-codec@1.23.0?type=jar",
       "publisher" : "The Apache Software Foundation",
       "group" : "commons-codec",
       "name" : "commons-codec",
-      "version" : "1.22.1",
+      "version" : "1.23.0",
       "description" : "The Apache Commons Codec component contains encoders and decoders for formats such as Base16, Base32, Base64, digest, and Hexadecimal. In addition to these widely used encoders and decoders, the codec package also maintains a collection of phonetic encoding utilities.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "7bfd10447817907ffd7f14fbc6493940"
+          "content" : "dc0c1fa739a6cfc59d948ebe371af90a"
         },
         {
           "alg" : "SHA-1",
-          "content" : "da09bcdb330deef7cfee70f30c6889fda70d5ebf"
+          "content" : "11adf2daaeb941e80599a3e8010d63aed995f509"
         },
         {
           "alg" : "SHA-256",
-          "content" : "78a5d732fbd715e2d10bd7150d2f8030bae57267f8aacc5c88f642cb6c2e5d3f"
+          "content" : "47504a3ce71d73a1b0af07675546b8d8c5af87f82ef12b6381f9eb3c17dd5a5b"
         },
         {
           "alg" : "SHA-512",
-          "content" : "1e2023b6e7715339a309226c94635db77fd3d8d7f6fc1048e0138dc4b4ff27540e1e1ff2238a41b94029a9497b2935af6e8b05eeeed69b76600c2f4eed3e36ed"
+          "content" : "fdbda49825afd3eef86987155865f74f71b51f88c9145df12a473b209f52a70d4e84a5f3c19648f42c9b8a5989bcdf4a0976df0a42b85fa3dbb5b52841a350ff"
         },
         {
           "alg" : "SHA-384",
-          "content" : "29f01c913caa51660ff4a8623255f819961ee63b20b125a1c3e5f061b4a75864c1a349420f6d314009b4cf12524aecfb"
+          "content" : "de1caffb821f8bfa44fe0570bf8dbf308e07d23f254c9c4f15825a167f70a6e22fc9f5c9df03f2e56d261f94b3cb3859"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "de7a0317378663055c9a2f80d30bc543549924e994a27c683ee1ff405587395d00b13d277dd39ceb09fa64a9f110d09e"
+          "content" : "7abb2ae4ad494c6732fea2d9c4eabc267223f70a8a3164b10297437809b82f4e2d90383f282b5c4999c5e0acaf9c9594"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "70d7c377536c088c88d043b4f3297cb58ea9bd7d8374514f16060ca62977253e"
+          "content" : "fe24f5492b702edf2dae5b3cb5ebb7a2661e5a4c02fd15dd95dd22bcea8373e7"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "7885692a52215d8ea620afc25b22719c835d9079265592a9b790e4c13b1cd5cbb023eb9cf39a304e463cf280dd7931ca966528c9bb14b58c400018699c058ec7"
+          "content" : "e5395d37af0ec14b84f8e122d89b0276e74a32389c1c88f3a3b69753eab2d5051b7236fc230396105b06faa0af7406d10392e7f6ab8a15d0586cdd45b0a872c9"
         }
       ],
       "licenses" : [
@@ -240,7 +240,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/commons-codec/commons-codec@1.22.1?type=jar",
+      "purl" : "pkg:maven/commons-codec/commons-codec@1.23.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -345,44 +345,44 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.networknt/json-schema-validator@3.0.7?type=jar",
+      "bom-ref" : "pkg:maven/com.networknt/json-schema-validator@3.0.8?type=jar",
       "group" : "com.networknt",
       "name" : "json-schema-validator",
-      "version" : "3.0.7",
+      "version" : "3.0.8",
       "description" : "A json schema validator that supports draft v4, v6, v7, v2019-09 and v2020-12",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "bc40b1ae0b880a3bc94179ad6ddce1d5"
+          "content" : "0d3c9dcf38dbc710a57a419c65265812"
         },
         {
           "alg" : "SHA-1",
-          "content" : "5e755525565bf48be0049c129b4005c2ca6a43eb"
+          "content" : "89981e0d1f6798f6c2a64c399b377f18102c4ad1"
         },
         {
           "alg" : "SHA-256",
-          "content" : "27b90bce60845f353b203b735cda2e0cb9a32c4962550e249141a2b065b9be5c"
+          "content" : "d3f4c61ba35c3543bdf1ab42462bf89721542f4adea5b092ee7b430dfd467181"
         },
         {
           "alg" : "SHA-512",
-          "content" : "aace0c5b7eb64e404201a713d1621ca8728392150fa98fda007ae819041742b602aa406cbfa28b54fb2a985cee71bee87ed2184a2818a4d4332c52a36e127e09"
+          "content" : "6af48f54074995e83f116e7fb43ca89f01ab65d7c23c9976deb2a05d2b3be9e2f3256c97b6c486f1a71baaac4d3d5ae553efb7f2f22f11235a9943ec200fe9d5"
         },
         {
           "alg" : "SHA-384",
-          "content" : "0f5870dd4404fa98ff6cf680a71d1d883b63938cae71da62339d6ab740ea7d4ec7eb2488f56128055f23f50bdcee09ab"
+          "content" : "45c84641e8b476ebaf7727bd8754dd3a3aede2b1ab5be97348dc0a6375c3d23816e053238b40680e8967b243f753e0e3"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "e43e19226409aa060879001c273db23394cdd37cde59829724442d1b7594852ddb2e97233e31d6675a1ced8496814f87"
+          "content" : "dbfdfcf7aad2cb0bb6b8413a692833e24e24c226946ca8da9e07bd169e95d0e374106d20ece16ab759387f14444fee00"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "770af0ca389bce3803911ed669784629cc3267256afaf9831536c5908c62f998"
+          "content" : "8c52c2fa0a8254333221903d98b70ea5acbf0bdcf7552efd28b778fd016eea6f"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "d63d1754c21bc282a82d0481398183c3f14a22c4f44163980394152c02170c5ac33674d6a57b6352515c8ef7cc8c3bd26966c782058cc85fb71c68681fb813e1"
+          "content" : "f681bc5ca65983f7c2e4beac954eac6b79bc88866fde6d3bc26cb5d7e522e9311f87d71d4284b5505a38cf87811c187b70061c96a885e5f8a000b41851a69538"
         }
       ],
       "licenses" : [
@@ -397,7 +397,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.networknt/json-schema-validator@3.0.7?type=jar",
+      "purl" : "pkg:maven/com.networknt/json-schema-validator@3.0.8?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -489,45 +489,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/tools.jackson.core/jackson-databind@3.2.1?type=jar",
+      "bom-ref" : "pkg:maven/tools.jackson.core/jackson-databind@3.2.3?type=jar",
       "publisher" : "FasterXML",
       "group" : "tools.jackson.core",
       "name" : "jackson-databind",
-      "version" : "3.2.1",
+      "version" : "3.2.3",
       "description" : "General data-binding functionality for Jackson: works on core streaming API",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "a5f8a8e60591bcc61a3c521317b3293c"
+          "content" : "60c5fc1b2ac506e9acfde1662aa8fbaf"
         },
         {
           "alg" : "SHA-1",
-          "content" : "363dc46ceb44a97cba68cb0e9da4a3cb5bf723d4"
+          "content" : "edb121f17d1a441732b15919f531e529c5cc76ec"
         },
         {
           "alg" : "SHA-256",
-          "content" : "8d005c5626b1839e2eea6bd33a437287e7a24d54e1bb3746b8f861193262b519"
+          "content" : "235b72436af983857e44efa42449f4f0a2c571e69d6c5d9dd1253ae7d192dcf2"
         },
         {
           "alg" : "SHA-512",
-          "content" : "5ef9ee43b5b55b3e3b3618fe8c35ec674005957ac2a0d90298e67ff6b82495016d2c8c07da6e1efe9a91dbd29dc9fb86c2470728f425111cffc3362e60dead29"
+          "content" : "72f4e366e0dc6fca769070d98131946fa79a45ba8d7c15be03916d8f2bfd5541ef90896b78bfdf36ad999e2f42d06d337b296b5996bb0fc0cccc6acb69e2514e"
         },
         {
           "alg" : "SHA-384",
-          "content" : "299e007edf092b6d49e57d9e4e24a4d2e4784f1cf2770ce0293e2ccd07f82d0b549d1b29391565ebbe5df7a34be3c154"
+          "content" : "12b53583bb5680904ea191a68f32ad7190847c7de806cae78de046d8df0df9c3cb46ed0c88a4131a01062eafcedbe0e5"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "8899110cde40b0f8a80819bd8c992080ec891e3e152e361459b70e7cfefdc1ad6174d0b0db9cd3a36e661f0ae1a55588"
+          "content" : "3ffbfcaec1f312e450e64f7dac6117de4c716c8d136fd30236dcb47e2830b55ff1bcbd06331c60d5e6df1f0ad85927dd"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "f049f33f716b8c7e94afbebde9761f21cd871dd906f7b97ffde52f5b8748aa4e"
+          "content" : "0f77f46f5862cb6fb7874c3bd6286dc365f3e37ac7a241762bdeb89b4cba63ac"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "54b30829f60d8249df73a868839e505ebf510c197800f7a8b8f2513d80b67ffd16a904ea4874ceb958d111f4dc5ca46a90cd0e685c1b6ef5766e523d27eec2d5"
+          "content" : "32c39b0c82a5b4994387e76b3096f8b6b75240a07ce442d2f66b74f014c47dad14e4b0b5c17ec866c450a9717a6be34dc1b3ad2201e244006a8378522468e388"
         }
       ],
       "licenses" : [
@@ -542,7 +542,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/tools.jackson.core/jackson-databind@3.2.1?type=jar",
+      "purl" : "pkg:maven/tools.jackson.core/jackson-databind@3.2.3?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -564,45 +564,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/tools.jackson.core/jackson-core@3.2.1?type=jar",
+      "bom-ref" : "pkg:maven/tools.jackson.core/jackson-core@3.2.3?type=jar",
       "publisher" : "FasterXML",
       "group" : "tools.jackson.core",
       "name" : "jackson-core",
-      "version" : "3.2.1",
+      "version" : "3.2.3",
       "description" : "Core Jackson processing abstractions (aka Streaming API), implementation for JSON",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "7fb8949692eb2d7ee38d07d8fd245c0e"
+          "content" : "2422ba3b4c39dc4a954620be4d6337df"
         },
         {
           "alg" : "SHA-1",
-          "content" : "5bff2a525073cff8a8206751f6f6bc4650b81b94"
+          "content" : "94d7dab7ac8e336a4c7a5ce36b8ca206bfde18c5"
         },
         {
           "alg" : "SHA-256",
-          "content" : "2688aaa60b207403287e16a71fb5644bf2f9cfc464cc601ae95c6c86a5af1f94"
+          "content" : "a0c17e7e665a5e95c82f5fb45c0fec2ae3dc556c80f0016452c9c84cd23f3817"
         },
         {
           "alg" : "SHA-512",
-          "content" : "e9fe35e4e3806932904204e9d96bf040b38dc0761ccfbc112e48fc24a1fc7c9c60d65cce6bf46876c4a815688ef225fb90c4a94cefa364225fd67e5b760f0a36"
+          "content" : "052e1b0422e66a713c127dc47839d35c9b4b64edf230051608a3d05d4ae83f0dff84cdf845d2115d0a47f59b693abd368b3ef2be613a8545b64f80290cef8d1d"
         },
         {
           "alg" : "SHA-384",
-          "content" : "1713f31a2b2e2aec42109cddd0c1fcafa0d7d4f1fa86e5b31ddd28c050044bfb4bd7a2299ac17c7d0a8884b68b2f32ce"
+          "content" : "70c2fba9a91785dc098432dd6b6aa666454f2230234308c3a6d822122026cbc85e48f94c26c3945b6bb6171f4d33be0f"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "6c6361cf59d850ef6c33fa90da76b09c39894352826fcb06829f3c21f66c8bb4243a37141b5d767b1dac736436861d20"
+          "content" : "c7b9a2e46ee2a3d14e02325ca9a48b786fbe9b9024b66d4afa27488e8eef467fd28046795c424a70c817d1df312e5470"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "eeb15c37e503c4e49ee87148586092d414ec0d4708dfe83117201629bde48515"
+          "content" : "356b07d732d69d00fbd72876285cfbe4c5c0098113be3ca8151f82f32fa6dbba"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "f8b6b62b4d08ad3d0ac492245fe9218ea4d8d372b9e388e71d2d04e716ce7bb13a71b560caa0fef6551f307967378439c1e13332e5b90c906f004513a11b29c0"
+          "content" : "c6f11c9a9da0bce87f80b47d9f9763bb222e7cd06dfbd803c8c41cc5426cc87b4fa45c88b618ed612d34897c73ec04c8b5876927f28dc2ac1e156772bfb3ace0"
         }
       ],
       "licenses" : [
@@ -617,7 +617,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/tools.jackson.core/jackson-core@3.2.1?type=jar",
+      "purl" : "pkg:maven/tools.jackson.core/jackson-core@3.2.3?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -784,45 +784,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.4?type=jar",
+      "bom-ref" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.5?type=jar",
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.httpcomponents.client5",
       "name" : "httpclient5",
-      "version" : "5.6.4",
+      "version" : "5.6.5",
       "description" : "Apache HttpComponents Client",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "42f90ff32bc3f72cb8bdfdf235e28328"
+          "content" : "d8cc8b781781dc447050138b9cd7bf68"
         },
         {
           "alg" : "SHA-1",
-          "content" : "2a8ff1366303ac253e0ea64dab1e5abb5b7687bd"
+          "content" : "4540cf4269d2e4a713a434a01e195af29e1ef9e1"
         },
         {
           "alg" : "SHA-256",
-          "content" : "bdef5f8841145cd76c4c605ff301bc840eea0d5292332b7b892a93316c0d8ee1"
+          "content" : "a10b555f7c85a720d1011a086d679d854b155816cde91a40198cc98c2b0867e8"
         },
         {
           "alg" : "SHA-512",
-          "content" : "2acc897cde347dc33d7c180f2b8c9b255f1fb687f6afc75e271b037998cf248d69648f1c92225c2ed1ba370ef212ad08ff36a1b90d5faad2cddb3bcc7129b0cf"
+          "content" : "d31ba483b5de27071efe116b3a94913f90d0f410e71809c68d3142cf4968f289cb7dabe423320770d6bdc56acfe8d2943f8850b338e73d61afd4182bf700ffb8"
         },
         {
           "alg" : "SHA-384",
-          "content" : "43856479fa74a1d193930d26f37fefeb4eadef0dd480c4e840cdaabae6138304ba8aecdaed6a8940d0e971d82c597dd7"
+          "content" : "91514a155a1ba9e4ca14f39f408acbca061efe3602fe3a7875ab8200589bff72adec28eace8460379b7e7aeef6459d18"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "1684a4ccb7c533cc531d96274fc8f6ff33106840f0f1523655b4313393a952ed376b83004d5e0217213ece2035005ee3"
+          "content" : "c4f5791a47f959530943619c01381ced385910caad4a3e3389f5cbcaa30ac752f0d5c361ca55d9b14296a6747392c18a"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "ab2b8fd38edd948d38fbcc23baa8e6e2437e25610c16bb1df7bbe7d95453bbcd"
+          "content" : "00ae74969636542a25131300b1da43702daa0a22e446aeb07b2a088d0290882f"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "9503f6ec6318d2aecae0e68e3eabbfaa012c512141b89e52d12fa4f13450114482508ef2ded7e9a3262fd7c4b5f08e7f1bfe4fa343b870dae81d5c04acaac6eb"
+          "content" : "1b730aca7330167292d6325c27f2ec6964d751fa7d1fb84b170ca3fc635ee2ad0a97102be01b1328d7f2ed6f996576ba98bbc321f0e3be561ee864749679a63b"
         }
       ],
       "licenses" : [
@@ -837,11 +837,11 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.4?type=jar",
+      "purl" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.5?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
-          "url" : "https://hc.apache.org/httpcomponents-client-5.6.x/5.6.4/httpclient5/"
+          "url" : "https://hc.apache.org/httpcomponents-client-5.6.x/5.6.5/httpclient5/"
         },
         {
           "type" : "distribution-intake",
@@ -857,51 +857,51 @@
         },
         {
           "type" : "vcs",
-          "url" : "https://github.com/apache/httpcomponents-client/tree/5.6.4/httpclient5"
+          "url" : "https://github.com/apache/httpcomponents-client/tree/5.6.5/httpclient5"
         }
       ]
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.3?type=jar",
+      "bom-ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.4?type=jar",
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.httpcomponents.core5",
       "name" : "httpcore5-h2",
-      "version" : "5.4.3",
+      "version" : "5.4.4",
       "description" : "Apache HttpComponents HTTP/2 Core Components",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "4b9da0d3e87ed769ef6a162223f2265c"
+          "content" : "8f56560c50101d9422ca597c48973c9b"
         },
         {
           "alg" : "SHA-1",
-          "content" : "33bcd37d645539d27c65e17420843fd7f6c0ebf4"
+          "content" : "90c30ff56e226bdb96cf5c987aebc42e1a8a9f45"
         },
         {
           "alg" : "SHA-256",
-          "content" : "c7db7026b8e2dea39132b04a6069f6671e2858309b20a146ec5c7dd6ed73a0b6"
+          "content" : "9a61441889f9b222ce99581977cc549b4dfca7ac9d2841582c1e57a31fa65b48"
         },
         {
           "alg" : "SHA-512",
-          "content" : "0bde9a7579cba0dbb6322c8a25eefd0bdb80bd907b4e66c20570ce23558fd57daf9ae5233a571546171456b9f7da6e970507cde971a1155d1bce011c62b281af"
+          "content" : "6fd81dffd73dee36e85d676f587738d7a31c5b35bfc2ece82fd749cca9894b997ad1b9264bfd9ce4a92ffeba5751d0eaee4b106b03ce7ef4110e6bb4f3bb8eee"
         },
         {
           "alg" : "SHA-384",
-          "content" : "31c865c7c4fd4975d1a60223478b1aa9a8c374e77e23f46c3033f9f88a4fa774850c5f7c4974ee6c98a8f0ac031ed843"
+          "content" : "28a1970490d83c9ebaba10d31ea9a933563f2d99db7eb800264e9f7da61e9d80b19ae9ea898bd2457577c0c8daa3cd1c"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "06cf3bffe6edd2fc68630b79d041cc1af328f83f55356d75e69ebed85057edcd3c3f1319d5d7c777878807122ed9c86b"
+          "content" : "b47195f8b614c9225471dd05cad344ccab47d5716141807e5414894af4cbcb70e22095694fc59d85b36dbef637f8c509"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "d9e78aa4f4420d006a5df8b339df2c58d5fc680e5c344d746bdb39ecf4af1791"
+          "content" : "408ac7a375ebf2de02ace34081f259d8f62188ff32514e38a754ee717843ef4f"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "63557025bcf6a3b28d85a62d06840290d5587e10b35cf41f4b4a640c29d09f1cc96bba26a3aec0cc0de37098edfb42c53de401ce94cbf32680f6e1143cd091a4"
+          "content" : "db379c65037f375bc79c74a017815af3a83c296bdeec3c2654688b3f354eb16d4a669870201078112aa9975a7088bec36d80a727c937b84d1d78536a9a715770"
         }
       ],
       "licenses" : [
@@ -916,11 +916,11 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.3?type=jar",
+      "purl" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.4?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
-          "url" : "https://hc.apache.org/httpcomponents-core-5.4.x/5.4.3/httpcore5-h2/"
+          "url" : "https://hc.apache.org/httpcomponents-core-5.4.x/5.4.4/httpcore5-h2/"
         },
         {
           "type" : "distribution-intake",
@@ -936,7 +936,7 @@
         },
         {
           "type" : "vcs",
-          "url" : "https://github.com/apache/httpcomponents-core/tree/5.4.3/httpcore5-h2"
+          "url" : "https://github.com/apache/httpcomponents-core/tree/5.4.4/httpcore5-h2"
         }
       ]
     },
@@ -1881,6 +1881,78 @@
         {
           "type" : "vcs",
           "url" : "scm:git:git@github.com:apache/parquet-mr.git/parquet-format-structures"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/javax.annotation/javax.annotation-api@1.3.2?type=jar",
+      "publisher" : "GlassFish Community",
+      "group" : "javax.annotation",
+      "name" : "javax.annotation-api",
+      "version" : "1.3.2",
+      "description" : "Common Annotations for the JavaTM Platform API",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "2ab1973eefffaa2aeec47d50b9e40b9d"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "934c04d3cfef185a8008e7bf34331b79730a9d43"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "e04ba5195bcd555dc95650f7cc614d151e4bcd52d29a10b8aa2197f3ab89ab9b"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "679cf44c3b9d635b43ed122a555d570292c3f0937c33871c40438a1a53e2058c80578694ec9466eac9e280e19bfb7a95b261594cc4c1161c85dc97df6235e553"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "fc0058495e54efb6e05a34e3ff422e7c8347bcc77d6d9b87e9253424968dee6ef6a215c318d7e54f8705276be81f0682"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "ed6464b715de6ced0d9981a3f28140824946a4b7a02ffaff6116c833bb36e8f77a6282ce63c0d82cfe841d4fd6916891"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "ecfc9bef24ae28cf94c6775ecf6e2086d90a25d8d5476a4f6bb24001601b6cd0"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "f2b333527faedf504f60aa70a3d491972fa76f7e61e6351027f74613f41001157656824fe312b6e1df6dc4979704fe2a745b618d5368a97fe0bf8749739de9e2"
+        }
+      ],
+      "licenses" : [
+        {
+          "expression" : "(CDDL-1.0 OR GPL-2.0-with-classpath-exception)"
+        }
+      ],
+      "purl" : "pkg:maven/javax.annotation/javax.annotation-api@1.3.2?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "http://jcp.org/en/jsr/detail?id=250"
+        },
+        {
+          "type" : "distribution-intake",
+          "url" : "https://maven.java.net/service/local/staging/deploy/maven2/"
+        },
+        {
+          "type" : "issue-tracker",
+          "url" : "https://github.com/javaee/javax.annotation/issues"
+        },
+        {
+          "type" : "mailing-list",
+          "url" : "javaee-spec@javaee.groups.io"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/javaee/javax.annotation"
         }
       ]
     },
@@ -3673,45 +3745,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
       "publisher" : "Google",
       "group" : "com.google.auth",
       "name" : "google-auth-library-oauth2-http",
-      "version" : "1.53.0",
+      "version" : "1.54.0",
       "description" : "Client libraries providing authentication and authorization to enable calling Google APIs.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "c12d61efe0e497bb98e32f25cabe3515"
+          "content" : "389c3ce3b969bbb90aaf721cf5d296f6"
         },
         {
           "alg" : "SHA-1",
-          "content" : "3de9f3eae8aab187b75ad4d5b832c42519d73816"
+          "content" : "b2f8b90295f07340bee6b99b8b07d20156e2780e"
         },
         {
           "alg" : "SHA-256",
-          "content" : "54e811f5fa463a8d462a707a7d70c841d09fdc4eb4b4bbd1822977e3812d585d"
+          "content" : "03cb8e07cd40b20307494b640abb08c0a91d455b96681e55bc7cf817634d91d4"
         },
         {
           "alg" : "SHA-512",
-          "content" : "232dbbc961aa5e71fb018e3116fc553c320ad337cdcb5c08d01a8472ae4222ebbe54be56933a1ecd0e9c2c8972fc0a67e7d0d86b9cfa3d6e16ceeabd2e1f1da7"
+          "content" : "8206c1a594c80991a7f2cdde4500bef4c85bccbdf9f072b580dce47de5d78e8550fcb7ff4c8c781d02849d5e3048e10cbb03be5551237a3da74a3d9ef9fb2f0e"
         },
         {
           "alg" : "SHA-384",
-          "content" : "17be70791da377d2b3b102b6cef4a55929c6ce128bcc7b1dab51b4f18452755b10869e390e69231f09b2f401271aa807"
+          "content" : "a8c41d19155c5c98c43d6aae4055677a9e758835457a59bdb88d250620ac83bd96cd1794c63e7be7984809ed988579ed"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "f8b7866d19bda68f70a3327f8f2a000e4d36bd8e8c34becc5dd0aa80f0532f1812f6482b6a8585c74e3f69b0686be2cf"
+          "content" : "aaf73fcbf185641de2a1fe859304d6da712823bd2459582a6926bc0947e2a8934222f5531c3cdceb1fe10a680572e2b1"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "43ff6aea72ec6493491f899300c325ed4612d846a5bc9dc245d52e64a880d523"
+          "content" : "96c5817003fd2074d12a04a4eb47f44acdd2d5766cdefd16a226d6d68bde0cb8"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "299f3d993246dbd9201c2a573dd2cd2322f6271670f8a20ae090afaeeb70f11ece8288b436468c55b9d19dd1661fd7312ce01b59ad03e0a698d0db2b495b8cc5"
+          "content" : "332bd000a324009a1a43a2af75de3649f6ad0f641aaaf4913504db25273ad9a10ec936b36a4c0200a6a86ee7863c163eb791c8f25ef365ea678ed78c31d2aac7"
         }
       ],
       "licenses" : [
@@ -3727,7 +3799,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
+      "purl" : "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3824,45 +3896,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.auth/google-auth-library-credentials@1.53.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
       "publisher" : "Google",
       "group" : "com.google.auth",
       "name" : "google-auth-library-credentials",
-      "version" : "1.53.0",
+      "version" : "1.54.0",
       "description" : "Client libraries providing authentication and authorization to enable calling Google APIs.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "612242120e0fe4dca5f2f8f422706187"
+          "content" : "0302f519dd543c22c9f9e9bb418cbe28"
         },
         {
           "alg" : "SHA-1",
-          "content" : "9c411f231ef75d343ea6b1ed32f951527e1180bc"
+          "content" : "adf39b1bb4ce262297420e154ca3b645bc642b3e"
         },
         {
           "alg" : "SHA-256",
-          "content" : "9acd6f9032c0d7e5da290df40824be986d4d440bc8c82e0a7b83246862744a28"
+          "content" : "47c36c6201c4c0336e0275aecfbba155a46d63aa07d416176a790774c9ecdca9"
         },
         {
           "alg" : "SHA-512",
-          "content" : "d6bb191bc159f3a8bd5ce11022b88088fc4b3d4f4eb5ea095395c5f38d88da1b666a377fe6e9805ec61498d9bec52b2ee3bc32450bf9947a504cd2f4f8febef1"
+          "content" : "15829148a64200589eca13f91f262ab0891c3fa88677bb640d51612db2b44528089bffe5cbc14b59a137a473fd480eab4f094378c61378ee94004fe2c915042c"
         },
         {
           "alg" : "SHA-384",
-          "content" : "f34e862beffd3dcc7129126604e16477c15e095ceb9ed3ce7073801cd73184e16ce06a939efb5d28498282482158dbb0"
+          "content" : "035dc148cc65b23f3f5d97c14874be7ddc39f4e9e5b767fab8ffc0475d50d8da34bcf2f6ea318d30e77e4bfe59f9f8e4"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "587c6ae2bdf644674cc1866d4316a33986b35580283be574f4405e00c633fb1cfcc177a8e4dca5704c2cc679607dd171"
+          "content" : "f7c3c33a5893f67d5fd4343eed45473fded4d1b38bdc40e137559a116be88e71cd168f420a8d5e364fa0d2a992e2596f"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "392f225d043fa61cdca172896e31e69dd5eaa7cc7e585f1a5f0f0e35c0e3bcc6"
+          "content" : "205b463b6aed45b0a7dfab2c0f7c91f4a0b6abfb30f52503859df8516f4c1982"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "f1cb63f504c9e03afc7900f88cadd9303a0fc31275c642db908c386700b51876e5f69fe572735a84043421106bc2495546b0f0258a4c828d61b6fe45f04a53db"
+          "content" : "aecb47b48d28677d6f2024404ee1a5f46d7cc4af77554e6e0e51bb9dc83171267b1b8e648e6e6ab5c788a37e773e46f282dd90ed98de45774269049133751245"
         }
       ],
       "licenses" : [
@@ -3878,7 +3950,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.auth/google-auth-library-credentials@1.53.0?type=jar",
+      "purl" : "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3975,45 +4047,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+      "bom-ref" : "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
       "publisher" : "Google LLC",
       "group" : "com.google.api",
       "name" : "api-common",
-      "version" : "2.69.0",
+      "version" : "2.70.0",
       "description" : "Common utilities for Google APIs in Java",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "08b507c9334236e5f7ad6cc779a6e430"
+          "content" : "17384a8d86466b5cb9d7494c5536177f"
         },
         {
           "alg" : "SHA-1",
-          "content" : "51fea91b8d604fdb389049d8c8b9897214b3e577"
+          "content" : "134bba6d6f20eee43fe86abf7e166a6a5d799b59"
         },
         {
           "alg" : "SHA-256",
-          "content" : "9095977e5decd6c6dd7e087c1886a294e6152574e1263a08ceb0d08cbcde62b0"
+          "content" : "18477eead80b20e0c3a747f084d8a0b10cd123d6349b7e989ae176c7854efaf5"
         },
         {
           "alg" : "SHA-512",
-          "content" : "6c678d33b08dbd77b0f24ba6dddbd03a4e439bb65fdc9a6d576b4e8971ec374126f11b2d6d403f89572f923b230393c9a43722fe8bff359db95246c556c76f0e"
+          "content" : "c4b867bf8b8e10f6e6e28f853e2b494db4ba930c0fddae45697ecc5e1106b0ee5a8d68e80b2f3447053889dff765c8a88a5c79568fb46db12a774b16c5576c68"
         },
         {
           "alg" : "SHA-384",
-          "content" : "69e33901b61bfe9178def4142a4d6ff291c6505befec9286fba548e498bd39fdc605ea6f27f2544eab649846c79f589b"
+          "content" : "471a0be692058dc07f56ec3098da5c619b6414f746893a9ac7870b81e55ab73ecaa4958bdc4467a7af3f4e490ef7eb88"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "985397b60b41e9dc19e84a0c8599f076b7dc8f75f11e4f1a6991384672ff89e5f2b019f7a103e4fa9ed9ab036aa8c060"
+          "content" : "be933452ed1b445fa6b22465ebf4bbbdd085dd6805a975bc8bf23fd0b3257b388372af48b279e094e7c5d2435fe5aa27"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "f9d28e035779e5bd3519025f437e0853a9b08518df8fbe619d9acf62a919840c"
+          "content" : "fb9b4d435749dc920e697efa25ce0ddb02bb29977375dc5a3379505a8738dd3a"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "59deaea4b92a7597671263693f361124e261237884c596e06809921831d991e3dba959a37294246f7f231eeba95def3999ac8366202b4609fdf2fe3f51c5b537"
+          "content" : "6c5b0f4bfa632b6bb9d1d3403ede444af82428be338ee0d89a87edc028ec9cbaf6b8477e5833287fa7e7035c3d1f8f0c515092f05252d0126546796b7e41148c"
         }
       ],
       "licenses" : [
@@ -4029,7 +4101,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+      "purl" : "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -4046,78 +4118,6 @@
         {
           "type" : "vcs",
           "url" : "https://github.com/googleapis/google-cloud-java"
-        }
-      ]
-    },
-    {
-      "type" : "library",
-      "bom-ref" : "pkg:maven/javax.annotation/javax.annotation-api@1.3.2?type=jar",
-      "publisher" : "GlassFish Community",
-      "group" : "javax.annotation",
-      "name" : "javax.annotation-api",
-      "version" : "1.3.2",
-      "description" : "Common Annotations for the JavaTM Platform API",
-      "scope" : "required",
-      "hashes" : [
-        {
-          "alg" : "MD5",
-          "content" : "2ab1973eefffaa2aeec47d50b9e40b9d"
-        },
-        {
-          "alg" : "SHA-1",
-          "content" : "934c04d3cfef185a8008e7bf34331b79730a9d43"
-        },
-        {
-          "alg" : "SHA-256",
-          "content" : "e04ba5195bcd555dc95650f7cc614d151e4bcd52d29a10b8aa2197f3ab89ab9b"
-        },
-        {
-          "alg" : "SHA-512",
-          "content" : "679cf44c3b9d635b43ed122a555d570292c3f0937c33871c40438a1a53e2058c80578694ec9466eac9e280e19bfb7a95b261594cc4c1161c85dc97df6235e553"
-        },
-        {
-          "alg" : "SHA-384",
-          "content" : "fc0058495e54efb6e05a34e3ff422e7c8347bcc77d6d9b87e9253424968dee6ef6a215c318d7e54f8705276be81f0682"
-        },
-        {
-          "alg" : "SHA3-384",
-          "content" : "ed6464b715de6ced0d9981a3f28140824946a4b7a02ffaff6116c833bb36e8f77a6282ce63c0d82cfe841d4fd6916891"
-        },
-        {
-          "alg" : "SHA3-256",
-          "content" : "ecfc9bef24ae28cf94c6775ecf6e2086d90a25d8d5476a4f6bb24001601b6cd0"
-        },
-        {
-          "alg" : "SHA3-512",
-          "content" : "f2b333527faedf504f60aa70a3d491972fa76f7e61e6351027f74613f41001157656824fe312b6e1df6dc4979704fe2a745b618d5368a97fe0bf8749739de9e2"
-        }
-      ],
-      "licenses" : [
-        {
-          "expression" : "(CDDL-1.0 OR GPL-2.0-with-classpath-exception)"
-        }
-      ],
-      "purl" : "pkg:maven/javax.annotation/javax.annotation-api@1.3.2?type=jar",
-      "externalReferences" : [
-        {
-          "type" : "website",
-          "url" : "http://jcp.org/en/jsr/detail?id=250"
-        },
-        {
-          "type" : "distribution-intake",
-          "url" : "https://maven.java.net/service/local/staging/deploy/maven2/"
-        },
-        {
-          "type" : "issue-tracker",
-          "url" : "https://github.com/javaee/javax.annotation/issues"
-        },
-        {
-          "type" : "mailing-list",
-          "url" : "javaee-spec@javaee.groups.io"
-        },
-        {
-          "type" : "vcs",
-          "url" : "https://github.com/javaee/javax.annotation"
         }
       ]
     },
@@ -4194,45 +4194,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.3?type=jar",
+      "bom-ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.4?type=jar",
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.httpcomponents.core5",
       "name" : "httpcore5",
-      "version" : "5.4.3",
+      "version" : "5.4.4",
       "description" : "Apache HttpComponents HTTP/1.1 core components",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "40cba87d4704bc9e1691f340fb8042cf"
+          "content" : "1d7150db6792387e1f39dd626060c746"
         },
         {
           "alg" : "SHA-1",
-          "content" : "32a0699fbcb103f5621c00983ee8f5aac080e4a6"
+          "content" : "fb236f682f1eaae1abec9b60e940158ac369f15b"
         },
         {
           "alg" : "SHA-256",
-          "content" : "18bfbbabb478dfb67f31aeaf428c387f3c3df654582e1309f708ee1f3086830a"
+          "content" : "b08e3c3a440fec2029e89980134c7c787dd6796454641ad1eafb81478d7e8b0b"
         },
         {
           "alg" : "SHA-512",
-          "content" : "2ae04ae83015c46314a502a0973bec86312680cb548f0ae68002af4f5fd958deb60c702ad9dcae72c23561e2e0954518bb0355a1496096f7e9b9a2efbb7c9bae"
+          "content" : "9c341b5529705d56e13d74c4ed91b3b3afdd2add5b4783ebc0488f7c5c1299b12eaa827b92b1ebcedf4fd2516fb5cae96f8becbe604749fa47a928d42b999bab"
         },
         {
           "alg" : "SHA-384",
-          "content" : "09312cfbd7b33c3c8712405aff437ef7b93260a07a625b7cc491d3e2fa0d65852d72f4f6701ef707c4cae52caadcddd0"
+          "content" : "dc2cc35dfaf7dc67ebc776ccbe4300f580f587db0c192d9c177f0020b7ecca0c9dc5e2932d260daac052b302336da012"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "419f9608bec952746b274a3510bc0f0dbdb6cc4b1269c9bd89c218894a42fda0dfd7b46912b57cc722b3d76b7f11c07b"
+          "content" : "af970fe47d3244c602bc966c727ebbf67073c4fee4c7ee0b957cbcfb840b692b9f2a1f8c318870179bb8d033e8700535"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "8cb162e60b804205084fcc8e562f6eb47f5c13eefa42208cf6accab1d28e0ba2"
+          "content" : "3f80bf2a9c2120c21f955e8c5976e591c55dff53a0915e65ba46e981c7164ea7"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "eccc71fecc0525c6fca46ca9e19eaecf26d646f3e71528796e8dcc0f16cb0882d485ceffa1c48e14e60eb8b429ae0fd5935274bb8907c2869ab54cb76e931abd"
+          "content" : "8b85ec771c37aaaecf35b275f1933d799024be69546a3568bfa85b2db3ba3738bccf8c5624f1412785a8d907bc2ca740beb3779238a72b20761c8c78c59bf1c9"
         }
       ],
       "licenses" : [
@@ -4247,11 +4247,11 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.3?type=jar",
+      "purl" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.4?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
-          "url" : "https://hc.apache.org/httpcomponents-core-5.4.x/5.4.3/httpcore5/"
+          "url" : "https://hc.apache.org/httpcomponents-core-5.4.x/5.4.4/httpcore5/"
         },
         {
           "type" : "distribution-intake",
@@ -4267,7 +4267,7 @@
         },
         {
           "type" : "vcs",
-          "url" : "https://github.com/apache/httpcomponents-core/tree/5.4.3/httpcore5"
+          "url" : "https://github.com/apache/httpcomponents-core/tree/5.4.4/httpcore5"
         }
       ]
     },
@@ -4542,44 +4542,44 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j@1.16.0?type=jar",
+      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j@1.22.0?type=jar",
       "group" : "dev.langchain4j",
       "name" : "langchain4j",
-      "version" : "1.16.0",
+      "version" : "1.22.0",
       "description" : "Build LLM-powered applications in Java: chatbots, agents, RAG, and much more",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "1e0113d57c0516ddbfbcd8bf6bde8630"
+          "content" : "4d60a0629ef9e039851d68e2e78672e8"
         },
         {
           "alg" : "SHA-1",
-          "content" : "e711c7ba1bb8507c44ef9ad570a62bad95d3d03a"
+          "content" : "6b180bb45537c75bb2f71b554718913081f9f491"
         },
         {
           "alg" : "SHA-256",
-          "content" : "bb3cec8b2b99fd50301d406b7c751108141693c8cba22aa7338dcb5be9ab5324"
+          "content" : "e056822cf525cfa4b1669ca918398d728fd2be984ff6e74c315a9a2cf8739c07"
         },
         {
           "alg" : "SHA-512",
-          "content" : "9ab0e8ee0b9912de94ae4c43075859080acf4a89f5d956c5e5af58cb150543b2d06b925924c752817f31ad93980761433e2d0cc6a248ffff351719552636a16b"
+          "content" : "c9c005952795a6d5a0bbe3effe6b548ad87d73190524f755f910767a9c83b699d6dc0a0b002fcbe01ec1ee31cf51b85cdf996a3dcf10a4b400938371f8ba59e8"
         },
         {
           "alg" : "SHA-384",
-          "content" : "0bac6defe2c57f4ce5d7b896eb1a0543ebaca6a32d0c61af099b071b122b5f9899487368948806a21f50c4083d4d4c9e"
+          "content" : "eccc40d7894f73aefebe940f6217329782703e36844d54e8bf7768e5f8abb0f58d9e17c8804120739c1013f891b56cb8"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "bff0a7c97fade266c152c7985a8be2b851837cac7137fdefebb75f7d3dfb9b8c45af7c1266bdf123ccfb812ca2095c4d"
+          "content" : "3c8ed6b32ac0cbd6349da6582d60bd94f343f50747d6eb010755df632e59a2f075fcca592065341c9ccbbb47dd4cf56a"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "126c48a1c8e6b8eaf17e5d4e03c396a8762144de31b6e21839af7fcb5fe45a3e"
+          "content" : "9d8fe85ae1cb4867b08d02f8970f3985738a1de30caecfab5c335b44339a16c7"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "da59fb25c56cd959cf1bfed154123f6d169ca255857c036ad827ced9d9eb0fca060f518fa6ab2d7298665c03b11d27b5b0ea50de70564d15d8eb7f5c56bb9b4d"
+          "content" : "a26f2d11f59d86a3b169cff637c52f63cf9b266a7e725181bc9e3bb254310bfae12018a23b609d178e829b517623702cb0dd99c79b17e92ab685f72539fbe315"
         }
       ],
       "licenses" : [
@@ -4594,7 +4594,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/dev.langchain4j/langchain4j@1.16.0?type=jar",
+      "purl" : "pkg:maven/dev.langchain4j/langchain4j@1.22.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -9598,44 +9598,44 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j-bedrock@1.16.0?type=jar",
+      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j-bedrock@1.22.0?type=jar",
       "group" : "dev.langchain4j",
       "name" : "langchain4j-bedrock",
-      "version" : "1.16.0",
+      "version" : "1.22.0",
       "description" : "LangChain4j :: Integration :: Amazon Bedrock",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "88ca8ab274d5d313e6b1afd350a08f64"
+          "content" : "19ecd009361980ebc92f339f79d43716"
         },
         {
           "alg" : "SHA-1",
-          "content" : "1d557e2378e22efb31986779c20c24e106e94849"
+          "content" : "0567e43f34d472abe8f8f2ce982799b89eb4b8a3"
         },
         {
           "alg" : "SHA-256",
-          "content" : "4e3be046a22790ec8dc50e5811f9ad97a6130663548d945531ff13315acbfad8"
+          "content" : "9f37d9c9b2d246b4b3ea44d78ee255432166d815006de0ade2f19210a3ce6a70"
         },
         {
           "alg" : "SHA-512",
-          "content" : "bbc6f323df8e553b06eddebdf5e3dc172c68d3db673c40439db96663ed861019f66f9e39fa21d2096f35f5a822e2f773eefe1a915d9c031b13dc462bbeeedab7"
+          "content" : "c0c95f21b5ac51dab28794d2dfa6e9d17ddd28a396b4adc1c4f5f53dc22f9039ffb47139555209b84b99201dd499b918d2c5f5c2085a472a4667cff29c360088"
         },
         {
           "alg" : "SHA-384",
-          "content" : "51671b8abe8940ce09fc6b0a634e8de0152cdc0a0da966774bc40482b4c7c3ce927e9797b1fbd3e6c9d364602e78f646"
+          "content" : "1d7fa3b95f3f79e7173b8b854dd4eb808647c4bf90e7d4eaffb014079f393303ceee66daf9e40a75420f0b29f86efbbd"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "67d58321ea0015563305219d6ce02dcbc30b64b5e9d8e02d28c72c22f801eec2b9d76fe0c13b8533ab1015a521b5a5c3"
+          "content" : "09b55a3fb50f0071b465621edd3475d5340ea7e01af4d568c36697deb3906cdcf6979c272c8a8c313848a014a0024e78"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "a2aa89bdc55222f1aeef259894fddd96395b7c08ff557679d009544c5516ea71"
+          "content" : "5068386f36312d6af6c8cf95132be9407e24ca7ca021b70ca9cc91e33e17c88b"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "9c3023e1028500dbe2d88c5f014efdcaa21f99db3421f1cf9e0fca177dec77899dfcda76ff05434788d52e9f5da68cf2d28174978501996431f9ba4245ff1bd2"
+          "content" : "a509cf79e549be6828a00e0bbaf04d43275217f37b43711bb710597be370127e8a0a4d9b753ae48da6760c8c6465b607553bacdd663685d66ea982b821713867"
         }
       ],
       "licenses" : [
@@ -9650,7 +9650,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/dev.langchain4j/langchain4j-bedrock@1.16.0?type=jar",
+      "purl" : "pkg:maven/dev.langchain4j/langchain4j-bedrock@1.22.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -9664,44 +9664,44 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j-core@1.16.0?type=jar",
+      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j-core@1.22.0?type=jar",
       "group" : "dev.langchain4j",
       "name" : "langchain4j-core",
-      "version" : "1.16.0",
+      "version" : "1.22.0",
       "description" : "Core classes and interfaces of LangChain4j",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "31a0eabb0dc8d5684b81358794f913ad"
+          "content" : "9448e68d05722bc3918119ab12dee985"
         },
         {
           "alg" : "SHA-1",
-          "content" : "7aef857d622497af7b9dcde64103a6f622c7ee32"
+          "content" : "88666984e95e71c0465728a959665d8fa4d52267"
         },
         {
           "alg" : "SHA-256",
-          "content" : "5649d0b715c2a6e6644ad0657c7119e92cf0fe4cb0e84b3a4e423e1e42b00e4c"
+          "content" : "e06b7cdda44070a3c9213a9bd96bd52791d86fdd4b3dfc05a37300d6182d7c8b"
         },
         {
           "alg" : "SHA-512",
-          "content" : "b07cd7db7996c5821b660335abd0771bbc194b071ff03f6b5f421dc5d8992887706cfa4e62b3ef17b9b7fb86c903a7137f89202a5652dec206b122892bd9756a"
+          "content" : "222b44831f0f7317eb930458ad51389bd20ed4b7299a437989efbec56943918923db97b17dd49eb075fe5a87f50029e2c2d9756f5e6d0054c2c5c68542d766b4"
         },
         {
           "alg" : "SHA-384",
-          "content" : "021f6f227944df1ca7377f26eadddd9ef9d36a2a841bc45f0611c743983fb371eb66984ead2154ccc518acde6e6c1859"
+          "content" : "cf4e7100c3e9d21b7f5b60b18c9f5cb29c17201ba7a8d1968106bf3733d4b8dba51d130ccb5ef4a462662e0f16715ac7"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "1e0c0b365e3366b42365235157bfb07793226a4c649eb67d3a8fbf40527d6c27f228e65cdae19d8d0e19bae905b9676d"
+          "content" : "b9bf4361cb9d100d06d1765e38b90f9c3f7d00c3b89b97cf17eae87cdffe33d07b95605ae53ed804d4f9d425cae1c459"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "f7e4fe4a646f7c6db27dfa70f81536b2c2fdb3a49ab77e0e60402cdd3cc14654"
+          "content" : "c6509e4fd02d0936cf9025abcae80f25ea1e90dad37d546f3d52018a51f62e26"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "8185c727f50ef609bff47c9db2c6ee01adb2bf28c1b362a15e2c56da439ca18edfac782d314de65f7415a10cef57b9242defbf8c410bb2cc095200465767513a"
+          "content" : "f0530a5139949f22d632f4a2c157aa1765b1c869ddcc0ac3a4d70dd164498d8e22eb56e2ca7c4671902b4fd1db2b72feecfbbb23ed368454a25358b61dbddd91"
         }
       ],
       "licenses" : [
@@ -9716,7 +9716,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/dev.langchain4j/langchain4j-core@1.16.0?type=jar",
+      "purl" : "pkg:maven/dev.langchain4j/langchain4j-core@1.22.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -9725,6 +9725,138 @@
         {
           "type" : "vcs",
           "url" : "https://github.com/langchain4j/langchain4j/tree/main/langchain4j-core"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j-reactive-streaming@1.22.0-beta32?type=jar",
+      "group" : "dev.langchain4j",
+      "name" : "langchain4j-reactive-streaming",
+      "version" : "1.22.0-beta32",
+      "description" : "Shared reactive-streaming infrastructure for streaming chat model providers: the handler-to-Publisher bridge and the shared non-blocking contract test (TCK). Sits below the streaming providers and above core, http-client and mutiny-zero.",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "cd8538591c917f0eef5899f6d2b2a523"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "be657a1470f28a6dbcf8b547fd81e9a5c5e181e5"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "ca0c9967051626e7359101cd598162a8ab0e6a788499d0447dbbb3e3db541999"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "623464fa52d8b6c281663dea7b4f93ae29a71e868704f2011bbaa5c74de2dbea868f1a9fc0a45e59e4cd1f6300eada8d976a6260b19745475635d8a701170049"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "461685c7af8edffc506b4e518a0ebb4f66ab080d69a712044c332631a86a7216243c57fc68b5731b1e8360a09c27d49b"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "9e6c5f6f121a28758417e97f57b48f90776964097c1b32fc3461a66be704b33465b860d1dcbce1c426c51e263a5941c1"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "498b7b322f9d3767509725809abc0778431dffd2fd646ef73afc5597e1c28ef3"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "d023c032c97d8a7ea6266095469b8c1bc35e7e2d442ef0e61152c910ab27d8df6782fc3bde4ae3e026d7e3fb7eac9dbd899d8970a4918b5a66cbb3fcee82416f"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0",
+            "text" : {
+              "contentType" : "plain/text",
+              "encoding" : "base64",
+              "content" : "QXBhY2hlIExpY2Vuc2UKVmVyc2lvbiAyLjAsIEphbnVhcnkgMjAwNApodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvCgpURVJNUyBBTkQgQ09ORElUSU9OUyBGT1IgVVNFLCBSRVBST0RVQ1RJT04sIEFORCBESVNUUklCVVRJT04KCjEuIERlZmluaXRpb25zLgoKIkxpY2Vuc2UiIHNoYWxsIG1lYW4gdGhlIHRlcm1zIGFuZCBjb25kaXRpb25zIGZvciB1c2UsIHJlcHJvZHVjdGlvbiwgYW5kIGRpc3RyaWJ1dGlvbiBhcyBkZWZpbmVkIGJ5IFNlY3Rpb25zIDEgdGhyb3VnaCA5IG9mIHRoaXMgZG9jdW1lbnQuCgoiTGljZW5zb3IiIHNoYWxsIG1lYW4gdGhlIGNvcHlyaWdodCBvd25lciBvciBlbnRpdHkgYXV0aG9yaXplZCBieSB0aGUgY29weXJpZ2h0IG93bmVyIHRoYXQgaXMgZ3JhbnRpbmcgdGhlIExpY2Vuc2UuCgoiTGVnYWwgRW50aXR5IiBzaGFsbCBtZWFuIHRoZSB1bmlvbiBvZiB0aGUgYWN0aW5nIGVudGl0eSBhbmQgYWxsIG90aGVyIGVudGl0aWVzIHRoYXQgY29udHJvbCwgYXJlIGNvbnRyb2xsZWQgYnksIG9yIGFyZSB1bmRlciBjb21tb24gY29udHJvbCB3aXRoIHRoYXQgZW50aXR5LiBGb3IgdGhlIHB1cnBvc2VzIG9mIHRoaXMgZGVmaW5pdGlvbiwgImNvbnRyb2wiIG1lYW5zIChpKSB0aGUgcG93ZXIsIGRpcmVjdCBvciBpbmRpcmVjdCwgdG8gY2F1c2UgdGhlIGRpcmVjdGlvbiBvciBtYW5hZ2VtZW50IG9mIHN1Y2ggZW50aXR5LCB3aGV0aGVyIGJ5IGNvbnRyYWN0IG9yIG90aGVyd2lzZSwgb3IgKGlpKSBvd25lcnNoaXAgb2YgZmlmdHkgcGVyY2VudCAoNTAlKSBvciBtb3JlIG9mIHRoZSBvdXRzdGFuZGluZyBzaGFyZXMsIG9yIChpaWkpIGJlbmVmaWNpYWwgb3duZXJzaGlwIG9mIHN1Y2ggZW50aXR5LgoKIllvdSIgKG9yICJZb3VyIikgc2hhbGwgbWVhbiBhbiBpbmRpdmlkdWFsIG9yIExlZ2FsIEVudGl0eSBleGVyY2lzaW5nIHBlcm1pc3Npb25zIGdyYW50ZWQgYnkgdGhpcyBMaWNlbnNlLgoKIlNvdXJjZSIgZm9ybSBzaGFsbCBtZWFuIHRoZSBwcmVmZXJyZWQgZm9ybSBmb3IgbWFraW5nIG1vZGlmaWNhdGlvbnMsIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gc29mdHdhcmUgc291cmNlIGNvZGUsIGRvY3VtZW50YXRpb24gc291cmNlLCBhbmQgY29uZmlndXJhdGlvbiBmaWxlcy4KCiJPYmplY3QiIGZvcm0gc2hhbGwgbWVhbiBhbnkgZm9ybSByZXN1bHRpbmcgZnJvbSBtZWNoYW5pY2FsIHRyYW5zZm9ybWF0aW9uIG9yIHRyYW5zbGF0aW9uIG9mIGEgU291cmNlIGZvcm0sIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gY29tcGlsZWQgb2JqZWN0IGNvZGUsIGdlbmVyYXRlZCBkb2N1bWVudGF0aW9uLCBhbmQgY29udmVyc2lvbnMgdG8gb3RoZXIgbWVkaWEgdHlwZXMuCgoiV29yayIgc2hhbGwgbWVhbiB0aGUgd29yayBvZiBhdXRob3JzaGlwLCB3aGV0aGVyIGluIFNvdXJjZSBvciBPYmplY3QgZm9ybSwgbWFkZSBhdmFpbGFibGUgdW5kZXIgdGhlIExpY2Vuc2UsIGFzIGluZGljYXRlZCBieSBhIGNvcHlyaWdodCBub3RpY2UgdGhhdCBpcyBpbmNsdWRlZCBpbiBvciBhdHRhY2hlZCB0byB0aGUgd29yayAoYW4gZXhhbXBsZSBpcyBwcm92aWRlZCBpbiB0aGUgQXBwZW5kaXggYmVsb3cpLgoKIkRlcml2YXRpdmUgV29ya3MiIHNoYWxsIG1lYW4gYW55IHdvcmssIHdoZXRoZXIgaW4gU291cmNlIG9yIE9iamVjdCBmb3JtLCB0aGF0IGlzIGJhc2VkIG9uIChvciBkZXJpdmVkIGZyb20pIHRoZSBXb3JrIGFuZCBmb3Igd2hpY2ggdGhlIGVkaXRvcmlhbCByZXZpc2lvbnMsIGFubm90YXRpb25zLCBlbGFib3JhdGlvbnMsIG9yIG90aGVyIG1vZGlmaWNhdGlvbnMgcmVwcmVzZW50LCBhcyBhIHdob2xlLCBhbiBvcmlnaW5hbCB3b3JrIG9mIGF1dGhvcnNoaXAuIEZvciB0aGUgcHVycG9zZXMgb2YgdGhpcyBMaWNlbnNlLCBEZXJpdmF0aXZlIFdvcmtzIHNoYWxsIG5vdCBpbmNsdWRlIHdvcmtzIHRoYXQgcmVtYWluIHNlcGFyYWJsZSBmcm9tLCBvciBtZXJlbHkgbGluayAob3IgYmluZCBieSBuYW1lKSB0byB0aGUgaW50ZXJmYWNlcyBvZiwgdGhlIFdvcmsgYW5kIERlcml2YXRpdmUgV29ya3MgdGhlcmVvZi4KCiJDb250cmlidXRpb24iIHNoYWxsIG1lYW4gYW55IHdvcmsgb2YgYXV0aG9yc2hpcCwgaW5jbHVkaW5nIHRoZSBvcmlnaW5hbCB2ZXJzaW9uIG9mIHRoZSBXb3JrIGFuZCBhbnkgbW9kaWZpY2F0aW9ucyBvciBhZGRpdGlvbnMgdG8gdGhhdCBXb3JrIG9yIERlcml2YXRpdmUgV29ya3MgdGhlcmVvZiwgdGhhdCBpcyBpbnRlbnRpb25hbGx5IHN1Ym1pdHRlZCB0byBMaWNlbnNvciBmb3IgaW5jbHVzaW9uIGluIHRoZSBXb3JrIGJ5IHRoZSBjb3B5cmlnaHQgb3duZXIgb3IgYnkgYW4gaW5kaXZpZHVhbCBvciBMZWdhbCBFbnRpdHkgYXV0aG9yaXplZCB0byBzdWJtaXQgb24gYmVoYWxmIG9mIHRoZSBjb3B5cmlnaHQgb3duZXIuIEZvciB0aGUgcHVycG9zZXMgb2YgdGhpcyBkZWZpbml0aW9uLCAic3VibWl0dGVkIiBtZWFucyBhbnkgZm9ybSBvZiBlbGVjdHJvbmljLCB2ZXJiYWwsIG9yIHdyaXR0ZW4gY29tbXVuaWNhdGlvbiBzZW50IHRvIHRoZSBMaWNlbnNvciBvciBpdHMgcmVwcmVzZW50YXRpdmVzLCBpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVkIHRvIGNvbW11bmljYXRpb24gb24gZWxlY3Ryb25pYyBtYWlsaW5nIGxpc3RzLCBzb3VyY2UgY29kZSBjb250cm9sIHN5c3RlbXMsIGFuZCBpc3N1ZSB0cmFja2luZyBzeXN0ZW1zIHRoYXQgYXJlIG1hbmFnZWQgYnksIG9yIG9uIGJlaGFsZiBvZiwgdGhlIExpY2Vuc29yIGZvciB0aGUgcHVycG9zZSBvZiBkaXNjdXNzaW5nIGFuZCBpbXByb3ZpbmcgdGhlIFdvcmssIGJ1dCBleGNsdWRpbmcgY29tbXVuaWNhdGlvbiB0aGF0IGlzIGNvbnNwaWN1b3VzbHkgbWFya2VkIG9yIG90aGVyd2lzZSBkZXNpZ25hdGVkIGluIHdyaXRpbmcgYnkgdGhlIGNvcHlyaWdodCBvd25lciBhcyAiTm90IGEgQ29udHJpYnV0aW9uLiIKCiJDb250cmlidXRvciIgc2hhbGwgbWVhbiBMaWNlbnNvciBhbmQgYW55IGluZGl2aWR1YWwgb3IgTGVnYWwgRW50aXR5IG9uIGJlaGFsZiBvZiB3aG9tIGEgQ29udHJpYnV0aW9uIGhhcyBiZWVuIHJlY2VpdmVkIGJ5IExpY2Vuc29yIGFuZCBzdWJzZXF1ZW50bHkgaW5jb3Jwb3JhdGVkIHdpdGhpbiB0aGUgV29yay4KCjIuIEdyYW50IG9mIENvcHlyaWdodCBMaWNlbnNlLiBTdWJqZWN0IHRvIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZiB0aGlzIExpY2Vuc2UsIGVhY2ggQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBwZXJwZXR1YWwsIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8tY2hhcmdlLCByb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlIGNvcHlyaWdodCBsaWNlbnNlIHRvIHJlcHJvZHVjZSwgcHJlcGFyZSBEZXJpdmF0aXZlIFdvcmtzIG9mLCBwdWJsaWNseSBkaXNwbGF5LCBwdWJsaWNseSBwZXJmb3JtLCBzdWJsaWNlbnNlLCBhbmQgZGlzdHJpYnV0ZSB0aGUgV29yayBhbmQgc3VjaCBEZXJpdmF0aXZlIFdvcmtzIGluIFNvdXJjZSBvciBPYmplY3QgZm9ybS4KCjMuIEdyYW50IG9mIFBhdGVudCBMaWNlbnNlLiBTdWJqZWN0IHRvIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZiB0aGlzIExpY2Vuc2UsIGVhY2ggQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBwZXJwZXR1YWwsIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8tY2hhcmdlLCByb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlIChleGNlcHQgYXMgc3RhdGVkIGluIHRoaXMgc2VjdGlvbikgcGF0ZW50IGxpY2Vuc2UgdG8gbWFrZSwgaGF2ZSBtYWRlLCB1c2UsIG9mZmVyIHRvIHNlbGwsIHNlbGwsIGltcG9ydCwgYW5kIG90aGVyd2lzZSB0cmFuc2ZlciB0aGUgV29yaywgd2hlcmUgc3VjaCBsaWNlbnNlIGFwcGxpZXMgb25seSB0byB0aG9zZSBwYXRlbnQgY2xhaW1zIGxpY2Vuc2FibGUgYnkgc3VjaCBDb250cmlidXRvciB0aGF0IGFyZSBuZWNlc3NhcmlseSBpbmZyaW5nZWQgYnkgdGhlaXIgQ29udHJpYnV0aW9uKHMpIGFsb25lIG9yIGJ5IGNvbWJpbmF0aW9uIG9mIHRoZWlyIENvbnRyaWJ1dGlvbihzKSB3aXRoIHRoZSBXb3JrIHRvIHdoaWNoIHN1Y2ggQ29udHJpYnV0aW9uKHMpIHdhcyBzdWJtaXR0ZWQuIElmIFlvdSBpbnN0aXR1dGUgcGF0ZW50IGxpdGlnYXRpb24gYWdhaW5zdCBhbnkgZW50aXR5IChpbmNsdWRpbmcgYSBjcm9zcy1jbGFpbSBvciBjb3VudGVyY2xhaW0gaW4gYSBsYXdzdWl0KSBhbGxlZ2luZyB0aGF0IHRoZSBXb3JrIG9yIGEgQ29udHJpYnV0aW9uIGluY29ycG9yYXRlZCB3aXRoaW4gdGhlIFdvcmsgY29uc3RpdHV0ZXMgZGlyZWN0IG9yIGNvbnRyaWJ1dG9yeSBwYXRlbnQgaW5mcmluZ2VtZW50LCB0aGVuIGFueSBwYXRlbnQgbGljZW5zZXMgZ3JhbnRlZCB0byBZb3UgdW5kZXIgdGhpcyBMaWNlbnNlIGZvciB0aGF0IFdvcmsgc2hhbGwgdGVybWluYXRlIGFzIG9mIHRoZSBkYXRlIHN1Y2ggbGl0aWdhdGlvbiBpcyBmaWxlZC4KCjQuIFJlZGlzdHJpYnV0aW9uLiBZb3UgbWF5IHJlcHJvZHVjZSBhbmQgZGlzdHJpYnV0ZSBjb3BpZXMgb2YgdGhlIFdvcmsgb3IgRGVyaXZhdGl2ZSBXb3JrcyB0aGVyZW9mIGluIGFueSBtZWRpdW0sIHdpdGggb3Igd2l0aG91dCBtb2RpZmljYXRpb25zLCBhbmQgaW4gU291cmNlIG9yIE9iamVjdCBmb3JtLCBwcm92aWRlZCB0aGF0IFlvdSBtZWV0IHRoZSBmb2xsb3dpbmcgY29uZGl0aW9uczoKCiAgICAgKGEpIFlvdSBtdXN0IGdpdmUgYW55IG90aGVyIHJlY2lwaWVudHMgb2YgdGhlIFdvcmsgb3IgRGVyaXZhdGl2ZSBXb3JrcyBhIGNvcHkgb2YgdGhpcyBMaWNlbnNlOyBhbmQKCiAgICAgKGIpIFlvdSBtdXN0IGNhdXNlIGFueSBtb2RpZmllZCBmaWxlcyB0byBjYXJyeSBwcm9taW5lbnQgbm90aWNlcyBzdGF0aW5nIHRoYXQgWW91IGNoYW5nZWQgdGhlIGZpbGVzOyBhbmQKCiAgICAgKGMpIFlvdSBtdXN0IHJldGFpbiwgaW4gdGhlIFNvdXJjZSBmb3JtIG9mIGFueSBEZXJpdmF0aXZlIFdvcmtzIHRoYXQgWW91IGRpc3RyaWJ1dGUsIGFsbCBjb3B5cmlnaHQsIHBhdGVudCwgdHJhZGVtYXJrLCBhbmQgYXR0cmlidXRpb24gbm90aWNlcyBmcm9tIHRoZSBTb3VyY2UgZm9ybSBvZiB0aGUgV29yaywgZXhjbHVkaW5nIHRob3NlIG5vdGljZXMgdGhhdCBkbyBub3QgcGVydGFpbiB0byBhbnkgcGFydCBvZiB0aGUgRGVyaXZhdGl2ZSBXb3JrczsgYW5kCgogICAgIChkKSBJZiB0aGUgV29yayBpbmNsdWRlcyBhICJOT1RJQ0UiIHRleHQgZmlsZSBhcyBwYXJ0IG9mIGl0cyBkaXN0cmlidXRpb24sIHRoZW4gYW55IERlcml2YXRpdmUgV29ya3MgdGhhdCBZb3UgZGlzdHJpYnV0ZSBtdXN0IGluY2x1ZGUgYSByZWFkYWJsZSBjb3B5IG9mIHRoZSBhdHRyaWJ1dGlvbiBub3RpY2VzIGNvbnRhaW5lZCB3aXRoaW4gc3VjaCBOT1RJQ0UgZmlsZSwgZXhjbHVkaW5nIHRob3NlIG5vdGljZXMgdGhhdCBkbyBub3QgcGVydGFpbiB0byBhbnkgcGFydCBvZiB0aGUgRGVyaXZhdGl2ZSBXb3JrcywgaW4gYXQgbGVhc3Qgb25lIG9mIHRoZSBmb2xsb3dpbmcgcGxhY2VzOiB3aXRoaW4gYSBOT1RJQ0UgdGV4dCBmaWxlIGRpc3RyaWJ1dGVkIGFzIHBhcnQgb2YgdGhlIERlcml2YXRpdmUgV29ya3M7IHdpdGhpbiB0aGUgU291cmNlIGZvcm0gb3IgZG9jdW1lbnRhdGlvbiwgaWYgcHJvdmlkZWQgYWxvbmcgd2l0aCB0aGUgRGVyaXZhdGl2ZSBXb3Jrczsgb3IsIHdpdGhpbiBhIGRpc3BsYXkgZ2VuZXJhdGVkIGJ5IHRoZSBEZXJpdmF0aXZlIFdvcmtzLCBpZiBhbmQgd2hlcmV2ZXIgc3VjaCB0aGlyZC1wYXJ0eSBub3RpY2VzIG5vcm1hbGx5IGFwcGVhci4gVGhlIGNvbnRlbnRzIG9mIHRoZSBOT1RJQ0UgZmlsZSBhcmUgZm9yIGluZm9ybWF0aW9uYWwgcHVycG9zZXMgb25seSBhbmQgZG8gbm90IG1vZGlmeSB0aGUgTGljZW5zZS4gWW91IG1heSBhZGQgWW91ciBvd24gYXR0cmlidXRpb24gbm90aWNlcyB3aXRoaW4gRGVyaXZhdGl2ZSBXb3JrcyB0aGF0IFlvdSBkaXN0cmlidXRlLCBhbG9uZ3NpZGUgb3IgYXMgYW4gYWRkZW5kdW0gdG8gdGhlIE5PVElDRSB0ZXh0IGZyb20gdGhlIFdvcmssIHByb3ZpZGVkIHRoYXQgc3VjaCBhZGRpdGlvbmFsIGF0dHJpYnV0aW9uIG5vdGljZXMgY2Fubm90IGJlIGNvbnN0cnVlZCBhcyBtb2RpZnlpbmcgdGhlIExpY2Vuc2UuCgogICAgIFlvdSBtYXkgYWRkIFlvdXIgb3duIGNvcHlyaWdodCBzdGF0ZW1lbnQgdG8gWW91ciBtb2RpZmljYXRpb25zIGFuZCBtYXkgcHJvdmlkZSBhZGRpdGlvbmFsIG9yIGRpZmZlcmVudCBsaWNlbnNlIHRlcm1zIGFuZCBjb25kaXRpb25zIGZvciB1c2UsIHJlcHJvZHVjdGlvbiwgb3IgZGlzdHJpYnV0aW9uIG9mIFlvdXIgbW9kaWZpY2F0aW9ucywgb3IgZm9yIGFueSBzdWNoIERlcml2YXRpdmUgV29ya3MgYXMgYSB3aG9sZSwgcHJvdmlkZWQgWW91ciB1c2UsIHJlcHJvZHVjdGlvbiwgYW5kIGRpc3RyaWJ1dGlvbiBvZiB0aGUgV29yayBvdGhlcndpc2UgY29tcGxpZXMgd2l0aCB0aGUgY29uZGl0aW9ucyBzdGF0ZWQgaW4gdGhpcyBMaWNlbnNlLgoKNS4gU3VibWlzc2lvbiBvZiBDb250cmlidXRpb25zLiBVbmxlc3MgWW91IGV4cGxpY2l0bHkgc3RhdGUgb3RoZXJ3aXNlLCBhbnkgQ29udHJpYnV0aW9uIGludGVudGlvbmFsbHkgc3VibWl0dGVkIGZvciBpbmNsdXNpb24gaW4gdGhlIFdvcmsgYnkgWW91IHRvIHRoZSBMaWNlbnNvciBzaGFsbCBiZSB1bmRlciB0aGUgdGVybXMgYW5kIGNvbmRpdGlvbnMgb2YgdGhpcyBMaWNlbnNlLCB3aXRob3V0IGFueSBhZGRpdGlvbmFsIHRlcm1zIG9yIGNvbmRpdGlvbnMuIE5vdHdpdGhzdGFuZGluZyB0aGUgYWJvdmUsIG5vdGhpbmcgaGVyZWluIHNoYWxsIHN1cGVyc2VkZSBvciBtb2RpZnkgdGhlIHRlcm1zIG9mIGFueSBzZXBhcmF0ZSBsaWNlbnNlIGFncmVlbWVudCB5b3UgbWF5IGhhdmUgZXhlY3V0ZWQgd2l0aCBMaWNlbnNvciByZWdhcmRpbmcgc3VjaCBDb250cmlidXRpb25zLgoKNi4gVHJhZGVtYXJrcy4gVGhpcyBMaWNlbnNlIGRvZXMgbm90IGdyYW50IHBlcm1pc3Npb24gdG8gdXNlIHRoZSB0cmFkZSBuYW1lcywgdHJhZGVtYXJrcywgc2VydmljZSBtYXJrcywgb3IgcHJvZHVjdCBuYW1lcyBvZiB0aGUgTGljZW5zb3IsIGV4Y2VwdCBhcyByZXF1aXJlZCBmb3IgcmVhc29uYWJsZSBhbmQgY3VzdG9tYXJ5IHVzZSBpbiBkZXNjcmliaW5nIHRoZSBvcmlnaW4gb2YgdGhlIFdvcmsgYW5kIHJlcHJvZHVjaW5nIHRoZSBjb250ZW50IG9mIHRoZSBOT1RJQ0UgZmlsZS4KCjcuIERpc2NsYWltZXIgb2YgV2FycmFudHkuIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgTGljZW5zb3IgcHJvdmlkZXMgdGhlIFdvcmsgKGFuZCBlYWNoIENvbnRyaWJ1dG9yIHByb3ZpZGVzIGl0cyBDb250cmlidXRpb25zKSBvbiBhbiAiQVMgSVMiIEJBU0lTLCBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZCwgaW5jbHVkaW5nLCB3aXRob3V0IGxpbWl0YXRpb24sIGFueSB3YXJyYW50aWVzIG9yIGNvbmRpdGlvbnMgb2YgVElUTEUsIE5PTi1JTkZSSU5HRU1FTlQsIE1FUkNIQU5UQUJJTElUWSwgb3IgRklUTkVTUyBGT1IgQSBQQVJUSUNVTEFSIFBVUlBPU0UuIFlvdSBhcmUgc29sZWx5IHJlc3BvbnNpYmxlIGZvciBkZXRlcm1pbmluZyB0aGUgYXBwcm9wcmlhdGVuZXNzIG9mIHVzaW5nIG9yIHJlZGlzdHJpYnV0aW5nIHRoZSBXb3JrIGFuZCBhc3N1bWUgYW55IHJpc2tzIGFzc29jaWF0ZWQgd2l0aCBZb3VyIGV4ZXJjaXNlIG9mIHBlcm1pc3Npb25zIHVuZGVyIHRoaXMgTGljZW5zZS4KCjguIExpbWl0YXRpb24gb2YgTGlhYmlsaXR5LiBJbiBubyBldmVudCBhbmQgdW5kZXIgbm8gbGVnYWwgdGhlb3J5LCB3aGV0aGVyIGluIHRvcnQgKGluY2x1ZGluZyBuZWdsaWdlbmNlKSwgY29udHJhY3QsIG9yIG90aGVyd2lzZSwgdW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IChzdWNoIGFzIGRlbGliZXJhdGUgYW5kIGdyb3NzbHkgbmVnbGlnZW50IGFjdHMpIG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzaGFsbCBhbnkgQ29udHJpYnV0b3IgYmUgbGlhYmxlIHRvIFlvdSBmb3IgZGFtYWdlcywgaW5jbHVkaW5nIGFueSBkaXJlY3QsIGluZGlyZWN0LCBzcGVjaWFsLCBpbmNpZGVudGFsLCBvciBjb25zZXF1ZW50aWFsIGRhbWFnZXMgb2YgYW55IGNoYXJhY3RlciBhcmlzaW5nIGFzIGEgcmVzdWx0IG9mIHRoaXMgTGljZW5zZSBvciBvdXQgb2YgdGhlIHVzZSBvciBpbmFiaWxpdHkgdG8gdXNlIHRoZSBXb3JrIChpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVkIHRvIGRhbWFnZXMgZm9yIGxvc3Mgb2YgZ29vZHdpbGwsIHdvcmsgc3RvcHBhZ2UsIGNvbXB1dGVyIGZhaWx1cmUgb3IgbWFsZnVuY3Rpb24sIG9yIGFueSBhbmQgYWxsIG90aGVyIGNvbW1lcmNpYWwgZGFtYWdlcyBvciBsb3NzZXMpLCBldmVuIGlmIHN1Y2ggQ29udHJpYnV0b3IgaGFzIGJlZW4gYWR2aXNlZCBvZiB0aGUgcG9zc2liaWxpdHkgb2Ygc3VjaCBkYW1hZ2VzLgoKOS4gQWNjZXB0aW5nIFdhcnJhbnR5IG9yIEFkZGl0aW9uYWwgTGlhYmlsaXR5LiBXaGlsZSByZWRpc3RyaWJ1dGluZyB0aGUgV29yayBvciBEZXJpdmF0aXZlIFdvcmtzIHRoZXJlb2YsIFlvdSBtYXkgY2hvb3NlIHRvIG9mZmVyLCBhbmQgY2hhcmdlIGEgZmVlIGZvciwgYWNjZXB0YW5jZSBvZiBzdXBwb3J0LCB3YXJyYW50eSwgaW5kZW1uaXR5LCBvciBvdGhlciBsaWFiaWxpdHkgb2JsaWdhdGlvbnMgYW5kL29yIHJpZ2h0cyBjb25zaXN0ZW50IHdpdGggdGhpcyBMaWNlbnNlLiBIb3dldmVyLCBpbiBhY2NlcHRpbmcgc3VjaCBvYmxpZ2F0aW9ucywgWW91IG1heSBhY3Qgb25seSBvbiBZb3VyIG93biBiZWhhbGYgYW5kIG9uIFlvdXIgc29sZSByZXNwb25zaWJpbGl0eSwgbm90IG9uIGJlaGFsZiBvZiBhbnkgb3RoZXIgQ29udHJpYnV0b3IsIGFuZCBvbmx5IGlmIFlvdSBhZ3JlZSB0byBpbmRlbW5pZnksIGRlZmVuZCwgYW5kIGhvbGQgZWFjaCBDb250cmlidXRvciBoYXJtbGVzcyBmb3IgYW55IGxpYWJpbGl0eSBpbmN1cnJlZCBieSwgb3IgY2xhaW1zIGFzc2VydGVkIGFnYWluc3QsIHN1Y2ggQ29udHJpYnV0b3IgYnkgcmVhc29uIG9mIHlvdXIgYWNjZXB0aW5nIGFueSBzdWNoIHdhcnJhbnR5IG9yIGFkZGl0aW9uYWwgbGlhYmlsaXR5LgoKRU5EIE9GIFRFUk1TIEFORCBDT05ESVRJT05TCgpBUFBFTkRJWDogSG93IHRvIGFwcGx5IHRoZSBBcGFjaGUgTGljZW5zZSB0byB5b3VyIHdvcmsuCgpUbyBhcHBseSB0aGUgQXBhY2hlIExpY2Vuc2UgdG8geW91ciB3b3JrLCBhdHRhY2ggdGhlIGZvbGxvd2luZyBib2lsZXJwbGF0ZSBub3RpY2UsIHdpdGggdGhlIGZpZWxkcyBlbmNsb3NlZCBieSBicmFja2V0cyAiW10iIHJlcGxhY2VkIHdpdGggeW91ciBvd24gaWRlbnRpZnlpbmcgaW5mb3JtYXRpb24uIChEb24ndCBpbmNsdWRlIHRoZSBicmFja2V0cyEpICBUaGUgdGV4dCBzaG91bGQgYmUgZW5jbG9zZWQgaW4gdGhlIGFwcHJvcHJpYXRlIGNvbW1lbnQgc3ludGF4IGZvciB0aGUgZmlsZSBmb3JtYXQuIFdlIGFsc28gcmVjb21tZW5kIHRoYXQgYSBmaWxlIG9yIGNsYXNzIG5hbWUgYW5kIGRlc2NyaXB0aW9uIG9mIHB1cnBvc2UgYmUgaW5jbHVkZWQgb24gdGhlIHNhbWUgInByaW50ZWQgcGFnZSIgYXMgdGhlIGNvcHlyaWdodCBub3RpY2UgZm9yIGVhc2llciBpZGVudGlmaWNhdGlvbiB3aXRoaW4gdGhpcmQtcGFydHkgYXJjaGl2ZXMuCgpDb3B5cmlnaHQgW3l5eXldIFtuYW1lIG9mIGNvcHlyaWdodCBvd25lcl0KCkxpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSAiTGljZW5zZSIpOwp5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCllvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdAoKaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCgpVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlCmRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCldJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLgpTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kCmxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgo="
+            }
+          }
+        }
+      ],
+      "purl" : "pkg:maven/dev.langchain4j/langchain4j-reactive-streaming@1.22.0-beta32?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://github.com/langchain4j/langchain4j/tree/main/langchain4j-reactive-streaming"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/langchain4j/langchain4j/tree/main/langchain4j-reactive-streaming"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/dev.langchain4j/langchain4j-http-client@1.22.0?type=jar",
+      "group" : "dev.langchain4j",
+      "name" : "langchain4j-http-client",
+      "version" : "1.22.0",
+      "description" : "LangChain4j :: HTTP Client",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "6c61fe3a2cc18c45f48e95c86d7f855f"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "7f55ed7bcc6aa8a3a272976cf7288a40ef7713c9"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "504d97eb523c0f891465850b46d73ebfc3a208ab1ba3a685a15a2dcd723928f9"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "755e84f26c6595292ead023bd1d400e0ff565f1cb5fbd7c922f6c407fef671819aa1034b165432c76ed082f4d39abd735575489a080b74b90d0ab3027d6ebb0e"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "28963bfd4893a12257152bda9c95d0444fe417f1f17ad887c394b21376f0c6f64e5d368ecd52393a8e04c31a7cd9a4e5"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "d3e475bfbb5e6a860f4be2a89f0d469b3a535be582034c9425c059ea23b2e0a3a3014d239184d9c925cf1fefc78ef292"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "db75d8a5b508cd79b30ea9a2804eaf7081f6a3035a069bdca8db782624411108"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "c3637a0e2f58360fb7ce1cb9524d395a923228b8300ffa206adae48785672ecb002944cf46aed20fcaaa752d5d7b0f6cc1b606a8bfc623d347b349d72169609c"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0",
+            "text" : {
+              "contentType" : "plain/text",
+              "encoding" : "base64",
+              "content" : "QXBhY2hlIExpY2Vuc2UKVmVyc2lvbiAyLjAsIEphbnVhcnkgMjAwNApodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvCgpURVJNUyBBTkQgQ09ORElUSU9OUyBGT1IgVVNFLCBSRVBST0RVQ1RJT04sIEFORCBESVNUUklCVVRJT04KCjEuIERlZmluaXRpb25zLgoKIkxpY2Vuc2UiIHNoYWxsIG1lYW4gdGhlIHRlcm1zIGFuZCBjb25kaXRpb25zIGZvciB1c2UsIHJlcHJvZHVjdGlvbiwgYW5kIGRpc3RyaWJ1dGlvbiBhcyBkZWZpbmVkIGJ5IFNlY3Rpb25zIDEgdGhyb3VnaCA5IG9mIHRoaXMgZG9jdW1lbnQuCgoiTGljZW5zb3IiIHNoYWxsIG1lYW4gdGhlIGNvcHlyaWdodCBvd25lciBvciBlbnRpdHkgYXV0aG9yaXplZCBieSB0aGUgY29weXJpZ2h0IG93bmVyIHRoYXQgaXMgZ3JhbnRpbmcgdGhlIExpY2Vuc2UuCgoiTGVnYWwgRW50aXR5IiBzaGFsbCBtZWFuIHRoZSB1bmlvbiBvZiB0aGUgYWN0aW5nIGVudGl0eSBhbmQgYWxsIG90aGVyIGVudGl0aWVzIHRoYXQgY29udHJvbCwgYXJlIGNvbnRyb2xsZWQgYnksIG9yIGFyZSB1bmRlciBjb21tb24gY29udHJvbCB3aXRoIHRoYXQgZW50aXR5LiBGb3IgdGhlIHB1cnBvc2VzIG9mIHRoaXMgZGVmaW5pdGlvbiwgImNvbnRyb2wiIG1lYW5zIChpKSB0aGUgcG93ZXIsIGRpcmVjdCBvciBpbmRpcmVjdCwgdG8gY2F1c2UgdGhlIGRpcmVjdGlvbiBvciBtYW5hZ2VtZW50IG9mIHN1Y2ggZW50aXR5LCB3aGV0aGVyIGJ5IGNvbnRyYWN0IG9yIG90aGVyd2lzZSwgb3IgKGlpKSBvd25lcnNoaXAgb2YgZmlmdHkgcGVyY2VudCAoNTAlKSBvciBtb3JlIG9mIHRoZSBvdXRzdGFuZGluZyBzaGFyZXMsIG9yIChpaWkpIGJlbmVmaWNpYWwgb3duZXJzaGlwIG9mIHN1Y2ggZW50aXR5LgoKIllvdSIgKG9yICJZb3VyIikgc2hhbGwgbWVhbiBhbiBpbmRpdmlkdWFsIG9yIExlZ2FsIEVudGl0eSBleGVyY2lzaW5nIHBlcm1pc3Npb25zIGdyYW50ZWQgYnkgdGhpcyBMaWNlbnNlLgoKIlNvdXJjZSIgZm9ybSBzaGFsbCBtZWFuIHRoZSBwcmVmZXJyZWQgZm9ybSBmb3IgbWFraW5nIG1vZGlmaWNhdGlvbnMsIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gc29mdHdhcmUgc291cmNlIGNvZGUsIGRvY3VtZW50YXRpb24gc291cmNlLCBhbmQgY29uZmlndXJhdGlvbiBmaWxlcy4KCiJPYmplY3QiIGZvcm0gc2hhbGwgbWVhbiBhbnkgZm9ybSByZXN1bHRpbmcgZnJvbSBtZWNoYW5pY2FsIHRyYW5zZm9ybWF0aW9uIG9yIHRyYW5zbGF0aW9uIG9mIGEgU291cmNlIGZvcm0sIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gY29tcGlsZWQgb2JqZWN0IGNvZGUsIGdlbmVyYXRlZCBkb2N1bWVudGF0aW9uLCBhbmQgY29udmVyc2lvbnMgdG8gb3RoZXIgbWVkaWEgdHlwZXMuCgoiV29yayIgc2hhbGwgbWVhbiB0aGUgd29yayBvZiBhdXRob3JzaGlwLCB3aGV0aGVyIGluIFNvdXJjZSBvciBPYmplY3QgZm9ybSwgbWFkZSBhdmFpbGFibGUgdW5kZXIgdGhlIExpY2Vuc2UsIGFzIGluZGljYXRlZCBieSBhIGNvcHlyaWdodCBub3RpY2UgdGhhdCBpcyBpbmNsdWRlZCBpbiBvciBhdHRhY2hlZCB0byB0aGUgd29yayAoYW4gZXhhbXBsZSBpcyBwcm92aWRlZCBpbiB0aGUgQXBwZW5kaXggYmVsb3cpLgoKIkRlcml2YXRpdmUgV29ya3MiIHNoYWxsIG1lYW4gYW55IHdvcmssIHdoZXRoZXIgaW4gU291cmNlIG9yIE9iamVjdCBmb3JtLCB0aGF0IGlzIGJhc2VkIG9uIChvciBkZXJpdmVkIGZyb20pIHRoZSBXb3JrIGFuZCBmb3Igd2hpY2ggdGhlIGVkaXRvcmlhbCByZXZpc2lvbnMsIGFubm90YXRpb25zLCBlbGFib3JhdGlvbnMsIG9yIG90aGVyIG1vZGlmaWNhdGlvbnMgcmVwcmVzZW50LCBhcyBhIHdob2xlLCBhbiBvcmlnaW5hbCB3b3JrIG9mIGF1dGhvcnNoaXAuIEZvciB0aGUgcHVycG9zZXMgb2YgdGhpcyBMaWNlbnNlLCBEZXJpdmF0aXZlIFdvcmtzIHNoYWxsIG5vdCBpbmNsdWRlIHdvcmtzIHRoYXQgcmVtYWluIHNlcGFyYWJsZSBmcm9tLCBvciBtZXJlbHkgbGluayAob3IgYmluZCBieSBuYW1lKSB0byB0aGUgaW50ZXJmYWNlcyBvZiwgdGhlIFdvcmsgYW5kIERlcml2YXRpdmUgV29ya3MgdGhlcmVvZi4KCiJDb250cmlidXRpb24iIHNoYWxsIG1lYW4gYW55IHdvcmsgb2YgYXV0aG9yc2hpcCwgaW5jbHVkaW5nIHRoZSBvcmlnaW5hbCB2ZXJzaW9uIG9mIHRoZSBXb3JrIGFuZCBhbnkgbW9kaWZpY2F0aW9ucyBvciBhZGRpdGlvbnMgdG8gdGhhdCBXb3JrIG9yIERlcml2YXRpdmUgV29ya3MgdGhlcmVvZiwgdGhhdCBpcyBpbnRlbnRpb25hbGx5IHN1Ym1pdHRlZCB0byBMaWNlbnNvciBmb3IgaW5jbHVzaW9uIGluIHRoZSBXb3JrIGJ5IHRoZSBjb3B5cmlnaHQgb3duZXIgb3IgYnkgYW4gaW5kaXZpZHVhbCBvciBMZWdhbCBFbnRpdHkgYXV0aG9yaXplZCB0byBzdWJtaXQgb24gYmVoYWxmIG9mIHRoZSBjb3B5cmlnaHQgb3duZXIuIEZvciB0aGUgcHVycG9zZXMgb2YgdGhpcyBkZWZpbml0aW9uLCAic3VibWl0dGVkIiBtZWFucyBhbnkgZm9ybSBvZiBlbGVjdHJvbmljLCB2ZXJiYWwsIG9yIHdyaXR0ZW4gY29tbXVuaWNhdGlvbiBzZW50IHRvIHRoZSBMaWNlbnNvciBvciBpdHMgcmVwcmVzZW50YXRpdmVzLCBpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVkIHRvIGNvbW11bmljYXRpb24gb24gZWxlY3Ryb25pYyBtYWlsaW5nIGxpc3RzLCBzb3VyY2UgY29kZSBjb250cm9sIHN5c3RlbXMsIGFuZCBpc3N1ZSB0cmFja2luZyBzeXN0ZW1zIHRoYXQgYXJlIG1hbmFnZWQgYnksIG9yIG9uIGJlaGFsZiBvZiwgdGhlIExpY2Vuc29yIGZvciB0aGUgcHVycG9zZSBvZiBkaXNjdXNzaW5nIGFuZCBpbXByb3ZpbmcgdGhlIFdvcmssIGJ1dCBleGNsdWRpbmcgY29tbXVuaWNhdGlvbiB0aGF0IGlzIGNvbnNwaWN1b3VzbHkgbWFya2VkIG9yIG90aGVyd2lzZSBkZXNpZ25hdGVkIGluIHdyaXRpbmcgYnkgdGhlIGNvcHlyaWdodCBvd25lciBhcyAiTm90IGEgQ29udHJpYnV0aW9uLiIKCiJDb250cmlidXRvciIgc2hhbGwgbWVhbiBMaWNlbnNvciBhbmQgYW55IGluZGl2aWR1YWwgb3IgTGVnYWwgRW50aXR5IG9uIGJlaGFsZiBvZiB3aG9tIGEgQ29udHJpYnV0aW9uIGhhcyBiZWVuIHJlY2VpdmVkIGJ5IExpY2Vuc29yIGFuZCBzdWJzZXF1ZW50bHkgaW5jb3Jwb3JhdGVkIHdpdGhpbiB0aGUgV29yay4KCjIuIEdyYW50IG9mIENvcHlyaWdodCBMaWNlbnNlLiBTdWJqZWN0IHRvIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZiB0aGlzIExpY2Vuc2UsIGVhY2ggQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBwZXJwZXR1YWwsIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8tY2hhcmdlLCByb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlIGNvcHlyaWdodCBsaWNlbnNlIHRvIHJlcHJvZHVjZSwgcHJlcGFyZSBEZXJpdmF0aXZlIFdvcmtzIG9mLCBwdWJsaWNseSBkaXNwbGF5LCBwdWJsaWNseSBwZXJmb3JtLCBzdWJsaWNlbnNlLCBhbmQgZGlzdHJpYnV0ZSB0aGUgV29yayBhbmQgc3VjaCBEZXJpdmF0aXZlIFdvcmtzIGluIFNvdXJjZSBvciBPYmplY3QgZm9ybS4KCjMuIEdyYW50IG9mIFBhdGVudCBMaWNlbnNlLiBTdWJqZWN0IHRvIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZiB0aGlzIExpY2Vuc2UsIGVhY2ggQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBwZXJwZXR1YWwsIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8tY2hhcmdlLCByb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlIChleGNlcHQgYXMgc3RhdGVkIGluIHRoaXMgc2VjdGlvbikgcGF0ZW50IGxpY2Vuc2UgdG8gbWFrZSwgaGF2ZSBtYWRlLCB1c2UsIG9mZmVyIHRvIHNlbGwsIHNlbGwsIGltcG9ydCwgYW5kIG90aGVyd2lzZSB0cmFuc2ZlciB0aGUgV29yaywgd2hlcmUgc3VjaCBsaWNlbnNlIGFwcGxpZXMgb25seSB0byB0aG9zZSBwYXRlbnQgY2xhaW1zIGxpY2Vuc2FibGUgYnkgc3VjaCBDb250cmlidXRvciB0aGF0IGFyZSBuZWNlc3NhcmlseSBpbmZyaW5nZWQgYnkgdGhlaXIgQ29udHJpYnV0aW9uKHMpIGFsb25lIG9yIGJ5IGNvbWJpbmF0aW9uIG9mIHRoZWlyIENvbnRyaWJ1dGlvbihzKSB3aXRoIHRoZSBXb3JrIHRvIHdoaWNoIHN1Y2ggQ29udHJpYnV0aW9uKHMpIHdhcyBzdWJtaXR0ZWQuIElmIFlvdSBpbnN0aXR1dGUgcGF0ZW50IGxpdGlnYXRpb24gYWdhaW5zdCBhbnkgZW50aXR5IChpbmNsdWRpbmcgYSBjcm9zcy1jbGFpbSBvciBjb3VudGVyY2xhaW0gaW4gYSBsYXdzdWl0KSBhbGxlZ2luZyB0aGF0IHRoZSBXb3JrIG9yIGEgQ29udHJpYnV0aW9uIGluY29ycG9yYXRlZCB3aXRoaW4gdGhlIFdvcmsgY29uc3RpdHV0ZXMgZGlyZWN0IG9yIGNvbnRyaWJ1dG9yeSBwYXRlbnQgaW5mcmluZ2VtZW50LCB0aGVuIGFueSBwYXRlbnQgbGljZW5zZXMgZ3JhbnRlZCB0byBZb3UgdW5kZXIgdGhpcyBMaWNlbnNlIGZvciB0aGF0IFdvcmsgc2hhbGwgdGVybWluYXRlIGFzIG9mIHRoZSBkYXRlIHN1Y2ggbGl0aWdhdGlvbiBpcyBmaWxlZC4KCjQuIFJlZGlzdHJpYnV0aW9uLiBZb3UgbWF5IHJlcHJvZHVjZSBhbmQgZGlzdHJpYnV0ZSBjb3BpZXMgb2YgdGhlIFdvcmsgb3IgRGVyaXZhdGl2ZSBXb3JrcyB0aGVyZW9mIGluIGFueSBtZWRpdW0sIHdpdGggb3Igd2l0aG91dCBtb2RpZmljYXRpb25zLCBhbmQgaW4gU291cmNlIG9yIE9iamVjdCBmb3JtLCBwcm92aWRlZCB0aGF0IFlvdSBtZWV0IHRoZSBmb2xsb3dpbmcgY29uZGl0aW9uczoKCiAgICAgKGEpIFlvdSBtdXN0IGdpdmUgYW55IG90aGVyIHJlY2lwaWVudHMgb2YgdGhlIFdvcmsgb3IgRGVyaXZhdGl2ZSBXb3JrcyBhIGNvcHkgb2YgdGhpcyBMaWNlbnNlOyBhbmQKCiAgICAgKGIpIFlvdSBtdXN0IGNhdXNlIGFueSBtb2RpZmllZCBmaWxlcyB0byBjYXJyeSBwcm9taW5lbnQgbm90aWNlcyBzdGF0aW5nIHRoYXQgWW91IGNoYW5nZWQgdGhlIGZpbGVzOyBhbmQKCiAgICAgKGMpIFlvdSBtdXN0IHJldGFpbiwgaW4gdGhlIFNvdXJjZSBmb3JtIG9mIGFueSBEZXJpdmF0aXZlIFdvcmtzIHRoYXQgWW91IGRpc3RyaWJ1dGUsIGFsbCBjb3B5cmlnaHQsIHBhdGVudCwgdHJhZGVtYXJrLCBhbmQgYXR0cmlidXRpb24gbm90aWNlcyBmcm9tIHRoZSBTb3VyY2UgZm9ybSBvZiB0aGUgV29yaywgZXhjbHVkaW5nIHRob3NlIG5vdGljZXMgdGhhdCBkbyBub3QgcGVydGFpbiB0byBhbnkgcGFydCBvZiB0aGUgRGVyaXZhdGl2ZSBXb3JrczsgYW5kCgogICAgIChkKSBJZiB0aGUgV29yayBpbmNsdWRlcyBhICJOT1RJQ0UiIHRleHQgZmlsZSBhcyBwYXJ0IG9mIGl0cyBkaXN0cmlidXRpb24sIHRoZW4gYW55IERlcml2YXRpdmUgV29ya3MgdGhhdCBZb3UgZGlzdHJpYnV0ZSBtdXN0IGluY2x1ZGUgYSByZWFkYWJsZSBjb3B5IG9mIHRoZSBhdHRyaWJ1dGlvbiBub3RpY2VzIGNvbnRhaW5lZCB3aXRoaW4gc3VjaCBOT1RJQ0UgZmlsZSwgZXhjbHVkaW5nIHRob3NlIG5vdGljZXMgdGhhdCBkbyBub3QgcGVydGFpbiB0byBhbnkgcGFydCBvZiB0aGUgRGVyaXZhdGl2ZSBXb3JrcywgaW4gYXQgbGVhc3Qgb25lIG9mIHRoZSBmb2xsb3dpbmcgcGxhY2VzOiB3aXRoaW4gYSBOT1RJQ0UgdGV4dCBmaWxlIGRpc3RyaWJ1dGVkIGFzIHBhcnQgb2YgdGhlIERlcml2YXRpdmUgV29ya3M7IHdpdGhpbiB0aGUgU291cmNlIGZvcm0gb3IgZG9jdW1lbnRhdGlvbiwgaWYgcHJvdmlkZWQgYWxvbmcgd2l0aCB0aGUgRGVyaXZhdGl2ZSBXb3Jrczsgb3IsIHdpdGhpbiBhIGRpc3BsYXkgZ2VuZXJhdGVkIGJ5IHRoZSBEZXJpdmF0aXZlIFdvcmtzLCBpZiBhbmQgd2hlcmV2ZXIgc3VjaCB0aGlyZC1wYXJ0eSBub3RpY2VzIG5vcm1hbGx5IGFwcGVhci4gVGhlIGNvbnRlbnRzIG9mIHRoZSBOT1RJQ0UgZmlsZSBhcmUgZm9yIGluZm9ybWF0aW9uYWwgcHVycG9zZXMgb25seSBhbmQgZG8gbm90IG1vZGlmeSB0aGUgTGljZW5zZS4gWW91IG1heSBhZGQgWW91ciBvd24gYXR0cmlidXRpb24gbm90aWNlcyB3aXRoaW4gRGVyaXZhdGl2ZSBXb3JrcyB0aGF0IFlvdSBkaXN0cmlidXRlLCBhbG9uZ3NpZGUgb3IgYXMgYW4gYWRkZW5kdW0gdG8gdGhlIE5PVElDRSB0ZXh0IGZyb20gdGhlIFdvcmssIHByb3ZpZGVkIHRoYXQgc3VjaCBhZGRpdGlvbmFsIGF0dHJpYnV0aW9uIG5vdGljZXMgY2Fubm90IGJlIGNvbnN0cnVlZCBhcyBtb2RpZnlpbmcgdGhlIExpY2Vuc2UuCgogICAgIFlvdSBtYXkgYWRkIFlvdXIgb3duIGNvcHlyaWdodCBzdGF0ZW1lbnQgdG8gWW91ciBtb2RpZmljYXRpb25zIGFuZCBtYXkgcHJvdmlkZSBhZGRpdGlvbmFsIG9yIGRpZmZlcmVudCBsaWNlbnNlIHRlcm1zIGFuZCBjb25kaXRpb25zIGZvciB1c2UsIHJlcHJvZHVjdGlvbiwgb3IgZGlzdHJpYnV0aW9uIG9mIFlvdXIgbW9kaWZpY2F0aW9ucywgb3IgZm9yIGFueSBzdWNoIERlcml2YXRpdmUgV29ya3MgYXMgYSB3aG9sZSwgcHJvdmlkZWQgWW91ciB1c2UsIHJlcHJvZHVjdGlvbiwgYW5kIGRpc3RyaWJ1dGlvbiBvZiB0aGUgV29yayBvdGhlcndpc2UgY29tcGxpZXMgd2l0aCB0aGUgY29uZGl0aW9ucyBzdGF0ZWQgaW4gdGhpcyBMaWNlbnNlLgoKNS4gU3VibWlzc2lvbiBvZiBDb250cmlidXRpb25zLiBVbmxlc3MgWW91IGV4cGxpY2l0bHkgc3RhdGUgb3RoZXJ3aXNlLCBhbnkgQ29udHJpYnV0aW9uIGludGVudGlvbmFsbHkgc3VibWl0dGVkIGZvciBpbmNsdXNpb24gaW4gdGhlIFdvcmsgYnkgWW91IHRvIHRoZSBMaWNlbnNvciBzaGFsbCBiZSB1bmRlciB0aGUgdGVybXMgYW5kIGNvbmRpdGlvbnMgb2YgdGhpcyBMaWNlbnNlLCB3aXRob3V0IGFueSBhZGRpdGlvbmFsIHRlcm1zIG9yIGNvbmRpdGlvbnMuIE5vdHdpdGhzdGFuZGluZyB0aGUgYWJvdmUsIG5vdGhpbmcgaGVyZWluIHNoYWxsIHN1cGVyc2VkZSBvciBtb2RpZnkgdGhlIHRlcm1zIG9mIGFueSBzZXBhcmF0ZSBsaWNlbnNlIGFncmVlbWVudCB5b3UgbWF5IGhhdmUgZXhlY3V0ZWQgd2l0aCBMaWNlbnNvciByZWdhcmRpbmcgc3VjaCBDb250cmlidXRpb25zLgoKNi4gVHJhZGVtYXJrcy4gVGhpcyBMaWNlbnNlIGRvZXMgbm90IGdyYW50IHBlcm1pc3Npb24gdG8gdXNlIHRoZSB0cmFkZSBuYW1lcywgdHJhZGVtYXJrcywgc2VydmljZSBtYXJrcywgb3IgcHJvZHVjdCBuYW1lcyBvZiB0aGUgTGljZW5zb3IsIGV4Y2VwdCBhcyByZXF1aXJlZCBmb3IgcmVhc29uYWJsZSBhbmQgY3VzdG9tYXJ5IHVzZSBpbiBkZXNjcmliaW5nIHRoZSBvcmlnaW4gb2YgdGhlIFdvcmsgYW5kIHJlcHJvZHVjaW5nIHRoZSBjb250ZW50IG9mIHRoZSBOT1RJQ0UgZmlsZS4KCjcuIERpc2NsYWltZXIgb2YgV2FycmFudHkuIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgTGljZW5zb3IgcHJvdmlkZXMgdGhlIFdvcmsgKGFuZCBlYWNoIENvbnRyaWJ1dG9yIHByb3ZpZGVzIGl0cyBDb250cmlidXRpb25zKSBvbiBhbiAiQVMgSVMiIEJBU0lTLCBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZCwgaW5jbHVkaW5nLCB3aXRob3V0IGxpbWl0YXRpb24sIGFueSB3YXJyYW50aWVzIG9yIGNvbmRpdGlvbnMgb2YgVElUTEUsIE5PTi1JTkZSSU5HRU1FTlQsIE1FUkNIQU5UQUJJTElUWSwgb3IgRklUTkVTUyBGT1IgQSBQQVJUSUNVTEFSIFBVUlBPU0UuIFlvdSBhcmUgc29sZWx5IHJlc3BvbnNpYmxlIGZvciBkZXRlcm1pbmluZyB0aGUgYXBwcm9wcmlhdGVuZXNzIG9mIHVzaW5nIG9yIHJlZGlzdHJpYnV0aW5nIHRoZSBXb3JrIGFuZCBhc3N1bWUgYW55IHJpc2tzIGFzc29jaWF0ZWQgd2l0aCBZb3VyIGV4ZXJjaXNlIG9mIHBlcm1pc3Npb25zIHVuZGVyIHRoaXMgTGljZW5zZS4KCjguIExpbWl0YXRpb24gb2YgTGlhYmlsaXR5LiBJbiBubyBldmVudCBhbmQgdW5kZXIgbm8gbGVnYWwgdGhlb3J5LCB3aGV0aGVyIGluIHRvcnQgKGluY2x1ZGluZyBuZWdsaWdlbmNlKSwgY29udHJhY3QsIG9yIG90aGVyd2lzZSwgdW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IChzdWNoIGFzIGRlbGliZXJhdGUgYW5kIGdyb3NzbHkgbmVnbGlnZW50IGFjdHMpIG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzaGFsbCBhbnkgQ29udHJpYnV0b3IgYmUgbGlhYmxlIHRvIFlvdSBmb3IgZGFtYWdlcywgaW5jbHVkaW5nIGFueSBkaXJlY3QsIGluZGlyZWN0LCBzcGVjaWFsLCBpbmNpZGVudGFsLCBvciBjb25zZXF1ZW50aWFsIGRhbWFnZXMgb2YgYW55IGNoYXJhY3RlciBhcmlzaW5nIGFzIGEgcmVzdWx0IG9mIHRoaXMgTGljZW5zZSBvciBvdXQgb2YgdGhlIHVzZSBvciBpbmFiaWxpdHkgdG8gdXNlIHRoZSBXb3JrIChpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVkIHRvIGRhbWFnZXMgZm9yIGxvc3Mgb2YgZ29vZHdpbGwsIHdvcmsgc3RvcHBhZ2UsIGNvbXB1dGVyIGZhaWx1cmUgb3IgbWFsZnVuY3Rpb24sIG9yIGFueSBhbmQgYWxsIG90aGVyIGNvbW1lcmNpYWwgZGFtYWdlcyBvciBsb3NzZXMpLCBldmVuIGlmIHN1Y2ggQ29udHJpYnV0b3IgaGFzIGJlZW4gYWR2aXNlZCBvZiB0aGUgcG9zc2liaWxpdHkgb2Ygc3VjaCBkYW1hZ2VzLgoKOS4gQWNjZXB0aW5nIFdhcnJhbnR5IG9yIEFkZGl0aW9uYWwgTGlhYmlsaXR5LiBXaGlsZSByZWRpc3RyaWJ1dGluZyB0aGUgV29yayBvciBEZXJpdmF0aXZlIFdvcmtzIHRoZXJlb2YsIFlvdSBtYXkgY2hvb3NlIHRvIG9mZmVyLCBhbmQgY2hhcmdlIGEgZmVlIGZvciwgYWNjZXB0YW5jZSBvZiBzdXBwb3J0LCB3YXJyYW50eSwgaW5kZW1uaXR5LCBvciBvdGhlciBsaWFiaWxpdHkgb2JsaWdhdGlvbnMgYW5kL29yIHJpZ2h0cyBjb25zaXN0ZW50IHdpdGggdGhpcyBMaWNlbnNlLiBIb3dldmVyLCBpbiBhY2NlcHRpbmcgc3VjaCBvYmxpZ2F0aW9ucywgWW91IG1heSBhY3Qgb25seSBvbiBZb3VyIG93biBiZWhhbGYgYW5kIG9uIFlvdXIgc29sZSByZXNwb25zaWJpbGl0eSwgbm90IG9uIGJlaGFsZiBvZiBhbnkgb3RoZXIgQ29udHJpYnV0b3IsIGFuZCBvbmx5IGlmIFlvdSBhZ3JlZSB0byBpbmRlbW5pZnksIGRlZmVuZCwgYW5kIGhvbGQgZWFjaCBDb250cmlidXRvciBoYXJtbGVzcyBmb3IgYW55IGxpYWJpbGl0eSBpbmN1cnJlZCBieSwgb3IgY2xhaW1zIGFzc2VydGVkIGFnYWluc3QsIHN1Y2ggQ29udHJpYnV0b3IgYnkgcmVhc29uIG9mIHlvdXIgYWNjZXB0aW5nIGFueSBzdWNoIHdhcnJhbnR5IG9yIGFkZGl0aW9uYWwgbGlhYmlsaXR5LgoKRU5EIE9GIFRFUk1TIEFORCBDT05ESVRJT05TCgpBUFBFTkRJWDogSG93IHRvIGFwcGx5IHRoZSBBcGFjaGUgTGljZW5zZSB0byB5b3VyIHdvcmsuCgpUbyBhcHBseSB0aGUgQXBhY2hlIExpY2Vuc2UgdG8geW91ciB3b3JrLCBhdHRhY2ggdGhlIGZvbGxvd2luZyBib2lsZXJwbGF0ZSBub3RpY2UsIHdpdGggdGhlIGZpZWxkcyBlbmNsb3NlZCBieSBicmFja2V0cyAiW10iIHJlcGxhY2VkIHdpdGggeW91ciBvd24gaWRlbnRpZnlpbmcgaW5mb3JtYXRpb24uIChEb24ndCBpbmNsdWRlIHRoZSBicmFja2V0cyEpICBUaGUgdGV4dCBzaG91bGQgYmUgZW5jbG9zZWQgaW4gdGhlIGFwcHJvcHJpYXRlIGNvbW1lbnQgc3ludGF4IGZvciB0aGUgZmlsZSBmb3JtYXQuIFdlIGFsc28gcmVjb21tZW5kIHRoYXQgYSBmaWxlIG9yIGNsYXNzIG5hbWUgYW5kIGRlc2NyaXB0aW9uIG9mIHB1cnBvc2UgYmUgaW5jbHVkZWQgb24gdGhlIHNhbWUgInByaW50ZWQgcGFnZSIgYXMgdGhlIGNvcHlyaWdodCBub3RpY2UgZm9yIGVhc2llciBpZGVudGlmaWNhdGlvbiB3aXRoaW4gdGhpcmQtcGFydHkgYXJjaGl2ZXMuCgpDb3B5cmlnaHQgW3l5eXldIFtuYW1lIG9mIGNvcHlyaWdodCBvd25lcl0KCkxpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSAiTGljZW5zZSIpOwp5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCllvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdAoKaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCgpVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlCmRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCldJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLgpTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kCmxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgo="
+            }
+          }
+        }
+      ],
+      "purl" : "pkg:maven/dev.langchain4j/langchain4j-http-client@1.22.0?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://github.com/langchain4j/langchain4j/tree/main/langchain4j-http-client"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/langchain4j/langchain4j/tree/main/langchain4j-http-client"
         }
       ]
     },
@@ -9791,6 +9923,81 @@
         {
           "type" : "vcs",
           "url" : "https://github.com/aws/aws-sdk-java-v2/services/bedrockruntime"
+        }
+      ]
+    },
+    {
+      "type" : "library",
+      "bom-ref" : "pkg:maven/io.smallrye.reactive/mutiny-zero@1.3.1?type=jar",
+      "publisher" : "SmallRye",
+      "group" : "io.smallrye.reactive",
+      "name" : "mutiny-zero",
+      "version" : "1.3.1",
+      "description" : "Mutiny Zero is a minimal API for creating reactive-streams compliant publishers",
+      "scope" : "required",
+      "hashes" : [
+        {
+          "alg" : "MD5",
+          "content" : "bf44e987be8b5c6722db05ab7ddc49d2"
+        },
+        {
+          "alg" : "SHA-1",
+          "content" : "c8bb468cec476ba245188f7292802749158c44bb"
+        },
+        {
+          "alg" : "SHA-256",
+          "content" : "10455d395ca9e3d8256bb216672684ad9482288d331efc48db4196eba804273b"
+        },
+        {
+          "alg" : "SHA-512",
+          "content" : "5ef24dd74b756947efc09f7f1f7446396a04ca1a0cf12f2ada174dd6cacea8cbb47e57d75e093ed6489b799409e82b06fd5c58a8b7329e01bb7071cc0d1a2964"
+        },
+        {
+          "alg" : "SHA-384",
+          "content" : "b517bd0a9b3aae5e76a0f9fc2c937b0e94549c5aeae3eba8ed9dae367160ed1881f7e1e9bf6acd5af19ef101920e5c84"
+        },
+        {
+          "alg" : "SHA3-384",
+          "content" : "805d2f1ed399bf3f89e9ed8fd55f721d5ddb391e59246bcc15beecab4a4e5721b6b4726e123f096865c12f380f2bf91e"
+        },
+        {
+          "alg" : "SHA3-256",
+          "content" : "e74f63e15143b44df8f196fa1117fb55b61c6ac79de454c6ff75bb778e0b146e"
+        },
+        {
+          "alg" : "SHA3-512",
+          "content" : "9e51a309b7caafb1e1e27f31b3f30af2e767e07cf7ca33f1c25174aefbb0849c9dc613207829ecd15a6b463741d98253ab3198312223c9d8ed781a0aa712c465"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0",
+            "text" : {
+              "contentType" : "plain/text",
+              "encoding" : "base64",
+              "content" : "QXBhY2hlIExpY2Vuc2UKVmVyc2lvbiAyLjAsIEphbnVhcnkgMjAwNApodHRwOi8vd3d3LmFwYWNoZS5vcmcvbGljZW5zZXMvCgpURVJNUyBBTkQgQ09ORElUSU9OUyBGT1IgVVNFLCBSRVBST0RVQ1RJT04sIEFORCBESVNUUklCVVRJT04KCjEuIERlZmluaXRpb25zLgoKIkxpY2Vuc2UiIHNoYWxsIG1lYW4gdGhlIHRlcm1zIGFuZCBjb25kaXRpb25zIGZvciB1c2UsIHJlcHJvZHVjdGlvbiwgYW5kIGRpc3RyaWJ1dGlvbiBhcyBkZWZpbmVkIGJ5IFNlY3Rpb25zIDEgdGhyb3VnaCA5IG9mIHRoaXMgZG9jdW1lbnQuCgoiTGljZW5zb3IiIHNoYWxsIG1lYW4gdGhlIGNvcHlyaWdodCBvd25lciBvciBlbnRpdHkgYXV0aG9yaXplZCBieSB0aGUgY29weXJpZ2h0IG93bmVyIHRoYXQgaXMgZ3JhbnRpbmcgdGhlIExpY2Vuc2UuCgoiTGVnYWwgRW50aXR5IiBzaGFsbCBtZWFuIHRoZSB1bmlvbiBvZiB0aGUgYWN0aW5nIGVudGl0eSBhbmQgYWxsIG90aGVyIGVudGl0aWVzIHRoYXQgY29udHJvbCwgYXJlIGNvbnRyb2xsZWQgYnksIG9yIGFyZSB1bmRlciBjb21tb24gY29udHJvbCB3aXRoIHRoYXQgZW50aXR5LiBGb3IgdGhlIHB1cnBvc2VzIG9mIHRoaXMgZGVmaW5pdGlvbiwgImNvbnRyb2wiIG1lYW5zIChpKSB0aGUgcG93ZXIsIGRpcmVjdCBvciBpbmRpcmVjdCwgdG8gY2F1c2UgdGhlIGRpcmVjdGlvbiBvciBtYW5hZ2VtZW50IG9mIHN1Y2ggZW50aXR5LCB3aGV0aGVyIGJ5IGNvbnRyYWN0IG9yIG90aGVyd2lzZSwgb3IgKGlpKSBvd25lcnNoaXAgb2YgZmlmdHkgcGVyY2VudCAoNTAlKSBvciBtb3JlIG9mIHRoZSBvdXRzdGFuZGluZyBzaGFyZXMsIG9yIChpaWkpIGJlbmVmaWNpYWwgb3duZXJzaGlwIG9mIHN1Y2ggZW50aXR5LgoKIllvdSIgKG9yICJZb3VyIikgc2hhbGwgbWVhbiBhbiBpbmRpdmlkdWFsIG9yIExlZ2FsIEVudGl0eSBleGVyY2lzaW5nIHBlcm1pc3Npb25zIGdyYW50ZWQgYnkgdGhpcyBMaWNlbnNlLgoKIlNvdXJjZSIgZm9ybSBzaGFsbCBtZWFuIHRoZSBwcmVmZXJyZWQgZm9ybSBmb3IgbWFraW5nIG1vZGlmaWNhdGlvbnMsIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gc29mdHdhcmUgc291cmNlIGNvZGUsIGRvY3VtZW50YXRpb24gc291cmNlLCBhbmQgY29uZmlndXJhdGlvbiBmaWxlcy4KCiJPYmplY3QiIGZvcm0gc2hhbGwgbWVhbiBhbnkgZm9ybSByZXN1bHRpbmcgZnJvbSBtZWNoYW5pY2FsIHRyYW5zZm9ybWF0aW9uIG9yIHRyYW5zbGF0aW9uIG9mIGEgU291cmNlIGZvcm0sIGluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gY29tcGlsZWQgb2JqZWN0IGNvZGUsIGdlbmVyYXRlZCBkb2N1bWVudGF0aW9uLCBhbmQgY29udmVyc2lvbnMgdG8gb3RoZXIgbWVkaWEgdHlwZXMuCgoiV29yayIgc2hhbGwgbWVhbiB0aGUgd29yayBvZiBhdXRob3JzaGlwLCB3aGV0aGVyIGluIFNvdXJjZSBvciBPYmplY3QgZm9ybSwgbWFkZSBhdmFpbGFibGUgdW5kZXIgdGhlIExpY2Vuc2UsIGFzIGluZGljYXRlZCBieSBhIGNvcHlyaWdodCBub3RpY2UgdGhhdCBpcyBpbmNsdWRlZCBpbiBvciBhdHRhY2hlZCB0byB0aGUgd29yayAoYW4gZXhhbXBsZSBpcyBwcm92aWRlZCBpbiB0aGUgQXBwZW5kaXggYmVsb3cpLgoKIkRlcml2YXRpdmUgV29ya3MiIHNoYWxsIG1lYW4gYW55IHdvcmssIHdoZXRoZXIgaW4gU291cmNlIG9yIE9iamVjdCBmb3JtLCB0aGF0IGlzIGJhc2VkIG9uIChvciBkZXJpdmVkIGZyb20pIHRoZSBXb3JrIGFuZCBmb3Igd2hpY2ggdGhlIGVkaXRvcmlhbCByZXZpc2lvbnMsIGFubm90YXRpb25zLCBlbGFib3JhdGlvbnMsIG9yIG90aGVyIG1vZGlmaWNhdGlvbnMgcmVwcmVzZW50LCBhcyBhIHdob2xlLCBhbiBvcmlnaW5hbCB3b3JrIG9mIGF1dGhvcnNoaXAuIEZvciB0aGUgcHVycG9zZXMgb2YgdGhpcyBMaWNlbnNlLCBEZXJpdmF0aXZlIFdvcmtzIHNoYWxsIG5vdCBpbmNsdWRlIHdvcmtzIHRoYXQgcmVtYWluIHNlcGFyYWJsZSBmcm9tLCBvciBtZXJlbHkgbGluayAob3IgYmluZCBieSBuYW1lKSB0byB0aGUgaW50ZXJmYWNlcyBvZiwgdGhlIFdvcmsgYW5kIERlcml2YXRpdmUgV29ya3MgdGhlcmVvZi4KCiJDb250cmlidXRpb24iIHNoYWxsIG1lYW4gYW55IHdvcmsgb2YgYXV0aG9yc2hpcCwgaW5jbHVkaW5nIHRoZSBvcmlnaW5hbCB2ZXJzaW9uIG9mIHRoZSBXb3JrIGFuZCBhbnkgbW9kaWZpY2F0aW9ucyBvciBhZGRpdGlvbnMgdG8gdGhhdCBXb3JrIG9yIERlcml2YXRpdmUgV29ya3MgdGhlcmVvZiwgdGhhdCBpcyBpbnRlbnRpb25hbGx5IHN1Ym1pdHRlZCB0byBMaWNlbnNvciBmb3IgaW5jbHVzaW9uIGluIHRoZSBXb3JrIGJ5IHRoZSBjb3B5cmlnaHQgb3duZXIgb3IgYnkgYW4gaW5kaXZpZHVhbCBvciBMZWdhbCBFbnRpdHkgYXV0aG9yaXplZCB0byBzdWJtaXQgb24gYmVoYWxmIG9mIHRoZSBjb3B5cmlnaHQgb3duZXIuIEZvciB0aGUgcHVycG9zZXMgb2YgdGhpcyBkZWZpbml0aW9uLCAic3VibWl0dGVkIiBtZWFucyBhbnkgZm9ybSBvZiBlbGVjdHJvbmljLCB2ZXJiYWwsIG9yIHdyaXR0ZW4gY29tbXVuaWNhdGlvbiBzZW50IHRvIHRoZSBMaWNlbnNvciBvciBpdHMgcmVwcmVzZW50YXRpdmVzLCBpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVkIHRvIGNvbW11bmljYXRpb24gb24gZWxlY3Ryb25pYyBtYWlsaW5nIGxpc3RzLCBzb3VyY2UgY29kZSBjb250cm9sIHN5c3RlbXMsIGFuZCBpc3N1ZSB0cmFja2luZyBzeXN0ZW1zIHRoYXQgYXJlIG1hbmFnZWQgYnksIG9yIG9uIGJlaGFsZiBvZiwgdGhlIExpY2Vuc29yIGZvciB0aGUgcHVycG9zZSBvZiBkaXNjdXNzaW5nIGFuZCBpbXByb3ZpbmcgdGhlIFdvcmssIGJ1dCBleGNsdWRpbmcgY29tbXVuaWNhdGlvbiB0aGF0IGlzIGNvbnNwaWN1b3VzbHkgbWFya2VkIG9yIG90aGVyd2lzZSBkZXNpZ25hdGVkIGluIHdyaXRpbmcgYnkgdGhlIGNvcHlyaWdodCBvd25lciBhcyAiTm90IGEgQ29udHJpYnV0aW9uLiIKCiJDb250cmlidXRvciIgc2hhbGwgbWVhbiBMaWNlbnNvciBhbmQgYW55IGluZGl2aWR1YWwgb3IgTGVnYWwgRW50aXR5IG9uIGJlaGFsZiBvZiB3aG9tIGEgQ29udHJpYnV0aW9uIGhhcyBiZWVuIHJlY2VpdmVkIGJ5IExpY2Vuc29yIGFuZCBzdWJzZXF1ZW50bHkgaW5jb3Jwb3JhdGVkIHdpdGhpbiB0aGUgV29yay4KCjIuIEdyYW50IG9mIENvcHlyaWdodCBMaWNlbnNlLiBTdWJqZWN0IHRvIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZiB0aGlzIExpY2Vuc2UsIGVhY2ggQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBwZXJwZXR1YWwsIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8tY2hhcmdlLCByb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlIGNvcHlyaWdodCBsaWNlbnNlIHRvIHJlcHJvZHVjZSwgcHJlcGFyZSBEZXJpdmF0aXZlIFdvcmtzIG9mLCBwdWJsaWNseSBkaXNwbGF5LCBwdWJsaWNseSBwZXJmb3JtLCBzdWJsaWNlbnNlLCBhbmQgZGlzdHJpYnV0ZSB0aGUgV29yayBhbmQgc3VjaCBEZXJpdmF0aXZlIFdvcmtzIGluIFNvdXJjZSBvciBPYmplY3QgZm9ybS4KCjMuIEdyYW50IG9mIFBhdGVudCBMaWNlbnNlLiBTdWJqZWN0IHRvIHRoZSB0ZXJtcyBhbmQgY29uZGl0aW9ucyBvZiB0aGlzIExpY2Vuc2UsIGVhY2ggQ29udHJpYnV0b3IgaGVyZWJ5IGdyYW50cyB0byBZb3UgYSBwZXJwZXR1YWwsIHdvcmxkd2lkZSwgbm9uLWV4Y2x1c2l2ZSwgbm8tY2hhcmdlLCByb3lhbHR5LWZyZWUsIGlycmV2b2NhYmxlIChleGNlcHQgYXMgc3RhdGVkIGluIHRoaXMgc2VjdGlvbikgcGF0ZW50IGxpY2Vuc2UgdG8gbWFrZSwgaGF2ZSBtYWRlLCB1c2UsIG9mZmVyIHRvIHNlbGwsIHNlbGwsIGltcG9ydCwgYW5kIG90aGVyd2lzZSB0cmFuc2ZlciB0aGUgV29yaywgd2hlcmUgc3VjaCBsaWNlbnNlIGFwcGxpZXMgb25seSB0byB0aG9zZSBwYXRlbnQgY2xhaW1zIGxpY2Vuc2FibGUgYnkgc3VjaCBDb250cmlidXRvciB0aGF0IGFyZSBuZWNlc3NhcmlseSBpbmZyaW5nZWQgYnkgdGhlaXIgQ29udHJpYnV0aW9uKHMpIGFsb25lIG9yIGJ5IGNvbWJpbmF0aW9uIG9mIHRoZWlyIENvbnRyaWJ1dGlvbihzKSB3aXRoIHRoZSBXb3JrIHRvIHdoaWNoIHN1Y2ggQ29udHJpYnV0aW9uKHMpIHdhcyBzdWJtaXR0ZWQuIElmIFlvdSBpbnN0aXR1dGUgcGF0ZW50IGxpdGlnYXRpb24gYWdhaW5zdCBhbnkgZW50aXR5IChpbmNsdWRpbmcgYSBjcm9zcy1jbGFpbSBvciBjb3VudGVyY2xhaW0gaW4gYSBsYXdzdWl0KSBhbGxlZ2luZyB0aGF0IHRoZSBXb3JrIG9yIGEgQ29udHJpYnV0aW9uIGluY29ycG9yYXRlZCB3aXRoaW4gdGhlIFdvcmsgY29uc3RpdHV0ZXMgZGlyZWN0IG9yIGNvbnRyaWJ1dG9yeSBwYXRlbnQgaW5mcmluZ2VtZW50LCB0aGVuIGFueSBwYXRlbnQgbGljZW5zZXMgZ3JhbnRlZCB0byBZb3UgdW5kZXIgdGhpcyBMaWNlbnNlIGZvciB0aGF0IFdvcmsgc2hhbGwgdGVybWluYXRlIGFzIG9mIHRoZSBkYXRlIHN1Y2ggbGl0aWdhdGlvbiBpcyBmaWxlZC4KCjQuIFJlZGlzdHJpYnV0aW9uLiBZb3UgbWF5IHJlcHJvZHVjZSBhbmQgZGlzdHJpYnV0ZSBjb3BpZXMgb2YgdGhlIFdvcmsgb3IgRGVyaXZhdGl2ZSBXb3JrcyB0aGVyZW9mIGluIGFueSBtZWRpdW0sIHdpdGggb3Igd2l0aG91dCBtb2RpZmljYXRpb25zLCBhbmQgaW4gU291cmNlIG9yIE9iamVjdCBmb3JtLCBwcm92aWRlZCB0aGF0IFlvdSBtZWV0IHRoZSBmb2xsb3dpbmcgY29uZGl0aW9uczoKCiAgICAgKGEpIFlvdSBtdXN0IGdpdmUgYW55IG90aGVyIHJlY2lwaWVudHMgb2YgdGhlIFdvcmsgb3IgRGVyaXZhdGl2ZSBXb3JrcyBhIGNvcHkgb2YgdGhpcyBMaWNlbnNlOyBhbmQKCiAgICAgKGIpIFlvdSBtdXN0IGNhdXNlIGFueSBtb2RpZmllZCBmaWxlcyB0byBjYXJyeSBwcm9taW5lbnQgbm90aWNlcyBzdGF0aW5nIHRoYXQgWW91IGNoYW5nZWQgdGhlIGZpbGVzOyBhbmQKCiAgICAgKGMpIFlvdSBtdXN0IHJldGFpbiwgaW4gdGhlIFNvdXJjZSBmb3JtIG9mIGFueSBEZXJpdmF0aXZlIFdvcmtzIHRoYXQgWW91IGRpc3RyaWJ1dGUsIGFsbCBjb3B5cmlnaHQsIHBhdGVudCwgdHJhZGVtYXJrLCBhbmQgYXR0cmlidXRpb24gbm90aWNlcyBmcm9tIHRoZSBTb3VyY2UgZm9ybSBvZiB0aGUgV29yaywgZXhjbHVkaW5nIHRob3NlIG5vdGljZXMgdGhhdCBkbyBub3QgcGVydGFpbiB0byBhbnkgcGFydCBvZiB0aGUgRGVyaXZhdGl2ZSBXb3JrczsgYW5kCgogICAgIChkKSBJZiB0aGUgV29yayBpbmNsdWRlcyBhICJOT1RJQ0UiIHRleHQgZmlsZSBhcyBwYXJ0IG9mIGl0cyBkaXN0cmlidXRpb24sIHRoZW4gYW55IERlcml2YXRpdmUgV29ya3MgdGhhdCBZb3UgZGlzdHJpYnV0ZSBtdXN0IGluY2x1ZGUgYSByZWFkYWJsZSBjb3B5IG9mIHRoZSBhdHRyaWJ1dGlvbiBub3RpY2VzIGNvbnRhaW5lZCB3aXRoaW4gc3VjaCBOT1RJQ0UgZmlsZSwgZXhjbHVkaW5nIHRob3NlIG5vdGljZXMgdGhhdCBkbyBub3QgcGVydGFpbiB0byBhbnkgcGFydCBvZiB0aGUgRGVyaXZhdGl2ZSBXb3JrcywgaW4gYXQgbGVhc3Qgb25lIG9mIHRoZSBmb2xsb3dpbmcgcGxhY2VzOiB3aXRoaW4gYSBOT1RJQ0UgdGV4dCBmaWxlIGRpc3RyaWJ1dGVkIGFzIHBhcnQgb2YgdGhlIERlcml2YXRpdmUgV29ya3M7IHdpdGhpbiB0aGUgU291cmNlIGZvcm0gb3IgZG9jdW1lbnRhdGlvbiwgaWYgcHJvdmlkZWQgYWxvbmcgd2l0aCB0aGUgRGVyaXZhdGl2ZSBXb3Jrczsgb3IsIHdpdGhpbiBhIGRpc3BsYXkgZ2VuZXJhdGVkIGJ5IHRoZSBEZXJpdmF0aXZlIFdvcmtzLCBpZiBhbmQgd2hlcmV2ZXIgc3VjaCB0aGlyZC1wYXJ0eSBub3RpY2VzIG5vcm1hbGx5IGFwcGVhci4gVGhlIGNvbnRlbnRzIG9mIHRoZSBOT1RJQ0UgZmlsZSBhcmUgZm9yIGluZm9ybWF0aW9uYWwgcHVycG9zZXMgb25seSBhbmQgZG8gbm90IG1vZGlmeSB0aGUgTGljZW5zZS4gWW91IG1heSBhZGQgWW91ciBvd24gYXR0cmlidXRpb24gbm90aWNlcyB3aXRoaW4gRGVyaXZhdGl2ZSBXb3JrcyB0aGF0IFlvdSBkaXN0cmlidXRlLCBhbG9uZ3NpZGUgb3IgYXMgYW4gYWRkZW5kdW0gdG8gdGhlIE5PVElDRSB0ZXh0IGZyb20gdGhlIFdvcmssIHByb3ZpZGVkIHRoYXQgc3VjaCBhZGRpdGlvbmFsIGF0dHJpYnV0aW9uIG5vdGljZXMgY2Fubm90IGJlIGNvbnN0cnVlZCBhcyBtb2RpZnlpbmcgdGhlIExpY2Vuc2UuCgogICAgIFlvdSBtYXkgYWRkIFlvdXIgb3duIGNvcHlyaWdodCBzdGF0ZW1lbnQgdG8gWW91ciBtb2RpZmljYXRpb25zIGFuZCBtYXkgcHJvdmlkZSBhZGRpdGlvbmFsIG9yIGRpZmZlcmVudCBsaWNlbnNlIHRlcm1zIGFuZCBjb25kaXRpb25zIGZvciB1c2UsIHJlcHJvZHVjdGlvbiwgb3IgZGlzdHJpYnV0aW9uIG9mIFlvdXIgbW9kaWZpY2F0aW9ucywgb3IgZm9yIGFueSBzdWNoIERlcml2YXRpdmUgV29ya3MgYXMgYSB3aG9sZSwgcHJvdmlkZWQgWW91ciB1c2UsIHJlcHJvZHVjdGlvbiwgYW5kIGRpc3RyaWJ1dGlvbiBvZiB0aGUgV29yayBvdGhlcndpc2UgY29tcGxpZXMgd2l0aCB0aGUgY29uZGl0aW9ucyBzdGF0ZWQgaW4gdGhpcyBMaWNlbnNlLgoKNS4gU3VibWlzc2lvbiBvZiBDb250cmlidXRpb25zLiBVbmxlc3MgWW91IGV4cGxpY2l0bHkgc3RhdGUgb3RoZXJ3aXNlLCBhbnkgQ29udHJpYnV0aW9uIGludGVudGlvbmFsbHkgc3VibWl0dGVkIGZvciBpbmNsdXNpb24gaW4gdGhlIFdvcmsgYnkgWW91IHRvIHRoZSBMaWNlbnNvciBzaGFsbCBiZSB1bmRlciB0aGUgdGVybXMgYW5kIGNvbmRpdGlvbnMgb2YgdGhpcyBMaWNlbnNlLCB3aXRob3V0IGFueSBhZGRpdGlvbmFsIHRlcm1zIG9yIGNvbmRpdGlvbnMuIE5vdHdpdGhzdGFuZGluZyB0aGUgYWJvdmUsIG5vdGhpbmcgaGVyZWluIHNoYWxsIHN1cGVyc2VkZSBvciBtb2RpZnkgdGhlIHRlcm1zIG9mIGFueSBzZXBhcmF0ZSBsaWNlbnNlIGFncmVlbWVudCB5b3UgbWF5IGhhdmUgZXhlY3V0ZWQgd2l0aCBMaWNlbnNvciByZWdhcmRpbmcgc3VjaCBDb250cmlidXRpb25zLgoKNi4gVHJhZGVtYXJrcy4gVGhpcyBMaWNlbnNlIGRvZXMgbm90IGdyYW50IHBlcm1pc3Npb24gdG8gdXNlIHRoZSB0cmFkZSBuYW1lcywgdHJhZGVtYXJrcywgc2VydmljZSBtYXJrcywgb3IgcHJvZHVjdCBuYW1lcyBvZiB0aGUgTGljZW5zb3IsIGV4Y2VwdCBhcyByZXF1aXJlZCBmb3IgcmVhc29uYWJsZSBhbmQgY3VzdG9tYXJ5IHVzZSBpbiBkZXNjcmliaW5nIHRoZSBvcmlnaW4gb2YgdGhlIFdvcmsgYW5kIHJlcHJvZHVjaW5nIHRoZSBjb250ZW50IG9mIHRoZSBOT1RJQ0UgZmlsZS4KCjcuIERpc2NsYWltZXIgb2YgV2FycmFudHkuIFVubGVzcyByZXF1aXJlZCBieSBhcHBsaWNhYmxlIGxhdyBvciBhZ3JlZWQgdG8gaW4gd3JpdGluZywgTGljZW5zb3IgcHJvdmlkZXMgdGhlIFdvcmsgKGFuZCBlYWNoIENvbnRyaWJ1dG9yIHByb3ZpZGVzIGl0cyBDb250cmlidXRpb25zKSBvbiBhbiAiQVMgSVMiIEJBU0lTLCBXSVRIT1VUIFdBUlJBTlRJRVMgT1IgQ09ORElUSU9OUyBPRiBBTlkgS0lORCwgZWl0aGVyIGV4cHJlc3Mgb3IgaW1wbGllZCwgaW5jbHVkaW5nLCB3aXRob3V0IGxpbWl0YXRpb24sIGFueSB3YXJyYW50aWVzIG9yIGNvbmRpdGlvbnMgb2YgVElUTEUsIE5PTi1JTkZSSU5HRU1FTlQsIE1FUkNIQU5UQUJJTElUWSwgb3IgRklUTkVTUyBGT1IgQSBQQVJUSUNVTEFSIFBVUlBPU0UuIFlvdSBhcmUgc29sZWx5IHJlc3BvbnNpYmxlIGZvciBkZXRlcm1pbmluZyB0aGUgYXBwcm9wcmlhdGVuZXNzIG9mIHVzaW5nIG9yIHJlZGlzdHJpYnV0aW5nIHRoZSBXb3JrIGFuZCBhc3N1bWUgYW55IHJpc2tzIGFzc29jaWF0ZWQgd2l0aCBZb3VyIGV4ZXJjaXNlIG9mIHBlcm1pc3Npb25zIHVuZGVyIHRoaXMgTGljZW5zZS4KCjguIExpbWl0YXRpb24gb2YgTGlhYmlsaXR5LiBJbiBubyBldmVudCBhbmQgdW5kZXIgbm8gbGVnYWwgdGhlb3J5LCB3aGV0aGVyIGluIHRvcnQgKGluY2x1ZGluZyBuZWdsaWdlbmNlKSwgY29udHJhY3QsIG9yIG90aGVyd2lzZSwgdW5sZXNzIHJlcXVpcmVkIGJ5IGFwcGxpY2FibGUgbGF3IChzdWNoIGFzIGRlbGliZXJhdGUgYW5kIGdyb3NzbHkgbmVnbGlnZW50IGFjdHMpIG9yIGFncmVlZCB0byBpbiB3cml0aW5nLCBzaGFsbCBhbnkgQ29udHJpYnV0b3IgYmUgbGlhYmxlIHRvIFlvdSBmb3IgZGFtYWdlcywgaW5jbHVkaW5nIGFueSBkaXJlY3QsIGluZGlyZWN0LCBzcGVjaWFsLCBpbmNpZGVudGFsLCBvciBjb25zZXF1ZW50aWFsIGRhbWFnZXMgb2YgYW55IGNoYXJhY3RlciBhcmlzaW5nIGFzIGEgcmVzdWx0IG9mIHRoaXMgTGljZW5zZSBvciBvdXQgb2YgdGhlIHVzZSBvciBpbmFiaWxpdHkgdG8gdXNlIHRoZSBXb3JrIChpbmNsdWRpbmcgYnV0IG5vdCBsaW1pdGVkIHRvIGRhbWFnZXMgZm9yIGxvc3Mgb2YgZ29vZHdpbGwsIHdvcmsgc3RvcHBhZ2UsIGNvbXB1dGVyIGZhaWx1cmUgb3IgbWFsZnVuY3Rpb24sIG9yIGFueSBhbmQgYWxsIG90aGVyIGNvbW1lcmNpYWwgZGFtYWdlcyBvciBsb3NzZXMpLCBldmVuIGlmIHN1Y2ggQ29udHJpYnV0b3IgaGFzIGJlZW4gYWR2aXNlZCBvZiB0aGUgcG9zc2liaWxpdHkgb2Ygc3VjaCBkYW1hZ2VzLgoKOS4gQWNjZXB0aW5nIFdhcnJhbnR5IG9yIEFkZGl0aW9uYWwgTGlhYmlsaXR5LiBXaGlsZSByZWRpc3RyaWJ1dGluZyB0aGUgV29yayBvciBEZXJpdmF0aXZlIFdvcmtzIHRoZXJlb2YsIFlvdSBtYXkgY2hvb3NlIHRvIG9mZmVyLCBhbmQgY2hhcmdlIGEgZmVlIGZvciwgYWNjZXB0YW5jZSBvZiBzdXBwb3J0LCB3YXJyYW50eSwgaW5kZW1uaXR5LCBvciBvdGhlciBsaWFiaWxpdHkgb2JsaWdhdGlvbnMgYW5kL29yIHJpZ2h0cyBjb25zaXN0ZW50IHdpdGggdGhpcyBMaWNlbnNlLiBIb3dldmVyLCBpbiBhY2NlcHRpbmcgc3VjaCBvYmxpZ2F0aW9ucywgWW91IG1heSBhY3Qgb25seSBvbiBZb3VyIG93biBiZWhhbGYgYW5kIG9uIFlvdXIgc29sZSByZXNwb25zaWJpbGl0eSwgbm90IG9uIGJlaGFsZiBvZiBhbnkgb3RoZXIgQ29udHJpYnV0b3IsIGFuZCBvbmx5IGlmIFlvdSBhZ3JlZSB0byBpbmRlbW5pZnksIGRlZmVuZCwgYW5kIGhvbGQgZWFjaCBDb250cmlidXRvciBoYXJtbGVzcyBmb3IgYW55IGxpYWJpbGl0eSBpbmN1cnJlZCBieSwgb3IgY2xhaW1zIGFzc2VydGVkIGFnYWluc3QsIHN1Y2ggQ29udHJpYnV0b3IgYnkgcmVhc29uIG9mIHlvdXIgYWNjZXB0aW5nIGFueSBzdWNoIHdhcnJhbnR5IG9yIGFkZGl0aW9uYWwgbGlhYmlsaXR5LgoKRU5EIE9GIFRFUk1TIEFORCBDT05ESVRJT05TCgpBUFBFTkRJWDogSG93IHRvIGFwcGx5IHRoZSBBcGFjaGUgTGljZW5zZSB0byB5b3VyIHdvcmsuCgpUbyBhcHBseSB0aGUgQXBhY2hlIExpY2Vuc2UgdG8geW91ciB3b3JrLCBhdHRhY2ggdGhlIGZvbGxvd2luZyBib2lsZXJwbGF0ZSBub3RpY2UsIHdpdGggdGhlIGZpZWxkcyBlbmNsb3NlZCBieSBicmFja2V0cyAiW10iIHJlcGxhY2VkIHdpdGggeW91ciBvd24gaWRlbnRpZnlpbmcgaW5mb3JtYXRpb24uIChEb24ndCBpbmNsdWRlIHRoZSBicmFja2V0cyEpICBUaGUgdGV4dCBzaG91bGQgYmUgZW5jbG9zZWQgaW4gdGhlIGFwcHJvcHJpYXRlIGNvbW1lbnQgc3ludGF4IGZvciB0aGUgZmlsZSBmb3JtYXQuIFdlIGFsc28gcmVjb21tZW5kIHRoYXQgYSBmaWxlIG9yIGNsYXNzIG5hbWUgYW5kIGRlc2NyaXB0aW9uIG9mIHB1cnBvc2UgYmUgaW5jbHVkZWQgb24gdGhlIHNhbWUgInByaW50ZWQgcGFnZSIgYXMgdGhlIGNvcHlyaWdodCBub3RpY2UgZm9yIGVhc2llciBpZGVudGlmaWNhdGlvbiB3aXRoaW4gdGhpcmQtcGFydHkgYXJjaGl2ZXMuCgpDb3B5cmlnaHQgW3l5eXldIFtuYW1lIG9mIGNvcHlyaWdodCBvd25lcl0KCkxpY2Vuc2VkIHVuZGVyIHRoZSBBcGFjaGUgTGljZW5zZSwgVmVyc2lvbiAyLjAgKHRoZSAiTGljZW5zZSIpOwp5b3UgbWF5IG5vdCB1c2UgdGhpcyBmaWxlIGV4Y2VwdCBpbiBjb21wbGlhbmNlIHdpdGggdGhlIExpY2Vuc2UuCllvdSBtYXkgb2J0YWluIGEgY29weSBvZiB0aGUgTGljZW5zZSBhdAoKaHR0cDovL3d3dy5hcGFjaGUub3JnL2xpY2Vuc2VzL0xJQ0VOU0UtMi4wCgpVbmxlc3MgcmVxdWlyZWQgYnkgYXBwbGljYWJsZSBsYXcgb3IgYWdyZWVkIHRvIGluIHdyaXRpbmcsIHNvZnR3YXJlCmRpc3RyaWJ1dGVkIHVuZGVyIHRoZSBMaWNlbnNlIGlzIGRpc3RyaWJ1dGVkIG9uIGFuICJBUyBJUyIgQkFTSVMsCldJVEhPVVQgV0FSUkFOVElFUyBPUiBDT05ESVRJT05TIE9GIEFOWSBLSU5ELCBlaXRoZXIgZXhwcmVzcyBvciBpbXBsaWVkLgpTZWUgdGhlIExpY2Vuc2UgZm9yIHRoZSBzcGVjaWZpYyBsYW5ndWFnZSBnb3Zlcm5pbmcgcGVybWlzc2lvbnMgYW5kCmxpbWl0YXRpb25zIHVuZGVyIHRoZSBMaWNlbnNlLgo="
+            }
+          }
+        }
+      ],
+      "purl" : "pkg:maven/io.smallrye.reactive/mutiny-zero@1.3.1?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "website",
+          "url" : "https://smallrye.io"
+        },
+        {
+          "type" : "distribution-intake",
+          "url" : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+        },
+        {
+          "type" : "issue-tracker",
+          "url" : "https://github.com/smallrye/smallrye-mutiny-zero/issues"
+        },
+        {
+          "type" : "vcs",
+          "url" : "https://github.com/smallrye/smallrye-mutiny-zero/mutiny-zero"
         }
       ]
     },
@@ -10366,7 +10573,7 @@
         "pkg:maven/software.amazon.awssdk/secretsmanager@2.52.0?type=jar",
         "pkg:maven/software.amazon.awssdk/sqs@2.52.0?type=jar",
         "pkg:maven/software.amazon.awssdk/kms@2.52.0?type=jar",
-        "pkg:maven/dev.langchain4j/langchain4j-bedrock@1.16.0?type=jar",
+        "pkg:maven/dev.langchain4j/langchain4j-bedrock@1.22.0?type=jar",
         "pkg:maven/com.newrelic.opentracing/java-aws-lambda@3.5.0?type=jar",
         "pkg:maven/com.newrelic.opentracing/newrelic-java-lambda@2.2.5?type=jar",
         "pkg:maven/io.opentracing/opentracing-util@0.33.0?type=jar"
@@ -10392,12 +10599,12 @@
         "pkg:maven/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml@2.22.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jdk8@2.22.3?type=jar",
         "pkg:maven/com.google.http-client/google-http-client@2.2.0?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
-        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.3?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
+        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.4?type=jar",
         "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.86?type=jar",
         "pkg:maven/org.bouncycastle/bcpkix-jdk18on@1.86?type=jar",
         "pkg:maven/com.nimbusds/nimbus-jose-jwt@10.10?type=jar",
-        "pkg:maven/dev.langchain4j/langchain4j@1.16.0?type=jar"
+        "pkg:maven/dev.langchain4j/langchain4j@1.22.0?type=jar"
       ]
     },
     {
@@ -10405,15 +10612,15 @@
       "dependsOn" : [
         "pkg:maven/org.apache.commons/commons-lang3@3.20.0?type=jar",
         "pkg:maven/org.apache.commons/commons-csv@1.14.1?type=jar",
-        "pkg:maven/commons-codec/commons-codec@1.22.1?type=jar",
+        "pkg:maven/commons-codec/commons-codec@1.23.0?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.22.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.22?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml@2.22.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr310@2.22.3?type=jar",
-        "pkg:maven/com.networknt/json-schema-validator@3.0.7?type=jar",
+        "pkg:maven/com.networknt/json-schema-validator@3.0.8?type=jar",
         "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
-        "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.4?type=jar",
+        "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.5?type=jar",
         "pkg:maven/org.apache.opennlp/opennlp-tools@2.5.12?type=jar"
       ]
     },
@@ -10425,7 +10632,7 @@
       "ref" : "pkg:maven/org.apache.commons/commons-csv@1.14.1?type=jar",
       "dependsOn" : [
         "pkg:maven/commons-io/commons-io@2.22.0?type=jar",
-        "pkg:maven/commons-codec/commons-codec@1.22.1?type=jar"
+        "pkg:maven/commons-codec/commons-codec@1.23.0?type=jar"
       ]
     },
     {
@@ -10433,7 +10640,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/commons-codec/commons-codec@1.22.1?type=jar",
+      "ref" : "pkg:maven/commons-codec/commons-codec@1.23.0?type=jar",
       "dependsOn" : [ ]
     },
     {
@@ -10472,10 +10679,10 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.networknt/json-schema-validator@3.0.7?type=jar",
+      "ref" : "pkg:maven/com.networknt/json-schema-validator@3.0.8?type=jar",
       "dependsOn" : [
         "pkg:maven/com.ethlo.time/itu@1.14.0?type=jar",
-        "pkg:maven/tools.jackson.core/jackson-databind@3.2.1?type=jar",
+        "pkg:maven/tools.jackson.core/jackson-databind@3.2.3?type=jar",
         "pkg:maven/tools.jackson.dataformat/jackson-dataformat-yaml@3.2.1?type=jar",
         "pkg:maven/org.slf4j/slf4j-api@2.0.18?type=jar"
       ]
@@ -10485,21 +10692,21 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/tools.jackson.core/jackson-databind@3.2.1?type=jar",
+      "ref" : "pkg:maven/tools.jackson.core/jackson-databind@3.2.3?type=jar",
       "dependsOn" : [
         "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.22?type=jar",
-        "pkg:maven/tools.jackson.core/jackson-core@3.2.1?type=jar"
+        "pkg:maven/tools.jackson.core/jackson-core@3.2.3?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/tools.jackson.core/jackson-core@3.2.1?type=jar",
+      "ref" : "pkg:maven/tools.jackson.core/jackson-core@3.2.3?type=jar",
       "dependsOn" : [ ]
     },
     {
       "ref" : "pkg:maven/tools.jackson.dataformat/jackson-dataformat-yaml@3.2.1?type=jar",
       "dependsOn" : [
-        "pkg:maven/tools.jackson.core/jackson-core@3.2.1?type=jar",
-        "pkg:maven/tools.jackson.core/jackson-databind@3.2.1?type=jar",
+        "pkg:maven/tools.jackson.core/jackson-core@3.2.3?type=jar",
+        "pkg:maven/tools.jackson.core/jackson-databind@3.2.3?type=jar",
         "pkg:maven/org.snakeyaml/snakeyaml-engine@3.0.1?type=jar"
       ]
     },
@@ -10542,20 +10749,20 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.4?type=jar",
+      "ref" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.5?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.3?type=jar",
-        "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.3?type=jar"
+        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.4?type=jar",
+        "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.4?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.3?type=jar",
+      "ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.4?type=jar",
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.3?type=jar",
+      "ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.4.4?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.3?type=jar"
+        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.4?type=jar"
       ]
     },
     {
@@ -10706,7 +10913,7 @@
       "ref" : "pkg:maven/org.apache.httpcomponents/httpclient@4.5.14?type=jar",
       "dependsOn" : [
         "pkg:maven/org.apache.httpcomponents/httpcore@4.4.16?type=jar",
-        "pkg:maven/commons-codec/commons-codec@1.22.1?type=jar"
+        "pkg:maven/commons-codec/commons-codec@1.23.0?type=jar"
       ]
     },
     {
@@ -10741,17 +10948,17 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.53.0?type=jar",
+      "ref" : "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
       "dependsOn" : [
         "pkg:maven/org.jspecify/jspecify@1.0.0?type=jar",
         "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
-        "pkg:maven/com.google.auth/google-auth-library-credentials@1.53.0?type=jar",
+        "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
         "pkg:maven/com.google.http-client/google-http-client@2.2.0?type=jar",
         "pkg:maven/com.google.http-client/google-http-client-gson@2.2.0?type=jar",
         "pkg:maven/com.google.errorprone/error_prone_annotations@2.50.0?type=jar",
-        "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+        "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
         "pkg:maven/com.google.code.gson/gson@2.14.0?type=jar"
       ]
     },
@@ -10760,7 +10967,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.auth/google-auth-library-credentials@1.53.0?type=jar",
+      "ref" : "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
       "dependsOn" : [
         "pkg:maven/org.jspecify/jspecify@1.0.0?type=jar"
       ]
@@ -10779,12 +10986,11 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.google.api/api-common@2.69.0?type=jar",
+      "ref" : "pkg:maven/com.google.api/api-common@2.70.0?type=jar",
       "dependsOn" : [
         "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
-        "pkg:maven/javax.annotation/javax.annotation-api@1.3.2?type=jar",
         "pkg:maven/com.google.errorprone/error_prone_annotations@2.50.0?type=jar"
       ]
     },
@@ -10809,23 +11015,30 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/dev.langchain4j/langchain4j@1.16.0?type=jar",
+      "ref" : "pkg:maven/dev.langchain4j/langchain4j@1.22.0?type=jar",
       "dependsOn" : [
-        "pkg:maven/dev.langchain4j/langchain4j-core@1.16.0?type=jar",
+        "pkg:maven/dev.langchain4j/langchain4j-core@1.22.0?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.22?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.22.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.3?type=jar",
         "pkg:maven/org.apache.opennlp/opennlp-tools@2.5.12?type=jar",
-        "pkg:maven/org.slf4j/slf4j-api@2.0.18?type=jar"
+        "pkg:maven/org.slf4j/slf4j-api@2.0.18?type=jar",
+        "pkg:maven/io.smallrye.reactive/mutiny-zero@1.3.1?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/dev.langchain4j/langchain4j-core@1.16.0?type=jar",
+      "ref" : "pkg:maven/dev.langchain4j/langchain4j-core@1.22.0?type=jar",
       "dependsOn" : [
         "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.22?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.22.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.3?type=jar",
         "pkg:maven/org.slf4j/slf4j-api@2.0.18?type=jar",
+        "pkg:maven/org.jspecify/jspecify@1.0.0?type=jar"
+      ]
+    },
+    {
+      "ref" : "pkg:maven/io.smallrye.reactive/mutiny-zero@1.3.1?type=jar",
+      "dependsOn" : [
         "pkg:maven/org.jspecify/jspecify@1.0.0?type=jar"
       ]
     },
@@ -11237,8 +11450,8 @@
       "ref" : "pkg:maven/software.amazon.awssdk/apache5-client@2.52.0?type=jar",
       "dependsOn" : [
         "pkg:maven/software.amazon.awssdk/http-client-spi@2.52.0?type=jar",
-        "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.4?type=jar",
-        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.3?type=jar",
+        "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.5?type=jar",
+        "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.4.4?type=jar",
         "pkg:maven/software.amazon.awssdk/utils@2.52.0?type=jar",
         "pkg:maven/software.amazon.awssdk/metrics-spi@2.52.0?type=jar",
         "pkg:maven/software.amazon.awssdk/annotations@2.52.0?type=jar"
@@ -11504,13 +11717,28 @@
       ]
     },
     {
-      "ref" : "pkg:maven/dev.langchain4j/langchain4j-bedrock@1.16.0?type=jar",
+      "ref" : "pkg:maven/dev.langchain4j/langchain4j-bedrock@1.22.0?type=jar",
       "dependsOn" : [
-        "pkg:maven/dev.langchain4j/langchain4j-core@1.16.0?type=jar",
+        "pkg:maven/dev.langchain4j/langchain4j-core@1.22.0?type=jar",
+        "pkg:maven/dev.langchain4j/langchain4j-reactive-streaming@1.22.0-beta32?type=jar",
         "pkg:maven/software.amazon.awssdk/bedrockruntime@2.52.0?type=jar",
+        "pkg:maven/io.smallrye.reactive/mutiny-zero@1.3.1?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.22?type=jar",
-        "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.22.3?type=jar",
-        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.3?type=jar",
+        "pkg:maven/org.slf4j/slf4j-api@2.0.18?type=jar"
+      ]
+    },
+    {
+      "ref" : "pkg:maven/dev.langchain4j/langchain4j-reactive-streaming@1.22.0-beta32?type=jar",
+      "dependsOn" : [
+        "pkg:maven/dev.langchain4j/langchain4j-core@1.22.0?type=jar",
+        "pkg:maven/dev.langchain4j/langchain4j-http-client@1.22.0?type=jar",
+        "pkg:maven/io.smallrye.reactive/mutiny-zero@1.3.1?type=jar"
+      ]
+    },
+    {
+      "ref" : "pkg:maven/dev.langchain4j/langchain4j-http-client@1.22.0?type=jar",
+      "dependsOn" : [
+        "pkg:maven/dev.langchain4j/langchain4j-core@1.22.0?type=jar",
         "pkg:maven/org.slf4j/slf4j-api@2.0.18?type=jar"
       ]
     },

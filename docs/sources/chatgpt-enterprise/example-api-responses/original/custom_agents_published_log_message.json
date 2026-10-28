@@ -1,0 +1,26 @@
+{
+  "event_id": "2f6ac884-71f2-4b24-b94b-58a1a55b2c7c",
+  "type": "CUSTOM_AGENTS_LOG",
+  "timestamp": "2026-02-28T20:43:58.762392Z",
+  "principal": {
+    "id": "be545252-ad04-4cfa-9ca5-deca58416151",
+    "type": "CHATGPT_WORKSPACE"
+  },
+  "actor": {
+    "type": "ACCOUNT_USER",
+    "user_id": "user-TUvqhBX7HbQPRgHyEBt5WRcI",
+    "user_email": "user@example.org"
+  },
+  "event_type": "AGENT_PUBLISHED",
+  "client_id": "AGENT_BUILDER_WEB",
+  "workspace_id": "be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details": {
+    "detail_type": "AGENT_PUBLISHED",
+    "agent_id": "agent-123",
+    "version_id": "version-7",
+    "publish_type": "changes",
+    "changes_count": 4,
+    "release_name": "v2",
+    "release_description": "Workflow and connector updates"
+  }
+}

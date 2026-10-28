@@ -42,8 +42,12 @@ resource "aws_lambda_permission" "allow_input_bucket" {
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
   function_name = module.psoxy_lambda.function_name
+  # TODO(v0.8): use function ARN (provider `function_name` accepts ARN) and remove `depends_on` below
+  # function_name = module.psoxy_lambda.function_arn
   principal     = "s3.amazonaws.com"
   source_arn    = data.aws_s3_bucket.input.arn
+
+  depends_on = [module.psoxy_lambda] # TODO(v0.8): remove once invoke permissions use function_arn
 }
 
 resource "aws_s3_bucket_notification" "bucket_notification" {
