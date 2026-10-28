@@ -25,5 +25,5 @@ exclude = [
   '^\\.\\./',
   '^mailto:',
   # GCP Console deep links require a browser session; lychee often fails with HTTP/2 protocol errors in CI.
-  '^https://console\\.cloud\\.google\\.com/',
+  'https://console.cloud.google.com/.*',
 ]
