@@ -8,20 +8,19 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
-# Node version matrix notes:
-# even numbers are LTS; odd go to ~3m maintenance after next major version
-# 18 released 2022-04-19 - maintained until June 2025
-# 20 maintained until June 2026
-# 22 is latest LTS as of Oct 2024; maintained until 2027
-# 24 released May 2025; current until Nov 2025; active until Nov 2026; maintained until May 2027
-# 25 should be latest as of Oct 2025; current until Apr 2026, maintained until June 2026
+# Node version matrix notes (see https://github.com/nodejs/release#release-schedule):
+# even numbers become LTS; odd are short-lived "current" releases
+# 18, 20, 25 are EOL (20 since Apr 2026) - no longer receive security fixes
+# 22 maintenance LTS; EOL Apr 2027
+# 24 LTS; EOL Apr 2028
+# 26 released Apr 2026; becomes LTS Oct 2026 - covered by "latest"
 
 jobs:
   ci_tools:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: ["20", "22", "24", "latest"]
+        node-version: ["22", "24", "latest"]
     steps:
     - uses: actions/checkout@v5
     - name: Use Node.js ${{ matrix.node-version }}
@@ -41,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: ["20", "22", "24", "latest"]
+        node-version: ["22", "24", "latest"]
     steps:
     - uses: actions/checkout@v5
     - name: Use Node.js ${{ matrix.node-version }}

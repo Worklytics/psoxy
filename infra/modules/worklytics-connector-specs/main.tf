@@ -52,21 +52,25 @@ locals {
   }
 
   chat_gpt_enterprise_example_workspace_id = coalesce(var.chat_gpt_enterprise_example_workspace_id, try(var.connector_settings["chat_gpt_enterprise_example_workspace_id"], null), "YOUR_WORKSPACEID")
-  confluence_example_cloud_id              = coalesce(var.confluence_example_cloud_id, try(var.connector_settings["confluence_example_cloud_id"], null), "YOUR_confluence_example_cloud_id")
-  confluence_example_group_id              = coalesce(var.confluence_example_group_id, try(var.connector_settings["confluence_example_group_id"], null), "YOUR_confluence_example_group_id")
-  jira_example_cloud_id                    = coalesce(var.jira_cloud_id, try(var.connector_settings["jira_cloud_id"], null), "YOUR_JIRA_CLOUD_ID")
-  jira_server_url                          = coalesce(var.jira_server_url, try(var.connector_settings["jira_server_url"], null), "YOUR_JIRA_SERVER_URL")
-  jira_example_issue_id                    = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, try(var.connector_settings["jira_example_issue_id"], null), "YOUR_JIRA_EXAMPLE_ISSUE_ID")
-  atlassian_organization_id                = coalesce(var.atlassian_organization_id, try(var.connector_settings["atlassian_organization_id"], null), "YOUR_ATLASSIAN_ORG_ID")
-  github_installation_id                   = coalesce(var.github_installation_id, try(var.connector_settings["github_installation_id"], null), "YOUR_GITHUB_INSTALLATION_ID")
-  github_copilot_installation_id           = coalesce(var.github_copilot_installation_id, try(var.connector_settings["github_copilot_installation_id"], null), "YOUR_GITHUB_COPILOT_INSTALLATION_ID")
-  github_enterprise_server_host            = coalesce(var.github_api_host, var.github_enterprise_server_host != "" ? var.github_enterprise_server_host : null, try(var.connector_settings["github_enterprise_server_host"], null), "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
-  github_enterprise_server_version         = var.github_enterprise_server_version != "v3" ? var.github_enterprise_server_version : try(var.connector_settings["github_enterprise_server_version"], "v3")
-  github_organization                      = coalesce(var.github_organization, try(var.connector_settings["github_organization"], null), "YOUR_GITHUB_ORGANIZATION_NAME")
-  github_first_organization                = split(",", local.github_organization)[0]
-  github_example_repository                = coalesce(var.github_example_repository, try(var.connector_settings["github_example_repository"], null), "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
-  gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, try(var.connector_settings["gitlab_example_group_id"], null), "YOUR_GITLAB_GROUP_ID")
-  gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, try(var.connector_settings["gitlab_example_project_id"], null), "YOUR_GITLAB_PROJECT_ID")
+  # Organization Id is optional (COSTS collection only); keep it `null` when unconfigured so
+  # `settings_to_provide` leaves the Worklytics field blank rather than autofilling an invalid id.
+  chat_gpt_enterprise_organization_id         = try(var.connector_settings["chat_gpt_enterprise_example_organization_id"], null)
+  chat_gpt_enterprise_example_organization_id = coalesce(local.chat_gpt_enterprise_organization_id, "YOUR_ORGANIZATIONID")
+  confluence_example_cloud_id                 = coalesce(var.confluence_example_cloud_id, try(var.connector_settings["confluence_example_cloud_id"], null), "YOUR_confluence_example_cloud_id")
+  confluence_example_group_id                 = coalesce(var.confluence_example_group_id, try(var.connector_settings["confluence_example_group_id"], null), "YOUR_confluence_example_group_id")
+  jira_example_cloud_id                       = coalesce(var.jira_cloud_id, try(var.connector_settings["jira_cloud_id"], null), "YOUR_JIRA_CLOUD_ID")
+  jira_server_url                             = coalesce(var.jira_server_url, try(var.connector_settings["jira_server_url"], null), "YOUR_JIRA_SERVER_URL")
+  jira_example_issue_id                       = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, try(var.connector_settings["jira_example_issue_id"], null), "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  atlassian_organization_id                   = coalesce(var.atlassian_organization_id, try(var.connector_settings["atlassian_organization_id"], null), "YOUR_ATLASSIAN_ORG_ID")
+  github_installation_id                      = coalesce(var.github_installation_id, try(var.connector_settings["github_installation_id"], null), "YOUR_GITHUB_INSTALLATION_ID")
+  github_copilot_installation_id              = coalesce(var.github_copilot_installation_id, try(var.connector_settings["github_copilot_installation_id"], null), "YOUR_GITHUB_COPILOT_INSTALLATION_ID")
+  github_enterprise_server_host               = coalesce(var.github_api_host, var.github_enterprise_server_host != "" ? var.github_enterprise_server_host : null, try(var.connector_settings["github_enterprise_server_host"], null), "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
+  github_enterprise_server_version            = var.github_enterprise_server_version != "v3" ? var.github_enterprise_server_version : try(var.connector_settings["github_enterprise_server_version"], "v3")
+  github_organization                         = coalesce(var.github_organization, try(var.connector_settings["github_organization"], null), "YOUR_GITHUB_ORGANIZATION_NAME")
+  github_first_organization                   = split(",", local.github_organization)[0]
+  github_example_repository                   = coalesce(var.github_example_repository, try(var.connector_settings["github_example_repository"], null), "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
+  gitlab_example_group_id                     = coalesce(var.gitlab_example_group_id, try(var.connector_settings["gitlab_example_group_id"], null), "YOUR_GITLAB_GROUP_ID")
+  gitlab_example_project_id                   = coalesce(var.gitlab_example_project_id, try(var.connector_settings["gitlab_example_project_id"], null), "YOUR_GITLAB_PROJECT_ID")
 
   # Shared GraphQL example for GitHub connectors. GraphQL `variables.org` uses github_first_organization
   # (first value when github_organization is comma-separated). REST `/users/{USERNAME}` placeholders are
@@ -156,7 +160,8 @@ EOT
         }
       ],
       settings_to_provide = {
-        "Workspace Id" = local.chat_gpt_enterprise_example_workspace_id
+        "Workspace Id"    = local.chat_gpt_enterprise_example_workspace_id
+        "Organization Id" = local.chat_gpt_enterprise_organization_id
       }
       reserved_concurrent_executions : null
       enable_async_processing : true
@@ -172,6 +177,8 @@ EOT
       # Legacy `/conversations` paths below remain allow-listed for existing deployments, but OpenAI reports
       # the stateful API was removed on June 5, 2026 — generated test calls may fail; prefer `/logs` for new integrations.
       # `{CONVERSATION_ID}`: only meaningful if your tenant still serves the legacy conversations API.
+      # `{ORGANIZATION_ID}`: ChatGPT organization id (Worklytics "Organization Id" / connector_settings.chat_gpt_enterprise_example_organization_id);
+      #   optional - only needed to collect COSTS (usage/billing) data via the organization-scoped `/logs` route below.
       example_api_calls : [
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/users",
@@ -180,9 +187,12 @@ EOT
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/automations",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/logs",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/logs/{LOG_FILE_ID}",
+        "/v1/compliance/organizations/${local.chat_gpt_enterprise_example_organization_id}/logs?event_type=COSTS&after=${time_static.deployment.unix - 86400 * 30}",
+        "/v1/compliance/organizations/${local.chat_gpt_enterprise_example_organization_id}/logs/{LOG_FILE_ID}",
       ]
       external_token_todo : templatefile("${path.module}/docs/chatgpt/enterprise/instructions.tftpl", {
         workspace_id                = local.chat_gpt_enterprise_example_workspace_id,
+        organization_id             = local.chat_gpt_enterprise_example_organization_id,
         path_to_instance_parameters = "PSOXY_CHATGPT_ENTERPRISE_"
       })
     }
