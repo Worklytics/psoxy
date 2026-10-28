@@ -21,9 +21,12 @@ exclude_loopback = true
 # Skip relative markdown links.
 exclude = [
   '^/',
-  '^\\./',
-  '^\\.\\./',
+  '^\./',
+  '^\.\./',
   '^mailto:',
   # GCP Console deep links require a browser session; lychee often fails with HTTP/2 protocol errors in CI.
-  'https://console.cloud.google.com/.*',
+  # NOTE: lychee.toml strings are TOML literal (single-quoted) strings, so backslashes are NOT
+  # escape characters here - a doubled '\\.' below is a literal two-backslash sequence in the
+  # resulting regex (never matches), not an escaped dot. Use a single '\.' for a literal dot.
+  '^https://console\.cloud\.google\.com/',
 ]
