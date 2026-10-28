@@ -307,7 +307,7 @@ check "bulk_connector_s3_trigger_options_exclusive" {
   assert {
     condition = alltrue([
       for k, t in local.bulk_connector_s3_triggers :
-      t.file_pattern == null || trimspace(t.file_pattern) == "" || (t.file_prefix == null && t.file_suffix == null)
+      (t.file_pattern == null ? true : trimspace(t.file_pattern) == "") || (t.file_prefix == null && t.file_suffix == null)
     ])
     error_message = "Bulk connector S3 trigger: use file_pattern (EventBridge) OR file_prefix/file_suffix (native S3 notification), not both. Check custom_bulk_connector_arguments and bulk_connectors / custom_bulk_connectors."
   }

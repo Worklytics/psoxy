@@ -11,7 +11,7 @@ module "env_id" {
 }
 
 locals {
-  use_eventbridge_trigger = var.file_pattern != null && trimspace(var.file_pattern) != ""
+  use_eventbridge_trigger = var.file_pattern == null ? false : trimspace(var.file_pattern) != ""
   eventbridge_rule_name   = substr("${module.env_id.id}-${replace(var.instance_id, "_", "-")}-bulk-s3", 0, 64)
 }
 

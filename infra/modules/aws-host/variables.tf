@@ -374,8 +374,7 @@ variable "custom_bulk_connector_arguments" {
   validation {
     condition = alltrue([
       for k, args in var.custom_bulk_connector_arguments :
-      args.file_pattern == null
-      || trimspace(args.file_pattern) == ""
+      (args.file_pattern == null ? true : trimspace(args.file_pattern) == "")
       || (args.file_prefix == null && args.file_suffix == null)
     ])
     error_message = "custom_bulk_connector_arguments: file_pattern cannot be set together with file_prefix or file_suffix for the same connector id."

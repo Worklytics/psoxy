@@ -32,7 +32,7 @@ module "env_id" {
 locals {
   bucket_name_prefix = "${module.env_id.id}-${replace(var.instance_id, "_", "-")}"
 
-  use_eventbridge_trigger = var.file_pattern != null && trimspace(var.file_pattern) != ""
+  use_eventbridge_trigger = var.file_pattern == null ? false : trimspace(var.file_pattern) != ""
   # Prefix matches bulk Lambda name (${module.env_id.id}-${instance_id}) so rules sort with other env resources
   eventbridge_rule_name = substr("${module.env_id.id}-${replace(var.instance_id, "_", "-")}-bulk-s3", 0, 64)
 }
