@@ -57,6 +57,8 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   lambda_function {
     lambda_function_arn = module.psoxy_lambda.function_arn
     events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = var.file_prefix != null ? var.file_prefix : ""
+    filter_suffix       = var.file_suffix != null ? var.file_suffix : ""
   }
 
   depends_on = [aws_lambda_permission.allow_input_bucket]

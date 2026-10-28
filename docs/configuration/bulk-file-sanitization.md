@@ -264,6 +264,40 @@ Alternatively, you can remove the environment variable from your instance, and i
 
 This approach is useful for testing, but note that if you later run `terraform apply` again, any changes you make to the environment variable may be overwritten by Terraform.
 
+### Limiting which S3 uploads invoke the bulk Lambda (AWS)
+
+By default, every new object in a bulk connector's **input** bucket triggers the Psoxy Lambda. If your upstream process lands many files in that bucket but only some should be sanitized, configure optional **S3 event notification filters** so only matching object keys invoke the function.
+
+On AWS deployments, set `file_prefix` and/or `file_suffix` on the connector (custom bulk connectors) or in `custom_bulk_connector_arguments` (for prebuilt connectors such as `hris`). These map directly to the S3 notification `filter_prefix` / `filter_suffix` for `s3:ObjectCreated` events. They do not delete or block uploads; files that do not match simply do not trigger Psoxy.
+
+Example for a prebuilt connector:
+
+```hcl
+custom_bulk_connector_arguments = {
+  hris = {
+    file_prefix = "worklytics/inbound/"
+    file_suffix = ".csv"
+  }
+}
+```
+
+Example on a custom bulk connector:
+
+```hcl
+custom_bulk_connectors = {
+  my_vendor_export = {
+    source_kind = "my_vendor_export"
+    file_prefix = "exports/psoxy/"
+    file_suffix = ".csv.gz"
+    rules = {
+      columnsToPseudonymize = ["employee_id"]
+    }
+  }
+}
+```
+
+If both are set, the object key must match **both** the prefix and suffix. See [AWS S3 event notification filters](https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-how-to-filtering.html). This filtering is not available for GCP bulk connectors in the same form; GCP Eventarc triggers in our modules do not expose an equivalent prefix/suffix filter today.
+
 ### Troubleshooting
 
 If you encounter issues processing your files, check the logs of the Psoxy instance. The logs will give some indication of what went wrong, and may help you identify the issue.

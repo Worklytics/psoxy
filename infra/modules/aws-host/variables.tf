@@ -306,6 +306,8 @@ variable "bulk_connectors" {
     settings_to_provide   = optional(map(string), {})
     enable_gen_metadata   = optional(bool, false)
     environment_variables = optional(map(string), {})
+    file_prefix           = optional(string) # S3 notification filter; only matching keys invoke the bulk Lambda
+    file_suffix           = optional(string) # S3 notification filter; only matching keys invoke the bulk Lambda
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -360,6 +362,8 @@ variable "custom_bulk_connector_rules" {
 variable "custom_bulk_connector_arguments" {
   type = map(object({
     memory_size_mb = optional(number)
+    file_prefix    = optional(string) # overrides bulk_connectors / custom_bulk_connectors value for this connector id
+    file_suffix    = optional(string)
   }))
 
   description = "map of connector id --> arguments object"

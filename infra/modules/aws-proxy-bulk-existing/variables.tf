@@ -190,3 +190,17 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 2
 }
+
+variable "file_prefix" {
+  type        = string
+  description = "Optional S3 object key prefix filter for the input bucket notification that invokes this Lambda. Only `s3:ObjectCreated` events for keys starting with this prefix will trigger processing. Omit or leave null to invoke on all new objects."
+  default     = null
+  nullable    = true
+}
+
+variable "file_suffix" {
+  type        = string
+  description = "Optional S3 object key suffix filter for the input bucket notification that invokes this Lambda. Only `s3:ObjectCreated` events for keys ending with this suffix will trigger processing. Omit or leave null to invoke on all new objects."
+  default     = null
+  nullable    = true
+}
