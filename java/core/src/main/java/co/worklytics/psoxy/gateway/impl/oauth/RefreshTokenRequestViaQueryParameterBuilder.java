@@ -32,7 +32,7 @@ public class RefreshTokenRequestViaQueryParameterBuilder
     private static final Map<String, String> EMPTY_MAP = Collections.emptyMap();
 
     @Inject
-    ConfigService config;
+    AccountCredentialsGrantConfig accountCredentialsGrantConfig;
     @Inject
     SecretStore secretStore;
 
@@ -77,8 +77,9 @@ public class RefreshTokenRequestViaQueryParameterBuilder
 
     @Override
     public void addHeaders(HttpHeaders httpHeaders) {
-        String clientId = StringUtils.trim(config.getConfigPropertyAsOptional(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID)
-            .orElseGet(() -> secretStore.getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID)));
+        String clientId = StringUtils.trim(accountCredentialsGrantConfig.getClientId()
+            .orElseGet(() -> secretStore.getConfigPropertyOrError(
+                AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID)));
 
         String clientSecret = StringUtils.trim(secretStore.getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET));
 

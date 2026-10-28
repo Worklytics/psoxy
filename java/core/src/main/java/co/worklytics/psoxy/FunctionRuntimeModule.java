@@ -19,7 +19,7 @@ import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LoggingConfiguration;
 import co.worklytics.psoxy.gateway.ProcessedDataStage;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
@@ -74,8 +74,8 @@ public class FunctionRuntimeModule {
 
     @Provides
     @Singleton
-    static ProxyConstants providesProxyConstants(ConfigService configService) {
-        String userAgent = configService.getConfigPropertyAsOptional(ProxyConfigProperty.USER_AGENT)
+    static ProxyConstants providesProxyConstants(ProxyConfig proxyConfig) {
+        String userAgent = proxyConfig.getUserAgent()
                 .orElse(ProxyConstants.buildDefaultUserAgent());
 
         return ProxyConstants.builder()
@@ -157,10 +157,11 @@ public class FunctionRuntimeModule {
 
     @SneakyThrows
     @Provides @Singleton WebhookSanitizer webhookSanitizer(WebhookSanitizerImplFactory webhookSanitizerFactory,
-                                                           ConfigService configService,
+                                                           ProxyConfig proxyConfig,
                                                            @Named("ForYAML") ObjectMapper objectMapper,
                                                            co.worklytics.psoxy.rules.RulesUtils rulesUtils) {
-        String rulesStr = configService.getConfigPropertyOrError(ProxyConfigProperty.RULES);
+        String rulesStr = proxyConfig.getRules().orElseThrow(() -> new IllegalStateException(
+            "Missing required config: RULES"));
         String yamlEncodedRules = rulesUtils.decodeToYaml(rulesStr);
         WebhookCollectionRules rules =
             objectMapper.readerFor(WebhookCollectionRules.class).readValue(yamlEncodedRules);

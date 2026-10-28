@@ -244,6 +244,13 @@ public interface AwsModule {
 
     @Provides
     @Singleton
+    static AwsWorkloadIdentityFederationGrantConfig awsWorkloadIdentityFederationGrantConfig(
+            ConfigService configService) {
+        return AwsWorkloadIdentityFederationGrantConfig.fromConfigService(configService);
+    }
+
+    @Provides
+    @Singleton
     static GenMetadataConfig genMetadataConfig(ConfigService configService) {
         return BedrockGenMetadataConfig.from(configService);
     }

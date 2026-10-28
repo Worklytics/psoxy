@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import com.avaulta.gateway.resources.ResourceService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.rules.RESTRules;
@@ -20,7 +20,7 @@ class ConfigRulesModuleTest {
 
     private Logger logger;
     private RulesUtils rulesUtils;
-    private ConfigService config;
+    private ProxyConfig proxyConfig = ProxyConfig.builder().build();
     private EnvVarsConfigService envVarsConfigService;
     private ResourceService resourceService;
 
@@ -28,7 +28,6 @@ class ConfigRulesModuleTest {
     void setUp() {
         logger = Logger.getLogger(ConfigRulesModuleTest.class.getName());
         rulesUtils = MockModules.provideMock(RulesUtils.class);
-        config = MockModules.provideMock(ConfigService.class);
         envVarsConfigService = MockModules.provideMock(EnvVarsConfigService.class);
         resourceService = MockModules.provideMock(ResourceService.class);
     }
@@ -36,42 +35,43 @@ class ConfigRulesModuleTest {
     @Test
     void rules_loadedFromEnvConfig() {
         RuleSet mockRuleSet = MockModules.provideMock(RuleSet.class);
-        when(rulesUtils.getRulesFromConfig(config, envVarsConfigService)).thenReturn(Optional.of(mockRuleSet));
+        when(rulesUtils.getRulesFromConfig(proxyConfig, envVarsConfigService)).thenReturn(Optional.of(mockRuleSet));
 
-        RuleSet resolved = ConfigRulesModule.rules(logger, rulesUtils, config, envVarsConfigService, resourceService);
+        RuleSet resolved = ConfigRulesModule.rules(logger, rulesUtils, proxyConfig, envVarsConfigService, resourceService);
 
         assertEquals(mockRuleSet, resolved);
         verifyNoInteractions(resourceService);
-        verify(config, never()).getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE);
     }
 
     @Test
     void rules_loadedFromResource() {
         RuleSet mockRuleSet = MockModules.provideMock(RuleSet.class);
-        when(rulesUtils.getRulesFromConfig(config, envVarsConfigService)).thenReturn(Optional.empty());
+        when(rulesUtils.getRulesFromConfig(proxyConfig, envVarsConfigService)).thenReturn(Optional.empty());
         when(rulesUtils.getRulesFromResource(resourceService)).thenReturn(Optional.of(mockRuleSet));
 
-        RuleSet resolved = ConfigRulesModule.rules(logger, rulesUtils, config, envVarsConfigService, resourceService);
+        RuleSet resolved = ConfigRulesModule.rules(logger, rulesUtils, proxyConfig, envVarsConfigService, resourceService);
 
         assertEquals(mockRuleSet, resolved);
         verify(rulesUtils).getRulesFromResource(resourceService);
-        verify(config, never()).getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE);
     }
 
     @Test
     void rules_fallbackToDefaults() {
-        when(rulesUtils.getRulesFromConfig(config, envVarsConfigService)).thenReturn(Optional.empty());
+        ConfigService config = MockModules.provideMock(ConfigService.class);
+        when(config.getConfigPropertyAsOptional(co.worklytics.psoxy.gateway.ProxyConfigProperty.SOURCE))
+            .thenReturn(Optional.of("gmail"));
+        when(config.getConfigPropertyAsOptional(co.worklytics.psoxy.gateway.ProxyConfigProperty.PSEUDONYMIZE_APP_IDS))
+            .thenReturn(Optional.of("false"));
+        ProxyConfig resolvedProxyConfig = ProxyConfig.fromConfigService(config);
+
+        when(rulesUtils.getRulesFromConfig(resolvedProxyConfig, envVarsConfigService)).thenReturn(Optional.empty());
         when(rulesUtils.getRulesFromResource(resourceService)).thenReturn(Optional.empty());
 
-        when(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE)).thenReturn(Optional.of("gmail"));
-        when(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYMIZE_APP_IDS)).thenReturn(Optional.of("false"));
-
-        RuleSet resolved = ConfigRulesModule.rules(logger, rulesUtils, config, envVarsConfigService, resourceService);
+        RuleSet resolved = ConfigRulesModule.rules(logger, rulesUtils, resolvedProxyConfig, envVarsConfigService, resourceService);
 
         assertNotNull(resolved);
         assertTrue(resolved instanceof RESTRules);
         verify(rulesUtils).getRulesFromResource(resourceService);
-        verify(config).getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE);
     }
 
     @Test
@@ -85,11 +85,10 @@ class ConfigRulesModuleTest {
 
     @Test
     void rules_doesNotFallbackToDefaultsWhenResourceRulesAreInvalid() {
-        when(rulesUtils.getRulesFromConfig(config, envVarsConfigService)).thenReturn(Optional.empty());
+        when(rulesUtils.getRulesFromConfig(proxyConfig, envVarsConfigService)).thenReturn(Optional.empty());
         when(rulesUtils.getRulesFromResource(resourceService)).thenThrow(new RuntimeException("Invalid resource rules"));
 
         assertThrows(RuntimeException.class,
-            () -> ConfigRulesModule.rules(logger, rulesUtils, config, envVarsConfigService, resourceService));
-        verify(config, never()).getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE);
+            () -> ConfigRulesModule.rules(logger, rulesUtils, proxyConfig, envVarsConfigService, resourceService));
     }
 }

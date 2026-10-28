@@ -137,6 +137,11 @@ variable "environment_variables" {
     condition     = !contains(keys(var.environment_variables), "REQUEST_TIMEOUT_SECONDS")
     error_message = "REQUEST_TIMEOUT_SECONDS cannot be set via environment_variables; use timeout_seconds instead."
   }
+
+  validation {
+    condition     = !contains(keys(var.environment_variables), "CLIENT_IP_X_FORWARDED_FOR_OFFSET")
+    error_message = "CLIENT_IP_X_FORWARDED_FOR_OFFSET cannot be set via environment_variables; use client_ip_x_forwarded_for_offset instead."
+  }
 }
 
 variable "source_kind" {
@@ -305,6 +310,21 @@ variable "ingress_settings" {
     condition     = contains(["ALLOW_ALL", "ALLOW_INTERNAL_AND_GCLB", "ALLOW_INTERNAL_ONLY"], var.ingress_settings)
     error_message = "ingress_settings must be one of: ALLOW_ALL, ALLOW_INTERNAL_AND_GCLB, ALLOW_INTERNAL_ONLY."
   }
+}
+
+variable "client_ip_x_forwarded_for_offset" {
+  type        = number
+  description = <<-EOT
+    Negative offset from the end of X-Forwarded-For for the optional IP allowlist. -1 is the last address. This module does not interpret how proxies in front of the function append that header; pass the offset that matches the deployment. Sets CLIENT_IP_X_FORWARDED_FOR_OFFSET.
+
+    Null (default) with an allowlist uses -1. A future release will require an explicit offset whenever an allowlist is set.
+
+    X-Forwarded-For can be spoofed in whole or in part. IP allowlisting is optional and only increases attack complexity. Do not rely on it for authentication. Authenticate and authorize with a reliable scheme, such as GCP IAM.
+
+    CLIENT_IP_X_FORWARDED_FOR_OFFSET is reserved. Set it with this variable, not environment_variables.
+  EOT
+  default     = null
+  nullable    = true
 }
 
 variable "external_lb_base_url" {

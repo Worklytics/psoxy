@@ -109,7 +109,7 @@ public class GcpApiDataRequestHandler {
 
     void handleSyncCase(HttpRequest request, HttpResponse response) {
         // sync case
-        CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request);
+        CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request, gcpApiModeConfig.get().getClientIpXForwardedForOffset());
 
         try {
             if (envVarsConfigService.isDevelopment()) {

@@ -734,8 +734,35 @@ public class PrebuiltSanitizerRules {
         .innerJsonPath("$..text")
         .build();
 
+    /**
+     * keywords counted in textDigest of AI prompts; same list as other AI tools' rules (eg, chatgpt-enterprise)
+     */
+    static final List<String> AI_PROMPT_KEYWORDS = List.of(
+        "python", "javascript", "typescript", "java", "sql", "html",
+        "react", "bash", "css", "docker", "ruby", "golang",
+        "kotlin", "php", "node", "angular", "vue", "swift",
+        "npm", "github", "git", "function", "error", "api",
+        "debug", "implement", "bug", "deploy", "script", "class",
+        "method", "array", "exception", "refactor", "compile", "callback",
+        "const", "async", "await", "pull request", "code review", "unit test",
+        "stack trace", "code", "generate image", "create image", "draw image", "make image",
+        "design image", "picture of", "illustration of", "visual of", "render", "generate graphic",
+        "create graphic", "dall-e", "dalle", "email", "e-mail", "mail",
+        "summarize", "summarise", "summary", "pivot table", "bar chart", "line chart",
+        "pie chart", "data analysis", "vlookup", "financials", "accounting", "payroll",
+        "breakeven", "cashflow", "nps", "tableau", "snowflake", "analyze",
+        "chart", "pivot", "write", "draft", "compose", "craft",
+        "design", "draw", "rewrite", "proofread", "redline", "review",
+        "translate to", "report", "proposal", "blog", "article", "presentation",
+        "slides", "brief", "newsletter", "linkedin", "memo", "deck",
+        "outline", "contract", "nda", "what is", "what are", "how does",
+        "how do", "how to", "explain how", "explain why", "explain what", "why does",
+        "why is", "difference between", "best practices", "compared to", "brainstorm", "alternatives",
+        "versus", "tradeoffs", "explain", "compared");
+
     static final Augment.TextDigest MS_COPILOT_AUGMENT_BODY = Augment.TextDigest.builder()
         .jsonPath("$..body.content")
+        .keywords(AI_PROMPT_KEYWORDS)
         .build();
 
     static final Transform.Redact MS_COPILOT_CONTENT_REDACT = Transform.Redact.builder()
