@@ -26,6 +26,7 @@ locals {
     ATLASSIAN_ORGANIZATION_ID = "Atlassian Organization Id"
     GITHUB_ORGANIZATION       = "GitHub Organization",
     WORKSPACE_ID              = "Workspace Id"
+    ORGANIZATION_ID           = "Organization Id"
   }
 
   query_params = [for param_name, ux_name in local.autofilled_settings : "${param_name}=${urlencode(var.settings_to_provide[ux_name])}"
@@ -47,6 +48,7 @@ locals {
     "AWS Psoxy Role ARN"        = "IAM role Worklytics assumes to call the proxy and read the bucket"
     "AWS Psoxy Region"          = "AWS region of the proxy deployment"
     "Workspace Id"              = "ChatGPT Enterprise workspace id"
+    "Organization Id"           = "ChatGPT organization id (optional, for cost/usage data)"
     "Parser"                    = "bulk import parser id"
     "Atlassian Organization Id" = "Atlassian organization id"
     "GitHub Organization"       = "GitHub organization"

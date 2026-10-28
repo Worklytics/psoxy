@@ -45,7 +45,9 @@ if [ -n "${REMOTE_URI}" ] && [[ "${REMOTE_URI}" != s3://* && "${REMOTE_URI}" != 
     exit 1
 fi
 
-BASE_URL="https://opennlp.sourceforge.net/models-1.5"
+# The opennlp.sourceforge.net vanity subdomain no longer serves files directly (404s);
+# SourceForge now requires the /projects/.../files/.../download path, which redirects to a mirror.
+BASE_URL="https://sourceforge.net/projects/opennlp/files/models-1.5"
 DEST_DIR="java/gateway-core/src/main/resources/opennlp"
 
 # Downloaded for local dev / tests (includes NER models not used by textMetadata at runtime).
@@ -81,7 +83,7 @@ for MODEL in "${MODELS[@]}"; do
     fi
 
     printf "${INFO}Fetching %s...${NC}\n" "$MODEL"
-    if curl -L -f -s -o "$TARGET_PATH" "$BASE_URL/$MODEL"; then
+    if curl -L -f -s -o "$TARGET_PATH" "$BASE_URL/$MODEL/download"; then
         printf "${SUCCESS}Successfully downloaded %s${NC}\n" "$MODEL"
     else
         printf "${ERR}Failed to download %s${NC}\n" "$MODEL"
