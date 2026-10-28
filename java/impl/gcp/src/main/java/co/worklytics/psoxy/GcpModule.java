@@ -12,6 +12,7 @@ import com.google.cloud.kms.v1.KeyManagementServiceClient;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.ConnectivityFailures;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.LockService;
@@ -226,5 +227,9 @@ public interface GcpModule {
         @Binds
         @IntoSet
         abstract GenMetadataChatModelProvider vertexGeminiChatModelProvider(VertexGeminiChatModelProvider impl);
+
+        @Binds
+        @IntoSet
+        abstract ConnectivityFailures gcpConnectivityFailures(GcpConnectivityFailures impl);
     }
 }
