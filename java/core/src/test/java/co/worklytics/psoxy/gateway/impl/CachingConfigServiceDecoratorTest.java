@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Ticker;
 import co.worklytics.psoxy.gateway.TransientConfigException;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -166,6 +167,31 @@ class CachingConfigServiceDecoratorTest {
         assertEquals(Optional.of("valid_token"),
             cache.getConfigPropertyAsOptional(TestConfigProperties.EXAMPLE_PROPERTY));
         assertEquals(CachingConfigServiceDecorator.MAX_TRANSIENT_RETRIES * 2 + 1, delegate.getReads());
+    }
+
+    @Test
+    void transientRetryDelayDoublesUntilCap() {
+        CachingConfigServiceDecorator cache =
+            new CachingConfigServiceDecorator(localHashMapConfigService, Duration.ofMinutes(1));
+
+        assertEquals(CachingConfigServiceDecorator.DEFAULT_TRANSIENT_RETRY_DELAY_MS,
+            cache.maxTransientRetryDelayMs(0));
+        assertEquals(CachingConfigServiceDecorator.DEFAULT_TRANSIENT_RETRY_DELAY_MS * 2,
+            cache.maxTransientRetryDelayMs(1));
+        assertEquals(CachingConfigServiceDecorator.DEFAULT_TRANSIENT_RETRY_DELAY_MS * 4,
+            cache.maxTransientRetryDelayMs(2));
+        assertEquals(CachingConfigServiceDecorator.MAX_TRANSIENT_RETRY_DELAY_MS,
+            cache.maxTransientRetryDelayMs(10));
+    }
+
+    @Test
+    void transientRetryDelayUsesInjectedRandomGenerator() {
+        RandomNumberGenerator alwaysMax = bound -> bound - 1;
+        CachingConfigServiceDecorator cache = new CachingConfigServiceDecorator(
+            localHashMapConfigService, Duration.ofMinutes(1), new FakeTicker(), 500L, alwaysMax);
+
+        assertEquals(500L, cache.computeTransientRetryDelayMs(0));
+        assertEquals(1000L, cache.computeTransientRetryDelayMs(1));
     }
 
     @Test

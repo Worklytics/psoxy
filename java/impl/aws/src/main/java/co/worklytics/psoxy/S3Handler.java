@@ -15,6 +15,9 @@ import javax.inject.Inject;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
+import com.newrelic.opentracing.LambdaTracer;
+import io.opentracing.util.GlobalTracer;
+import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
@@ -31,18 +34,37 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 @Log
 public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<S3Event, String> {
 
-    @Inject
-    StorageHandler storageHandler;
+    /**
+     * Static initialization allows reuse in containers
+     * {@link "https://aws.amazon.com/premiumsupport/knowledge-center/lambda-improve-java-function-performance/"}
+     */
+    static AwsContainer awsContainer;
+    static StorageHandler storageHandler;
+    static S3Client s3Client;
 
-    @Inject
-    S3Client s3Client;
+    static {
+        staticInit();
+    }
 
+    private static void staticInit() {
+        awsContainer = DaggerAwsContainer.create();
+        S3Handler bootstrap = new S3Handler();
+        awsContainer.injectS3Handler(bootstrap);
+        storageHandler = bootstrap.injectedStorageHandler;
+        s3Client = bootstrap.injectedS3Client;
+
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            awsContainer.loggingConfiguration().validateNewRelicHandler(S3Handler.class);
+            GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
+        }
+    }
+
+    @Inject StorageHandler injectedStorageHandler;
+    @Inject S3Client injectedS3Client;
 
     @SneakyThrows
     @Override
     public String handleRequest(S3Event s3Event, Context context) {
-
-        DaggerAwsContainer.create().injectS3Handler(this);
 
         S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
 
