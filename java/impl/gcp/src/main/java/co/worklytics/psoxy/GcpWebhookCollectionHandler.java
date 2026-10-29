@@ -22,7 +22,6 @@ import com.google.pubsub.v1.ProjectSubscriptionName;
 import com.google.pubsub.v1.PullRequest;
 import com.google.pubsub.v1.PullResponse;
 import com.google.pubsub.v1.ReceivedMessage;
-import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
@@ -41,7 +40,6 @@ public class GcpWebhookCollectionHandler {
     GoogleIdTokenVerifierFactory googleIdTokenVerifierFactory;
     GcpEnvironment gcpEnvironment;
     BatchMergeHandler batchMergeHandler;
-    ConfigService configService;
     WebhookCollectorModeConfig webhookCollectorModeConfig;
     JwksDecorator jwksResource;
     EnvVarsConfigService envVarsConfigService;
@@ -56,7 +54,6 @@ public class GcpWebhookCollectionHandler {
                                        GcpEnvironment gcpEnvironment,
                                        BatchMergeHandler batchMergeHandler,
                                        JwksDecorator.Factory jwksDecoratorFactory,
-                                       ConfigService configService,
                                        WebhookCollectorModeConfig webhookCollectorModeConfig,
                                        EnvVarsConfigService envVarsConfigService,
                                        Lazy<GcpEnvironment.GcpWebhookCollectorModeConfig> gcpWebhookCollectorModeConfig) {
@@ -65,7 +62,6 @@ public class GcpWebhookCollectionHandler {
         this.googleIdTokenVerifierFactory = googleIdTokenVerifierFactory;
         this.batchMergeHandler = batchMergeHandler;
         this.jwksResource = jwksDecoratorFactory.create(inboundWebhookHandler);
-        this.configService = configService;
         this.webhookCollectorModeConfig = webhookCollectorModeConfig;
         this.envVarsConfigService = envVarsConfigService;
         this.gcpWebhookCollectorModeConfig = gcpWebhookCollectorModeConfig;
@@ -118,7 +114,8 @@ public class GcpWebhookCollectionHandler {
             // request SHOULD Contain Authorization header, which handleBatch should check
             handleBatch(request, response);
         } else {
-            CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request);
+            CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(
+                request, gcpWebhookCollectorModeConfig.get().getClientIpXForwardedForOffset());
             HttpEventResponse genericResponse;
             if (request.getPath().startsWith("/" + JwksDecorator.PATH_TO_RESOURCE)) {
                 // JWKS resources are *publically* accessible

@@ -2,8 +2,7 @@ package co.worklytics.psoxy;
 
 import java.util.Optional;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import dagger.assisted.AssistedFactory;
 
 @AssistedFactory
@@ -13,11 +12,10 @@ public interface PseudonymizerImplFactory {
 
     // explicitly checking for LEGACY to warn user, so must suppress deprecation warning
     @SuppressWarnings("deprecation")
-    default Pseudonymizer.ConfigurationOptions buildOptions(ConfigService config) {
+    default Pseudonymizer.ConfigurationOptions buildOptions(ProxyConfig proxyConfig) {
         Pseudonymizer.ConfigurationOptions.ConfigurationOptionsBuilder builder = Pseudonymizer.ConfigurationOptions.builder();
 
-        Optional<PseudonymImplementation> pseudonymImplementation = config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION)
-            .map(PseudonymImplementation::parseConfigPropertyValue);
+        Optional<PseudonymImplementation> pseudonymImplementation = proxyConfig.getPseudonymImplementation();
 
         pseudonymImplementation
             .ifPresent(builder::pseudonymImplementation);
@@ -28,12 +26,10 @@ public interface PseudonymizerImplFactory {
             }
         });
 
-        config.getConfigPropertyAsOptional(ProxyConfigProperty.EMAIL_CANONICALIZATION)
-            .map(EmailCanonicalization::parseConfigPropertyValue)
+        proxyConfig.getEmailCanonicalization()
             .ifPresent(builder::emailCanonicalization);
 
-        config.getConfigPropertyAsOptional(ProxyConfigProperty.EMAIL_DOMAIN_HANDLING)
-            .map(EmailDomainHandling::parseConfigPropertyValue)
+        proxyConfig.getEmailDomainHandling()
             .ifPresent(builder::emailDomainHandling);
 
         return builder.build();

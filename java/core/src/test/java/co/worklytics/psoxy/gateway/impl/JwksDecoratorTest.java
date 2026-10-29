@@ -11,7 +11,8 @@ import java.util.Collections;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfig;
+import static org.mockito.Mockito.mock;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
@@ -26,7 +27,6 @@ import co.worklytics.test.MockModules;
 public class JwksDecoratorTest {
 
     JwksDecorator handler;
-    ConfigService configService;
     WebhookCollectorModeConfig webhookCollectorModeConfig;
     Set<PublicKeyStoreClient> keyClients;
 
@@ -56,8 +56,6 @@ public class JwksDecoratorTest {
         PublicKey publicKey = keyPair.getPublic();
         generatedBase64Key = Base64.getEncoder().encodeToString(publicKey.getEncoded());
 
-        configService = MockModules.ForConfigService.configService();
-        
         // Mock WebhookCollectorModeConfig
         webhookCollectorModeConfig = WebhookCollectorModeConfig.builder()
         .acceptedAuthKeys("base64:" + generatedBase64Key)
@@ -69,7 +67,7 @@ public class JwksDecoratorTest {
         handler = new JwksDecorator(new InboundWebhookHandler(
             () -> MockModules.provideMock(WebhookSanitizer.class),
             new NoOutput(),
-            configService,
+            mock(co.worklytics.psoxy.gateway.ProxyConfig.class),
             webhookCollectorModeConfig,
             new NetworkSecurityUtils(
                     ApiModeConfig.builder().build(),

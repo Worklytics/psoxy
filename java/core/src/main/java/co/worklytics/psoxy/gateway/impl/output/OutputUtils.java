@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import javax.inject.Inject;
@@ -12,10 +13,9 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import com.google.common.annotations.VisibleForTesting;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
-import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.ProcessedDataStage;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
@@ -40,7 +40,7 @@ import lombok.extern.java.Log;
 public class OutputUtils {
 
     @Inject
-    ConfigService configService;
+    ProxyConfig proxyConfig;
     @Inject
     ApiModeConfig apiModeConfig;
     @Inject
@@ -62,12 +62,12 @@ public class OutputUtils {
     @SuppressWarnings("unchecked")
     public ApiDataSideOutput forStage(ProcessedDataStage processedDataStage) {
 
-        ProxyConfigProperty configProperty = switch (processedDataStage) {
-            case ORIGINAL -> ProxyConfigProperty.SIDE_OUTPUT_ORIGINAL;
-            case SANITIZED -> ProxyConfigProperty.SIDE_OUTPUT_SANITIZED;
+        Optional<String> sideOutputLocation = switch (processedDataStage) {
+            case ORIGINAL -> proxyConfig.getSideOutputOriginal();
+            case SANITIZED -> proxyConfig.getSideOutputSanitized();
         };
 
-        Output outputToAdapt = configService.getConfigPropertyAsOptional(configProperty)
+        Output outputToAdapt = sideOutputLocation
             .map(OutputLocationImpl::of)
             .map(this::createOutputForLocation)
             .map(output -> (Output) CompressedOutputWrapper.wrap((Output) output))
