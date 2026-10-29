@@ -31,6 +31,9 @@ module "env_id" {
 
 locals {
   bucket_name_prefix = "${module.env_id.id}-${replace(var.instance_id, "_", "-")}"
+
+  rules_plain = var.rules_file == null ? yamlencode(var.rules) : file(var.rules_file)
+  rules_hash  = sha1(local.rules_plain)
 }
 
 
@@ -64,8 +67,9 @@ module "psoxy_lambda" {
   environment_variables = merge(
     var.environment_variables,
     {
-      INPUT_BUCKET  = aws_s3_bucket.input.bucket,
-      OUTPUT_BUCKET = aws_s3_bucket.sanitized.bucket,
+      INPUT_BUCKET     = aws_s3_bucket.input.bucket,
+      OUTPUT_BUCKET    = aws_s3_bucket.sanitized.bucket,
+      CUSTOM_RULES_SHA = local.rules_hash,
     },
     var.new_relic_account_id != null && var.new_relic_account_id != "" ? {
       NEW_RELIC_ACCOUNT_ID     = var.new_relic_account_id

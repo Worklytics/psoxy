@@ -29,6 +29,7 @@ import co.worklytics.psoxy.gateway.output.OutputFactory;
 import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import co.worklytics.psoxy.impl.gen.VertexGenMetadataConfig;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.gcp.GcpKmsPublicKeyStoreClient;
 import dagger.Binds;
 import dagger.Module;
@@ -137,7 +138,8 @@ public interface GcpModule {
     @Provides @Singleton @Named("Native")
     static SecretStore nativeSecretStore(EnvVarsConfigService envVarsConfigService,
                                          SecretManagerConfigServiceFactory secretManagerConfigServiceFactory,
-                                         @Named("instance") SecretManagerConfigService instanceConfigService) {
+                                         @Named("instance") SecretManagerConfigService instanceConfigService,
+                                         RandomNumberGenerator randomNumberGenerator) {
         String pathToSharedConfig =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
                 // Default is considered as empty; otherwise it will fail due a NPE
@@ -148,8 +150,8 @@ public interface GcpModule {
         Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
         Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
         return CompositeConfigService.builder()
-            .preferred(new CachingConfigServiceDecorator(instanceConfigService, proxyInstanceConfigCacheTtl))
-            .fallback(new CachingConfigServiceDecorator(shared, sharedConfigCacheTtl))
+            .preferred(new CachingConfigServiceDecorator(instanceConfigService, proxyInstanceConfigCacheTtl, randomNumberGenerator))
+            .fallback(new CachingConfigServiceDecorator(shared, sharedConfigCacheTtl, randomNumberGenerator))
             .build();
     }
 

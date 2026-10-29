@@ -22,6 +22,7 @@ import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.NoOpResourceService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.impl.gen.BedrockGenMetadataConfig;
 import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
@@ -100,7 +101,8 @@ public interface AwsModule {
                                    EnvVarsConfigService envVarsConfigService,
                                    ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory,
                                    @Named("instance") ParameterStoreConfigService instanceScopedParameterConfigService,
-                                   SecretsManagerSecretStoreFactory secretsManagerSecretStoreFactory) {
+                                   SecretsManagerSecretStoreFactory secretsManagerSecretStoreFactory,
+                                   RandomNumberGenerator randomNumberGenerator) {
 
         String pathToSharedConfig =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
@@ -132,8 +134,8 @@ public interface AwsModule {
         Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
 
         return CompositeSecretStore.builder()
-            .preferred(new CachingConfigServiceDecorator(instanceConfigService, proxyInstanceConfigCacheTtl))
-            .fallback(new CachingConfigServiceDecorator(sharedConfigService, sharedConfigCacheTtl))
+            .preferred(new CachingConfigServiceDecorator(instanceConfigService, proxyInstanceConfigCacheTtl, randomNumberGenerator))
+            .fallback(new CachingConfigServiceDecorator(sharedConfigService, sharedConfigCacheTtl, randomNumberGenerator))
             .build();
     }
 
@@ -142,7 +144,8 @@ public interface AwsModule {
     @Singleton
     static ConfigService nativeConfigService(EnvVarsConfigService envVarsConfigService,
                                              ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory,
-                                             @Named("instance") ParameterStoreConfigService instanceScopedParameterConfigService) {
+                                             @Named("instance") ParameterStoreConfigService instanceScopedParameterConfigService,
+                                             RandomNumberGenerator randomNumberGenerator) {
 
         String pathToSharedConfig =
                 envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
@@ -155,8 +158,8 @@ public interface AwsModule {
         Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
         Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
         return CompositeConfigService.builder()
-                .preferred(new CachingConfigServiceDecorator(instanceScopedParameterConfigService, proxyInstanceConfigCacheTtl))
-                .fallback(new CachingConfigServiceDecorator(sharedParameterConfigService, sharedConfigCacheTtl))
+                .preferred(new CachingConfigServiceDecorator(instanceScopedParameterConfigService, proxyInstanceConfigCacheTtl, randomNumberGenerator))
+                .fallback(new CachingConfigServiceDecorator(sharedParameterConfigService, sharedConfigCacheTtl, randomNumberGenerator))
                 .build();
     }
 
