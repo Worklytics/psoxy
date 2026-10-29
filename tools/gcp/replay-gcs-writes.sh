@@ -16,8 +16,59 @@ else
     ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
 fi
 
-# shellcheck source=gcs-bulk-tool-common.sh
-source "$(dirname "$0")/gcs-bulk-tool-common.sh"
+gcs_bulk_tool_timestamp_to_epoch() {
+    local timestamp="$1"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        date -j -f "%Y-%m-%dT%H:%M:%SZ" "$timestamp" +%s
+    else
+        date -d "$timestamp" +%s
+    fi
+}
+
+gcs_bulk_tool_strip_gs_uri() {
+    local value="$1"
+    if [[ "$value" == gs://* ]]; then
+        value="${value#gs://}"
+    fi
+    echo "$value"
+}
+
+gcs_bulk_tool_creation_time_to_epoch() {
+    local creation_time="$1"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        date -j -f "%Y-%m-%dT%H:%M:%SZ" "$creation_time" +%s 2>/dev/null || \
+            date -j -f "%Y-%m-%d %H:%M:%S" "$creation_time" +%s 2>/dev/null
+    else
+        date -d "$creation_time" +%s 2>/dev/null
+    fi
+}
+
+gcs_bulk_tool_list_input_objects_modified_after() {
+    local bucket="$1"
+    local prefix="$2"
+    local timestamp_epoch="$3"
+    local outfile="$4"
+
+    local list_uri="gs://${bucket}/**"
+    if [ -n "$prefix" ]; then
+        list_uri="gs://${bucket}/${prefix}**"
+    fi
+
+    while read -r line; do
+        if [[ "$line" =~ ^[0-9]+[[:space:]] ]]; then
+            local creation_time
+            creation_time=$(echo "$line" | awk '{print $2}')
+            local object_path
+            object_path=$(echo "$line" | awk '{print $3}')
+            local creation_epoch
+            creation_epoch=$(gcs_bulk_tool_creation_time_to_epoch "$creation_time")
+            if [ -n "$creation_epoch" ] && [ "$creation_epoch" -gt "$timestamp_epoch" ]; then
+                local key="${object_path#gs://${bucket}/}"
+                printf '%s\t%s\n' "$creation_time" "$key" >> "$outfile"
+            fi
+        fi
+    done < <(gsutil ls -l "$list_uri" 2>/dev/null)
+}
 
 # Function to display usage information
 usage() {

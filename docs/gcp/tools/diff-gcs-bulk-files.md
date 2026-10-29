@@ -2,7 +2,7 @@
 
 **Script:** [`diff-gcs-bulk-files.sh`](https://github.com/Worklytics/psoxy/blob/main/tools/gcp/diff-gcs-bulk-files.sh) · [Download raw](https://raw.githubusercontent.com/Worklytics/psoxy/main/tools/gcp/diff-gcs-bulk-files.sh)
 
-Also download [`gcs-bulk-tool-common.sh`](https://raw.githubusercontent.com/Worklytics/psoxy/main/tools/gcp/gcs-bulk-tool-common.sh) into the same directory.
+Single self-contained script; no other files required.
 
 Lists objects in a bulk connector **input** bucket that do **not** have a corresponding object in the **sanitized** bucket, limited to a time window. Results are printed **newest first**.
 

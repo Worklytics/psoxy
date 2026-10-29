@@ -2,7 +2,7 @@
 
 **Script:** [`replay-gcs-writes.sh`](https://github.com/Worklytics/psoxy/blob/main/tools/gcp/replay-gcs-writes.sh) · [Download raw](https://raw.githubusercontent.com/Worklytics/psoxy/main/tools/gcp/replay-gcs-writes.sh)
 
-Also download [`gcs-bulk-tool-common.sh`](https://raw.githubusercontent.com/Worklytics/psoxy/main/tools/gcp/gcs-bulk-tool-common.sh) into the same directory.
+Single self-contained script; no other files required.
 
 Re-triggers bulk processing for objects already in a bulk connector **input** Cloud Storage bucket. The script runs `gsutil rewrite -kO` on each object, which emits an object update event so the Psoxy Cloud Function processes the file again.
 

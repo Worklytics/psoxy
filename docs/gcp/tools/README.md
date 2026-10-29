@@ -7,6 +7,6 @@ Command-line scripts for debugging and operating Psoxy bulk connectors on GCP. S
 - [Diff GCS bulk files](diff-gcs-bulk-files.md) — find input objects with no sanitized output
 - [Replay GCS writes](replay-gcs-writes.md) — re-trigger Cloud Function processing via GCS events
 
-`diff-gcs-bulk-files.sh` and `replay-gcs-writes.sh` source [`gcs-bulk-tool-common.sh`](https://raw.githubusercontent.com/Worklytics/psoxy/main/tools/gcp/gcs-bulk-tool-common.sh); keep that file in the same directory when downloading from GitHub.
+Each script is standalone (one file to download from GitHub).
 
 See also [GCP troubleshooting — bulk processing failures](../troubleshooting.md#bulk-processing-failures).
