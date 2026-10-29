@@ -141,33 +141,24 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
     }
 
     /**
-     * Maximum delay before a retry after transient failure on cache miss. Doubles with each failed
-     * attempt (500ms, 1s, 2s, … with default base) until {@link #MAX_TRANSIENT_RETRY_DELAY_MS}.
-     */
-    @VisibleForTesting
-    long maxTransientRetryDelayMs(int attemptZeroBased) {
-        if (transientRetryDelayMs <= 0) {
-            return 0;
-        }
-        long delayMs = transientRetryDelayMs;
-        for (int i = 0; i < attemptZeroBased; i++) {
-            if (delayMs >= MAX_TRANSIENT_RETRY_DELAY_MS) {
-                return MAX_TRANSIENT_RETRY_DELAY_MS;
-            }
-            delayMs *= 2;
-        }
-        return Math.min(MAX_TRANSIENT_RETRY_DELAY_MS, delayMs);
-    }
-
-    /**
-     * Full jitter in {@code [0, maxTransientRetryDelayMs(attempt)]} to desynchronize retries.
+     * Full jitter in {@code [0, maxDelayMs]} before retrying after a transient cache miss.
+     * {@code maxDelayMs} doubles with each failed attempt (500ms, 1s, 2s, … with default base)
+     * until {@link #MAX_TRANSIENT_RETRY_DELAY_MS} (8 seconds).
      */
     @VisibleForTesting
     long computeTransientRetryDelayMs(int attemptZeroBased) {
-        long maxDelayMs = maxTransientRetryDelayMs(attemptZeroBased);
-        if (maxDelayMs <= 0) {
+        if (transientRetryDelayMs <= 0) {
             return 0;
         }
+        long maxDelayMs = transientRetryDelayMs;
+        for (int i = 0; i < attemptZeroBased; i++) {
+            if (maxDelayMs >= MAX_TRANSIENT_RETRY_DELAY_MS) {
+                maxDelayMs = MAX_TRANSIENT_RETRY_DELAY_MS;
+                break;
+            }
+            maxDelayMs *= 2;
+        }
+        maxDelayMs = Math.min(MAX_TRANSIENT_RETRY_DELAY_MS, maxDelayMs);
         return randomNumberGenerator.nextInt((int) maxDelayMs + 1);
     }
 

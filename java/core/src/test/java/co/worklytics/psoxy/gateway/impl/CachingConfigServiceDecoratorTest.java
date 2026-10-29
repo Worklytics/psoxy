@@ -171,27 +171,28 @@ class CachingConfigServiceDecoratorTest {
 
     @Test
     void transientRetryDelayDoublesUntilCap() {
-        CachingConfigServiceDecorator cache =
-            new CachingConfigServiceDecorator(localHashMapConfigService, Duration.ofMinutes(1));
-
-        assertEquals(CachingConfigServiceDecorator.DEFAULT_TRANSIENT_RETRY_DELAY_MS,
-            cache.maxTransientRetryDelayMs(0));
-        assertEquals(CachingConfigServiceDecorator.DEFAULT_TRANSIENT_RETRY_DELAY_MS * 2,
-            cache.maxTransientRetryDelayMs(1));
-        assertEquals(CachingConfigServiceDecorator.DEFAULT_TRANSIENT_RETRY_DELAY_MS * 4,
-            cache.maxTransientRetryDelayMs(2));
-        assertEquals(CachingConfigServiceDecorator.MAX_TRANSIENT_RETRY_DELAY_MS,
-            cache.maxTransientRetryDelayMs(10));
-    }
-
-    @Test
-    void transientRetryDelayUsesInjectedRandomGenerator() {
         RandomNumberGenerator alwaysMax = bound -> bound - 1;
         CachingConfigServiceDecorator cache = new CachingConfigServiceDecorator(
             localHashMapConfigService, Duration.ofMinutes(1), new FakeTicker(), 500L, alwaysMax);
 
-        assertEquals(500L, cache.computeTransientRetryDelayMs(0));
-        assertEquals(1000L, cache.computeTransientRetryDelayMs(1));
+        assertEquals(CachingConfigServiceDecorator.DEFAULT_TRANSIENT_RETRY_DELAY_MS,
+            cache.computeTransientRetryDelayMs(0));
+        assertEquals(CachingConfigServiceDecorator.DEFAULT_TRANSIENT_RETRY_DELAY_MS * 2,
+            cache.computeTransientRetryDelayMs(1));
+        assertEquals(CachingConfigServiceDecorator.DEFAULT_TRANSIENT_RETRY_DELAY_MS * 4,
+            cache.computeTransientRetryDelayMs(2));
+        assertEquals(CachingConfigServiceDecorator.MAX_TRANSIENT_RETRY_DELAY_MS,
+            cache.computeTransientRetryDelayMs(10));
+    }
+
+    @Test
+    void transientRetryDelayUsesInjectedRandomGenerator() {
+        RandomNumberGenerator alwaysZero = bound -> 0;
+        CachingConfigServiceDecorator cache = new CachingConfigServiceDecorator(
+            localHashMapConfigService, Duration.ofMinutes(1), new FakeTicker(), 500L, alwaysZero);
+
+        assertEquals(0L, cache.computeTransientRetryDelayMs(0));
+        assertEquals(0L, cache.computeTransientRetryDelayMs(1));
     }
 
     @Test

@@ -6,9 +6,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import javax.inject.Inject;
@@ -19,6 +21,7 @@ import com.newrelic.opentracing.LambdaTracer;
 import io.opentracing.util.GlobalTracer;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.storage.StorageHandler;
@@ -38,33 +41,82 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
      * Static initialization allows reuse in containers
      * {@link "https://aws.amazon.com/premiumsupport/knowledge-center/lambda-improve-java-function-performance/"}
      */
-    static AwsContainer awsContainer;
-    static StorageHandler storageHandler;
-    static S3Client s3Client;
+    static final Duration CONTAINER_CACHE_TTL = Duration.ofMinutes(20);
 
-    static {
-        staticInit();
-    }
+    static final Object DEPENDENCIES_LOCK = new Object();
 
-    private static void staticInit() {
-        awsContainer = DaggerAwsContainer.create();
-        S3Handler bootstrap = new S3Handler();
-        awsContainer.injectS3Handler(bootstrap);
-        storageHandler = bootstrap.injectedStorageHandler;
-        s3Client = bootstrap.injectedS3Client;
+    static volatile CachedDependencies dependencies;
 
-        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
-            awsContainer.loggingConfiguration().validateNewRelicHandler(S3Handler.class);
-            GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
+    static boolean newRelicInitialized;
+
+    static class CachedDependencies {
+        final StorageHandler storageHandler;
+        final S3Client s3Client;
+        final String configFingerprint;
+        final long loadedAtNanos;
+
+        CachedDependencies(StorageHandler storageHandler, S3Client s3Client, String configFingerprint,
+                           long loadedAtNanos) {
+            this.storageHandler = storageHandler;
+            this.s3Client = s3Client;
+            this.configFingerprint = configFingerprint;
+            this.loadedAtNanos = loadedAtNanos;
+        }
+
+        boolean isValid(String expectedFingerprint, long nowNanos) {
+            return Objects.equals(configFingerprint, expectedFingerprint)
+                && nowNanos - loadedAtNanos < CONTAINER_CACHE_TTL.toNanos();
         }
     }
 
     @Inject StorageHandler injectedStorageHandler;
     @Inject S3Client injectedS3Client;
 
+    static String configFingerprint() {
+        return Objects.toString(System.getenv(ProxyConfigProperty.CUSTOM_RULES_SHA.name()), "")
+            + "|" + Objects.toString(System.getenv(ProxyConfigProperty.BUNDLE_FILENAME.name()), "");
+    }
+
+    static CachedDependencies loadDependencies(String fingerprint, long loadedAtNanos) {
+        AwsContainer awsContainer = DaggerAwsContainer.create();
+        S3Handler bootstrap = new S3Handler();
+        awsContainer.injectS3Handler(bootstrap);
+
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled() && !newRelicInitialized) {
+            awsContainer.loggingConfiguration().validateNewRelicHandler(S3Handler.class);
+            GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
+            newRelicInitialized = true;
+        }
+
+        return new CachedDependencies(
+            bootstrap.injectedStorageHandler,
+            bootstrap.injectedS3Client,
+            fingerprint,
+            loadedAtNanos);
+    }
+
+    static CachedDependencies cachedDependencies() {
+        String fingerprint = configFingerprint();
+        long now = System.nanoTime();
+        CachedDependencies current = dependencies;
+        if (current != null && current.isValid(fingerprint, now)) {
+            return current;
+        }
+        synchronized (DEPENDENCIES_LOCK) {
+            current = dependencies;
+            if (current != null && current.isValid(fingerprint, now)) {
+                return current;
+            }
+            dependencies = loadDependencies(fingerprint, now);
+            return dependencies;
+        }
+    }
+
     @SneakyThrows
     @Override
     public String handleRequest(S3Event s3Event, Context context) {
+
+        CachedDependencies deps = cachedDependencies();
 
         S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
 
@@ -73,17 +125,20 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         log.info(String.format("Received a request for processing %s from bucket %s.", sourceKey, importBucket));
 
-        List<StorageHandler.ObjectTransform> transforms = storageHandler.buildTransforms();
+        List<StorageHandler.ObjectTransform> transforms = deps.storageHandler.buildTransforms();
 
         for (StorageHandler.ObjectTransform transform : transforms) {
-            process(importBucket, sourceKey, transform);
+            process(deps, importBucket, sourceKey, transform);
         }
 
         return "Processed!";
     }
 
     @SneakyThrows
-    StorageEventResponse process(String importBucket, String sourceKey, StorageHandler.ObjectTransform transform) {
+    StorageEventResponse process(CachedDependencies deps, String importBucket, String sourceKey,
+                                 StorageHandler.ObjectTransform transform) {
+        StorageHandler storageHandler = deps.storageHandler;
+        S3Client s3Client = deps.s3Client;
         StorageEventResponse storageEventResponse;
 
         HeadObjectResponse sourceMetadata = s3Client.headObject(HeadObjectRequest.builder()

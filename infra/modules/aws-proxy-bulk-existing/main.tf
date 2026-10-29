@@ -28,10 +28,16 @@ module "psoxy_lambda" {
   environment_variables = merge(
     var.environment_variables,
     {
-      INPUT_BUCKET  = var.input_bucket
-      OUTPUT_BUCKET = module.sanitized_output_bucket.output_bucket
+      INPUT_BUCKET     = var.input_bucket
+      OUTPUT_BUCKET    = module.sanitized_output_bucket.output_bucket
+      CUSTOM_RULES_SHA = local.rules_hash
     }
   )
+}
+
+locals {
+  rules_plain = yamlencode(var.rules)
+  rules_hash  = sha1(local.rules_plain)
 }
 
 data "aws_s3_bucket" "input" {
