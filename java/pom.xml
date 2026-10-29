@@ -20,6 +20,8 @@
         <dependency.apache-commons-lang3.version>3.20.0</dependency.apache-commons-lang3.version>
         <dependency.apache-commons-csv.version>1.14.1</dependency.apache-commons-csv.version>
         <dependency.guava.version>33.7.2-jre</dependency.guava.version>
+        <dependency.snappy-java.version>1.1.10.9</dependency.snappy-java.version>
+        <dependency.opentelemetry.version>1.67.0</dependency.opentelemetry.version>
         <dependency.commons-io.version>2.22.0</dependency.commons-io.version>
         <dependency.commons-net.version>3.13.0</dependency.commons-net.version>
         <dependency.apache-httpcore.version>5.4.4</dependency.apache-httpcore.version>
@@ -74,6 +76,18 @@
                 <groupId>tools.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
                 <version>${dependency.jackson3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.xerial.snappy</groupId>
+                <artifactId>snappy-java</artifactId>
+                <version>${dependency.snappy-java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-bom</artifactId>
+                <version>${dependency.opentelemetry.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
