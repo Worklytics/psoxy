@@ -4,7 +4,7 @@
   "serialNumber" : "urn:uuid:9808b28e-0240-34fc-9d98-b905e1866936",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2026-10-28T23:36:01Z",
+    "timestamp" : "2026-10-29T22:56:56Z",
     "lifecycles" : [
       {
         "phase" : "build"
@@ -92,35 +92,35 @@
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "3754548f51f63f333304f52d962bded4"
+          "content" : "5e88791ebfc738b1a4abc507c49d7f40"
         },
         {
           "alg" : "SHA-1",
-          "content" : "38652de1d5b8fc388372db236fd479bc790545c3"
+          "content" : "f7d517e2a9c722e9cda9fc978532e89bac51d758"
         },
         {
           "alg" : "SHA-256",
-          "content" : "5cead27f926fa779838fdd815b3cf9d1a2475776edd8742cf0a796844950b780"
+          "content" : "da70ea28a788e97d5fdc1c919c764e548a940eb76ef18624e90151966317c678"
         },
         {
           "alg" : "SHA-512",
-          "content" : "a66285102dcaba80d82e1eace5da38c7468ffb085a4fd22d86ad38f5772df05f692a390e3cbb6e9ade83ea25f8f38d43087a1da2935e71b65d6f29293dccf4dd"
+          "content" : "46fc49527cba7d646a516812497e1bf9ec342cc3033ce34c77e8351606a7f60285e16cd01acf5d04e3bfbc3211f9f6c193170bba1e6041920b611432e93afae7"
         },
         {
           "alg" : "SHA-384",
-          "content" : "bd21e1a96fb32479afcddce49d8eb6bb566844af66e392955b205e296d67718b7dda70fa58b5452bf354f0015e99da84"
+          "content" : "a5cb9a8a7be41f9d42a6346c1dd52a597da4eea6628a4794cbcebed6a0e249ca3f395cda62bbf47e1acd6c2edcd55e5f"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "43ecfcf77efef7fa817330bcb0118663aca31b32619166b01958eb970fe99f4f9ba305b0f787294920161d1516e7829b"
+          "content" : "f40b305c33f3ff21cc91f49c37c93140be6cf7dcf939a2e70b0ec1ae2404862c2a32600a4ab05c6e91802b7886db6910"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "af69b05257cbf7b9621be503d156df7e936c8e0cd87d25dedae32bd6b3cb4cab"
+          "content" : "6ab78bdc3ec3f8df6c08027ca0c110970980db66c5d81318e3588ba4e0bb0bba"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "8f740105839102d1851a5418dcb10a2283c2fcaa98cb6dacf041c62e8049330ddd6465cf03f43c44cdf934f62114a8f966fcee1e0eb8f124d0dcfd37c48f4c8e"
+          "content" : "750c283b3a6e8e13162d8affb88b12c882337c295442ec23859440b1d93c60efff280ebaa2068d70bda764a0865e2eb53c9421949b307bfd4881992cd8c3a196"
         }
       ],
       "licenses" : [
@@ -143,35 +143,35 @@
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "05209f60d70af07bc0875c1338cd0adb"
+          "content" : "3682742e183b8ffae3244ba1786d8880"
         },
         {
           "alg" : "SHA-1",
-          "content" : "7a955b6c62ab4b1b24191a35b50fbe69dc2329ff"
+          "content" : "316fc314a58bc0478f8cf8fc7d90cc0e911ccbf2"
         },
         {
           "alg" : "SHA-256",
-          "content" : "076fffc4b117cefe288bba3aaf72783c9d37c13b75438f0631ea401960dfb06a"
+          "content" : "d7db728487ccaddc285c3f5a615f6707526bddc77f2849421e398fc97ffca58c"
         },
         {
           "alg" : "SHA-512",
-          "content" : "775302b7d3bddb0bd31b9baaae4853b0f0be2039c642543491dd5279eee3e797729dd354fb5e714e9062b6a9600ca9ca983e355c264bd588fb4cf4532cc98bd7"
+          "content" : "fc20f932fe6a9c7641db1094c4189d8d249775769292465f4d2628812e399d1684d88e8950eb81c0f0f738e6c735c291953b51d48749ad18f3649f564819287d"
         },
         {
           "alg" : "SHA-384",
-          "content" : "a6335530b09125bb48e41bdb1f93cd894f682725a676a5dd8a6899d88dbffc3b1067f5d733e99d5390bf5dcc7f05c062"
+          "content" : "1c1f594ac361885df2a9b3fad22c8c37c31cf1e22f8af80ff5e2b681eb7e3a697ffd15ad55b3e5fe7bb500bce46ade07"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "7e5410bb32f2592a0672d32e1672d6fc039eb8eada9204f13d395c0831d97ff20d902809abe9c3a6beedf25ad8cdcacc"
+          "content" : "904d8dd4c246918a898a0cae4af37dc1cf1d0ca8471c334d677b996f0ccdfbf1942678b74f299552ebdf742509694888"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "66c4318a281808a4ce2886a2b71342a35828c3e9ab93549b08473abe65c1aaa0"
+          "content" : "507ddbe2d7e395c02759fdc53bfab4089b0a896c6e76badd03eab754036301c6"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "6402c7f5c38cab818ea07071077ebf4e8c6ea0690f2b92c9cb3c985521ae79fc26d685dc2e1f3047efd18ecad751ebafc618433794d00372f417ff888b7284c9"
+          "content" : "df18050905656e88e747df8691dc67df8556c9c3ccfa3fae296b827e47c368374593081fe49514ca2db240f10e232c0e984f531ac739fbdf44444b220cd47a94"
         }
       ],
       "licenses" : [
@@ -2037,45 +2037,45 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.xerial.snappy/snappy-java@1.1.10.7?type=jar",
+      "bom-ref" : "pkg:maven/org.xerial.snappy/snappy-java@1.1.10.9?type=jar",
       "publisher" : "xerial.org",
       "group" : "org.xerial.snappy",
       "name" : "snappy-java",
-      "version" : "1.1.10.7",
+      "version" : "1.1.10.9",
       "description" : "snappy-java: A fast compression/decompression library",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "d74bb2e2857f965683c9de931b71fc86"
+          "content" : "645284c1b4a115f7500a54ad8367d2d1"
         },
         {
           "alg" : "SHA-1",
-          "content" : "3049f95640f4625a945cfab85715f603fa4c8f80"
+          "content" : "f6afcbfe4017d6076a6d40d644c0c0ace886483d"
         },
         {
           "alg" : "SHA-256",
-          "content" : "4c766cb3f855415ee734b2392949a0b6f12a60879334a74518deaf6270d32e36"
+          "content" : "35228628442e4b9797681c7cbd3b26594f6da3379159dbd0cb07094ed3aece0d"
         },
         {
           "alg" : "SHA-512",
-          "content" : "22a6ebb8e8ad4d8a149b0c67d8658ac1535d7014857064c4f7ed4999e29c6186de8a80b50dd9b59f631fa1c24970524fdbbb84083c80c59eb0c72d4efb041fef"
+          "content" : "f987b2ba02f8fd6d3fb8f7d550148fd1818ce930deaccd32b5f187449fbb7a5cba7eae6d37c7709b0b8d593d2182982fa4d4a06a3e76ff2dd0115d1558286aac"
         },
         {
           "alg" : "SHA-384",
-          "content" : "b7ea971de5e286b4bdb8b96063f0ffe611ef82f5887fa6845fc2721bf0e71a88b0c754ba010816596f0b6c178160c0c5"
+          "content" : "df0a17a271de81fa30c196403593dadbf6e12d005570152ecdf85b921850bf62c99a0e67682e90f77f07e1b124de9737"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "9ef6c5ad194027c8b4be0f756dfeb958ae3daa5ad942b34c4e9e570ce7516ba91fad298929e4d716f6a091d0b274bbc9"
+          "content" : "80834166f26c7929d1ce3ba1a0b37bedd621577fa47dd07aa74605ea61c563b0cd887e2e997122980ab9a561d4bff017"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "83f4ede80f49271566745463652e3cdebbe4e2112174400ddf082bf9b39d09cd"
+          "content" : "392f2d13e850ecf3d0929d605928e3f2ff1293f039e58e9a5f012a38ed53edfe"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "3c1ffb884ac57e812f997357f9501afbffec3aaac2aa2bb87b0dd8ec2e7e43d922c250dfc658920ade2014aa138440d2d9cdfce8e453812d089898d10390a6db"
+          "content" : "fe29042397974c7746638702721eb157ef9579cb0c95fc0b7c39312ba00c06c49beb6fad808e860ed2b21864cf5384a49c8944babe5f33566c38dc00c5392239"
         }
       ],
       "licenses" : [
@@ -2091,7 +2091,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.xerial.snappy/snappy-java@1.1.10.7?type=jar",
+      "purl" : "pkg:maven/org.xerial.snappy/snappy-java@1.1.10.9?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -10828,7 +10828,7 @@
         "pkg:maven/org.apache.parquet/parquet-format-structures@1.17.1?type=jar",
         "pkg:maven/org.apache.parquet/parquet-common@1.17.1?type=jar",
         "pkg:maven/org.apache.parquet/parquet-jackson@1.17.1?type=jar",
-        "pkg:maven/org.xerial.snappy/snappy-java@1.1.10.7?type=jar",
+        "pkg:maven/org.xerial.snappy/snappy-java@1.1.10.9?type=jar",
         "pkg:maven/com.github.luben/zstd-jni@1.5.7-3?type=jar",
         "pkg:maven/org.slf4j/slf4j-api@2.0.18?type=jar"
       ]
@@ -10838,7 +10838,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/org.xerial.snappy/snappy-java@1.1.10.7?type=jar",
+      "ref" : "pkg:maven/org.xerial.snappy/snappy-java@1.1.10.9?type=jar",
       "dependsOn" : [ ]
     },
     {
