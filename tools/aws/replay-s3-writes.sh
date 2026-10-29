@@ -16,21 +16,39 @@ else
     ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
 fi
 
-# Resolve a Python 3 interpreter (python3 preferred, then python)
-resolve_python() {
-    if command -v python3 &> /dev/null; then
-        echo python3
-        return 0
+s3_bulk_tool_default_timestamp_one_week_ago() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        date -u -v-7d '+%Y-%m-%dT%H:%M:%SZ'
+    else
+        date -u -d '1 week ago' '+%Y-%m-%dT%H:%M:%SZ'
     fi
-    if command -v python &> /dev/null && python -c 'import sys; sys.exit(0 if sys.version_info >= (3, 0) else 1)' 2>/dev/null; then
-        echo python
-        return 0
-    fi
-    return 1
 }
 
-# Normalize metadata from head-object (empty/null query results become "{}")
-normalize_existing_metadata() {
+s3_bulk_tool_timestamp_to_epoch() {
+    local timestamp="$1"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        date -j -f "%Y-%m-%dT%H:%M:%SZ" "$timestamp" +%s
+    else
+        date -d "$timestamp" +%s
+    fi
+}
+
+s3_bulk_tool_last_modified_to_epoch() {
+    local last_modified="$1"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        date -j -f "%Y-%m-%dT%H:%M:%S" "${last_modified:0:19}" +%s 2>/dev/null || \
+            date -j -f "%Y-%m-%dT%H:%M:%SZ" "$last_modified" +%s 2>/dev/null
+    else
+        date -d "$last_modified" +%s 2>/dev/null
+    fi
+}
+
+s3_bulk_tool_validate_timestamp() {
+    local timestamp="$1"
+    [[ "$timestamp" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]]
+}
+
+s3_bulk_tool_normalize_existing_metadata() {
     local metadata="$1"
     if [ -z "$metadata" ] || [ "$metadata" = "null" ]; then
         echo "{}"
@@ -39,12 +57,11 @@ normalize_existing_metadata() {
     fi
 }
 
-# Merge existing object metadata with psoxy-last-replay; output compact JSON for --metadata
-merge_replay_metadata() {
+s3_bulk_tool_merge_replay_metadata() {
     local existing="$1"
     local ts="$2"
 
-    existing=$(normalize_existing_metadata "$existing")
+    existing=$(s3_bulk_tool_normalize_existing_metadata "$existing")
 
     if command -v jq &> /dev/null; then
         local merged
@@ -59,20 +76,21 @@ merge_replay_metadata() {
         return 0
     fi
 
-    local python_cmd
-    if python_cmd=$(resolve_python); then
-        "$python_cmd" -c '
-import json, sys
-raw = sys.argv[1]
-ts = sys.argv[2]
-try:
-    metadata = json.loads(raw) if raw else {}
-except json.JSONDecodeError:
-    metadata = {}
-if not isinstance(metadata, dict):
-    metadata = {}
-metadata["psoxy-last-replay"] = ts
-print(json.dumps(metadata, separators=(",", ":")))
+    if command -v node &> /dev/null; then
+        node -e '
+const raw = process.argv[1];
+const ts = process.argv[2];
+let metadata = {};
+try {
+  metadata = raw ? JSON.parse(raw) : {};
+} catch {
+  metadata = {};
+}
+if (typeof metadata !== "object" || metadata === null || Array.isArray(metadata)) {
+  metadata = {};
+}
+metadata["psoxy-last-replay"] = ts;
+process.stdout.write(JSON.stringify(metadata));
 ' "$existing" "$ts"
         return 0
     fi
@@ -82,8 +100,120 @@ print(json.dumps(metadata, separators=(",", ":")))
         return 0
     fi
 
-    echo "Error: jq or python is required" >&2
+    echo "Error: jq or Node.js is required to merge existing object metadata" >&2
     return 1
+}
+
+s3_bulk_tool_assume_role_if_needed() {
+    local role_arn="$1"
+    local session_prefix="$2"
+
+    if [ -z "$role_arn" ]; then
+        return 0
+    fi
+
+    echo -e "Assuming role: ${INFO}$role_arn${NC}"
+
+    local session_name="${session_prefix}-$(date +%s)"
+    local assume_role_output
+    assume_role_output=$(aws sts assume-role \
+        --role-arn "$role_arn" \
+        --role-session-name "$session_name" \
+        --output json 2>&1) || {
+        echo -e "${ERR}Error: Failed to assume role${NC}"
+        echo "$assume_role_output"
+        return 1
+    }
+
+    if command -v jq &> /dev/null; then
+        export AWS_ACCESS_KEY_ID
+        export AWS_SECRET_ACCESS_KEY
+        export AWS_SESSION_TOKEN
+        AWS_ACCESS_KEY_ID=$(echo "$assume_role_output" | jq -r '.Credentials.AccessKeyId')
+        AWS_SECRET_ACCESS_KEY=$(echo "$assume_role_output" | jq -r '.Credentials.SecretAccessKey')
+        AWS_SESSION_TOKEN=$(echo "$assume_role_output" | jq -r '.Credentials.SessionToken')
+    else
+        export AWS_ACCESS_KEY_ID
+        export AWS_SECRET_ACCESS_KEY
+        export AWS_SESSION_TOKEN
+        AWS_ACCESS_KEY_ID=$(echo "$assume_role_output" | grep -o '"AccessKeyId": "[^"]*' | cut -d'"' -f4)
+        AWS_SECRET_ACCESS_KEY=$(echo "$assume_role_output" | grep -o '"SecretAccessKey": "[^"]*' | cut -d'"' -f4)
+        AWS_SESSION_TOKEN=$(echo "$assume_role_output" | grep -o '"SessionToken": "[^"]*' | cut -d'"' -f4)
+    fi
+
+    if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$AWS_SESSION_TOKEN" ]; then
+        echo -e "${ERR}Error: Failed to extract credentials from assume-role response${NC}"
+        return 1
+    fi
+
+    echo -e "${SUCCESS}✓ Successfully assumed role${NC}"
+    echo ""
+    return 0
+}
+
+s3_bulk_tool_list_input_objects_modified_after() {
+    local bucket="$1"
+    local prefix="$2"
+    local timestamp_epoch="$3"
+    local outfile="$4"
+    local error_file="$5"
+
+    local continuation_token=""
+    while true; do
+        if command -v jq &> /dev/null; then
+            local list_args=(s3api list-objects-v2 --bucket "$bucket" --output json)
+            if [ -n "$prefix" ]; then
+                list_args+=(--prefix "$prefix")
+            fi
+            if [ -n "$continuation_token" ]; then
+                list_args+=(--starting-token "$continuation_token")
+            fi
+
+            local page_json
+            page_json=$(aws "${list_args[@]}" 2>"$error_file") || return 1
+
+            while IFS=$'\t' read -r last_modified key; do
+                [ -z "$key" ] && continue
+                local modified_epoch
+                modified_epoch=$(s3_bulk_tool_last_modified_to_epoch "$last_modified")
+                if [ -n "$modified_epoch" ] && [ "$modified_epoch" -gt "$timestamp_epoch" ]; then
+                    printf '%s\t%s\n' "$last_modified" "$key" >> "$outfile"
+                fi
+            done < <(echo "$page_json" | jq -r '.Contents[]? | [.LastModified, .Key] | @tsv')
+            continuation_token=$(echo "$page_json" | jq -r '.NextContinuationToken // empty')
+        else
+            local text_args=(s3api list-objects-v2 --bucket "$bucket" --query 'Contents[].[LastModified,Key]' --output text)
+            local token_args=(s3api list-objects-v2 --bucket "$bucket" --query 'NextContinuationToken' --output text)
+            if [ -n "$prefix" ]; then
+                text_args+=(--prefix "$prefix")
+                token_args+=(--prefix "$prefix")
+            fi
+            if [ -n "$continuation_token" ]; then
+                text_args+=(--starting-token "$continuation_token")
+                token_args+=(--starting-token "$continuation_token")
+            fi
+
+            local list_output
+            list_output=$(aws "${text_args[@]}" 2>"$error_file") || return 1
+
+            while read -r last_modified key; do
+                [ -z "$key" ] && continue
+                [ "$last_modified" = "None" ] && continue
+                local modified_epoch
+                modified_epoch=$(s3_bulk_tool_last_modified_to_epoch "$last_modified")
+                if [ -n "$modified_epoch" ] && [ "$modified_epoch" -gt "$timestamp_epoch" ]; then
+                    printf '%s\t%s\n' "$last_modified" "$key" >> "$outfile"
+                fi
+            done <<< "$list_output"
+
+            continuation_token=$(aws "${token_args[@]}" 2>"$error_file")
+        fi
+
+        if [ -z "$continuation_token" ] || [ "$continuation_token" = "None" ]; then
+            break
+        fi
+    done
+    return 0
 }
 
 # Function to display usage information
@@ -207,14 +337,7 @@ else
     if [ $# -eq 2 ]; then
         TIMESTAMP="$2"
     else
-        # Calculate one week ago in ISO 8601 format
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS
-            TIMESTAMP=$(date -u -v-7d '+%Y-%m-%dT%H:%M:%SZ')
-        else
-            # Linux
-            TIMESTAMP=$(date -u -d '1 week ago' '+%Y-%m-%dT%H:%M:%SZ')
-        fi
+        TIMESTAMP=$(s3_bulk_tool_default_timestamp_one_week_ago)
         echo -e "No timestamp provided, defaulting to one week ago: ${INFO}$TIMESTAMP${NC}"
     fi
 
@@ -226,7 +349,7 @@ else
 fi
 
 # Validate timestamp format (basic ISO 8601 check) - only in bucket mode
-if [[ "$SINGLE_OBJECT_MODE" == false ]] && [[ ! "$TIMESTAMP" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]]; then
+if [[ "$SINGLE_OBJECT_MODE" == false ]] && ! s3_bulk_tool_validate_timestamp "$TIMESTAMP"; then
     echo "Error: Invalid timestamp format. Expected: YYYY-MM-DDTHH:MM:SSZ"
     echo "Example: 2024-01-01T00:00:00Z"
     exit 1
@@ -245,45 +368,7 @@ if ! aws sts get-caller-identity &> /dev/null; then
 fi
 
 # Assume role if provided
-if [ -n "$ROLE_ARN" ]; then
-    echo -e "Assuming role: ${INFO}$ROLE_ARN${NC}"
-
-    # Generate a session name
-    SESSION_NAME="replay-s3-writes-$(date +%s)"
-
-    # Assume the role and capture credentials
-    ASSUME_ROLE_OUTPUT=$(aws sts assume-role \
-        --role-arn "$ROLE_ARN" \
-        --role-session-name "$SESSION_NAME" \
-        --output json 2>&1)
-
-    if [ $? -ne 0 ]; then
-        echo -e "${ERR}Error: Failed to assume role${NC}"
-        echo "$ASSUME_ROLE_OUTPUT"
-        exit 1
-    fi
-
-    # Extract credentials and export as environment variables
-    if command -v jq &> /dev/null; then
-        # Use jq for reliable JSON parsing if available
-        export AWS_ACCESS_KEY_ID=$(echo "$ASSUME_ROLE_OUTPUT" | jq -r '.Credentials.AccessKeyId')
-        export AWS_SECRET_ACCESS_KEY=$(echo "$ASSUME_ROLE_OUTPUT" | jq -r '.Credentials.SecretAccessKey')
-        export AWS_SESSION_TOKEN=$(echo "$ASSUME_ROLE_OUTPUT" | jq -r '.Credentials.SessionToken')
-    else
-        # Fall back to grep if jq not available
-        export AWS_ACCESS_KEY_ID=$(echo "$ASSUME_ROLE_OUTPUT" | grep -o '"AccessKeyId": "[^"]*' | cut -d'"' -f4)
-        export AWS_SECRET_ACCESS_KEY=$(echo "$ASSUME_ROLE_OUTPUT" | grep -o '"SecretAccessKey": "[^"]*' | cut -d'"' -f4)
-        export AWS_SESSION_TOKEN=$(echo "$ASSUME_ROLE_OUTPUT" | grep -o '"SessionToken": "[^"]*' | cut -d'"' -f4)
-    fi
-
-    if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$AWS_SESSION_TOKEN" ]; then
-        echo -e "${ERR}Error: Failed to extract credentials from assume-role response${NC}"
-        exit 1
-    fi
-
-    echo -e "${SUCCESS}✓ Successfully assumed role${NC}"
-    echo ""
-fi
+s3_bulk_tool_assume_role_if_needed "$ROLE_ARN" "replay-s3-writes" || exit 1
 
 # Display required permissions information
 echo -e "NOTE: Running this script requires that you be authenticated as an AWS user/role with the following permissions on the bucket:"
@@ -315,7 +400,7 @@ replay_object_write() {
 
     local merged_metadata merge_error
     merge_error=$(mktemp)
-    if ! merged_metadata=$(merge_replay_metadata "$existing_metadata" "$timestamp_rfc3339" 2>"$merge_error"); then
+    if ! merged_metadata=$(s3_bulk_tool_merge_replay_metadata "$existing_metadata" "$timestamp_rfc3339" 2>"$merge_error"); then
         echo "Error: failed to merge metadata for s3://$bucket/$object_key" >&2
         cat "$merge_error" >&2
         rm -f "$merge_error"
@@ -371,107 +456,29 @@ if [ -n "$PREFIX" ]; then
 fi
 
 # Convert our timestamp to epoch for comparison
-TIMESTAMP_EPOCH=""
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
-    TIMESTAMP_EPOCH=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$TIMESTAMP" +%s)
-else
-    # Linux
-    TIMESTAMP_EPOCH=$(date -d "$TIMESTAMP" +%s)
-fi
+TIMESTAMP_EPOCH=$(s3_bulk_tool_timestamp_to_epoch "$TIMESTAMP")
 
-# Filter objects by creation time
+# Filter objects by modification time
 echo "Getting list of objects in bucket and filtering by modification time..."
 FILTERED_FILE=$(mktemp)
 ERROR_FILE=$(mktemp)
 trap 'rm -f "$TEMP_FILE" "$FILTERED_FILE" "$ERROR_FILE"' EXIT
 
-append_objects_modified_after() {
-    local key="$1"
-    local last_modified="$2"
-
-    if [ -z "$key" ]; then
-        return 0
+if ! s3_bulk_tool_list_input_objects_modified_after "$BUCKET_NAME" "$PREFIX" "$TIMESTAMP_EPOCH" "$FILTERED_FILE" "$ERROR_FILE"; then
+    echo -e "${ERR}Error: Failed to list objects in bucket${NC}"
+    ERROR_MSG=$(cat "$ERROR_FILE")
+    if echo "$ERROR_MSG" | grep -q -i "AccessDenied\|Forbidden\|403"; then
+        echo -e "${ERR}Permission Error: Access denied. Please verify you have s3:ListBucket permission on the bucket.${NC}"
+    elif echo "$ERROR_MSG" | grep -q -i "NoSuchBucket"; then
+        echo -e "${ERR}Error: Bucket does not exist or you don't have permission to access it.${NC}"
     fi
+    echo "$ERROR_MSG"
+    exit 1
+fi
 
-    local modified_epoch=""
-    # AWS returns timestamps in format: 2024-01-01T12:34:56.000Z or 2024-01-01T12:34:56+00:00
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        modified_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${last_modified:0:19}" +%s 2>/dev/null || \
-                        date -j -f "%Y-%m-%dT%H:%M:%SZ" "$last_modified" +%s 2>/dev/null)
-    else
-        modified_epoch=$(date -d "$last_modified" +%s 2>/dev/null)
-    fi
-
-    if [ -n "$modified_epoch" ] && [ "$modified_epoch" -gt "$TIMESTAMP_EPOCH" ]; then
-        echo "$key" >> "$FILTERED_FILE"
-    fi
-}
-
-CONTINUATION_TOKEN=""
-while true; do
-    LIST_ARGS=(s3api list-objects-v2 --bucket "$BUCKET_NAME" --output json)
-    if [ -n "$PREFIX" ]; then
-        LIST_ARGS+=(--prefix "$PREFIX")
-    fi
-    if [ -n "$CONTINUATION_TOKEN" ]; then
-        LIST_ARGS+=(--starting-token "$CONTINUATION_TOKEN")
-    fi
-
-    PAGE_JSON=$(aws "${LIST_ARGS[@]}" 2>"$ERROR_FILE")
-    LIST_EXIT_CODE=$?
-
-    if [ $LIST_EXIT_CODE -ne 0 ]; then
-        echo -e "${ERR}Error: Failed to list objects in bucket${NC}"
-        ERROR_MSG=$(cat "$ERROR_FILE")
-        if echo "$ERROR_MSG" | grep -q -i "AccessDenied\|Forbidden\|403"; then
-            echo -e "${ERR}Permission Error: Access denied. Please verify you have s3:ListBucket permission on the bucket.${NC}"
-        elif echo "$ERROR_MSG" | grep -q -i "NoSuchBucket"; then
-            echo -e "${ERR}Error: Bucket does not exist or you don't have permission to access it.${NC}"
-        fi
-        echo "$ERROR_MSG"
-        exit 1
-    fi
-
-    if command -v jq &> /dev/null; then
-        while IFS=$'\t' read -r key last_modified; do
-            append_objects_modified_after "$key" "$last_modified"
-        done < <(echo "$PAGE_JSON" | jq -r '.Contents[]? | [.Key, .LastModified] | @tsv')
-        CONTINUATION_TOKEN=$(echo "$PAGE_JSON" | jq -r '.NextContinuationToken // empty')
-    elif python_cmd=$(resolve_python); then
-        while IFS=$'\t' read -r key last_modified; do
-            append_objects_modified_after "$key" "$last_modified"
-        done < <("$python_cmd" -c 'import json,sys
-page=json.load(sys.stdin)
-for item in page.get("Contents") or []:
-    print("{}\t{}".format(item["Key"], item["LastModified"]))' <<< "$PAGE_JSON")
-        CONTINUATION_TOKEN=$("$python_cmd" -c 'import json,sys; print(json.load(sys.stdin).get("NextContinuationToken") or "")' <<< "$PAGE_JSON")
-    else
-        TEXT_ARGS=(s3api list-objects-v2 --bucket "$BUCKET_NAME" --query 'Contents[].[Key,LastModified]' --output text)
-        TOKEN_ARGS=(s3api list-objects-v2 --bucket "$BUCKET_NAME" --query 'NextContinuationToken' --output text)
-        if [ -n "$PREFIX" ]; then
-            TEXT_ARGS+=(--prefix "$PREFIX")
-            TOKEN_ARGS+=(--prefix "$PREFIX")
-        fi
-        if [ -n "$CONTINUATION_TOKEN" ]; then
-            TEXT_ARGS+=(--starting-token "$CONTINUATION_TOKEN")
-            TOKEN_ARGS+=(--starting-token "$CONTINUATION_TOKEN")
-        fi
-
-        LIST_OUTPUT=$(aws "${TEXT_ARGS[@]}" 2>"$ERROR_FILE")
-        while read -r key last_modified; do
-            append_objects_modified_after "$key" "$last_modified"
-        done <<< "$LIST_OUTPUT"
-        CONTINUATION_TOKEN=$(aws "${TOKEN_ARGS[@]}" 2>"$ERROR_FILE")
-    fi
-
-    if [ -z "$CONTINUATION_TOKEN" ] || [ "$CONTINUATION_TOKEN" = "None" ]; then
-        break
-    fi
-done
-
-# Move filtered results to temp file
-mv "$FILTERED_FILE" "$TEMP_FILE"
+while IFS=$'\t' read -r _last_modified object_key; do
+    echo "$object_key" >> "$TEMP_FILE"
+done < "$FILTERED_FILE"
 
 # Count total objects to process
 TOTAL_OBJECTS=$(wc -l < "$TEMP_FILE" | tr -d ' ')

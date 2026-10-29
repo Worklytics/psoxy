@@ -168,26 +168,49 @@ If those are present, yet the error persists, it's possible that you have some o
 
 ## Bulk Processing failures
 
-If you need to re-trigger bulk processing of objects that have already been written to S3 (e.g., for webhook collectors), you can use the `replay-s3-writes.sh` script.
+When files land in the bulk connector **input** bucket but never appear in the **sanitized** bucket, use the tools below before re-triggering processing.
 
-This script copies S3 objects to themselves (adding a `psoxy-last-replay` metadata field), which triggers S3 write events that will cause the Lambda function to re-process those objects.
+### Find missing sanitized files
 
+[`diff-s3-bulk-files.sh`](tools/diff-s3-bulk-files.md) compares input and sanitized buckets. It lists input objects (default: modified in the **last 7 days**) that have no matching object in the sanitized bucket, **newest first**.
+
+- Documentation: [Diff S3 bulk files](tools/diff-s3-bulk-files.md)
+- Script on GitHub: [`tools/aws/diff-s3-bulk-files.sh`](https://github.com/Worklytics/psoxy/blob/main/tools/aws/diff-s3-bulk-files.sh)
+- Download: [raw script](https://raw.githubusercontent.com/Worklytics/psoxy/main/tools/aws/diff-s3-bulk-files.sh)
+
+```bash
+# Default lookback (1 week); sanitized bucket derived from ...-input → ...-sanitized
+./diff-s3-bulk-files.sh myenv-connector-input
+
+# Explicit cutoff time
+./diff-s3-bulk-files.sh myenv-connector-input myenv-connector-sanitized 2024-06-01T00:00:00Z
+```
+
+Review CloudWatch logs for the bulk Lambda around the timestamps shown. Fix configuration, rules, or permissions as needed.
+
+### Re-trigger processing
+
+[`replay-s3-writes.sh`](tools/replay-s3-writes.md) copies S3 objects to themselves (adding a `psoxy-last-replay` metadata field), which triggers S3 write events that cause the Lambda to re-process those objects.
+
+- Documentation: [Replay S3 writes](tools/replay-s3-writes.md)
+- Script on GitHub: [`tools/aws/replay-s3-writes.sh`](https://github.com/Worklytics/psoxy/blob/main/tools/aws/replay-s3-writes.sh)
+- Download: [raw script](https://raw.githubusercontent.com/Worklytics/psoxy/main/tools/aws/replay-s3-writes.sh)
 
 ```bash
 # Re-trigger processing for all objects modified in the last week
-./tools/aws/replay-s3-writes.sh my-bucket-name
+./replay-s3-writes.sh my-bucket-name
 
 # Re-trigger processing for objects modified since a specific date
-./tools/aws/replay-s3-writes.sh my-bucket-name 2024-01-01T00:00:00Z
+./replay-s3-writes.sh my-bucket-name 2024-01-01T00:00:00Z
 
 # Re-trigger processing for objects under a prefix
-./tools/aws/replay-s3-writes.sh --prefix raw/source_bucket=my-bucket my-bucket-name
+./replay-s3-writes.sh --prefix raw/source_bucket=my-bucket my-bucket-name
 
 # Re-trigger processing for a single object
-./tools/aws/replay-s3-writes.sh s3://my-bucket-name/path/to/object.json
+./replay-s3-writes.sh s3://my-bucket-name/path/to/object.json
 
 # Assume an IAM role before accessing the bucket
-./tools/aws/replay-s3-writes.sh --role arn:aws:iam::123456789012:role/MyRole my-bucket-name
+./replay-s3-writes.sh --role arn:aws:iam::123456789012:role/MyRole my-bucket-name
 ```
 
 Notes:

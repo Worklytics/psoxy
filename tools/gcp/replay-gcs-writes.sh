@@ -2,7 +2,7 @@
 
 # Script to replay writes on GCS objects created since a specific timestamp
 # (useful to re-trigger bulk processing of those objects via proxy)
-# Usage: ./replay-gcs-writes.sh <bucket_name> [timestamp]
+# Usage: ./replay-gcs-writes.sh [--prefix PREFIX] <bucket_name> [timestamp]
 # Timestamp format: YYYY-MM-DDTHH:MM:SSZ (ISO 8601)
 # If timestamp is not provided, defaults to one week ago
 
@@ -16,10 +16,16 @@ else
     ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
 fi
 
+# shellcheck source=gcs-bulk-tool-common.sh
+source "$(dirname "$0")/gcs-bulk-tool-common.sh"
+
 # Function to display usage information
 usage() {
-    echo "Usage: $0 <bucket_name> [timestamp]"
+    echo "Usage: $0 [--prefix PREFIX] <bucket_name> [timestamp]"
     echo "   OR: $0 <object_path>"
+    echo ""
+    echo "Options:"
+    echo "  --prefix PREFIX    : GCS object prefix to limit listing (bucket mode only)"
     echo ""
     echo "Arguments:"
     echo "  bucket_name  : GCS bucket name (with or without gs:// prefix)"
@@ -31,6 +37,7 @@ usage() {
     echo "  $0 my-bucket                                    # Replay writes on objects from last week"
     echo "  $0 gs://my-bucket                               # Replay writes on objects from last week (gs:// prefix accepted)"
     echo "  $0 my-bucket 2024-01-01T00:00:00Z              # Replay writes on objects since specific date"
+    echo "  $0 --prefix exports/ my-bucket                 # Replay writes under a prefix"
     echo "  $0 gs://my-bucket/path/to/object.json          # Replay write on a single object"
     echo "  $0 my-bucket/path/to/object.json               # Replay write on a single object (gs:// added automatically)"
     echo ""
@@ -39,6 +46,42 @@ usage() {
     echo "  • If object_path provided: Replay write on just that single object using 'gsutil rewrite -kO'"
     exit 1
 }
+
+PREFIX=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --prefix)
+            if [ $# -lt 2 ]; then
+                echo "Error: --prefix option requires a prefix value"
+                usage
+            fi
+            PREFIX="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            echo "Error: Unknown option: $1"
+            usage
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+PREFIX=$(gcs_bulk_tool_strip_gs_uri "$PREFIX")
+if [[ "$PREFIX" == gs://* ]]; then
+    PREFIX="${PREFIX#gs://}"
+    if [[ "$PREFIX" == */* ]]; then
+        PREFIX="${PREFIX#*/}"
+    fi
+fi
+if [ -n "$PREFIX" ] && [[ "$PREFIX" != */ ]]; then
+    PREFIX="${PREFIX}/"
+fi
 
 # Check if correct number of arguments provided
 if [ $# -lt 1 ] || [ $# -gt 2 ]; then
@@ -55,6 +98,10 @@ if [[ "$FIRST_ARG" == gs://*/* ]] || ([[ "$FIRST_ARG" != gs://* ]] && [[ "$FIRST
     # Single object mode
     if [ $# -ne 1 ]; then
         echo "Error: When providing an object path, no additional arguments are allowed"
+        usage
+    fi
+    if [ -n "$PREFIX" ]; then
+        echo "Error: --prefix is only supported in bucket mode, not when replaying a single object path"
         usage
     fi
     # Add gs:// prefix if not present
@@ -144,54 +191,22 @@ TEMP_FILE=$(mktemp)
 trap 'rm -f "$TEMP_FILE"' EXIT
 
 # List objects created after the timestamp and store in temp file
-echo -e "Enumerating objects created after ${INFO}$TIMESTAMP${NC}..."
-
-# First, get all objects in the bucket
-echo "Getting list of all objects in bucket..."
-gsutil ls "gs://$BUCKET_NAME/**" > "$TEMP_FILE"
-
-# Convert our timestamp to epoch for comparison
-TIMESTAMP_EPOCH=""
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
-    TIMESTAMP_EPOCH=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$TIMESTAMP" +%s)
-else
-    # Linux
-    TIMESTAMP_EPOCH=$(date -d "$TIMESTAMP" +%s)
+echo -e "Enumerating objects updated after ${INFO}$TIMESTAMP${NC}..."
+if [ -n "$PREFIX" ]; then
+    echo -e "Filtering to prefix: ${INFO}$PREFIX${NC}"
 fi
 
-# Filter objects by creation time using a single gsutil call
-echo "Filtering objects by creation time..."
+TIMESTAMP_EPOCH=$(gcs_bulk_tool_timestamp_to_epoch "$TIMESTAMP")
+
 FILTERED_FILE=$(mktemp)
 trap 'rm -f "$TEMP_FILE" "$FILTERED_FILE"' EXIT
 
-# Use gsutil ls -l to get object metadata in bulk
-gsutil ls -l "gs://$BUCKET_NAME/**" 2>/dev/null | while read -r line; do
-    # Each line is either:
-    #  - metadata line: <size>  <creation_time>  <object_path>
-    #  - summary line: TOTAL: <size> bytes in <count> objects
-    #  - header line: (ignore)
-    # We want lines that start with a number (size)
-    if [[ "$line" =~ ^[0-9]+[[:space:]] ]]; then
-        size=$(echo "$line" | awk '{print $1}')
-        creation_time=$(echo "$line" | awk '{print $2}')
-        object_path=$(echo "$line" | awk '{print $3}')
-        # Convert creation_time to epoch
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            creation_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$creation_time" +%s 2>/dev/null || \
-                             date -j -f "%Y-%m-%d %H:%M:%S" "$creation_time" +%s 2>/dev/null)
-        else
-            creation_epoch=$(date -d "$creation_time" +%s 2>/dev/null)
-        fi
-        # If creation time is after our timestamp, include this object
-        if [ -n "$creation_epoch" ] && [ "$creation_epoch" -gt "$TIMESTAMP_EPOCH" ]; then
-            echo "$object_path" >> "$FILTERED_FILE"
-        fi
-    fi
-done
+echo "Getting list of objects in bucket and filtering by update time..."
+gcs_bulk_tool_list_input_objects_modified_after "$BUCKET_NAME" "$PREFIX" "$TIMESTAMP_EPOCH" "$FILTERED_FILE"
 
-# Move filtered results back to temp file
-mv "$FILTERED_FILE" "$TEMP_FILE"
+while IFS=$'\t' read -r _updated object_path_key; do
+    echo "gs://$BUCKET_NAME/$object_path_key" >> "$TEMP_FILE"
+done < "$FILTERED_FILE"
 
 # Count total objects to process
 TOTAL_OBJECTS=$(wc -l < "$TEMP_FILE" | tr -d ' ')

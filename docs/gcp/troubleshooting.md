@@ -284,18 +284,40 @@ See [VPC configuration](./guides/vpc.md#removing-vpc-egress) for background on D
 
 ## Bulk processing failures
 
-If you need to re-trigger bulk processing of objects that have already been written to GCS (e.g., for webhook collectors), you can use the `replay-gcs-writes.sh` script.
+When files land in the bulk connector **input** bucket but never appear in the **sanitized** bucket, use the tools below.
 
-This script uses `gsutil rewrite -kO` to replay write events on GCS objects, which triggers Cloud Storage write events that will cause the Cloud Function to re-process those objects.
+### Find missing sanitized files
+
+[`diff-gcs-bulk-files.sh`](tools/diff-gcs-bulk-files.md) lists input objects (default: updated in the **last 7 days**) with no corresponding sanitized object, **newest first**.
+
+- Documentation: [Diff GCS bulk files](tools/diff-gcs-bulk-files.md)
+- Script: [`tools/gcp/diff-gcs-bulk-files.sh`](https://github.com/Worklytics/psoxy/blob/main/tools/gcp/diff-gcs-bulk-files.sh) · [Download raw](https://raw.githubusercontent.com/Worklytics/psoxy/main/tools/gcp/diff-gcs-bulk-files.sh)
 
 ```bash
-# Re-trigger processing for all objects created in the last week
-./tools/gcp/replay-gcs-writes.sh my-bucket-name
+./diff-gcs-bulk-files.sh myenv-connector-input
+./diff-gcs-bulk-files.sh myenv-connector-input myenv-connector-sanitized 2024-06-01T00:00:00Z
+```
 
-# Re-trigger processing for objects created since a specific date
-./tools/gcp/replay-gcs-writes.sh my-bucket-name 2024-01-01T00:00:00Z
+Check Cloud Logging for the bulk Cloud Function around those timestamps.
+
+### Re-trigger processing
+
+[`replay-gcs-writes.sh`](tools/replay-gcs-writes.md) uses `gsutil rewrite -kO` to replay write events on GCS objects, which triggers Cloud Storage events that cause the Cloud Function to re-process those objects.
+
+- Documentation: [Replay GCS writes](tools/replay-gcs-writes.md)
+- Script: [`tools/gcp/replay-gcs-writes.sh`](https://github.com/Worklytics/psoxy/blob/main/tools/gcp/replay-gcs-writes.sh) · [Download raw](https://raw.githubusercontent.com/Worklytics/psoxy/main/tools/gcp/replay-gcs-writes.sh)
+
+```bash
+# Re-trigger processing for all objects updated in the last week
+./replay-gcs-writes.sh my-bucket-name
+
+# Re-trigger processing for objects updated since a specific date
+./replay-gcs-writes.sh my-bucket-name 2024-01-01T00:00:00Z
+
+# Re-trigger processing under a prefix
+./replay-gcs-writes.sh --prefix exports/ my-bucket-name
 
 # Re-trigger processing for a single object
-./tools/gcp/replay-gcs-writes.sh gs://my-bucket-name/path/to/object.json
+./replay-gcs-writes.sh gs://my-bucket-name/path/to/object.json
 ```
 

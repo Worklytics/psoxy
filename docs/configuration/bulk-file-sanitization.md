@@ -6,6 +6,8 @@ Psoxy can be used to sanitize bulk files (eg, CSV, NDSJON, etc), writing the res
 
 You can automate a data pipeline to push files to an `-input` bucket, which will trigger a Psoxy instance (GCP Cloud Function or AWS Lambda), which will read the file, sanitize it, and write the result to a corresponding `-sanitized` bucket.
 
+If processing fails or output never appears, see [AWS bulk processing failures](../aws/troubleshooting.md#bulk-processing-failures) or [GCP bulk processing failures](../gcp/troubleshooting.md#bulk-processing-failures) for diff and replay scripts.
+
 You should limit the size of files processed by proxy to 200k rows or less, to ensure processing of any single file finishes within the run time limitations of the host platform (AWS, GCP). There is some flexibility here based on the complexity of your rules and file schema, but we've found 200k to be a conservative target.
 
 ### Compression
