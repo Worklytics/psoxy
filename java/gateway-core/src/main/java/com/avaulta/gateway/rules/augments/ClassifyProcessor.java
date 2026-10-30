@@ -13,7 +13,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Facade for {@link Augment.Classify} — closed-set label via {@link GenMetadataBackend}.
+ * Facade for {@link Augment.Classify} — one closed-set label.
+ *
+ * <p>{@code remote-llm} calls {@link GenMetadataBackend#classify}. {@code embedded-decide} calls
+ * {@link EmbeddedDecideClassify} and does not call the chat backend. A down decider fails the
+ * augment; it does not fall through.
  */
 public class ClassifyProcessor {
 
@@ -22,11 +26,26 @@ public class ClassifyProcessor {
     private static final int DEFAULT_MAX_ATTEMPTS = 2;
 
     private final GenMetadataBackend backend;
+    private final EmbeddedDecideClassify embeddedDecide;
+    private final boolean embeddedDecideEnabled;
     private final ObjectMapper objectMapper;
     private final int maxAttempts;
 
     public ClassifyProcessor(GenMetadataBackend backend, ObjectMapper objectMapper, int maxAttempts) {
+        this(backend, null, false, objectMapper, maxAttempts);
+    }
+
+    public ClassifyProcessor(GenMetadataBackend backend,
+                             EmbeddedDecideClassify embeddedDecide,
+                             boolean embeddedDecideEnabled,
+                             ObjectMapper objectMapper,
+                             int maxAttempts) {
+        if (embeddedDecideEnabled && embeddedDecide == null) {
+            throw new IllegalArgumentException("embedded-decide requires a loopback classify client");
+        }
         this.backend = backend;
+        this.embeddedDecide = embeddedDecide;
+        this.embeddedDecideEnabled = embeddedDecideEnabled;
         this.objectMapper = objectMapper;
         this.maxAttempts = maxAttempts > 0 ? maxAttempts : DEFAULT_MAX_ATTEMPTS;
     }
@@ -67,7 +86,11 @@ public class ClassifyProcessor {
         log.info("classify augment inference call started at " + startedAt);
         GenMetadataInferenceResult result;
         try {
-            result = backend.classify(taskPrompt, classes, inputJson, options);
+            if (embeddedDecideEnabled) {
+                result = embeddedDecide.classify(taskPrompt, classes, inputJson, options);
+            } else {
+                result = backend.classify(taskPrompt, classes, inputJson, options);
+            }
         } finally {
             long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedNanos);
             log.info("classify augment inference call completed in " + elapsedMs + "ms");

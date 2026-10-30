@@ -52,9 +52,11 @@ import com.avaulta.gateway.rules.augments.GenMetadataBackend;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.AugmentProcessor;
+import co.worklytics.psoxy.impl.gen.ClassifyConfig;
 import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import co.worklytics.psoxy.impl.gen.LangChain4jGenMetadataBackend;
+import co.worklytics.psoxy.impl.gen.LoopbackDecideClassify;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
 import dagger.Binds;
@@ -481,10 +483,19 @@ public class PsoxyModule {
 
     @Provides
     @Singleton
+    static ClassifyConfig classifyConfig(ConfigService configService) {
+        return ClassifyConfig.from(configService);
+    }
+
+    @Provides
+    @Singleton
     static ClassifyProcessor classifyProcessor(GenMetadataBackend genMetadataBackend,
-                                               ObjectMapper objectMapper,
-                                               GenMetadataConfig genMetadataConfig) {
-        return new ClassifyProcessor(genMetadataBackend, objectMapper,
-            genMetadataConfig.getMaxAttempts());
+                                               LoopbackDecideClassify embeddedDecide,
+                                               ClassifyConfig classifyConfig,
+                                               ObjectMapper objectMapper) {
+        boolean embedded = classifyConfig.getImplementation()
+            == ClassifyConfig.Implementation.EMBEDDED_DECIDE;
+        return new ClassifyProcessor(genMetadataBackend, embeddedDecide, embedded, objectMapper,
+            classifyConfig.getMaxAttempts());
     }
 }

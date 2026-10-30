@@ -30,6 +30,15 @@ public final class BedrockGenMetadataConfig extends GenMetadataConfig {
             maxAttempts(configService));
     }
 
+    /**
+     * Same Bedrock backend with a classify model id and timeout. Nova foundation-model ids are
+     * rewritten the same way as {@link #from}.
+     */
+    BedrockGenMetadataConfig withModelAndTimeout(String modelId, int timeoutSeconds) {
+        return new BedrockGenMetadataConfig(
+            normalizeModelId(modelId), timeoutSeconds, getMaxAttempts());
+    }
+
     /** Test helper when ConfigService is not involved. */
     public static BedrockGenMetadataConfig of(String modelId, int timeoutSeconds) {
         return new BedrockGenMetadataConfig(

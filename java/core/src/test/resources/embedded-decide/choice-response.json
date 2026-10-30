@@ -1,0 +1,20 @@
+{
+  "model": "strands-decider-2B-qwen3.5-v1-2610",
+  "answers": {
+    "label": {
+      "type": "choice",
+      "choice": "Email Drafting",
+      "probabilities": {
+        "Email Drafting": 0.91,
+        "Research and Ideation": 0.04,
+        "Uncategorized": 0.03,
+        "Excluded": 0.02
+      },
+      "confidence": 0.88
+    }
+  },
+  "usage": {
+    "input_tokens": 120,
+    "output_tokens": 1
+  }
+}

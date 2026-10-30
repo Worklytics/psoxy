@@ -45,7 +45,17 @@ OpenNLP model files for the `textMetadata` augment are loaded from `{SHARED_RESO
 
 ### genMetadata
 
-`!<genMetadata>` and `!<classify>` augments use Vertex AI or Bedrock, not this bucket. See [genMetadata](../development/alpha-features/gen-metadata-augment.md).
+`!<genMetadata>` and `CLASSIFY_IMPLEMENTATION=remote-llm` use Vertex AI or Bedrock, not this bucket. See [genMetadata](../development/alpha-features/gen-metadata-augment.md).
+
+### Embedded decide checkpoint
+
+`CLASSIFY_IMPLEMENTATION=embedded-decide` reads a directory, not a single object the JVM parses:
+
+```
+{SHARED_RESOURCE_PATH}/decide/strands-decider-2B-qwen3.5-v1-2610/<revision>/
+```
+
+`<revision>` is a `YYMMDD` tag (`CLASSIFY_MODEL_REVISION`). `main` is not a valid revision. The directory holds the adapter (`strands_decider_config.json`, `lora/`, `head.safetensors`, tokenizer files) and `base/` (`Qwen/Qwen3.5-2B-Base`, with a `REVISION` file naming the pinned commit). Copy it with `tools/fetch-decide-checkpoint.sh`. Turn on `enable_remote_resources` for that connector. The container entrypoint syncs the prefix to local disk and starts the decider on `127.0.0.1` before the Java handler. Weights are not in the image and are not fetched from Hugging Face on a cold start. Gemma checkpoints are not part of this prefix.
 
 ## Troubleshooting
 

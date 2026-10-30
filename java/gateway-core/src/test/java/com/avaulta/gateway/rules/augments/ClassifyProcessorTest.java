@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -134,6 +135,69 @@ class ClassifyProcessorTest {
         assertEquals("classify", classify.getFunctionName());
         assertEquals("Uncategorized".length(), classify.getMaxOutputTokens());
         assertNull(classify.getOutputSchema());
+    }
+
+    @Test
+    void compute_embeddedDecideDoesNotCallTheChatBackend() {
+        AtomicInteger embeddedCalls = new AtomicInteger();
+        ClassifyProcessor processor = new ClassifyProcessor(
+            (taskPrompt, outputSchema, inputData, options) -> {
+                throw new AssertionError("chat backend called");
+            },
+            (taskPrompt, classes, inputData, options) -> {
+                embeddedCalls.incrementAndGet();
+                return GenMetadataInferenceResult.of("Feature");
+            },
+            true,
+            OBJECT_MAPPER,
+            2);
+        assertEquals("Feature", processor.compute(
+            Augment.Classify.builder()
+                .jsonPath("$.x")
+                .prompt("classify")
+                .classes(List.of("Feature", "Bugfix"))
+                .build(),
+            "x"));
+        assertEquals(1, embeddedCalls.get());
+    }
+
+    @Test
+    void compute_remoteLlmDoesNotCallLoopback() {
+        ClassifyProcessor processor = new ClassifyProcessor(
+            (taskPrompt, outputSchema, inputData, options) -> GenMetadataInferenceResult.of("Bugfix"),
+            (taskPrompt, classes, inputData, options) -> {
+                throw new AssertionError("loopback called");
+            },
+            false,
+            OBJECT_MAPPER,
+            2);
+        assertEquals("Bugfix", processor.compute(
+            Augment.Classify.builder()
+                .jsonPath("$.x")
+                .prompt("classify")
+                .classes(List.of("Feature", "Bugfix"))
+                .build(),
+            "x"));
+    }
+
+    @Test
+    void compute_missingEmbeddedChoiceRetriesThenFails() {
+        AtomicInteger attempts = new AtomicInteger();
+        ClassifyProcessor processor = new ClassifyProcessor(
+            (taskPrompt, outputSchema, inputData, options) -> {
+                throw new AssertionError("chat backend called");
+            },
+            (taskPrompt, classes, inputData, options) -> {
+                attempts.incrementAndGet();
+                return null;
+            },
+            true,
+            OBJECT_MAPPER,
+            2);
+        GenMetadataAugmentException ex = assertThrows(GenMetadataAugmentException.class,
+            () -> processor.compute(classifyAugment(), "x"));
+        assertEquals(GenMetadataAugmentException.Code.INFERENCE_FAILED, ex.getCode());
+        assertEquals(2, attempts.get());
     }
 
     private static Augment.Classify classifyAugment() {
