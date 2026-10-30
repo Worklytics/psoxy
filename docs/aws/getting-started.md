@@ -72,6 +72,8 @@ If any connector sets `enable_gen_metadata = true`:
 
 See [genMetadata](../development/alpha-features/gen-metadata-augment.md). If invokes fail with `AccessDeniedException` / `not authorized to perform bedrock:InvokeModel`, check [troubleshooting](troubleshooting.md#bedrock-genmetadata-access-denied).
 
+`CLASSIFY_IMPLEMENTATION=remote-llm` uses the same Bedrock grant. It reads `CLASSIFY_MODEL`, `CLASSIFY_TIMEOUT_SECONDS`, and `CLASSIFY_RETRIES`, not `GEN_METADATA_*`. `embedded-decide` does not call Bedrock. It needs the container image under `tools/embedded-decide/` (the Java zip has no local decider), `enable_remote_resources`, Lambda memory and ephemeral storage at 10,240 MB, and provisioned concurrency on API connectors so the cold load (tens of seconds) is not inside API Gateway's 30 s integration timeout. A published measurement of that container on Lambda (arm64, 10,240 MB) was about 4.3 s per warm decision. This deployment still ships the zip until that image is published. Do not add a second AWS service to host the model.
+
 ## Provisioning Environment
 
 To provision AWS infra, you'll need the `aws-cli` installed and authenticated on the environment where you'll run `terraform`.

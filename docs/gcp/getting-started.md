@@ -87,6 +87,8 @@ The module [psoxy-constants](../../infra/modules/psoxy-constants) is a dependenc
 
 If any connector sets `enable_gen_metadata = true`, Terraform enables `aiplatform.googleapis.com` and grants `roles/aiplatform.user` to that connector's service account. See [genMetadata](../development/alpha-features/gen-metadata-augment.md).
 
+`CLASSIFY_IMPLEMENTATION=remote-llm` uses that same Vertex grant and reads `CLASSIFY_*` rather than `GEN_METADATA_*`. `embedded-decide` does not call Vertex. Run the image from `tools/embedded-decide/` with `enable_remote_resources`, on the order of 16 GiB of memory so the checkpoint and the JVM both fit (Cloud Run's platform cap to check is 32 GiB), and a minimum instance on API connectors so the cold load is not inside the request deadline. The Java zip has no local decider process. Do not add a second Cloud Run service for the model.
+
 ## Example
 
 The [Worklytics/psoxy-example-gcp](https://github.com/Worklytics/psoxy-example-gcp) repo provides an example configuration for hosting proxy instances in GCP. You use that template, following its `Usage` docs to get started.

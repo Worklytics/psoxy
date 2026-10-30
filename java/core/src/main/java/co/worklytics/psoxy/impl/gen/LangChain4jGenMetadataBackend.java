@@ -78,6 +78,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     }
 
     private final GenMetadataConfig config;
+    private final ClassifyConfig classifyConfig;
     private final GenMetadataPromptBudget promptBudget;
     private final GenMetadataChatModelFactory chatModelFactory;
     private final GenMetadataTokenUsageAccumulator tokenUsageAccumulator;
@@ -87,6 +88,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
 
     @Inject
     public LangChain4jGenMetadataBackend(GenMetadataConfig config,
+                                         ClassifyConfig classifyConfig,
                                          GenMetadataPromptBudget promptBudget,
                                          GenMetadataChatModelFactory chatModelFactory,
                                          GenMetadataTokenUsageAccumulator tokenUsageAccumulator,
@@ -94,6 +96,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
                                          GenMetadataResponseFormats responseFormats,
                                          Optional<Clock> clock) {
         this.config = config;
+        this.classifyConfig = classifyConfig;
         this.promptBudget = promptBudget;
         this.chatModelFactory = chatModelFactory;
         this.tokenUsageAccumulator = tokenUsageAccumulator;
@@ -102,7 +105,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         this.clock = clock.orElse(Clock.systemUTC());
     }
 
-    /** Test helper when a concrete {@link Clock} is on hand. */
+    /** Test helper when a concrete {@link Clock} is on hand. Classify follows {@code config}. */
     LangChain4jGenMetadataBackend(GenMetadataConfig config,
                                   GenMetadataPromptBudget promptBudget,
                                   GenMetadataChatModelFactory chatModelFactory,
@@ -110,8 +113,21 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
                                   GenMetadataPromptBuilder promptBuilder,
                                   GenMetadataResponseFormats responseFormats,
                                   Clock clock) {
-        this(config, promptBudget, chatModelFactory, tokenUsageAccumulator, promptBuilder,
-            responseFormats, Optional.ofNullable(clock));
+        this(config, ClassifyConfig.matchingHost(config), promptBudget, chatModelFactory,
+            tokenUsageAccumulator, promptBuilder, responseFormats, Optional.ofNullable(clock));
+    }
+
+    /** Test helper with an explicit classify deployment. */
+    LangChain4jGenMetadataBackend(GenMetadataConfig config,
+                                  ClassifyConfig classifyConfig,
+                                  GenMetadataPromptBudget promptBudget,
+                                  GenMetadataChatModelFactory chatModelFactory,
+                                  GenMetadataTokenUsageAccumulator tokenUsageAccumulator,
+                                  GenMetadataPromptBuilder promptBuilder,
+                                  GenMetadataResponseFormats responseFormats,
+                                  Clock clock) {
+        this(config, classifyConfig, promptBudget, chatModelFactory, tokenUsageAccumulator,
+            promptBuilder, responseFormats, Optional.ofNullable(clock));
     }
 
     private final ConcurrentHashMap<String, ModelHandle> models = new ConcurrentHashMap<>();
@@ -147,14 +163,20 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             log.info("genMetadata Bedrock: omitting ResponseFormat/outputConfig for model "
                 + config.getModelId());
         }
-        return completeChat(handle, messages, responseFormat.orElse(null), effectiveMaxTokens);
+        return completeChat(handle, messages, responseFormat.orElse(null), effectiveMaxTokens,
+            config.getModelId(), config.getTimeoutSeconds());
     }
 
     @Override
     public GenMetadataInferenceResult classify(String taskPrompt, @NonNull List<String> classes,
                                                String inputData,
                                                GenMetadataInferenceOptions options) {
-        ModelHandle handle = requireReadyHandle();
+        if (classifyConfig.getImplementation() != ClassifyConfig.Implementation.REMOTE_LLM) {
+            throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
+                "classify chat backend is only for CLASSIFY_IMPLEMENTATION=remote-llm");
+        }
+        GenMetadataConfig callConfig = classifyCallConfig();
+        ModelHandle handle = requireReadyHandle(callConfig);
         GenMetadataInferenceOptions effective =
             options != null ? options : GenMetadataInferenceOptions.defaults();
 
@@ -163,23 +185,44 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         String fittedInput = promptBudget.fitDynamicInput(inputData, effectiveMaxInputTokens);
         List<ChatMessage> messages =
             promptBuilder.toClassifyMessages(taskPrompt, classes, fittedInput);
-        boolean bedrock = config.getBackend() == GenMetadataConfig.Backend.BEDROCK;
+        boolean bedrock = callConfig.getBackend() == GenMetadataConfig.Backend.BEDROCK;
         Optional<ResponseFormat> responseFormat = bedrock
             ? Optional.empty()
             : responseFormats.fromClasses(classes);
         if (bedrock) {
             log.info("classify Bedrock: omitting ResponseFormat/outputConfig for model "
-                + config.getModelId());
+                + callConfig.getModelId());
         }
-        return completeChat(handle, messages, responseFormat.orElse(null), maxOutputTokens);
+        return completeChat(handle, messages, responseFormat.orElse(null), maxOutputTokens,
+            callConfig.getModelId(), callConfig.getTimeoutSeconds());
+    }
+
+    /**
+     * Host backend (Bedrock or Vertex) with {@code CLASSIFY_MODEL} and
+     * {@code CLASSIFY_TIMEOUT_SECONDS}. Does not read {@code GEN_METADATA_MODEL}.
+     */
+    private GenMetadataConfig classifyCallConfig() {
+        String modelId = classifyConfig.remoteModelId(config.getModelId());
+        int timeoutSeconds = classifyConfig.getTimeoutSeconds();
+        if (config instanceof BedrockGenMetadataConfig bedrock) {
+            return bedrock.withModelAndTimeout(modelId, timeoutSeconds);
+        }
+        if (config instanceof VertexGenMetadataConfig vertex) {
+            return vertex.withModelAndTimeout(modelId, timeoutSeconds);
+        }
+        return config;
     }
 
     private ModelHandle requireReadyHandle() {
-        if (!chatModelFactory.supports(config)) {
+        return requireReadyHandle(config);
+    }
+
+    private ModelHandle requireReadyHandle(GenMetadataConfig callConfig) {
+        if (!chatModelFactory.supports(callConfig)) {
             throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
                 "genMetadata backend is not available");
         }
-        ModelHandle handle = resolveModel();
+        ModelHandle handle = resolveModel(callConfig);
         if (!handle.isReady()) {
             throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
                 "genMetadata client failed to initialize", handle.failure);
@@ -189,22 +232,24 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
 
     private GenMetadataInferenceResult completeChat(ModelHandle handle, List<ChatMessage> messages,
                                                     ResponseFormat responseFormat,
-                                                    int maxOutputTokens) {
+                                                    int maxOutputTokens,
+                                                    String modelId,
+                                                    int timeoutSeconds) {
         try {
             Instant inferenceStartedAt = clock.instant();
             long inferenceStartedMs = clock.millis();
             log.info("genMetadata LLM inference started at " + inferenceStartedAt
-                + " modelId=" + config.getModelId()
+                + " modelId=" + modelId
                 + " backend=" + backendLabel()
                 + thinkingLogSuffix());
             ChatResponse response;
             try {
                 response = chatWithTimeout(handle.chatModel, messages, responseFormat,
-                    maxOutputTokens);
+                    maxOutputTokens, modelId, timeoutSeconds);
             } finally {
                 log.info("genMetadata LLM inference completed in "
                     + (clock.millis() - inferenceStartedMs) + "ms"
-                    + " modelId=" + config.getModelId());
+                    + " modelId=" + modelId);
             }
             if (response == null) {
                 return null;
@@ -217,7 +262,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             if (text != null && !text.isBlank()) {
                 log.info("genMetadata model response received"
                     + " chars=" + text.length()
-                    + " modelId=" + config.getModelId());
+                    + " modelId=" + modelId);
             }
             return GenMetadataInferenceResult.of(text);
         } catch (InterruptedException e) {
@@ -246,12 +291,17 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     }
 
     ModelHandle resolveModel() {
-        return models.computeIfAbsent(config.getModelId(), this::createModelHandle);
+        return resolveModel(config);
     }
 
-    private ModelHandle createModelHandle(String modelKey) {
+    private ModelHandle resolveModel(GenMetadataConfig callConfig) {
+        String cacheKey = callConfig.getModelId() + "\0" + callConfig.getTimeoutSeconds();
+        return models.computeIfAbsent(cacheKey, key -> createModelHandle(callConfig, key));
+    }
+
+    private ModelHandle createModelHandle(GenMetadataConfig callConfig, String modelKey) {
         try {
-            ChatModel chatModel = chatModelFactory.create(config, null);
+            ChatModel chatModel = chatModelFactory.create(callConfig, null);
             log.info("Initialized genMetadata LangChain4j client: " + modelKey
                 + " backend=" + backendLabel()
                 + thinkingLogSuffix());
@@ -286,6 +336,13 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
 
     ChatResponse chatWithTimeout(ChatModel chatModel, List<ChatMessage> messages,
                                  ResponseFormat responseFormat, int maxOutputTokens) throws Exception {
+        return chatWithTimeout(chatModel, messages, responseFormat, maxOutputTokens,
+            config.getModelId(), config.getTimeoutSeconds());
+    }
+
+    private ChatResponse chatWithTimeout(ChatModel chatModel, List<ChatMessage> messages,
+                                         ResponseFormat responseFormat, int maxOutputTokens,
+                                         String modelId, int timeoutSeconds) throws Exception {
         ChatRequest.Builder requestBuilder = ChatRequest.builder()
             .messages(messages)
             .maxOutputTokens(maxOutputTokens);
@@ -293,7 +350,6 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             requestBuilder.responseFormat(responseFormat);
         }
         ChatRequest request = requestBuilder.build();
-        int timeoutSeconds = config.getTimeoutSeconds();
         long deadlineNanos = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds);
         boolean acquired = false;
         try {
@@ -301,7 +357,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             if (waitNanos <= 0
                 || !cloudSlots.tryAcquire(waitNanos, TimeUnit.NANOSECONDS)) {
                 log.warning("genMetadata timed out after " + timeoutSeconds
-                    + "s waiting for an inference slot modelId=" + config.getModelId());
+                    + "s waiting for an inference slot modelId=" + modelId);
                 return null;
             }
             acquired = true;
@@ -310,7 +366,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
                 future = chatExecutor.submit(() -> chatModel.chat(request));
             } catch (RejectedExecutionException e) {
                 log.warning("genMetadata inference rejected; all workers busy modelId="
-                    + config.getModelId());
+                    + modelId);
                 return null;
             }
             long remainingNanos = deadlineNanos - System.nanoTime();
@@ -318,7 +374,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
                 future.cancel(true);
                 drainCancelled(future);
                 log.warning("genMetadata LLM inference timed out after " + timeoutSeconds
-                    + "s modelId=" + config.getModelId());
+                    + "s modelId=" + modelId);
                 return null;
             }
             try {
@@ -326,7 +382,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             } catch (TimeoutException e) {
                 future.cancel(true);
                 log.warning("genMetadata LLM inference timed out after " + timeoutSeconds
-                    + "s modelId=" + config.getModelId());
+                    + "s modelId=" + modelId);
                 drainCancelled(future);
                 return null;
             } catch (ExecutionException e) {

@@ -74,6 +74,12 @@ public final class VertexGenMetadataConfig extends GenMetadataConfig {
         return " thinkingLevel=" + thinkingLevel;
     }
 
+    /** Same Vertex location and thinking level, with a classify model id and timeout. */
+    VertexGenMetadataConfig withModelAndTimeout(String modelId, int timeoutSeconds) {
+        return new VertexGenMetadataConfig(
+            modelId, timeoutSeconds, getMaxAttempts(), modelRegion, thinkingLevel);
+    }
+
     /** Test helper when ConfigService is not involved. */
     public static VertexGenMetadataConfig of(String modelId, String modelRegion, int timeoutSeconds) {
         String region = StringUtils.isNotBlank(modelRegion) ? modelRegion.trim() : DEFAULT_MODEL_REGION;
