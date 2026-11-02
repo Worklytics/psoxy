@@ -21,6 +21,8 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.TransientConfigException;
 import co.worklytics.psoxy.gateway.WritableConfigService;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
+import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
@@ -33,27 +35,42 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
 
     static final int MAX_TRANSIENT_RETRIES = 3;
     static final long DEFAULT_TRANSIENT_RETRY_DELAY_MS = 500L;
+    /** Upper bound on any single inter-attempt sleep during cache-miss retries (8 seconds). */
+    static final long MAX_TRANSIENT_RETRY_DELAY_MS = 8_000L;
 
     final ConfigService delegate;
     final Duration defaultTtl;
     final Ticker ticker;
     final long transientRetryDelayMs;
+    final RandomNumberGenerator randomNumberGenerator;
 
     public CachingConfigServiceDecorator(ConfigService delegate, Duration defaultTtl) {
-        this(delegate, defaultTtl, Ticker.systemTicker(), DEFAULT_TRANSIENT_RETRY_DELAY_MS);
+        this(delegate, defaultTtl, Ticker.systemTicker(), DEFAULT_TRANSIENT_RETRY_DELAY_MS, new RandomNumberGeneratorImpl());
+    }
+
+    public CachingConfigServiceDecorator(ConfigService delegate, Duration defaultTtl,
+                                         RandomNumberGenerator randomNumberGenerator) {
+        this(delegate, defaultTtl, Ticker.systemTicker(), DEFAULT_TRANSIENT_RETRY_DELAY_MS, randomNumberGenerator);
     }
 
     @VisibleForTesting
     CachingConfigServiceDecorator(ConfigService delegate, Duration defaultTtl, Ticker ticker) {
-        this(delegate, defaultTtl, ticker, DEFAULT_TRANSIENT_RETRY_DELAY_MS);
+        this(delegate, defaultTtl, ticker, DEFAULT_TRANSIENT_RETRY_DELAY_MS, new RandomNumberGeneratorImpl());
     }
 
     @VisibleForTesting
     CachingConfigServiceDecorator(ConfigService delegate, Duration defaultTtl, Ticker ticker, long transientRetryDelayMs) {
+        this(delegate, defaultTtl, ticker, transientRetryDelayMs, new RandomNumberGeneratorImpl());
+    }
+
+    @VisibleForTesting
+    CachingConfigServiceDecorator(ConfigService delegate, Duration defaultTtl, Ticker ticker,
+                                  long transientRetryDelayMs, RandomNumberGenerator randomNumberGenerator) {
         this.delegate = delegate;
         this.defaultTtl = defaultTtl;
         this.ticker = ticker;
         this.transientRetryDelayMs = transientRetryDelayMs;
+        this.randomNumberGenerator = randomNumberGenerator;
     }
 
     private volatile LoadingCache<ConfigProperty, String> cache;
@@ -85,12 +102,8 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
                                         log.log(Level.WARNING, String.format("Transient failure on attempt %d/%d for config property %s",
                                             attempt + 1, MAX_TRANSIENT_RETRIES, key.name()));
                                     }
-                                    try {
-                                        if (transientRetryDelayMs > 0)
-                                            Thread.sleep(transientRetryDelayMs);
-                                    } catch (InterruptedException ie) {
-                                        Thread.currentThread().interrupt();
-                                        throw new TransientConfigException("Config load for " + key.name() + " interrupted during retry", ie);
+                                    if (attempt < MAX_TRANSIENT_RETRIES - 1) {
+                                        sleepBeforeTransientRetry(key, attempt);
                                     }
                                 }
                                 throw lastException;
@@ -125,6 +138,41 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
             }
         }
         return cache;
+    }
+
+    /**
+     * Full jitter in {@code [0, maxDelayMs]} before retrying after a transient cache miss.
+     * {@code maxDelayMs} doubles with each failed attempt (500ms, 1s, 2s, … with default base)
+     * until {@link #MAX_TRANSIENT_RETRY_DELAY_MS} (8 seconds).
+     */
+    @VisibleForTesting
+    long computeTransientRetryDelayMs(int attemptZeroBased) {
+        if (transientRetryDelayMs <= 0) {
+            return 0;
+        }
+        long maxDelayMs = transientRetryDelayMs;
+        for (int i = 0; i < attemptZeroBased; i++) {
+            if (maxDelayMs >= MAX_TRANSIENT_RETRY_DELAY_MS) {
+                maxDelayMs = MAX_TRANSIENT_RETRY_DELAY_MS;
+                break;
+            }
+            maxDelayMs *= 2;
+        }
+        maxDelayMs = Math.min(MAX_TRANSIENT_RETRY_DELAY_MS, maxDelayMs);
+        return randomNumberGenerator.nextInt((int) maxDelayMs + 1);
+    }
+
+    private void sleepBeforeTransientRetry(ConfigProperty key, int attemptZeroBased) {
+        long delayMs = computeTransientRetryDelayMs(attemptZeroBased);
+        if (delayMs <= 0) {
+            return;
+        }
+        try {
+            Thread.sleep(delayMs);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new TransientConfigException("Config load for " + key.name() + " interrupted during retry", ie);
+        }
     }
 
     @Override
