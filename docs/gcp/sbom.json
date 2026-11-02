@@ -4,7 +4,7 @@
   "serialNumber" : "urn:uuid:0cd5ef53-d0d7-3fb0-95b0-ffe674e969b5",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2026-10-29T22:58:08Z",
+    "timestamp" : "2026-11-02T20:37:46Z",
     "lifecycles" : [
       {
         "phase" : "build"
@@ -92,35 +92,35 @@
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "b63ff6d071c763b7ff8ce15caad83a9d"
+          "content" : "c2ba1723de7b0f4c5a8ba6c12de2df25"
         },
         {
           "alg" : "SHA-1",
-          "content" : "7cfd9173c1011453b11a23b91cee75d5e63409aa"
+          "content" : "523ccc76bd08b1bbff7e50b970362c4d4783aa18"
         },
         {
           "alg" : "SHA-256",
-          "content" : "1f7c40b6660081664d428f426b798b45398d9f2776a0b21b595d705b930fb5a1"
+          "content" : "1cbdb6070cd02bde98425aa1a0b62c9a2728b9e2ca047078cf5553721a4632fc"
         },
         {
           "alg" : "SHA-512",
-          "content" : "9059cda2f14694c357347ec8044b1804b452c8d67d1b10428e276c9aea50473aaa3c60c7e5bb0d8476cf6a640b701dd9b6e80b0aa75e8cb49c343d57c8c8c81f"
+          "content" : "f4fff3542ea6c31e3efc878b8adeb29af86347071374193c8a733d404469153be2b2f867217e1b1c445299dce6b7584ac849d33dfe70e60aad45ae0adfcddb65"
         },
         {
           "alg" : "SHA-384",
-          "content" : "86fb1d70507177373c72118d23656c747e856d8d4e54f65756b29d3cf8044b3ec0a5ad3eb9a12d4357f3fc34221d93ad"
+          "content" : "cd6c2bb4b4de74d50a9479b0f5e5c0640f79a05c8801808e2e2738e0e4149eef245cffaeffa406252112bad11d045377"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "a1e3fb4e7bf40c1a8b83b3d173fd2f1bc84dab5fe1bfa03263bc7a0fcd0eeb1c53427c17bab457069dba916710581e69"
+          "content" : "035e92d99faa70899fd27a6f62f109289fdcbf1c52a1677ab64331ef71958552ddc3239791a1bca32fe7860a8e5c7229"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "4e58b37b53ca8ee5c15b88577fad684fc3bb66451bcacbe3e50fd47ad1c8ab31"
+          "content" : "6bdb995c66f31d378f95be5f65fbdac415dfb56a7da24f83b8eb4e847b126753"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "a6419620dd321b86c8057642316b121ef27e8f923b34cbd33dca9e93dea5992b6e8848721f76d239f0c7a3f15844cde125a3884c69b5345e885299e2661bb186"
+          "content" : "7673a6db059a64d9dbf16a1373e3bb02db51f6a8ec58d56b038d41b545f173067f0e1d2233d105122426598278f86a4b3aad0f45499ba4706310fb61157caeb0"
         }
       ],
       "licenses" : [
@@ -143,35 +143,35 @@
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "be505ca6e434911283e1f5ff6f992b1a"
+          "content" : "c23fe4f640b063a4ef56c9b9ed40135b"
         },
         {
           "alg" : "SHA-1",
-          "content" : "ca081f9a22920dabbd40b9881ffa56490579033f"
+          "content" : "ab265ec6f87f71301f58782906038558a402c7c8"
         },
         {
           "alg" : "SHA-256",
-          "content" : "09946782b4fc645d6ec7976950ab5ce844bdb1b4b4e07e7f1b8edc923acd5b62"
+          "content" : "3f5c998c4977a972202b66b61e16cc309cc501c0aeb5289d1cc65cf4892f425e"
         },
         {
           "alg" : "SHA-512",
-          "content" : "e3aa48e873492e4eedf7c759dc97dcc42a2c4660edff96fe1d865fe1fa6793cc8f5b7c0ce332be675cf1eb9ad9aa2fc1e2631a51dbce258f24a4a41923ca83dc"
+          "content" : "b31603e90a6caa8d93e9453d2b2033a10a949e573049512b6439cd04aae95b44c8aadc00a003afe342415fc4df3bb504fee2b4d0e32a2b01a6db2385c55c08f0"
         },
         {
           "alg" : "SHA-384",
-          "content" : "54b6174d0d2c34716164a092f17a481e5f6f71d7b2e83bff125d4dbe97c89f54938e5535f369a1a8652218bf6dad9f2a"
+          "content" : "6265eac8a2bba8532979156766d322689fd90ccc0e4ae02936ff5ee623a91d88439a65a801c306cb4b2952b58a237a41"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "2cf827310fde23a8daaed6ac8b682bf331aaaf98228c7904970fb4ac140f0b345d64366fb778d53280ca3d9b6bf08722"
+          "content" : "95601c60337df101a034ee6714c9b2b6d17b815497d2576df7e1b57f2bd16c771c969bf5a991c083b3d599d80b1e52c9"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "12fc15e60d8260cb535fd8af9732767de1a16bac9b1efbaba3c1713fb007af7a"
+          "content" : "11af7e43c3da71fe5978c1509cf5ec3ed8918151883b0c419bade5ed9bdfea60"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "637f79ef998f0042e91766403c3180b2412fa63881c7ca9e239ee5716cb8ffcb013abbbe567a5d33aa8a6a528caa87987e9c8dbdd8cca163736e6cfa63ea5657"
+          "content" : "6beb313f2ff97390ee1552a9500e953f53a3f25819199b63e604bb3865af7204b322683a30cd4140fd61fa41418c4d6700efe05d70d3cb7fdc22d906372db386"
         }
       ],
       "licenses" : [
@@ -1937,44 +1937,44 @@
     },
     {
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
+      "bom-ref" : "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
       "group" : "com.google.guava",
       "name" : "guava",
-      "version" : "33.6.0-jre",
+      "version" : "33.7.2-jre",
       "description" : "Guava is a suite of core and expanded libraries that include utility classes, Google's collections, I/O classes, and much more.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "34a4f258ed23d2e876a6e4666bb3b1c5"
+          "content" : "b07f61705f717d9ae7946c7fdb1efd7a"
         },
         {
           "alg" : "SHA-1",
-          "content" : "c376b13067cc99a5774403530953f7b05a91e218"
+          "content" : "e70def5b06cfb109ea050de99870e79c8ce80dbc"
         },
         {
           "alg" : "SHA-256",
-          "content" : "dc573e1fca4fd5454f4a5fd3d7da2df03002876a4175bafc14a95980dd7713b3"
+          "content" : "b530942257fb935f8b2cfaa5f8eb5bd59c555fd8e8d01b8ce98912e077ea606c"
         },
         {
           "alg" : "SHA-512",
-          "content" : "1442688a4409e961f2cee38ac904c0869bb6c9f06bf8b67b80eeafb20bc1af518cc4e9f786b2f4917855b2b9ad8ed4a3dec6f1a12f10616e25398c127914433b"
+          "content" : "bd663dc02f2293a552d82829518435b8cfcd77b7c73eeb638aef93918ef7613ad2a869003b09d1afb4446fa74308041daa7a6aea85c1bedb17db1f5f0c2c5c0b"
         },
         {
           "alg" : "SHA-384",
-          "content" : "e75be17b490c9f059676f5fb4e18e74542eeb6236891cc1e3fc8d3def0ec1afb07e34279ffef8e55273431e6eece3a38"
+          "content" : "7c1d8db6504620e2feb70d56e4bffb479e5ba292c1d911da060cb66f2ac3d4050c718a72e6cfd6c82a36fd840c499942"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "a37b65c84e2ee662cf4cea2f9b60f231d7012bd82a234c9f4e2b7a358f1db6ad8135c9705407b1a4a64fe8fadd6bcd00"
+          "content" : "13dcb7e8318a75368b33e1abc3a5b9b674bed950d6cfe1e7ca8be8f42f642816e69ae5d39d5ddbe998fe2c9acbf6ee28"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "9e0f02ce2f5afac968f6045de0d467a23c4c570e9ea1ae0fbee0de0c40547327"
+          "content" : "adee2b0b99a4777a1fb04eb1a26d6b44aa47457c850dbf43d743d17801615c18"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "4d6845505f11539b91f610721f9fb4006dbdd8b2366ae8993380be9e3e9adaf045d4e435e2f5459b574920dfc692240a866b382bfd5901fe16482d539a4ce156"
+          "content" : "5bff0e702aaa6bfbf3fdd8fb963b6242d5dbecd8b7601afc0bfe158314887352d48c79c4ef9e256a0510474ac39493c59ca277bd1989a04705a723c6045fe4b7"
         }
       ],
       "licenses" : [
@@ -1989,7 +1989,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
+      "purl" : "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -12176,7 +12176,7 @@
         "pkg:maven/commons-net/commons-net@3.13.0?type=jar",
         "pkg:maven/io.airlift/aircompressor@2.0.3?type=jar",
         "pkg:maven/blue.strategic.parquet/parquet-floor@2.1?type=jar",
-        "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
+        "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
         "pkg:maven/javax.inject/javax.inject@1?type=jar",
         "pkg:maven/com.google.dagger/dagger@2.60.1?type=jar",
         "pkg:maven/com.jayway.jsonpath/json-path@3.0.0?type=jar",
@@ -12206,7 +12206,7 @@
         "pkg:maven/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml@2.22.4?type=jar",
         "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr310@2.22.4?type=jar",
         "pkg:maven/com.networknt/json-schema-validator@3.0.8?type=jar",
-        "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
+        "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
         "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.6.5?type=jar",
         "pkg:maven/org.apache.opennlp/opennlp-tools@2.5.12?type=jar"
       ]
@@ -12302,7 +12302,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
+      "ref" : "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
       "dependsOn" : [
         "pkg:maven/com.google.guava/failureaccess@1.0.3?type=jar",
         "pkg:maven/com.google.guava/listenablefuture@9999.0-empty-to-avoid-conflict-with-guava?type=jar",
@@ -12485,7 +12485,7 @@
         "pkg:maven/org.apache.httpcomponents/httpcore@4.4.16?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
         "pkg:maven/com.google.errorprone/error_prone_annotations@2.50.0?type=jar",
-        "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
+        "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
         "pkg:maven/com.google.j2objc/j2objc-annotations@3.1?type=jar",
         "pkg:maven/io.grpc/grpc-context@1.83.0?type=jar",
         "pkg:maven/io.opencensus/opencensus-api@0.31.1?type=jar",
@@ -12520,7 +12520,7 @@
       "ref" : "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.54.0?type=jar",
       "dependsOn" : [
         "pkg:maven/org.jspecify/jspecify@1.0.0?type=jar",
-        "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
+        "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
         "pkg:maven/com.google.auto.value/auto-value-annotations@1.11.0?type=jar",
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
         "pkg:maven/com.google.auth/google-auth-library-credentials@1.54.0?type=jar",
@@ -12612,7 +12612,7 @@
         "pkg:maven/com.google.devtools.ksp/symbol-processing-api@2.3.7?type=jar",
         "pkg:maven/com.google.googlejavaformat/google-java-format@1.33.0?type=jar",
         "pkg:maven/com.google.guava/failureaccess@1.0.3?type=jar",
-        "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
+        "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
         "pkg:maven/com.squareup/javapoet@1.13.0?type=jar",
         "pkg:maven/com.squareup/kotlinpoet@1.11.0?type=jar",
         "pkg:maven/javax.inject/javax.inject@1?type=jar",
@@ -12629,7 +12629,7 @@
         "pkg:maven/com.google.code.findbugs/jsr305@3.0.2?type=jar",
         "pkg:maven/com.google.devtools.ksp/symbol-processing-api@2.3.7?type=jar",
         "pkg:maven/com.google.guava/failureaccess@1.0.3?type=jar",
-        "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
+        "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
         "pkg:maven/com.squareup/javapoet@1.13.0?type=jar",
         "pkg:maven/javax.inject/javax.inject@1?type=jar"
       ]
@@ -12657,7 +12657,7 @@
     {
       "ref" : "pkg:maven/com.google.googlejavaformat/google-java-format@1.33.0?type=jar",
       "dependsOn" : [
-        "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar"
+        "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar"
       ]
     },
     {
@@ -12719,7 +12719,7 @@
         "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr310@2.22.4?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.4?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.22?type=jar",
-        "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
+        "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
         "pkg:maven/com.google.guava/failureaccess@1.0.3?type=jar",
         "pkg:maven/com.google.guava/listenablefuture@9999.0-empty-to-avoid-conflict-with-guava?type=jar",
         "pkg:maven/com.google.errorprone/error_prone_annotations@2.50.0?type=jar",
@@ -13148,7 +13148,7 @@
         "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1beta2@2.99.0?type=jar",
         "pkg:maven/com.google.api.grpc/proto-google-cloud-secretmanager-v1@2.99.0?type=jar",
         "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.73.0?type=jar",
-        "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
+        "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
         "pkg:maven/com.google.guava/failureaccess@1.0.3?type=jar",
         "pkg:maven/com.google.guava/listenablefuture@9999.0-empty-to-avoid-conflict-with-guava?type=jar",
         "pkg:maven/com.google.j2objc/j2objc-annotations@3.1?type=jar",
@@ -13239,7 +13239,7 @@
         "pkg:maven/com.google.http-client/google-http-client-gson@2.2.0?type=jar",
         "pkg:maven/com.google.api.grpc/proto-google-cloud-pubsub-v1@1.157.0?type=jar",
         "pkg:maven/com.google.api.grpc/proto-google-iam-v1@1.73.0?type=jar",
-        "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
+        "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
         "pkg:maven/com.google.guava/failureaccess@1.0.3?type=jar",
         "pkg:maven/com.google.guava/listenablefuture@9999.0-empty-to-avoid-conflict-with-guava?type=jar",
         "pkg:maven/com.google.j2objc/j2objc-annotations@3.1?type=jar",
@@ -13307,7 +13307,7 @@
         "pkg:maven/com.google.protobuf/protobuf-java@4.33.6?type=jar",
         "pkg:maven/com.google.api.grpc/proto-google-common-protos@2.78.0?type=jar",
         "pkg:maven/com.google.api.grpc/proto-google-cloud-kms-v1@2.102.0?type=jar",
-        "pkg:maven/com.google.guava/guava@33.6.0-jre?type=jar",
+        "pkg:maven/com.google.guava/guava@33.7.2-jre?type=jar",
         "pkg:maven/com.google.guava/failureaccess@1.0.3?type=jar",
         "pkg:maven/com.google.guava/listenablefuture@9999.0-empty-to-avoid-conflict-with-guava?type=jar",
         "pkg:maven/com.google.j2objc/j2objc-annotations@3.1?type=jar",
