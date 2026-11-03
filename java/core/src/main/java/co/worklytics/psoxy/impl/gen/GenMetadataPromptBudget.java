@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  * That prefix is stable per augment rule and is split for provider prompt caching; identity is
  * {@link GenMetadataStaticPromptFingerprint}.
  *
- * <p>Estimate is {@value #CHARS_PER_TOKEN_ESTIMATE} chars/token, not a model tokenizer.
+ * <p>Estimate is {@link GenMetadataPromptTokenEstimate#CHARS_PER_TOKEN_ESTIMATE} chars/token, not a model tokenizer.
  *
  * <p>TODO: use a real tokenizer (e.g. langchain4j's OpenAiTokenCountEstimator / jtokkit) when
  * one is available on the classpath.
@@ -19,9 +19,6 @@ import lombok.NoArgsConstructor;
 @Singleton
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class GenMetadataPromptBudget {
-
-    /** Rough chars-per-token for English / JSON-escaped input. */
-    static final int CHARS_PER_TOKEN_ESTIMATE = 4;
 
     /**
      * Truncate serialized source so it fits {@code maxInputTokens} estimated tokens.
@@ -31,7 +28,7 @@ public class GenMetadataPromptBudget {
         if (inputData == null) {
             return null;
         }
-        int budgetChars = Math.max(0, maxInputTokens) * CHARS_PER_TOKEN_ESTIMATE;
+        int budgetChars = Math.max(0, maxInputTokens) * GenMetadataPromptTokenEstimate.CHARS_PER_TOKEN_ESTIMATE;
         if (inputData.length() <= budgetChars) {
             return inputData;
         }

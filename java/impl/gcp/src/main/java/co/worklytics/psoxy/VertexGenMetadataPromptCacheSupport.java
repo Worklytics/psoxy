@@ -40,6 +40,11 @@ public class VertexGenMetadataPromptCacheSupport implements GenMetadataPromptCac
             requestBuilder.messages(assembly.getUncachedMessages());
             return;
         }
+        if (!VertexGenMetadataExplicitCachePolicy.prefixEligibleForExplicitCache(
+            assembly.getCachedPrefixMessages())) {
+            requestBuilder.messages(assembly.getUncachedMessages());
+            return;
+        }
         try {
             String cacheName = cachedContentResolver.cachedContentResourceName(
                 vertex, assembly.getCachedPrefixMessages());
@@ -48,10 +53,14 @@ public class VertexGenMetadataPromptCacheSupport implements GenMetadataPromptCac
                 .cachedContent(cacheName)
                 .build());
         } catch (RuntimeException e) {
-            log.log(Level.WARNING,
+            Level level = VertexGenMetadataExplicitCachePolicy.isMinimumTokenCountError(e)
+                ? Level.FINE
+                : Level.WARNING;
+            log.log(level,
                 "Vertex genMetadata prompt cache unavailable; using full prompt modelId="
-                    + vertex.getModelId(),
-                e);
+                    + vertex.getModelId()
+                    + (level == Level.FINE ? " (prefix below explicit cache minimum)" : ""),
+                level == Level.FINE ? null : e);
             requestBuilder.messages(assembly.getUncachedMessages());
         }
     }
