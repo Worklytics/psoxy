@@ -19,8 +19,12 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
     @Override
     public void accept(GcsEvent gcsEvent, Context context) throws Exception {
-       GcpContainer container = startup.getOrCreate(DaggerGcpContainer::create);
-       if (startup.failed()) {
+       GcpContainer container = startup.getOrCreate(() -> {
+           GcpContainer created = DaggerGcpContainer.create();
+           created.gcsFileEventHandler();
+           return created;
+       });
+       if (container == null) {
            String service = startup.match(startup.failure())
                    .map(failure -> failure.getService())
                    .orElse(null);

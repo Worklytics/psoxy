@@ -46,6 +46,8 @@ public final class GcpContainerStartup {
      */
     private final ConnectivityFailureResponses responses = startupResponses();
 
+    private final GcpConfigStoreResponses configStoreResponses = new GcpConfigStoreResponses(responses);
+
     private volatile GcpContainer container;
     private volatile Throwable connectivityFailure;
     private volatile Instant retryAfter = Instant.EPOCH;
@@ -73,7 +75,8 @@ public final class GcpContainerStartup {
         }
         DependencyConnectivityFailure failure = connectivityFailures.match(cause)
                 .orElseGet(() -> DependencyConnectivityFailure.builder().build());
-        GcpConfigStoreResponses.write(request, response, responses, failure, cause, true);
+        configStoreResponses.write(request, response, failure, cause, true,
+                GcpEnvironment.DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET);
     }
 
     public Optional<DependencyConnectivityFailure> match(Throwable throwable) {

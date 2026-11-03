@@ -25,7 +25,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 import co.worklytics.psoxy.gateway.ConnectivityFailureMatcher;
-import co.worklytics.psoxy.gateway.ConnectivityFailureResponses;
 import co.worklytics.psoxy.gateway.DependencyConnectivityFailure;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventRequestDto;
@@ -53,7 +52,7 @@ public class GcpApiDataRequestHandler {
     final GoogleIdTokenVerifierFactory googleIdTokenVerifierFactory;
     final ObjectMapper objectMapper;
     final ConnectivityFailureMatcher connectivityFailures;
-    final ConnectivityFailureResponses connectivityFailureResponses;
+    final GcpConfigStoreResponses configStoreResponses;
 
     // standard Bearer token prefix on Authorization header
     static final String BEARER_PREFIX = "Bearer ";
@@ -69,7 +68,7 @@ public class GcpApiDataRequestHandler {
         GoogleIdTokenVerifierFactory googleIdTokenVerifierFactory,
         ObjectMapper objectMapper,
         ConnectivityFailureMatcher connectivityFailures,
-        ConnectivityFailureResponses connectivityFailureResponses) {
+        GcpConfigStoreResponses configStoreResponses) {
         this.requestHandler = requestHandler;
         this.gcpEnvironment = gcpEnvironment;
         this.gcpApiModeConfig = gcpApiModeConfig;
@@ -77,7 +76,7 @@ public class GcpApiDataRequestHandler {
         this.googleIdTokenVerifierFactory = googleIdTokenVerifierFactory;
         this.objectMapper = objectMapper;
         this.connectivityFailures = connectivityFailures;
-        this.connectivityFailureResponses = connectivityFailureResponses;
+        this.configStoreResponses = configStoreResponses;
     }
 
     @SneakyThrows
@@ -151,8 +150,8 @@ public class GcpApiDataRequestHandler {
             try {
                 Optional<DependencyConnectivityFailure> failure = connectivityFailures.match(e);
                 if (failure.isPresent()) {
-                    GcpConfigStoreResponses.write(request, response, connectivityFailureResponses,
-                            failure.get(), e, false);
+                    configStoreResponses.write(request, response, failure.get(), e, false,
+                            gcpApiModeConfig.get().getClientIpXForwardedForOffset());
                     return;
                 }
                 response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);

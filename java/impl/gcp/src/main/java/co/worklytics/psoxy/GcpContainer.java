@@ -27,6 +27,9 @@ interface GcpContainer {
     ConnectivityFailureResponses connectivityFailureResponses();
 
     @Singleton
+    GcpConfigStoreResponses configStoreResponses();
+
+    @Singleton
     GcsFileEventHandler gcsFileEventHandler();
 
     @Singleton

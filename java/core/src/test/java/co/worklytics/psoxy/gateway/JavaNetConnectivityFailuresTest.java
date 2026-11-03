@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway;
 
 import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Optional;
 import com.google.common.util.concurrent.UncheckedExecutionException;
@@ -35,6 +36,12 @@ class JavaNetConnectivityFailuresTest {
 
         assertTrue(match.isPresent());
         assertEquals(null, match.get().getService());
+    }
+
+    @Test
+    void connectTimeoutIsAConnectionFailureAndReadTimeoutIsNot() {
+        assertTrue(failures.match(new SocketTimeoutException("Connect timed out")).isPresent());
+        assertFalse(failures.match(new SocketTimeoutException("Read timed out")).isPresent());
     }
 
     @Test

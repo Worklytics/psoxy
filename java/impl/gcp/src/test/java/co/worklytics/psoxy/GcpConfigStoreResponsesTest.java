@@ -32,13 +32,14 @@ class GcpConfigStoreResponsesTest {
         OutputStream body = new ByteArrayOutputStream();
         when(response.getOutputStream()).thenReturn(body);
 
-        GcpConfigStoreResponses.write(request, response, responses(),
+        responses().write(request, response,
                 DependencyConnectivityFailure.builder()
                         .service("secretmanager")
                         .clientMessage("Unable to reach Secret Manager. Check the logs.")
                         .build(),
                 new UnknownHostException("secretmanager.googleapis.com"),
-                true);
+                true,
+                -1);
 
         verify(response).setStatusCode(503);
         verify(response).appendHeader("X-Psoxy-Error", "CONFIG_STORE_UNREACHABLE");
@@ -59,10 +60,11 @@ class GcpConfigStoreResponsesTest {
         OutputStream body = new ByteArrayOutputStream();
         when(response.getOutputStream()).thenReturn(body);
 
-        GcpConfigStoreResponses.write(request, response, responses(),
+        responses().write(request, response,
                 DependencyConnectivityFailure.builder().build(),
                 new UnknownHostException("www.googleapis.com"),
-                false);
+                false,
+                -1);
 
         verify(response).setStatusCode(503);
         verify(response).appendHeader("X-Psoxy-Error", "DEPENDENT_SERVICE_UNREACHABLE");
@@ -73,11 +75,11 @@ class GcpConfigStoreResponsesTest {
         assertFalse(written.contains("Affected service"));
     }
 
-    private static ConnectivityFailureResponses responses() {
+    private static GcpConfigStoreResponses responses() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.registerModule(new Jdk8Module());
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        return new ConnectivityFailureResponses(objectMapper);
+        return new GcpConfigStoreResponses(new ConnectivityFailureResponses(objectMapper));
     }
 }

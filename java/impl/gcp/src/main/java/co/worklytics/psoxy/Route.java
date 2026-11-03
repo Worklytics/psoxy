@@ -27,8 +27,12 @@ public class Route implements HttpFunction {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        GcpContainer container = startup.getOrCreate(DaggerGcpContainer::create);
-        if (startup.failed()) {
+        GcpContainer container = startup.getOrCreate(() -> {
+            GcpContainer created = DaggerGcpContainer.create();
+            created.httpRequestHandler();
+            return created;
+        });
+        if (container == null) {
             startup.write(request, response);
             return;
         }
@@ -44,8 +48,8 @@ public class Route implements HttpFunction {
             if (failure.isEmpty()) {
                 throw e;
             }
-            GcpConfigStoreResponses.write(request, response, container.connectivityFailureResponses(),
-                    failure.get(), e, false);
+            container.configStoreResponses().write(request, response, failure.get(), e, false,
+                    GcpEnvironment.DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET);
         }
     }
 
