@@ -323,6 +323,9 @@ module "api_connector" {
   timeout_seconds                       = coalesce(try(each.value.timeout_seconds, null), 180)
   ingress_settings                      = local.api_connector_external_lb_enabled ? "ALLOW_INTERNAL_AND_GCLB" : "ALLOW_ALL"
   external_lb_base_url                  = local.api_connector_external_lb_base_url
+  # External ALB appends the observed client and then the forwarding-rule address, so the client is offset -2.
+  # Null uses the connector default: -1 when an allowlist is set (last hop on a direct Cloud Run URL).
+  client_ip_x_forwarded_for_offset = local.api_connector_external_lb_enabled ? -2 : null
 
 
   environment_variables = merge(

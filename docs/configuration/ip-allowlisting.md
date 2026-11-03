@@ -1,6 +1,6 @@
 # Client IP Allowlisting
 
-Psoxy can restrict API data access and webhook ingestion to requests from known client IP addresses or CIDR blocks. This is a **defense-in-depth** control on top of IAM authentication — it limits *where* an already-authorized principal may call from, not *who* they are.
+Psoxy can restrict API data access and webhook ingestion to requests from known client IP addresses or CIDR blocks. This is an **optional** control on top of IAM authentication. Do not rely on it for authentication. It only increases the complexity of an attack. Client IP addresses can be spoofed.
 
 Configure allowlists in your root Terraform module (for example `infra/examples-dev/aws/terraform.tfvars` or `infra/examples-dev/gcp/terraform.tfvars`):
 
@@ -46,14 +46,20 @@ Each API connector and webhook collector receives:
 - `ALLOWED_DATA_ACCESS_IP_BLOCKS` — comma-separated list for REST API mode.
 - `ALLOWED_WEBHOOK_IP_BLOCKS` — comma-separated list for webhook collector mode.
 
-The proxy rejects requests with HTTP 403 when lockdown is enabled and the client IP cannot be determined or does not match an exact IP or CIDR entry. IPv4 and IPv6 are supported; comma-separated `X-Forwarded-For` values use the first hop.
+The proxy rejects requests with HTTP 403 when lockdown is enabled and the client IP cannot be determined or does not match an exact IP or CIDR entry. IPv4 and IPv6 are supported.
+
+On **AWS**, the client address is API Gateway's `sourceIp` when that field is present. On **GCP**, the address is one hop from `X-Forwarded-For`, selected by `client_ip_x_forwarded_for_offset` (a negative offset from the end of the header, passed through as `CLIENT_IP_X_FORWARDED_FOR_OFFSET`). `-1` is the last address. The function module does not decide which hop a given deployment appends; you pass the offset that matches the proxies in front of the function. When the offset is omitted and an allowlist is set, the modules currently use `-1`. A future release will require an explicit offset whenever an allowlist is set.
+
+`gcp-host` passes `-2` when an external Application Load Balancer fronts API connectors, because that load balancer appends the client it observed and then the forwarding-rule address. A direct Cloud Run URL leaves the offset unset, so an allowlist uses the last hop, which is the address Cloud Run appended. Webhook collectors are the same unless you set the offset.
+
+`X-Forwarded-For` can be spoofed, in whole or in part. The offset only selects which entry the allowlist reads. If the header does not contain that entry, the client address is unknown and an allowlist rejects the request. See [FAQ - Security](../faq-security.md) and [Authentication and Authorization in GCP](../gcp/authentication-authorization.md).
 
 Health checks are not subject to this gate (they run before IP enforcement) but still report `callerIp` in the response for verification.
 
 ## Operational notes
 
 - Confirm the IP or CIDR your client actually presents to the proxy (health check `callerIp`, or Cloud Run / Lambda logs). Egress IPv4 and IPv6 may differ; Node.js clients often prefer IPv6 unless you force IPv4 (for example `NODE_OPTIONS='--dns-result-order=ipv4first'`).
-- IP allowlisting is not authentication. IPs can be spoofed in some paths; treat this as a supplementary control.
+- Do not rely on IP allowlisting for authentication. The proxy supports it only as an optional control that increases the complexity of an attack. Client IP addresses can be spoofed, so this check must not be the control you depend on. Authenticate callers with the host platform (for example GCP IAM). See [FAQ - Security](../faq-security.md).
 - Fixed egress IPs from Worklytics may require a subscription add-on; contact [sales@worklytics.co](mailto:sales@worklytics.co). See also [FAQ - Security](../faq-security.md).
 
 ## Cloud Armor (GCP)

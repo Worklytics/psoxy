@@ -36,9 +36,9 @@ import com.avaulta.gateway.rules.PathTemplateUtils.Match;
 import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.annotations.VisibleForTesting;
 import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.BulkContentTypes;
-import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.BulkModeConfig;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
@@ -83,7 +83,10 @@ public class StorageHandler {
     private static final int LINES_TO_VALIDATE = 5;
 
     @Inject
-    ConfigService config;
+    BulkModeConfig bulkModeConfig;
+
+    @Inject
+    ProxyConfig proxyConfig;
 
     @Inject
     BulkDataSanitizerFactory bulkDataSanitizerFactory;
@@ -235,6 +238,14 @@ public class StorageHandler {
                                        Supplier<InputStream> inputStreamSupplier,
                                        Supplier<OutputStream> outputStreamSupplier) {
 
+        String objectPath = formatObjectPath(request.getSourceBucketName(), request.getSourceObjectPath());
+
+        if (getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isEmpty()) {
+            log.info("skipped " + objectPath + " - no applicable rules");
+            return null;
+        }
+
+        log.info("Processing object " + objectPath);
 
         this.validate(request, transform, inputStreamSupplier);
 
@@ -263,7 +274,7 @@ public class StorageHandler {
      */
     @VisibleForTesting
     boolean compressOutput(boolean isSourceCompressed,
-                                               ConfigService config,
+                                               BulkModeConfig bulkModeConfig,
                                                 ObjectTransform transform) {
 
         Optional<Boolean> transformSetting = Optional.ofNullable(transform.getCompressOutput());
@@ -272,8 +283,7 @@ public class StorageHandler {
             return transformSetting.get();
         } else {
             return isSourceCompressed ||
-                config.getConfigPropertyAsOptional(BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS)
-                    .map(Boolean::parseBoolean)
+                bulkModeConfig.getCompressOutputAlways()
                     .orElse(true); //effectively, default COMPRESS_OUTPUT_ALWAYS=true
         }
     }
@@ -298,7 +308,7 @@ public class StorageHandler {
 
         boolean isSourceCompressed = isSourceCompressed(sourceContentEncoding, sourceObjectPath);
 
-        boolean compressOutput = compressOutput(isSourceCompressed, config, transform);
+        boolean compressOutput = compressOutput(isSourceCompressed, bulkModeConfig, transform);
 
         StorageEventRequest request = StorageEventRequest.builder()
             .sourceBucketName(sourceBucketName)
@@ -320,7 +330,7 @@ public class StorageHandler {
         List<StorageHandler.ObjectTransform> transforms = new ArrayList<>();
         transforms.add(buildDefaultTransform());
 
-        transforms.addAll(rulesUtils.parseAdditionalTransforms(config));
+        transforms.addAll(bulkModeConfig.getAdditionalTransforms());
 
         return transforms;
     }
@@ -339,7 +349,7 @@ public class StorageHandler {
             BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
             BulkMetaData.VERSION.getMetaDataKey(), ProxyConstants.JAVA_SOURCE_CODE_VERSION,
             BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + "/" + sourceKey,
-            BulkMetaData.RULES_SHA.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES).map(DigestUtils::sha1Hex).orElse("unknown")
+            BulkMetaData.RULES_SHA.getMetaDataKey(), proxyConfig.getRules().map(DigestUtils::sha1Hex).orElse("unknown")
         ));
 
         String hash = piiSaltHash();
@@ -440,12 +450,17 @@ public class StorageHandler {
     @VisibleForTesting
     ObjectTransform buildDefaultTransform() {
        return ObjectTransform.builder()
-            .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
+            .destinationBucketName(bulkModeConfig.getOutputBucketOrError())
             .pathWithinBucket(outputBasePath().orElse(""))
             .rules(defaultRuleSet.get())
             .build();
     }
 
+
+    /** Bucket and object key as logged for bulk storage events (e.g. {@code my-bucket/path/to/file.csv}). */
+    public static String formatObjectPath(String bucketName, String objectKey) {
+        return bucketName + "/" + objectKey;
+    }
 
     /**
      * get applicable rules, if any
@@ -505,6 +520,10 @@ public class StorageHandler {
     void validate(StorageEventRequest request,
                   StorageHandler.ObjectTransform transform,
                   Supplier<InputStream> inputStreamSupplier) {
+
+        if (getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isEmpty()) {
+            return;
+        }
         
         // Skip validation for binary formats like Parquet, as text-based validation corrupts/fails
         if (isSupportedBinaryType(request)) {
@@ -534,8 +553,7 @@ public class StorageHandler {
 
 
     public int getBufferSize() {
-        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.BUFFER_SIZE)
-                .map(value -> ConfigService.parseIntValue(BulkModeConfigProperty.BUFFER_SIZE, value))
+        return bulkModeConfig.getBufferSize()
                 .orElse(DEFAULT_BUFFER_SIZE);
     }
 
@@ -556,19 +574,19 @@ public class StorageHandler {
         // the full-file process resets again).
         genMetadataTokenUsage.reset();
 
+        Optional<BulkDataRules> applicableRules =
+            getApplicableRules(transform.getRules(), request.getSourceObjectPath());
+
+        if (applicableRules.isEmpty()) {
+            return;
+        }
+
         int bufferSize = getBufferSize();
 
         try (
             InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
             OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier)
         ) {
-
-            Optional<BulkDataRules> applicableRules =
-                getApplicableRules(transform.getRules(), request.getSourceObjectPath());
-
-            if (applicableRules.isEmpty()) {
-                throw new IllegalArgumentException("No applicable rules found for " + request.getSourceObjectPath());
-            }
 
             BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
 
@@ -682,13 +700,13 @@ public class StorageHandler {
      * @return
      */
     Optional<String> inputBasePath() {
-        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.INPUT_BASE_PATH)
+        return bulkModeConfig.getInputBasePath()
             .filter(StringUtils::isNotBlank);
             //.map(inputBasePath -> inputBasePath.startsWith("/") ? inputBasePath : "/" + inputBasePath);
     }
 
     Optional<String> outputBasePath() {
-        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH)
+        return bulkModeConfig.getOutputBasePath()
             .filter(StringUtils::isNotBlank);
             //.map(outputBasePath -> outputBasePath.startsWith("/") ? outputBasePath : "/" + outputBasePath);
     }

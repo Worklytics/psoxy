@@ -27,7 +27,7 @@ class GcpConfigStoreResponsesTest {
     void writesConfigStoreUnreachableResponse() throws Exception {
         HttpRequest request = mock(HttpRequest.class);
         when(request.getHeaders()).thenReturn(Map.of(
-                "X-Forwarded-For", List.of("203.0.113.9, 198.51.100.1")));
+                "X-Forwarded-For", List.of("203.0.113.9")));
         HttpResponse response = mock(HttpResponse.class);
         OutputStream body = new ByteArrayOutputStream();
         when(response.getOutputStream()).thenReturn(body);

@@ -28,7 +28,8 @@ final class GcpConfigStoreResponses {
             return "unknown";
         }
         try {
-            return CloudFunctionRequest.of(request).getClientIp().orElse("unknown");
+            return CloudFunctionRequest.of(request, GcpEnvironment.DEFAULT_CLIENT_IP_X_FORWARDED_FOR_OFFSET)
+                    .getClientIp().orElse("unknown");
         } catch (RuntimeException ignored) {
             return "unknown";
         }

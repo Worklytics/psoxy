@@ -54,14 +54,6 @@ class GcpIamSignJwtAuthStrategyTest {
 
     @BeforeEach
     void setup() {
-        config = MockModules.provideMock(ConfigService.class);
-        when(config.getConfigPropertyOrError(GcpIamSignJwtAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_EMAIL))
-            .thenReturn(DWD_SA);
-        when(config.getConfigPropertyOrError(GcpIamSignJwtAuthStrategy.ConfigProperty.OAUTH_SCOPES))
-            .thenReturn(SCOPES);
-        when(config.getConfigPropertyOrError(GcpIamSignJwtAuthStrategy.ConfigProperty.PROCESS_IDENTITY_SOURCE))
-            .thenReturn("test");
-
         recordingTransport = new RecordingTransport();
         HttpTransportFactory httpTransportFactory = () -> recordingTransport;
 
@@ -91,7 +83,11 @@ class GcpIamSignJwtAuthStrategyTest {
         };
 
         strategy = new GcpIamSignJwtAuthStrategy();
-        strategy.config = config;
+        strategy.authConfig = GcpIamSignJwtAuthConfig.builder()
+            .serviceAccountEmail(DWD_SA)
+            .oauthScopes(SCOPES)
+            .processIdentitySource("test")
+            .build();
         strategy.httpTransportFactory = httpTransportFactory;
         strategy.objectMapper = objectMapper;
         strategy.clock = Clock.fixed(NOW, ZoneOffset.UTC);
@@ -155,8 +151,11 @@ class GcpIamSignJwtAuthStrategyTest {
     void getRequiredConfigProperties_includesProcessIdentityWhenConfigured() {
         AwsWifGoogleCloudProcessIdentity awsWif = new AwsWifGoogleCloudProcessIdentity();
         strategy.processIdentities = Set.of(awsWif);
-        when(config.getConfigPropertyOrError(GcpIamSignJwtAuthStrategy.ConfigProperty.PROCESS_IDENTITY_SOURCE))
-            .thenReturn(AwsWifGoogleCloudProcessIdentity.CONFIG_IDENTIFIER);
+        strategy.authConfig = GcpIamSignJwtAuthConfig.builder()
+            .serviceAccountEmail(DWD_SA)
+            .oauthScopes(SCOPES)
+            .processIdentitySource(AwsWifGoogleCloudProcessIdentity.CONFIG_IDENTIFIER)
+            .build();
 
         Set<ConfigService.ConfigProperty> required = strategy.getRequiredConfigProperties();
         assertTrue(required.contains(GcpIamSignJwtAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_EMAIL));
@@ -167,8 +166,11 @@ class GcpIamSignJwtAuthStrategyTest {
 
     @Test
     void getProcessIdentity_unknownIdentifier() {
-        when(config.getConfigPropertyOrError(GcpIamSignJwtAuthStrategy.ConfigProperty.PROCESS_IDENTITY_SOURCE))
-            .thenReturn("not-a-real-identity");
+        strategy.authConfig = GcpIamSignJwtAuthConfig.builder()
+            .serviceAccountEmail(DWD_SA)
+            .oauthScopes(SCOPES)
+            .processIdentitySource("not-a-real-identity")
+            .build();
         assertThrows(IllegalStateException.class, strategy::getProcessIdentity);
     }
 
@@ -182,17 +184,10 @@ class GcpIamSignJwtAuthStrategyTest {
 
     @Test
     void awsWifProcessIdentity_isAwsCredentialsNotAdc() {
-        ConfigService wifConfig = MockModules.provideMock(ConfigService.class);
-        when(wifConfig.getConfigPropertyOrError(AwsWifGoogleCloudProcessIdentity.ConfigProperty.GCP_WIF_AUDIENCE))
-            .thenReturn("//iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/aws");
-        when(wifConfig.getConfigPropertyAsOptional(AwsWifGoogleCloudProcessIdentity.ConfigProperty.GCP_WIF_TOKEN_URL))
-            .thenReturn(Optional.empty());
-        when(wifConfig.getConfigPropertyAsOptional(
-            AwsWifGoogleCloudProcessIdentity.ConfigProperty.GCP_WIF_SERVICE_ACCOUNT_IMPERSONATION_URL))
-            .thenReturn(Optional.empty());
-
         AwsWifGoogleCloudProcessIdentity identity = new AwsWifGoogleCloudProcessIdentity();
-        identity.config = wifConfig;
+        identity.wifConfig = AwsWifGoogleCloudProcessIdentityConfig.builder()
+            .gcpWifAudience("//iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/aws")
+            .build();
         identity.httpTransportFactory = () -> recordingTransport;
 
         assertEquals(AwsWifGoogleCloudProcessIdentity.CONFIG_IDENTIFIER, identity.getConfigIdentifier());

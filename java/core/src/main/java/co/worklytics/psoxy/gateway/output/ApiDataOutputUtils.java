@@ -71,7 +71,7 @@ public class ApiDataOutputUtils {
     }
 
     ApiModeConfig apiModeConfig;
-    ConfigService config;
+    ProxyConfig proxyConfig;
     Provider<UUID> uuidProvider;
     Base64.Encoder base64encoder;
 
@@ -94,7 +94,7 @@ public class ApiDataOutputUtils {
                 .map(s -> s + "/" + this.buildSanitizedOutputKey(processingContext))
                 .orElse(null));
 
-        if (config.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT_ORIGINAL).isPresent()) {
+        if (proxyConfig.getSideOutputOriginal().isPresent()) {
             builder.rawOutputKey(this.buildRawOutputKey(processingContext));
         }
         return builder.build();

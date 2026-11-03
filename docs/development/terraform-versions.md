@@ -1,7 +1,6 @@
 # Terraform Version Compatibility
 
-We use CI to automate testing against *latest* version of each minor version of Terraform
-(eg 1.7.x, 1.8.x, etc that we support).
+We use CI to automate testing against the latest patch of each minor Terraform version from 1.7.x through the current release line, plus HashiCorp's `latest` installer pin (matrices in `.github/workflows/ci-terraform-*.yaml`). Modules still target the 1.7.x language feature set for customer compatibility; CI still matrices 1.7.x–1.10.x until a planned **psoxy v0.8** minimum-version bump (~> 1.11).
 
 Given that Hashicorp has changed Terraform licensing to ELv2; and that Linux foundation has forked
 Terraform from 1.5.x to [create OpenTofu](https://opentofu.org/blog/the-opentofu-fork-is-now-available/),

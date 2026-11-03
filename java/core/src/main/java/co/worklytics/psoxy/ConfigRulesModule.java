@@ -9,7 +9,7 @@ import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.base.Preconditions;
-import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import com.avaulta.gateway.resources.ResourceService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
@@ -66,7 +66,7 @@ public class ConfigRulesModule {
     @Provides @Singleton
     static RuleSet rules(Logger log,
                          RulesUtils rulesUtils,
-                         ConfigService config,
+                         ProxyConfig proxyConfig,
                          EnvVarsConfigService envVarsConfigService,
                          ResourceService resourceService) {
 
@@ -77,20 +77,18 @@ public class ConfigRulesModule {
             return o;
         };
 
-        return loadAndLog.apply(rulesUtils.getRulesFromConfig(config, envVarsConfigService), "Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
+        return loadAndLog.apply(rulesUtils.getRulesFromConfig(proxyConfig, envVarsConfigService), "Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
             .or( () -> loadAndLog.apply(rulesUtils.getRulesFromResource(resourceService), "Rules: loaded from instance resource (" + RulesUtils.RULES_RESOURCE_PATH + ")"))
-            .or( () -> loadAndLog.apply(getDefaults(log, config), "Rules: fallback to prebuilt rules"))
+            .or( () -> loadAndLog.apply(getDefaults(log, proxyConfig), "Rules: fallback to prebuilt rules"))
                 .orElseThrow( () -> new RuntimeException("No rules found"));
 
     }
 
     //NOTE: not compile error due to type-erasure, but DEFAULTS are all RESTRules
-    static Optional<RuleSet> getDefaults(Logger log, ConfigService config) {
-        boolean pseudonymizeAppIds =
-            config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYMIZE_APP_IDS)
-                .map(Boolean::parseBoolean).orElse(false);
+    static Optional<RuleSet> getDefaults(Logger log, ProxyConfig proxyConfig) {
+        boolean pseudonymizeAppIds = proxyConfig.isPseudonymizeAppIds();
 
-        String source = config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE)
+        String source = proxyConfig.getSource()
             .orElseThrow( () -> new RuntimeException(
                 String.format("No source specified, so can't determine default rules. Configure '%s' or '%s' to avoid this error.",
                     ProxyConfigProperty.SOURCE.name(), ProxyConfigProperty.RULES.name())));

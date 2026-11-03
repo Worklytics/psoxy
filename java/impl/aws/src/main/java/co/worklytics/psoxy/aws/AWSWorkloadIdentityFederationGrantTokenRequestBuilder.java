@@ -27,13 +27,17 @@ import java.util.stream.Stream;
 public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends WorkloadIdentityFederationGrantTokenRequestBuilder {
 
     @Inject
-    public AWSWorkloadIdentityFederationGrantTokenRequestBuilder(ConfigService configService,
-                                                                 CognitoIdentityClient cognitoIdentityClient) {
-        super(configService);
+    public AWSWorkloadIdentityFederationGrantTokenRequestBuilder(
+            co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthConfig oauthConfig,
+            co.worklytics.psoxy.gateway.impl.oauth.WorkloadIdentityFederationGrantConfig wifConfig,
+            AwsWorkloadIdentityFederationGrantConfig awsConfig,
+            CognitoIdentityClient cognitoIdentityClient) {
+        super(oauthConfig, wifConfig);
+        this.awsConfig = awsConfig;
         this.cognitoIdentityClient = cognitoIdentityClient;
     }
 
-    enum ConfigProperty implements ConfigService.ConfigProperty {
+    public enum ConfigProperty implements ConfigService.ConfigProperty {
         IDENTITY_POOL_ID,
         IDENTITY_ID,
         DEVELOPER_NAME_ID,
@@ -43,6 +47,7 @@ public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
         private final SupportedSource supportedSource = SupportedSource.ENV_VAR;
     }
 
+    final AwsWorkloadIdentityFederationGrantConfig awsConfig;
     final CognitoIdentityClient cognitoIdentityClient;
 
     @Override
@@ -64,10 +69,10 @@ public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
     protected String getClientAssertion() {
         GetOpenIdTokenForDeveloperIdentityResponse response = cognitoIdentityClient
                 .getOpenIdTokenForDeveloperIdentity(GetOpenIdTokenForDeveloperIdentityRequest.builder()
-                        .identityId(getConfig().getConfigPropertyOrError(ConfigProperty.IDENTITY_ID))
-                        .identityPoolId(getConfig().getConfigPropertyOrError(ConfigProperty.IDENTITY_POOL_ID))
-                        .logins(Collections.singletonMap(getConfig().getConfigPropertyOrError(ConfigProperty.DEVELOPER_NAME_ID),
-                                getConfig().getConfigPropertyOrError(WorkloadIdentityFederationGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID)))
+                        .identityId(awsConfig.getIdentityIdOrError())
+                        .identityPoolId(awsConfig.getIdentityPoolIdOrError())
+                        .logins(Collections.singletonMap(awsConfig.getDeveloperNameIdOrError(),
+                                oauthConfig.getClientId().orElseThrow()))
                         .build());
 
         return response.token();

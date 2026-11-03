@@ -55,6 +55,10 @@ public class ApiModeConfig {
         configService.getConfigPropertyAsOptional(ApiModeConfigProperty.REQUEST_PATH_PREFIX_TO_TRIM)
                 .map(StringUtils::trimToNull)
                 .ifPresent(builder::requestPathPrefixToTrim);
+        configService.getConfigPropertyAsOptional(ApiModeConfigProperty.FOLLOW_REDIRECTS)
+                .or(() -> configService.getConfigPropertyAsOptional(ProxyConfigProperty.FOLLOW_REDIRECTS))
+                .map(Boolean::parseBoolean)
+                .ifPresent(builder::followRedirects);
 
         String tlsRaw = configService.getConfigPropertyAsOptional(ApiModeConfigProperty.TLS_VERSION)
                 .orElse(TlsVersions.TLSv1_3);
@@ -106,6 +110,13 @@ public class ApiModeConfig {
      * segment is removed (e.g. {@code /v1/} when routing is {@code /<prefix>/<function-name>/...})
      */
     private final String requestPathPrefixToTrim;
+
+    @Builder.Default
+    private final boolean followRedirects = true;
+
+    public boolean isFollowRedirects() {
+        return followRedirects;
+    }
 
     public Optional<String> getRequestPathPrefixToTrim() {
         return Optional.ofNullable(requestPathPrefixToTrim).filter(s -> !s.isBlank());
@@ -176,6 +187,13 @@ public class ApiModeConfig {
         REQUEST_PATH_PREFIX_TO_TRIM,
 
         REQUEST_TIMEOUT_SECONDS,
+
+        /**
+         * Whether the proxy follows HTTP redirects when calling source APIs.
+         *
+         * @see ProxyConfigProperty#FOLLOW_REDIRECTS
+         */
+        FOLLOW_REDIRECTS,
         ;
 
         @Getter(onMethod_ = @Override)
