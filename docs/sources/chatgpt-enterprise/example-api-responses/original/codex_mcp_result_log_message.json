@@ -1,0 +1,23 @@
+{
+  "event_id": "70dfe00c-2852-43f4-a52b-8f61113f16c9",
+  "type": "CODEX_LOG",
+  "principal": {
+    "id": "workspace_abc123",
+    "type": "CHATGPT_WORKSPACE"
+  },
+  "actor": {
+    "type": "ACCOUNT_USER",
+    "user_id": "user-abc123def456",
+    "user_email": "alice@example.com"
+  },
+  "event_type": "APP_MCP_RESULT",
+  "client_id": "CODEX_CLI",
+  "workspace_id": "be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details": {
+    "detail_type": "APP_MCP_RESULT",
+    "call_id": "call_123",
+    "name": "search_docs",
+    "status": "success",
+    "result_preview": "Found 3 matching documents in the knowledge base."
+  }
+}

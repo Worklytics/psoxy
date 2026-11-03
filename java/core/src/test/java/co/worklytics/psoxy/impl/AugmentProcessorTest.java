@@ -175,6 +175,38 @@ class AugmentProcessorTest {
 
     @SneakyThrows
     @Test
+    void applyAugments_textDigest_withPhraseKeywords() {
+        Augment.TextDigest augment = Augment.TextDigest.builder()
+            .jsonPath("$.body.content")
+            .keywords(Arrays.asList("code review", "pull request", "dall-e", "how do", "git"))
+            .build();
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("content", "Can you do a Code Review of my pull request? Ask DALL-E for a logo. How does git work?");
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("body", body);
+
+        augmentProcessor.applyAugments(List.of(augment), document);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> resultBody = (Map<String, Object>) document.get("body");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> digest = (Map<String, Object>) resultBody.get("+content:textDigest");
+
+        assertNotNull(digest);
+        @SuppressWarnings("unchecked")
+        Map<String, Integer> keywords = (Map<String, Integer>) digest.get("keywords");
+        assertEquals(4, keywords.size());
+        assertEquals(1, keywords.get("code review"));
+        assertEquals(1, keywords.get("pull request"));
+        assertEquals(1, keywords.get("dall-e"));
+        assertEquals(1, keywords.get("git"));
+        // "how do" is not a whole-word match in "How does"
+        assertNull(keywords.get("how do"));
+    }
+
+    @SneakyThrows
+    @Test
     void applyAugments_conflictDetection_skipsAllAugments() {
         Augment.TextDigest augment = Augment.TextDigest.builder()
             .jsonPath("$.body.content")

@@ -55,7 +55,7 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
         SERVICE_ACCOUNT_KEY,
     }
 
-    @Inject ConfigService config;
+    @Inject GoogleCloudPlatformServiceAccountKeyAuthConfig authConfig;
     @Inject SecretStore secretStore;
     @Inject HttpTransportFactory httpTransportFactory;
     @Inject ObjectMapper objectMapper;
@@ -171,7 +171,7 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
 
     private synchronized Set<String> getScopes() {
         if (scopes == null) {
-            scopes = Arrays.stream(config.getConfigPropertyOrError(ConfigProperty.OAUTH_SCOPES).split(" "))
+            scopes = Arrays.stream(authConfig.getOauthScopesOrError().split(" "))
                 .collect(Collectors.toSet());
         }
         return scopes;

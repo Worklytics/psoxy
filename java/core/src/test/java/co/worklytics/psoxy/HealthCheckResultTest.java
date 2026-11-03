@@ -34,7 +34,7 @@ class HealthCheckResultTest {
   "sourceAuthGrantType" : null,
   "sourceAuthStrategy" : null,
   "userAgent" : null,
-  "version" : "rc-v0.1.15",
+  "version" : "v0.EXAMPLE",
   "warningMessages" : [ ]
 }""";
 
@@ -75,6 +75,23 @@ class HealthCheckResultTest {
             .build();
 
         assertEquals("v0.1.15", healthCheckResult.getVersion());
+
+        // prebuilt GCP bundles are .zip
+        healthCheckResult = HealthCheckResult.builder()
+            .bundleFilename("psoxy-gcp-0.7.0.zip")
+            .build();
+
+        assertEquals("0.7.0", healthCheckResult.getVersion());
+    }
+
+    @Test
+    public void versionPrefersJavaSourceCodeVersion() {
+        HealthCheckResult healthCheckResult = HealthCheckResult.builder()
+            .javaSourceCodeVersion("v0.7.0")
+            .bundleFilename("psoxy-gcp-0.7.0.zip")
+            .build();
+
+        assertEquals("v0.7.0", healthCheckResult.getVersion());
     }
 
     @SneakyThrows

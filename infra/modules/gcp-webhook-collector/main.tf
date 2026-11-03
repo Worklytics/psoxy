@@ -356,6 +356,10 @@ resource "google_cloudfunctions2_function" "function" {
         PATH_TO_INSTANCE_CONFIG = local.path_to_instance_config_parameters
       },
       var.allowed_webhook_ip_blocks != null ? { ALLOWED_WEBHOOK_IP_BLOCKS = join(",", var.allowed_webhook_ip_blocks) } : {},
+      # Reserved. Null with an allowlist is -1. Not taken from environment_variables.
+      var.client_ip_x_forwarded_for_offset != null || var.allowed_webhook_ip_blocks != null ? {
+        CLIENT_IP_X_FORWARDED_FOR_OFFSET = tostring(var.client_ip_x_forwarded_for_offset != null ? var.client_ip_x_forwarded_for_offset : -1)
+      } : {},
       local.side_output_env_vars,
       var.remote_resource_bucket != null ? { REMOTE_RESOURCE_BUCKET = var.remote_resource_bucket } : {},
       var.remote_resource_instance_path != null ? { INSTANCE_RESOURCE_PATH = var.remote_resource_instance_path } : {},
@@ -496,7 +500,7 @@ Review the deployed Cloud function in GCP console:
 [Function in GCP Console](https://console.cloud.google.com/functions/details/${google_cloudfunctions2_function.function.location}/${google_cloudfunctions2_function.function.name}?project=${google_cloudfunctions2_function.function.project})
 
 We provide some Node.js scripts to easily validate the deployment. To be able
-to run the test commands below, you need Node.js (>=20) and npm (v >=8)
+to run the test commands below, you need Node.js (>=22) and npm (v >=10)
 installed. Then, ensure all dependencies are installed by running:
 
 ```shell
@@ -515,9 +519,9 @@ Then, based on your configuration, these are some example test calls you can try
 ```shell
 ${local.command_cli_call} --method POST \
  -u ${local.proxy_endpoint_url} \
-%{ if local.signing_key_id != null ~}
+%{if local.signing_key_id != null~}
  --signing-key "gcp-kms:${local.signing_key_id}" \
-%{ endif ~}
+%{endif~}
  --identity-issuer ${local.proxy_endpoint_url} \
  --identity-subject '${var.example_identity}' \
  --body '${coalesce(var.example_payload, "{\"test\": \"body\"}")}' 

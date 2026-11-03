@@ -19,7 +19,7 @@
             "analytics"
           ],
           "conversation_starters":[
-            "{\"length\":25,\"word_count\":6}",
+            "{\"keywords\":{\"how do\":1},\"length\":25,\"word_count\":6}",
             "{\"length\":22,\"word_count\":3}"
           ],
           "created_at":1.692158100123456E9,
@@ -78,7 +78,7 @@
             "{\"length\":15,\"word_count\":3}"
           ],
           "created_at":1.692158205111222E9,
-          "instructions":"{\"length\":16,\"word_count\":3}",
+          "instructions":"{\"keywords\":{\"analyze\":1},\"length\":16,\"word_count\":3}",
           "files":[ ],
           "tools":[
             {

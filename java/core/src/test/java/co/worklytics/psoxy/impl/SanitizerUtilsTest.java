@@ -245,6 +245,32 @@ class SanitizerUtilsTest {
 
     @SneakyThrows
     @Test
+    void textDigest_with_phrase_keywords() {
+        String input = "Can you do a Code Review of my pull request? Ask DALL-E for a logo. How does git work?";
+        Transform.TextDigest transform = Transform.TextDigest.builder()
+            .keywords(Arrays.asList("code review", "pull request", "dall-e", "how do", "git"))
+            .build();
+        MapFunction textDigestFunction = sanitizerUtils.getTextDigest(transform);
+
+        String resultJson = (String) textDigestFunction.map(input, jsonConfiguration);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = new ObjectMapper().readValue(resultJson, Map.class);
+
+        assertEquals(input.length(), result.get("length"));
+
+        @SuppressWarnings("unchecked")
+        Map<String, Integer> keywordsMap = (Map<String, Integer>) result.get("keywords");
+        assertEquals(4, keywordsMap.size());
+        assertEquals(1, keywordsMap.get("code review"));
+        assertEquals(1, keywordsMap.get("pull request"));
+        assertEquals(1, keywordsMap.get("dall-e"));
+        assertEquals(1, keywordsMap.get("git"));
+        // "how do" is not a whole-word match in "How does"
+        assertNull(keywordsMap.get("how do"));
+    }
+
+    @SneakyThrows
+    @Test
     void textDigest_with_escaping() {
         String input = "{\n" + "  \"type\": \"AdaptiveCard\",\n" + "  \"version\": \"1.0\",\n"
             + "  \"body\": [\n" + "    {\n" + "      \"type\": \"TextBlock\",\n"

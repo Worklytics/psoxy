@@ -21,7 +21,7 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.SignedJWT;
 import co.worklytics.psoxy.ControlHeader;
-import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProcessedContent;
@@ -56,7 +56,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
 
     private final Output output;
     private final WebhookSanitizer webhookSanitizer;
-    private final ConfigService configService;
+    private final ProxyConfig proxyConfig;
     private final WebhookCollectorModeConfig webhookCollectorModeConfig;
     private final NetworkSecurityUtils networkSecurityUtils;
     private final Set<PublicKeyStoreClient> publicKeyStoreClients;
@@ -65,14 +65,14 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
     @Inject
     public InboundWebhookHandler(Lazy<WebhookSanitizer> webhookSanitizerProvider,
                                  @Named("forWebhooks") Output output,
-                                 ConfigService configService,
+                                 ProxyConfig proxyConfig,
                                  WebhookCollectorModeConfig webhookCollectorModeConfig,
                                  NetworkSecurityUtils networkSecurityUtils,
                                  Set<PublicKeyStoreClient> publicKeyStoreClients,
                                  Clock clock) {
         this.webhookSanitizer = webhookSanitizerProvider.get(); // avoids trying to instantiate WebhookSanitizerImpl when we don't need one
         this.output = output;
-        this.configService = configService;
+        this.proxyConfig = proxyConfig;
         this.webhookCollectorModeConfig = webhookCollectorModeConfig;
         this.networkSecurityUtils = networkSecurityUtils;
         this.publicKeyStoreClients = publicKeyStoreClients;
@@ -104,7 +104,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
     public HttpEventResponse handle(HttpEventRequest request) {
         Optional<String> authorizationHeader = getAuthorizationHeader(request);
 
-        boolean isDevelopmentMode = configService.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE).map(Boolean::parseBoolean).orElse(false);
+        boolean isDevelopmentMode = proxyConfig.isDevelopmentMode();
         if (isDevelopmentMode) {
             log.info("Development mode enabled; auth header: " + authorizationHeader.orElse("not present"));
             log.info("Request: "  + request.prettyPrint());

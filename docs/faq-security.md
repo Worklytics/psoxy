@@ -10,11 +10,11 @@ Yes, via the `allowed_data_access_ip_blocks` and `allowed_webhook_ip_blocks` Ter
 
 **AWS:** Terraform applies **infrastructure-level** restrictions (`aws:SourceIp` on caller role assume-role policies) **and** **application-level** checks inside the proxy on each request.
 
-**GCP:** The shipped Terraform modules apply **application-level** restrictions only (environment variables consumed by the proxy). Cloud Run IAM does not support source-IP conditions on invoker bindings; use [Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) separately if you need network ingress filtering outside the proxy.
+**GCP:** The shipped Terraform modules apply **application-level** restrictions only (environment variables consumed by the proxy). Cloud Run IAM does not support source-IP conditions on invoker bindings. The proxy reads one hop from `X-Forwarded-For`, at `CLIENT_IP_X_FORWARDED_FOR_OFFSET` (a negative offset from the end of the header). When that offset is omitted and an allowlist is set, it currently uses `-1` (the last hop). A future release will require an explicit offset whenever an allowlist is set. That header can be spoofed, in whole or in part. Do not rely on this check for authentication. Use [Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) on an [external Application Load Balancer](gcp/guides/external-alb.md) when you want a separate network filter. See [Authentication and Authorization in GCP](gcp/authentication-authorization.md).
 
 See [Client IP Allowlisting](configuration/ip-allowlisting.md) for configuration and platform differences.
 
-All requests from your Worklytics tenant are still authenticated via identity federation (OIDC) and authorized by IAM, so IP allowlisting is defense-in-depth, not a substitute for authentication.
+All requests from your Worklytics tenant are still authenticated via identity federation (OIDC) and authorized by IAM. IP allowlisting is optional. It only increases the complexity of an attack. It is not authentication, and it is not a substitute for IAM.
 
 Remember that Psoxy is, in effect, a drop-in replacement for a data sources API; in general, these APIs are already reachable from the public internet without IP restriction. Psoxy exposes a more restricted view — read-oriented endpoints and fields with PII redacted or pseudonymized.
 

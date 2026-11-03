@@ -35,7 +35,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.BulkContentTypes;
-import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
+import co.worklytics.psoxy.gateway.BulkModeConfig;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
@@ -112,13 +113,14 @@ class StorageHandlerTest {
         Container container = DaggerStorageHandlerTest_Container.create();
         container.inject(this);
 
-        when(config.getConfigPropertyOrError(eq(BulkModeConfigProperty.OUTPUT_BUCKET)))
+        when(config.getConfigPropertyOrError(eq(BulkModeConfig.BulkModeConfigProperty.OUTPUT_BUCKET)))
             .thenReturn("bucket");
 
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.SOURCE)))
             .thenReturn(Optional.of("hris"));
 
         handler = handlerProvider.get();
+        refreshHandlerConfigFromMocks();
 
         mockReader = MockModules.provideMock(InputStreamReader.class);
 
@@ -127,13 +129,18 @@ class StorageHandlerTest {
 
     }
 
+    private void refreshHandlerConfigFromMocks() {
+        handler.bulkModeConfig = BulkModeConfig.fromConfigService(config, yamlMapper);
+        handler.proxyConfig = ProxyConfig.fromConfigService(config);
+    }
+
 
     @ValueSource(strings = { "", "/", "/foo", "/foo/bar" })
     @ParameterizedTest
     void buildDefaultTransform(String outputBasePath) {
-        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfig.BulkModeConfigProperty.OUTPUT_BASE_PATH)))
             .thenReturn(Optional.of(outputBasePath));
-
+        refreshHandlerConfigFromMocks();
 
         assertEquals(outputBasePath,
             handler.buildDefaultTransform().getPathWithinBucket());
@@ -141,12 +148,11 @@ class StorageHandlerTest {
 
     @Test
     void buildRequest() {
-        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.INPUT_BASE_PATH)))
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfig.BulkModeConfigProperty.INPUT_BASE_PATH)))
             .thenReturn(Optional.empty());
-        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfig.BulkModeConfigProperty.OUTPUT_BASE_PATH)))
             .thenReturn(Optional.empty());
-
-
+        refreshHandlerConfigFromMocks();
 
         StorageEventRequest request =
             handler.buildRequest("bucket-in", "directory/file.csv", handler.buildDefaultTransform(), null, null);
@@ -167,14 +173,15 @@ class StorageHandlerTest {
     })
     @ParameterizedTest
     void buildRequest(String inputBasePath, String outputBasePath, String expectedOutputPath) {
-        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.INPUT_BASE_PATH)))
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfig.BulkModeConfigProperty.INPUT_BASE_PATH)))
             .thenReturn(Optional.ofNullable(inputBasePath));
-        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfig.BulkModeConfigProperty.OUTPUT_BASE_PATH)))
             .thenReturn(Optional.ofNullable(outputBasePath));
+        refreshHandlerConfigFromMocks();
 
         StorageHandler.ObjectTransform transform = StorageHandler.ObjectTransform.builder()
-            .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
-            .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
+            .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfig.BulkModeConfigProperty.OUTPUT_BUCKET))
+            .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfig.BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
             .rules(mock(BulkDataRules.class))
             .build();
 
@@ -356,9 +363,10 @@ class StorageHandlerTest {
     })
     public void handlesCompressedContent_legacy(String filename, String contentEncoding, boolean expected) {
 
-        // configure such that legacy behavior
-        when(config.getConfigPropertyAsOptional(BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS))
-            .thenReturn(Optional.of("false"));
+        handler.bulkModeConfig = BulkModeConfig.builder()
+            .outputBucket("bucket")
+            .compressOutputAlways(false)
+            .build();
 
         StorageEventRequest request = handler.buildRequest("bucket", filename, handler.buildDefaultTransform(), contentEncoding, null);
         assertEquals(expected, request.getDecompressInput());
@@ -374,9 +382,10 @@ class StorageHandlerTest {
     })
     public void handlesCompressedContent(String filename, String contentEncoding, boolean expectCompressedInput, boolean expectCompressedOutput) {
 
-        // configure such that legacy behavior
-        when(config.getConfigPropertyAsOptional(BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS))
-            .thenReturn(Optional.of("true"));
+        handler.bulkModeConfig = BulkModeConfig.builder()
+            .outputBucket("bucket")
+            .compressOutputAlways(true)
+            .build();
 
         StorageEventRequest request = handler.buildRequest("bucket", filename, handler.buildDefaultTransform(), contentEncoding, null);
         assertEquals(expectCompressedInput, request.getDecompressInput());
@@ -408,17 +417,20 @@ class StorageHandlerTest {
         "false,true,,true",
     })
     public void compressOutputSetting(Boolean inputCompressed, Boolean configSetting, Boolean transformSetting, Boolean expected) {
-        when(config.getConfigPropertyAsOptional(BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS))
+        when(config.getConfigPropertyAsOptional(BulkModeConfig.BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS))
             .thenReturn(configSetting == null ? Optional.empty() : Optional.of(configSetting.toString()));
 
         StorageHandler.ObjectTransform transform = StorageHandler.ObjectTransform.builder()
-            .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
-            .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
+            .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfig.BulkModeConfigProperty.OUTPUT_BUCKET))
+            .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfig.BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
             .rules(mock(BulkDataRules.class))
             .compressOutput(transformSetting)
             .build();
 
-        assertEquals(expected, handler.compressOutput(inputCompressed, config,  transform));
+        BulkModeConfig bulkModeConfig = BulkModeConfig.builder()
+            .compressOutputAlways(configSetting)
+            .build();
+        assertEquals(expected, handler.compressOutput(inputCompressed, bulkModeConfig, transform));
     }
 
     @SneakyThrows
@@ -448,10 +460,11 @@ class StorageHandlerTest {
 
     @Test
     void buildRequest_replacesGenericContentTypeWithInferred() {
-        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.INPUT_BASE_PATH)))
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfig.BulkModeConfigProperty.INPUT_BASE_PATH)))
             .thenReturn(Optional.empty());
-        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfig.BulkModeConfigProperty.OUTPUT_BASE_PATH)))
             .thenReturn(Optional.empty());
+        refreshHandlerConfigFromMocks();
 
         StorageEventRequest request = handler.buildRequest(
             "bucket-in",
@@ -515,10 +528,11 @@ class StorageHandlerTest {
 
     @Test
     void buildRequest_replacesGenericContentTypeWithInferredForJsonl() {
-        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.INPUT_BASE_PATH)))
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfig.BulkModeConfigProperty.INPUT_BASE_PATH)))
             .thenReturn(Optional.empty());
-        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfig.BulkModeConfigProperty.OUTPUT_BASE_PATH)))
             .thenReturn(Optional.empty());
+        refreshHandlerConfigFromMocks();
 
         StorageEventRequest request = handler.buildRequest(
             "bucket-in",

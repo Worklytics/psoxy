@@ -27,7 +27,9 @@ locals {
 
   http_methods = var.http_methods # Use http_methods directly without adding OPTIONS
 
-  auth_issuer = "${var.api_gateway_v2.stage_invoke_url}/${module.gate_instance.function_name}"
+  # plan-time name (matches aws-proxy-lambda local.function_name); do not use module.gate_instance.function_name here—would cycle via AUTH_ISSUER env var once that output depends on the Lambda resource (v0.8)
+  gate_function_name = "${module.env_id.id}-${var.instance_id}"
+  auth_issuer        = "${var.api_gateway_v2.stage_invoke_url}/${local.gate_function_name}"
 
   collection_path = "/collect"
 }
@@ -189,12 +191,16 @@ resource "aws_lambda_permission" "api_gateway" {
   statement_id  = "Allow${module.gate_instance.function_name}Invoke"
   action        = "lambda:InvokeFunction"
   function_name = module.gate_instance.function_name
+  # TODO(v0.8): use function ARN (provider `function_name` accepts ARN) and remove `depends_on` below
+  # function_name = module.gate_instance.function_arn
   principal     = "apigateway.amazonaws.com"
 
   # The /*/*/ part allows invocation from any stage, method and resource path
   # within API Gateway REST API.
   # TODO: limit by http method here too?  for webhooks, would need POST, OPTIONS at min
   source_arn = "${var.api_gateway_v2.execution_arn}/*/*/${module.gate_instance.function_name}/*"
+
+  depends_on = [module.gate_instance] # TODO(v0.8): remove once invoke permissions use function_arn
 }
 
 
@@ -313,7 +319,7 @@ Review the deployed function in AWS console:
 
 We provide some Node.js scripts to simplify testing your proxy deployment. To be able run test
 commands below, you will need
-   - Node.js (>=20) and npm (v >=8) installed.
+   - Node.js (>=22) and npm (v >=10) installed.
    - install the tool itself (in the location from which you plan to run the test commands, if it's
      not the same location where you originally ran the Terraform apply)
 

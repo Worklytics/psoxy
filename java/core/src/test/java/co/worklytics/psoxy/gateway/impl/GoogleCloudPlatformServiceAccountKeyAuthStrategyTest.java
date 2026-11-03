@@ -82,8 +82,9 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
 
         MockModules.ForHttpTransportFactory.mockResponse(authStrategy.httpTransportFactory, FAKE_TOKEN_RESPONSE);
 
-        when(authStrategy.config.getConfigPropertyOrError(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.OAUTH_SCOPES))
-            .thenReturn(oauthScopes);
+        authStrategy.authConfig = GoogleCloudPlatformServiceAccountKeyAuthConfig.builder()
+            .oauthScopes(oauthScopes)
+            .build();
         when(authStrategy.secretStore.getConfigPropertyAsOptional(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_KEY))
             .thenReturn(Optional.of(new String(Base64.getEncoder().encode(KEY.getBytes()))));
 
@@ -187,8 +188,9 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
         // Test that credentials work with plain JSON key format
         MockModules.ForHttpTransportFactory.mockResponse(authStrategy.httpTransportFactory, FAKE_TOKEN_RESPONSE);
 
-        when(authStrategy.config.getConfigPropertyOrError(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.OAUTH_SCOPES))
-            .thenReturn(oauthScopes);
+        authStrategy.authConfig = GoogleCloudPlatformServiceAccountKeyAuthConfig.builder()
+            .oauthScopes(oauthScopes)
+            .build();
         when(authStrategy.secretStore.getConfigPropertyAsOptional(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_KEY))
             .thenReturn(Optional.of(KEY)); // Plain JSON format
 

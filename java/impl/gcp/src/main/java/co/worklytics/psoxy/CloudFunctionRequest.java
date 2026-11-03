@@ -20,6 +20,9 @@ public class CloudFunctionRequest implements HttpEventRequest {
     @NonNull
     final HttpRequest request;
 
+    /** Negative offset from the end of {@code X-Forwarded-For}. */
+    final int clientIpXForwardedForOffset;
+
     private Map<String, List<String>> caseInsensitiveHeaders;
 
     private byte[] body;
@@ -92,17 +95,16 @@ public class CloudFunctionRequest implements HttpEventRequest {
     @Override
     public Optional<String> getClientIp() {
         return getHeader(HttpEventRequest.HTTP_HEADER_X_FORWARDED_FOR)
-            .flatMap(CloudFunctionRequest::trustedGcpClientIp);
+            .flatMap(value -> clientIpAtPosition(value, clientIpXForwardedForOffset));
     }
 
-    private static Optional<String> trustedGcpClientIp(String xForwardedFor) {
+    private static Optional<String> clientIpAtPosition(String xForwardedFor, int positionFromEnd) {
         List<String> hops = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(xForwardedFor);
-        if (hops.isEmpty()) {
+        int index = hops.size() + positionFromEnd;
+        if (index < 0 || index >= hops.size()) {
             return Optional.empty();
         }
-        // GCP HTTP(S) load balancers append the observed client IP and then the load balancer IP.
-        // Existing left-side values can be client-supplied and must not drive IP allowlist checks.
-        return Optional.of(hops.get(hops.size() >= 2 ? hops.size() - 2 : 0));
+        return Optional.of(hops.get(index));
     }
 
     @Override

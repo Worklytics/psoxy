@@ -1,20 +1,19 @@
 ---
 endpoints:
-  - pathTemplate: "/api/v1/UserPageAnalytics"
-    allowedQueryParams: []
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.userTableStats[*].email"
-          - "$.userTableStats[*].apiKey"
-        encoding: "URL_SAFE_TOKEN"
-    responseSchema:
-      type: "object"
-      properties:
-        userTableStats:
-          type: "array"
-          items:
-            $ref: "#/definitions/UserPageStat"
+- pathTemplate: "/api/v1/UserPageAnalytics"
+  allowedQueryParams: []
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.userTableStats[*].email"
+    - "$.userTableStats[*].apiKey"
+  responseSchema:
+    type: "object"
+    properties:
+      userTableStats:
+        type: "array"
+        items:
+          $ref: "#/definitions/UserPageStat"
 definitions:
   UserPageStat:
     type: "object"

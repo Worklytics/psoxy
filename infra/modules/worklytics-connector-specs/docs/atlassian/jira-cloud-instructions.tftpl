@@ -1,3 +1,8 @@
+**DEPRECATED:** this connector (`jira-cloud`) is deprecated in favor of `jira-cloud-service-account`,
+which authenticates via an Atlassian OAuth 2.0 service account credential instead of the
+user-delegated 3LO `refresh_token` flow below (no annual re-authorization needed). `jira-cloud`
+remains fully supported for existing deployments.
+
 ## Prerequisites
 Jira Cloud through Psoxy uses Jira OAuth 2.0 (3LO) with following classical scopes:
 - `read:jira-user`: for getting [users](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-users/#api-rest-api-3-users-search-get)

@@ -33,7 +33,7 @@ module "psoxy" {
 
 ## Usage - with `vpc.tf`
 
-If you don't have a pre-existing VPC you wish to use, our [aws example repo](https://github.com/Worklytics/psoxy-example-aws) includes [`vpc.tf`](https://github.com/Worklytics/psoxy-example-aws/blob/main/vpc.tf) at the top level. It adopts the default VPC, puts a NAT gateway in the default public subnet (`aws_default_subnet.public`), and places the Lambda in a separate private subnet (`aws_subnet.private`). The public route table sends `0.0.0.0/0` to the internet gateway. The private route table sends `0.0.0.0/0` to the NAT. Those routes cannot be combined on one table: replacing the internet-gateway route with a NAT route on the subnet that hosts the NAT leaves the NAT with no path to the internet, and external HTTPS calls hang until they time out.
+If you don't have a pre-existing VPC you wish to use, our [aws example repo](https://github.com/Worklytics/psoxy-example-aws) includes [`vpc.tf`](https://github.com/Worklytics/psoxy-example-aws/blob/main/vpc.tf) at the top level, with its resources commented out. Uncomment that file and the `vpc_config` block in `main.tf`. Uncommented, it adopts the default VPC, puts a NAT gateway in the default public subnet (`aws_default_subnet.public`), and places the Lambda in a separate private subnet (`aws_subnet.private`). The public route table sends `0.0.0.0/0` to the internet gateway. The private route table sends `0.0.0.0/0` to the NAT. Those routes cannot be combined on one table: replacing the internet-gateway route with a NAT route on the subnet that hosts the NAT leaves the NAT with no path to the internet, and external HTTPS calls hang until they time out.
 
 Prerequisites:
 
@@ -42,7 +42,7 @@ Prerequisites:
 
 NOTE: if you provide `vpc_config`, the value you pass for `use_api_gateway_v2` will be ignored; using a VPC **requires** API Gateway v2, so will override value of this flag to `true`.
 
-The example `main.tf` passes the private subnet into the `psoxy` module:
+Uncomment this block in the example `main.tf`:
 
 ```hcl
 module "psoxy" {
@@ -57,7 +57,7 @@ module "psoxy" {
 
 `vpc_config` does not take a `vpc_id`. The Lambda security group and the interface endpoints use `aws_security_group.default`: inbound TCP 443 from itself, outbound TCP 443, and outbound TCP/UDP 53 to the VPC CIDR so DNS can resolve external hostnames.
 
-To deploy without a VPC, remove `vpc_config` from the module and remove the resources in `vpc.tf`. The NAT gateway and the interface endpoints are billed while they exist.
+The example leaves VPC disabled. Uncomment `vpc_config` in `main.tf` and the resources in `vpc.tf` to enable it. The NAT gateway and the interface endpoints are billed while they exist.
 
 Alternatively, you modify `vpc.tf` to use a provision non-default VPC/subnet/security group, and reference those from your `main.tf` - subject to the caveats above.
 

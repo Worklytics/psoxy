@@ -1,0 +1,24 @@
+{
+  "event_id": "f1a2b3c4-52b7-4e20-a901-2ddb2bf9c340",
+  "type": "CODEX_LOG",
+  "principal": {
+    "id": "workspace_abc123",
+    "type": "CHATGPT_WORKSPACE"
+  },
+  "actor": {
+    "type": "ACCOUNT_USER",
+    "user_id": "user-abc123def456",
+    "user_email": "alice@example.com"
+  },
+  "event_type": "TOOL_DECISION",
+  "client_id": "CODEX_CLI",
+  "workspace_id": "be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details": {
+    "detail_type": "TOOL_DECISION",
+    "session_id": "session-abc123",
+    "call_id": "call-003",
+    "tool_call_id": "toolcall-003",
+    "source": "automated_reviewer",
+    "decision": "approved"
+  }
+}

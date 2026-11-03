@@ -298,6 +298,8 @@ resource "aws_lambda_permission" "api_gateway" {
   statement_id  = "Allow${module.psoxy_lambda.function_name}Invoke"
   action        = "lambda:InvokeFunction"
   function_name = module.psoxy_lambda.function_name
+  # TODO(v0.8): use function ARN (provider `function_name` accepts ARN) and remove `depends_on` below
+  # function_name = module.psoxy_lambda.function_arn
   principal     = "apigateway.amazonaws.com"
 
 
@@ -305,6 +307,8 @@ resource "aws_lambda_permission" "api_gateway" {
   # within API Gateway REST API.
   # TODO: limit by http method here too?
   source_arn = "${var.api_gateway_v2.execution_arn}/*/*/${module.psoxy_lambda.function_name}/{proxy+}"
+
+  depends_on = [module.psoxy_lambda] # TODO(v0.8): remove once invoke permissions use function_arn
 }
 
 
@@ -403,7 +407,7 @@ Review the deployed function in AWS console:
 
 We provide some Node.js scripts to simplify testing your proxy deployment. To be able run test
 commands below, you will need
-   - Node.js (>=20) and npm (v >=8) installed.
+   - Node.js (>=22) and npm (v >=10) installed.
    - install the tool itself (in the location from which you plan to run the test commands, if it's
      not the same location where you originally ran the Terraform apply)
 

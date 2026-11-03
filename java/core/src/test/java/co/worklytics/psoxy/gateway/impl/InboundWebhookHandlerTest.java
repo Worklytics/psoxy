@@ -28,7 +28,7 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.SignedJWT;
-import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
@@ -47,7 +47,7 @@ class InboundWebhookHandlerTest {
         handler = new InboundWebhookHandler(
             mock(Lazy.class),
             new NoOutput(),
-            mock(ConfigService.class),
+            mock(ProxyConfig.class),
             webhookConfig,
             new NetworkSecurityUtils(
                     ApiModeConfig.builder().build(),

@@ -1,0 +1,23 @@
+{
+  "event_id":"a9b8c7d6-52b7-4e20-a901-2ddb2bf9c341",
+  "type":"CODEX_LOG",
+  "principal":{
+    "id":"t~TDhE_IAxxWoLdspQg3HZYlI9IEx8ylVhXguQIRJb7vc",
+    "type":"CHATGPT_WORKSPACE"
+  },
+  "actor":{
+    "type":"ACCOUNT_USER",
+    "user_id":"t~QNybpbKvUYf4HL8gqEZfPRwjlz4FbGlr4mKOaduViYc",
+    "user_email":"t~knxWE5tapsutcz6pLWSC3wfb5t34lCrXNZsKnhwyVXk@example.com"
+  },
+  "event_type":"EXECUTION_REQUESTED",
+  "client_id":"CODEX_CLI",
+  "workspace_id":"be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details":{
+    "detail_type":"EXECUTION_REQUESTED",
+    "session_id":"session-abc123",
+    "tool_call_id":"toolcall-004",
+    "launch_trace_id":"trace-001",
+    "launch_span_id":"span-001"
+  }
+}

@@ -20,6 +20,16 @@ You can obtain the identity of your Worklytics tenant's GCP service account from
 
 When `allowed_data_access_ip_blocks` or `allowed_webhook_ip_blocks` is set in Terraform, the proxy enforces allowlists **inside the Cloud Function** via `ALLOWED_DATA_ACCESS_IP_BLOCKS` and `ALLOWED_WEBHOOK_IP_BLOCKS` environment variables. The shipped modules do **not** add source-IP IAM conditions on Cloud Run invoker bindings (GCP does not support that pattern on `roles/run.invoker`).
 
+Do not rely on this allowlist for authentication. The proxy supports it only as an optional control that increases the complexity of an attack. The address comes from `X-Forwarded-For`, which can be spoofed in whole or in part. Authenticate and authorize callers with a reliable scheme, such as GCP IAM, OIDC or JWT signatures, or mTLS.
+
+API connectors use GCP IAM. The shipped modules grant `roles/run.invoker` to each Worklytics service account, and Cloud Run enforces that binding. Webhook collectors grant `roles/run.invoker` to `allUsers` and authenticate each webhook by verifying a JWT signature. IAM does not protect a collector if that check is turned off.
+
+`client_ip_x_forwarded_for_offset` is the hop compared to the allowlist: a negative offset from the end of `X-Forwarded-For`, passed through as `CLIENT_IP_X_FORWARDED_FOR_OFFSET`. `-1` is the last address. The function modules do not interpret how a deployment appends that header. When the offset is omitted and an allowlist is set, they currently use `-1`. A future release will require an explicit offset whenever an allowlist is set.
+
+`gcp-host` passes `-2` when an external Application Load Balancer fronts API connectors, because that load balancer appends the client it observed and then the forwarding-rule address. A direct function URL, including webhook collectors, leaves the offset unset.
+
+If the header does not contain that hop, the client address is unknown and the allowlist rejects the request. Use the allowlist only in addition to that authentication.
+
 Worklytics can ensure fixed egress IP addresses for outbound requests from your tenant as a paid add-on. Contact [sales@worklytics.co](mailto:sales@worklytics.co) for details.
 
 For network ingress filtering in front of Cloud Run (for example Cloud Armor on a load balancer), see [External Application Load Balancer (ALB)](guides/external-alb.md) (beta). That path requires Cloud Run custom audiences so identity tokens minted for the load balancer URL are accepted. See also [GCP Private Service Connect and connectivity options](../development/gcp-private-service-connect.md#enhancing-public-internet-options-with-ip-allowlisting).
