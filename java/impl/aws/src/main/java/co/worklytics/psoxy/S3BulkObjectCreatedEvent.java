@@ -6,9 +6,6 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import com.amazonaws.services.lambda.runtime.events.S3Event;
-import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Value;
 
 /**
@@ -35,16 +32,30 @@ class S3BulkObjectCreatedEvent {
     }
 
     private static S3BulkObjectCreatedEvent fromS3Notification(Map<String, Object> input) {
-        ObjectMapper mapper = new ObjectMapper();
-        S3Event s3Event = mapper.convertValue(input, S3Event.class);
-        List<S3EventNotification.S3EventNotificationRecord> records = s3Event.getRecords();
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> records = (List<Map<String, Object>>) input.get("Records");
         if (records == null || records.isEmpty()) {
             throw new IllegalArgumentException("S3 event has no records");
         }
-        S3EventNotification.S3EventNotificationRecord record = records.get(0);
-        String bucket = record.getS3().getBucket().getName();
-        String key = record.getS3().getObject().getUrlDecodedKey();
-        return new S3BulkObjectCreatedEvent(bucket, key);
+        Map<String, Object> record = records.get(0);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> s3 = (Map<String, Object>) record.get("s3");
+        if (s3 == null) {
+            throw new IllegalArgumentException("S3 event record missing s3");
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, Object> bucket = (Map<String, Object>) s3.get("bucket");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> object = (Map<String, Object>) s3.get("object");
+        if (bucket == null || object == null) {
+            throw new IllegalArgumentException("S3 event missing bucket or object");
+        }
+        String bucketName = (String) bucket.get("name");
+        String key = (String) object.get("key");
+        if (bucketName == null || key == null) {
+            throw new IllegalArgumentException("S3 event missing bucket name or object key");
+        }
+        return new S3BulkObjectCreatedEvent(bucketName, URLDecoder.decode(key, StandardCharsets.UTF_8));
     }
 
     @SuppressWarnings("unchecked")
@@ -63,10 +74,6 @@ class S3BulkObjectCreatedEvent {
         if (bucketName == null || key == null) {
             throw new IllegalArgumentException("EventBridge S3 event missing bucket name or object key");
         }
-        return new S3BulkObjectCreatedEvent(bucketName, urlDecodeKey(key));
-    }
-
-    private static String urlDecodeKey(String key) {
-        return URLDecoder.decode(key, StandardCharsets.UTF_8);
+        return new S3BulkObjectCreatedEvent(bucketName, key);
     }
 }
