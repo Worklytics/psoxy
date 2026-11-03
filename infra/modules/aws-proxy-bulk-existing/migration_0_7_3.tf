@@ -2,5 +2,5 @@
 
 moved {
   from = aws_ssm_parameter.rules
-  to   = module.rules_parameter.aws_ssm_parameter.rules[0]
+  to   = module.rules_parameter.aws_ssm_parameter.rules
 }
