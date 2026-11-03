@@ -468,6 +468,8 @@ definitions:
         type: "string"
       meeting_type:
         type: "integer"
+      occurrence_id:
+        type: "string"
       participants:
         type: "array"
         items:
