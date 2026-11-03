@@ -14,11 +14,11 @@
       "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem1\"",
       "actor": {
         "callerType": "USER",
-        "email": "alice@worklytics.co",
-        "profileId": "117927411761819390794"
+        "email": "alice@acme.com",
+        "profileId": "114928375610284756193"
       },
-      "ipAddress": "203.0.113.42",
-      "ownerDomain": "worklytics.co",
+      "ipAddress": "203.0.113.47",
+      "ownerDomain": "acme.com",
       "networkInfo": {
         "ipAsn": [13335],
         "regionCode": "US",
@@ -67,7 +67,7 @@
             },
             {
               "name": "owner",
-              "value": "mary@worklytics.co"
+              "value": "mary@acme.com"
             },
             {
               "name": "visibility",
@@ -75,7 +75,7 @@
             },
             {
               "name": "ip_address",
-              "value": "203.0.113.42"
+              "value": "203.0.113.47"
             }
           ]
         }
@@ -105,8 +105,8 @@
             "ownerIdentity": [
               {
                 "userIdentity": {
-                  "id": "0neiluseridxxxxx",
-                  "userEmail": "neil@worklytics.co"
+                  "id": "105738294017384756201",
+                  "userEmail": "neil@acme.com"
                 }
               }
             ]
@@ -125,11 +125,11 @@
       "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem2\"",
       "actor": {
         "callerType": "USER",
-        "email": "alice@worklytics.co",
-        "profileId": "117927411761819390794"
+        "email": "alice@acme.com",
+        "profileId": "114928375610284756193"
       },
-      "ipAddress": "203.0.113.42",
-      "ownerDomain": "worklytics.co",
+      "ipAddress": "203.0.113.47",
+      "ownerDomain": "acme.com",
       "events": [
         {
           "type": "acl_change",
@@ -153,11 +153,11 @@
             },
             {
               "name": "owner",
-              "value": "mary@worklytics.co"
+              "value": "mary@acme.com"
             },
             {
               "name": "target_user",
-              "value": "bob@worklytics.co"
+              "value": "bob@acme.com"
             },
             {
               "name": "added_role",
@@ -177,7 +177,7 @@
             },
             {
               "name": "recipients",
-              "multiValue": ["bob@worklytics.co"]
+              "multiValue": ["bob@acme.com"]
             }
           ]
         }
@@ -194,8 +194,8 @@
       "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem3\"",
       "actor": {
         "callerType": "USER",
-        "email": "bob@worklytics.co",
-        "profileId": "100531288453445237356"
+        "email": "bob@acme.com",
+        "profileId": "109384756102938475610"
       },
       "events": [
         {
@@ -232,7 +232,7 @@
             },
             {
               "name": "owner",
-              "value": "mary@worklytics.co"
+              "value": "mary@acme.com"
             },
             {
               "name": "doc_type",
@@ -253,11 +253,11 @@
       "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem4\"",
       "actor": {
         "callerType": "USER",
-        "email": "bob@worklytics.co",
-        "profileId": "100531288453445237356"
+        "email": "bob@acme.com",
+        "profileId": "109384756102938475610"
       },
-      "ipAddress": "203.0.113.42",
-      "ownerDomain": "worklytics.co",
+      "ipAddress": "198.51.100.23",
+      "ownerDomain": "acme.com",
       "events": [
         {
           "type": "access",
@@ -281,7 +281,7 @@
             },
             {
               "name": "owner",
-              "value": "alice@worklytics.co"
+              "value": "alice@acme.com"
             },
             {
               "name": "visibility",
@@ -302,11 +302,11 @@
       "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem5\"",
       "actor": {
         "callerType": "USER",
-        "email": "alice@worklytics.co",
-        "profileId": "117927411761819390794"
+        "email": "alice@acme.com",
+        "profileId": "114928375610284756193"
       },
-      "ipAddress": "203.0.113.42",
-      "ownerDomain": "worklytics.co",
+      "ipAddress": "203.0.113.47",
+      "ownerDomain": "acme.com",
       "events": [
         {
           "type": "access",
@@ -330,7 +330,7 @@
             },
             {
               "name": "owner",
-              "value": "mary@worklytics.co"
+              "value": "mary@acme.com"
             },
             {
               "name": "visibility",
@@ -351,10 +351,10 @@
       "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem6\"",
       "actor": {
         "callerType": "USER",
-        "email": "mary@worklytics.co",
-        "profileId": "100531288453445237356"
+        "email": "mary@acme.com",
+        "profileId": "118472930184756201847"
       },
-      "ownerDomain": "worklytics.co",
+      "ownerDomain": "acme.com",
       "events": [
         {
           "type": "access",
@@ -386,7 +386,7 @@
             },
             {
               "name": "owner",
-              "value": "mary@worklytics.co"
+              "value": "mary@acme.com"
             },
             {
               "name": "visibility",
@@ -407,11 +407,11 @@
       "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem7\"",
       "actor": {
         "callerType": "USER",
-        "email": "bob@worklytics.co",
-        "profileId": "100531288453445237356"
+        "email": "bob@acme.com",
+        "profileId": "109384756102938475610"
       },
-      "ipAddress": "203.0.113.42",
-      "ownerDomain": "worklytics.co",
+      "ipAddress": "198.51.100.23",
+      "ownerDomain": "acme.com",
       "events": [
         {
           "type": "access",
@@ -435,11 +435,11 @@
             },
             {
               "name": "owner",
-              "value": "mary@worklytics.co"
+              "value": "mary@acme.com"
             },
             {
               "name": "target_user",
-              "value": "alice@worklytics.co"
+              "value": "alice@acme.com"
             }
           ]
         }
@@ -456,10 +456,10 @@
       "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem8\"",
       "actor": {
         "callerType": "USER",
-        "email": "alice@worklytics.co",
-        "profileId": "117927411761819390794"
+        "email": "alice@acme.com",
+        "profileId": "114928375610284756193"
       },
-      "ownerDomain": "worklytics.co",
+      "ownerDomain": "acme.com",
       "events": [
         {
           "type": "access",
@@ -487,7 +487,7 @@
             },
             {
               "name": "owner",
-              "value": "alice@worklytics.co"
+              "value": "alice@acme.com"
             },
             {
               "name": "destination_folder_id",
@@ -512,11 +512,11 @@
       "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem9\"",
       "actor": {
         "callerType": "USER",
-        "email": "alice@worklytics.co",
-        "profileId": "117927411761819390794"
+        "email": "alice@acme.com",
+        "profileId": "114928375610284756193"
       },
-      "ipAddress": "203.0.113.42",
-      "ownerDomain": "worklytics.co",
+      "ipAddress": "203.0.113.47",
+      "ownerDomain": "acme.com",
       "events": [
         {
           "type": "access",
@@ -553,10 +553,10 @@
       "etag": "\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem10\"",
       "actor": {
         "callerType": "USER",
-        "email": "mary@worklytics.co",
-        "profileId": "100531288453445237356"
+        "email": "mary@acme.com",
+        "profileId": "118472930184756201847"
       },
-      "ownerDomain": "worklytics.co",
+      "ownerDomain": "acme.com",
       "events": [
         {
           "type": "acl_change",
@@ -580,11 +580,11 @@
             },
             {
               "name": "owner",
-              "value": "mary@worklytics.co"
+              "value": "mary@acme.com"
             },
             {
               "name": "new_owner",
-              "value": "alice@worklytics.co"
+              "value": "alice@acme.com"
             },
             {
               "name": "new_owner_is_shared_drive",

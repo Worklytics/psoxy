@@ -31,23 +31,24 @@ class GDriveLogTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("drive-activities.json");
 
         Collection<String> PII = Arrays.asList(
-            "alice@worklytics.co",
-            "mary@worklytics.co",
-            "bob@worklytics.co",
-            "neil@worklytics.co"
+            "alice@acme.com",
+            "mary@acme.com",
+            "bob@acme.com",
+            "neil@acme.com"
         );
         assertNotSanitized(jsonString, PII);
-        assertNotSanitized(jsonString, "203.0.113.42");
+        assertNotSanitized(jsonString, "203.0.113.47", "198.51.100.23");
 
         String sanitized =
             sanitizer.sanitize("GET", new URL(endpoint), jsonString);
 
         assertPseudonymized(sanitized, PII);
-        assertTransformed(sanitized, Arrays.asList("203.0.113.42"), HashIp.builder().build());
+        assertTransformed(sanitized, Arrays.asList("203.0.113.47", "198.51.100.23"), HashIp.builder().build());
         assertPseudonymized(sanitized,
-            "117927411761819390794",
-            "100531288453445237356",
-            "0neiluseridxxxxx"
+            "114928375610284756193",
+            "109384756102938475610",
+            "118472930184756201847",
+            "105738294017384756201"
         );
 
         assertNotSanitized(jsonString,

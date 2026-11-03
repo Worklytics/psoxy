@@ -14,11 +14,11 @@
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem1\"",
       "actor":{
         "callerType":"USER",
-        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
-        "profileId":"t~Uya4owtCJeJfhhg3CYojl9Xjpe10yvY_5XOH14V7TxE"
+        "email":"t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com",
+        "profileId":"t~dLlBuooHsoN1ZnXxOYv6PdJmitc2mWf-DeJqMrFB7Mk"
       },
-      "ipAddress":"t~FF_NukhrsL6d49CqBcU9AAjHiGZYMHeLvoi9QuSKfE0",
-      "ownerDomain":"worklytics.co",
+      "ipAddress":"t~Er9_PKwcICEJbZIoWA1MAFfK0m969qrBTGE43AYnpLQ",
+      "ownerDomain":"acme.com",
       "networkInfo":{
         "ipAsn":[
           13335
@@ -65,7 +65,7 @@
             },
             {
               "name":"owner",
-              "value":"t~SuLKx-wI7BY6ymwyzWhgNm1k2HNYbLCtZB2GQlqflXk@worklytics.co"
+              "value":"t~neVdqCo999p24Dylf5pUBt7MSjk3X8_rPWmdyhlspWU@acme.com"
             },
             {
               "name":"visibility",
@@ -73,7 +73,7 @@
             },
             {
               "name":"ip_address",
-              "value":"t~FF_NukhrsL6d49CqBcU9AAjHiGZYMHeLvoi9QuSKfE0"
+              "value":"t~Er9_PKwcICEJbZIoWA1MAFfK0m969qrBTGE43AYnpLQ"
             }
           ]
         }
@@ -88,8 +88,8 @@
             "ownerIdentity":[
               {
                 "userIdentity":{
-                  "id":"t~zzqNx5rfLMw4pjyuYGvGDIhcvcG4zaI7GrDNSZhjlEc",
-                  "userEmail":"t~7LFvqPBD0TK__e9lJRtb9yQF6RdJOPf41SdhwZlBguI@worklytics.co"
+                  "id":"t~n7GHUTbQ8LdzNWOoX8Tn1skYBvwlh98SymQFBcejSi4",
+                  "userEmail":"t~Do-T3xcuUa7QxSL1V4Qb5V_qsNZRzd_eGGUB1n8AsBI@acme.com"
                 }
               }
             ]
@@ -108,11 +108,11 @@
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem2\"",
       "actor":{
         "callerType":"USER",
-        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
-        "profileId":"t~Uya4owtCJeJfhhg3CYojl9Xjpe10yvY_5XOH14V7TxE"
+        "email":"t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com",
+        "profileId":"t~dLlBuooHsoN1ZnXxOYv6PdJmitc2mWf-DeJqMrFB7Mk"
       },
-      "ipAddress":"t~FF_NukhrsL6d49CqBcU9AAjHiGZYMHeLvoi9QuSKfE0",
-      "ownerDomain":"worklytics.co",
+      "ipAddress":"t~Er9_PKwcICEJbZIoWA1MAFfK0m969qrBTGE43AYnpLQ",
+      "ownerDomain":"acme.com",
       "events":[
         {
           "type":"acl_change",
@@ -132,11 +132,11 @@
             },
             {
               "name":"owner",
-              "value":"t~SuLKx-wI7BY6ymwyzWhgNm1k2HNYbLCtZB2GQlqflXk@worklytics.co"
+              "value":"t~neVdqCo999p24Dylf5pUBt7MSjk3X8_rPWmdyhlspWU@acme.com"
             },
             {
               "name":"target_user",
-              "value":"t~ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4@worklytics.co"
+              "value":"t~-U7WKf4bQgfCSqtg28kpp672BXIc8kZN6Gmtg2iKn14@acme.com"
             },
             {
               "name":"added_role",
@@ -169,8 +169,8 @@
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem3\"",
       "actor":{
         "callerType":"USER",
-        "email":"t~ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4@worklytics.co",
-        "profileId":"t~QC9uUiOogI34RablRTn07ze4n6xOTmznaaPCq9i2ZyE"
+        "email":"t~-U7WKf4bQgfCSqtg28kpp672BXIc8kZN6Gmtg2iKn14@acme.com",
+        "profileId":"t~Pq0XEudurqLkZ7XwDgv2Zjv_NiYXahSq-VyNp8X1DeI"
       },
       "events":[
         {
@@ -195,7 +195,7 @@
             },
             {
               "name":"owner",
-              "value":"t~SuLKx-wI7BY6ymwyzWhgNm1k2HNYbLCtZB2GQlqflXk@worklytics.co"
+              "value":"t~neVdqCo999p24Dylf5pUBt7MSjk3X8_rPWmdyhlspWU@acme.com"
             },
             {
               "name":"doc_type",
@@ -216,11 +216,11 @@
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem4\"",
       "actor":{
         "callerType":"USER",
-        "email":"t~ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4@worklytics.co",
-        "profileId":"t~QC9uUiOogI34RablRTn07ze4n6xOTmznaaPCq9i2ZyE"
+        "email":"t~-U7WKf4bQgfCSqtg28kpp672BXIc8kZN6Gmtg2iKn14@acme.com",
+        "profileId":"t~Pq0XEudurqLkZ7XwDgv2Zjv_NiYXahSq-VyNp8X1DeI"
       },
-      "ipAddress":"t~FF_NukhrsL6d49CqBcU9AAjHiGZYMHeLvoi9QuSKfE0",
-      "ownerDomain":"worklytics.co",
+      "ipAddress":"t~9_kzwBSbXL8kOgCv-QEkYPmhRok6Nx9TsDODoH6-_PI",
+      "ownerDomain":"acme.com",
       "events":[
         {
           "type":"access",
@@ -240,7 +240,7 @@
             },
             {
               "name":"owner",
-              "value":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co"
+              "value":"t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com"
             },
             {
               "name":"visibility",
@@ -261,11 +261,11 @@
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem5\"",
       "actor":{
         "callerType":"USER",
-        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
-        "profileId":"t~Uya4owtCJeJfhhg3CYojl9Xjpe10yvY_5XOH14V7TxE"
+        "email":"t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com",
+        "profileId":"t~dLlBuooHsoN1ZnXxOYv6PdJmitc2mWf-DeJqMrFB7Mk"
       },
-      "ipAddress":"t~FF_NukhrsL6d49CqBcU9AAjHiGZYMHeLvoi9QuSKfE0",
-      "ownerDomain":"worklytics.co",
+      "ipAddress":"t~Er9_PKwcICEJbZIoWA1MAFfK0m969qrBTGE43AYnpLQ",
+      "ownerDomain":"acme.com",
       "events":[
         {
           "type":"access",
@@ -285,7 +285,7 @@
             },
             {
               "name":"owner",
-              "value":"t~SuLKx-wI7BY6ymwyzWhgNm1k2HNYbLCtZB2GQlqflXk@worklytics.co"
+              "value":"t~neVdqCo999p24Dylf5pUBt7MSjk3X8_rPWmdyhlspWU@acme.com"
             },
             {
               "name":"visibility",
@@ -306,10 +306,10 @@
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem6\"",
       "actor":{
         "callerType":"USER",
-        "email":"t~SuLKx-wI7BY6ymwyzWhgNm1k2HNYbLCtZB2GQlqflXk@worklytics.co",
-        "profileId":"t~QC9uUiOogI34RablRTn07ze4n6xOTmznaaPCq9i2ZyE"
+        "email":"t~neVdqCo999p24Dylf5pUBt7MSjk3X8_rPWmdyhlspWU@acme.com",
+        "profileId":"t~oYjJvsg7AC2eBCGZZD_G90WsaVFxIYSS_wE2pXM1mIM"
       },
-      "ownerDomain":"worklytics.co",
+      "ownerDomain":"acme.com",
       "events":[
         {
           "type":"access",
@@ -329,7 +329,7 @@
             },
             {
               "name":"owner",
-              "value":"t~SuLKx-wI7BY6ymwyzWhgNm1k2HNYbLCtZB2GQlqflXk@worklytics.co"
+              "value":"t~neVdqCo999p24Dylf5pUBt7MSjk3X8_rPWmdyhlspWU@acme.com"
             },
             {
               "name":"visibility",
@@ -350,11 +350,11 @@
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem7\"",
       "actor":{
         "callerType":"USER",
-        "email":"t~ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4@worklytics.co",
-        "profileId":"t~QC9uUiOogI34RablRTn07ze4n6xOTmznaaPCq9i2ZyE"
+        "email":"t~-U7WKf4bQgfCSqtg28kpp672BXIc8kZN6Gmtg2iKn14@acme.com",
+        "profileId":"t~Pq0XEudurqLkZ7XwDgv2Zjv_NiYXahSq-VyNp8X1DeI"
       },
-      "ipAddress":"t~FF_NukhrsL6d49CqBcU9AAjHiGZYMHeLvoi9QuSKfE0",
-      "ownerDomain":"worklytics.co",
+      "ipAddress":"t~9_kzwBSbXL8kOgCv-QEkYPmhRok6Nx9TsDODoH6-_PI",
+      "ownerDomain":"acme.com",
       "events":[
         {
           "type":"access",
@@ -374,11 +374,11 @@
             },
             {
               "name":"owner",
-              "value":"t~SuLKx-wI7BY6ymwyzWhgNm1k2HNYbLCtZB2GQlqflXk@worklytics.co"
+              "value":"t~neVdqCo999p24Dylf5pUBt7MSjk3X8_rPWmdyhlspWU@acme.com"
             },
             {
               "name":"target_user",
-              "value":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co"
+              "value":"t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com"
             }
           ]
         }
@@ -395,10 +395,10 @@
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem8\"",
       "actor":{
         "callerType":"USER",
-        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
-        "profileId":"t~Uya4owtCJeJfhhg3CYojl9Xjpe10yvY_5XOH14V7TxE"
+        "email":"t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com",
+        "profileId":"t~dLlBuooHsoN1ZnXxOYv6PdJmitc2mWf-DeJqMrFB7Mk"
       },
-      "ownerDomain":"worklytics.co",
+      "ownerDomain":"acme.com",
       "events":[
         {
           "type":"access",
@@ -422,7 +422,7 @@
             },
             {
               "name":"owner",
-              "value":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co"
+              "value":"t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com"
             },
             {
               "name":"destination_folder_id",
@@ -443,11 +443,11 @@
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem9\"",
       "actor":{
         "callerType":"USER",
-        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
-        "profileId":"t~Uya4owtCJeJfhhg3CYojl9Xjpe10yvY_5XOH14V7TxE"
+        "email":"t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com",
+        "profileId":"t~dLlBuooHsoN1ZnXxOYv6PdJmitc2mWf-DeJqMrFB7Mk"
       },
-      "ipAddress":"t~FF_NukhrsL6d49CqBcU9AAjHiGZYMHeLvoi9QuSKfE0",
-      "ownerDomain":"worklytics.co",
+      "ipAddress":"t~Er9_PKwcICEJbZIoWA1MAFfK0m969qrBTGE43AYnpLQ",
+      "ownerDomain":"acme.com",
       "events":[
         {
           "type":"access",
@@ -472,10 +472,10 @@
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/driveLogItem10\"",
       "actor":{
         "callerType":"USER",
-        "email":"t~SuLKx-wI7BY6ymwyzWhgNm1k2HNYbLCtZB2GQlqflXk@worklytics.co",
-        "profileId":"t~QC9uUiOogI34RablRTn07ze4n6xOTmznaaPCq9i2ZyE"
+        "email":"t~neVdqCo999p24Dylf5pUBt7MSjk3X8_rPWmdyhlspWU@acme.com",
+        "profileId":"t~oYjJvsg7AC2eBCGZZD_G90WsaVFxIYSS_wE2pXM1mIM"
       },
-      "ownerDomain":"worklytics.co",
+      "ownerDomain":"acme.com",
       "events":[
         {
           "type":"acl_change",
@@ -495,11 +495,11 @@
             },
             {
               "name":"owner",
-              "value":"t~SuLKx-wI7BY6ymwyzWhgNm1k2HNYbLCtZB2GQlqflXk@worklytics.co"
+              "value":"t~neVdqCo999p24Dylf5pUBt7MSjk3X8_rPWmdyhlspWU@acme.com"
             },
             {
               "name":"new_owner",
-              "value":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co"
+              "value":"t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com"
             },
             {
               "name":"new_owner_is_shared_drive",
