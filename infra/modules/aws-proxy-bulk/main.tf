@@ -31,9 +31,22 @@ module "env_id" {
 
 locals {
   bucket_name_prefix = "${module.env_id.id}-${replace(var.instance_id, "_", "-")}"
+}
 
-  rules_plain = var.rules_file == null ? yamlencode(var.rules) : file(var.rules_file)
-  rules_hash  = sha1(local.rules_plain)
+module "rules_parameter" {
+  source = "../aws-ssm-rules"
+
+  prefix    = var.path_to_instance_ssm_parameters
+  content   = var.rules_file == null ? yamlencode(var.rules) : null
+  file_path = var.rules_file
+  description = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
+
+  remote_resource_bucket        = var.remote_resource_bucket
+  remote_resource_instance_path = var.remote_resource_instance_path
+}
+
+locals {
+  rules_hash = module.rules_parameter.rules_hash
 }
 
 
@@ -316,19 +329,6 @@ resource "aws_s3_bucket_policy" "testing_sanitized" {
       }
     ]
   })
-}
-
-resource "aws_ssm_parameter" "rules" {
-  name           = "${var.path_to_instance_ssm_parameters}RULES"
-  type           = "String"
-  description    = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
-  insecure_value = var.rules_file == null ? yamlencode(var.rules) : file(var.rules_file) # NOTE: insecure_value just means shown in Terraform output
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
 }
 
 locals {

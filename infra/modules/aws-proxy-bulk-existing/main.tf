@@ -2,6 +2,18 @@
 # TODO: highly duplicative with regular `aws-proxy-bulk` case, and could likely be unified in future
 # version
 
+module "rules_parameter" {
+  source = "../aws-ssm-rules"
+
+  prefix      = var.path_to_instance_ssm_parameters
+  content     = yamlencode(var.rules)
+  description = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
+}
+
+locals {
+  rules_hash = module.rules_parameter.rules_hash
+}
+
 module "psoxy_lambda" {
   source = "../aws-proxy-lambda"
 
@@ -33,11 +45,6 @@ module "psoxy_lambda" {
       CUSTOM_RULES_SHA = local.rules_hash
     }
   )
-}
-
-locals {
-  rules_plain = yamlencode(var.rules)
-  rules_hash  = sha1(local.rules_plain)
 }
 
 data "aws_s3_bucket" "input" {
@@ -110,20 +117,6 @@ module "sanitized_output_bucket" {
   provision_bucket_public_access_block = var.provision_bucket_public_access_block
 }
 
-
-resource "aws_ssm_parameter" "rules" {
-  name           = "${var.path_to_instance_ssm_parameters}RULES"
-  type           = "String"
-  description    = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
-  insecure_value = yamlencode(var.rules) # NOTE: insecure_value just means shown in Terraform output
-
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
-}
 
 # to facilitate composition of output pipeline
 output "output_bucket" {

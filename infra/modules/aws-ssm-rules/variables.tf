@@ -24,3 +24,21 @@ variable "content" {
   description = "Raw rules content string. Mutually exclusive with file_path; one of the two must be provided."
   default     = null
 }
+
+variable "remote_resource_bucket" {
+  type        = string
+  description = "When rules exceed the SSM size limit, store them at {remote_resource_instance_path}/rules.yaml in this bucket instead."
+  default     = null
+}
+
+variable "remote_resource_instance_path" {
+  type        = string
+  description = "Path prefix within remote_resource_bucket for this connector's rules.yaml object."
+  default     = null
+}
+
+variable "description" {
+  type        = string
+  description = "Optional SSM parameter description."
+  default     = null
+}
