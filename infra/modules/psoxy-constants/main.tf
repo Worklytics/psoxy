@@ -318,6 +318,24 @@ locals {
         ]
       },
       {
+        Sid    = "EventBridgeAccess"
+        Effect = "Allow"
+        Action = [
+          "events:PutRule",
+          "events:DeleteRule",
+          "events:DescribeRule",
+          "events:DisableRule",
+          "events:EnableRule",
+          "events:PutTargets",
+          "events:RemoveTargets",
+          "events:ListTargetsByRule",
+          "events:ListTagsForResource",
+          "events:TagResource",
+          "events:UntagResource",
+        ]
+        Resource = "arn:aws:events:*:${local.account_id_resource_pattern}:rule/${module.env_id.id}*"
+      },
+      {
         # seems this needed by Terraform on account-level; avoids error like the following:
         # Error: describing SSM parameter (LST-PRIV_PSOXY_ENCRYPTION_KEY): AccessDeniedException: User: arn:aws:sts::123123123123123:assumed-role/MinProvisioner/aws-go-sdk-1717785438809132000 is not authorized to perform: ssm:DescribeParameters on resource: arn:aws:ssm:us-west-1:874171213677:* because no identity-based policy allows the ssm:DescribeParameters action
         Sid : "SSMParameterAccessAccountLevel",
