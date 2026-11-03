@@ -813,7 +813,7 @@ public class PrebuiltSanitizerRules {
                                 .build()
                 ,
                 Transform.Pseudonymize.builder()
-                        .includeReversible(true)
+                        .includeEncrypted(true)
                         .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
                         .jsonPath(String.format("$%s%s.login", prefix, objectNames))
                         .build()
@@ -986,7 +986,7 @@ public class PrebuiltSanitizerRules {
                         .jsonPath("$..organizationVerifiedDomainEmails[*]")
                         .build())
                 .transform(Transform.Pseudonymize.builder()
-                        .includeReversible(true)
+                        .includeEncrypted(true)
                         .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
                         .jsonPath("$..login")
                         .build())

@@ -939,7 +939,7 @@ endpoints:
     - "$.data[*].id"
     - "$.first_id"
     - "$.last_id"
-    includeReversible: true
+    includeEncrypted: true
   responseSchema:
     type: "object"
     properties:

@@ -145,7 +145,7 @@ public class PrebuiltSanitizerRules {
         .build();
 
     static final Transform ENTRA_ID_USERS_NO_APP_IDS_TRANSFORM_RULE = Transform.Pseudonymize.builder()
-        .includeReversible(true)
+        .includeEncrypted(true)
         .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
         .jsonPath("$..id")
         .build();
@@ -161,7 +161,7 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2 ENTRA_ID_NO_MSFT_IDS_NO_GROUPS = ENTRA_ID_NO_GROUPS
         .withTransformByEndpoint(ENTRA_ID_REGEX_USERS_BY_PSEUDO, Transform.Pseudonymize.builder()
-            .includeReversible(true)
+            .includeEncrypted(true)
             .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .jsonPath("$..id")
             .build());

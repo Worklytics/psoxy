@@ -183,8 +183,21 @@ class SanitizerUtilsTest {
         MapFunction f = sanitizerUtils.getTokenize(Transform.Tokenize.builder().build());
         String r = (String) f.map(original, jsonConfiguration);
 
+        assertTrue(r.startsWith(UrlSafeTokenPseudonymEncoder.REVERSIBLE_PREFIX));
         assertArrayEquals(reversibleTokenizationStrategy.getReversibleToken(original),
             urlSafePseudonymEncoder.decode(r).getReversible());
+    }
+
+    @Test
+    void tokenize_hashOnly() {
+        String original = "blah";
+        MapFunction f = sanitizerUtils.getTokenize(Transform.Tokenize.builder()
+            .includeEncrypted(false)
+            .build());
+        String r = (String) f.map(original, jsonConfiguration);
+
+        assertTrue(r.startsWith(UrlSafeTokenPseudonymEncoder.TOKEN_PREFIX));
+        assertNull(urlSafePseudonymEncoder.decode(r).getReversible());
     }
 
     @Test
