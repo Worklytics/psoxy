@@ -10,7 +10,8 @@ endpoints:
   - !<pseudonymize>
     jsonPaths:
     - "$..obfuscatedId"
-    - "$..emailAddress"
+    - "$..metadata.email"
+    - "$..metadata.aliasEmails[*]"
   responseSchema:
     type: "object"
     properties:
@@ -27,14 +28,14 @@ endpoints:
   allowedRequestHeaders:
   - "X-Glean-ActAs"
   transforms:
-    - !<pseudonymize>
-      jsonPaths:
-        - "$..aliasEmails[*]"
-    - !<pseudonymize>
-      jsonPaths:
-        - "$..email"
-        - "$..obfuscatedId"
-      includeReversible: true
+  - !<pseudonymize>
+    jsonPaths:
+    - "$..aliasEmails[*]"
+  - !<pseudonymize>
+    jsonPaths:
+    - "$..email"
+    - "$..obfuscatedId"
+    includeReversible: true
   responseSchema:
     type: "object"
     properties:
@@ -66,8 +67,10 @@ definitions:
         type: "integer"
       averageRunsPerDayCount:
         type: "number"
+      departmentName:
+        type: "string"
       person:
-        $ref: "#/definitions/PersonInsight"
+        $ref: "#/definitions/Person"
       runCount:
         type: "integer"
   AgentsResponse:
@@ -115,12 +118,14 @@ definitions:
         type: "integer"
       numGleanbotUsefulResponses:
         type: "integer"
+      numMcpCalls:
+        type: "integer"
       numSearches:
         type: "integer"
       numSummarizations:
         type: "integer"
       person:
-        $ref: "#/definitions/PersonInsight"
+        $ref: "#/definitions/Person"
   PerUserInsight_1:
     type: "object"
     properties:
@@ -135,19 +140,12 @@ definitions:
       numSummarizations:
         type: "integer"
       person:
-        $ref: "#/definitions/PersonInsight"
+        $ref: "#/definitions/Person"
   Person:
     type: "object"
     properties:
       metadata:
         $ref: "#/definitions/PersonMetadata"
-      obfuscatedId:
-        type: "string"
-  PersonInsight:
-    type: "object"
-    properties:
-      emailAddress:
-        type: "string"
       obfuscatedId:
         type: "string"
   PersonMetadata:

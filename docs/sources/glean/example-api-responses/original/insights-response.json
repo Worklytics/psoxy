@@ -92,7 +92,10 @@
       {
         "person": {
           "name": "George Clooney",
-          "obfuscatedId": "abc123"
+          "obfuscatedId": "abc123",
+          "metadata": {
+            "email": "george.clooney@company.com"
+          }
         },
         "numSearches": 0,
         "numChats": 0,
@@ -101,7 +104,8 @@
         "numDaysActive": 0,
         "numSummarizations": 0,
         "numAiAnswers": 0,
-        "numAgentRuns": 0
+        "numAgentRuns": 0,
+        "numMcpCalls": 0
       }
     ]
   },
@@ -247,7 +251,10 @@
       {
         "person": {
           "name": "George Clooney",
-          "obfuscatedId": "abc123"
+          "obfuscatedId": "abc123",
+          "metadata": {
+            "email": "george.clooney@company.com"
+          }
         },
         "numChatMessages": 0,
         "numSummarizations": 0,
@@ -394,7 +401,10 @@
       {
         "person": {
           "name": "George Clooney",
-          "obfuscatedId": "abc123"
+          "obfuscatedId": "abc123",
+          "metadata": {
+            "email": "george.clooney@company.com"
+          }
         },
         "departmentName": "string",
         "agentsUsedCount": 0,

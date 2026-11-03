@@ -3,7 +3,10 @@
     "perUserInsights":[
       {
         "person":{
-          "obfuscatedId":"t~WO6ZqzuAlomZiWLfNpl4m2ubveZggJyxVxGZ6TdrQmQ"
+          "obfuscatedId":"t~WO6ZqzuAlomZiWLfNpl4m2ubveZggJyxVxGZ6TdrQmQ",
+          "metadata":{
+            "email":"t~pFwtup8U9udj9BUAJMyERjzE44BnFwV8xjcROXFJi5I@company.com"
+          }
         },
         "numSearches":0,
         "numChats":0,
@@ -12,7 +15,8 @@
         "numDaysActive":0,
         "numSummarizations":0,
         "numAiAnswers":0,
-        "numAgentRuns":0
+        "numAgentRuns":0,
+        "numMcpCalls":0
       }
     ]
   },
@@ -20,7 +24,10 @@
     "perUserInsights":[
       {
         "person":{
-          "obfuscatedId":"t~WO6ZqzuAlomZiWLfNpl4m2ubveZggJyxVxGZ6TdrQmQ"
+          "obfuscatedId":"t~WO6ZqzuAlomZiWLfNpl4m2ubveZggJyxVxGZ6TdrQmQ",
+          "metadata":{
+            "email":"t~pFwtup8U9udj9BUAJMyERjzE44BnFwV8xjcROXFJi5I@company.com"
+          }
         },
         "numChatMessages":0,
         "numSummarizations":0,
@@ -34,8 +41,12 @@
     "agentUsersInsights":[
       {
         "person":{
-          "obfuscatedId":"t~WO6ZqzuAlomZiWLfNpl4m2ubveZggJyxVxGZ6TdrQmQ"
+          "obfuscatedId":"t~WO6ZqzuAlomZiWLfNpl4m2ubveZggJyxVxGZ6TdrQmQ",
+          "metadata":{
+            "email":"t~pFwtup8U9udj9BUAJMyERjzE44BnFwV8xjcROXFJi5I@company.com"
+          }
         },
+        "departmentName":"string",
         "agentsUsedCount":0,
         "averageRunsPerDayCount":0,
         "agentsCreatedCount":0,
