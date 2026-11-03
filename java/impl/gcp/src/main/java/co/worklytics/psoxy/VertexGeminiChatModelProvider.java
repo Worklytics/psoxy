@@ -8,7 +8,6 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.google.genai.GoogleGenAiChatModel;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -49,7 +48,7 @@ public class VertexGeminiChatModelProvider implements GenMetadataChatModelProvid
                 "VertexGeminiChatModelProvider requires VertexGenMetadataConfig, got "
                     + config.getClass().getSimpleName());
         }
-        String project = resolveProjectId();
+        String project = VertexGenAiClientSupport.resolveProjectId();
         log.info("Creating Vertex Gemini chat model project=" + project
             + " location=" + vertex.getModelRegion()
             + " model=" + vertex.getModelId()
@@ -65,27 +64,10 @@ public class VertexGeminiChatModelProvider implements GenMetadataChatModelProvid
     }
 
     String resolveProjectId() {
-        String fromAdc = ServiceOptions.getDefaultProjectId();
-        if (StringUtils.isNotBlank(fromAdc)) {
-            return fromAdc;
-        }
-        String fromEnv = firstNonBlank(
-            System.getenv("GOOGLE_CLOUD_PROJECT"),
-            System.getenv("GCP_PROJECT"),
-            System.getenv("GCLOUD_PROJECT"));
-        if (fromEnv != null) {
-            return fromEnv;
-        }
-        throw new IllegalStateException(
-            "Vertex genMetadata requires a GCP project id (ADC / metadata / GOOGLE_CLOUD_PROJECT)");
+        return VertexGenAiClientSupport.resolveProjectId();
     }
 
     private static String firstNonBlank(String... values) {
-        for (String value : values) {
-            if (StringUtils.isNotBlank(value)) {
-                return value.trim();
-            }
-        }
-        return null;
+        return VertexGenAiClientSupport.firstNonBlank(values);
     }
 }

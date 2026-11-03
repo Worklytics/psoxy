@@ -33,6 +33,7 @@ class LangChain4jGenMetadataBackendTimeoutTest {
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
             new GenMetadataResponseFormats(),
+            GenMetadataBackendTestSupport.noPromptCacheFactory(),
             Clock.systemUTC());
 
         ChatModel slowModel = new ChatModel() {
@@ -48,7 +49,7 @@ class LangChain4jGenMetadataBackendTimeoutTest {
         };
 
         ChatResponse response = backend.chatWithTimeout(
-            slowModel, List.of(UserMessage.from("hello")), null, 64);
+            slowModel, GenMetadataBackendTestSupport.simpleAssembly("hello"), null, 64);
         assertNull(response);
     }
 
@@ -63,6 +64,7 @@ class LangChain4jGenMetadataBackendTimeoutTest {
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
             new GenMetadataResponseFormats(),
+            GenMetadataBackendTestSupport.noPromptCacheFactory(),
             Clock.systemUTC());
 
         ChatModel occupying = new ChatModel() {
@@ -86,7 +88,7 @@ class LangChain4jGenMetadataBackendTimeoutTest {
             pool.submit(() -> {
                 try {
                     ChatResponse response = backend.chatWithTimeout(
-                        occupying, List.of(UserMessage.from("hello")), null, 64);
+                        occupying, GenMetadataBackendTestSupport.simpleAssembly("hello"), null, 64);
                     if (response == null) {
                         nulls.incrementAndGet();
                     }

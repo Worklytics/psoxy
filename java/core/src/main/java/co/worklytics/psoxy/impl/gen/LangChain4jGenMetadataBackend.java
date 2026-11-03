@@ -6,7 +6,6 @@ import com.avaulta.gateway.rules.augments.GenMetadataBackend;
 import com.avaulta.gateway.rules.augments.GenMetadataInferenceOptions;
 import com.avaulta.gateway.rules.augments.GenMetadataInferenceResult;
 import com.avaulta.gateway.rules.JsonSchema;
-import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ResponseFormat;
@@ -83,6 +82,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     private final GenMetadataTokenUsageAccumulator tokenUsageAccumulator;
     private final GenMetadataPromptBuilder promptBuilder;
     private final GenMetadataResponseFormats responseFormats;
+    private final GenMetadataPromptCacheSupportFactory promptCacheSupportFactory;
     private final Clock clock;
 
     @Inject
@@ -92,6 +92,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
                                          GenMetadataTokenUsageAccumulator tokenUsageAccumulator,
                                          GenMetadataPromptBuilder promptBuilder,
                                          GenMetadataResponseFormats responseFormats,
+                                         GenMetadataPromptCacheSupportFactory promptCacheSupportFactory,
                                          Optional<Clock> clock) {
         this.config = config;
         this.promptBudget = promptBudget;
@@ -99,6 +100,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         this.tokenUsageAccumulator = tokenUsageAccumulator;
         this.promptBuilder = promptBuilder;
         this.responseFormats = responseFormats;
+        this.promptCacheSupportFactory = promptCacheSupportFactory;
         this.clock = clock.orElse(Clock.systemUTC());
     }
 
@@ -109,9 +111,10 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
                                   GenMetadataTokenUsageAccumulator tokenUsageAccumulator,
                                   GenMetadataPromptBuilder promptBuilder,
                                   GenMetadataResponseFormats responseFormats,
+                                  GenMetadataPromptCacheSupportFactory promptCacheSupportFactory,
                                   Clock clock) {
         this(config, promptBudget, chatModelFactory, tokenUsageAccumulator, promptBuilder,
-            responseFormats, Optional.ofNullable(clock));
+            responseFormats, promptCacheSupportFactory, Optional.ofNullable(clock));
     }
 
     private final ConcurrentHashMap<String, ModelHandle> models = new ConcurrentHashMap<>();
@@ -136,8 +139,8 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         int effectiveMaxTokens = effectiveMaxTokens(effective.getMaxOutputTokens());
         int effectiveMaxInputTokens = effectiveMaxInputTokens(effective.getMaxInputTokens());
         String fittedInput = promptBudget.fitDynamicInput(inputData, effectiveMaxInputTokens);
-        List<ChatMessage> messages =
-            promptBuilder.toMessages(taskPrompt, outputSchema, fittedInput);
+        GenMetadataPromptAssembly assembly =
+            promptBuilder.assembleGenerate(taskPrompt, outputSchema, fittedInput);
         // Bedrock Converse maps ResponseFormat → outputConfig; Amazon Nova (our default) rejects it.
         boolean bedrock = config.getBackend() == GenMetadataConfig.Backend.BEDROCK;
         Optional<ResponseFormat> responseFormat = bedrock
@@ -147,7 +150,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             log.info("genMetadata Bedrock: omitting ResponseFormat/outputConfig for model "
                 + config.getModelId());
         }
-        return completeChat(handle, messages, responseFormat.orElse(null), effectiveMaxTokens);
+        return completeChat(handle, assembly, responseFormat.orElse(null), effectiveMaxTokens);
     }
 
     @Override
@@ -161,8 +164,8 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         int effectiveMaxInputTokens = effectiveMaxInputTokens(effective.getMaxInputTokens());
         int maxOutputTokens = effectiveMaxTokens(effective.getMaxOutputTokens());
         String fittedInput = promptBudget.fitDynamicInput(inputData, effectiveMaxInputTokens);
-        List<ChatMessage> messages =
-            promptBuilder.toClassifyMessages(taskPrompt, classes, fittedInput);
+        GenMetadataPromptAssembly assembly =
+            promptBuilder.assembleClassify(taskPrompt, classes, fittedInput);
         boolean bedrock = config.getBackend() == GenMetadataConfig.Backend.BEDROCK;
         Optional<ResponseFormat> responseFormat = bedrock
             ? Optional.empty()
@@ -171,7 +174,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             log.info("classify Bedrock: omitting ResponseFormat/outputConfig for model "
                 + config.getModelId());
         }
-        return completeChat(handle, messages, responseFormat.orElse(null), maxOutputTokens);
+        return completeChat(handle, assembly, responseFormat.orElse(null), maxOutputTokens);
     }
 
     private ModelHandle requireReadyHandle() {
@@ -187,7 +190,8 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         return handle;
     }
 
-    private GenMetadataInferenceResult completeChat(ModelHandle handle, List<ChatMessage> messages,
+    private GenMetadataInferenceResult completeChat(ModelHandle handle,
+                                                    GenMetadataPromptAssembly assembly,
                                                     ResponseFormat responseFormat,
                                                     int maxOutputTokens) {
         try {
@@ -199,7 +203,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
                 + thinkingLogSuffix());
             ChatResponse response;
             try {
-                response = chatWithTimeout(handle.chatModel, messages, responseFormat,
+                response = chatWithTimeout(handle.chatModel, assembly, responseFormat,
                     maxOutputTokens);
             } finally {
                 log.info("genMetadata LLM inference completed in "
@@ -284,14 +288,15 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         return Augment.GenMetadata.DEFAULT_MAX_OUTPUT_TOKENS;
     }
 
-    ChatResponse chatWithTimeout(ChatModel chatModel, List<ChatMessage> messages,
+    ChatResponse chatWithTimeout(ChatModel chatModel, GenMetadataPromptAssembly assembly,
                                  ResponseFormat responseFormat, int maxOutputTokens) throws Exception {
         ChatRequest.Builder requestBuilder = ChatRequest.builder()
-            .messages(messages)
             .maxOutputTokens(maxOutputTokens);
         if (responseFormat != null) {
             requestBuilder.responseFormat(responseFormat);
         }
+        promptCacheSupportFactory.forConfig(config)
+            .configureRequest(config, assembly, requestBuilder);
         ChatRequest request = requestBuilder.build();
         int timeoutSeconds = config.getTimeoutSeconds();
         long deadlineNanos = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds);

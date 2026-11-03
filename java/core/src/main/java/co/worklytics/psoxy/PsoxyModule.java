@@ -52,6 +52,7 @@ import com.avaulta.gateway.rules.augments.GenMetadataBackend;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.AugmentProcessor;
+import co.worklytics.psoxy.impl.gen.GenMetadataPromptCacheSupport;
 import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import co.worklytics.psoxy.impl.gen.LangChain4jGenMetadataBackend;
@@ -84,6 +85,9 @@ public class PsoxyModule {
 
         @Multibinds
         abstract Set<GenMetadataChatModelProvider> chatModelProviders();
+
+        @Multibinds
+        abstract Set<GenMetadataPromptCacheSupport> genMetadataPromptCacheSupports();
 
         @Binds
         abstract GenMetadataBackend genMetadataBackend(LangChain4jGenMetadataBackend impl);

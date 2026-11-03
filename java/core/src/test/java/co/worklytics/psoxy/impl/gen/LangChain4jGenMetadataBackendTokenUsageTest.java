@@ -52,6 +52,7 @@ class LangChain4jGenMetadataBackendTokenUsageTest {
             accumulator,
             new GenMetadataPromptBuilder(om),
             new GenMetadataResponseFormats(),
+            GenMetadataBackendTestSupport.noPromptCacheFactory(),
             Clock.systemUTC());
 
         JsonSchema schema = JsonSchema.builder()

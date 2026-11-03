@@ -26,6 +26,7 @@ import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.impl.gen.BedrockGenMetadataConfig;
 import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
+import co.worklytics.psoxy.impl.gen.GenMetadataPromptCacheSupport;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -305,6 +306,10 @@ public interface AwsModule {
 
         @Binds @IntoSet
         abstract GenMetadataChatModelProvider bedrockChatModelProvider(BedrockChatModelProvider impl);
+
+        @Binds @IntoSet
+        abstract GenMetadataPromptCacheSupport bedrockGenMetadataPromptCacheSupport(
+            BedrockGenMetadataPromptCacheSupport impl);
 
     }
 }

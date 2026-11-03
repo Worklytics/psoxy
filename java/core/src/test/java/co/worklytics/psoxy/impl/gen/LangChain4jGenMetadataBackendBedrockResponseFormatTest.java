@@ -57,6 +57,7 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
             new GenMetadataResponseFormats(),
+            GenMetadataBackendTestSupport.noPromptCacheFactory(),
             Clock.systemUTC());
 
         JsonSchema schema = JsonSchema.builder()
@@ -108,6 +109,7 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om2),
             new GenMetadataResponseFormats(),
+            GenMetadataBackendTestSupport.noPromptCacheFactory(),
             Clock.systemUTC());
         JsonSchema schema = JsonSchema.builder().type("string").build();
 
@@ -151,6 +153,7 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
             new GenMetadataResponseFormats(),
+            GenMetadataBackendTestSupport.noPromptCacheFactory(),
             Clock.systemUTC());
 
         List<String> classes = List.of("Feature", "Uncategorized", "Bug");

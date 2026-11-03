@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
  * Caps the <em>dynamic</em> genMetadata corpus (serialized source match) in estimated tokens.
  *
  * <p>The static prefix — system text, task {@code prompt}, and schema/labels — is not counted.
- * That prefix is stable per augment rule and is the candidate for future provider prompt caching.
+ * That prefix is stable per augment rule and is split for provider prompt caching; identity is
+ * {@link GenMetadataStaticPromptFingerprint}.
  *
  * <p>Estimate is {@value #CHARS_PER_TOKEN_ESTIMATE} chars/token, not a model tokenizer.
  *

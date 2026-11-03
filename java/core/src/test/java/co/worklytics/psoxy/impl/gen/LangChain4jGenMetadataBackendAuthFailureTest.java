@@ -65,6 +65,7 @@ class LangChain4jGenMetadataBackendAuthFailureTest {
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
             new GenMetadataResponseFormats(),
+            GenMetadataBackendTestSupport.noPromptCacheFactory(),
             Clock.systemUTC());
 
         JsonSchema outputSchema = JsonSchema.builder()

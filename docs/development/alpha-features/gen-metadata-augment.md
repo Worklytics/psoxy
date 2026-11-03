@@ -165,6 +165,7 @@ ClassifyProcessor / GenMetadataProcessor
 ```
 
 - Concurrent cloud calls use a semaphore (max 4).
+- **Prompt caching:** static prefix (system text, task `prompt`, schema/labels) is split from per-record input. **Bedrock** uses Converse prompt cache on the split messages (`AFTER_USER_MESSAGE`, 1h TTL); no local cache — Bedrock keys cached blocks by content. **Vertex** uses context cached content with a deterministic display name `psoxy-genmd-{sha256(prefix)}` so multiple function instances reuse the same resource; a process-local Guava cache holds resource names keyed by project, location, model, and prefix fingerprint. Failures fall back to the full prompt.
 - **Token usage:** each cloud call accumulates provider `input` / `output` token counts (when returned). Totals are logged at the end of each bulk file and written on the sanitized object (`psoxy-gen-metadata-input-tokens`, `psoxy-gen-metadata-output-tokens`, `psoxy-gen-metadata-calls`). GCS streams the object then PATCHes metadata; if `storage.objects.update` is missing the PATCH 403s and totals stay in logs only.
 - Structured augment cells in CSV/Parquet are JSON-serialized (not Java `Map#toString()`). Rule-derived augment columns are always present; a record with no match or a failed inference gets an empty placeholder so later rows cannot drop the column.
 
@@ -179,7 +180,6 @@ ClassifyProcessor / GenMetadataProcessor
 
 ## Deferred
 
-- **Prompt caching:** the static prefix (system text + task `prompt` + schema/labels) is stable per augment rule; the dynamic suffix is the serialized match. Provider prompt caching (Bedrock prompt cache / Vertex cached content) should pin that prefix and only pay for the capped dynamic tokens per record.
 - App-layer spend ledger / infra budget alerts
 - Transcript chunking / multi-call map-reduce for long inputs
 - Rule-level model / thinking-level selection

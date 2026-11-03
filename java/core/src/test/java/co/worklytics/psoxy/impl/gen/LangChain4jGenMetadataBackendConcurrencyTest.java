@@ -58,6 +58,7 @@ class LangChain4jGenMetadataBackendConcurrencyTest {
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
             new GenMetadataResponseFormats(),
+            GenMetadataBackendTestSupport.noPromptCacheFactory(),
             Clock.systemUTC());
 
         int threads = 8;
