@@ -15,8 +15,6 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.inject.Inject;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.events.S3Event;
-import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
 import com.newrelic.opentracing.LambdaTracer;
 import io.opentracing.util.GlobalTracer;
 import co.worklytics.psoxy.aws.AwsContainer;
@@ -35,7 +33,7 @@ import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Log
-public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<S3Event, String> {
+public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<Map<String, Object>, String> {
 
     /**
      * Static initialization allows reuse in containers
@@ -114,21 +112,22 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
     @SneakyThrows
     @Override
-    public String handleRequest(S3Event s3Event, Context context) {
+    public String handleRequest(Map<String, Object> input, Context context) {
 
         CachedDependencies deps = cachedDependencies();
 
-        S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
+        S3BulkObjectCreatedEvent objectCreated = S3BulkObjectCreatedEvent.fromLambdaEvent(input);
 
-        String importBucket = record.getS3().getBucket().getName();
-        String sourceKey = record.getS3().getObject().getUrlDecodedKey();
+        String importBucket = objectCreated.getBucketName();
+        String sourceKey = objectCreated.getObjectKey();
+        String objectPath = StorageHandler.formatObjectPath(importBucket, sourceKey);
 
-        log.info(String.format("Received a request for processing %s from bucket %s.", sourceKey, importBucket));
+        log.info("Triggered for object " + objectPath);
 
         List<StorageHandler.ObjectTransform> transforms = deps.storageHandler.buildTransforms();
 
         for (StorageHandler.ObjectTransform transform : transforms) {
-            process(deps, importBucket, sourceKey, transform);
+            process(deps, importBucket, sourceKey, objectPath, transform);
         }
 
         return "Processed!";
@@ -136,9 +135,15 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
     @SneakyThrows
     StorageEventResponse process(CachedDependencies deps, String importBucket, String sourceKey,
-                                 StorageHandler.ObjectTransform transform) {
+                                 String objectPath, StorageHandler.ObjectTransform transform) {
         StorageHandler storageHandler = deps.storageHandler;
         S3Client s3Client = deps.s3Client;
+
+        if (storageHandler.getApplicableRules(transform.getRules(), sourceKey).isEmpty()) {
+            log.info("skipped " + objectPath + " - no applicable rules");
+            return null;
+        }
+
         StorageEventResponse storageEventResponse;
 
         HeadObjectResponse sourceMetadata = s3Client.headObject(HeadObjectRequest.builder()
@@ -177,7 +182,11 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
                     .build());
             }, () -> outputStream);
 
-            log.info(String.format("Successfully pseudonymized %s/%s to buffer", importBucket, sourceKey));
+            if (storageEventResponse == null) {
+                return null;
+            }
+
+            log.info(String.format("Successfully pseudonymized %s to buffer", objectPath));
         }
 
         try (InputStream fileInputStream = new FileInputStream(tmpFile);
