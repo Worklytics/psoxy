@@ -14,6 +14,12 @@ Changes to be including in future/planned release notes will be added here.
 - `textDigest` (transform and augment) `keywords`: keywords made of several words (`pull request`, `code review`) or containing punctuation (`dall-e`, `e-mail`) now match. Previously the proxy compared one word at a time, so these never matched. Matching stays case-insensitive and whole-word. This affects `claude`, `chatgpt-enterprise` and `glean-customer-events-log-bulk`: the `keywords` counts in their sanitized output now include these phrases. Single-word keywords are unchanged, except that letters with accents now count as part of a word (`code` no longer matches `Codeänderung`).
 
 
+## [0.7.3](https://github.com/Worklytics/psoxy/releases/tag/v0.7.3)
+
+- `aws` bulk connectors: optional `file_prefix` / `file_suffix` (native S3 notification filters) or `file_pattern` (EventBridge wildcard rule on object keys) in Terraform (`bulk_connectors`, `custom_bulk_connectors`, and `custom_bulk_connector_arguments`) to limit which input-bucket uploads invoke the bulk Lambda; `file_pattern` is mutually exclusive with prefix/suffix. EventBridge rule names use the same `{env_id}-{connector_id}` prefix as the bulk Lambda. Provisioner policy adds EventBridge rule/target permissions. See [Bulk input triggers (S3)](docs/aws/bulk-s3-triggers.md).
+- Bulk storage handlers (AWS S3 and GCP GCS): clearer logs (`Triggered for object …`, `Processing object …`, `skipped … - no applicable rules`); skip files with no matching path rules without throwing or opening streams; AWS bulk Lambda accepts EventBridge S3 Object Created events in addition to direct S3 notifications.
+
+
 ## [0.7.1](https://github.com/Worklytics/psoxy/releases/tag/v0.7.1)
 - `aws`: VPC example `vpc.tf` improved, public/private segmentation and security groups.
 - `chatgpt-enterprise`: improved documentation re setup instructions.

@@ -17,6 +17,7 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageException;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
+import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.storage.StorageHandler;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
@@ -58,6 +59,14 @@ public class GcsFileEventHandler {
     @SneakyThrows
     private void process(String importBucket, String sourceName, StorageHandler.ObjectTransform transform) {
 
+        String objectPath = StorageHandler.formatObjectPath(importBucket, sourceName);
+        log.info("Triggered for object " + objectPath);
+
+        if (storageHandler.getApplicableRules(transform.getRules(), sourceName).isEmpty()) {
+            log.info("skipped " + objectPath + " - no applicable rules");
+            return;
+        }
+
         Storage storage = storageProvider.get();
         BlobId sourceBlobId = BlobId.of(importBucket, sourceName);
 
@@ -66,49 +75,49 @@ public class GcsFileEventHandler {
         if (storageHandler.hasBeenSanitized(sourceBlobInfo.getMetadata())) {
             //possible if proxy directly (or indirectly via some other pipeline) is writing back
             //to the same bucket it originally read from. to avoid perpetuating the loop, skip
-            log.warning("Skipping " + importBucket + "/" + sourceName + " because it has already been sanitized; does your configuration result in a loop?");
+            log.warning("Skipping " + objectPath + " because it has already been sanitized; does your configuration result in a loop?");
             return;
         }
 
         StorageEventRequest request =
             storageHandler.buildRequest(importBucket, sourceName, transform, sourceBlobInfo.getContentEncoding(), sourceBlobInfo.getContentType());
 
-        if (storageHandler.getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isPresent()) {
+        Supplier<InputStream> inputStreamSupplier = () -> {
+            ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(true));
+            return Channels.newInputStream(readChannel);
+        };
 
-            Supplier<InputStream> inputStreamSupplier = () -> {
-                ReadChannel readChannel = storage.reader(sourceBlobId, Storage.BlobSourceOption.shouldReturnRawInputStream(true));
-                return Channels.newInputStream(readChannel);
-            };
+        // Stream directly to GCS. Do not buffer the sanitized object on /tmp.
+        Supplier<OutputStream> outputStreamSupplier = () -> {
+            BlobInfo.Builder blobInfoBuilder = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
+                .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform));
 
-            // Stream directly to GCS. Do not buffer the sanitized object on /tmp.
-            Supplier<OutputStream> outputStreamSupplier = () -> {
-                BlobInfo.Builder blobInfoBuilder = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
-                    .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform));
+            Optional.ofNullable(request.getContentType())
+                .ifPresent(blobInfoBuilder::setContentType);
 
-                Optional.ofNullable(request.getContentType())
-                    .ifPresent(blobInfoBuilder::setContentType);
+            if (request.getCompressOutput()) {
+                blobInfoBuilder.setContentEncoding(StorageHandler.CONTENT_ENCODING_GZIP);
+            } else {
+                Optional.ofNullable(sourceBlobInfo.getContentEncoding())
+                    .ifPresent(blobInfoBuilder::setContentEncoding);
+            }
+            //NOTE: disableGzipContent() is important to avoid double compression
+            WriteChannel writeChannel = storage.writer(blobInfoBuilder.build(), Storage.BlobWriteOption.disableGzipContent());
+            //NOTE: when close() called on the stream, close is called on channel, so should be OK
+            return Channels.newOutputStream(writeChannel);
+        };
 
-                if (request.getCompressOutput()) {
-                    blobInfoBuilder.setContentEncoding(StorageHandler.CONTENT_ENCODING_GZIP);
-                } else {
-                    Optional.ofNullable(sourceBlobInfo.getContentEncoding())
-                        .ifPresent(blobInfoBuilder::setContentEncoding);
-                }
-                //NOTE: disableGzipContent() is important to avoid double compression
-                WriteChannel writeChannel = storage.writer(blobInfoBuilder.build(), Storage.BlobWriteOption.disableGzipContent());
-                //NOTE: when close() called on the stream, close is called on channel, so should be OK
-                return Channels.newOutputStream(writeChannel);
-            };
-
+        StorageEventResponse response =
             storageHandler.handle(request, transform, inputStreamSupplier, outputStreamSupplier);
 
-            patchDestinationMetadata(
-                storage,
-                BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()),
-                storageHandler.buildObjectMetadata(importBucket, sourceName, transform));
-        } else {
-            log.info("Skipping " + importBucket + "/" + request.getSourceObjectPath() + " because no rules apply");
+        if (response == null) {
+            return;
         }
+
+        patchDestinationMetadata(
+            storage,
+            BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()),
+            storageHandler.buildObjectMetadata(importBucket, sourceName, transform));
     }
 
     /**

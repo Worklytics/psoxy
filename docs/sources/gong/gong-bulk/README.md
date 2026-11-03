@@ -6,8 +6,6 @@
 
 Psoxy can pseudonymize Gong bulk export data for ingestion into Worklytics.
 
-See [https://docs.worklytics.co/psoxy/sources/gong/gong-bulk](https://docs.worklytics.co/psoxy/sources/gong/gong-bulk)
-
 Data is exported from Gong's [Forecast and Gong User Tables](https://help.gong.io/docs/forecast-and-gong-user-tables)
 feature as CSV files that must be uploaded periodically to the proxy input bucket.
 
