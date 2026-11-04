@@ -8,20 +8,17 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 /**
  * Detects required source-auth configuration properties that are absent from both the
  * environment/config service and the secret store.
  */
-@NoArgsConstructor(onConstructor_ = @Inject)
+@AllArgsConstructor(onConstructor_ = @Inject)
 public class MissingConfigChecker {
 
-    @Inject
     ConfigService config;
-    @Inject
     SecretStore secretStore;
-    @Inject
     Lazy<SourceAuthStrategy> sourceAuthStrategy;
 
     /**
