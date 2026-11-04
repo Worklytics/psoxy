@@ -104,21 +104,10 @@ class InboundWebhookHandlerTest {
     }
 
     private InboundWebhookHandler handlerFor(WebhookCollectorModeConfig config) {
-        ConfigService configService = new ConfigService() {
-            @Override
-            public String getConfigPropertyOrError(ConfigService.ConfigProperty property) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public Optional<String> getConfigPropertyAsOptional(ConfigService.ConfigProperty property) {
-                return Optional.empty();
-            }
-        };
         return new InboundWebhookHandler(
             mock(Lazy.class),
             new NoOutput(),
-            configService,
+            mock(ProxyConfig.class),
             config,
             new NetworkSecurityUtils(ApiModeConfig.builder().build(), config),
             Collections.emptySet(),
