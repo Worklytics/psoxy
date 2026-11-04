@@ -103,7 +103,7 @@ test_writes_test_script_files() {
   }
 }
 EOF
-  run_script --yes >/dev/null
+  run_script >/dev/null
   assert_file "${WORK}/test-gcal.sh" $'#!/bin/bash\necho gcal\n'
   assert_file "${WORK}/test-all.sh" $'#!/bin/bash\necho all\n'
   [[ -x "${WORK}/test-gcal.sh" ]] || fail "test-gcal.sh should be executable"
@@ -111,7 +111,7 @@ EOF
   printf 'ok writes test_script_files\n'
 }
 
-test_noninteractive_keeps_existing_unless_yes() {
+test_always_overwrites_existing() {
   reset_work
   setup_fake_terraform
   write_fixture <<'EOF'
@@ -125,10 +125,8 @@ test_noninteractive_keeps_existing_unless_yes() {
 EOF
   printf 'local\n' > "${WORK}/test-gcal.sh"
   run_script >/dev/null
-  assert_file "${WORK}/test-gcal.sh" $'local\n'
-  run_script --yes >/dev/null
   assert_file "${WORK}/test-gcal.sh" $'from output\n'
-  printf 'ok noninteractive overwrite rules\n'
+  printf 'ok always overwrites existing\n'
 }
 
 test_unsafe_path_does_not_escape_workdir() {
@@ -147,7 +145,7 @@ test_unsafe_path_does_not_escape_workdir() {
 }
 EOF
   set +e
-  run_script --yes >/dev/null 2>&1
+  run_script >/dev/null 2>&1
   local rc=$?
   set -e
   [[ "$rc" -eq 1 ]] || fail "unsafe path should exit 1, got ${rc}"
@@ -203,7 +201,7 @@ test_wrappers_match_and_find_implementation() {
 }
 
 test_writes_test_script_files
-test_noninteractive_keeps_existing_unless_yes
+test_always_overwrites_existing
 test_unsafe_path_does_not_escape_workdir
 test_no_test_content_exits_cleanly
 test_refuses_to_run_outside_terraform_root

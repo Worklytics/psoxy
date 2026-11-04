@@ -9,7 +9,7 @@ Full documentation of the test tool is available [here](psoxy-test-tool.md). And
 From the root of an AWS or GCP example, after `terraform init` and `terraform apply`:
 
 ```shell
-./generate-tests.sh --yes
+./generate-tests.sh
 ```
 
 That reads the `test_script_files` Terraform output and writes `test-*.sh` plus `test-all.sh` into the example directory (same content Terraform would write via `todos.tf` when `todos_as_local_files` is true).
