@@ -1,0 +1,103 @@
+{
+  "object": "page",
+  "data": [
+    {
+      "object": "workspace.usage.result",
+      "start_time": 1759276800,
+      "end_time": 1759363200,
+      "user_id": "user-abc123",
+      "actor": {
+        "type": "ACCOUNT_USER",
+        "user_id": "user-abc123",
+        "email": "analyst@example.com"
+      },
+      "totals": {
+        "chats": 4,
+        "messages": 9,
+        "credits": null,
+        "cost_usd": 0.25,
+        "estimated_cost_usd": 0.1,
+        "uncached_text_input_tokens": 110,
+        "cached_text_input_tokens": 220,
+        "text_output_tokens": 55,
+        "text_total_tokens": 385
+      },
+      "clients": [
+        {
+          "client_id": "CHAT_WEB",
+          "chats": 3,
+          "messages": 7,
+          "credits": null,
+          "cost_usd": 0.1,
+          "uncached_text_input_tokens": 100,
+          "cached_text_input_tokens": 200,
+          "text_output_tokens": 50,
+          "text_total_tokens": 350
+        },
+        {
+          "client_id": "CODEX_CLI",
+          "chats": 1,
+          "messages": 2,
+          "credits": null,
+          "cost_usd": 0.15,
+          "uncached_text_input_tokens": 10,
+          "cached_text_input_tokens": 20,
+          "text_output_tokens": 5,
+          "text_total_tokens": 35
+        }
+      ],
+      "models": [
+        {
+          "model": "gpt-5.6",
+          "speed": "standard",
+          "credits": null,
+          "cost_usd": 0.25,
+          "uncached_text_input_tokens": 110,
+          "cached_text_input_tokens": 220,
+          "text_output_tokens": 55,
+          "text_total_tokens": 385
+        }
+      ],
+      "code_attribution": {
+        "lines_of_code": {
+          "added": 123,
+          "removed": 45
+        }
+      }
+    },
+    {
+      "object": "workspace.usage.result",
+      "start_time": 1759276800,
+      "end_time": 1759363200,
+      "user_id": "user-def456",
+      "actor": {
+        "type": "ACCOUNT_USER",
+        "user_id": "user-def456",
+        "email": null
+      },
+      "totals": {
+        "chats": 2,
+        "messages": 5,
+        "credits": 1.2,
+        "cost_usd": null,
+        "estimated_cost_usd": null,
+        "uncached_text_input_tokens": null,
+        "cached_text_input_tokens": null,
+        "text_output_tokens": null,
+        "text_total_tokens": null
+      },
+      "clients": [
+        {
+          "client_id": "CODEX_CLI",
+          "chats": 2,
+          "messages": 5,
+          "credits": 1.2
+        }
+      ],
+      "models": null,
+      "code_attribution": null
+    }
+  ],
+  "has_more": true,
+  "next_page": "cursor_token_abc"
+}

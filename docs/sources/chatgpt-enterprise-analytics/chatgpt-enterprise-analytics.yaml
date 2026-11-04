@@ -1,0 +1,189 @@
+---
+endpoints:
+- pathTemplate: "/v1/analytics/workspaces/{workspaceId}/usage"
+  allowedQueryParams:
+  - "start_time"
+  - "end_time"
+  - "limit"
+  - "page"
+  - "include"
+  transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.data[*].user_id"
+    - "$.data[*].actor['user_id','email']"
+  responseSchema:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/UsageRow"
+      has_more:
+        type: "boolean"
+      next_page:
+        type: "string"
+      object:
+        type: "string"
+definitions:
+  AccountUserActor:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      type:
+        type: "string"
+      user_id:
+        type: "string"
+  ClientUsage:
+    type: "object"
+    properties:
+      cached_text_input_tokens:
+        type: "integer"
+      chats:
+        type: "integer"
+      client_id:
+        type: "string"
+      cost_usd:
+        type: "number"
+      credits:
+        type: "number"
+      messages:
+        type: "integer"
+      text_output_tokens:
+        type: "integer"
+      text_total_tokens:
+        type: "integer"
+      uncached_text_input_tokens:
+        type: "integer"
+  CodeAttributionMetrics:
+    type: "object"
+    properties:
+      lines_of_code:
+        $ref: "#/definitions/LinesOfCodeAttribution"
+  ConnectorUsage:
+    type: "object"
+    properties:
+      connector_id:
+        type: "string"
+      turn_count:
+        type: "integer"
+  LinesOfCodeAttribution:
+    type: "object"
+    properties:
+      added:
+        type: "integer"
+      removed:
+        type: "integer"
+  ModelUsage:
+    type: "object"
+    properties:
+      cached_text_input_tokens:
+        type: "integer"
+      cost_usd:
+        type: "number"
+      credits:
+        type: "number"
+      model:
+        type: "string"
+      speed:
+        type: "string"
+      text_output_tokens:
+        type: "integer"
+      text_total_tokens:
+        type: "integer"
+      uncached_text_input_tokens:
+        type: "integer"
+  PluginUsage:
+    type: "object"
+    properties:
+      connectors_used:
+        type: "array"
+        items:
+          $ref: "#/definitions/ConnectorUsage"
+      plugin_id:
+        type: "string"
+      plugin_name:
+        type: "string"
+      skills_invoked:
+        type: "array"
+        items:
+          $ref: "#/definitions/SkillUsage"
+      turn_count:
+        type: "integer"
+  SkillUsage:
+    type: "object"
+    properties:
+      skill_id:
+        type: "string"
+      skill_name:
+        type: "string"
+      turn_count:
+        type: "integer"
+  ToolUsage:
+    type: "object"
+    properties:
+      tool_id:
+        type: "string"
+      tool_name:
+        type: "string"
+      turn_count:
+        type: "integer"
+  Usage:
+    type: "object"
+    properties:
+      cached_text_input_tokens:
+        type: "integer"
+      chats:
+        type: "integer"
+      cost_usd:
+        type: "number"
+      credits:
+        type: "number"
+      estimated_cost_usd:
+        type: "number"
+      messages:
+        type: "integer"
+      text_output_tokens:
+        type: "integer"
+      text_total_tokens:
+        type: "integer"
+      uncached_text_input_tokens:
+        type: "integer"
+  UsageRow:
+    type: "object"
+    properties:
+      actor:
+        $ref: "#/definitions/AccountUserActor"
+      clients:
+        type: "array"
+        items:
+          $ref: "#/definitions/ClientUsage"
+      code_attribution:
+        $ref: "#/definitions/CodeAttributionMetrics"
+      end_time:
+        type: "integer"
+      models:
+        type: "array"
+        items:
+          $ref: "#/definitions/ModelUsage"
+      object:
+        type: "string"
+      plugins:
+        type: "array"
+        items:
+          $ref: "#/definitions/PluginUsage"
+      skills_invoked:
+        type: "array"
+        items:
+          $ref: "#/definitions/SkillUsage"
+      start_time:
+        type: "integer"
+      tools:
+        type: "array"
+        items:
+          $ref: "#/definitions/ToolUsage"
+      totals:
+        $ref: "#/definitions/Usage"
+      user_id:
+        type: "string"
