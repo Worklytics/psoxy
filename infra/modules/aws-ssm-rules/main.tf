@@ -34,7 +34,7 @@ locals {
 
   store_in_ssm = length(local.param_value) < local.ssm_advanced_size_limit
 
-  remote_object_key = var.remote_resource_instance_path != null ? "${trimsuffix(var.remote_resource_instance_path, "/")}/rules.yaml" : null
+  remote_object_key = var.remote_resource_instance_path != null ? join("/", compact([trimsuffix(replace(var.remote_resource_instance_path, "/^[/]+/", ""), "/"), "rules.yaml"])) : null
 }
 
 resource "aws_ssm_parameter" "rules" {
