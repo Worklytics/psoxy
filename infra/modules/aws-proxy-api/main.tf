@@ -191,12 +191,10 @@ locals {
       local.sqs_iam_statements,
       var.extra_lambda_role_iam_statements,
       ] : [
-      for stmt in statements : {
-        Sid      = stmt.Sid
-        Effect   = stmt.Effect
+      for stmt in statements : merge(stmt, {
         Action   = tolist(stmt.Action)
         Resource = tolist(stmt.Resource)
-      }
+      })
     ]
   ])
 }
