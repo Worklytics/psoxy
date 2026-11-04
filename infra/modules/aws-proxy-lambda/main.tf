@@ -362,12 +362,10 @@ locals {
       flatten(values(module.side_output_iam_statements)[*].iam_statements),
       var.lambda_role_iam_statements,
       ] : [
-      for stmt in statements : {
-        Sid      = stmt.Sid
-        Effect   = stmt.Effect
+      for stmt in statements : merge(stmt, {
         Action   = tolist(stmt.Action)
         Resource = tolist(stmt.Resource)
-      }
+      })
     ]
   ])
 }
