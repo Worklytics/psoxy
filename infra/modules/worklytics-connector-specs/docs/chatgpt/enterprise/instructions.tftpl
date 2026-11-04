@@ -6,7 +6,9 @@ See [Managing Admin keys in Admin Console](https://help.openai.com/en/articles/2
    - **Admin keys** are available on ChatGPT Enterprise, Edu, and Healthcare workspaces. If **Credentials** lists only **Access Tokens**, this workspace does not have Admin keys. An Access Token cannot authorize these compliance calls. Confirm the top-left selector is the ChatGPT workspace, not the organization, and that you are an Owner of that workspace.
    - Choose **Custom** permissions.
    - Set **Conversation messages** to **Read**. This is required. Only an Owner can grant it. Worklytics reads conversation usage from Compliance Logs with event type `CONVERSATION_MESSAGE`.
-   - If this workspace uses Codex, set **Codex logs** to **Read** (`CODEX_LOG`). That box is separate from **Codex analytics API**; leave analytics at None unless you are also connecting Codex Enterprise Analytics.
+   - If this workspace uses Codex, set **Codex logs** to **Read** (`CODEX_LOG`). That box is separate from the analytics permission categories below, which this key does not need:
+     - **Codex analytics API** is for the deprecated `codex-enterprise-analytics` connector - leave at None for new connections.
+     - **Enterprise analytics API** is for `chatgpt-enterprise-analytics` - that connector uses its own, separate Admin key; leave at None here.
    - Leave the other categories at None.
    - The secret can only be viewed once. An Admin can grant categories such as audit, authentication, or app logs, and a key limited to those will not return conversation usage.
    - This is a workspace Admin key. A [Platform API key](https://platform.openai.com/api-keys) and an API Platform organization Admin key (those call `/v1/organization/…`) are different credentials.

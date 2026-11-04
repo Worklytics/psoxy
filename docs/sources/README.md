@@ -13,10 +13,11 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `azure-ad`                 | [Azure Active Directory](microsoft-365/entra-id/README.md)                  | API  | DEPRECATED   |
 | `badge`                    | [Badge](badge/README.md)                                                    | Bulk | GA           |
 | `chatgpt-enterprise`       | [ChatGPT Enterprise](chatgpt-enterprise/README.md)                          | API  | BETA         |
+| `chatgpt-enterprise-analytics` | [ChatGPT Enterprise Analytics](chatgpt-enterprise-analytics/README.md)   | API  | BETA         |
 | `claude`                   | [Claude](anthropic/claude/README.md)                                        | API  | BETA         |
 | `claude-enterprise-analytics` | [Claude Enterprise Analytics](anthropic/claude-enterprise-analytics/README.md) | API  | BETA         |
 | `claude-code`              | [Claude Code](anthropic/claude-code/README.md)                              | API  | BETA         |
-| `codex-enterprise-analytics` | [Codex Enterprise Analytics](codex-enterprise-analytics/README.md)        | API  | BETA         |
+| `codex-enterprise-analytics` | [Codex Enterprise Analytics](codex-enterprise-analytics/README.md)        | API  | DEPRECATED   |
 | `confluence-cloud`         | [Confluence Cloud (deprecated)](atlassian/confluence/README.md#deprecated-confluence-cloud-3lo) | API  | DEPRECATED   |
 | `confluence-cloud-service-account` | [Confluence Cloud](atlassian/confluence/README.md) | API  | BETA         |
 | `cursor`                   | [Cursor](cursor/README.md)                                                  | API  | BETA         |
