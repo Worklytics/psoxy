@@ -257,8 +257,9 @@ module "api_connector" {
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
       EMAIL_CANONICALIZATION = var.email_canonicalization
-      CUSTOM_RULES_SHA = try(local.api_connector_rules_file_paths[each.key], null) != null ? filesha1(local.api_connector_rules_file_paths[each.key]) : (
-        try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
+      CUSTOM_RULES_SHA = try(
+        module.custom_api_connector_rules[each.key].rules_hash,
+        try(module.api_connector_rules_raw[each.key].rules_hash, null)
       )
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     },

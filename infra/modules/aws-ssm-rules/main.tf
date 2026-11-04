@@ -76,7 +76,8 @@ resource "aws_s3_object" "rules" {
 }
 
 output "rules_hash" {
-  value = sha1(local.rules_plain)
+  # Include SSM version or S3 etag so dependents (Lambda env) update only after rules reach remote storage.
+  value = local.store_in_ssm ? sha1("${aws_ssm_parameter.rules[0].version}:${local.rules_plain}") : sha1("${aws_s3_object.rules[0].etag}:${local.rules_plain}")
 }
 
 output "stored_in_remote_bucket" {
