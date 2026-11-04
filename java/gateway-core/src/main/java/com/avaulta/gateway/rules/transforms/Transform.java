@@ -250,6 +250,9 @@ public abstract class Transform {
 
         Boolean getIncludeOriginal();
 
+        String INCLUDE_REVERSIBLE_DEPRECATED_DESCRIPTION =
+            "Deprecated. Use includeEncrypted. Existing rules should migrate to includeEncrypted by psoxy v0.8; this property remains accepted.";
+
         /**
          * @deprecated use {@link #getIncludeEncrypted()}. Still accepted so existing rules keep the same behavior.
          */
@@ -266,18 +269,27 @@ public abstract class Transform {
         }
 
         /**
-         * True when {@code includeEncrypted} is explicitly set (including {@code false}), or, if that
-         * flag is omitted, when the deprecated {@code includeReversible} flag is true.
-         * An explicit {@code includeReversible: false} with {@code includeEncrypted} omitted does not
-         * include the encrypted form.
+         * When both {@code includeEncrypted} and {@code includeReversible} are set, {@code includeEncrypted} wins.
+         * Otherwise uses reversible {@code p~} output when either flag is {@code true}; {@code false} when neither is
+         * set or when the only explicit value is {@code false}.
          */
         @SuppressWarnings("deprecation")
         default boolean includesEncrypted() {
             Boolean encrypted = getIncludeEncrypted();
+            Boolean reversible = getIncludeReversible();
+            if (encrypted != null && reversible != null) {
+                return encrypted;
+            }
+            if (Boolean.TRUE.equals(encrypted) || Boolean.TRUE.equals(reversible)) {
+                return true;
+            }
             if (encrypted != null) {
                 return encrypted;
             }
-            return Boolean.TRUE.equals(getIncludeReversible());
+            if (reversible != null) {
+                return reversible;
+            }
+            return false;
         }
 
         /**
@@ -321,7 +333,7 @@ public abstract class Transform {
          * @deprecated use {@code includeEncrypted}. Still accepted so existing rules keep the same behavior.
          */
         @Deprecated
-        @JsonPropertyDescription("Deprecated. Use includeEncrypted. If true, an encrypted form of the pseudonym is included in the output.")
+        @JsonPropertyDescription(PseudonymizationTransform.INCLUDE_REVERSIBLE_DEPRECATED_DESCRIPTION)
         @JsonInclude(JsonInclude.Include.NON_NULL)
         Boolean includeReversible;
 
@@ -341,6 +353,7 @@ public abstract class Transform {
          */
         @JsonPropertyDescription(PseudonymizationTransform.INCLUDE_ENCRYPTED_DESCRIPTION)
         @JsonInclude(JsonInclude.Include.NON_NULL)
+        @Getter(onMethod_ = {@Override})
         Boolean includeEncrypted;
 
         /**
@@ -395,7 +408,7 @@ public abstract class Transform {
          * @deprecated use {@code includeEncrypted}. Still accepted so existing rules keep the same behavior.
          */
         @Deprecated
-        @JsonPropertyDescription("Deprecated. Use includeEncrypted. If true, an encrypted form of the pseudonym is included in the output.")
+        @JsonPropertyDescription(PseudonymizationTransform.INCLUDE_REVERSIBLE_DEPRECATED_DESCRIPTION)
         @JsonInclude(JsonInclude.Include.NON_NULL)
         Boolean includeReversible;
 
@@ -415,6 +428,7 @@ public abstract class Transform {
          */
         @JsonPropertyDescription(PseudonymizationTransform.INCLUDE_ENCRYPTED_DESCRIPTION)
         @JsonInclude(JsonInclude.Include.NON_NULL)
+        @Getter(onMethod_ = {@Override})
         Boolean includeEncrypted;
 
         /**
@@ -456,7 +470,10 @@ public abstract class Transform {
     @AllArgsConstructor //for builder
     @NoArgsConstructor //for Jackson
     @Getter
-    public static class Tokenize extends Transform {
+    public static class Tokenize extends Transform implements PseudonymizationTransform {
+
+        static final String INCLUDE_ENCRYPTED_DESCRIPTION =
+            "If true, values are replaced with reversible `p~` tokens that the proxy can decode for subsequent requests using ENCRYPTION_KEY. If false or omitted, values are replaced with hash-only `t~` tokens. The deprecated includeReversible flag is treated the same way (either flag true produces `p~` tokens).";
 
         /**
          * if provided, only group within matched by this regex will be tokenized
@@ -470,6 +487,45 @@ public abstract class Transform {
          */
         @JsonInclude(JsonInclude.Include.NON_NULL)
         String regex;
+
+        @JsonPropertyDescription(INCLUDE_ENCRYPTED_DESCRIPTION)
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @Getter(AccessLevel.NONE)
+        Boolean includeEncrypted;
+
+        /**
+         * @deprecated use {@code includeEncrypted}. Still accepted so existing rules keep the same behavior.
+         */
+        @Deprecated
+        @JsonPropertyDescription(PseudonymizationTransform.INCLUDE_REVERSIBLE_DEPRECATED_DESCRIPTION)
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        Boolean includeReversible;
+
+        /**
+         * @deprecated use {@link #getIncludeEncrypted()}
+         */
+        @Deprecated
+        @Override
+        public Boolean getIncludeReversible() {
+            return includeReversible;
+        }
+
+        @Override
+        public Boolean getIncludeEncrypted() {
+            return includeEncrypted;
+        }
+
+        @JsonIgnore
+        @Override
+        public Boolean getIncludeOriginal() {
+            return false;
+        }
+
+        @Override
+        @SuppressWarnings("deprecation")
+        public boolean includesEncrypted() {
+            return PseudonymizationTransform.super.includesEncrypted();
+        }
 
         //NOTE: always format to URL-safe
         public Tokenize clone() {

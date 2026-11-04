@@ -302,6 +302,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         } else if (transform instanceof RecordTransform.Tokenize) {
             return sanitizerUtils.getTransformImpl(pseudonymizer, Transform.Tokenize.builder()
                 .jsonPaths(transform.getPaths())
+                .includeEncrypted(true)
                 .build());
         } else if (transform instanceof RecordTransform.TextDigest) {
             return sanitizerUtils.getTransformImpl(pseudonymizer, Transform.TextDigest.builder()

@@ -50,7 +50,7 @@ endpoints:
         jsonPaths:
           - "$.teamMembers[*].email"
           - "$.teamMembers[*].id"
-        includeReversible: true
+        includeEncrypted: true
     responseSchema:
       type: "object"
       properties:

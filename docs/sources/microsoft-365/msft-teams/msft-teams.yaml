@@ -192,6 +192,7 @@ endpoints:
           - "$..emailAddress"
         encoding: "URL_SAFE_TOKEN"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$..callId"
       - !<redact>
