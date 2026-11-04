@@ -40,7 +40,7 @@ module "msft-connection-auth-federation" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=rc-v0.7.3"
 
   application_id = each.value.connector.id
-  display_name   = "GcpFederation-${each.key}"
+  display_name   = "${local.env_qualifier}-${each.key}-GcpFederation"
   description    = "Federation to be used for psoxy Connector - ${each.value.display_name}${local.env_qualifier}"
   issuer         = "https://accounts.google.com"
   subject        = module.psoxy.api_connector_gcp_execution_service_accounts[each.key].unique_id
