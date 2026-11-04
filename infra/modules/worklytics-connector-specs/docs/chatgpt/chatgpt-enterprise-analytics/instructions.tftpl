@@ -1,0 +1,18 @@
+See OpenAI's [Daily Usage Analytics API migration guide](https://learn.chatgpt.com/docs/enterprise/analytics-api-migration)
+for the latest, but as of 2026 you need a workspace-scoped Admin key (not a Platform API key) with
+the `enterprise.analytics.usage.read` permission (Enterprise analytics API: Read).
+
+1 - Open the [OpenAI Admin Console](https://admin.openai.com/credentials?tab=admin-keys) under
+  **Credentials → Admin keys → Create new admin key**.
+  - Choose this workspace, then select **Custom** permissions and set **Enterprise analytics API**
+    to **Read**.
+  - Reminder: this key can only be viewed/copied once.
+2 - Copy the key immediately - you won't see it again; then paste it as the
+  `${path_to_instance_parameters}ACCESS_TOKEN` parameter value in the proxy's Secret Manager.
+
+3. After your administrator deploys the Psoxy instance (`terraform apply`), follow the
+   `TODO 3 - connect chatgpt-enterprise-analytics in Worklytics.md` file generated in your Terraform
+   working directory. That file provides the **Psoxy Base URL** (your proxy/function endpoint),
+   which you must enter in the Worklytics connector settings, along with your ChatGPT **Workspace
+   Id** (example: `${workspace_id}`), found in the ChatGPT Admin console
+   (https://chatgpt.com/admin) on the workspace settings page.

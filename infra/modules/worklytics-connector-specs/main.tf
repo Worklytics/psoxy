@@ -238,7 +238,7 @@ EOT
       source_auth_strategy : "oauth2_access_token"
       secured_variables : [
         {
-          name : "ACCESS_TOKEN" # OpenAI calls this a 'Platform API key', but it's actually an access token
+          name : "ACCESS_TOKEN" # ChatGPT Admin Console "Admin key" (Bearer). A Platform API key is a different credential; see instructions.tftpl.
           writable : false
           sensitive : true
           value_managed_by_tf : false
