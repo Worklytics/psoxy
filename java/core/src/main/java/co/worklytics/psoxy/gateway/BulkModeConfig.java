@@ -47,8 +47,19 @@ public class BulkModeConfig {
         configService.getConfigPropertyAsOptional(BulkModeConfigProperty.ADDITIONAL_TRANSFORMS)
             .ifPresent(yaml -> builder.additionalTransforms(parseAdditionalTransforms(yaml, yamlMapper)));
 
+        configService.getConfigPropertyAsOptional(BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING)
+            .map(Boolean::parseBoolean)
+            .ifPresent(builder::parallelRecordProcessing);
+        configService.getConfigPropertyAsOptional(BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING_THREADS)
+            .map(value -> ConfigService.parseIntValue(
+                BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING_THREADS, value))
+            .ifPresent(builder::parallelRecordProcessingThreads);
+
         return builder.build();
     }
+
+    /** Default worker count when {@link #parallelRecordProcessing} is enabled without an explicit thread count. */
+    public static final int DEFAULT_PARALLEL_RECORD_PROCESSING_THREADS = 4;
 
     private static List<StorageHandler.ObjectTransform> parseAdditionalTransforms(String yaml,
                                                                                     ObjectMapper yamlMapper) {
@@ -74,6 +85,17 @@ public class BulkModeConfig {
     Boolean compressOutputAlways;
     @Builder.Default
     List<StorageHandler.ObjectTransform> additionalTransforms = Collections.emptyList();
+
+    /**
+     * When true, record-oriented bulk sanitization processes records concurrently but still writes
+     * output in input order within a single file-handling request.
+     */
+    Boolean parallelRecordProcessing;
+
+    /**
+     * Size of the fixed thread pool used when {@link #parallelRecordProcessing} is enabled.
+     */
+    Integer parallelRecordProcessingThreads;
 
     public Optional<RecordRules.Format> getOutputFormat() {
         return Optional.ofNullable(outputFormat);
@@ -106,6 +128,20 @@ public class BulkModeConfig {
         return additionalTransforms;
     }
 
+    public boolean isParallelRecordProcessingEnabled() {
+        return Boolean.TRUE.equals(parallelRecordProcessing);
+    }
+
+    public Optional<Integer> getParallelRecordProcessingThreads() {
+        return Optional.ofNullable(parallelRecordProcessingThreads);
+    }
+
+    public int getParallelRecordProcessingThreadsOrDefault() {
+        return getParallelRecordProcessingThreads()
+            .filter(threads -> threads > 0)
+            .orElse(DEFAULT_PARALLEL_RECORD_PROCESSING_THREADS);
+    }
+
     @NoArgsConstructor
     @AllArgsConstructor
     public enum BulkModeConfigProperty implements ConfigService.ConfigProperty {
@@ -130,7 +166,19 @@ public class BulkModeConfig {
          * Output format to use when writing sanitized data.
          * Values: NDJSON, CSV, PARQUET, JSON_ARRAY
          */
-        BULK_OUTPUT_FORMAT;
+        BULK_OUTPUT_FORMAT,
+
+        /**
+         * When {@code true}, record-oriented bulk files sanitize records in parallel within a
+         * single invocation, preserving output record order.
+         */
+        PARALLEL_RECORD_PROCESSING,
+
+        /**
+         * Thread pool size for {@link #PARALLEL_RECORD_PROCESSING}. Defaults to
+         * {@link BulkModeConfig#DEFAULT_PARALLEL_RECORD_PROCESSING_THREADS} when unset.
+         */
+        PARALLEL_RECORD_PROCESSING_THREADS;
 
         @Getter(onMethod_ = @Override)
         private SupportedSource supportedSource = SupportedSource.ENV_VAR;
