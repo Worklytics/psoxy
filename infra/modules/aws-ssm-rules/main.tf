@@ -34,7 +34,11 @@ locals {
 
   store_in_ssm = length(local.param_value) < local.ssm_advanced_size_limit
 
-  remote_object_key = var.remote_resource_instance_path != null ? join("/", compact([trimsuffix(replace(var.remote_resource_instance_path, "/^[/]+/", ""), "/"), "rules.yaml"])) : null
+  # Match S3ResourceService.resolveKey(): prefix normalized without leading slashes; bucket root → rules.yaml
+  remote_instance_path_normalized = var.remote_resource_instance_path != null ? trim(trimspace(var.remote_resource_instance_path), "/") : null
+  remote_object_key = local.remote_instance_path_normalized != null ? (
+    local.remote_instance_path_normalized == "" ? "rules.yaml" : "${local.remote_instance_path_normalized}/rules.yaml"
+  ) : null
 }
 
 resource "aws_ssm_parameter" "rules" {

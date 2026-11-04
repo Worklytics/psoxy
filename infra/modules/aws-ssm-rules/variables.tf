@@ -14,8 +14,10 @@ variable "file_path" {
   }
 
   validation {
-    condition     = var.file_path == null || try(endswith(var.file_path, ".yaml"), false)
-    error_message = "Rules should be plain .yaml file."
+    condition = var.file_path == null || (
+      try(endswith(var.file_path, ".yaml"), false) || try(endswith(var.file_path, ".yml"), false)
+    )
+    error_message = "Rules should be a plain .yaml or .yml file."
   }
 }
 

@@ -67,3 +67,41 @@ run "remote_bucket_when_rules_exceed_ssm_limit" {
     error_message = "Oversized rules should be uploaded to the instance resource path as rules.yaml"
   }
 }
+
+run "accept_yml_rules_file" {
+  command = plan
+
+  module {
+    source = "./"
+  }
+
+  variables {
+    prefix    = "TEST_"
+    file_path = "tests/rules-small.yml"
+  }
+
+  assert {
+    condition     = length(aws_ssm_parameter.rules) == 1
+    error_message = "Rules from a .yml file should be stored in SSM"
+  }
+}
+
+run "remote_bucket_key_at_bucket_root" {
+  command = plan
+
+  module {
+    source = "./"
+  }
+
+  variables {
+    prefix                        = "TEST_"
+    file_path                     = "tests/rules-over-ssm-limit.yaml"
+    remote_resource_bucket        = "my-artifacts"
+    remote_resource_instance_path = "/"
+  }
+
+  assert {
+    condition     = length(aws_s3_object.rules) == 1 && aws_s3_object.rules[0].key == "rules.yaml"
+    error_message = "Bucket-root instance path should upload rules.yaml without a leading slash"
+  }
+}
