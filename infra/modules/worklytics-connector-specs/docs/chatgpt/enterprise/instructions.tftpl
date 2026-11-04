@@ -6,16 +6,38 @@ See [Managing Admin keys in Admin Console](https://help.openai.com/en/articles/2
    - **Admin keys** are available on ChatGPT Enterprise, Edu, and Healthcare workspaces. If **Credentials** lists only **Access Tokens**, this workspace does not have Admin keys. An Access Token cannot authorize these compliance calls. Confirm the top-left selector is the ChatGPT workspace, not the organization, and that you are an Owner of that workspace.
    - Choose **Custom** permissions.
    - Set **Conversation messages** to **Read**. This is required. Only an Owner can grant it. Worklytics reads conversation usage from Compliance Logs with event type `CONVERSATION_MESSAGE`.
-   - If this workspace uses Codex, set **Codex logs** to **Read** (`CODEX_LOG`). That box is separate from the analytics permission categories below, which this key does not need:
-     - **Codex analytics API** is for the deprecated `codex-enterprise-analytics` connector - leave at None for new connections.
-     - **Enterprise analytics API** is for `chatgpt-enterprise-analytics` - that connector uses its own, separate Admin key; leave at None here.
-   - Leave the other categories at None.
+   - If this workspace uses Codex, set **Codex logs** to **Read** (`CODEX_LOG`). That box is separate from **Codex analytics API**; leave analytics at None unless you are also connecting Codex Enterprise Analytics.
+   - Leave the other categories at None, unless you also want Worklytics to collect `APP_LOG`, the plugin event types, or `CUSTOM_AGENTS_LOG` (all optional) — see [Required scopes](#required-scopes) below for the full list of fine-grained scopes, or grant the broad **Compliance logging platform → Read** scope to cover every category at once.
    - The secret can only be viewed once. An Admin can grant categories such as audit, authentication, or app logs, and a key limited to those will not return conversation usage.
    - This is a workspace Admin key. A [Platform API key](https://platform.openai.com/api-keys) and an API Platform organization Admin key (those call `/v1/organization/…`) are different credentials.
 2. Copy the key immediately, then paste it as the `${path_to_instance_parameters}ACCESS_TOKEN` parameter value in the proxy's Secret Manager.
 3. After your administrator deploys the Psoxy instance (`terraform apply`), follow the `TODO 3 - connect chatgpt-enterprise in Worklytics.md` file generated in your Terraform working directory. That file provides the **Psoxy Base URL** (your proxy/function endpoint) and **Bucket Name** (the async output bucket where sanitized API responses are stored), which you must enter in the Worklytics connector settings, along with your ChatGPT Enterprise **Workspace Id** (ChatGPT Admin console, https://chatgpt.com/admin, on the workspace settings page).
 4. On that Worklytics connection, set the fetch option `fetchProjects` to `false`.
-5. (Optional, for cost/usage data) Fill **Organization Id** with the id from the ChatGPT Admin console (https://chatgpt.com/admin) — distinct from the Workspace Id above. This lets Worklytics collect hourly cost/usage (COSTS) data from `GET /v1/compliance/organizations/{organizationId}/logs`, the one **organization**-scoped Compliance Logs route (every other route here is workspace-scoped). The same Admin key and `compliance_logs_platform.read` scope granted in step 1 already covers COSTS; no separate grant is needed. Leave **Organization Id** blank to skip cost/usage collection entirely.
+5. (Optional, for cost/usage data) Fill **Organization Id** with the id from the ChatGPT Admin console (https://chatgpt.com/admin) — distinct from the Workspace Id above. This lets Worklytics collect hourly cost/usage (COSTS) data from `GET /v1/compliance/organizations/{organizationId}/logs`, the one **organization**-scoped Compliance Logs route (every other route here is workspace-scoped). This needs its own `compliance_logs_platform.costs.read` grant (or the broad `.read` scope) — the `CONVERSATION_MESSAGE`/`CODEX_LOG` grants from step 1 do not cover it. Leave **Organization Id** blank to skip cost/usage collection entirely.
+
+### Required scopes
+
+Admin keys are authorized per `event_type` requested from `/logs`. Each log category has its own fine-grained scope (prefixed `chatgpt.enterprise.compliance_logs_platform.`):
+
+| Event type | Scope suffix | Worklytics fetches it today |
+|---|---|---|
+| `CONVERSATION_MESSAGE` | `conversation_message.read` | yes (required) |
+| `CODEX_LOG` | `codex_log.read` | yes, if the workspace uses Codex |
+| `APP_LOG` | `app_log.read` | yes, if enabled |
+| `CHATGPT_PLUGIN_SPREADSHEET` | `chatgpt_plugin_spreadsheet.read` | yes, if enabled |
+| `CHATGPT_PLUGIN_PRESENTATION` | `chatgpt_plugin_presentation.read` | yes, if enabled |
+| `CHATGPT_PLUGIN_DOCUMENT` | `chatgpt_plugin_document.read` | yes, if enabled |
+| `CUSTOM_AGENTS_LOG` | `custom_agents_log.read` | yes, if enabled |
+| `COSTS` | `costs.read` | yes, if Organization Id is set |
+| `APP_AUTH_LOG` | `app_auth_log.read` | not yet |
+| `AUDIT_LOG` | `audit_log.read` | not yet |
+| `AUTH_LOG` | `auth_log.read` | not yet |
+| `CODEX_SECURITY_LOG` | `codex_security_log.read` | not yet |
+| `AGENT_TRACES` | `agent_traces.read` | not yet |
+
+To grant every log type at once instead of one by one, use the broad `chatgpt.enterprise.compliance_logs_platform.read` scope — shown in the Admin portal's **Create Admin API key** modal as **Compliance logging platform → Read**. The legacy `chatgpt.enterprise.compliance_export.read` scope is also still accepted as an alias for that broad scope.
+
+That broad/legacy pair only covers Compliance Logs. It's a different scope family from the one gating the stateful `/projects` route below — granting one does not grant the other, despite the similar `compliance_export` name.
 
 `/projects` is project-creation metadata. Conversation and Codex usage come from `/logs` and `/logs/{id}`. Worklytics still requests `GET /v1/compliance/workspaces/{workspaceId}/projects` before `/logs` when `fetchProjects` is left on. An Admin key granted only log categories often cannot read that stateful endpoint. With `fetchProjects` set to `false`, Worklytics skips `/projects` and still requests the logs.
 
