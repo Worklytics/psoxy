@@ -5,8 +5,9 @@ in each release's notes.
 
 Changes to be including in future/planned release notes will be added here.
 
-
 ## [0.7.3](https://github.com/Worklytics/psoxy/releases/tag/v0.7.3)
+- `chatgpt-enterprise-analytics` new connector in **beta**; imports per-user daily ChatGPT and Codex usage (chats, messages, credits/cost, token counts, per-client/per-model breakdowns, Codex code attribution) from OpenAI's ChatGPT Enterprise Analytics API; see [docs/sources/chatgpt-enterprise-analytics/README.md](docs/sources/chatgpt-enterprise-analytics/README.md)
+- `codex-enterprise-analytics` marked **deprecated**: OpenAI is deprecating the Codex-only endpoint this connector uses, in favor of the combined endpoint above. Existing connections are unaffected; new connections should use `chatgpt-enterprise-analytics` instead.
 - `aws` bulk connectors: optional `file_prefix` / `file_suffix` (native S3 notification filters) or `file_pattern` (EventBridge wildcard rule on object keys) in Terraform (`bulk_connectors`, `custom_bulk_connectors`, and `custom_bulk_connector_arguments`) to limit which input-bucket uploads invoke the bulk Lambda; `file_pattern` is mutually exclusive with prefix/suffix. EventBridge rule names use the same `{env_id}-{connector_id}` prefix as the bulk Lambda. Provisioner policy adds EventBridge rule/target permissions. See [Bulk input triggers (S3)](docs/aws/bulk-s3-triggers.md).
 - Bulk storage handlers (AWS S3 and GCP GCS): clearer logs (`Triggered for object …`, `Processing object …`, `skipped … - no applicable rules`); skip files with no matching path rules without throwing or opening streams; AWS bulk Lambda accepts EventBridge S3 Object Created events in addition to direct S3 notifications.
 - **Breaking (`aws` webhook collectors):** `collection_enabled` defaults to `false`. The first apply deploys the collector and `/.well-known/*` without a JWT authorizer, and the Lambda refuses to store webhook payloads. Set `collection_enabled = true` and apply again to create the authorizer and accept `POST /collect`. Existing AWS webhook collectors stop collecting until that second apply. GCP collectors are unchanged (`COLLECTION_ENABLED=true`).

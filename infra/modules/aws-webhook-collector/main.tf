@@ -61,6 +61,9 @@ module "rules_parameter" {
   source    = "../aws-ssm-rules"
   file_path = var.rules_file
   prefix    = var.path_to_instance_ssm_parameters
+
+  remote_resource_bucket        = var.remote_resource_bucket
+  remote_resource_instance_path = var.remote_resource_instance_path
 }
 
 # q: better name for this module invocation ?
