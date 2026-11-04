@@ -490,7 +490,7 @@ public abstract class Transform {
 
         @JsonPropertyDescription(INCLUDE_ENCRYPTED_DESCRIPTION)
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        @Getter(onMethod_ = {@Override})
+        @Getter(AccessLevel.NONE)
         Boolean includeEncrypted;
 
         /**
@@ -508,6 +508,11 @@ public abstract class Transform {
         @Override
         public Boolean getIncludeReversible() {
             return includeReversible;
+        }
+
+        @Override
+        public Boolean getIncludeEncrypted() {
+            return includeEncrypted;
         }
 
         @JsonIgnore
