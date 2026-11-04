@@ -225,9 +225,13 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                 //lock held by another processed
                 return false;
             }
+        } catch (PermissionDeniedException e) {
+            throw new RuntimeException(
+                    String.format("Permission denied accessing lock secret for %s", lockId), e);
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Could not create secret " + lockId, e);
-            return false;
+            throw new RuntimeException(String.format("Could not acquire lock %s", lockId), e);
         }
     }
 

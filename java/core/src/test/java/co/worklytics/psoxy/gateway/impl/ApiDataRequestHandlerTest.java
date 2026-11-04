@@ -1053,6 +1053,39 @@ class ApiDataRequestHandlerTest {
 
     @Test
     @SneakyThrows
+    void handle_missingRequiredConfig_returnsPreconditionFailedWithoutSourceCall() {
+        setup("zoom", "api.zoom.us");
+        ApiDataRequestHandler spy = spy(handler);
+
+        when(handler.sourceAuthStrategy.getRequiredConfigProperties()).thenReturn(
+            Set.of(co.worklytics.psoxy.gateway.impl.oauth.AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID,
+                co.worklytics.psoxy.gateway.impl.oauth.AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET));
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/v2/users");
+        when(request.getQuery()).thenReturn(Optional.empty());
+        when(request.getHeader(any())).thenReturn(Optional.empty());
+        when(request.getClientIp()).thenReturn(Optional.empty());
+        when(request.isHttps()).thenReturn(Optional.of(true));
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        spy.sanitizer = sanitizer;
+
+        HttpEventResponse response = spy.handle(request,
+            ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
+
+        verify(spy, never()).getRequestFactory(any());
+        assertEquals(HttpStatus.SC_PRECONDITION_FAILED, response.getStatusCode());
+        assertEquals(ErrorCauses.CONNECTION_SETUP.name(),
+            response.getHeaders().get(ProcessedDataMetadataFields.ERROR.getHttpHeader()));
+        assertTrue(response.getBody().contains("CLIENT_ID"));
+        assertTrue(response.getBody().contains("CLIENT_SECRET"));
+    }
+
+    @Test
+    @SneakyThrows
     void handle_sourceAuthTokenFailure_isUnauthorizedNotInternalParseError() {
         setup("gmail", "www.googleapis.com");
         ApiDataRequestHandler spy = spy(handler);
