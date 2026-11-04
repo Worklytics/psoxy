@@ -41,7 +41,7 @@
       "content":{
         "object":"compliance.workspace.conversation.message.content",
         "type":"text",
-        "value":"{\"length\":26,\"word_count\":5}"
+        "value":"{\"keywords\":{\"what is\":1},\"length\":26,\"word_count\":5}"
       },
       "files":[ ]
     }

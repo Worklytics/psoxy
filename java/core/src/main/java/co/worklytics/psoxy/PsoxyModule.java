@@ -34,7 +34,15 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.BulkModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.impl.AwsWifGoogleCloudProcessIdentityConfig;
+import co.worklytics.psoxy.gateway.impl.GcpIamSignJwtAuthConfig;
+import co.worklytics.psoxy.gateway.impl.GoogleCloudPlatformServiceAccountKeyAuthConfig;
+import co.worklytics.psoxy.gateway.impl.oauth.AccountCredentialsGrantConfig;
+import co.worklytics.psoxy.gateway.impl.oauth.ClientCredentialsGrantConfig;
+import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthConfig;
+import co.worklytics.psoxy.gateway.impl.oauth.WorkloadIdentityFederationGrantConfig;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
@@ -156,13 +164,12 @@ public class PsoxyModule {
 
     @Provides
     static OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder tokenRequestPayloadBuilder(
-            ConfigService configService,
+            OAuthRefreshTokenSourceAuthConfig oauthConfig,
             Set<OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder> payloadBuilders) {
         // Final instantiation of configs are per-function. Grant type is dependent of type of auth
         // strategy so might not exist for certain functions.
         // If it is mis-configured will throw NPE at some point
-        Optional<String> grantTypeOptional = configService.getConfigPropertyAsOptional(
-                OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE);
+        Optional<String> grantTypeOptional = oauthConfig.getGrantType();
         return grantTypeOptional.map(grantType -> payloadBuilders
                 .stream()
                 .filter(impl -> Objects.equals(grantType, impl.getGrantType()))
@@ -187,15 +194,14 @@ public class PsoxyModule {
 
     @Provides
     static OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser tokenResponseParser(
-            ConfigService configService,
+            OAuthRefreshTokenSourceAuthConfig oauthConfig,
             Set<OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser> tokenParser,
             OAuthRefreshTokenSourceAuthStrategy.TokenResponseParserImpl defaultParser) {
         // Final instantiation of configs are per-function. TOKEN_RESPONSE_TYPE is dependent of type
         // of auth
         // strategy so might not exist for certain functions.
         // If it is mis-configured will throw NPE at some point
-        Optional<String> parserNameOptional = configService.getConfigPropertyAsOptional(
-                OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.TOKEN_RESPONSE_TYPE);
+        Optional<String> parserNameOptional = oauthConfig.getTokenResponseType();
         return parserNameOptional.map(parseName -> tokenParser
                 .stream()
                 .filter(impl -> Objects.equals(parseName, impl.getName()))
@@ -216,8 +222,60 @@ public class PsoxyModule {
 
     @Provides
     @Singleton
-    static BulkModeConfig bulkModeConfig(ConfigService configService) {
-        return BulkModeConfig.fromConfigService(configService);
+    static ProxyConfig proxyConfig(ConfigService configService) {
+        return ProxyConfig.fromConfigService(configService);
+    }
+
+    @Provides
+    @Singleton
+    static OAuthRefreshTokenSourceAuthConfig oauthRefreshTokenSourceAuthConfig(ConfigService configService) {
+        return OAuthRefreshTokenSourceAuthConfig.fromConfigService(configService);
+    }
+
+    @Provides
+    @Singleton
+    static ClientCredentialsGrantConfig clientCredentialsGrantConfig(ConfigService configService) {
+        return ClientCredentialsGrantConfig.fromConfigService(configService);
+    }
+
+    @Provides
+    @Singleton
+    static AccountCredentialsGrantConfig accountCredentialsGrantConfig(ConfigService configService) {
+        return AccountCredentialsGrantConfig.fromConfigService(configService);
+    }
+
+    @Provides
+    @Singleton
+    static WorkloadIdentityFederationGrantConfig workloadIdentityFederationGrantConfig(
+            ConfigService configService) {
+        return WorkloadIdentityFederationGrantConfig.fromConfigService(configService);
+    }
+
+    @Provides
+    @Singleton
+    static GcpIamSignJwtAuthConfig gcpIamSignJwtAuthConfig(ConfigService configService) {
+        return GcpIamSignJwtAuthConfig.fromConfigService(configService);
+    }
+
+    @Provides
+    @Singleton
+    static GoogleCloudPlatformServiceAccountKeyAuthConfig googleCloudPlatformServiceAccountKeyAuthConfig(
+            ConfigService configService) {
+        return GoogleCloudPlatformServiceAccountKeyAuthConfig.fromConfigService(configService);
+    }
+
+    @Provides
+    @Singleton
+    static AwsWifGoogleCloudProcessIdentityConfig awsWifGoogleCloudProcessIdentityConfig(
+            ConfigService configService) {
+        return AwsWifGoogleCloudProcessIdentityConfig.fromConfigService(configService);
+    }
+
+    @Provides
+    @Singleton
+    static BulkModeConfig bulkModeConfig(ConfigService configService,
+            @Named("ForYAML") ObjectMapper yamlMapper) {
+        return BulkModeConfig.fromConfigService(configService, yamlMapper);
     }
 
 
@@ -383,8 +441,8 @@ public class PsoxyModule {
 
     @Provides
     Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory,
-            ConfigService config) {
-        return factory.create(factory.buildOptions(config));
+            ProxyConfig proxyConfig) {
+        return factory.create(factory.buildOptions(proxyConfig));
     }
 
     @Provides

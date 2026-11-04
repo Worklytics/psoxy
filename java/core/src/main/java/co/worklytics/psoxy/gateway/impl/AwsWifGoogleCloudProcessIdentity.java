@@ -68,7 +68,7 @@ public class AwsWifGoogleCloudProcessIdentity implements GoogleCloudProcessIdent
     private final String configIdentifier = CONFIG_IDENTIFIER;
 
     @Inject
-    ConfigService config;
+    AwsWifGoogleCloudProcessIdentityConfig wifConfig;
     @Inject
     HttpTransportFactory httpTransportFactory;
 
@@ -76,15 +76,14 @@ public class AwsWifGoogleCloudProcessIdentity implements GoogleCloudProcessIdent
     public GoogleCredentials getCredentials() {
         AwsCredentials.Builder builder = AwsCredentials.newBuilder()
             .setHttpTransportFactory(httpTransportFactory)
-            .setAudience(config.getConfigPropertyOrError(ConfigProperty.GCP_WIF_AUDIENCE))
+            .setAudience(wifConfig.getGcpWifAudienceOrError())
             .setSubjectTokenType(ExternalAccountCredentials.SubjectTokenTypes.AWS4)
-            .setTokenUrl(config.getConfigPropertyAsOptional(ConfigProperty.GCP_WIF_TOKEN_URL)
-                .filter(StringUtils::isNotBlank)
+            .setTokenUrl(wifConfig.getGcpWifTokenUrl()
                 .orElse(defaultStsTokenUrl()))
             .setCredentialSource(new AwsCredentialSource(awsCredentialSourceFromExecutionRole()))
             .setScopes(List.of(OAuth2Utils.CLOUD_PLATFORM_SCOPE));
 
-        config.getConfigPropertyAsOptional(ConfigProperty.GCP_WIF_SERVICE_ACCOUNT_IMPERSONATION_URL)
+        wifConfig.getGcpWifServiceAccountImpersonationUrl()
             .filter(StringUtils::isNotBlank)
             .ifPresent(builder::setServiceAccountImpersonationUrl);
 

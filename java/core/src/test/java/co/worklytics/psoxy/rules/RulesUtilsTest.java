@@ -23,7 +23,8 @@ import com.avaulta.gateway.rules.RuleSet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
+import co.worklytics.psoxy.gateway.BulkModeConfig;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
@@ -122,7 +123,7 @@ class RulesUtilsTest {
         when(config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
             .thenReturn("hris");
 
-        RuleSet rules = utils.getRulesFromConfig(config, new EnvVarsConfigService()).get();
+        RuleSet rules = utils.getRulesFromConfig(ProxyConfig.fromConfigService(config), new EnvVarsConfigService()).get();
         assertNotNull(rules);
     }
 
@@ -140,7 +141,7 @@ class RulesUtilsTest {
         when(config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
             .thenReturn("hris");
 
-        RuleSet rules = utils.getRulesFromConfig(config, new EnvVarsConfigService()).get();
+        RuleSet rules = utils.getRulesFromConfig(ProxyConfig.fromConfigService(config), new EnvVarsConfigService()).get();
         assertNotNull(rules, "Failed to parse gzipped rule");
     }
 
@@ -160,13 +161,14 @@ class RulesUtilsTest {
     @Test
     public void parseYamlRulesFromConfig() {
 
-        when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.ADDITIONAL_TRANSFORMS)))
+        when(config.getConfigPropertyAsOptional(eq(BulkModeConfig.BulkModeConfigProperty.ADDITIONAL_TRANSFORMS)))
             .thenReturn(Optional.of(yamlMapper.writeValueAsString(transformList)));
 
+        BulkModeConfig bulkModeConfig = BulkModeConfig.fromConfigService(config, yamlMapper);
         assertEquals("blah",
-            utils.parseAdditionalTransforms(config).get(0).getDestinationBucketName());
+            bulkModeConfig.getAdditionalTransforms().get(0).getDestinationBucketName());
         assertEquals("something",
-            ((ColumnarRules) utils.parseAdditionalTransforms(config).get(0).getRules()).getColumnsToPseudonymize().get(0));
+            ((ColumnarRules) bulkModeConfig.getAdditionalTransforms().get(0).getRules()).getColumnsToPseudonymize().get(0));
     }
 
     @SneakyThrows

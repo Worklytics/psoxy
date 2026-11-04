@@ -41,7 +41,7 @@ Release orchestration (cut RC, QA examples-dev, rc→main, tag/publish) lives in
 When modifying code in this repository, you should ensure that your changes pass our standardized tests. 
 
 ### Terraform Testing
-Terraform changes should be validated against multiple versions. CI tests against Terraform versions from `~1.7.0` up to `~1.14.0` and `latest`. In practice, testing with `latest` is OK for local / pre-commit testing.
+Terraform changes should be validated against multiple versions. CI matrices Terraform from `~1.7.0` through the current latest minor and `latest` in `.github/workflows/ci-terraform-*.yaml` (1.7.x–1.10.x legs planned for removal in psoxy v0.8 when min TF becomes ~> 1.11). In practice, testing with `latest` is OK for local / pre-commit testing.
 
 To validate terraform changes locally:
 1. Navigate to the example directories (`infra/examples-dev/aws` and `infra/examples-dev/gcp`)
@@ -83,7 +83,8 @@ When modifying Java files, follow these guidelines:
 9. **Concurrency**: The proxy may handle concurrent requests. Any new code introducing shared mutable state, lazy initialization, or caches must be thread-safe. Use `volatile`, `synchronized`, `ConcurrentHashMap`, or immutable snapshots (`Set.copyOf`, `List.copyOf`) as appropriate. Document thread-safety assumptions in javadoc.
 10. **Prefer dependency injection over static helpers**: Platform adapters should expose raw request data; cross-cutting normalization belongs in shared handlers/services (e.g. `ApiDataRequestHandler`).
 11. **Config property placement**: API connector settings belong on `ApiModeConfig.ApiModeConfigProperty` (or platform-specific API-mode config types). Use `ProxyConfigProperty` for proxy-wide settings; `BulkModeConfigProperty` for bulk connectors; webhook settings on webhook config types. Do not hardcode example payloads, field names from a specific source, or demo-only constants in production code.
-12. **Keep platform code in platform modules**: AWS-only types live in `impl.aws`; GCP-only types live in `impl.gcp`. Core stays cloud-agnostic so deployment JARs stay small. Cmd-line may throw `UnsupportedOperationException` for cloud-only features.
+12. **Concrete configuration POJOs**: Load settings into immutable config classes (see `WebhookCollectorModeConfig`, `ProxyConfig`, `BulkModeConfig`) via `fromConfigService` in Dagger modules, then inject the POJO (use `dagger.Lazy<>` when appropriate). `ConfigService` belongs in modules (including `@Provides` that resolve dependencies such as `ConfigRulesModule`, grant-type selection, pseudonymizer wiring) and in config implementations—not in handlers, sanitizers, or auth strategies. Exceptions: health-check live introspection (`ConfigService` + `SecretStore` for missing keys and metadata), versioned secret reads at refresh time, and tests. Nested property enums belong on the POJO; parsing stays in the factory.
+13. **Keep platform code in platform modules**: AWS-only types live in `impl.aws`; GCP-only types live in `impl.gcp`. Core stays cloud-agnostic so deployment JARs stay small. Cmd-line may throw `UnsupportedOperationException` for cloud-only features.
 
 ## Terraform Conventions
 

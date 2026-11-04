@@ -49,6 +49,11 @@ output "lookup_output_buckets" {
   value       = { for k, v in module.lookup_output : k => v.bucket_name }
 }
 
+output "lookup_tables" {
+  description = "Map of lookup_tables key to GCS bucket name for that lookup table output. Empty when no lookup tables are configured."
+  value       = { for k, v in module.lookup_output : k => v.bucket_name }
+}
+
 output "todos" {
   description = "List of todo steps to complete, in markdown format. Includes ALB DNS setup (when managed TLS is enabled) followed by per-connector test TODOs; those TODOs use ALB endpoint URLs when an external load balancer is enabled."
   value = concat(

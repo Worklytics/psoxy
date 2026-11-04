@@ -70,8 +70,7 @@ class ApiDataRequestHandlerConcurrencyTest {
         when(handler.secretStore
             .getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
             .thenReturn(Optional.of("salt"));
-        when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
-            .thenReturn("gmail");
+        handler.proxyConfig = co.worklytics.psoxy.gateway.ProxyConfig.builder().source("gmail").build();
         handler.apiModeConfig = ApiModeConfig.builder().targetHost("gmail.googleapis.com").build();
 
         // Get access to the private loadSanitizerRules() method which contains the DCL

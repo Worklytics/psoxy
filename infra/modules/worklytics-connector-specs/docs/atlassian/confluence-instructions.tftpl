@@ -1,3 +1,8 @@
+**DEPRECATED:** this connector (`confluence-cloud`) is deprecated in favor of
+`confluence-cloud-service-account`, which authenticates via an Atlassian OAuth 2.0 service account
+credential instead of the user-delegated 3LO `refresh_token` flow below (no annual re-authorization
+needed). `confluence-cloud` remains fully supported for existing deployments.
+
 ## Prerequisites
 Confluence OAuth 2.0 (3LO) through Psoxy requires a Confluence Cloud account with following granular scopes:
 

@@ -27,7 +27,7 @@ public class RefreshTokenTokenRequestBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
     @Inject
-    ConfigService config;
+    OAuthRefreshTokenSourceAuthConfig oauthConfig;
     @Inject
     SecretStore secretStore;
 
@@ -55,8 +55,9 @@ public class RefreshTokenTokenRequestBuilder
     }
 
     private String getClientId() {
-        return config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID)
-                .orElseGet(() -> secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
+        return oauthConfig.getClientId()
+                .orElseGet(() -> secretStore.getConfigPropertyOrError(
+                    OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
 
     }
 

@@ -4,13 +4,12 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.UrlEncodedContent;
-import lombok.Getter;
-import lombok.SneakyThrows;
-
-import javax.inject.Inject;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import javax.inject.Inject;
+import lombok.Getter;
+import lombok.SneakyThrows;
 
 /**
  * implementation of a "workload identity" credentials.
@@ -26,13 +25,15 @@ import java.util.TreeMap;
 public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
-
-    protected WorkloadIdentityFederationGrantTokenRequestBuilder(ConfigService configService) {
-        this.config = configService;
+    protected WorkloadIdentityFederationGrantTokenRequestBuilder(
+            OAuthRefreshTokenSourceAuthConfig oauthConfig,
+            WorkloadIdentityFederationGrantConfig wifConfig) {
+        this.oauthConfig = oauthConfig;
+        this.wifConfig = wifConfig;
     }
 
     @Getter
-    protected enum ConfigProperty implements ConfigService.ConfigProperty {
+    public enum ConfigProperty implements ConfigService.ConfigProperty {
         CLIENT_ID,
         TOKEN_SCOPE,
         ;
@@ -41,29 +42,21 @@ public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
         private final SupportedSource supportedSource = SupportedSource.ENV_VAR;
     }
 
-    // as far as what's actually sent in the OAuth 2.0 'grant_type' param:
-    //  - 'client_credentials' is MSFT
-    //  - for Google, this is AuthUtils.JWT_BEARER_GRANT_TYPE ("urn:ietf:params:oauth:grant-type:jwt-bearer")
-    // imho, I see the argument for both cases of that.
-    // arguably we should make this `grantType` value a strategy, and separately configure an
-    // the OAuth 2.0 grant_type value per env vars
     @Getter(onMethod_ = @Override)
     private final String grantType = "workload_identity_federation";
 
-    //for Google, this is "assertion"
-    // see: https://datatracker.ietf.org/doc/html/rfc7521#section-4.2
     private static final String PARAM_CLIENT_ID = "client_id";
     private static final String PARAM_CLIENT_ASSERTION = "client_assertion";
-    // see: https://datatracker.ietf.org/doc/html/rfc7521#section-4.2
     private static final String PARAM_CLIENT_ASSERTION_TYPE = "client_assertion_type";
     private static final String CLIENT_ASSERTION_TYPE_JWT = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
 
-    //https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
     private static final String PARAM_SCOPE = "scope";
     private static final String PARAM_GRANT_TYPE = "grant_type";
 
     @Getter
-    final ConfigService config;
+    protected final OAuthRefreshTokenSourceAuthConfig oauthConfig;
+    @Getter
+    protected final WorkloadIdentityFederationGrantConfig wifConfig;
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
@@ -81,15 +74,14 @@ public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
 
     @SneakyThrows
     public HttpContent buildPayload() {
-        String oauthClientId = config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID);
+        String oauthClientId = oauthConfig.getClientId().orElseThrow(() -> new IllegalStateException(
+            "Missing required config: " + OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
 
         Map<String, String> data = new TreeMap<>();
-        //https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
         data.put(PARAM_GRANT_TYPE, "client_credentials");
-        config.getConfigPropertyAsOptional(ConfigProperty.TOKEN_SCOPE)
-                .ifPresent(r -> data.put(PARAM_SCOPE, r)); // 'scope' param is optional, per RFC
+        wifConfig.getTokenScope()
+                .ifPresent(r -> data.put(PARAM_SCOPE, r));
 
-        //https://datatracker.ietf.org/doc/html/rfc7521#section-4.2
         data.put(PARAM_CLIENT_ASSERTION_TYPE, CLIENT_ASSERTION_TYPE_JWT);
         data.put(PARAM_CLIENT_ASSERTION, getClientAssertion());
         data.put(PARAM_CLIENT_ID, oauthClientId);

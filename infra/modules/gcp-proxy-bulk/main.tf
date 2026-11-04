@@ -345,7 +345,7 @@ Review the deployed Cloud function in GCP console:
 [Function in GCP Console](https://console.cloud.google.com/functions/details/${var.region}/${google_cloudfunctions2_function.function.name}?project=${var.gcp_project.project_id})
 
 We provide some Node.js scripts to easily validate the deployment. To be able
-to run the test commands below, you need Node.js (>=20) and npm (v >=8)
+to run the test commands below, you need Node.js (>=22) and npm (v >=10)
 installed. Ensure all dependencies are installed by running:
 
 ```shell

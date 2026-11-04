@@ -137,7 +137,7 @@ public class GcpIamSignJwtAuthStrategy implements SourceAuthStrategy {
         private final SupportedSource supportedSource = SupportedSource.ENV_VAR;
     }
 
-    @Inject ConfigService config;
+    @Inject GcpIamSignJwtAuthConfig authConfig;
     @Inject HttpTransportFactory httpTransportFactory;
     @Inject ObjectMapper objectMapper;
     /**
@@ -244,7 +244,7 @@ public class GcpIamSignJwtAuthStrategy implements SourceAuthStrategy {
     @VisibleForTesting
     AccessToken refreshDelegatedAccessToken(String userToImpersonate) throws IOException {
         String serviceAccountEmail =
-            config.getConfigPropertyOrError(ConfigProperty.SERVICE_ACCOUNT_EMAIL);
+            authConfig.getServiceAccountEmailOrError();
         String payload = buildJwtPayload(serviceAccountEmail, userToImpersonate);
         String signedJwt = signJwt(serviceAccountEmail, payload);
         return exchangeJwtForAccessToken(signedJwt);
@@ -328,7 +328,7 @@ public class GcpIamSignJwtAuthStrategy implements SourceAuthStrategy {
 
     @VisibleForTesting
     GoogleCloudProcessIdentity getProcessIdentity() {
-        String identifier = config.getConfigPropertyOrError(ConfigProperty.PROCESS_IDENTITY_SOURCE);
+        String identifier = authConfig.getProcessIdentitySourceOrError();
         return processIdentities.stream()
             .filter(identity -> Objects.equals(identifier, identity.getConfigIdentifier()))
             .findFirst()
@@ -342,7 +342,7 @@ public class GcpIamSignJwtAuthStrategy implements SourceAuthStrategy {
 
     private synchronized Set<String> getScopes() {
         if (scopes == null) {
-            scopes = Arrays.stream(config.getConfigPropertyOrError(ConfigProperty.OAUTH_SCOPES).split(" "))
+            scopes = Arrays.stream(authConfig.getOauthScopesOrError().split(" "))
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         }

@@ -2,7 +2,7 @@
 
 Node.js testing tool for Worklytics Psoxy.
 
-We provide a collection of Node.js scripts to help you test your Worklytics Psoxy deploy. The requirements to be able to run the scripts are [Node.js] (version >=16) and [npm] (version >=8). First of all, install the npm dependencies: `npm i`.
+We provide a collection of Node.js scripts to help you test your Worklytics Psoxy deploy. The requirements to be able to run the scripts are [Node.js] (version >=22; latest LTS recommended) and [npm] (version >=10, bundled with Node.js). First of all, install the npm dependencies: `npm i`.
 
 The primary tool is a command line interface (CLI) script that allows you to execute "Psoxy Test Calls" to your Worklytics Psoxy instance. Check all the available options by running `node cli-call.js -h` (*).
 

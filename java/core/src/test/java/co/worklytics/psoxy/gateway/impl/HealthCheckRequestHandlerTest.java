@@ -58,8 +58,7 @@ public class HealthCheckRequestHandlerTest {
         when(handler.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
                 .thenReturn(Optional.of("salt"));
 
-        when(handler.config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE))
-                .thenReturn(Optional.of("something"));
+        handler.proxyConfig = co.worklytics.psoxy.gateway.ProxyConfig.builder().source("something").build();
 
         request = MockModules.provideMock(HttpEventRequest.class);
     }

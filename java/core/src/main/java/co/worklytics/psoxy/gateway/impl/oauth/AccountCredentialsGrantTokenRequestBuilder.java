@@ -29,7 +29,7 @@ public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshT
     public static final String GRANT_TYPE = "account_credentials";
 
     @Inject
-    ConfigService config;
+    AccountCredentialsGrantConfig accountCredentialsGrantConfig;
     @Inject
     SecretStore secretStore;
 
@@ -64,7 +64,7 @@ public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshT
 
         //trim to avoid copy-paste errors
         //q : check for non-printable chars or anything like that
-        String accountId = StringUtils.trim(config.getConfigPropertyAsOptional(ConfigProperty.ACCOUNT_ID)
+        String accountId = StringUtils.trim(accountCredentialsGrantConfig.getAccountId()
             .orElseGet(() -> secretStore.getConfigPropertyOrError(ConfigProperty.ACCOUNT_ID)));
 
         // The documentation doesn't say anything to use POST data, but passes everything in the URL
@@ -77,7 +77,7 @@ public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshT
 
     @Override
     public void addHeaders(HttpHeaders httpHeaders) {
-        String clientId = StringUtils.trim(config.getConfigPropertyAsOptional(ConfigProperty.CLIENT_ID)
+        String clientId = StringUtils.trim(accountCredentialsGrantConfig.getClientId()
             .orElseGet(() -> secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_ID)));
 
         String clientSecret = StringUtils.trim(secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET));

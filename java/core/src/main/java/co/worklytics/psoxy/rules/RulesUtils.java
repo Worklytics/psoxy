@@ -24,8 +24,7 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
 import co.worklytics.psoxy.ErrorCauses;
-import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
-import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfig;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import com.avaulta.gateway.resources.ResourceService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
@@ -71,9 +70,9 @@ public class RulesUtils {
      * @see com.fasterxml.jackson.core.JsonParseException sry for the misnomer, but we leverage Jackson for both YAML and JSON
      */
     @SneakyThrows
-    public Optional<com.avaulta.gateway.rules.RuleSet> getRulesFromConfig(ConfigService config,
+    public Optional<com.avaulta.gateway.rules.RuleSet> getRulesFromConfig(ProxyConfig proxyConfig,
                                                                           EnvVarsConfigService envVarsConfigService) {
-        Optional<String> configuredRules = config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES);
+        Optional<String> configuredRules = proxyConfig.getRules();
 
         if (configuredRules.isPresent()) {
             String yamlEncodedRules = decodeToYaml(configuredRules.get());
@@ -97,7 +96,7 @@ public class RulesUtils {
             }
         } else {
             if (envVarsConfigService != null // legacy case
-                && envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.CUSTOM_RULES_SHA).map(StringUtils::isNotBlank).orElse(false)) {
+                && proxyConfig.getCustomRulesSha().map(StringUtils::isNotBlank).orElse(false)) {
                 //possible cases
                 //  - Terraform bug where SHA filled in env vars,
                 //  - RULES set in GCP Secret Manager/ AWS Parameter Store / etc but
@@ -189,18 +188,4 @@ public class RulesUtils {
         return singleLine.substring(0, RULES_LOG_SNIPPET_MAX_CHARS) + "...";
     }
 
-    public List<StorageHandler.ObjectTransform> parseAdditionalTransforms(ConfigService config) {
-        Optional<String> additionalTransforms = config.getConfigPropertyAsOptional(BulkModeConfigProperty.ADDITIONAL_TRANSFORMS);
-        CollectionType type = yamlMapper.getTypeFactory().constructCollectionType(ArrayList.class, StorageHandler.ObjectTransform.class);
-
-        if (additionalTransforms.isPresent()) {
-            try {
-                return yamlMapper.readValue(additionalTransforms.get(), type);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Failed to parse ADDITIONAL_TRANSFORMS from config", e);
-            }
-        } else {
-            return new ArrayList<>();
-        }
-    }
 }

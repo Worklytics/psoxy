@@ -49,6 +49,11 @@ output "lookup_output_buckets" {
   value       = { for k, v in module.lookup_output : k => v.output_bucket }
 }
 
+output "lookup_tables" {
+  description = "Map of lookup_table_builders key to S3 bucket name for that lookup table output. Empty when no lookup tables are configured."
+  value       = { for k, v in module.lookup_output : k => v.output_bucket }
+}
+
 output "pseudonym_salt" {
   description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
   value       = module.psoxy.pseudonym_salt

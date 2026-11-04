@@ -30,13 +30,19 @@ import java.util.stream.Stream;
 public class GCPWorkloadIdentityFederationGrantTokenRequestBuilder extends WorkloadIdentityFederationGrantTokenRequestBuilder {
 
 
+    final GcpWorkloadIdentityFederationGrantConfig gcpConfig;
+
     @Inject
-    public GCPWorkloadIdentityFederationGrantTokenRequestBuilder(ConfigService configService) {
-        super(configService);
+    public GCPWorkloadIdentityFederationGrantTokenRequestBuilder(
+            co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthConfig oauthConfig,
+            co.worklytics.psoxy.gateway.impl.oauth.WorkloadIdentityFederationGrantConfig wifConfig,
+            GcpWorkloadIdentityFederationGrantConfig gcpConfig) {
+        super(oauthConfig, wifConfig);
+        this.gcpConfig = gcpConfig;
     }
 
     @Getter
-    enum ConfigProperty implements ConfigService.ConfigProperty {
+    public enum ConfigProperty implements ConfigService.ConfigProperty {
         AUDIENCE,
         ;
 
@@ -68,7 +74,7 @@ public class GCPWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
         uriBuilder.setScheme("http");
         uriBuilder.setHost("metadata.google.internal");
         uriBuilder.setPath("computeMetadata/v1/instance/service-accounts/default/identity");
-        uriBuilder.setParameter("audience", getConfig().getConfigPropertyOrError(ConfigProperty.AUDIENCE));
+        uriBuilder.setParameter("audience", gcpConfig.getAudienceOrError());
 
         HttpURLConnection httpUrlConnection = (HttpURLConnection) uriBuilder.build().toURL().openConnection();
         httpUrlConnection.setRequestMethod("GET");

@@ -16,8 +16,8 @@ run "oauth_refresh_token_locks" {
   command = apply
 
   assert {
-    error_message = "9 oauth connectors expected to USE_SHARED_TOKEN"
-    condition = 9 == length([for k, v in output.available_oauth_data_source_connectors :
+    error_message = "11 oauth connectors expected to USE_SHARED_TOKEN"
+    condition = 11 == length([for k, v in output.available_oauth_data_source_connectors :
     v if try(lower(v.environment_variables.USE_SHARED_TOKEN), "false") == "true"])
   }
 
@@ -36,8 +36,8 @@ run "oauth_refresh_token_locks" {
 run "oauth_refresh_token_access_tokens" {
 
   assert {
-    error_message = "all 19 oauth connectors use ACCESS_TOKEN (all except dropbox??)"
-    condition = 20 == length([for k, v in output.available_oauth_data_source_connectors :
+    error_message = "22 oauth connectors use ACCESS_TOKEN (all except dropbox??)"
+    condition = 22 == length([for k, v in output.available_oauth_data_source_connectors :
       v if anytrue([for var in v.secured_variables : var.name == "ACCESS_TOKEN"])
     ])
   }
