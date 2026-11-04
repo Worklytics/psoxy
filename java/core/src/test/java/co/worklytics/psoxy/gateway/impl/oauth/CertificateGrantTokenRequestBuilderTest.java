@@ -104,8 +104,8 @@ class CertificateGrantTokenRequestBuilderTest {
 
         when(secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
                 .thenReturn(clientId);
-        when(configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT))
-                .thenReturn(tokenEndpoint);
+        when(configService.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT))
+                .thenReturn(Optional.of(tokenEndpoint));
         payloadBuilder.oauthConfig = OAuthRefreshTokenSourceAuthConfig.fromConfigService(configService);
     }
 
