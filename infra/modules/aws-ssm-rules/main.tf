@@ -31,22 +31,59 @@ locals {
   # compress if necessary; but otherwise leave plain so human readable
   use_compressed = length(local.rules_plain) > local.ssm_advanced_size_limit
   param_value    = local.use_compressed ? base64gzip(local.rules_plain) : local.rules_plain
+
+  store_in_ssm = length(local.param_value) < local.ssm_advanced_size_limit
+
+  # Match S3ResourceService.resolveKey(): prefix normalized without leading slashes; bucket root → rules.yaml
+  remote_instance_path_normalized = var.remote_resource_instance_path != null ? trim(trimspace(var.remote_resource_instance_path), "/") : null
+  remote_object_key = local.remote_instance_path_normalized != null ? (
+    local.remote_instance_path_normalized == "" ? "rules.yaml" : "${local.remote_instance_path_normalized}/rules.yaml"
+  ) : null
 }
 
 resource "aws_ssm_parameter" "rules" {
+  count = local.store_in_ssm ? 1 : 0
+
   name           = "${var.prefix}RULES"
   type           = "String"
+  description    = var.description
   tier           = length(local.param_value) < local.ssm_standard_size_limit ? "Standard" : "Advanced"
   insecure_value = local.param_value
 
   lifecycle {
+    ignore_changes = [tags]
+
     precondition {
-      condition     = length(local.param_value) < local.ssm_advanced_size_limit
-      error_message = "Rules are too big to store as an SSM parameter."
+      condition = local.store_in_ssm || (
+        var.remote_resource_bucket != null && var.remote_resource_instance_path != null
+      )
+      error_message = "Rules exceed the SSM Parameter Store size limit (8192 bytes). Set enable_remote_resources = true on the host module so rules can be stored in the artifacts bucket, or reduce rule size."
+    }
+  }
+}
+
+resource "aws_s3_object" "rules" {
+  count = local.store_in_ssm ? 0 : 1
+
+  bucket  = var.remote_resource_bucket
+  key     = local.remote_object_key
+  content = local.rules_plain
+
+  lifecycle {
+    precondition {
+      condition = local.store_in_ssm || (
+        var.remote_resource_bucket != null && var.remote_resource_instance_path != null
+      )
+      error_message = "Rules exceed the SSM Parameter Store size limit (8192 bytes). Set enable_remote_resources = true on the host module so rules can be stored in the artifacts bucket, or reduce rule size."
     }
   }
 }
 
 output "rules_hash" {
-  value = sha1(local.rules_plain)
+  # Include SSM version or S3 etag so dependents (Lambda env) update only after rules reach remote storage.
+  value = local.store_in_ssm ? sha1("${aws_ssm_parameter.rules[0].version}:${local.rules_plain}") : sha1("${aws_s3_object.rules[0].etag}:${local.rules_plain}")
+}
+
+output "stored_in_remote_bucket" {
+  value = !local.store_in_ssm
 }

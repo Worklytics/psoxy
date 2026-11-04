@@ -32,3 +32,6 @@
 
 # local IaC backups created by tools/reset-example.sh
 */.psoxy-iac-backup
+
+# One-shot local imports (account-specific resource IDs). Do not commit.
+*/imports.tf

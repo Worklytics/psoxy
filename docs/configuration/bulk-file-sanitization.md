@@ -264,6 +264,8 @@ Alternatively, you can remove the environment variable from your instance, and i
 
 This approach is useful for testing, but note that if you later run `terraform apply` again, any changes you make to the environment variable may be overwritten by Terraform.
 
+On **AWS**, you can also limit which S3 uploads invoke the bulk Lambda at all (S3 notification prefix/suffix or EventBridge `file_pattern`). See [Bulk input triggers (S3)](../aws/bulk-s3-triggers.md).
+
 ### Troubleshooting
 
 If you encounter issues processing your files, check the logs of the Psoxy instance. The logs will give some indication of what went wrong, and may help you identify the issue.

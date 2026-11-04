@@ -61,6 +61,17 @@ if batch, then logic will:
 
 PubSub/Cloud Tasks doesn't natively support batching messages. The webhook collection cloud function instance is instead triggered via Cloud Scheduler (eg, every 5 minutes) to pull messages in batches from a PubSub topic.
 
+#### AWS JWT authorizer bootstrap
+
+The HTTP API JWT authorizer and the collector share one Lambda. API Gateway fetches `{issuer}/.well-known/openid-configuration` from its own network when `CreateAuthorizer` runs. That URL is not reachable until a previous apply has deployed the unauthenticated `/.well-known/{proxy+}` route, the Lambda permission, and a stage.
+
+`collection_enabled` (default `false`) is the customer-facing switch:
+
+- `false`: no `aws_apigatewayv2_authorizer` and no `/collect` route. `COLLECTION_ENABLED=false` on the Lambda, so `InboundWebhookHandler` returns 403 for anything except CORS preflight. `JwksDecorator` still serves discovery.
+- `true`: authorizer plus `/collect` routes with `authorization_type = JWT`. `COLLECTION_ENABLED=true`. A request that reaches the handler has passed the authorizer; in-Lambda JWT checks (`REQUIRE_AUTHORIZATION_HEADER`) still run when configured.
+
+GCP sets `COLLECTION_ENABLED=true` always; authorization there stays inside the function. The field lives on `WebhookCollectorModeConfig`.
+
 
 ### Future
 
