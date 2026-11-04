@@ -33,8 +33,7 @@ module "rules_parameter" {
   source = "../aws-ssm-rules"
 
   prefix      = var.path_to_instance_ssm_parameters
-  content     = var.rules_file == null ? yamlencode(var.rules) : null
-  file_path   = var.rules_file
+  content     = var.rules_file == null ? yamlencode(var.rules) : file(var.rules_file)
   description = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
 
   remote_resource_bucket        = var.remote_resource_bucket
