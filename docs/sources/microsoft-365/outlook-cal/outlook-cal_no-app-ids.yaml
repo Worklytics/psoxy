@@ -236,6 +236,7 @@ endpoints:
         filters:
           - "https://[^.]+\\.zoom\\.us/.*"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
         regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"

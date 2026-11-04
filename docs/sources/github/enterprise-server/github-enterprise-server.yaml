@@ -430,6 +430,7 @@ endpoints:
           - "$..members_url"
           - "$..repositories_url"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$..slug"
   - pathTemplate: "/api/{enterpriseServerVersion}/orgs/{org}/teams/{teamSlug}/members"

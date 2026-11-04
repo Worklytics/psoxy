@@ -180,7 +180,7 @@ class SanitizerUtilsTest {
     @Test
     void tokenize() {
         String original = "blah";
-        MapFunction f = sanitizerUtils.getTokenize(Transform.Tokenize.builder().build());
+        MapFunction f = sanitizerUtils.getTokenize(Transform.Tokenize.builder().includeEncrypted(true).build());
         String r = (String) f.map(original, jsonConfiguration);
 
         assertTrue(r.startsWith(UrlSafeTokenPseudonymEncoder.REVERSIBLE_PREFIX));
@@ -206,6 +206,7 @@ class SanitizerUtilsTest {
             "/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA%3D')/events";
         String host = "https://graph.microsoft.com";
         MapFunction f = sanitizerUtils.getTokenize(Transform.Tokenize.builder()
+            .includeEncrypted(true)
             .regex("^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$").build());
         String r = (String) f.map(host + path, jsonConfiguration);
 

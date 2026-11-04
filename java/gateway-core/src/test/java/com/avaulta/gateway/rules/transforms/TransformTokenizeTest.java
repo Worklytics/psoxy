@@ -15,14 +15,14 @@ public class TransformTokenizeTest {
 
     @SneakyThrows
     @Test
-    public void yaml_omittedIncludeEncrypted_defaultsTrue() {
+    public void yaml_omittedIncludeEncrypted_defaultsFalse() {
         Transform.Tokenize parsed = yamlMapper.readValue("""
             --- !<tokenize>
             jsonPaths:
               - "$.nextLink"
             """, Transform.Tokenize.class);
 
-        assertTrue(parsed.includesEncrypted());
+        assertFalse(parsed.includesEncrypted());
         assertNull(parsed.getIncludeEncrypted());
     }
 

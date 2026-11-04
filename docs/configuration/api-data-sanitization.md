@@ -175,7 +175,7 @@ Use case are values that _may_ be sensitive, but are opaque. For example, page t
 
 Options:
 
-- `includeEncrypted` (default: `true`): if true, values are replaced with reversible `p~` tokens that the proxy can decode for subsequent requests. If false, values are replaced with hash-only `t~` tokens that cannot be reversed. The deprecated `includeReversible` flag is treated the same way (either flag set to true produces `p~` tokens).
+- `includeEncrypted` (default: `false` when omitted): if true, values are replaced with reversible `p~` tokens that the proxy can decode for subsequent requests. If false or omitted, values are replaced with hash-only `t~` tokens that cannot be reversed. The deprecated `includeReversible` flag is treated the same way (either flag set to true produces `p~` tokens). Shipped connector rules set `includeEncrypted: true` where reversible tokens are required.
 - `regex` a capturing regex to use to extract portion of value that needs to be tokenized.
 
 #### Text Digest

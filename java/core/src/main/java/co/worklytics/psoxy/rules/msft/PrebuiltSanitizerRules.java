@@ -27,6 +27,7 @@ public class PrebuiltSanitizerRules {
     static final Transform.Tokenize TOKENIZE_ODATA_LINKS = Transform.Tokenize.builder()
         .jsonPath("$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']")
         .regex("^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$")
+        .includeEncrypted(true)
         .build();
 
     static final Transform REDACT_ODATA_CONTEXT = Transform.Redact.builder()
@@ -458,10 +459,12 @@ public class PrebuiltSanitizerRules {
 
     static final Transform.Tokenize MS_TEAMS_CALL_ID_TOKENIZATION = Transform.Tokenize.builder()
         .jsonPath("$..callId")
+        .includeEncrypted(true)
         .build();
 
     static final Transform.Tokenize MS_TEAMS_CHAT_ID_TOKENIZATION = Transform.Tokenize.builder()
         .jsonPath("$..chatId")
+        .includeEncrypted(true)
         .build();
 
     static final Endpoint MS_TEAMS_TEAMS = Endpoint.builder()
@@ -605,6 +608,7 @@ public class PrebuiltSanitizerRules {
                 // id of the chat may contain MSFT user GUIDS
                 Transform.Tokenize.builder()
                     .jsonPath("$..id")
+                    .includeEncrypted(true)
                     .build(),
                 MS_TEAMS_USERS_CHATS_REDACT
                     .toBuilder()
@@ -799,10 +803,12 @@ public class PrebuiltSanitizerRules {
                 Transform.Tokenize.builder()
                     .jsonPath("$..sessionId")
                     .jsonPath("$..attachments[*].attachmentId")
+                    .includeEncrypted(true)
                     .build(),
                 Transform.Tokenize.builder()
                     .jsonPath("$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']")
                     .regex("^https://graph.microsoft.com/beta/copilot/users/([a-zA-Z0-9_-]+)/.*$")
+                    .includeEncrypted(true)
                     .build(),
                 Transform.Pseudonymize.builder()
                     .jsonPath("$..from..[?(@.applicationIdentityType != \"bot\")].id")
@@ -857,6 +863,7 @@ public class PrebuiltSanitizerRules {
         return Transform.Tokenize.builder()
             .jsonPath("$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']")
             .regex("^https://graph.microsoft.com/v1.0/" + regex + ".*$")
+            .includeEncrypted(true)
             .build();
     }
 }

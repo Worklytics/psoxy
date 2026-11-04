@@ -206,6 +206,7 @@ endpoints:
           - "$..user.email"
         encoding: "URL_SAFE_TOKEN"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$.['@odata.nextLink']"
         regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"

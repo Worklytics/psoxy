@@ -221,6 +221,7 @@ public class PrebuiltSanitizerRules {
 
     private static final Transform TEAM_SLUG_TOKENIZATION = Transform.Tokenize.builder()
             .jsonPath("$..slug")
+            .includeEncrypted(true)
             .build();
 
     static final Endpoint ORG_MEMBERS = Endpoint.builder()

@@ -270,11 +270,11 @@ public abstract class Transform {
 
         /**
          * When both {@code includeEncrypted} and {@code includeReversible} are set, {@code includeEncrypted} wins.
-         * Otherwise, reversible {@code p~} output is used if either flag is {@code true}; {@code false} if either is
-         * explicitly {@code false} and neither is {@code true}; otherwise {@code defaultWhenUnset}.
+         * Otherwise uses reversible {@code p~} output when either flag is {@code true}; {@code false} when neither is
+         * set or when the only explicit value is {@code false}.
          */
         @SuppressWarnings("deprecation")
-        default boolean resolveIncludesEncrypted(boolean defaultWhenUnset) {
+        default boolean includesEncrypted() {
             Boolean encrypted = getIncludeEncrypted();
             Boolean reversible = getIncludeReversible();
             if (encrypted != null && reversible != null) {
@@ -289,15 +289,7 @@ public abstract class Transform {
             if (reversible != null) {
                 return reversible;
             }
-            return defaultWhenUnset;
-        }
-
-        /**
-         * Defaults to {@code false} when both flags are omitted ({@link Pseudonymize}, {@link PseudonymizeRegexMatches}).
-         */
-        @SuppressWarnings("deprecation")
-        default boolean includesEncrypted() {
-            return resolveIncludesEncrypted(false);
+            return false;
         }
 
         /**
@@ -361,6 +353,7 @@ public abstract class Transform {
          */
         @JsonPropertyDescription(PseudonymizationTransform.INCLUDE_ENCRYPTED_DESCRIPTION)
         @JsonInclude(JsonInclude.Include.NON_NULL)
+        @Getter(onMethod_ = {@Override})
         Boolean includeEncrypted;
 
         /**
@@ -435,6 +428,7 @@ public abstract class Transform {
          */
         @JsonPropertyDescription(PseudonymizationTransform.INCLUDE_ENCRYPTED_DESCRIPTION)
         @JsonInclude(JsonInclude.Include.NON_NULL)
+        @Getter(onMethod_ = {@Override})
         Boolean includeEncrypted;
 
         /**
@@ -479,7 +473,7 @@ public abstract class Transform {
     public static class Tokenize extends Transform implements PseudonymizationTransform {
 
         static final String INCLUDE_ENCRYPTED_DESCRIPTION =
-            "If true (default when omitted), values are replaced with reversible `p~` tokens that the proxy can decode for subsequent requests using ENCRYPTION_KEY. If false, values are replaced with hash-only `t~` tokens that cannot be reversed. The deprecated includeReversible flag is treated the same way.";
+            "If true, values are replaced with reversible `p~` tokens that the proxy can decode for subsequent requests using ENCRYPTION_KEY. If false or omitted, values are replaced with hash-only `t~` tokens. The deprecated includeReversible flag is treated the same way (either flag true produces `p~` tokens).";
 
         /**
          * if provided, only group within matched by this regex will be tokenized
@@ -496,6 +490,7 @@ public abstract class Transform {
 
         @JsonPropertyDescription(INCLUDE_ENCRYPTED_DESCRIPTION)
         @JsonInclude(JsonInclude.Include.NON_NULL)
+        @Getter(onMethod_ = {@Override})
         Boolean includeEncrypted;
 
         /**
@@ -521,12 +516,10 @@ public abstract class Transform {
             return false;
         }
 
-        /**
-         * Defaults to {@code true} when both flags are omitted, unlike {@link Pseudonymize}.
-         */
         @Override
+        @SuppressWarnings("deprecation")
         public boolean includesEncrypted() {
-            return resolveIncludesEncrypted(true);
+            return PseudonymizationTransform.super.includesEncrypted();
         }
 
         //NOTE: always format to URL-safe
