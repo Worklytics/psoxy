@@ -188,6 +188,12 @@ variable "http_methods" {
   default     = ["POST"]
 }
 
+variable "collection_enabled" {
+  type        = bool
+  description = "Whether this collector accepts webhook payloads. Leave false for the first apply so the OpenID discovery route exists before the JWT authorizer is created. Set true and apply again to create the authorizer and start collection."
+  default     = false
+}
+
 # examples:
 # `aws-kms:aws-kms:arn:aws:kms:REGION:ACCOUNT_ID:alias/ALIAS_NAME`
 # `base64:BASE64_ENCODED_PUBLIC_KEY` - must be RSA public key in base64 format
@@ -248,6 +254,12 @@ variable "todos_as_local_files" {
   type        = bool
   description = "whether to render TODOs as flat files"
   default     = true
+}
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 2
 }
 
 variable "example_payload" {

@@ -48,6 +48,7 @@ endpoints:
           - "$..emailAddress"
         encoding: "URL_SAFE_TOKEN"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$..id"
       - !<redact>
@@ -59,6 +60,7 @@ endpoints:
           - "$..user.id"
           - "$..userId"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
         regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
@@ -140,9 +142,11 @@ endpoints:
           - "$..userId"
         encoding: "URL_SAFE_TOKEN"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$..chatId"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
         regex: "^https://graph.microsoft.com/v1.0/chats/(.*)/messages(\\?.*).*$"
@@ -231,6 +235,7 @@ endpoints:
           - "$..userId"
         encoding: "URL_SAFE_TOKEN"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$..callId"
       - !<redact>
@@ -273,6 +278,7 @@ endpoints:
         jsonPaths:
           - "$..['@odata.type']"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
         regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
@@ -307,6 +313,7 @@ endpoints:
         jsonPaths:
           - "$..['@odata.type']"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
         regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
@@ -326,6 +333,7 @@ endpoints:
           - "$..identity.id"
         encoding: "URL_SAFE_TOKEN"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
         regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
@@ -388,5 +396,5 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..id"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"

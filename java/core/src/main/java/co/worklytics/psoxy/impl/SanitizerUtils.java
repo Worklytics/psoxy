@@ -13,6 +13,7 @@ import com.avaulta.gateway.rules.transforms.HashIp;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
@@ -138,21 +139,30 @@ public class SanitizerUtils {
                     .map(p -> p.matcher(toTokenize));
                 if (matcher.isPresent()) {
                     if (matcher.get().matches()) {
-                        String token = urlSafePseudonymEncoder.encode(Pseudonym.builder()
-                            .reversible(reversibleTokenizationStrategy.getReversibleToken(matcher.get().group(1)))
-                            .build());
+                        String token = urlSafePseudonymEncoder.encode(
+                            tokenizePseudonym(matcher.get().group(1), transform.includesEncrypted()));
                         return toTokenize.replace(matcher.get().group(1), token);
                     } else {
                         return s;
                     }
                 } else {
-                    String token = urlSafePseudonymEncoder.encode(Pseudonym.builder()
-                        .reversible(reversibleTokenizationStrategy.getReversibleToken(toTokenize))
-                        .build());
-                    return token;
+                    return urlSafePseudonymEncoder.encode(
+                        tokenizePseudonym(toTokenize, transform.includesEncrypted()));
                 }
             }
         };
+    }
+
+    Pseudonym tokenizePseudonym(String datum, boolean includeEncrypted) {
+        if (includeEncrypted) {
+            return Pseudonym.builder()
+                .reversible(reversibleTokenizationStrategy.getReversibleToken(datum))
+                .build();
+        }
+        byte[] reversible = reversibleTokenizationStrategy.getReversibleToken(datum);
+        return Pseudonym.builder()
+            .hash(Arrays.copyOf(reversible, Sha256DeterministicTokenizationStrategy.HASH_SIZE_BYTES))
+            .build();
     }
 
     MapFunction getTextDigest(Transform.TextDigest transform) {

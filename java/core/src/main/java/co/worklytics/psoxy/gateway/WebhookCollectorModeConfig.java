@@ -38,6 +38,9 @@ public class WebhookCollectorModeConfig {
         configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.REQUIRE_AUTHORIZATION_HEADER)
             .map(Boolean::parseBoolean)
             .ifPresent(builder::requireAuthorizationHeader);
+        configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.COLLECTION_ENABLED)
+            .map(Boolean::parseBoolean)
+            .ifPresent(builder::collectionEnabled);
         configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.WEBHOOK_OUTPUT)
             .ifPresent(builder::webhookOutput);
         configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.WEBHOOK_BATCH_OUTPUT)
@@ -92,6 +95,20 @@ public class WebhookCollectorModeConfig {
     @NonNull
     @Builder.Default
     Boolean requireAuthorizationHeader = true;
+
+    /**
+     * When false, discovery documents are still served, but webhook payloads are not stored.
+     *
+     * AWS leaves this false on the first apply. That apply deploys {@code /.well-known/*} without
+     * a JWT authorizer. A second apply sets this true, creates the authorizer, and starts
+     * collection. A request that reaches the collector after that has passed the authorizer.
+     *
+     * Defaults to false so a collector does not store unauthenticated payloads while the
+     * authorizer is absent. GCP modules set this true; they do not use that authorizer bootstrap.
+     */
+    @NonNull
+    @Builder.Default
+    Boolean collectionEnabled = false;
 
     /**
      * where any webhooks received by this collector should be sent.
@@ -204,6 +221,13 @@ public class WebhookCollectorModeConfig {
          * defaults to true
          */
         REQUIRE_AUTHORIZATION_HEADER,
+
+        /**
+         * When false, the collector serves discovery documents but does not store webhook payloads.
+         *
+         * AWS sets this from {@code collection_enabled} (default false). GCP modules set it true.
+         */
+        COLLECTION_ENABLED,
 
         /**
          * where any webhooks received by this collector should be sent.

@@ -2,7 +2,17 @@
 
 **Connector ID:** `codex-enterprise-analytics`
 
-**Availability:** Beta
+**Availability:** Deprecated
+
+> OpenAI is deprecating the `/v1/analytics/codex/workspaces/{WORKSPACE_ID}/usage` endpoint this
+> connector uses. New connections should use
+> [ChatGPT Enterprise Analytics](../chatgpt-enterprise-analytics/README.md) instead, which covers
+> the same Codex usage metrics plus ChatGPT usage via the combined endpoint. This connector remains
+> available for existing connections only. See OpenAI's
+> [migration guide](https://learn.chatgpt.com/docs/enterprise/analytics-api-migration) for the full
+> field-level contract - notably, `threads`/`turns` are renamed `chats`/`messages` on the new
+> endpoint, and the old `codex.enterprise.analytics.read` scope does not grant access to it (a new
+> Admin key with `enterprise.analytics.usage.read` is required).
 
 This API allows ChatGPT Enterprise and Codex administrators to pull daily Codex adoption and code
 review metrics for a workspace. It is intended for dashboarding, reporting, and trend analysis,

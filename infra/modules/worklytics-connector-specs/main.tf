@@ -196,9 +196,11 @@ EOT
         path_to_instance_parameters = "PSOXY_CHATGPT_ENTERPRISE_"
       })
     }
+    # DEPRECATED: OpenAI is deprecating the Codex-only /v1/analytics/codex/workspaces/{workspace_id}/usage
+    # endpoint this uses, in favor of the combined ChatGPT+Codex endpoint - see chatgpt-enterprise-analytics below.
     codex-enterprise-analytics = {
       source_kind : "codex-enterprise-analytics",
-      availability : "beta",
+      availability : "deprecated",
       enable_by_default : false,
       worklytics_connector_id : "codex-enterprise-analytics-psoxy"
       display_name : "Codex Enterprise Analytics"
@@ -223,6 +225,35 @@ EOT
       external_token_todo : templatefile("${path.module}/docs/chatgpt/codex-enterprise-analytics/instructions.tftpl", {
         workspace_id                = local.chat_gpt_enterprise_example_workspace_id,
         path_to_instance_parameters = "PSOXY_CODEX_ENTERPRISE_ANALYTICS_"
+      })
+    }
+    chatgpt-enterprise-analytics = {
+      source_kind : "chatgpt-enterprise-analytics",
+      availability : "beta",
+      enable_by_default : false,
+      worklytics_connector_id : "chatgpt-enterprise-analytics-psoxy"
+      display_name : "ChatGPT Enterprise Analytics"
+      worklytics_connector_name : "ChatGPT Enterprise Analytics via Psoxy"
+      target_host : "api.chatgpt.com"
+      source_auth_strategy : "oauth2_access_token"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN" # ChatGPT Admin Console "Admin key" (Bearer). A Platform API key is a different credential; see instructions.tftpl.
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      settings_to_provide = {
+        "Workspace Id" = local.chat_gpt_enterprise_example_workspace_id
+      }
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/v1/analytics/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/usage?start_time=${time_static.deployment.unix - 86400 * 30}&end_time=${time_static.deployment.unix}",
+      ]
+      external_token_todo : templatefile("${path.module}/docs/chatgpt/chatgpt-enterprise-analytics/instructions.tftpl", {
+        workspace_id                = local.chat_gpt_enterprise_example_workspace_id,
+        path_to_instance_parameters = "PSOXY_CHATGPT_ENTERPRISE_ANALYTICS_"
       })
     }
     claude = {

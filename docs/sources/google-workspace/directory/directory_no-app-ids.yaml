@@ -31,7 +31,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.users[*].id"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/admin/directory/v1/users/{accountId}"
     transforms:
@@ -63,7 +63,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.id"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/admin/directory/v1/groups"
     transforms:

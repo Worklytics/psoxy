@@ -317,9 +317,9 @@ resource "aws_cloudwatch_log_group" "webhook_collection_api_log" {
   kms_key_id        = var.logs_kms_key_arn
 }
 
-# routes will be deployed in the 'aws-webhook-collector' module; expect TWO routes per collector:
-# - one for the webhook collector itself (eg, `{instance-id}/*`, or something similar; everything that's NOT  jwks) - auth == JWT
-# - one for jwks (eg, `{instance-id}/.well-known/jwks.json`) - auth == NONE
+# routes will be deployed in the 'aws-webhook-collector' module:
+# - jwks (eg, `{instance-id}/.well-known/{proxy+}`) - auth == NONE; always
+# - collect (eg, `{instance-id}/collect`) - auth == JWT; only when collection_enabled is true
 
 ## End Webhook Collector API Gateway
 

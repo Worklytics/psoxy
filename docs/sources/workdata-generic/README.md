@@ -27,4 +27,4 @@ The connector enforces strict directory schemas incorporating an export identifi
 - Example Data (Items): [items0.ndjson](example-bulk/original/items0.ndjson) | [sanitized](example-bulk/sanitized/items0.ndjson)
 - Example Data (Accounts): [accounts0.ndjson](example-bulk/original/accounts0.ndjson) | [sanitized](example-bulk/sanitized/accounts0.ndjson)
 
-Please see the full documentation: [Connecting to Worklytics](https://docs.worklytics.co/psoxy/sources/workdata-generic).
+Please see the connector sections above for configuration and rules.
