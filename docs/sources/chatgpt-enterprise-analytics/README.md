@@ -61,24 +61,7 @@ for that setup.
 
 If you have an existing [Codex Enterprise Analytics](../codex-enterprise-analytics/README.md)
 connection, OpenAI's [migration guide](https://learn.chatgpt.com/docs/enterprise/analytics-api-migration)
-covers the full field-level contract; the points most relevant to this connector:
-
-- The old `codex.enterprise.analytics.read` scope does **not** grant access to this endpoint - you
-  need a new Admin key with `enterprise.analytics.usage.read` (see Prerequisites above).
-- `totals.threads`/`clients[].threads` become `chats`; `totals.turns`/`clients[].turns` become
-  `messages` - same rename this connector's own model already uses.
-- Unified totals include ChatGPT activity, so they're expected to exceed the old Codex-only totals
-  for the same workspace/day - this is not a data-quality regression.
-- Pagination cursors are not interchangeable between the two endpoints; a fresh `page`-less request
-  is required against this one.
-- `totals`/`models[]` are not guaranteed to equal the sum of `clients[]` - some credit/cost/token
-  usage can lack client attribution. Don't treat a mismatch as a bug.
-
-## Rate Limits
-
-Default: **30 requests/minute**, adjustable via the `DEFAULT` system setting on the data source
-connection. OpenAI does not publish a documented rate limit for this endpoint, so this is a
-conservative default.
+covers the full field-level contract.
 
 ## Examples
 
