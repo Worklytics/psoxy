@@ -16,6 +16,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.ErrorCauses;
 import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.HealthCheckResult;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
@@ -216,10 +217,15 @@ public class HealthCheckRequestHandler {
         }
 
         try {
-            rulesUtils.getRulesFromConfig(proxyConfig, envVarsConfigService);
+            if (proxyConfig.getRules().isPresent()) {
+                rulesUtils.getRulesFromConfig(proxyConfig, envVarsConfigService);
+            }
         } catch (InvalidRulesException e) {
             logInDev("Invalid RULES configuration: " + e.getMessage(), e);
             healthCheckResult.warningMessage("RULES configuration error: " + e.getErrorCause().name());
+        } catch (Throwable e) {
+            logInDev("Invalid RULES configuration: " + e.getMessage(), e);
+            healthCheckResult.warningMessage("RULES configuration error: " + ErrorCauses.RULES_INVALID.name());
         }
 
         // if SALT configured, as a hash of it to the health check, to enable detection of changes
