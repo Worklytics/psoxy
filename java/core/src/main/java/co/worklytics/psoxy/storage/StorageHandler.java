@@ -607,7 +607,7 @@ public class StorageHandler {
     }
 
     void warnIfParallelProcessingNotApplicable(StorageEventRequest request, BulkDataRules rules) {
-        if (!bulkModeConfig.isParallelProcessingEnabled()) {
+        if (bulkModeConfig.getParallelProcessingThreads().isEmpty()) {
             return;
         }
         if (rules instanceof RecordRules) {

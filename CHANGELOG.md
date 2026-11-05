@@ -5,7 +5,7 @@ in each release's notes.
 
 Changes to be including in future/planned release notes will be added here.
 
-## Unreleased
+## [0.7.4]
 
 - bulk (`RecordRules`): optional `PARALLEL_PROCESSING_THREADS` (positive integer, max `128`) for ordered parallel sanitization within a single file; Terraform bulk connectors accept `parallel_processing_threads` (deprecated env aliases `PARALLEL_RECORD_PROCESSING_THREADS` / `PARALLEL_RECORD_PROCESSING=true`). Logs a warning when set but matched rules are not `RecordRules`. Parallel workers share one genMetadata token scope for object metadata.
 

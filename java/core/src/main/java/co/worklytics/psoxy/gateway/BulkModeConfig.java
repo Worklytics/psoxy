@@ -162,17 +162,8 @@ public class BulkModeConfig {
         return additionalTransforms;
     }
 
-    public boolean isParallelProcessingEnabled() {
-        return getParallelProcessingThreads().isPresent();
-    }
-
     public Optional<Integer> getParallelProcessingThreads() {
         return Optional.ofNullable(parallelProcessingThreads);
-    }
-
-    public int getParallelProcessingThreadCount() {
-        return getParallelProcessingThreads()
-            .orElseThrow(() -> new IllegalStateException("Parallel processing is not enabled"));
     }
 
     @NoArgsConstructor

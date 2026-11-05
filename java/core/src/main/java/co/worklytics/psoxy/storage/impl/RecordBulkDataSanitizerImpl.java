@@ -120,7 +120,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
             recordWriter.beginRecordSet();
 
-            if (bulkModeConfig.isParallelProcessingEnabled()) {
+            if (bulkModeConfig.getParallelProcessingThreads().isPresent()) {
                 sanitizeRecordsInParallel(recordReader, recordWriter, compiledTransforms);
             } else {
                 sanitizeRecordsSequentially(recordReader, recordWriter, compiledTransforms);
@@ -144,10 +144,12 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                                              RecordWriter recordWriter,
                                              List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
         throws IOException {
-        int threadCount = bulkModeConfig.getParallelProcessingThreadCount();
+        int threadCount = bulkModeConfig.getParallelProcessingThreads().get();
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         Semaphore inFlight = new Semaphore(threadCount);
         OrderedParallelRecordOutput orderedOutput = new OrderedParallelRecordOutput(recordWriter);
+        // First sanitize/write failure wins; we stop reading new records, let in-flight tasks finish,
+        // then rethrow so the whole file fails (same as sequential path propagating IOException).
         AtomicReference<RuntimeException> processingFailure = new AtomicReference<>();
         GenMetadataTokenUsageAccumulator.FileScopeHandle genMetadataFileScope =
             genMetadataTokenUsage.currentFileScopeHandle();

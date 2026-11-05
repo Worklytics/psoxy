@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.gateway;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -24,8 +23,7 @@ class BulkModeConfigTest {
         BulkModeConfig config = BulkModeConfig.fromConfigService(
             configService, new ObjectMapper(new YAMLFactory()));
 
-        assertTrue(config.isParallelProcessingEnabled());
-        assertEquals(8, config.getParallelProcessingThreadCount());
+        assertEquals(Optional.of(8), config.getParallelProcessingThreads());
     }
 
     @Test
@@ -39,8 +37,7 @@ class BulkModeConfigTest {
         BulkModeConfig config = BulkModeConfig.fromConfigService(
             configService, new ObjectMapper(new YAMLFactory()));
 
-        assertTrue(config.isParallelProcessingEnabled());
-        assertEquals(6, config.getParallelProcessingThreadCount());
+        assertEquals(Optional.of(6), config.getParallelProcessingThreads());
     }
 
     @Test
@@ -52,9 +49,8 @@ class BulkModeConfigTest {
         BulkModeConfig config = BulkModeConfig.fromConfigService(
             configService, new ObjectMapper(new YAMLFactory()));
 
-        assertTrue(config.isParallelProcessingEnabled());
-        assertEquals(BulkModeConfig.DEFAULT_PARALLEL_PROCESSING_THREADS,
-            config.getParallelProcessingThreadCount());
+        assertEquals(Optional.of(BulkModeConfig.DEFAULT_PARALLEL_PROCESSING_THREADS),
+            config.getParallelProcessingThreads());
     }
 
     @Test
@@ -64,7 +60,7 @@ class BulkModeConfigTest {
         BulkModeConfig config = BulkModeConfig.fromConfigService(
             configService, new ObjectMapper(new YAMLFactory()));
 
-        assertFalse(config.isParallelProcessingEnabled());
+        assertTrue(config.getParallelProcessingThreads().isEmpty());
     }
 
     @Test
