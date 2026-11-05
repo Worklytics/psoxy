@@ -60,6 +60,7 @@ module "psoxy_lambda" {
       INPUT_BUCKET     = var.input_bucket
       OUTPUT_BUCKET    = module.sanitized_output_bucket.output_bucket
       CUSTOM_RULES_SHA = local.rules_hash
+      BULK_PROCESSING_TIMEOUT_SECONDS = "600"
     }
   )
 }

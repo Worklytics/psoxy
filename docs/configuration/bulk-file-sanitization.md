@@ -272,7 +272,7 @@ Record-oriented bulk sanitization (`RecordRules`) processes records one at a tim
 
 Example: `PARALLEL_PROCESSING_THREADS=8`
 
-In Terraform, set optional `parallel_processing_threads` on each bulk connector instead of raw environment variable names.
+In Terraform, set optional `parallel_processing_threads` on each bulk connector instead of raw environment variable names. Deployments set `BULK_PROCESSING_TIMEOUT_SECONDS` from the connector execution timeout so parallel work can abort before the runtime hard-kills the function.
 
 If `PARALLEL_PROCESSING_THREADS` is set but the matched rules for a file are not `RecordRules` (for example column-oriented CSV rules), parallel processing is not used and the proxy logs a warning for that file.
 

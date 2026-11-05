@@ -64,6 +64,19 @@ class BulkModeConfigTest {
     }
 
     @Test
+    void bulkProcessingTimeoutDefaultsWhenUnset() {
+        ConfigService configService = mockWithOutputBucket();
+
+        BulkModeConfig config = BulkModeConfig.fromConfigService(
+            configService, new ObjectMapper(new YAMLFactory()));
+
+        assertEquals(BulkModeConfig.DEFAULT_BULK_PROCESSING_TIMEOUT_SECONDS,
+            config.getBulkProcessingTimeoutSeconds());
+        assertEquals(BulkModeConfig.DEFAULT_BULK_PROCESSING_TIMEOUT_SECONDS - 30,
+            config.getParallelProcessingBudgetSeconds());
+    }
+
+    @Test
     void rejectsNonPositiveThreadCount() {
         ConfigService configService = mockWithOutputBucket();
         when(configService.getConfigPropertyAsOptional(BulkModeConfigProperty.PARALLEL_PROCESSING_THREADS))

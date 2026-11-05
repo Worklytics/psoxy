@@ -23,6 +23,22 @@ import lombok.Value;
 public class BulkModeConfig {
 
     /**
+     * Default worker count when legacy parallel enable flags are set without an explicit thread count.
+     */
+    public static final int DEFAULT_PARALLEL_PROCESSING_THREADS = 4;
+
+    /** Upper bound for {@link BulkModeConfigProperty#PARALLEL_PROCESSING_THREADS}. */
+    public static final int MAX_PARALLEL_PROCESSING_THREADS = 128;
+
+    /**
+     * Default bulk file-handling budget when {@link BulkModeConfigProperty#BULK_PROCESSING_TIMEOUT_SECONDS}
+     * is unset; should match typical bulk Lambda / Cloud Function timeouts in Terraform modules.
+     */
+    public static final int DEFAULT_BULK_PROCESSING_TIMEOUT_SECONDS = 600;
+
+    private static final int BULK_PROCESSING_TIMEOUT_HEADROOM_SECONDS = 30;
+
+    /**
      * Factory method to build config from ConfigService
      */
     public static BulkModeConfig fromConfigService(ConfigService configService, ObjectMapper yamlMapper) {
@@ -49,16 +65,13 @@ public class BulkModeConfig {
 
         resolveParallelProcessingThreads(configService).ifPresent(builder::parallelProcessingThreads);
 
+        configService.getConfigPropertyAsOptional(BulkModeConfigProperty.BULK_PROCESSING_TIMEOUT_SECONDS)
+            .map(value -> ConfigService.parseIntValue(
+                BulkModeConfigProperty.BULK_PROCESSING_TIMEOUT_SECONDS, value))
+            .ifPresent(builder::bulkProcessingTimeoutSeconds);
+
         return builder.build();
     }
-
-    /**
-     * Default worker count when legacy parallel enable flags are set without an explicit thread count.
-     */
-    public static final int DEFAULT_PARALLEL_PROCESSING_THREADS = 4;
-
-    /** Upper bound for {@link BulkModeConfigProperty#PARALLEL_PROCESSING_THREADS}. */
-    public static final int MAX_PARALLEL_PROCESSING_THREADS = 128;
 
     static Optional<Integer> resolveParallelProcessingThreads(ConfigService configService) {
         Optional<String> threadsValue = configService.getConfigPropertyAsOptional(
@@ -131,6 +144,13 @@ public class BulkModeConfig {
      */
     Integer parallelProcessingThreads;
 
+    /**
+     * Overall file-handling budget in seconds; should match the bulk connector execution timeout
+     * configured in infrastructure ({@link BulkModeConfigProperty#BULK_PROCESSING_TIMEOUT_SECONDS}).
+     */
+    @Builder.Default
+    int bulkProcessingTimeoutSeconds = DEFAULT_BULK_PROCESSING_TIMEOUT_SECONDS;
+
     public Optional<RecordRules.Format> getOutputFormat() {
         return Optional.ofNullable(outputFormat);
     }
@@ -166,6 +186,15 @@ public class BulkModeConfig {
         return Optional.ofNullable(parallelProcessingThreads);
     }
 
+    /**
+     * Time budget for parallel record processing within a file, in seconds. Shorter than
+     * {@link #getBulkProcessingTimeoutSeconds()} so the invocation can fail before the runtime
+     * hard-kills the function.
+     */
+    public int getParallelProcessingBudgetSeconds() {
+        return Math.max(1, bulkProcessingTimeoutSeconds - BULK_PROCESSING_TIMEOUT_HEADROOM_SECONDS);
+    }
+
     @NoArgsConstructor
     @AllArgsConstructor
     public enum BulkModeConfigProperty implements ConfigService.ConfigProperty {
@@ -185,6 +214,12 @@ public class BulkModeConfig {
         BUFFER_SIZE,
 
         COMPRESS_OUTPUT_ALWAYS,
+
+        /**
+         * Bulk file-handling execution timeout in seconds; should match the Lambda / Cloud Function
+         * timeout configured for the bulk connector instance.
+         */
+        BULK_PROCESSING_TIMEOUT_SECONDS,
 
         /**
          * Output format to use when writing sanitized data.

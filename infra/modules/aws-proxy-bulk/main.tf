@@ -90,6 +90,7 @@ module "psoxy_lambda" {
       INPUT_BUCKET     = aws_s3_bucket.input.bucket,
       OUTPUT_BUCKET    = aws_s3_bucket.sanitized.bucket,
       CUSTOM_RULES_SHA = local.rules_hash,
+      BULK_PROCESSING_TIMEOUT_SECONDS = "600",
     },
     var.new_relic_account_id != null && var.new_relic_account_id != "" ? {
       NEW_RELIC_ACCOUNT_ID     = var.new_relic_account_id

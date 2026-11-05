@@ -8,13 +8,17 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -140,19 +144,26 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         }
     }
 
+    /**
+     * Sanitizes records on a thread pool while preserving input order on output. A fatal sanitize
+     * or write error fails the entire file (augment failures are logged and omitted per record, as
+     * in sequential processing).
+     */
     private void sanitizeRecordsInParallel(RecordReader recordReader,
                                              RecordWriter recordWriter,
                                              List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
         throws IOException {
         int threadCount = bulkModeConfig.getParallelProcessingThreads().get();
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-        Semaphore inFlight = new Semaphore(threadCount);
-        OrderedParallelRecordOutput orderedOutput = new OrderedParallelRecordOutput(recordWriter);
-        // First sanitize/write failure wins; we stop reading new records, let in-flight tasks finish,
-        // then rethrow so the whole file fails (same as sequential path propagating IOException).
+        Semaphore pendingRecords = new Semaphore(threadCount);
+        OrderedParallelRecordOutput orderedOutput =
+            new OrderedParallelRecordOutput(recordWriter, pendingRecords);
         AtomicReference<RuntimeException> processingFailure = new AtomicReference<>();
         GenMetadataTokenUsageAccumulator.FileScopeHandle genMetadataFileScope =
             genMetadataTokenUsage.currentFileScopeHandle();
+        long deadlineNanos = System.nanoTime()
+            + TimeUnit.SECONDS.toNanos(bulkModeConfig.getParallelProcessingBudgetSeconds());
+        List<Future<?>> workerFutures = new ArrayList<>();
         long recordIndex = 0;
 
         try {
@@ -161,35 +172,35 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                 if (processingFailure.get() != null) {
                     break;
                 }
-                inFlight.acquire();
+                if (!pendingRecords.tryAcquire(remainingNanos(deadlineNanos), TimeUnit.NANOSECONDS)) {
+                    throw new IOException("Timed out waiting to schedule parallel bulk record processing");
+                }
                 final long index = recordIndex++;
                 final Map<String, Object> recordCopy = deepCopyRecord(record);
-                executor.submit(() -> genMetadataTokenUsage.withFileScope(genMetadataFileScope, () -> {
-                    try {
-                        if (processingFailure.get() != null) {
-                            return;
+                workerFutures.add(executor.submit(() -> genMetadataTokenUsage.withFileScope(
+                    genMetadataFileScope, () -> {
+                        boolean handedOffToOrderedOutput = false;
+                        try {
+                            if (processingFailure.get() != null) {
+                                return;
+                            }
+                            Optional<Map<String, Object>> sanitized =
+                                sanitizeRecordForOutput(recordCopy, compiledTransforms);
+                            orderedOutput.recordComplete(index, sanitized);
+                            handedOffToOrderedOutput = true;
+                        } catch (RuntimeException e) {
+                            noteProcessingFailure(processingFailure, e);
+                        } catch (IOException e) {
+                            noteProcessingFailure(processingFailure, new RuntimeException(e));
+                        } finally {
+                            if (!handedOffToOrderedOutput) {
+                                pendingRecords.release();
+                            }
                         }
-                        Optional<Map<String, Object>> sanitized =
-                            sanitizeRecordForOutput(recordCopy, compiledTransforms);
-                        orderedOutput.recordComplete(index, sanitized);
-                    } catch (RuntimeException e) {
-                        processingFailure.compareAndSet(null, e);
-                    } catch (IOException e) {
-                        processingFailure.compareAndSet(null, new RuntimeException(e));
-                    } finally {
-                        inFlight.release();
-                    }
-                }));
+                    })));
             }
 
-            inFlight.acquire(threadCount);
-            inFlight.release(threadCount);
-
-            executor.shutdown();
-            if (!executor.awaitTermination(1, TimeUnit.HOURS)) {
-                executor.shutdownNow();
-                throw new IOException("Timed out waiting for parallel bulk record processing");
-            }
+            awaitWorkerFutures(workerFutures, deadlineNanos, processingFailure);
 
             if (processingFailure.get() != null) {
                 throw processingFailure.get();
@@ -200,8 +211,57 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             Thread.currentThread().interrupt();
             throw new IOException("Parallel bulk record processing interrupted", e);
         } finally {
-            executor.shutdownNow();
+            shutdownExecutor(executor, deadlineNanos);
         }
+    }
+
+    private static long remainingNanos(long deadlineNanos) {
+        long remaining = deadlineNanos - System.nanoTime();
+        return Math.max(0, remaining);
+    }
+
+    private static void noteProcessingFailure(AtomicReference<RuntimeException> processingFailure,
+                                              RuntimeException failure) {
+        processingFailure.compareAndSet(null, failure);
+    }
+
+    private static void awaitWorkerFutures(List<Future<?>> workerFutures,
+                                           long deadlineNanos,
+                                           AtomicReference<RuntimeException> processingFailure)
+        throws IOException, InterruptedException {
+        for (Future<?> workerFuture : workerFutures) {
+            long remaining = remainingNanos(deadlineNanos);
+            if (remaining == 0) {
+                throw new IOException("Timed out waiting for parallel bulk record processing");
+            }
+            try {
+                workerFuture.get(remaining, TimeUnit.NANOSECONDS);
+            } catch (TimeoutException e) {
+                throw new IOException("Timed out waiting for parallel bulk record processing", e);
+            } catch (ExecutionException e) {
+                noteProcessingFailure(processingFailure, toRuntimeException(e.getCause()));
+            }
+        }
+    }
+
+    private static RuntimeException toRuntimeException(Throwable cause) {
+        if (cause instanceof RuntimeException runtimeException) {
+            return runtimeException;
+        }
+        return new RuntimeException(cause);
+    }
+
+    private static void shutdownExecutor(ExecutorService executor, long deadlineNanos) {
+        executor.shutdown();
+        try {
+            long remaining = remainingNanos(deadlineNanos);
+            if (remaining > 0 && executor.awaitTermination(remaining, TimeUnit.NANOSECONDS)) {
+                return;
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        executor.shutdownNow();
     }
 
     @SuppressWarnings("unchecked")

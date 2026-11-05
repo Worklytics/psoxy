@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import lombok.RequiredArgsConstructor;
+import java.util.concurrent.Semaphore;
 import lombok.extern.java.Log;
 
 /**
@@ -12,14 +12,23 @@ import lombok.extern.java.Log;
  * strictly in sequence. Safe to call {@link #recordComplete(long, Optional)} from multiple threads.
  */
 @Log
-@RequiredArgsConstructor
 class OrderedParallelRecordOutput {
 
     private final RecordWriter writer;
+    private final Semaphore backpressurePermits;
     private final Object writeLock = new Object();
     private long nextIndexToWrite = 0;
     private final TreeMap<Long, Optional<Map<String, Object>>> completed = new TreeMap<>();
     private IOException writeFailure;
+
+    OrderedParallelRecordOutput(RecordWriter writer) {
+        this(writer, null);
+    }
+
+    OrderedParallelRecordOutput(RecordWriter writer, Semaphore backpressurePermits) {
+        this.writer = writer;
+        this.backpressurePermits = backpressurePermits;
+    }
 
     /**
      * @param outcome empty if the record should be omitted from output; present if it should be written
@@ -54,6 +63,9 @@ class OrderedParallelRecordOutput {
                     writeFailure = e;
                     throw e;
                 }
+            }
+            if (backpressurePermits != null) {
+                backpressurePermits.release();
             }
         }
     }
