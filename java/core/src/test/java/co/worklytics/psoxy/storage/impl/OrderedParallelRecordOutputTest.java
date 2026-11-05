@@ -34,7 +34,7 @@ class OrderedParallelRecordOutputTest {
         ExecutorService executor = Executors.newFixedThreadPool(4);
         CountDownLatch startGate = new CountDownLatch(1);
         try {
-            submitDelayedRecord(executor, orderedOutput, startGate, 2, "second", 80);
+            orderedOutput.recordComplete(2, Optional.of(record("second")));
             submitDelayedRecord(executor, orderedOutput, startGate, 0, "first", 10);
             submitDelayedRecord(executor, orderedOutput, startGate, 1, "middle", 40);
 
