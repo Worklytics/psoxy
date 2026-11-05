@@ -257,8 +257,9 @@ module "api_connector" {
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
       EMAIL_CANONICALIZATION = var.email_canonicalization
-      CUSTOM_RULES_SHA = try(local.api_connector_rules_file_paths[each.key], null) != null ? filesha1(local.api_connector_rules_file_paths[each.key]) : (
-        try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
+      CUSTOM_RULES_SHA = try(
+        module.custom_api_connector_rules[each.key].rules_hash,
+        try(module.api_connector_rules_raw[each.key].rules_hash, null)
       )
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     },
@@ -281,6 +282,9 @@ module "custom_api_connector_rules" {
 
   prefix    = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   file_path = local.api_connector_rules_file_paths[each.key]
+
+  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
 }
 
 # Rules provisioned from rules_raw (content string, not file path)
@@ -291,6 +295,29 @@ module "api_connector_rules_raw" {
 
   prefix  = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   content = each.value
+
+  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
+}
+
+locals {
+  bulk_connector_s3_triggers = {
+    for k, v in var.bulk_connectors : k => {
+      file_pattern = try(var.custom_bulk_connector_arguments[k].file_pattern, v.file_pattern, null)
+      file_prefix  = try(var.custom_bulk_connector_arguments[k].file_prefix, v.file_prefix, null)
+      file_suffix  = try(var.custom_bulk_connector_arguments[k].file_suffix, v.file_suffix, null)
+    }
+  }
+}
+
+check "bulk_connector_s3_trigger_options_exclusive" {
+  assert {
+    condition = alltrue([
+      for k, t in local.bulk_connector_s3_triggers :
+      (t.file_pattern == null ? true : trimspace(t.file_pattern) == "") || (t.file_prefix == null && t.file_suffix == null)
+    ])
+    error_message = "Bulk connector S3 trigger: use file_pattern (EventBridge) OR file_prefix/file_suffix (native S3 notification), not both. Check custom_bulk_connector_arguments and bulk_connectors / custom_bulk_connectors."
+  }
 }
 
 module "bulk_connector" {
@@ -329,6 +356,9 @@ module "bulk_connector" {
   path_to_shared_ssm_parameters        = local.path_to_shared_secrets
   ssm_kms_key_ids                      = local.ssm_key_ids
   memory_size_mb                       = coalesce(try(var.custom_bulk_connector_arguments[each.key].memory_size_mb, null), each.value.memory_size_mb, 1024)
+  file_prefix                          = try(var.custom_bulk_connector_arguments[each.key].file_prefix, each.value.file_prefix, null)
+  file_suffix                          = try(var.custom_bulk_connector_arguments[each.key].file_suffix, each.value.file_suffix, null)
+  file_pattern                         = try(var.custom_bulk_connector_arguments[each.key].file_pattern, each.value.file_pattern, null)
   sanitized_expiration_days            = var.bulk_sanitized_expiration_days
   input_expiration_days                = var.bulk_input_expiration_days
   example_file                         = each.value.example_file
@@ -348,6 +378,9 @@ module "bulk_connector" {
       EMAIL_CANONICALIZATION = var.email_canonicalization
     },
     try(each.value.environment_variables, {}),
+    try(each.value.parallel_processing_threads, null) != null ? {
+      PARALLEL_PROCESSING_THREADS = tostring(each.value.parallel_processing_threads)
+    } : {},
     # If rules_raw is set and there's no custom override, pass it as RULES env var
     try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) != null ? {
       RULES = each.value.rules_raw
@@ -388,6 +421,7 @@ module "webhook_collectors" {
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   test_caller_role_arn                 = module.psoxy.webhook_test_caller_role_arn
   rules_file                           = try(local.webhook_collector_rules_file_paths[each.key], null)
+  collection_enabled                   = each.value.collection_enabled
   webhook_auth_public_keys             = each.value.auth_public_keys
   provision_auth_key                   = each.value.provision_auth_key
   output_path_prefix                   = each.value.output_path_prefix
@@ -396,6 +430,7 @@ module "webhook_collectors" {
   example_identity                     = try(each.value.example_identity, null)
 
   todos_as_local_files      = var.todos_as_local_files
+  todo_step                 = var.todo_step
   allowed_webhook_ip_blocks = var.allowed_webhook_ip_blocks
 
   enable_bedrock = try(each.value.enable_gen_metadata, false)

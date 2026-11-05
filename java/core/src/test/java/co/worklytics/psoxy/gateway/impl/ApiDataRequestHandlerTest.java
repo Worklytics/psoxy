@@ -663,7 +663,7 @@ class ApiDataRequestHandlerTest {
     void sanitizedApiResponseMetadata_includesOnlyProcessedDataFields() {
         Map<String, String> metadata = Map.of(
             ProcessedDataMetadataFields.RULES_SHA.getMetadataKey(), "abc123",
-            ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(), "v0.7.2",
+            ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(), "v0.7.3",
             ApiDataOutputUtils.OutputObjectMetadata.REQUEST_BODY.name(), "base64body",
             ApiDataOutputUtils.OutputObjectMetadata.QUERY_STRING.name(), "foo=bar",
             ApiDataOutputUtils.OutputObjectMetadata.PATH.name(), "users/me"
@@ -674,7 +674,7 @@ class ApiDataRequestHandlerTest {
 
         assertEquals("abc123",
             responseMetadata.get(ProcessedDataMetadataFields.RULES_SHA.getHttpHeader()));
-        assertEquals("v0.7.2",
+        assertEquals("v0.7.3",
             responseMetadata.get(ProcessedDataMetadataFields.PROXY_VERSION.getHttpHeader()));
         assertEquals(2, responseMetadata.size());
         assertFalse(responseMetadata.containsKey(
@@ -1049,6 +1049,39 @@ class ApiDataRequestHandlerTest {
         assertEquals(redirectedContent, sanitizedBodyCaptor.getValue());
 
         assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+    }
+
+    @Test
+    @SneakyThrows
+    void handle_missingRequiredConfig_returnsPreconditionFailedWithoutSourceCall() {
+        setup("zoom", "api.zoom.us");
+        ApiDataRequestHandler spy = spy(handler);
+
+        when(handler.sourceAuthStrategy.getRequiredConfigProperties()).thenReturn(
+            Set.of(co.worklytics.psoxy.gateway.impl.oauth.AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID,
+                co.worklytics.psoxy.gateway.impl.oauth.AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET));
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/v2/users");
+        when(request.getQuery()).thenReturn(Optional.empty());
+        when(request.getHeader(any())).thenReturn(Optional.empty());
+        when(request.getClientIp()).thenReturn(Optional.empty());
+        when(request.isHttps()).thenReturn(Optional.of(true));
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        spy.sanitizer = sanitizer;
+
+        HttpEventResponse response = spy.handle(request,
+            ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
+
+        verify(spy, never()).getRequestFactory(any());
+        assertEquals(HttpStatus.SC_PRECONDITION_FAILED, response.getStatusCode());
+        assertEquals(ErrorCauses.CONNECTION_SETUP.name(),
+            response.getHeaders().get(ProcessedDataMetadataFields.ERROR.getHttpHeader()));
+        assertTrue(response.getBody().contains("CLIENT_ID"));
+        assertTrue(response.getBody().contains("CLIENT_SECRET"));
     }
 
     @Test

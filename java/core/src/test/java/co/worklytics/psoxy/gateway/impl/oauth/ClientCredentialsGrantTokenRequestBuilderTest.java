@@ -130,8 +130,8 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
 
         when(secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
             .thenReturn(clientId);
-        when(configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT))
-            .thenReturn(tokenEndpoint);
+        when(configService.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT))
+            .thenReturn(Optional.of(tokenEndpoint));
         when(configService.getConfigPropertyAsOptional(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.TOKEN_SCOPE))
             .thenReturn(Optional.of("https://graph.microsoft.com/.default"));
 

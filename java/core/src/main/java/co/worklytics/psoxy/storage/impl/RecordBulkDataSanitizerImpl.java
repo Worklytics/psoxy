@@ -8,8 +8,18 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +44,7 @@ import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.gateway.BulkModeConfig;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.impl.AugmentProcessor;
+import co.worklytics.psoxy.impl.gen.GenMetadataTokenUsageAccumulator;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -69,6 +80,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
     SanitizerUtils sanitizerUtils;
+
+    @Inject
+    GenMetadataTokenUsageAccumulator genMetadataTokenUsage;
 
     RecordRules rules;
 
@@ -107,25 +121,175 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         RecordReader recordReader = createReader(format, reader, in);
         OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
              RecordWriter recordWriter = createWriter(outputFormat, writer, out)) {
-            
+
             recordWriter.beginRecordSet();
-            
-            Map<String, Object> record;
-            while ((record = recordReader.readRecord()) != null) {
-                try {
-                    Map<String, Object> sanitized = sanitizeRecord(record, compiledTransforms);
-                    if (ObjectUtils.isNotEmpty(rules.getAugments())) {
-                        augmentProcessor.ensureTopLevelAugmentProperties(
-                            sanitized, rules.getAugments());
-                    }
-                    recordWriter.writeRecord(sanitized);
-                } catch (UnmatchedPseudonymization e) {
-                    log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
-                }
+
+            if (bulkModeConfig.getParallelProcessingThreads().isPresent()) {
+                sanitizeRecordsInParallel(recordReader, recordWriter, compiledTransforms);
+            } else {
+                sanitizeRecordsSequentially(recordReader, recordWriter, compiledTransforms);
             }
-            
+
             recordWriter.endRecordSet();
         }
+    }
+
+    private void sanitizeRecordsSequentially(RecordReader recordReader,
+                                             RecordWriter recordWriter,
+                                             List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
+        throws IOException {
+        Map<String, Object> record;
+        while ((record = recordReader.readRecord()) != null) {
+            writeSanitizedRecord(recordWriter, record, compiledTransforms);
+        }
+    }
+
+    /**
+     * Sanitizes records on a thread pool while preserving input order on output. A fatal sanitize
+     * or write error fails the entire file (augment failures are logged and omitted per record, as
+     * in sequential processing).
+     */
+    private void sanitizeRecordsInParallel(RecordReader recordReader,
+                                             RecordWriter recordWriter,
+                                             List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
+        throws IOException {
+        int threadCount = bulkModeConfig.getParallelProcessingThreads().get();
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        Semaphore pendingRecords = new Semaphore(threadCount);
+        OrderedParallelRecordOutput orderedOutput =
+            new OrderedParallelRecordOutput(recordWriter, pendingRecords);
+        AtomicReference<RuntimeException> processingFailure = new AtomicReference<>();
+        GenMetadataTokenUsageAccumulator.FileScopeHandle genMetadataFileScope =
+            genMetadataTokenUsage.currentFileScopeHandle();
+        long deadlineNanos = System.nanoTime()
+            + TimeUnit.SECONDS.toNanos(bulkModeConfig.getParallelProcessingBudgetSeconds());
+        List<Future<?>> workerFutures = new ArrayList<>();
+        long recordIndex = 0;
+
+        try {
+            Map<String, Object> record;
+            while ((record = recordReader.readRecord()) != null) {
+                if (processingFailure.get() != null) {
+                    break;
+                }
+                if (!pendingRecords.tryAcquire(remainingNanos(deadlineNanos), TimeUnit.NANOSECONDS)) {
+                    throw new IOException("Timed out waiting to schedule parallel bulk record processing");
+                }
+                final long index = recordIndex++;
+                final Map<String, Object> recordCopy = deepCopyRecord(record);
+                workerFutures.add(executor.submit(() -> genMetadataTokenUsage.withFileScope(
+                    genMetadataFileScope, () -> {
+                        boolean handedOffToOrderedOutput = false;
+                        try {
+                            if (processingFailure.get() != null) {
+                                return;
+                            }
+                            Optional<Map<String, Object>> sanitized =
+                                sanitizeRecordForOutput(recordCopy, compiledTransforms);
+                            orderedOutput.recordComplete(index, sanitized);
+                            handedOffToOrderedOutput = true;
+                        } catch (RuntimeException e) {
+                            noteProcessingFailure(processingFailure, e);
+                        } catch (IOException e) {
+                            noteProcessingFailure(processingFailure, new RuntimeException(e));
+                        } finally {
+                            if (!handedOffToOrderedOutput) {
+                                pendingRecords.release();
+                            }
+                        }
+                    })));
+            }
+
+            awaitWorkerFutures(workerFutures, deadlineNanos, processingFailure);
+
+            if (processingFailure.get() != null) {
+                throw processingFailure.get();
+            }
+
+            orderedOutput.assertFullyDrained();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Parallel bulk record processing interrupted", e);
+        } finally {
+            shutdownExecutor(executor, deadlineNanos);
+        }
+    }
+
+    private static long remainingNanos(long deadlineNanos) {
+        long remaining = deadlineNanos - System.nanoTime();
+        return Math.max(0, remaining);
+    }
+
+    private static void noteProcessingFailure(AtomicReference<RuntimeException> processingFailure,
+                                              RuntimeException failure) {
+        processingFailure.compareAndSet(null, failure);
+    }
+
+    private static void awaitWorkerFutures(List<Future<?>> workerFutures,
+                                           long deadlineNanos,
+                                           AtomicReference<RuntimeException> processingFailure)
+        throws IOException, InterruptedException {
+        for (Future<?> workerFuture : workerFutures) {
+            long remaining = remainingNanos(deadlineNanos);
+            if (remaining == 0) {
+                throw new IOException("Timed out waiting for parallel bulk record processing");
+            }
+            try {
+                workerFuture.get(remaining, TimeUnit.NANOSECONDS);
+            } catch (TimeoutException e) {
+                throw new IOException("Timed out waiting for parallel bulk record processing", e);
+            } catch (ExecutionException e) {
+                noteProcessingFailure(processingFailure, toRuntimeException(e.getCause()));
+            }
+        }
+    }
+
+    private static RuntimeException toRuntimeException(Throwable cause) {
+        if (cause instanceof RuntimeException runtimeException) {
+            return runtimeException;
+        }
+        return new RuntimeException(cause);
+    }
+
+    private static void shutdownExecutor(ExecutorService executor, long deadlineNanos) {
+        executor.shutdown();
+        try {
+            long remaining = remainingNanos(deadlineNanos);
+            if (remaining > 0 && executor.awaitTermination(remaining, TimeUnit.NANOSECONDS)) {
+                return;
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        executor.shutdownNow();
+    }
+
+    @SuppressWarnings("unchecked")
+    Map<String, Object> deepCopyRecord(Map<String, Object> record) {
+        return objectMapper.convertValue(record, Map.class);
+    }
+
+    private void writeSanitizedRecord(RecordWriter recordWriter,
+                                      Map<String, Object> record,
+                                      List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
+        throws IOException {
+        Optional<Map<String, Object>> sanitized = sanitizeRecordForOutput(record, compiledTransforms);
+        if (sanitized.isPresent()) {
+            recordWriter.writeRecord(sanitized.get());
+        }
+    }
+
+    /**
+     * @return sanitized record to write, or empty if the record should be skipped
+     */
+    Optional<Map<String, Object>> sanitizeRecordForOutput(
+        Map<String, Object> record,
+        List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) {
+        Map<String, Object> sanitized = sanitizeRecord(record, compiledTransforms);
+        if (ObjectUtils.isNotEmpty(rules.getAugments())) {
+            augmentProcessor.ensureTopLevelAugmentProperties(sanitized, rules.getAugments());
+        }
+        return Optional.of(sanitized);
     }
 
     RecordReader createReader(RecordRules.Format format, Reader reader, InputStream in) throws IOException {
@@ -220,8 +384,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
      * Apply augments then transforms to a single record.
      */
     Map<String, Object> sanitizeRecord(Map<String, Object> document,
-                                       List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
-            throws UnmatchedPseudonymization {
+                                       List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) {
         if (ObjectUtils.isNotEmpty(rules.getAugments())) {
             augmentProcessor.applyAugments(rules.getAugments(), document);
         }
@@ -234,10 +397,8 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
      * @param document JSON "document object"
      * @param compiledTransforms ordered list of compiled transforms
      * @return the transformed document
-     * @throws UnmatchedPseudonymization if a pseudonymization transform should be applied, but nothing matches the path
      */
-    Map<String, Object> applyTransforms(Map<String, Object> document, List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
-            throws UnmatchedPseudonymization {
+    Map<String, Object> applyTransforms(Map<String, Object> document, List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) {
         for (Triple<JsonPath, RecordTransform, MapFunction> compiledTransform : compiledTransforms) {
             if (compiledTransform.getMiddle() instanceof RecordTransform.Pseudonymize) {
                 Object matches = null;
@@ -302,6 +463,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         } else if (transform instanceof RecordTransform.Tokenize) {
             return sanitizerUtils.getTransformImpl(pseudonymizer, Transform.Tokenize.builder()
                 .jsonPaths(transform.getPaths())
+                .includeEncrypted(true)
                 .build());
         } else if (transform instanceof RecordTransform.TextDigest) {
             return sanitizerUtils.getTransformImpl(pseudonymizer, Transform.TextDigest.builder()

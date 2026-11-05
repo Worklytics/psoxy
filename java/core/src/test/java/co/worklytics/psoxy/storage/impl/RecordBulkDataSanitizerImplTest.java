@@ -145,6 +145,49 @@ class RecordBulkDataSanitizerImplTest {
 
     }
 
+    @SneakyThrows
+    @Test
+    void parallelRecordProcessingMatchesSequentialOutput() {
+        String rulesYaml = "---\n" +
+            "format: \"NDJSON\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n";
+
+        Container container = DaggerRecordBulkDataSanitizerImplTest_Container.builder()
+            .forConfigService(new Container.ForConfigService() {
+                @Provides
+                @Singleton
+                public ConfigService configService() {
+                    ConfigService mock = MockModules.provideMock(ConfigService.class);
+                    when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
+                        .thenReturn(Optional.of(rulesYaml));
+                    when(mock.getConfigPropertyOrError(eq(BulkModeConfig.BulkModeConfigProperty.OUTPUT_BUCKET)))
+                        .thenReturn("output-bucket");
+                    when(mock.getConfigPropertyAsOptional(
+                        eq(BulkModeConfig.BulkModeConfigProperty.PARALLEL_PROCESSING_THREADS)))
+                        .thenReturn(Optional.of("4"));
+                    return mock;
+                }
+            })
+            .build();
+        container.inject(this);
+
+        outputStream = new ByteArrayOutputStream();
+        outputStreamSupplier = () -> outputStream;
+
+        final String objectPath = "export-20231128/file.ndjson";
+        final String pathToOriginal = "bulk/example.ndjson";
+        final String pathToSanitized = "bulk/example-sanitized.ndjson";
+        storageHandler.handle(BulkDataTestUtils.request(objectPath),
+            BulkDataTestUtils.transform(rules),
+            BulkDataTestUtils.inputStreamSupplier(pathToOriginal),
+            outputStreamSupplier);
+
+        assertEquals(new String(TestUtils.getData(pathToSanitized)),
+            new String(outputStream.toByteArray()));
+    }
+
 
     @SneakyThrows
     @Test

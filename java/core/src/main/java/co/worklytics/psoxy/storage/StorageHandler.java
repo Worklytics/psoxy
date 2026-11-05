@@ -33,6 +33,7 @@ import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
 import com.avaulta.gateway.rules.PathTemplateUtils;
 import com.avaulta.gateway.rules.PathTemplateUtils.Match;
+import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.annotations.VisibleForTesting;
 import co.worklytics.psoxy.Pseudonymizer;
@@ -238,6 +239,14 @@ public class StorageHandler {
                                        Supplier<InputStream> inputStreamSupplier,
                                        Supplier<OutputStream> outputStreamSupplier) {
 
+        String objectPath = formatObjectPath(request.getSourceBucketName(), request.getSourceObjectPath());
+
+        if (getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isEmpty()) {
+            log.info("skipped " + objectPath + " - no applicable rules");
+            return null;
+        }
+
+        log.info("Processing object " + objectPath);
 
         this.validate(request, transform, inputStreamSupplier);
 
@@ -449,6 +458,11 @@ public class StorageHandler {
     }
 
 
+    /** Bucket and object key as logged for bulk storage events (e.g. {@code my-bucket/path/to/file.csv}). */
+    public static String formatObjectPath(String bucketName, String objectKey) {
+        return bucketName + "/" + objectKey;
+    }
+
     /**
      * get applicable rules, if any
      *
@@ -507,6 +521,10 @@ public class StorageHandler {
     void validate(StorageEventRequest request,
                   StorageHandler.ObjectTransform transform,
                   Supplier<InputStream> inputStreamSupplier) {
+
+        if (getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isEmpty()) {
+            return;
+        }
         
         // Skip validation for binary formats like Parquet, as text-based validation corrupts/fails
         if (isSupportedBinaryType(request)) {
@@ -557,19 +575,21 @@ public class StorageHandler {
         // the full-file process resets again).
         genMetadataTokenUsage.reset();
 
+        Optional<BulkDataRules> applicableRules =
+            getApplicableRules(transform.getRules(), request.getSourceObjectPath());
+
+        if (applicableRules.isEmpty()) {
+            return;
+        }
+
+        warnIfParallelProcessingNotApplicable(request, applicableRules.get());
+
         int bufferSize = getBufferSize();
 
         try (
             InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
             OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier)
         ) {
-
-            Optional<BulkDataRules> applicableRules =
-                getApplicableRules(transform.getRules(), request.getSourceObjectPath());
-
-            if (applicableRules.isEmpty()) {
-                throw new IllegalArgumentException("No applicable rules found for " + request.getSourceObjectPath());
-            }
 
             BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
 
@@ -584,6 +604,19 @@ public class StorageHandler {
                 + " outputTokens=" + usage.getOutputTokens()
                 + " path=" + request.getSourceObjectPath());
         }
+    }
+
+    void warnIfParallelProcessingNotApplicable(StorageEventRequest request, BulkDataRules rules) {
+        if (bulkModeConfig.getParallelProcessingThreads().isEmpty()) {
+            return;
+        }
+        if (rules instanceof RecordRules) {
+            return;
+        }
+        log.warning(BulkModeConfig.BulkModeConfigProperty.PARALLEL_PROCESSING_THREADS.name()
+            + " is configured but rules for object " + request.getSourceObjectPath()
+            + " are not RecordRules (found " + rules.getClass().getSimpleName()
+            + "); parallel processing applies only to record-oriented bulk rules and is ignored for this file.");
     }
 
 

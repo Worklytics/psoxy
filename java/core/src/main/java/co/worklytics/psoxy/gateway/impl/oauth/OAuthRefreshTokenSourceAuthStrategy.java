@@ -487,8 +487,16 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             // only lock if we're using a shared token across processes
             boolean lockNeeded = sourceAuthStrategy.useSharedToken();
 
-            boolean acquired =
-                !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, TOKEN_LOCK_DURATION);
+            boolean acquired;
+            if (lockNeeded) {
+                try {
+                    acquired = lockService.acquire(TOKEN_REFRESH_LOCK_ID, TOKEN_LOCK_DURATION);
+                } catch (RuntimeException e) {
+                    throw new IOException("Cannot acquire OAuth token refresh lock: " + e.getMessage(), e);
+                }
+            } else {
+                acquired = true;
+            }
 
             AccessToken token;
             if (acquired) {

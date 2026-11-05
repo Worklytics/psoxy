@@ -13,7 +13,7 @@ Administrators can use it to retrieve this data for archival or Data Loss Preven
 
 This API is designed for regularly downloading data diffs to synchronize an offline database for data compliance, rather than mass export. The initial data sync will take longer, but subsequent syncs will be faster as only the diffs need to be downloaded.
 
-A workspace **Owner** creates the key at [https://admin.openai.com](https://admin.openai.com): select the ChatGPT workspace, then **Credentials → Admin keys → Create new admin key**. Choose **Custom** and set **Conversation messages** to **Read**. If the workspace uses Codex, also set **Codex logs** to **Read**. See [Managing Admin keys in Admin Console](https://help.openai.com/en/articles/20001407-managing-admin-keys-in-admin-console) and the [Admin API reference](https://chatgpt.com/public/admin/api-reference#tag/Introduction) (authorization is in the Introduction). Only an Owner can grant Conversation messages. An Admin can grant categories such as audit, authentication, or app logs; those alone do not include conversation usage.
+A workspace **Owner** creates the key at [https://admin.openai.com](https://admin.openai.com): select the ChatGPT workspace, then **Credentials → Admin keys → Create new admin key**. Choose **Custom** and set **Conversation messages** to **Read**. If the workspace uses Codex, also set **Codex logs** to **Read**. See [Required scopes](#required-scopes) below for the full list, [Managing Admin keys in Admin Console](https://help.openai.com/en/articles/20001407-managing-admin-keys-in-admin-console), and the [Admin API reference](https://chatgpt.com/public/admin/api-reference#tag/Introduction) (authorization is in the Introduction). Only an Owner can grant Conversation messages. An Admin can grant categories such as audit, authentication, or app logs; those alone do not include conversation usage.
 
 **Admin keys** are available on ChatGPT Enterprise, Edu, and Healthcare workspaces. If **Credentials** lists only **Access Tokens**, this workspace does not have Admin keys. An Access Token cannot authorize these compliance calls. Confirm the top-left selector is the ChatGPT workspace, not the organization, and that you are an Owner of that workspace.
 
@@ -26,6 +26,30 @@ That Admin key is a different credential from a [Platform API key](https://platf
 Psoxy allow-lists the compliance paths below and sanitizes whatever Worklytics requests. It does not call ChatGPT on its own.
 
 For a Psoxy connection (a proxy output bucket is set), Worklytics reads usage from `GET /v1/compliance/workspaces/{workspaceId}/logs` and `GET .../logs/{id}`, with event types `CONVERSATION_MESSAGE` and `CODEX_LOG`. It also requests `GET .../projects` on every fetch unless the connection's `fetchProjects` option is `false`. `/projects` supplies project-creation items only.
+
+## Required scopes
+
+Admin keys are authorized per `event_type` requested from `/logs`. Each log category has its own fine-grained scope:
+
+| Event type | Scope | Worklytics fetches it today |
+|---|---|---|
+| `CONVERSATION_MESSAGE` | `chatgpt.enterprise.compliance_logs_platform.conversation_message.read` | yes (required) |
+| `CODEX_LOG` | `chatgpt.enterprise.compliance_logs_platform.codex_log.read` | yes, if the workspace uses Codex |
+| `APP_LOG` | `chatgpt.enterprise.compliance_logs_platform.app_log.read` | yes |
+| `CHATGPT_PLUGIN_SPREADSHEET` | `chatgpt.enterprise.compliance_logs_platform.chatgpt_plugin_spreadsheet.read` | yes |
+| `CHATGPT_PLUGIN_PRESENTATION` | `chatgpt.enterprise.compliance_logs_platform.chatgpt_plugin_presentation.read` | yes |
+| `CHATGPT_PLUGIN_DOCUMENT` | `chatgpt.enterprise.compliance_logs_platform.chatgpt_plugin_document.read` | yes |
+| `CUSTOM_AGENTS_LOG` | `chatgpt.enterprise.compliance_logs_platform.custom_agents_log.read` | yes |
+| `COSTS` | `chatgpt.enterprise.compliance_logs_platform.costs.read` | yes, if Organization Id is set |
+| `APP_AUTH_LOG` | `chatgpt.enterprise.compliance_logs_platform.app_auth_log.read` | not yet |
+| `AUDIT_LOG` | `chatgpt.enterprise.compliance_logs_platform.audit_log.read` | not yet |
+| `AUTH_LOG` | `chatgpt.enterprise.compliance_logs_platform.auth_log.read` | not yet |
+| `CODEX_SECURITY_LOG` | `chatgpt.enterprise.compliance_logs_platform.codex_security_log.read` | not yet |
+| `AGENT_TRACES` | `chatgpt.enterprise.compliance_logs_platform.agent_traces.read` | not yet |
+
+Granting each category individually is the least-privilege option, but to grant every log type at once instead, use the broad `chatgpt.enterprise.compliance_logs_platform.read` scope — shown in the Admin portal's **Create Admin API key** modal as **Compliance logging platform → Read**. The legacy `chatgpt.enterprise.compliance_export.read` scope is also still accepted as an alias for that broad scope.
+
+That broad/legacy pair only covers Compliance Logs. It's a different scope family from the one gating the stateful `/projects` route (see `fetchProjects` below) — granting one does not grant the other, despite the similar `compliance_export` name.
 
 ## Instructions to Connect
 

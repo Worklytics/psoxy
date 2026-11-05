@@ -163,7 +163,7 @@ locals {
   # determine if the JAR is local and should be uploaded directly from plan-time variables
   is_local_jar            = var.deployment_bundle == null || !startswith(coalesce(var.deployment_bundle, "unknown"), "s3://")
   should_provision_bucket = var.artifacts_bucket_name == null && (local.is_local_jar || var.enable_remote_resources)
-  target_artifacts_bucket = coalesce(var.artifacts_bucket_name, try(aws_s3_bucket.artifacts[0].bucket, null))
+  target_artifacts_bucket = var.artifacts_bucket_name != null ? var.artifacts_bucket_name : try(aws_s3_bucket.artifacts[0].bucket, null)
   should_upload_object    = local.is_local_jar && (var.artifacts_bucket_name != null || local.should_provision_bucket)
 }
 
@@ -317,9 +317,9 @@ resource "aws_cloudwatch_log_group" "webhook_collection_api_log" {
   kms_key_id        = var.logs_kms_key_arn
 }
 
-# routes will be deployed in the 'aws-webhook-collector' module; expect TWO routes per collector:
-# - one for the webhook collector itself (eg, `{instance-id}/*`, or something similar; everything that's NOT  jwks) - auth == JWT
-# - one for jwks (eg, `{instance-id}/.well-known/jwks.json`) - auth == NONE
+# routes will be deployed in the 'aws-webhook-collector' module:
+# - jwks (eg, `{instance-id}/.well-known/{proxy+}`) - auth == NONE; always
+# - collect (eg, `{instance-id}/collect`) - auth == JWT; only when collection_enabled is true
 
 ## End Webhook Collector API Gateway
 

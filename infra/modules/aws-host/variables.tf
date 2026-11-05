@@ -304,8 +304,12 @@ variable "bulk_connectors" {
     instructions_template = optional(string)
     memory_size_mb        = optional(number)
     settings_to_provide   = optional(map(string), {})
-    enable_gen_metadata   = optional(bool, false)
-    environment_variables = optional(map(string), {})
+    enable_gen_metadata          = optional(bool, false)
+    parallel_processing_threads  = optional(number)
+    environment_variables        = optional(map(string), {})
+    file_prefix                  = optional(string) # S3 notification filter; only matching keys invoke the bulk Lambda
+    file_suffix           = optional(string) # S3 notification filter; only matching keys invoke the bulk Lambda
+    file_pattern          = optional(string) # EventBridge wildcard on object key; enables EventBridge trigger (mutually exclusive with file_prefix/file_suffix)
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -360,10 +364,22 @@ variable "custom_bulk_connector_rules" {
 variable "custom_bulk_connector_arguments" {
   type = map(object({
     memory_size_mb = optional(number)
+    file_prefix    = optional(string) # overrides bulk_connectors / custom_bulk_connectors value for this connector id
+    file_suffix    = optional(string)
+    file_pattern   = optional(string)
   }))
 
   description = "map of connector id --> arguments object"
   default     = {}
+
+  validation {
+    condition = alltrue([
+      for k, args in var.custom_bulk_connector_arguments :
+      (args.file_pattern == null ? true : trimspace(args.file_pattern) == "")
+      || (args.file_prefix == null && args.file_suffix == null)
+    ])
+    error_message = "custom_bulk_connector_arguments: file_pattern cannot be set together with file_prefix or file_suffix for the same connector id."
+  }
 }
 
 variable "custom_side_outputs" {
@@ -378,7 +394,8 @@ variable "custom_side_outputs" {
 
 variable "webhook_collectors" {
   type = map(object({
-    rules_file = string
+    rules_file         = string
+    collection_enabled = optional(bool, false)     # leave false for the first apply; set true and apply again to create the JWT authorizer and accept webhooks
     provision_auth_key = optional(object({         # whether to provision auth keys for webhook collector; if not provided, will not provision any
       rotation_days = optional(number, null)       # null means no rotation; if > 0, will rotate every N days
       key_spec      = optional(string, "RSA_2048") # RSA_2048, RSA_3072, or RSA_4096; defaults to RSA_2048, which should be sufficient this use-case

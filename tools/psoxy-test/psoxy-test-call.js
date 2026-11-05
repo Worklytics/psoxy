@@ -182,6 +182,10 @@ export default async function (options = {}) {
       additional: result.data
     });
 
+    if (options.healthCheck) {
+      throw new Error(errorMessage);
+    }
+
     if ([httpCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR,
       httpCodes.HTTP_STATUS_BAD_GATEWAY].includes(result.status)) {
       const logsURL = isAWS ? aws.getLogsURL(options) : gcp.getLogsURL(url);

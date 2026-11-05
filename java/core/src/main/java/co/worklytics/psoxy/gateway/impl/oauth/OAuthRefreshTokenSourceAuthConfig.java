@@ -14,8 +14,9 @@ public class OAuthRefreshTokenSourceAuthConfig {
 
     public static OAuthRefreshTokenSourceAuthConfig fromConfigService(ConfigService configService) {
         OAuthRefreshTokenSourceAuthConfigBuilder builder = OAuthRefreshTokenSourceAuthConfig.builder();
-        builder.refreshEndpoint(configService.getConfigPropertyOrError(
-            OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT));
+        configService.getConfigPropertyAsOptional(
+                OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT)
+            .ifPresent(builder::refreshEndpoint);
         configService.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID)
             .ifPresent(builder::clientId);
         configService.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.GRANT_TYPE)
