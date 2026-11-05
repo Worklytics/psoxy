@@ -59,6 +59,8 @@ public class HealthCheckRequestHandler {
     @Inject
     Lazy<SourceAuthStrategy> sourceAuthStrategy;
     @Inject
+    MissingConfigChecker missingConfigChecker;
+    @Inject
     ObjectMapper objectMapper;
     @Inject
     RulesUtils rulesUtils;
@@ -96,18 +98,7 @@ public class HealthCheckRequestHandler {
 
         Set<String> missing = new HashSet<>();
 
-        try {
-            missing.addAll(
-                sourceAuthStrategy.get().getRequiredConfigProperties().stream()
-                    .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
-                    .filter(configProperty -> secretStore.getConfigPropertyAsOptional(configProperty).isEmpty())
-                    .map(ConfigService.ConfigProperty::name)
-                    .collect(Collectors.toSet()));
-        } catch (Throwable e) {
-            // will fail if sourceAuthStrategy is not set up properly
-            logInDev(e.getMessage(), e);
-            missing = new HashSet<>();
-        }
+        missing.addAll(missingConfigChecker.findMissingRequiredConfigProperties());
 
         try {
             Optional<String> targetHost = apiModeConfig.getTargetHost();

@@ -10,10 +10,12 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import com.google.auth.Credentials;
@@ -68,6 +70,13 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
     public void setup() {
         GoogleCloudPlatformServiceAccountKeyAuthStrategyTest.Container container = DaggerGoogleCloudPlatformServiceAccountKeyAuthStrategyTest_Container.create();
         container.inject(this);
+    }
+
+    @Test
+    void getRequiredConfigProperties_excludesOptionalServiceAccountKey() {
+        assertEquals(
+            Set.of(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.OAUTH_SCOPES),
+            authStrategy.getRequiredConfigProperties());
     }
 
     @SneakyThrows

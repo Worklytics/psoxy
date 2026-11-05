@@ -158,6 +158,8 @@ public class ApiDataRequestHandler {
     NetworkSecurityUtils networkSecurityUtils;
     @Inject
     TargetOverrideRequestResolver targetOverrideRequestResolver;
+    @Inject
+    MissingConfigChecker missingConfigChecker;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -368,6 +370,22 @@ public class ApiDataRequestHandler {
             log.warning(String.format("%s. Blocked call by rules %s", logEntry,
                     objectMapper.writeValueAsString(rules.get())));
             return builder.build();
+        }
+
+        Set<String> missingRequiredConfig = missingConfigChecker.findMissingRequiredConfigProperties();
+        if (!missingRequiredConfig.isEmpty()) {
+            log.warning("API request blocked due to missing configuration: " + missingRequiredConfig);
+            ObjectNode body = objectMapper.createObjectNode();
+            ArrayNode missingArray = body.putArray("missingConfigProperties");
+            missingRequiredConfig.stream().sorted().forEach(missingArray::add);
+            return builder
+                    .statusCode(HttpStatus.SC_PRECONDITION_FAILED)
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                            ErrorCauses.CONNECTION_SETUP.name())
+                    .header(org.apache.http.HttpHeaders.CONTENT_TYPE,
+                            org.apache.http.entity.ContentType.APPLICATION_JSON.getMimeType())
+                    .body(objectMapper.writeValueAsString(body) + "\r\n")
+                    .build();
         }
 
         com.google.api.client.http.HttpRequest requestToSourceApi;

@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -36,6 +38,7 @@ import com.google.auth.oauth2.AccessToken;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
@@ -366,5 +369,32 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         assertTrue(strategy.isSourceAuthFailure(new IOException("invalid_grant: refresh token expired")));
         assertTrue(strategy.isSourceAuthFailure(new IOException("invalid_client")));
         assertFalse(strategy.isSourceAuthFailure(new IOException("Failed to parse stored access token JSON")));
+    }
+
+    @SneakyThrows
+    @Test
+    void refreshAccessToken_failsFastWhenLockAcquireThrows() {
+        Instant now = Instant.parse("2025-01-01T00:00:00Z");
+
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
+        strategy.oauthConfig = mockOauthConfig();
+        when(strategy.oauthConfig.getUseSharedToken()).thenReturn(Optional.of(true));
+        when(strategy.oauthConfig.getGrantType())
+            .thenReturn(Optional.of(AccountCredentialsGrantTokenRequestBuilder.GRANT_TYPE));
+
+        LockService lockService = mock(LockService.class);
+        when(lockService.acquire(any(), any()))
+            .thenThrow(new RuntimeException("Permission denied accessing lock secret"));
+
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler =
+            new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        tokenRefreshHandler.envVarsConfigService = MockModules.provideMock(EnvVarsConfigService.class);
+        tokenRefreshHandler.sourceAuthStrategy = strategy;
+        tokenRefreshHandler.clock = Clock.fixed(now, ZoneOffset.UTC);
+        tokenRefreshHandler.lockService = lockService;
+        tokenRefreshHandler.randomNumberGenerator = randomNumberGenerator;
+
+        assertThrows(IOException.class, tokenRefreshHandler::refreshAccessToken);
+        verify(lockService, times(1)).acquire(any(), any());
     }
 }
