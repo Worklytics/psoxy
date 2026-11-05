@@ -18,14 +18,29 @@ class BulkModeConfigTest {
     @Test
     void enablesParallelProcessingWhenThreadCountSet() {
         ConfigService configService = mockWithOutputBucket();
-        when(configService.getConfigPropertyAsOptional(BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING_THREADS))
+        when(configService.getConfigPropertyAsOptional(BulkModeConfigProperty.PARALLEL_PROCESSING_THREADS))
             .thenReturn(Optional.of("8"));
 
         BulkModeConfig config = BulkModeConfig.fromConfigService(
             configService, new ObjectMapper(new YAMLFactory()));
 
-        assertTrue(config.isParallelRecordProcessingEnabled());
-        assertEquals(8, config.getParallelRecordProcessingThreadCount());
+        assertTrue(config.isParallelProcessingEnabled());
+        assertEquals(8, config.getParallelProcessingThreadCount());
+    }
+
+    @Test
+    void acceptsDeprecatedParallelRecordProcessingThreadsEnvVar() {
+        ConfigService configService = mockWithOutputBucket();
+        when(configService.getConfigPropertyAsOptional(BulkModeConfigProperty.PARALLEL_PROCESSING_THREADS))
+            .thenReturn(Optional.empty());
+        when(configService.getConfigPropertyAsOptional(BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING_THREADS))
+            .thenReturn(Optional.of("6"));
+
+        BulkModeConfig config = BulkModeConfig.fromConfigService(
+            configService, new ObjectMapper(new YAMLFactory()));
+
+        assertTrue(config.isParallelProcessingEnabled());
+        assertEquals(6, config.getParallelProcessingThreadCount());
     }
 
     @Test
@@ -37,25 +52,25 @@ class BulkModeConfigTest {
         BulkModeConfig config = BulkModeConfig.fromConfigService(
             configService, new ObjectMapper(new YAMLFactory()));
 
-        assertTrue(config.isParallelRecordProcessingEnabled());
-        assertEquals(BulkModeConfig.DEFAULT_PARALLEL_RECORD_PROCESSING_THREADS,
-            config.getParallelRecordProcessingThreadCount());
+        assertTrue(config.isParallelProcessingEnabled());
+        assertEquals(BulkModeConfig.DEFAULT_PARALLEL_PROCESSING_THREADS,
+            config.getParallelProcessingThreadCount());
     }
 
     @Test
-    void parallelRecordProcessingDefaultsToDisabled() {
+    void parallelProcessingDefaultsToDisabled() {
         ConfigService configService = mockWithOutputBucket();
 
         BulkModeConfig config = BulkModeConfig.fromConfigService(
             configService, new ObjectMapper(new YAMLFactory()));
 
-        assertFalse(config.isParallelRecordProcessingEnabled());
+        assertFalse(config.isParallelProcessingEnabled());
     }
 
     @Test
     void rejectsNonPositiveThreadCount() {
         ConfigService configService = mockWithOutputBucket();
-        when(configService.getConfigPropertyAsOptional(BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING_THREADS))
+        when(configService.getConfigPropertyAsOptional(BulkModeConfigProperty.PARALLEL_PROCESSING_THREADS))
             .thenReturn(Optional.of("0"));
 
         assertThrows(IllegalArgumentException.class, () ->
@@ -65,7 +80,7 @@ class BulkModeConfigTest {
     @Test
     void rejectsExcessiveThreadCount() {
         ConfigService configService = mockWithOutputBucket();
-        when(configService.getConfigPropertyAsOptional(BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING_THREADS))
+        when(configService.getConfigPropertyAsOptional(BulkModeConfigProperty.PARALLEL_PROCESSING_THREADS))
             .thenReturn(Optional.of("1000"));
 
         assertThrows(IllegalArgumentException.class, () ->

@@ -47,49 +47,55 @@ public class BulkModeConfig {
         configService.getConfigPropertyAsOptional(BulkModeConfigProperty.ADDITIONAL_TRANSFORMS)
             .ifPresent(yaml -> builder.additionalTransforms(parseAdditionalTransforms(yaml, yamlMapper)));
 
-        resolveParallelRecordProcessingThreads(configService).ifPresent(builder::parallelRecordProcessingThreads);
+        resolveParallelProcessingThreads(configService).ifPresent(builder::parallelProcessingThreads);
 
         return builder.build();
     }
 
     /**
-     * Default worker count when legacy {@link BulkModeConfigProperty#PARALLEL_RECORD_PROCESSING} is
-     * {@code true} without {@link BulkModeConfigProperty#PARALLEL_RECORD_PROCESSING_THREADS}.
+     * Default worker count when legacy parallel enable flags are set without an explicit thread count.
      */
-    public static final int DEFAULT_PARALLEL_RECORD_PROCESSING_THREADS = 4;
+    public static final int DEFAULT_PARALLEL_PROCESSING_THREADS = 4;
 
-    /** Upper bound for {@link BulkModeConfigProperty#PARALLEL_RECORD_PROCESSING_THREADS}. */
-    public static final int MAX_PARALLEL_RECORD_PROCESSING_THREADS = 128;
+    /** Upper bound for {@link BulkModeConfigProperty#PARALLEL_PROCESSING_THREADS}. */
+    public static final int MAX_PARALLEL_PROCESSING_THREADS = 128;
 
-    static Optional<Integer> resolveParallelRecordProcessingThreads(ConfigService configService) {
+    static Optional<Integer> resolveParallelProcessingThreads(ConfigService configService) {
         Optional<String> threadsValue = configService.getConfigPropertyAsOptional(
-            BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING_THREADS);
+                BulkModeConfigProperty.PARALLEL_PROCESSING_THREADS)
+            .or(() -> configService.getConfigPropertyAsOptional(
+                BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING_THREADS));
         if (threadsValue.isPresent()) {
             String trimmed = threadsValue.get().trim();
             if (trimmed.isEmpty()) {
                 return Optional.empty();
             }
-            int threads = ConfigService.parseIntValue(
-                BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING_THREADS, trimmed);
+            BulkModeConfigProperty propertyUsed = configService.getConfigPropertyAsOptional(
+                    BulkModeConfigProperty.PARALLEL_PROCESSING_THREADS).isPresent()
+                ? BulkModeConfigProperty.PARALLEL_PROCESSING_THREADS
+                : BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING_THREADS;
+            int threads = ConfigService.parseIntValue(propertyUsed, trimmed);
             if (threads <= 0) {
                 throw new IllegalArgumentException(
-                    BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING_THREADS.name()
-                        + " must be a positive integer, got: " + threads);
+                    propertyUsed.name() + " must be a positive integer, got: " + threads);
             }
-            if (threads > MAX_PARALLEL_RECORD_PROCESSING_THREADS) {
+            if (threads > MAX_PARALLEL_PROCESSING_THREADS) {
                 throw new IllegalArgumentException(
-                    BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING_THREADS.name()
-                        + " must be <= " + MAX_PARALLEL_RECORD_PROCESSING_THREADS + ", got: " + threads);
+                    propertyUsed.name() + " must be <= " + MAX_PARALLEL_PROCESSING_THREADS
+                        + ", got: " + threads);
             }
             return Optional.of(threads);
         }
 
         boolean legacyEnabled = configService.getConfigPropertyAsOptional(
-                BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING)
+                BulkModeConfigProperty.PARALLEL_PROCESSING)
+            .map(Boolean::parseBoolean)
+            .orElse(false)
+            || configService.getConfigPropertyAsOptional(BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING)
             .map(Boolean::parseBoolean)
             .orElse(false);
         if (legacyEnabled) {
-            return Optional.of(DEFAULT_PARALLEL_RECORD_PROCESSING_THREADS);
+            return Optional.of(DEFAULT_PARALLEL_PROCESSING_THREADS);
         }
         return Optional.empty();
     }
@@ -120,10 +126,10 @@ public class BulkModeConfig {
     List<StorageHandler.ObjectTransform> additionalTransforms = Collections.emptyList();
 
     /**
-     * When set, record-oriented bulk sanitization uses this many worker threads and still writes
+     * When set, {@link RecordRules} bulk sanitization uses this many worker threads and still writes
      * output in input order within a single file-handling request.
      */
-    Integer parallelRecordProcessingThreads;
+    Integer parallelProcessingThreads;
 
     public Optional<RecordRules.Format> getOutputFormat() {
         return Optional.ofNullable(outputFormat);
@@ -156,18 +162,17 @@ public class BulkModeConfig {
         return additionalTransforms;
     }
 
-    public boolean isParallelRecordProcessingEnabled() {
-        return getParallelRecordProcessingThreads().isPresent();
+    public boolean isParallelProcessingEnabled() {
+        return getParallelProcessingThreads().isPresent();
     }
 
-    public Optional<Integer> getParallelRecordProcessingThreads() {
-        return Optional.ofNullable(parallelRecordProcessingThreads);
+    public Optional<Integer> getParallelProcessingThreads() {
+        return Optional.ofNullable(parallelProcessingThreads);
     }
 
-    public int getParallelRecordProcessingThreadCount() {
-        return getParallelRecordProcessingThreads()
-            .orElseThrow(() -> new IllegalStateException(
-                "Parallel record processing is not enabled"));
+    public int getParallelProcessingThreadCount() {
+        return getParallelProcessingThreads()
+            .orElseThrow(() -> new IllegalStateException("Parallel processing is not enabled"));
     }
 
     @NoArgsConstructor
@@ -197,15 +202,25 @@ public class BulkModeConfig {
         BULK_OUTPUT_FORMAT,
 
         /**
-         * When set to a positive integer (max {@link BulkModeConfig#MAX_PARALLEL_RECORD_PROCESSING_THREADS}),
-         * record-oriented bulk files sanitize records in parallel within a single invocation,
+         * When set to a positive integer (max {@link BulkModeConfig#MAX_PARALLEL_PROCESSING_THREADS}),
+         * {@link RecordRules} bulk files sanitize records in parallel within a single invocation,
          * preserving output record order.
+         */
+        PARALLEL_PROCESSING_THREADS,
+
+        /**
+         * Deprecated alias for {@link #PARALLEL_PROCESSING_THREADS}.
          */
         PARALLEL_RECORD_PROCESSING_THREADS,
 
         /**
-         * Legacy: when {@code true} and {@link #PARALLEL_RECORD_PROCESSING_THREADS} is unset, enables
-         * parallel processing with {@link BulkModeConfig#DEFAULT_PARALLEL_RECORD_PROCESSING_THREADS} threads.
+         * Legacy: when {@code true} and no thread-count property is set, enables parallel processing
+         * with {@link BulkModeConfig#DEFAULT_PARALLEL_PROCESSING_THREADS} threads.
+         */
+        PARALLEL_PROCESSING,
+
+        /**
+         * Deprecated alias for {@link #PARALLEL_PROCESSING}.
          */
         PARALLEL_RECORD_PROCESSING;
 

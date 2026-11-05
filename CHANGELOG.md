@@ -7,7 +7,7 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Unreleased
 
-- bulk (`RecordRules`): optional `PARALLEL_RECORD_PROCESSING_THREADS` (positive integer, max `128`) to sanitize records concurrently within a single file-handling request while preserving output order; Terraform bulk connectors accept optional `parallel_record_processing_threads` (legacy `PARALLEL_RECORD_PROCESSING=true` enables default `4` threads when the thread count is unset). Parallel workers share one genMetadata token accumulator scope so `psoxy-gen-metadata-*` object metadata is populated like serial processing.
+- bulk (`RecordRules`): optional `PARALLEL_PROCESSING_THREADS` (positive integer, max `128`) for ordered parallel sanitization within a single file; Terraform bulk connectors accept `parallel_processing_threads` (deprecated env aliases `PARALLEL_RECORD_PROCESSING_THREADS` / `PARALLEL_RECORD_PROCESSING=true`). Logs a warning when set but matched rules are not `RecordRules`. Parallel workers share one genMetadata token scope for object metadata.
 
 ## [0.7.3](https://github.com/Worklytics/psoxy/releases/tag/v0.7.3)
 - `chatgpt-enterprise-analytics` new connector in **beta**; imports per-user daily ChatGPT and Codex usage (chats, messages, credits/cost, token counts, per-client/per-model breakdowns, Codex code attribution) from OpenAI's ChatGPT Enterprise Analytics API; see [docs/sources/chatgpt-enterprise-analytics/README.md](docs/sources/chatgpt-enterprise-analytics/README.md)

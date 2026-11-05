@@ -277,9 +277,9 @@ variable "bulk_connectors" {
     settings_to_provide   = optional(map(string), {})
     available_memory_mb   = optional(number)
     timeout_seconds       = optional(number)
-    enable_gen_metadata   = optional(bool, false)
-    parallel_record_processing_threads = optional(number)
-    environment_variables = optional(map(string), {})
+    enable_gen_metadata          = optional(bool, false)
+    parallel_processing_threads  = optional(number)
+    environment_variables        = optional(map(string), {})
   }))
 
   description = "map of connector id  => bulk connectors to provision"

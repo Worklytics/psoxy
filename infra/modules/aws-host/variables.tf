@@ -304,10 +304,10 @@ variable "bulk_connectors" {
     instructions_template = optional(string)
     memory_size_mb        = optional(number)
     settings_to_provide   = optional(map(string), {})
-    enable_gen_metadata   = optional(bool, false)
-    parallel_record_processing_threads = optional(number)
-    environment_variables = optional(map(string), {})
-    file_prefix           = optional(string) # S3 notification filter; only matching keys invoke the bulk Lambda
+    enable_gen_metadata          = optional(bool, false)
+    parallel_processing_threads  = optional(number)
+    environment_variables        = optional(map(string), {})
+    file_prefix                  = optional(string) # S3 notification filter; only matching keys invoke the bulk Lambda
     file_suffix           = optional(string) # S3 notification filter; only matching keys invoke the bulk Lambda
     file_pattern          = optional(string) # EventBridge wildcard on object key; enables EventBridge trigger (mutually exclusive with file_prefix/file_suffix)
   }))

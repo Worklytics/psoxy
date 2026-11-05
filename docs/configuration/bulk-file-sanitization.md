@@ -268,11 +268,13 @@ On **AWS**, you can also limit which S3 uploads invoke the bulk Lambda at all (S
 
 #### Parallel record processing
 
-Record-oriented bulk sanitization (`RecordRules`) processes records one at a time by default. When transforms include slow remote work (for example LLM-based augments), set `PARALLEL_RECORD_PROCESSING_THREADS` to a positive integer (maximum `128`) on the bulk proxy instance. That enables parallel record processing within a single file-handling request; output is still written in input order. Omit the variable (or leave it blank) to keep sequential processing.
+Record-oriented bulk sanitization (`RecordRules`) processes records one at a time by default. When transforms include slow remote work (for example LLM-based augments), set `PARALLEL_PROCESSING_THREADS` to a positive integer (maximum `128`) on the bulk proxy instance. That enables parallel record processing within a single file-handling request; output is still written in input order. Omit the variable (or leave it blank) to keep sequential processing. Supported `RecordRules` formats include NDJSON, CSV, JSON array, and Parquet.
 
-Example: `PARALLEL_RECORD_PROCESSING_THREADS=8`
+Example: `PARALLEL_PROCESSING_THREADS=8`
 
-In Terraform, prefer the optional `parallel_record_processing_threads` field on each bulk connector (see below) instead of raw environment variable names.
+In Terraform, set optional `parallel_processing_threads` on each bulk connector instead of raw environment variable names.
+
+If `PARALLEL_PROCESSING_THREADS` is set but the matched rules for a file are not `RecordRules` (for example column-oriented CSV rules), parallel processing is not used and the proxy logs a warning for that file.
 
 Parallel processing applies to `RecordRules` only; column-oriented CSV rules are unchanged.
 

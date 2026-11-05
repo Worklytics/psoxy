@@ -120,7 +120,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
             recordWriter.beginRecordSet();
 
-            if (bulkModeConfig.isParallelRecordProcessingEnabled()) {
+            if (bulkModeConfig.isParallelProcessingEnabled()) {
                 sanitizeRecordsInParallel(recordReader, recordWriter, compiledTransforms);
             } else {
                 sanitizeRecordsSequentially(recordReader, recordWriter, compiledTransforms);
@@ -144,7 +144,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                                              RecordWriter recordWriter,
                                              List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
         throws IOException {
-        int threadCount = bulkModeConfig.getParallelRecordProcessingThreadCount();
+        int threadCount = bulkModeConfig.getParallelProcessingThreadCount();
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         Semaphore inFlight = new Semaphore(threadCount);
         OrderedParallelRecordOutput orderedOutput = new OrderedParallelRecordOutput(recordWriter);
