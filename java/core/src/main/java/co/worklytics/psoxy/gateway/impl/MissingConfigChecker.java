@@ -27,8 +27,10 @@ public class MissingConfigChecker {
     public Set<String> findMissingRequiredConfigProperties() {
         try {
             return sourceAuthStrategy.get().getRequiredConfigProperties().stream()
-                    .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
-                    .filter(configProperty -> secretStore.getConfigPropertyAsOptional(configProperty).isEmpty())
+                    .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty)
+                            .filter(value -> !value.isBlank()).isEmpty())
+                    .filter(configProperty -> secretStore.getConfigPropertyAsOptional(configProperty)
+                            .filter(value -> !value.isBlank()).isEmpty())
                     .map(ConfigService.ConfigProperty::name)
                     .collect(Collectors.toCollection(HashSet::new));
         } catch (Throwable e) {
