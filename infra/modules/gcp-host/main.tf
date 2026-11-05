@@ -565,6 +565,9 @@ module "bulk_connector" {
     },
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    try(each.value.parallel_processing_threads, null) != null ? {
+      PARALLEL_PROCESSING_THREADS = tostring(each.value.parallel_processing_threads)
+    } : {},
     try(each.value.enable_gen_metadata, false) ? {
       GEN_METADATA_BACKEND = "vertex"
     } : {},

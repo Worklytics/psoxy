@@ -7,18 +7,32 @@ import lombok.NoArgsConstructor;
 import lombok.Value;
 
 /**
- * Per-thread accumulator for genMetadata LLM token usage.
+ * Per-request accumulator for genMetadata LLM token usage.
  *
- * <p>Bulk processing resets at the start of each file on the worker thread; {@link #snapshot()}
- * feeds sanitized-object metadata on that same thread. Concurrent files therefore cannot clobber
- * each other's counts. Inference {@link #record} runs on the caller thread after {@code Future.get},
- * not on the chat-pool worker.
+ * <p>{@link #reset()} on the bulk/API worker thread starts a file scope; {@link #snapshot()} on that
+ * same thread reads totals for object metadata. {@link #record} uses that thread's scope when
+ * present. Parallel bulk record workers must run inference inside
+ * {@link #withFileScope(FileScopeHandle, Runnable)} so LLM calls on pool threads contribute to the
+ * same scope. Separate concurrent invocations on different threads keep isolated scopes via
+ * {@link ThreadLocal}.
  */
 @Singleton
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class GenMetadataTokenUsageAccumulator {
 
     private final ThreadLocal<Counters> current = ThreadLocal.withInitial(Counters::new);
+
+    /**
+     * Opaque handle to the active file scope on the thread that called {@link #reset()}.
+     */
+    @Value
+    public static class FileScopeHandle {
+        Counters counters;
+
+        private FileScopeHandle(Counters counters) {
+            this.counters = counters;
+        }
+    }
 
     /**
      * Record one completed LLM call. Null counts are treated as zero (provider omitted usage).
@@ -33,6 +47,30 @@ public class GenMetadataTokenUsageAccumulator {
 
     public Snapshot snapshot() {
         return current.get().snapshot();
+    }
+
+    /**
+     * Capture the request thread's file scope for propagation to parallel bulk workers.
+     */
+    public FileScopeHandle currentFileScopeHandle() {
+        return new FileScopeHandle(current.get());
+    }
+
+    /**
+     * Run {@code action} with the given file scope bound on the current thread (for worker threads).
+     */
+    public void withFileScope(FileScopeHandle handle, Runnable action) {
+        Counters previous = current.get();
+        current.set(handle.counters);
+        try {
+            action.run();
+        } finally {
+            if (previous != null) {
+                current.set(previous);
+            } else {
+                current.remove();
+            }
+        }
     }
 
     private static final class Counters {

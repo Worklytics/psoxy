@@ -266,6 +266,18 @@ This approach is useful for testing, but note that if you later run `terraform a
 
 On **AWS**, you can also limit which S3 uploads invoke the bulk Lambda at all (S3 notification prefix/suffix or EventBridge `file_pattern`). See [Bulk input triggers (S3)](../aws/bulk-s3-triggers.md).
 
+#### Parallel record processing
+
+Record-oriented bulk sanitization (`RecordRules`) processes records one at a time by default. When transforms include slow remote work (for example LLM-based augments), set `PARALLEL_PROCESSING_THREADS` to a positive integer (maximum `128`) on the bulk proxy instance. That enables parallel record processing within a single file-handling request; output is still written in input order. Omit the variable (or leave it blank) to keep sequential processing. Supported `RecordRules` formats include NDJSON, CSV, JSON array, and Parquet.
+
+Example: `PARALLEL_PROCESSING_THREADS=8`
+
+In Terraform, set optional `parallel_processing_threads` on each bulk connector instead of raw environment variable names. Deployments set `BULK_PROCESSING_TIMEOUT_SECONDS` from the connector execution timeout so parallel work can abort before the runtime hard-kills the function.
+
+If `PARALLEL_PROCESSING_THREADS` is set but the matched rules for a file are not `RecordRules` (for example column-oriented CSV rules), parallel processing is not used and the proxy logs a warning for that file.
+
+Parallel processing applies to `RecordRules` only; column-oriented CSV rules are unchanged.
+
 ### Troubleshooting
 
 If you encounter issues processing your files, check the logs of the Psoxy instance. The logs will give some indication of what went wrong, and may help you identify the issue.
