@@ -220,6 +220,7 @@ locals {
     ALLOW_ORIGINS      = "*" # TODO make configurable
     # AUTH_ISSUER                  = ""  # TODO: URL to collector itself, to be used to produce OpenID Connect Discovery Document
     REQUIRE_AUTHORIZATION_HEADER     = "true"
+    COLLECTION_ENABLED               = "true" # GCP authorizes inside the function, so collection stays on.
     WEBHOOK_OUTPUT                   = "https://pubsub.googleapis.com/${google_pubsub_topic.webhook_topic.id}"
     BATCH_MERGE_SUBSCRIPTION         = google_pubsub_subscription.webhook_subscription.id
     BATCH_SIZE                       = local.batch_size

@@ -16,6 +16,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.ErrorCauses;
 import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.HealthCheckResult;
 import co.worklytics.psoxy.ProcessedDataMetadataFields;
@@ -33,7 +34,9 @@ import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
+import co.worklytics.psoxy.rules.InvalidRulesException;
 import co.worklytics.psoxy.rules.RulesUtils;
+import com.avaulta.gateway.rules.RuleSet;
 import dagger.Lazy;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -62,9 +65,13 @@ public class HealthCheckRequestHandler {
     @Inject
     Lazy<SourceAuthStrategy> sourceAuthStrategy;
     @Inject
+    MissingConfigChecker missingConfigChecker;
+    @Inject
     ObjectMapper objectMapper;
     @Inject
     RulesUtils rulesUtils;
+    @Inject
+    Lazy<RuleSet> ruleSet;
     @Inject
     HashUtils hashUtils;
     @Inject
@@ -135,19 +142,7 @@ public class HealthCheckRequestHandler {
 
         Set<String> missing = new HashSet<>();
 
-        try {
-            missing.addAll(
-                sourceAuthStrategy.get().getRequiredConfigProperties().stream()
-                    .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
-                    .filter(configProperty -> secretStore.getConfigPropertyAsOptional(configProperty).isEmpty())
-                    .map(ConfigService.ConfigProperty::name)
-                    .collect(Collectors.toSet()));
-        } catch (Throwable e) {
-            rethrowIfConnectivityFailure(e);
-            // will fail if sourceAuthStrategy is not set up properly
-            logInDev(e.getMessage(), e);
-            missing = new HashSet<>();
-        }
+        missing.addAll(missingConfigChecker.findMissingRequiredConfigProperties());
 
         try {
             Optional<String> targetHost = apiModeConfig.getTargetHost();
@@ -241,20 +236,34 @@ public class HealthCheckRequestHandler {
         }
 
         try {
-            rulesUtils.getRulesFromConfig(proxyConfig, envVarsConfigService)
-                    .ifPresent(rules -> healthCheckResult.rules(rulesUtils.asYaml(rules)));
-        } catch (co.worklytics.psoxy.rules.InvalidRulesException e) {
+            healthCheckResult.rules(rulesUtils.asYaml(ruleSet.get()));
+        } catch (InvalidRulesException e) {
             logInDev("Failed to add rules to health check: " + e.getMessage(), e);
             healthCheckResult.warningMessage("RULES configuration error: " + e.getErrorCause().name());
             try {
-                proxyConfig.getRules()
-                        .ifPresent(healthCheckResult::rules);
+                proxyConfig.getRules().ifPresent(healthCheckResult::rules);
             } catch (Throwable ignored) {
                 rethrowIfConnectivityFailure(ignored);
             }
         } catch (Throwable e) {
             rethrowIfConnectivityFailure(e);
             logInDev("Failed to add rules to health check", e);
+            try {
+                proxyConfig.getRules().ifPresent(healthCheckResult::rules);
+            } catch (Throwable ignored) {
+            }
+        }
+
+        try {
+            if (proxyConfig.getRules().isPresent()) {
+                rulesUtils.getRulesFromConfig(proxyConfig, envVarsConfigService);
+            }
+        } catch (InvalidRulesException e) {
+            logInDev("Invalid RULES configuration: " + e.getMessage(), e);
+            healthCheckResult.warningMessage("RULES configuration error: " + e.getErrorCause().name());
+        } catch (Throwable e) {
+            logInDev("Invalid RULES configuration: " + e.getMessage(), e);
+            healthCheckResult.warningMessage("RULES configuration error: " + ErrorCauses.RULES_INVALID.name());
         }
 
         // if SALT configured, as a hash of it to the health check, to enable detection of changes

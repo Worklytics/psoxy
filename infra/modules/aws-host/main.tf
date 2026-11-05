@@ -257,8 +257,9 @@ module "api_connector" {
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
       EMAIL_CANONICALIZATION = var.email_canonicalization
-      CUSTOM_RULES_SHA = try(local.api_connector_rules_file_paths[each.key], null) != null ? filesha1(local.api_connector_rules_file_paths[each.key]) : (
-        try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
+      CUSTOM_RULES_SHA = try(
+        module.custom_api_connector_rules[each.key].rules_hash,
+        try(module.api_connector_rules_raw[each.key].rules_hash, null)
       )
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     },
@@ -281,6 +282,9 @@ module "custom_api_connector_rules" {
 
   prefix    = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   file_path = local.api_connector_rules_file_paths[each.key]
+
+  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
 }
 
 # Rules provisioned from rules_raw (content string, not file path)
@@ -291,6 +295,9 @@ module "api_connector_rules_raw" {
 
   prefix  = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   content = each.value
+
+  remote_resource_bucket        = local.remote_resources_enabled ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = local.remote_resources_enabled ? local.connector_instance_resource_path[each.key] : null
 }
 
 locals {
@@ -411,6 +418,7 @@ module "webhook_collectors" {
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   test_caller_role_arn                 = module.psoxy.webhook_test_caller_role_arn
   rules_file                           = try(local.webhook_collector_rules_file_paths[each.key], null)
+  collection_enabled                   = each.value.collection_enabled
   webhook_auth_public_keys             = each.value.auth_public_keys
   provision_auth_key                   = each.value.provision_auth_key
   output_path_prefix                   = each.value.output_path_prefix
@@ -419,6 +427,7 @@ module "webhook_collectors" {
   example_identity                     = try(each.value.example_identity, null)
 
   todos_as_local_files      = var.todos_as_local_files
+  todo_step                 = var.todo_step
   allowed_webhook_ip_blocks = var.allowed_webhook_ip_blocks
 
   enable_bedrock = try(each.value.enable_gen_metadata, false)

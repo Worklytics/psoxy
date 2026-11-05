@@ -36,7 +36,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/users/{username}"
     allowedQueryParams:
@@ -72,7 +72,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
     pathParameterSchemas:
       username:
@@ -94,7 +94,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -430,6 +430,7 @@ endpoints:
           - "$..members_url"
           - "$..repositories_url"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$..slug"
   - pathTemplate: "/orgs/{org}/teams/{teamSlug}/members"
@@ -466,7 +467,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/orgs/{org}/copilot/billing/seats"
     allowedQueryParams:
@@ -483,7 +484,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['assignee'].login"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -494,6 +495,7 @@ endpoints:
           - "$..members_url"
           - "$..repositories_url"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$..slug"
   - pathTemplate: "/orgs/{org}/audit-log"

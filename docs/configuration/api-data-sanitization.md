@@ -135,7 +135,7 @@ NOTE: these are implementations of `com.avaulta.gateway.rules.transforms.Transfo
 Options:
 
 - `includeEncrypted` (default: `false`): if true, an encrypted version of the pseudonym will be returned alongside the hashed version, to enable it to be used as a parameter in future requests; proxy instances will be able to decrypt this form - clients will not. rotating/destroying the ENCRYPTION_KEY (stored as a secret in your host environment) will render all previously generated encrypted values unusable. The same option is accepted on `!<pseudonymizeRegexMatches>`.
-- `includeReversible` (default: `false`): **Deprecated.** Use `includeEncrypted`. Same behavior; still accepted so existing rules continue to work.
+- `includeReversible` (default: `false`): **Deprecated.** Use `includeEncrypted`. Same behavior when set to the same value; still accepted. Shipped rules should use `includeEncrypted` by psoxy v0.8.
 - `encoding` (default: `JSON`): The encoding to use when serializing the pseudonym to a string.
   - `JSON` - a JSON object structure, with explicit fields
   - `URL_SAFE_TOKEN` - a string format that aims to be concise, URL-safe, and format-preserving for email case.
@@ -171,6 +171,13 @@ Eg, the following redacts all headers that have a name value other than those ex
 
 `!<tokenize>` - replaces matching values it with a reversible token, which proxy can reverse to the original value using `ENCRYPTION_KEY` secret stored in the proxy in subsequent requests.
 
+Use case are values that _may_ be sensitive, but are opaque. For example, page tokens in Microsoft Graph API do not have a defined structure, but in practice contain PII.
+
+Options:
+
+- `includeEncrypted` (default: `false` when omitted): if true, values are replaced with reversible `p~` tokens that the proxy can decode for subsequent requests. If false or omitted, values are replaced with hash-only `t~` tokens that cannot be reversed. The deprecated `includeReversible` flag is treated the same way (either flag set to true produces `p~` tokens). Shipped connector rules set `includeEncrypted: true` where reversible tokens are required.
+- `regex` a capturing regex to use to extract portion of value that needs to be tokenized.
+
 #### Text Digest
 
 `!<textDigest>` - replaces the matching string value with a JSON object containing metadata about the text: `length` and `word_count`. The original text content is completely removed.
@@ -178,12 +185,6 @@ Eg, the following redacts all headers that have a name value other than those ex
 Options:
 
 - `keywords` (BETA - behavior subject to change) - an optional list of keyword strings to search for within the text. If provided, the original text is tokenized into words and a frequency count is generated. The resulting JSON object will include a `keywords` property, containing a map of the configured keywords that were found in the text along with their occurrence counts. A keyword can be several words, such as `pull request`, or contain punctuation, such as `dall-e`. Matching is case-insensitive, but the keyword must appear as written and as whole words: `how do` matches `How do I`, but not `how does`, and `pull request` does not match `pull-request`. Letters with accents count as part of a word, so `code` does not match `Codeänderung`. Each keyword is counted on its own, so `explain` and `explain how` both count in `Explain how it works`.
-
-Use case are values that _may_ be sensitive, but are opaque. For example, page tokens in Microsoft Graph API do not have a defined structure, but in practice contain PII.
-
-Options:
-
-- `regex` a capturing regex to use to extract portion of value that needs to be tokenized.
 
 #### Filter Tokens by Regex
 

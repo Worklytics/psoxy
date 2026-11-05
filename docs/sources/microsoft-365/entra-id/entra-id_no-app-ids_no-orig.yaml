@@ -49,7 +49,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..id"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
     allowedRequestHeaders:

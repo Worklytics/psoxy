@@ -49,7 +49,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..id"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/v1.0/groups/?[^/]*"
     allowedRequestHeaders:
@@ -236,6 +236,7 @@ endpoints:
         filters:
           - "https://[^.]+\\.zoom\\.us/.*"
       - !<tokenize>
+        includeEncrypted: true
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
         regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"

@@ -272,7 +272,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.users[*]['id','pmi']"
-        includeReversible: true
+        includeEncrypted: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
