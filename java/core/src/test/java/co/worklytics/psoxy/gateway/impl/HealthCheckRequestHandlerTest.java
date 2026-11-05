@@ -17,6 +17,9 @@ import org.junit.jupiter.api.Test;
 
 import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
+import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
+import com.avaulta.gateway.rules.RuleSet;
+import dagger.Lazy;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -91,6 +94,23 @@ public class HealthCheckRequestHandlerTest {
         assertTrue(result.passed());
 
         assertEquals(HttpStatus.SC_OK, response.get().getStatusCode());
+    }
+
+    @Test
+    void handleIfHealthCheck_should_include_effective_rules_when_not_configured_in_env() throws IOException {
+        RuleSet asanaRules = PrebuiltSanitizerRules.DEFAULTS.get("asana");
+        handler.ruleSet = () -> asanaRules;
+
+        when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
+                .thenReturn(Optional.of(""));
+        when(apiModeConfig.getTargetHost())
+                .thenReturn(Optional.of("host"));
+
+        Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
+
+        assertTrue(response.isPresent());
+        HealthCheckResult result = handler.objectMapper.readValue(response.get().getBody(), HealthCheckResult.class);
+        assertTrue(StringUtils.isNotBlank(result.getRules()));
     }
 
     @Test
