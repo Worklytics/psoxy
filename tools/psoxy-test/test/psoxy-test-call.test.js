@@ -79,7 +79,7 @@ test('Psoxy Test Call: health check failure throws', async (t) => {
     healthCheck: true,
   };
 
-  await t.throwsAsync(async () => psoxyTestCall(options), { message: /Connection setup error/ });
+  await t.throwsAsync(async () => psoxyTestCall(options), { message: /Precondition Failed/ });
 });
 
 test('Psoxy Test Call: not recognized URL', async (t) => {
