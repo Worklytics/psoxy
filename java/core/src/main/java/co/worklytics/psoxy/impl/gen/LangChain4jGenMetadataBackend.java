@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.impl.gen;
 
+import co.worklytics.psoxy.PsoxyModule;
 import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.augments.GenMetadataAugmentException;
 import com.avaulta.gateway.rules.augments.GenMetadataBackend;
@@ -16,6 +17,7 @@ import lombok.NonNull;
 import lombok.extern.java.Log;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import java.time.Clock;
@@ -86,14 +88,15 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     private final Clock clock;
 
     @Inject
-    public LangChain4jGenMetadataBackend(GenMetadataConfig config,
-                                         GenMetadataPromptBudget promptBudget,
-                                         GenMetadataChatModelFactory chatModelFactory,
-                                         GenMetadataTokenUsageAccumulator tokenUsageAccumulator,
-                                         GenMetadataPromptBuilder promptBuilder,
-                                         GenMetadataResponseFormats responseFormats,
-                                         GenMetadataPromptCacheSupportFactory promptCacheSupportFactory,
-                                         Optional<Clock> clock) {
+    LangChain4jGenMetadataBackend(
+        GenMetadataConfig config,
+        GenMetadataPromptBudget promptBudget,
+        GenMetadataChatModelFactory chatModelFactory,
+        GenMetadataTokenUsageAccumulator tokenUsageAccumulator,
+        GenMetadataPromptBuilder promptBuilder,
+        GenMetadataResponseFormats responseFormats,
+        GenMetadataPromptCacheSupportFactory promptCacheSupportFactory,
+        @Named(PsoxyModule.GEN_METADATA_CLOCK) Clock clock) {
         this.config = config;
         this.promptBudget = promptBudget;
         this.chatModelFactory = chatModelFactory;
@@ -101,20 +104,7 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
         this.promptBuilder = promptBuilder;
         this.responseFormats = responseFormats;
         this.promptCacheSupportFactory = promptCacheSupportFactory;
-        this.clock = clock.orElse(Clock.systemUTC());
-    }
-
-    /** Test helper when a concrete {@link Clock} is on hand. */
-    LangChain4jGenMetadataBackend(GenMetadataConfig config,
-                                  GenMetadataPromptBudget promptBudget,
-                                  GenMetadataChatModelFactory chatModelFactory,
-                                  GenMetadataTokenUsageAccumulator tokenUsageAccumulator,
-                                  GenMetadataPromptBuilder promptBuilder,
-                                  GenMetadataResponseFormats responseFormats,
-                                  GenMetadataPromptCacheSupportFactory promptCacheSupportFactory,
-                                  Clock clock) {
-        this(config, promptBudget, chatModelFactory, tokenUsageAccumulator, promptBuilder,
-            responseFormats, promptCacheSupportFactory, Optional.ofNullable(clock));
+        this.clock = clock;
     }
 
     private final ConcurrentHashMap<String, ModelHandle> models = new ConcurrentHashMap<>();
@@ -138,7 +128,8 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
 
         int effectiveMaxTokens = effectiveMaxTokens(effective.getMaxOutputTokens());
         int effectiveMaxInputTokens = effectiveMaxInputTokens(effective.getMaxInputTokens());
-        String fittedInput = promptBudget.fitDynamicInput(inputData, effectiveMaxInputTokens);
+        String fittedInput = promptBudget.fitDynamicInput(inputData,
+            promptBudget.effectiveMaxDynamicInputChars(effectiveMaxInputTokens));
         GenMetadataPromptAssembly assembly =
             promptBuilder.assembleGenerate(taskPrompt, outputSchema, fittedInput);
         // Bedrock Converse maps ResponseFormat → outputConfig; Amazon Nova (our default) rejects it.
@@ -163,7 +154,8 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
 
         int effectiveMaxInputTokens = effectiveMaxInputTokens(effective.getMaxInputTokens());
         int maxOutputTokens = effectiveMaxTokens(effective.getMaxOutputTokens());
-        String fittedInput = promptBudget.fitDynamicInput(inputData, effectiveMaxInputTokens);
+        String fittedInput = promptBudget.fitDynamicInput(inputData,
+            promptBudget.effectiveMaxDynamicInputChars(effectiveMaxInputTokens));
         GenMetadataPromptAssembly assembly =
             promptBuilder.assembleClassify(taskPrompt, classes, fittedInput);
         boolean bedrock = config.getBackend() == GenMetadataConfig.Backend.BEDROCK;

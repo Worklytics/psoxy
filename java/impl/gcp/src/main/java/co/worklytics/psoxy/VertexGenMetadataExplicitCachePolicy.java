@@ -1,8 +1,12 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.impl.gen.GenMetadataPromptTokenEstimate;
 import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.UserMessage;
+import lombok.NoArgsConstructor;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
 
 /**
@@ -11,28 +15,27 @@ import java.util.List;
  * <p>Typical classify / genMetadata rule prefixes are far below this; those requests use the
  * full prompt without cached content. Bedrock prompt cache has separate (lower) minimums.
  */
-final class VertexGenMetadataExplicitCachePolicy {
+@Singleton
+@NoArgsConstructor(onConstructor_ = @Inject)
+public class VertexGenMetadataExplicitCachePolicy {
 
-    /**
-     * Minimum cached prefix size for explicit caching on Gemini via Vertex (API returns
-     * {@code INVALID_ARGUMENT} below this).
-     */
+    /** Vertex minimum prefix size in tokens for explicit caching. */
     static final int MIN_PREFIX_TOKENS = 4096;
 
+    /** Avg chars per token (word + space) for eligibility checks. */
+    static final int CHARS_PER_TOKEN_ESTIMATE = 5;
+
     /**
-     * Slight headroom so a char-based estimate does not call create when the API would reject.
+     * Precomputed {@code floor(MIN_PREFIX_TOKENS / 1.1) * CHARS_PER_TOKEN_ESTIMATE} so we do not
+     * call create when the API would reject the prefix.
      */
-    private static final double ESTIMATE_SAFETY_FACTOR = 1.1;
+    static final int MIN_PREFIX_CHARS_TO_ATTEMPT_VERTEX_CACHE = 18_618;
 
-    private VertexGenMetadataExplicitCachePolicy() {
+    public boolean prefixEligibleForExplicitCache(List<ChatMessage> cachedPrefixMessages) {
+        return prefixCharCount(cachedPrefixMessages) >= MIN_PREFIX_CHARS_TO_ATTEMPT_VERTEX_CACHE;
     }
 
-    static boolean prefixEligibleForExplicitCache(List<ChatMessage> cachedPrefixMessages) {
-        int estimated = GenMetadataPromptTokenEstimate.estimatedTokens(cachedPrefixMessages);
-        return estimated >= (int) Math.ceil(MIN_PREFIX_TOKENS * ESTIMATE_SAFETY_FACTOR);
-    }
-
-    static boolean isMinimumTokenCountError(Throwable t) {
+    public boolean isMinimumTokenCountError(Throwable t) {
         for (Throwable c = t; c != null; c = c.getCause()) {
             String msg = c.getMessage();
             if (msg != null && msg.contains("minimum token count")) {
@@ -40,5 +43,20 @@ final class VertexGenMetadataExplicitCachePolicy {
             }
         }
         return false;
+    }
+
+    private static int prefixCharCount(List<ChatMessage> messages) {
+        int total = 0;
+        for (ChatMessage message : messages) {
+            if (message instanceof SystemMessage systemMessage) {
+                total += systemMessage.text().length();
+            } else if (message instanceof UserMessage userMessage) {
+                total += userMessage.singleText().length();
+            } else {
+                throw new IllegalArgumentException(
+                    "Unsupported cached prefix message: " + message.getClass().getSimpleName());
+            }
+        }
+        return total;
     }
 }

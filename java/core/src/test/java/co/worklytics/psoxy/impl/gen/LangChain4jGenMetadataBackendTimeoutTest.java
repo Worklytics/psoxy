@@ -29,7 +29,7 @@ class LangChain4jGenMetadataBackendTimeoutTest {
         GenMetadataChatModelFactory factory = new GenMetadataChatModelFactory(Set.of());
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, new GenMetadataPromptBudget(), factory,
+            config, new GenMetadataPromptBudget(config), factory,
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
             new GenMetadataResponseFormats(),
@@ -60,7 +60,7 @@ class LangChain4jGenMetadataBackendTimeoutTest {
         GenMetadataChatModelFactory factory = new GenMetadataChatModelFactory(Set.of());
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, new GenMetadataPromptBudget(), factory,
+            config, new GenMetadataPromptBudget(config), factory,
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
             new GenMetadataResponseFormats(),

@@ -5,16 +5,26 @@ import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import co.worklytics.psoxy.impl.gen.VertexGenMetadataConfig;
 import com.avaulta.gateway.rules.augments.GenMetadataThinkingLevels;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 class VertexGeminiChatModelProviderTest {
+
+    @Mock
+    VertexGenAiClientFactory vertexGenAiClientFactory;
+
+    @InjectMocks
+    VertexGeminiChatModelProvider provider;
 
     @Test
     void supports_onlyVertex() {
-        VertexGeminiChatModelProvider provider = new VertexGeminiChatModelProvider();
         assertTrue(provider.supports(VertexGenMetadataConfig.of(
             VertexGenMetadataConfig.DEFAULT_MODEL, null, 15)));
         assertFalse(provider.supports(new GenMetadataConfig.Unsupported("local")));

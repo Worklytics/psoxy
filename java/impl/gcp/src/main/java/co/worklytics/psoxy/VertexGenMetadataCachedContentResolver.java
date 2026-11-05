@@ -8,6 +8,9 @@ import com.google.common.cache.LoadingCache;
 import com.google.genai.types.CachedContent;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.google.genai.GoogleGenAiCaches;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.java.Log;
 
 import javax.inject.Inject;
@@ -27,9 +30,13 @@ import java.util.logging.Level;
  */
 @Log
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class VertexGenMetadataCachedContentResolver {
 
     private static final Duration LOCAL_CACHE_TTL = Duration.ofMinutes(50);
+
+    private final VertexGenAiClientFactory clientFactory;
+    private final GenMetadataStaticPromptFingerprint staticPromptFingerprint;
 
     private final LoadingCache<CacheKey, String> resourceNames = CacheBuilder.newBuilder()
         .expireAfterWrite(LOCAL_CACHE_TTL)
@@ -40,27 +47,21 @@ public class VertexGenMetadataCachedContentResolver {
             }
         });
 
-    private final LoadingCache<String, VertexGenAiClientSupport.VertexGenAiCachesContext> clients =
+    private final LoadingCache<String, VertexGenAiClientFactory.VertexGenAiCachesContext> clients =
         CacheBuilder.newBuilder()
             .expireAfterAccess(Duration.ofHours(1))
             .build(new CacheLoader<>() {
                 @Override
-                public VertexGenAiClientSupport.VertexGenAiCachesContext load(String endpointKey) {
-                    String[] parts = endpointKey.split("\\|", 2);
-                    return VertexGenAiClientSupport.cachesContext(parts[0], parts[1]);
+                public VertexGenAiClientFactory.VertexGenAiCachesContext load(String location) {
+                    return clientFactory.cachesContext(location);
                 }
             });
 
-    @Inject
-    public VertexGenMetadataCachedContentResolver() {
-    }
-
     public String cachedContentResourceName(VertexGenMetadataConfig config,
                                             List<ChatMessage> cachedPrefixMessages) {
-        String fingerprint =
-            GenMetadataStaticPromptFingerprint.fromCachedPrefixMessages(cachedPrefixMessages);
+        String fingerprint = staticPromptFingerprint.fromCachedPrefixMessages(cachedPrefixMessages);
         CacheKey key = new CacheKey(
-            VertexGenAiClientSupport.resolveProjectId(),
+            clientFactory.projectId(),
             config.getModelRegion(),
             config.getModelId(),
             fingerprint,
@@ -77,30 +78,27 @@ public class VertexGenMetadataCachedContentResolver {
     }
 
     private String resolveResourceName(CacheKey key) {
-        VertexGenAiClientSupport.VertexGenAiCachesContext ctx =
-            clientContext(key.projectId(), key.location());
-        GoogleGenAiCaches caches = ctx.caches();
-        String displayName = VertexGenAiClientSupport.cacheDisplayName(key.staticPromptFingerprint());
+        VertexGenAiClientFactory.VertexGenAiCachesContext ctx = clientContext(key.getLocation());
+        GoogleGenAiCaches caches = ctx.getCaches();
+        String displayName = clientFactory.cacheDisplayName(key.getStaticPromptFingerprint());
 
-        Optional<CachedContent> existing =
-            VertexGenAiClientSupport.findByDisplayName(caches, displayName);
+        Optional<CachedContent> existing = clientFactory.findByDisplayName(caches, displayName);
         if (existing.isPresent()) {
             return existing.get().name().orElseThrow(
                 () -> new IllegalStateException("Vertex cached content missing resource name"));
         }
 
         try {
-            CachedContent created = VertexGenAiClientSupport.createCachedContent(
-                ctx.client(),
-                key.modelId(),
-                key.prefixMessages(),
+            CachedContent created = clientFactory.createCachedContent(
+                ctx.getClient(),
+                key.getModelId(),
+                key.getPrefixMessages(),
                 displayName,
-                VertexGenAiClientSupport.PROMPT_CACHE_TTL);
+                VertexGenAiClientFactory.PROMPT_CACHE_TTL);
             return created.name().orElseThrow(
                 () -> new IllegalStateException("Vertex cached content missing resource name"));
         } catch (RuntimeException createFailed) {
-            Optional<CachedContent> raced =
-                VertexGenAiClientSupport.findByDisplayName(caches, displayName);
+            Optional<CachedContent> raced = clientFactory.findByDisplayName(caches, displayName);
             if (raced.isPresent()) {
                 log.log(Level.FINE, "Vertex cached content create raced; reusing displayName="
                     + displayName);
@@ -111,68 +109,25 @@ public class VertexGenMetadataCachedContentResolver {
         }
     }
 
-    private VertexGenAiClientSupport.VertexGenAiCachesContext clientContext(String projectId,
-                                                                            String location) {
+    private VertexGenAiClientFactory.VertexGenAiCachesContext clientContext(String location) {
         try {
-            return clients.get(projectId + '|' + location);
+            return clients.get(location);
         } catch (ExecutionException e) {
             throw new IllegalStateException("Failed to init Vertex genAI client", e.getCause());
         }
     }
 
-    static final class CacheKey {
-        private final String projectId;
-        private final String location;
-        private final String modelId;
-        private final String staticPromptFingerprint;
-        private final List<ChatMessage> prefixMessages;
-
-        CacheKey(String projectId, String location, String modelId,
-                 String staticPromptFingerprint, List<ChatMessage> prefixMessages) {
-            this.projectId = projectId;
-            this.location = location;
-            this.modelId = modelId;
-            this.staticPromptFingerprint = staticPromptFingerprint;
-            this.prefixMessages = prefixMessages;
-        }
-
-        String projectId() {
-            return projectId;
-        }
-
-        String location() {
-            return location;
-        }
-
-        String modelId() {
-            return modelId;
-        }
-
-        String staticPromptFingerprint() {
-            return staticPromptFingerprint;
-        }
-
-        List<ChatMessage> prefixMessages() {
-            return prefixMessages;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof CacheKey cacheKey)) {
-                return false;
-            }
-            return projectId.equals(cacheKey.projectId)
-                && location.equals(cacheKey.location)
-                && modelId.equals(cacheKey.modelId)
-                && staticPromptFingerprint.equals(cacheKey.staticPromptFingerprint);
-        }
-
-        @Override
-        public int hashCode() {
-            return java.util.Objects.hash(projectId, location, modelId, staticPromptFingerprint);
-        }
+    @Value
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+    static class CacheKey {
+        @EqualsAndHashCode.Include
+        String projectId;
+        @EqualsAndHashCode.Include
+        String location;
+        @EqualsAndHashCode.Include
+        String modelId;
+        @EqualsAndHashCode.Include
+        String staticPromptFingerprint;
+        List<ChatMessage> prefixMessages;
     }
 }

@@ -1,14 +1,14 @@
 package co.worklytics.psoxy.impl.gen;
 
 import dev.langchain4j.data.message.UserMessage;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Set;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class GenMetadataBackendTestSupport {
-
-    private GenMetadataBackendTestSupport() {
-    }
 
     static GenMetadataPromptCacheSupportFactory noPromptCacheFactory() {
         return new GenMetadataPromptCacheSupportFactory(

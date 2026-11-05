@@ -93,6 +93,20 @@ public class PsoxyModule {
         abstract GenMetadataBackend genMetadataBackend(LangChain4jGenMetadataBackend impl);
     }
 
+    /**
+     * Gen-metadata uses an optional platform {@link Clock} when bound (e.g. tests with
+     * {@link co.worklytics.test.TestModules.ForFixedClock}); otherwise UTC system clock.
+     */
+    @Provides
+    @Singleton
+    @Named(GEN_METADATA_CLOCK)
+    static Clock genMetadataClock(Optional<Clock> clock) {
+        return clock.orElse(Clock.systemUTC());
+    }
+
+    /** Dagger binding name for {@link #genMetadataClock(Optional)}. */
+    public static final String GEN_METADATA_CLOCK = "GenMetadataClock";
+
 
     @Provides
     @Singleton

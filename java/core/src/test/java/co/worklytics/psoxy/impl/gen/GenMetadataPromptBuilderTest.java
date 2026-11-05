@@ -60,7 +60,9 @@ class GenMetadataPromptBuilderTest {
         GenMetadataPromptAssembly b = promptBuilder.assembleClassify(
             "Task", List.of("X"), "two");
         assertEquals(
-            GenMetadataStaticPromptFingerprint.fromCachedPrefixMessages(a.getCachedPrefixMessages()),
-            GenMetadataStaticPromptFingerprint.fromCachedPrefixMessages(b.getCachedPrefixMessages()));
+            new GenMetadataStaticPromptFingerprint().fromCachedPrefixMessages(
+                a.getCachedPrefixMessages()),
+            new GenMetadataStaticPromptFingerprint().fromCachedPrefixMessages(
+                b.getCachedPrefixMessages()));
     }
 }

@@ -53,7 +53,7 @@ class LangChain4jGenMetadataBackendConcurrencyTest {
 
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, new GenMetadataPromptBudget(),
+            config, new GenMetadataPromptBudget(config),
             new GenMetadataChatModelFactory(Set.of(provider)),
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),

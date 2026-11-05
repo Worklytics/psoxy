@@ -3,10 +3,9 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import co.worklytics.psoxy.impl.gen.VertexGenMetadataConfig;
-import com.google.cloud.ServiceOptions;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.google.genai.GoogleGenAiChatModel;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 
 import javax.inject.Inject;
@@ -18,7 +17,7 @@ import java.time.Duration;
  * Vertex AI Gemini ChatModel for genMetadata (GCP Cloud Function deployment only).
  *
  * <p>Uses the google-genai LangChain4j adapter (Application Default Credentials). Project via
- * {@link ServiceOptions#getDefaultProjectId()} / metadata. Model location and thinking level come
+ * {@link VertexGenAiClientFactory#projectId()}. Model location and thinking level come
  * from {@link VertexGenMetadataConfig} (not the Cloud Function region).
  *
  * <p>Gemini 3.5 Flash defaults to {@code MEDIUM} thinking, which shares {@code maxOutputTokens}
@@ -33,8 +32,10 @@ import java.time.Duration;
  */
 @Log
 @Singleton
-@NoArgsConstructor(onConstructor_ = @Inject)
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class VertexGeminiChatModelProvider implements GenMetadataChatModelProvider {
+
+    private final VertexGenAiClientFactory clientFactory;
 
     @Override
     public boolean supports(GenMetadataConfig config) {
@@ -48,7 +49,7 @@ public class VertexGeminiChatModelProvider implements GenMetadataChatModelProvid
                 "VertexGeminiChatModelProvider requires VertexGenMetadataConfig, got "
                     + config.getClass().getSimpleName());
         }
-        String project = VertexGenAiClientSupport.resolveProjectId();
+        String project = clientFactory.projectId();
         log.info("Creating Vertex Gemini chat model project=" + project
             + " location=" + vertex.getModelRegion()
             + " model=" + vertex.getModelId()
@@ -61,13 +62,5 @@ public class VertexGeminiChatModelProvider implements GenMetadataChatModelProvid
             .timeout(Duration.ofSeconds(vertex.getTimeoutSeconds()))
             .maxRetries(1)
             .build();
-    }
-
-    String resolveProjectId() {
-        return VertexGenAiClientSupport.resolveProjectId();
-    }
-
-    private static String firstNonBlank(String... values) {
-        return VertexGenAiClientSupport.firstNonBlank(values);
     }
 }

@@ -52,7 +52,7 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
 
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, new GenMetadataPromptBudget(),
+            config, new GenMetadataPromptBudget(config),
             new GenMetadataChatModelFactory(Set.of(provider)),
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
@@ -104,7 +104,7 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
         GenMetadataConfig config = BedrockGenMetadataConfig.of(BedrockGenMetadataConfig.DEFAULT_MODEL, 30);
         ObjectMapper om2 = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, new GenMetadataPromptBudget(),
+            config, new GenMetadataPromptBudget(config),
             new GenMetadataChatModelFactory(Set.of(provider)),
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om2),
@@ -148,7 +148,7 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
         GenMetadataConfig config = BedrockGenMetadataConfig.of(BedrockGenMetadataConfig.DEFAULT_MODEL, 30);
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, new GenMetadataPromptBudget(),
+            config, new GenMetadataPromptBudget(config),
             new GenMetadataChatModelFactory(Set.of(provider)),
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),

@@ -11,14 +11,17 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class GenMetadataStaticPromptFingerprintTest {
 
+    private final GenMetadataStaticPromptFingerprint fingerprint =
+        new GenMetadataStaticPromptFingerprint();
+
     @Test
     void samePrefixMessages_sameFingerprint() {
         List<dev.langchain4j.data.message.ChatMessage> prefix = List.of(
             SystemMessage.from("sys"),
             UserMessage.from("task"));
         assertEquals(
-            GenMetadataStaticPromptFingerprint.fromCachedPrefixMessages(prefix),
-            GenMetadataStaticPromptFingerprint.fromCachedPrefixMessages(prefix));
+            fingerprint.fromCachedPrefixMessages(prefix),
+            fingerprint.fromCachedPrefixMessages(prefix));
     }
 
     @Test
@@ -30,7 +33,7 @@ class GenMetadataStaticPromptFingerprintTest {
             SystemMessage.from("sys"),
             UserMessage.from("task-b"));
         assertNotEquals(
-            GenMetadataStaticPromptFingerprint.fromCachedPrefixMessages(a),
-            GenMetadataStaticPromptFingerprint.fromCachedPrefixMessages(b));
+            fingerprint.fromCachedPrefixMessages(a),
+            fingerprint.fromCachedPrefixMessages(b));
     }
 }

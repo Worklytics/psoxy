@@ -2,33 +2,48 @@ package co.worklytics.psoxy.impl.gen;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 /**
- * Caps the <em>dynamic</em> genMetadata corpus (serialized source match) in estimated tokens.
+ * Caps the <em>dynamic</em> genMetadata corpus (serialized source match) in characters.
  *
  * <p>The static prefix — system text, task {@code prompt}, and schema/labels — is not counted.
  * That prefix is stable per augment rule and is split for provider prompt caching; identity is
  * {@link GenMetadataStaticPromptFingerprint}.
  *
- * <p>Estimate is {@link GenMetadataPromptTokenEstimate#CHARS_PER_TOKEN_ESTIMATE} chars/token, not a model tokenizer.
- *
- * <p>TODO: use a real tokenizer (e.g. langchain4j's OpenAiTokenCountEstimator / jtokkit) when
- * one is available on the classpath.
+ * <p>TODO: revisit with a real tokenizer when one is available on the classpath.
  */
 @Singleton
-@NoArgsConstructor(onConstructor_ = @Inject)
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class GenMetadataPromptBudget {
 
     /**
-     * Truncate serialized source so it fits {@code maxInputTokens} estimated tokens.
-     * When truncating, the cut prefers a preceding whitespace or punctuation so a word is not split.
+     * When an augment rule sets {@code maxInputTokens}, convert to a char cap (avg word + space).
      */
-    public String fitDynamicInput(String inputData, int maxInputTokens) {
+    static final int CHARS_PER_TOKEN_FOR_RULE_CAP = 5;
+
+    private final GenMetadataConfig config;
+
+    /**
+     * Effective char budget for dynamic input: deployment cap, optionally tightened by the rule.
+     */
+    public int effectiveMaxDynamicInputChars(Integer ruleMaxInputTokens) {
+        int cap = config.getMaxDynamicInputChars();
+        if (ruleMaxInputTokens != null && ruleMaxInputTokens > 0) {
+            cap = Math.min(cap, ruleMaxInputTokens * CHARS_PER_TOKEN_FOR_RULE_CAP);
+        }
+        return cap;
+    }
+
+    /**
+     * Truncate serialized source to {@code maxChars}. When truncating, prefers a preceding
+     * whitespace or punctuation boundary so a word is not split.
+     */
+    public String fitDynamicInput(String inputData, int maxChars) {
         if (inputData == null) {
             return null;
         }
-        int budgetChars = Math.max(0, maxInputTokens) * GenMetadataPromptTokenEstimate.CHARS_PER_TOKEN_ESTIMATE;
+        int budgetChars = Math.max(0, maxChars);
         if (inputData.length() <= budgetChars) {
             return inputData;
         }
