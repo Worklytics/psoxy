@@ -11,12 +11,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import com.google.api.gax.rpc.AbortedException;
+import com.google.api.gax.rpc.FailedPreconditionException;
 import com.google.api.gax.rpc.NotFoundException;
 import com.google.api.gax.rpc.PermissionDeniedException;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
@@ -217,9 +220,16 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
             if (lockedAt.isBefore(clock.instant().minusSeconds(expires.getSeconds()))) {
                 log.warning("Lock " + lockId + " is stale or unset; will try to acquire it");
 
-                
-                updateLabelFromSecret(client, lockSecretName, LOCK_LABEL, Long.toString(Instant.now(clock).toEpochMilli()), lockSecret);
-                //due to etag, update should have FAILED if was modified since our read
+                try {
+                    updateLabelFromSecret(client, lockSecretName, LOCK_LABEL,
+                            Long.toString(Instant.now(clock).toEpochMilli()), lockSecret);
+                } catch (RuntimeException e) {
+                    if (isLockContentionFailure(e)) {
+                        return false;
+                    }
+                    throw e;
+                }
+                // due to etag, update should have FAILED if was modified since our read
                 return true;
             } else {
                 //lock held by another processed
@@ -229,10 +239,31 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
             throw new RuntimeException(
                     String.format("Permission denied accessing lock secret for %s", lockId), e);
         } catch (RuntimeException e) {
+            if (isLockContentionFailure(e)) {
+                return false;
+            }
             throw e;
         } catch (Exception e) {
+            if (isLockContentionFailure(e)) {
+                return false;
+            }
             throw new RuntimeException(String.format("Could not acquire lock %s", lockId), e);
         }
+    }
+
+    private static boolean isLockContentionFailure(Throwable failure) {
+        Throwable current = failure;
+        while (current != null) {
+            if (current instanceof AbortedException || current instanceof FailedPreconditionException) {
+                return true;
+            }
+            String message = current.getMessage();
+            if (message != null && message.toLowerCase(Locale.ROOT).contains("etag")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     @Override

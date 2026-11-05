@@ -66,6 +66,22 @@ test('Psoxy Test Call: unrecognized force option', async (t) => {
   td.verify(awsCall(options), {times: 0});
 });
 
+test('Psoxy Test Call: health check failure throws', async (t) => {
+  td.when(gcpCall(td.matchers.anything())).thenReturn({
+    status: 412,
+    statusMessage: 'Precondition Failed',
+    headers: {},
+    data: '{"missingConfigProperties":["CLIENT_ID"]}',
+  });
+
+  const options = {
+    url: 'https://foo.cloudfunctions.net',
+    healthCheck: true,
+  };
+
+  await t.throwsAsync(async () => psoxyTestCall(options), { message: /Connection setup error/ });
+});
+
 test('Psoxy Test Call: not recognized URL', async (t) => {
   const options = {
     url: 'https://foo.bar'
