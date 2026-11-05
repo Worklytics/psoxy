@@ -18,6 +18,10 @@ export NODE_OPTIONS="$${NODE_OPTIONS:+$NODE_OPTIONS }--no-deprecation"
 ${command_cli_call} -u "${proxy_endpoint_url}/" --health-check
 HEALTHCHECK_RC=$?
 
+if [ $HEALTHCHECK_RC -ne 0 ]; then
+  exit $HEALTHCHECK_RC
+fi
+
 ${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b "$BODY" $HEADER_FLAGS
 SYNC_CALL_RC=$?
 

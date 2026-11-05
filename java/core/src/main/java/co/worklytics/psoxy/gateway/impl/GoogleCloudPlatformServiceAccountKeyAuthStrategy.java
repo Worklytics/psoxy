@@ -33,7 +33,13 @@ import lombok.extern.java.Log;
 
 /**
  * Domain-wide delegation using a downloaded GCP service-account JSON key and
- * {@link GoogleCredentials#createDelegated(String)}.
+ * {@link GoogleCredentials#createDelegated(String)}, or—when {@link ConfigProperty#SERVICE_ACCOUNT_KEY}
+ * is unset—{@link GoogleCredentials#getApplicationDefault()} (typical on GCP-hosted proxies).
+ *
+ * <p>New Google Workspace deployments should prefer {@code api_client_auth_method =
+ * workload_identity_federation} in Terraform, which selects {@link GcpIamSignJwtAuthStrategy}
+ * instead of this strategy. This class remains for the legacy {@code service_account_key} path
+ * (downloaded JSON in the secret store, common on AWS Lambda).
  *
  * @see GcpIamSignJwtAuthStrategy keyless DWD via IAM {@code signJwt}
  */
@@ -114,10 +120,10 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
-        return Set.of(
-            ConfigProperty.SERVICE_ACCOUNT_KEY,
-            ConfigProperty.OAUTH_SCOPES
-        );
+        // SERVICE_ACCOUNT_KEY is optional: getBaseCredentials() falls back to ADC when absent.
+        // Requiring it here would fail health checks and API preflight on GCP-hosted deploys that
+        // rely on the runtime service account instead of a stored JSON key.
+        return Set.of(ConfigProperty.OAUTH_SCOPES);
     }
 
     @Override
