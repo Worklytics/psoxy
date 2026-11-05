@@ -362,6 +362,7 @@ variable "custom_bulk_connectors" {
     available_memory_mb = optional(number)
     timeout_seconds       = optional(number)
     enable_gen_metadata   = optional(bool, false)
+    parallel_record_processing_threads = optional(number)
     environment_variables = optional(map(string), {})
     rules_file            = optional(string)
     rules_raw             = optional(string, null)

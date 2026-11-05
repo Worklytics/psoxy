@@ -40,6 +40,7 @@ import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.gateway.BulkModeConfig;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.impl.AugmentProcessor;
+import co.worklytics.psoxy.impl.gen.GenMetadataTokenUsageAccumulator;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -75,6 +76,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
     SanitizerUtils sanitizerUtils;
+
+    @Inject
+    GenMetadataTokenUsageAccumulator genMetadataTokenUsage;
 
     RecordRules rules;
 
@@ -140,11 +144,13 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                                              RecordWriter recordWriter,
                                              List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
         throws IOException {
-        int threadCount = bulkModeConfig.getParallelRecordProcessingThreadsOrDefault();
+        int threadCount = bulkModeConfig.getParallelRecordProcessingThreadCount();
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         Semaphore inFlight = new Semaphore(threadCount);
         OrderedParallelRecordOutput orderedOutput = new OrderedParallelRecordOutput(recordWriter);
         AtomicReference<RuntimeException> processingFailure = new AtomicReference<>();
+        GenMetadataTokenUsageAccumulator.FileScopeHandle genMetadataFileScope =
+            genMetadataTokenUsage.currentFileScopeHandle();
         long recordIndex = 0;
 
         try {
@@ -156,7 +162,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                 inFlight.acquire();
                 final long index = recordIndex++;
                 final Map<String, Object> recordCopy = deepCopyRecord(record);
-                executor.submit(() -> {
+                executor.submit(() -> genMetadataTokenUsage.withFileScope(genMetadataFileScope, () -> {
                     try {
                         if (processingFailure.get() != null) {
                             return;
@@ -171,7 +177,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                     } finally {
                         inFlight.release();
                     }
-                });
+                }));
             }
 
             inFlight.acquire(threadCount);

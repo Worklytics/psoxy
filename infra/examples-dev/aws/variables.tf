@@ -347,6 +347,7 @@ variable "custom_bulk_connectors" {
     }))
     memory_size_mb        = optional(number, null)
     enable_gen_metadata   = optional(bool, false)
+    parallel_record_processing_threads = optional(number)
     environment_variables = optional(map(string), {})
     rules_raw             = optional(string, null)
     settings_to_provide   = optional(map(string), {})

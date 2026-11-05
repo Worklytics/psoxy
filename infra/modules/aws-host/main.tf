@@ -378,6 +378,9 @@ module "bulk_connector" {
       EMAIL_CANONICALIZATION = var.email_canonicalization
     },
     try(each.value.environment_variables, {}),
+    try(each.value.parallel_record_processing_threads, null) != null ? {
+      PARALLEL_RECORD_PROCESSING_THREADS = tostring(each.value.parallel_record_processing_threads)
+    } : {},
     # If rules_raw is set and there's no custom override, pass it as RULES env var
     try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) != null ? {
       RULES = each.value.rules_raw

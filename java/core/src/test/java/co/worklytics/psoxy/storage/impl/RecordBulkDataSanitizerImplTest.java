@@ -165,9 +165,6 @@ class RecordBulkDataSanitizerImplTest {
                     when(mock.getConfigPropertyOrError(eq(BulkModeConfig.BulkModeConfigProperty.OUTPUT_BUCKET)))
                         .thenReturn("output-bucket");
                     when(mock.getConfigPropertyAsOptional(
-                        eq(BulkModeConfig.BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING)))
-                        .thenReturn(Optional.of("true"));
-                    when(mock.getConfigPropertyAsOptional(
                         eq(BulkModeConfig.BulkModeConfigProperty.PARALLEL_RECORD_PROCESSING_THREADS)))
                         .thenReturn(Optional.of("4"));
                     return mock;
