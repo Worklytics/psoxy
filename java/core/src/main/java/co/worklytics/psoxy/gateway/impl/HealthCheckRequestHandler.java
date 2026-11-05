@@ -65,7 +65,7 @@ public class HealthCheckRequestHandler {
     @Inject
     RulesUtils rulesUtils;
     @Inject
-    RuleSet ruleSet;
+    Lazy<RuleSet> ruleSet;
     @Inject
     HashUtils hashUtils;
     @Inject
@@ -199,7 +199,7 @@ public class HealthCheckRequestHandler {
         }
 
         try {
-            healthCheckResult.rules(rulesUtils.asYaml(ruleSet));
+            healthCheckResult.rules(rulesUtils.asYaml(ruleSet.get()));
         } catch (InvalidRulesException e) {
             logInDev("Failed to add rules to health check: " + e.getMessage(), e);
             healthCheckResult.warningMessage("RULES configuration error: " + e.getErrorCause().name());
