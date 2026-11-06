@@ -129,9 +129,11 @@ If you don't want to use our provided terraform modules to manage your Entra ID 
 
 ### Single Entra ID Application for Multiple Connections
 
-Our [AWS example](https://github.com/Worklytics/psoxy-example-aws/tree/main) supports using a SINGLE Entra ID application for multiple connections,
+Our [AWS example](https://github.com/Worklytics/psoxy-example-aws/tree/main) and [GCP example](https://github.com/Worklytics/psoxy-example-gcp/tree/main) support using a SINGLE Entra ID application for multiple connections,
 instead of one for each. This could ease management, but requires that you determine the superset of scopes needed across all connectors you wish to use and create
 the Entra ID application with those scopes via the MSFT CLI or portal.
+
+On GCP, each connector still runs as its own service account, so the shared Entra application needs **one federated identity credential per connector** (each with a unique name and a subject matching that connector's GCP service account). You do not need separate Entra applications per connector.
 
 If you lack the `Cloud Application Administrator` role, you can ask someone in your organization with that role to create the Application(s) for you.
 
