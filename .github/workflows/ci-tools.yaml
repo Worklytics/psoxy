@@ -63,6 +63,13 @@ jobs:
       - name: Test generate-todos.sh
         run: ./tools/generate-todos.test.sh
 
+  ci_generate_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test generate-tests.sh
+        run: ./tools/generate-tests.test.sh
+
   ci_gcp_iam_permission_script:
     runs-on: ubuntu-latest
     steps:

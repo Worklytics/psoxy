@@ -18,11 +18,6 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! command -v python3 >/dev/null 2>&1; then
-  printf 'python3 is required for the overwrite-prompt test\n' >&2
-  exit 1
-fi
-
 ORIG_PATH="${PATH}"
 WORK=""
 FAKE_BIN=""
@@ -113,7 +108,7 @@ test_writes_todo_files_and_ignores_joined_blobs() {
   }
 }
 EOF
-  run_script --yes >/dev/null
+  run_script >/dev/null
   assert_file "${WORK}/TODO 1 - setup alpha.md" $'alpha body\n'
   assert_file "${WORK}/TODO 2 - test beta.md" $'beta line\nsecond line\n'
   [[ ! -e "${WORK}/empty.md" ]] || fail "empty TODO content was written"
@@ -121,7 +116,7 @@ EOF
   printf 'ok writes todo_files\n'
 }
 
-test_noninteractive_keeps_existing_unless_yes() {
+test_always_overwrites_existing() {
   reset_work
   setup_fake_terraform
   write_fixture <<'EOF'
@@ -135,10 +130,8 @@ test_noninteractive_keeps_existing_unless_yes() {
 EOF
   printf 'local edits\n' > "${WORK}/TODO 1 - setup alpha.md"
   run_script >/dev/null
-  assert_file "${WORK}/TODO 1 - setup alpha.md" $'local edits\n'
-  run_script --yes >/dev/null
   assert_file "${WORK}/TODO 1 - setup alpha.md" $'from output\n'
-  printf 'ok noninteractive overwrite rules\n'
+  printf 'ok always overwrites existing\n'
 }
 
 test_unsafe_path_does_not_escape_workdir() {
@@ -157,7 +150,7 @@ test_unsafe_path_does_not_escape_workdir() {
 }
 EOF
   set +e
-  run_script --yes >/dev/null 2>&1
+  run_script >/dev/null 2>&1
   local rc=$?
   set -e
   [[ "$rc" -eq 1 ]] || fail "unsafe path should exit 1, got ${rc}"
@@ -177,7 +170,7 @@ test_fallback_to_joined_todo_outputs() {
   "caller_role_arn": { "sensitive": false, "type": "string", "value": "arn:aws:iam::1:role/x" }
 }
 EOF
-  run_script --yes >/dev/null
+  run_script >/dev/null
   assert_file "${WORK}/todos_1.md" $'first\n'
   assert_file "${WORK}/todos_2.md" $'second\n'
   [[ ! -e "${WORK}/caller_role_arn.md" ]] || fail "unrelated output was written"
@@ -208,74 +201,6 @@ test_refuses_to_run_outside_terraform_root() {
   printf 'ok requires a terraform root\n'
 }
 
-test_prompt_no_keeps_and_default_yes_overwrites() {
-  reset_work
-  setup_fake_terraform
-  write_fixture <<'EOF'
-{
-  "todo_files": {
-    "sensitive": false,
-    "type": ["map", "string"],
-    "value": {
-      "TODO 1 - setup alpha.md": "from output alpha",
-      "TODO 2 - test beta.md": "from output beta"
-    }
-  }
-}
-EOF
-  printf 'KEEP\n' > "${WORK}/TODO 1 - setup alpha.md"
-  printf 'KEEP2\n' > "${WORK}/TODO 2 - test beta.md"
-
-  WORK="$WORK" SCRIPT="$SCRIPT" FAKE_BIN="$FAKE_BIN" ORIG_PATH="$ORIG_PATH" python3 - <<'PY'
-import os, pty, select, subprocess, sys
-work = os.environ["WORK"]
-script = os.environ["SCRIPT"]
-env = os.environ.copy()
-env["PATH"] = os.environ["FAKE_BIN"] + os.pathsep + os.environ["ORIG_PATH"]
-env["TODO_FIXTURE"] = os.path.join(work, "fixture.json")
-env["TERM"] = "xterm-256color"
-master, slave = pty.openpty()
-proc = subprocess.Popen(
-    [script],
-    stdin=slave,
-    stdout=slave,
-    stderr=slave,
-    cwd=work,
-    env=env,
-)
-os.close(slave)
-buf = b""
-# n keeps the first file; Enter accepts the default Y and overwrites the second.
-answers = [b"n\n", b"\n"]
-while True:
-    ready, _, _ = select.select([master], [], [], 5)
-    if not ready:
-        proc.kill()
-        sys.stderr.write(buf.decode(errors="replace"))
-        raise SystemExit("timed out waiting for overwrite prompt")
-    try:
-        chunk = os.read(master, 4096)
-    except OSError:
-        break
-    if not chunk:
-        break
-    buf += chunk
-    if b"[Y/n]" in buf and answers:
-        os.write(master, answers.pop(0))
-        buf = buf.replace(b"[Y/n]", b"[asked]", 1)
-rc = proc.wait()
-if rc != 0:
-    sys.stderr.write(buf.decode(errors="replace"))
-    raise SystemExit(f"prompt run exited {rc}")
-if b"Left 1" not in buf or b"Overwrote 1" not in buf:
-    sys.stderr.write(buf.decode(errors="replace"))
-    raise SystemExit("prompt summary did not report one skip and one overwrite")
-PY
-  assert_file "${WORK}/TODO 1 - setup alpha.md" $'KEEP\n'
-  assert_file "${WORK}/TODO 2 - test beta.md" $'from output beta\n'
-  printf 'ok overwrite prompt\n'
-}
-
 test_wrappers_match_and_find_implementation() {
   diff -q "$AWS_WRAPPER" "$GCP_WRAPPER" >/dev/null || fail "aws and gcp generate-todos.sh wrappers differ"
 
@@ -299,12 +224,11 @@ test_wrappers_match_and_find_implementation() {
 }
 
 test_writes_todo_files_and_ignores_joined_blobs
-test_noninteractive_keeps_existing_unless_yes
+test_always_overwrites_existing
 test_unsafe_path_does_not_escape_workdir
 test_fallback_to_joined_todo_outputs
 test_no_todo_content_exits_cleanly
 test_refuses_to_run_outside_terraform_root
-test_prompt_no_keeps_and_default_yes_overwrites
 test_wrappers_match_and_find_implementation
 
 printf 'all generate-todos tests passed\n'
