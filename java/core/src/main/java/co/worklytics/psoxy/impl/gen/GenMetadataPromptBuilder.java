@@ -38,23 +38,73 @@ class GenMetadataPromptBuilder {
             + "Never include schema keywords such as type, properties, required, or enum. "
             + "No markdown fences, no prose before or after the JSON.";
 
+    static final String INPUT_DATA_HEADER = "Input data to process:\n";
+
     List<ChatMessage> toMessages(String taskPrompt, JsonSchema outputSchema,
                                   String inputData) {
-        return List.of(
-            SystemMessage.from(SYSTEM_COMPUTE),
-            UserMessage.from(computeUserContent(taskPrompt, outputSchema, inputData))
-        );
+        return assembleGenerate(taskPrompt, outputSchema, inputData).getUncachedMessages();
     }
 
     List<ChatMessage> toClassifyMessages(String taskPrompt, List<String> classes,
                                          String inputData) {
-        return List.of(
+        return assembleClassify(taskPrompt, classes, inputData).getUncachedMessages();
+    }
+
+    GenMetadataPromptAssembly assembleClassify(String taskPrompt, List<String> classes,
+                                               String inputData) {
+        String staticUser = classifyStaticUserContent(taskPrompt, classes);
+        UserMessage dynamicUser = UserMessage.from(formatDynamicInput(inputData));
+        List<ChatMessage> uncached = List.of(
             SystemMessage.from(SYSTEM_CLASSIFY),
-            UserMessage.from(classifyUserContent(taskPrompt, classes, inputData))
+            UserMessage.from(staticUser + formatDynamicInput(inputData))
         );
+        List<ChatMessage> split = List.of(
+            SystemMessage.from(SYSTEM_CLASSIFY),
+            UserMessage.from(staticUser),
+            dynamicUser
+        );
+        List<ChatMessage> cachedPrefix = List.of(
+            SystemMessage.from(SYSTEM_CLASSIFY),
+            UserMessage.from(staticUser)
+        );
+        return GenMetadataPromptAssembly.builder()
+            .uncachedMessages(uncached)
+            .splitMessages(split)
+            .cachedPrefixMessages(cachedPrefix)
+            .dynamicUserMessage(dynamicUser)
+            .build();
+    }
+
+    GenMetadataPromptAssembly assembleGenerate(String taskPrompt, JsonSchema outputSchema,
+                                               String inputData) {
+        String staticUser = computeStaticUserContent(taskPrompt, outputSchema);
+        UserMessage dynamicUser = UserMessage.from(formatDynamicInput(inputData));
+        List<ChatMessage> uncached = List.of(
+            SystemMessage.from(SYSTEM_COMPUTE),
+            UserMessage.from(staticUser + formatDynamicInput(inputData))
+        );
+        List<ChatMessage> split = List.of(
+            SystemMessage.from(SYSTEM_COMPUTE),
+            UserMessage.from(staticUser),
+            dynamicUser
+        );
+        List<ChatMessage> cachedPrefix = List.of(
+            SystemMessage.from(SYSTEM_COMPUTE),
+            UserMessage.from(staticUser)
+        );
+        return GenMetadataPromptAssembly.builder()
+            .uncachedMessages(uncached)
+            .splitMessages(split)
+            .cachedPrefixMessages(cachedPrefix)
+            .dynamicUserMessage(dynamicUser)
+            .build();
     }
 
     String classifyUserContent(String taskPrompt, @NonNull List<String> classes, String inputData) {
+        return classifyStaticUserContent(taskPrompt, classes) + formatDynamicInput(inputData);
+    }
+
+    String classifyStaticUserContent(String taskPrompt, @NonNull List<String> classes) {
         String labels = classes.stream()
             .map(StringUtils::trimToNull)
             .filter(Objects::nonNull)
@@ -64,13 +114,15 @@ class GenMetadataPromptBuilder {
 
             Return exactly one of these classes:
             %s
-            Input data to process:
-            %s
-            """.formatted(taskPrompt.trim(), labels, inputData);
+            %s""".formatted(taskPrompt.trim(), labels, INPUT_DATA_HEADER);
     }
 
     String computeUserContent(String taskPrompt, JsonSchema outputSchema,
                                String inputData) {
+        return computeStaticUserContent(taskPrompt, outputSchema) + formatDynamicInput(inputData);
+    }
+
+    String computeStaticUserContent(String taskPrompt, JsonSchema outputSchema) {
         String schemaJson;
         try {
             schemaJson = objectMapper.writeValueAsString(outputSchema);
@@ -83,8 +135,10 @@ class GenMetadataPromptBuilder {
             Return exactly one JSON value that validates against this schema (instance, not the schema):
             %s
 
-            Input data to process:
-            %s
-            """.formatted(taskPrompt.trim(), schemaJson, inputData);
+            %s""".formatted(taskPrompt.trim(), schemaJson, INPUT_DATA_HEADER);
+    }
+
+    private String formatDynamicInput(String inputData) {
+        return inputData != null ? inputData : "";
     }
 }

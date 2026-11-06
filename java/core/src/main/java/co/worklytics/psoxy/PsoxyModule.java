@@ -52,6 +52,7 @@ import com.avaulta.gateway.rules.augments.GenMetadataBackend;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.impl.AugmentProcessor;
+import co.worklytics.psoxy.impl.gen.GenMetadataPromptCacheSupport;
 import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import co.worklytics.psoxy.impl.gen.LangChain4jGenMetadataBackend;
@@ -85,9 +86,26 @@ public class PsoxyModule {
         @Multibinds
         abstract Set<GenMetadataChatModelProvider> chatModelProviders();
 
+        @Multibinds
+        abstract Set<GenMetadataPromptCacheSupport> genMetadataPromptCacheSupports();
+
         @Binds
         abstract GenMetadataBackend genMetadataBackend(LangChain4jGenMetadataBackend impl);
     }
+
+    /**
+     * Gen-metadata uses an optional platform {@link Clock} when bound (e.g. tests with
+     * {@link co.worklytics.test.TestModules.ForFixedClock}); otherwise UTC system clock.
+     */
+    @Provides
+    @Singleton
+    @Named(GEN_METADATA_CLOCK)
+    static Clock genMetadataClock(Optional<Clock> clock) {
+        return clock.orElse(Clock.systemUTC());
+    }
+
+    /** Dagger binding name for {@link #genMetadataClock(Optional)}. */
+    public static final String GEN_METADATA_CLOCK = "GenMetadataClock";
 
 
     @Provides

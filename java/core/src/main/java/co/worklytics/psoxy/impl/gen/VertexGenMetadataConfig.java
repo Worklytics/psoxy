@@ -42,8 +42,9 @@ public final class VertexGenMetadataConfig extends GenMetadataConfig {
     private final String thinkingLevel;
 
     private VertexGenMetadataConfig(String modelId, int timeoutSeconds, int maxAttempts,
-                                    String modelRegion, String thinkingLevel) {
-        super(Backend.VERTEX, modelId, timeoutSeconds, maxAttempts);
+                                    int maxDynamicInputChars, String modelRegion,
+                                    String thinkingLevel) {
+        super(Backend.VERTEX, modelId, timeoutSeconds, maxAttempts, maxDynamicInputChars);
         this.modelRegion = modelRegion;
         this.thinkingLevel = thinkingLevel;
     }
@@ -65,6 +66,7 @@ public final class VertexGenMetadataConfig extends GenMetadataConfig {
             model,
             timeoutSeconds(configService),
             maxAttempts(configService),
+            maxDynamicInputChars(configService),
             modelRegion,
             thinkingLevel);
     }
@@ -78,14 +80,15 @@ public final class VertexGenMetadataConfig extends GenMetadataConfig {
     public static VertexGenMetadataConfig of(String modelId, String modelRegion, int timeoutSeconds) {
         String region = StringUtils.isNotBlank(modelRegion) ? modelRegion.trim() : DEFAULT_MODEL_REGION;
         return new VertexGenMetadataConfig(
-            modelId, timeoutSeconds, DEFAULT_MAX_ATTEMPTS, region, GenMetadataThinkingLevels.DEFAULT);
+            modelId, timeoutSeconds, DEFAULT_MAX_ATTEMPTS, DEFAULT_MAX_DYNAMIC_INPUT_CHARS,
+            region, GenMetadataThinkingLevels.DEFAULT);
     }
 
     public static VertexGenMetadataConfig of(String modelId, String modelRegion, String thinkingLevel,
                                              int timeoutSeconds) {
         String region = StringUtils.isNotBlank(modelRegion) ? modelRegion.trim() : DEFAULT_MODEL_REGION;
         return new VertexGenMetadataConfig(
-            modelId, timeoutSeconds, DEFAULT_MAX_ATTEMPTS, region,
-            GenMetadataThinkingLevels.resolve(thinkingLevel));
+            modelId, timeoutSeconds, DEFAULT_MAX_ATTEMPTS, DEFAULT_MAX_DYNAMIC_INPUT_CHARS,
+            region, GenMetadataThinkingLevels.resolve(thinkingLevel));
     }
 }
