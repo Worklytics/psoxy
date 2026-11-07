@@ -1,0 +1,17 @@
+# PoC (alpha): Claude Compliance chat messages — LLM classify only for chats owned by a target user.
+# Not enabled in prebuilt claude.yaml; exercised by ClaudeChatMessagesPopulationAugmentTest.
+# List-chat response shape: https://platform.claude.com/docs/en/api/compliance/apps/chats/messages/list
+!<classify>
+applyOnlyWhen: "$[?(@.user.id == 'user_xyz456')]"
+jsonPaths:
+  - "$"
+prompt: |
+  Classify the primary work theme of this Claude chat using user and assistant message text.
+  Ignore ids, email addresses, file names, artifacts, and tool metadata.
+  Use "Uncategorized" when unclear.
+maxInputTokens: 4000
+classes:
+  - Requirements & Planning
+  - Support & Troubleshooting
+  - Research & Ideation
+  - Uncategorized

@@ -1,0 +1,20 @@
+# PoC: same population gate for structured LLM extract (genMetadata).
+# Allowlist multiple chat owners with JsonPath `in` — one rule, one schema.
+!<genMetadata>
+applyOnlyWhen: "$[?(@.user.id in ['user_xyz456','user_abc111'])]"
+jsonPaths:
+  - "$"
+prompt: |
+  From this Claude chat payload, infer a short work theme label and whether support tickets were discussed.
+  Use message text only; ignore ids and email addresses.
+maxInputTokens: 4000
+maxOutputTokens: 200
+outputSchema:
+  type: object
+  required: [theme, supportMentioned]
+  additionalProperties: false
+  properties:
+    theme:
+      type: string
+    supportMentioned:
+      type: boolean

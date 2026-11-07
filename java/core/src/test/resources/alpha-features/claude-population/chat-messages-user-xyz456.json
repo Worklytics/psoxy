@@ -1,0 +1,46 @@
+{
+  "id": "claude_chat_abc123",
+  "name": "Product Requirements Discussion",
+  "created_at": "2025-06-07T08:09:10Z",
+  "updated_at": "2025-06-07T08:10:05Z",
+  "organization_id": "org_abc123",
+  "organization_uuid": "abcdef01-2345-6789-abcd-ef0123456789",
+  "project_id": "claude_proj_xyz789",
+  "model": "claude-opus-5",
+  "user": {
+    "id": "user_xyz456",
+    "email_address": "user@example.com"
+  },
+  "href": "https://claude.ai/chat/abcdef01-2345-6789-abcd-ef0123456789",
+  "chat_messages": [
+    {
+      "id": "claude_chat_msg_abc123",
+      "role": "user",
+      "created_at": "2025-06-07T08:09:10Z",
+      "content": [
+        {
+          "type": "text",
+          "text": "Can you help me draft requirements for our new dashboard feature?",
+          "truncated": false,
+          "thinking_redacted": false,
+          "added_as_context": false
+        }
+      ]
+    },
+    {
+      "id": "claude_chat_msg_def456",
+      "role": "assistant",
+      "created_at": "2025-06-07T08:09:11Z",
+      "content": [
+        {
+          "type": "text",
+          "text": "I'd be happy to help you draft requirements for your dashboard feature...",
+          "truncated": false,
+          "thinking_redacted": false,
+          "added_as_context": false
+        }
+      ]
+    }
+  ],
+  "has_more": false
+}
