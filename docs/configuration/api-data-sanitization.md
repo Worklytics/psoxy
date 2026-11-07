@@ -198,7 +198,7 @@ Options:
 
 ### Conditional Transform Application
 
-All transforms support an optional `applyOnlyWhen` parameter that allows conditional application based on the content of the response. This is particularly useful when dealing with APIs that return heterogeneous data (e.g., different object types in the same response).
+All transforms and augments support an optional `applyOnlyWhen` parameter that allows conditional application based on the content of the response. This is particularly useful when dealing with APIs that return heterogeneous data (e.g., different object types in the same response) or when LLM augments should run only for a subset of payloads (e.g. chats owned by specific user ids).
 
 `<apply-only-when> ::= "applyOnlyWhen: " <json-path-filter>`
 
