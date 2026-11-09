@@ -162,6 +162,7 @@ abstract public class RulesBaseTestCase {
     @Component(modules = {
         PsoxyModule.class,
         TestModules.ForGenMetadataConfig.class,
+        TestModules.ForSystemClock.class,
         MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
         MockModules.ForHostEnvironment.class,

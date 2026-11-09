@@ -18,7 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,8 +51,30 @@ public class VertexGenAiClientFactory {
         return projectId;
     }
 
-    public String cacheDisplayName(String staticPromptFingerprint) {
-        return CACHE_DISPLAY_NAME_PREFIX + staticPromptFingerprint;
+    public String cacheDisplayName(String modelId, String staticPromptFingerprint) {
+        return CACHE_DISPLAY_NAME_PREFIX + modelSegment(modelId) + "-" + staticPromptFingerprint;
+    }
+
+    private static String modelSegment(String modelId) {
+        return modelId.replace('/', '-');
+    }
+
+    /**
+     * Whether an existing Vertex cache resource can be used for the requested model and time.
+     */
+    static final Duration CACHED_CONTENT_REUSE_MARGIN = Duration.ofMinutes(2);
+
+    public boolean isReusableCachedContent(CachedContent content, String modelId, Clock clock) {
+        if (!content.model().map(modelId::equals).orElse(false)) {
+            return false;
+        }
+        return content.expireTime()
+            .map(expire -> expire.isAfter(clock.instant().plus(CACHED_CONTENT_REUSE_MARGIN)))
+            .orElse(true);
+    }
+
+    public Optional<Instant> remoteExpireTime(CachedContent content) {
+        return content.expireTime();
     }
 
     public VertexGenAiCachesContext cachesContext(String location) {

@@ -24,13 +24,19 @@ import java.util.List;
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class GenMetadataStaticPromptFingerprint {
 
+    private static final char MESSAGE_PART_SEPARATOR = '\0';
+    private static final char MESSAGE_RECORD_SEPARATOR = '\n';
+
     /**
      * Fingerprint from the messages in {@link GenMetadataPromptAssembly#getCachedPrefixMessages()}.
      */
     public String fromCachedPrefixMessages(List<ChatMessage> cachedPrefixMessages) {
         StringBuilder material = new StringBuilder();
         for (ChatMessage message : cachedPrefixMessages) {
-            material.append(messageType(message)).append('\0').append(messageText(message)).append('\n');
+            material.append(messageType(message))
+                .append(MESSAGE_PART_SEPARATOR)
+                .append(messageText(message))
+                .append(MESSAGE_RECORD_SEPARATOR);
         }
         return sha256Hex(material.toString());
     }

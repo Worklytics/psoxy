@@ -33,7 +33,7 @@ public class BedrockGenMetadataPromptCacheSupport implements GenMetadataPromptCa
         requestBuilder.messages(assembly.getSplitMessages());
         requestBuilder.parameters(BedrockChatRequestParameters.builder()
             .temperature(0.0)
-            .promptCaching(BedrockCachePointPlacement.AFTER_USER_MESSAGE, CacheTTL.VALUE_1_H)
+            .promptCaching(BedrockCachePointPlacement.AFTER_USER_MESSAGE, CacheTTL.VALUE_5_M)
             .build());
     }
 }

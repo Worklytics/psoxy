@@ -53,10 +53,10 @@ class GenMetadataPromptBuilder {
     GenMetadataPromptAssembly assembleClassify(String taskPrompt, List<String> classes,
                                                String inputData) {
         String staticUser = classifyStaticUserContent(taskPrompt, classes);
-        UserMessage dynamicUser = UserMessage.from(formatDynamicInput(inputData));
+        UserMessage dynamicUser = UserMessage.from(nullToEmptyInput(inputData));
         List<ChatMessage> uncached = List.of(
             SystemMessage.from(SYSTEM_CLASSIFY),
-            UserMessage.from(staticUser + formatDynamicInput(inputData))
+            UserMessage.from(staticUser + nullToEmptyInput(inputData))
         );
         List<ChatMessage> split = List.of(
             SystemMessage.from(SYSTEM_CLASSIFY),
@@ -78,10 +78,10 @@ class GenMetadataPromptBuilder {
     GenMetadataPromptAssembly assembleGenerate(String taskPrompt, JsonSchema outputSchema,
                                                String inputData) {
         String staticUser = computeStaticUserContent(taskPrompt, outputSchema);
-        UserMessage dynamicUser = UserMessage.from(formatDynamicInput(inputData));
+        UserMessage dynamicUser = UserMessage.from(nullToEmptyInput(inputData));
         List<ChatMessage> uncached = List.of(
             SystemMessage.from(SYSTEM_COMPUTE),
-            UserMessage.from(staticUser + formatDynamicInput(inputData))
+            UserMessage.from(staticUser + nullToEmptyInput(inputData))
         );
         List<ChatMessage> split = List.of(
             SystemMessage.from(SYSTEM_COMPUTE),
@@ -101,7 +101,7 @@ class GenMetadataPromptBuilder {
     }
 
     String classifyUserContent(String taskPrompt, @NonNull List<String> classes, String inputData) {
-        return classifyStaticUserContent(taskPrompt, classes) + formatDynamicInput(inputData);
+        return classifyStaticUserContent(taskPrompt, classes) + nullToEmptyInput(inputData);
     }
 
     String classifyStaticUserContent(String taskPrompt, @NonNull List<String> classes) {
@@ -119,7 +119,7 @@ class GenMetadataPromptBuilder {
 
     String computeUserContent(String taskPrompt, JsonSchema outputSchema,
                                String inputData) {
-        return computeStaticUserContent(taskPrompt, outputSchema) + formatDynamicInput(inputData);
+        return computeStaticUserContent(taskPrompt, outputSchema) + nullToEmptyInput(inputData);
     }
 
     String computeStaticUserContent(String taskPrompt, JsonSchema outputSchema) {
@@ -138,7 +138,7 @@ class GenMetadataPromptBuilder {
             %s""".formatted(taskPrompt.trim(), schemaJson, INPUT_DATA_HEADER);
     }
 
-    private String formatDynamicInput(String inputData) {
+    private String nullToEmptyInput(String inputData) {
         return inputData != null ? inputData : "";
     }
 }

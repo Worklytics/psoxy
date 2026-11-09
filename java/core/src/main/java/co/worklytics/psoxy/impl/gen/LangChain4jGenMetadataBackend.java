@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.impl.gen;
 
-import co.worklytics.psoxy.PsoxyModule;
 import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.augments.GenMetadataAugmentException;
 import com.avaulta.gateway.rules.augments.GenMetadataBackend;
@@ -14,10 +13,10 @@ import dev.langchain4j.model.chat.response.ChatResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import java.time.Clock;
@@ -48,6 +47,7 @@ import java.util.logging.Level;
  */
 @Log
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
 
     /** Max in-flight cloud LLM calls (one semaphore slot and one worker thread each). */
@@ -86,26 +86,6 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
     private final GenMetadataResponseFormats responseFormats;
     private final GenMetadataPromptCacheSupportFactory promptCacheSupportFactory;
     private final Clock clock;
-
-    @Inject
-    LangChain4jGenMetadataBackend(
-        GenMetadataConfig config,
-        GenMetadataPromptBudget promptBudget,
-        GenMetadataChatModelFactory chatModelFactory,
-        GenMetadataTokenUsageAccumulator tokenUsageAccumulator,
-        GenMetadataPromptBuilder promptBuilder,
-        GenMetadataResponseFormats responseFormats,
-        GenMetadataPromptCacheSupportFactory promptCacheSupportFactory,
-        @Named(PsoxyModule.GEN_METADATA_CLOCK) Clock clock) {
-        this.config = config;
-        this.promptBudget = promptBudget;
-        this.chatModelFactory = chatModelFactory;
-        this.tokenUsageAccumulator = tokenUsageAccumulator;
-        this.promptBuilder = promptBuilder;
-        this.responseFormats = responseFormats;
-        this.promptCacheSupportFactory = promptCacheSupportFactory;
-        this.clock = clock;
-    }
 
     private final ConcurrentHashMap<String, ModelHandle> models = new ConcurrentHashMap<>();
     private final Semaphore cloudSlots = new Semaphore(CLOUD_MAX_CONCURRENT, true);
@@ -282,14 +262,6 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
 
     ChatResponse chatWithTimeout(ChatModel chatModel, GenMetadataPromptAssembly assembly,
                                  ResponseFormat responseFormat, int maxOutputTokens) throws Exception {
-        ChatRequest.Builder requestBuilder = ChatRequest.builder()
-            .maxOutputTokens(maxOutputTokens);
-        if (responseFormat != null) {
-            requestBuilder.responseFormat(responseFormat);
-        }
-        promptCacheSupportFactory.forConfig(config)
-            .configureRequest(config, assembly, requestBuilder);
-        ChatRequest request = requestBuilder.build();
         int timeoutSeconds = config.getTimeoutSeconds();
         long deadlineNanos = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds);
         boolean acquired = false;
@@ -304,7 +276,16 @@ public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
             acquired = true;
             Future<ChatResponse> future;
             try {
-                future = chatExecutor.submit(() -> chatModel.chat(request));
+                future = chatExecutor.submit(() -> {
+                    ChatRequest.Builder requestBuilder = ChatRequest.builder()
+                        .maxOutputTokens(maxOutputTokens);
+                    if (responseFormat != null) {
+                        requestBuilder.responseFormat(responseFormat);
+                    }
+                    promptCacheSupportFactory.forConfig(config)
+                        .configureRequest(config, assembly, requestBuilder);
+                    return chatModel.chat(requestBuilder.build());
+                });
             } catch (RejectedExecutionException e) {
                 log.warning("genMetadata inference rejected; all workers busy modelId="
                     + config.getModelId());

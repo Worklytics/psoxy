@@ -76,6 +76,7 @@ class RecordBulkDataSanitizerImplTest {
     @Component(modules = {
         PsoxyModule.class,
         TestModules.ForGenMetadataConfig.class,
+        TestModules.ForSystemClock.class,
         MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
         ConfigRulesModule.class,

@@ -15,7 +15,9 @@ import lombok.extern.java.Log;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -33,16 +35,21 @@ import java.util.logging.Level;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class VertexGenMetadataCachedContentResolver {
 
-    private static final Duration LOCAL_CACHE_TTL = Duration.ofMinutes(50);
+    /**
+     * Shorter than Vertex {@link VertexGenAiClientFactory#PROMPT_CACHE_TTL}; entries re-validate remote
+     * {@code expireTime} on read.
+     */
+    private static final Duration LOCAL_CACHE_TTL = Duration.ofMinutes(40);
 
     private final VertexGenAiClientFactory clientFactory;
     private final GenMetadataStaticPromptFingerprint staticPromptFingerprint;
+    private final Clock clock;
 
-    private final LoadingCache<CacheKey, String> resourceNames = CacheBuilder.newBuilder()
+    private final LoadingCache<CacheKey, ResolvedCache> resourceNames = CacheBuilder.newBuilder()
         .expireAfterWrite(LOCAL_CACHE_TTL)
         .build(new CacheLoader<>() {
             @Override
-            public String load(CacheKey key) {
+            public ResolvedCache load(CacheKey key) {
                 return resolveResourceName(key);
             }
         });
@@ -67,7 +74,12 @@ public class VertexGenMetadataCachedContentResolver {
             fingerprint,
             cachedPrefixMessages);
         try {
-            return resourceNames.get(key);
+            ResolvedCache resolved = resourceNames.get(key);
+            if (!resolved.isUsable(clock)) {
+                resourceNames.invalidate(key);
+                resolved = resourceNames.get(key);
+            }
+            return resolved.getResourceName();
         } catch (ExecutionException e) {
             Throwable cause = e.getCause() != null ? e.getCause() : e;
             if (cause instanceof RuntimeException runtime) {
@@ -77,15 +89,20 @@ public class VertexGenMetadataCachedContentResolver {
         }
     }
 
-    private String resolveResourceName(CacheKey key) {
+    private ResolvedCache resolveResourceName(CacheKey key) {
         VertexGenAiClientFactory.VertexGenAiCachesContext ctx = clientContext(key.getLocation());
         GoogleGenAiCaches caches = ctx.getCaches();
-        String displayName = clientFactory.cacheDisplayName(key.getStaticPromptFingerprint());
+        String displayName =
+            clientFactory.cacheDisplayName(key.getModelId(), key.getStaticPromptFingerprint());
 
         Optional<CachedContent> existing = clientFactory.findByDisplayName(caches, displayName);
-        if (existing.isPresent()) {
-            return existing.get().name().orElseThrow(
-                () -> new IllegalStateException("Vertex cached content missing resource name"));
+        if (existing.isPresent()
+            && clientFactory.isReusableCachedContent(existing.get(), key.getModelId(), clock)) {
+            CachedContent content = existing.get();
+            return new ResolvedCache(
+                content.name().orElseThrow(
+                    () -> new IllegalStateException("Vertex cached content missing resource name")),
+                clientFactory.remoteExpireTime(content).orElse(null));
         }
 
         try {
@@ -95,15 +112,21 @@ public class VertexGenMetadataCachedContentResolver {
                 key.getPrefixMessages(),
                 displayName,
                 VertexGenAiClientFactory.PROMPT_CACHE_TTL);
-            return created.name().orElseThrow(
-                () -> new IllegalStateException("Vertex cached content missing resource name"));
+            return new ResolvedCache(
+                created.name().orElseThrow(
+                    () -> new IllegalStateException("Vertex cached content missing resource name")),
+                clientFactory.remoteExpireTime(created).orElse(null));
         } catch (RuntimeException createFailed) {
             Optional<CachedContent> raced = clientFactory.findByDisplayName(caches, displayName);
-            if (raced.isPresent()) {
+            if (raced.isPresent()
+                && clientFactory.isReusableCachedContent(raced.get(), key.getModelId(), clock)) {
                 log.log(Level.FINE, "Vertex cached content create raced; reusing displayName="
                     + displayName);
-                return raced.get().name().orElseThrow(
-                    () -> new IllegalStateException("Vertex cached content missing resource name"));
+                CachedContent content = raced.get();
+                return new ResolvedCache(
+                    content.name().orElseThrow(
+                        () -> new IllegalStateException("Vertex cached content missing resource name")),
+                    clientFactory.remoteExpireTime(content).orElse(null));
             }
             throw createFailed;
         }
@@ -118,15 +141,25 @@ public class VertexGenMetadataCachedContentResolver {
     }
 
     @Value
-    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+    static class ResolvedCache {
+        String resourceName;
+        Instant remoteExpireTime;
+
+        boolean isUsable(Clock clock) {
+            if (remoteExpireTime == null) {
+                return true;
+            }
+            return remoteExpireTime.isAfter(
+                clock.instant().plus(VertexGenAiClientFactory.CACHED_CONTENT_REUSE_MARGIN));
+        }
+    }
+
+    @Value
+    @EqualsAndHashCode(of = {"projectId", "location", "modelId", "staticPromptFingerprint"})
     static class CacheKey {
-        @EqualsAndHashCode.Include
         String projectId;
-        @EqualsAndHashCode.Include
         String location;
-        @EqualsAndHashCode.Include
         String modelId;
-        @EqualsAndHashCode.Include
         String staticPromptFingerprint;
         List<ChatMessage> prefixMessages;
     }
