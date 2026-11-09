@@ -23,6 +23,8 @@ public class DependencyConnectivityFailure {
     String clientMessage;
 
     public boolean isConfigStore() {
-        return "ssm".equals(service) || "secretsmanager".equals(service) || "secretmanager".equals(service);
+        return "ssm".equalsIgnoreCase(service)
+                || "secretsmanager".equalsIgnoreCase(service)
+                || "secretmanager".equalsIgnoreCase(service);
     }
 }

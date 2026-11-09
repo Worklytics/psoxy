@@ -64,25 +64,25 @@ public class AwsConnectivityFailures implements ConnectivityFailures {
     }
 
     private String clientMessage(String service) {
-        if ("ssm".equals(service)) {
+        if ("ssm".equalsIgnoreCase(service)) {
             return "Unable to reach SSM Parameter Store. Check the logs.";
         }
-        if ("secretsmanager".equals(service)) {
+        if ("secretsmanager".equalsIgnoreCase(service)) {
             return "Unable to reach Secrets Manager. Check the logs.";
         }
-        if ("kms".equals(service)) {
+        if ("kms".equalsIgnoreCase(service)) {
             return "Unable to reach KMS. Check the logs.";
         }
-        if ("s3".equals(service)) {
+        if ("s3".equalsIgnoreCase(service)) {
             return "Unable to reach S3. Check the logs.";
         }
-        if ("logs".equals(service)) {
+        if ("logs".equalsIgnoreCase(service)) {
             return "Unable to reach CloudWatch Logs. Check the logs.";
         }
-        if ("sts".equals(service)) {
+        if ("sts".equalsIgnoreCase(service)) {
             return "Unable to reach STS. Check the logs.";
         }
-        if ("jwks".equals(service)) {
+        if ("jwks".equalsIgnoreCase(service)) {
             return "Unable to reach a JWKS endpoint. Check the logs.";
         }
         return "Unable to reach an AWS API. Check the logs.";

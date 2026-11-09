@@ -48,19 +48,19 @@ public class GcpConnectivityFailures implements ConnectivityFailures {
     }
 
     private String clientMessage(String service) {
-        if ("secretmanager".equals(service)) {
+        if ("secretmanager".equalsIgnoreCase(service)) {
             return "Unable to reach Secret Manager. Check the logs.";
         }
-        if ("kms".equals(service)) {
+        if ("kms".equalsIgnoreCase(service)) {
             return "Unable to reach Cloud KMS. Check the logs.";
         }
-        if ("gcs".equals(service)) {
+        if ("gcs".equalsIgnoreCase(service)) {
             return "Unable to reach Cloud Storage. Check the logs.";
         }
-        if ("pubsub".equals(service)) {
+        if ("pubsub".equalsIgnoreCase(service)) {
             return "Unable to reach Pub/Sub. Check the logs.";
         }
-        if ("jwks".equals(service)) {
+        if ("jwks".equalsIgnoreCase(service)) {
             return "Unable to reach a JWKS endpoint. Check the logs.";
         }
         return "Unable to reach a Google API. Check the logs.";
