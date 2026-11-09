@@ -254,6 +254,7 @@ resource "google_cloudfunctions2_function" "function" {
     environment_variables = merge(tomap({
       INPUT_BUCKET  = google_storage_bucket.input_bucket.name,
       OUTPUT_BUCKET = module.output_bucket.bucket_name,
+      BULK_PROCESSING_TIMEOUT_SECONDS = tostring(var.timeout_seconds),
       }),
       var.environment_variables,
       var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },

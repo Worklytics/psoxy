@@ -33,6 +33,7 @@ import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
 import com.avaulta.gateway.rules.PathTemplateUtils;
 import com.avaulta.gateway.rules.PathTemplateUtils.Match;
+import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.annotations.VisibleForTesting;
 import co.worklytics.psoxy.Pseudonymizer;
@@ -581,6 +582,8 @@ public class StorageHandler {
             return;
         }
 
+        warnIfParallelProcessingNotApplicable(request, applicableRules.get());
+
         int bufferSize = getBufferSize();
 
         try (
@@ -601,6 +604,19 @@ public class StorageHandler {
                 + " outputTokens=" + usage.getOutputTokens()
                 + " path=" + request.getSourceObjectPath());
         }
+    }
+
+    void warnIfParallelProcessingNotApplicable(StorageEventRequest request, BulkDataRules rules) {
+        if (bulkModeConfig.getParallelProcessingThreads().isEmpty()) {
+            return;
+        }
+        if (rules instanceof RecordRules) {
+            return;
+        }
+        log.warning(BulkModeConfig.BulkModeConfigProperty.PARALLEL_PROCESSING_THREADS.name()
+            + " is configured but rules for object " + request.getSourceObjectPath()
+            + " are not RecordRules (found " + rules.getClass().getSimpleName()
+            + "); parallel processing applies only to record-oriented bulk rules and is ignored for this file.");
     }
 
 

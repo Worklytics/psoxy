@@ -34,6 +34,28 @@ class GenMetadataTokenUsageAccumulatorTest {
     }
 
     @Test
+    void parallelWorkersAggregateIntoRequestThreadScope() throws Exception {
+        GenMetadataTokenUsageAccumulator acc = new GenMetadataTokenUsageAccumulator();
+        acc.reset();
+        GenMetadataTokenUsageAccumulator.FileScopeHandle scope = acc.currentFileScopeHandle();
+
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        try {
+            var first = pool.submit(() -> acc.withFileScope(scope, () -> acc.record(10, 1)));
+            var second = pool.submit(() -> acc.withFileScope(scope, () -> acc.record(20, 2)));
+            first.get(5, TimeUnit.SECONDS);
+            second.get(5, TimeUnit.SECONDS);
+        } finally {
+            pool.shutdownNow();
+        }
+
+        GenMetadataTokenUsageAccumulator.Snapshot snap = acc.snapshot();
+        assertEquals(2, snap.getCalls());
+        assertEquals(30, snap.getInputTokens());
+        assertEquals(3, snap.getOutputTokens());
+    }
+
+    @Test
     void concurrentThreadsDoNotShareCounts() throws Exception {
         GenMetadataTokenUsageAccumulator acc = new GenMetadataTokenUsageAccumulator();
         CountDownLatch started = new CountDownLatch(2);
