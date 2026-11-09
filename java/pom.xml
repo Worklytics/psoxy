@@ -39,7 +39,7 @@
         <plugin.surefire.version>3.6.1</plugin.surefire.version>
         <dependency.bouncycastle.version>1.86</dependency.bouncycastle.version>
         <plugin.compiler.version>3.16.0</plugin.compiler.version>
-        <plugin.flatten.version>1.8.0</plugin.flatten.version>
+        <plugin.flatten.version>1.9.0</plugin.flatten.version>
         <plugin.shade.version>3.6.2</plugin.shade.version>
         <plugin.resources.version>3.5.0</plugin.resources.version>
         <plugin.jar.version>3.5.1</plugin.jar.version>
