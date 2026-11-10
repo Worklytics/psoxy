@@ -31,21 +31,22 @@ For a Psoxy connection (a proxy output bucket is set), Worklytics reads usage fr
 
 Admin keys are authorized per `event_type` requested from `/logs`. Each log category has its own fine-grained scope:
 
-| Event type | Scope | Worklytics fetches it today |
-|---|---|---|
-| `CONVERSATION_MESSAGE` | `chatgpt.enterprise.compliance_logs_platform.conversation_message.read` | yes (required) |
-| `CODEX_LOG` | `chatgpt.enterprise.compliance_logs_platform.codex_log.read` | yes, if the workspace uses Codex |
-| `APP_LOG` | `chatgpt.enterprise.compliance_logs_platform.app_log.read` | yes |
-| `CHATGPT_PLUGIN_SPREADSHEET` | `chatgpt.enterprise.compliance_logs_platform.chatgpt_plugin_spreadsheet.read` | yes |
-| `CHATGPT_PLUGIN_PRESENTATION` | `chatgpt.enterprise.compliance_logs_platform.chatgpt_plugin_presentation.read` | yes |
-| `CHATGPT_PLUGIN_DOCUMENT` | `chatgpt.enterprise.compliance_logs_platform.chatgpt_plugin_document.read` | yes |
-| `CUSTOM_AGENTS_LOG` | `chatgpt.enterprise.compliance_logs_platform.custom_agents_log.read` | yes |
-| `COSTS` | `chatgpt.enterprise.compliance_logs_platform.costs.read` | yes, if Organization Id is set |
-| `APP_AUTH_LOG` | `chatgpt.enterprise.compliance_logs_platform.app_auth_log.read` | not yet |
-| `AUDIT_LOG` | `chatgpt.enterprise.compliance_logs_platform.audit_log.read` | not yet |
-| `AUTH_LOG` | `chatgpt.enterprise.compliance_logs_platform.auth_log.read` | not yet |
-| `CODEX_SECURITY_LOG` | `chatgpt.enterprise.compliance_logs_platform.codex_security_log.read` | not yet |
-| `AGENT_TRACES` | `chatgpt.enterprise.compliance_logs_platform.agent_traces.read` | not yet |
+| Event type | Scope |
+|---|---|
+| `CONVERSATION_MESSAGE` | `chatgpt.enterprise.compliance_logs_platform.conversation_message.read` |
+| `CODEX_LOG` | `chatgpt.enterprise.compliance_logs_platform.codex_log.read` |
+| `APP_LOG` | `chatgpt.enterprise.compliance_logs_platform.app_log.read` |
+| `CHATGPT_PLUGIN_SPREADSHEET` | `chatgpt.enterprise.compliance_logs_platform.chatgpt_plugin_spreadsheet.read` |
+| `CHATGPT_PLUGIN_PRESENTATION` | `chatgpt.enterprise.compliance_logs_platform.chatgpt_plugin_presentation.read` |
+| `CHATGPT_PLUGIN_DOCUMENT` | `chatgpt.enterprise.compliance_logs_platform.chatgpt_plugin_document.read` |
+| `CUSTOM_AGENTS_LOG` | `chatgpt.enterprise.compliance_logs_platform.custom_agents_log.read` |
+| `COSTS` | `chatgpt.enterprise.compliance_logs_platform.costs.read` |
+| `CODEX_TURN` | `chatgpt.enterprise.compliance_logs_platform.codex_turn.read` |
+| `AUDIT_LOG` | `chatgpt.enterprise.compliance_logs_platform.audit_log.read` |
+| `AGENT_TRACES` | `chatgpt.enterprise.compliance_logs_platform.agent_traces.read` |
+| `CODEX_SECURITY_LOG` | `chatgpt.enterprise.compliance_logs_platform.codex_security_log.read` |
+| `APP_AUTH_LOG` | `chatgpt.enterprise.compliance_logs_platform.app_auth_log.read` |
+| `AUTH_LOG` | `chatgpt.enterprise.compliance_logs_platform.auth_log.read` |
 
 Granting each category individually is the least-privilege option, but to grant every log type at once instead, use the broad `chatgpt.enterprise.compliance_logs_platform.read` scope — shown in the Admin portal's **Create Admin API key** modal as **Compliance logging platform → Read**. The legacy `chatgpt.enterprise.compliance_export.read` scope is also still accepted as an alias for that broad scope.
 

@@ -19,21 +19,22 @@ See [Managing Admin keys in Admin Console](https://help.openai.com/en/articles/2
 
 Admin keys are authorized per `event_type` requested from `/logs`. Each log category has its own fine-grained scope (prefixed `chatgpt.enterprise.compliance_logs_platform.`):
 
-| Event type | Scope suffix | Worklytics fetches it today |
-|---|---|---|
-| `CONVERSATION_MESSAGE` | `conversation_message.read` | yes (required) |
-| `CODEX_LOG` | `codex_log.read` | yes, if the workspace uses Codex |
-| `APP_LOG` | `app_log.read` | yes, if enabled |
-| `CHATGPT_PLUGIN_SPREADSHEET` | `chatgpt_plugin_spreadsheet.read` | yes, if enabled |
-| `CHATGPT_PLUGIN_PRESENTATION` | `chatgpt_plugin_presentation.read` | yes, if enabled |
-| `CHATGPT_PLUGIN_DOCUMENT` | `chatgpt_plugin_document.read` | yes, if enabled |
-| `CUSTOM_AGENTS_LOG` | `custom_agents_log.read` | yes, if enabled |
-| `COSTS` | `costs.read` | yes, if Organization Id is set |
-| `APP_AUTH_LOG` | `app_auth_log.read` | not yet |
-| `AUDIT_LOG` | `audit_log.read` | not yet |
-| `AUTH_LOG` | `auth_log.read` | not yet |
-| `CODEX_SECURITY_LOG` | `codex_security_log.read` | not yet |
-| `AGENT_TRACES` | `agent_traces.read` | not yet |
+| Event type | Scope suffix |
+|---|---|
+| `CONVERSATION_MESSAGE` | `conversation_message.read` |
+| `CODEX_LOG` | `codex_log.read` |
+| `APP_LOG` | `app_log.read` |
+| `CHATGPT_PLUGIN_SPREADSHEET` | `chatgpt_plugin_spreadsheet.read` |
+| `CHATGPT_PLUGIN_PRESENTATION` | `chatgpt_plugin_presentation.read` |
+| `CHATGPT_PLUGIN_DOCUMENT` | `chatgpt_plugin_document.read` |
+| `CUSTOM_AGENTS_LOG` | `custom_agents_log.read` |
+| `COSTS` | `costs.read` |
+| `CODEX_TURN` | `codex_turn.read` |
+| `AUDIT_LOG` | `audit_log.read` |
+| `AGENT_TRACES` | `agent_traces.read` |
+| `CODEX_SECURITY_LOG` | `codex_security_log.read` |
+| `APP_AUTH_LOG` | `app_auth_log.read` |
+| `AUTH_LOG` | `auth_log.read` |
 
 To grant every log type at once instead of one by one, use the broad `chatgpt.enterprise.compliance_logs_platform.read` scope — shown in the Admin portal's **Create Admin API key** modal as **Compliance logging platform → Read**. The legacy `chatgpt.enterprise.compliance_export.read` scope is also still accepted as an alias for that broad scope.
 
