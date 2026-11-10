@@ -1,0 +1,64 @@
+{
+  "event_id": "9b1c2d3e-4f5a-4b6c-8d7e-0f1a2b3c4d5e",
+  "type": "AGENT_TRACES",
+  "timestamp": "2026-09-14T16:11:00.000000Z",
+  "principal": {
+    "id": "be545252-ad04-4cfa-9ca5-deca58416151",
+    "type": "CHATGPT_WORKSPACE"
+  },
+  "actor": {
+    "type": "ACCOUNT_USER",
+    "user_id": "user-TUvqhBX7HbQPRgHyEBt5WRcI",
+    "user_email": "user@example.org"
+  },
+  "payload": {
+    "resourceSpans": [
+      {
+        "scopeSpans": [
+          {
+            "scope": {
+              "name": "example.agent"
+            },
+            "spans": [
+              {
+                "traceId": "5b8efff798038103d269b633813fc60",
+                "spanId": "eee19b7ec3c1b174",
+                "name": "agent turn",
+                "kind": 1,
+                "startTimeUnixNano": "1544712660000000001",
+                "endTimeUnixNano": "1544712660000000124",
+                "status": {
+                  "code": 1
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "scopeSpans": [
+          {
+            "scope": {
+              "name": "example.agent.tool"
+            },
+            "spans": [
+              {
+                "traceId": "5b8efff798038103d269b633813fc60",
+                "spanId": "a1b2c3d4e5f60718",
+                "parentSpanId": "eee19b7ec3c1b174",
+                "name": "tool call",
+                "kind": 3,
+                "startTimeUnixNano": "1544712660000000010",
+                "endTimeUnixNano": "1544712660000000090",
+                "status": {
+                  "code": 2,
+                  "message": "tool invocation failed"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

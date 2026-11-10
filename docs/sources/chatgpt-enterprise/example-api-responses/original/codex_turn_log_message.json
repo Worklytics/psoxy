@@ -1,0 +1,69 @@
+{
+  "event_id": "c73ce7eb-1aa1-4d42-819a-2b14d9655f7b",
+  "type": "CODEX_TURN",
+  "timestamp": "2026-07-08T15:59:59Z",
+  "principal": {
+    "id": "be545252-ad04-4cfa-9ca5-deca58416151",
+    "type": "CHATGPT_WORKSPACE"
+  },
+  "actor": {
+    "type": "ACCOUNT_USER",
+    "user_id": "user-TUvqhBX7HbQPRgHyEBt5WRcI",
+    "user_email": "user@example.org"
+  },
+  "payload": {
+    "hour_partition": "2026-07-08T15",
+    "turn_id": "turn_123",
+    "turn_key": "turn_key_123",
+    "thread_id": "thread_123",
+    "session_id": "session_123",
+    "product_client_id": "CODEX_CLI",
+    "model": "gpt-5",
+    "reasoning_effort": "medium",
+    "speed": "standard",
+    "started_at": "2026-07-08T15:59:50Z",
+    "completed_at": "2026-07-08T15:59:59Z",
+    "duration_ms": 9000,
+    "response_count": 1,
+    "classification": {
+      "taxonomy_version": "v1",
+      "level_1": "code_implementation",
+      "level_2": "bug_fixing"
+    },
+    "credits": 12.5,
+    "cost_usd": 0.2583,
+    "estimated_cost_usd": 0.3,
+    "tags": [
+      "automation"
+    ],
+    "token_usage": {
+      "uncached_input_tokens": 100,
+      "cached_input_tokens": 20,
+      "output_tokens": 50
+    },
+    "skills": [
+      {
+        "skill_id": "skill_123",
+        "skill_name": "threat-model",
+        "skill_scope": "user",
+        "call_count": 2
+      }
+    ],
+    "plugins": [
+      {
+        "plugin_id": "plugin_123",
+        "plugin_name": "example-plugin",
+        "plugin_category": "productivity",
+        "marketplace_name": "openai-curated",
+        "call_count": 3
+      }
+    ],
+    "artifact_actions": [
+      {
+        "artifact_kind": "spreadsheet",
+        "action": "produced",
+        "action_count": 2
+      }
+    ]
+  }
+}
