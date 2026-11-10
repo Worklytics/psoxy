@@ -7,6 +7,7 @@ Changes to be including in future/planned release notes will be added here.
 
 ## [0.7.4]
 
+- `chatgpt-enterprise`: Compliance Logs Platform rules now cover four more event types - `AUDIT_LOG` (Agent Channel Audit, Slack/Microsoft Teams default-agent invocations), `AGENT_TRACES` (OTLP span telemetry), `CODEX_TURN` (per-turn Codex usage/cost/classification), and `CODEX_SECURITY_LOG` (Codex security scan configuration/finding/patch events) - plus `version_id` on Codex Site deployment events (independent of `version_number`) and `!<redact>` on citation URLs (`message.content.annotations[*].urls`), replacing the prior reversible `!<tokenize>`. See [docs/sources/chatgpt-enterprise/README.md](docs/sources/chatgpt-enterprise/README.md) for the updated per-event-type scope table.
 - bulk (`RecordRules`): optional `PARALLEL_PROCESSING_THREADS` (positive integer, max `128`) for ordered parallel sanitization within a single file; Terraform bulk connectors accept `parallel_processing_threads` and set `BULK_PROCESSING_TIMEOUT_SECONDS` from the connector execution timeout (deprecated env aliases `PARALLEL_RECORD_PROCESSING_THREADS` / `PARALLEL_RECORD_PROCESSING=true`). Logs a warning when set but matched rules are not `RecordRules`. Parallel workers share one genMetadata token scope for object metadata.
 
 ## [0.7.3](https://github.com/Worklytics/psoxy/releases/tag/v0.7.3)
