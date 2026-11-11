@@ -9,10 +9,12 @@ Full documentation of the test tool is available [here](psoxy-test-tool.md). And
 From the root of an AWS or GCP example, after `terraform init` and `terraform apply`:
 
 ```shell
-./build-tests.sh
+./generate-tests.sh
 ```
 
-That wrapper prefers `tools/build-test-scripts-from-output.sh` from the repository clone Terraform downloaded under `.terraform/modules/`, falls back to the generator shipped in the example's `tools/` directory, and writes `test-*.sh` plus `test-all.sh` into the example directory. You can pass a repo path (`./build-tests.sh /path/to/psoxy`) to use an explicit checkout instead.
+That reads the `test_script_files` Terraform output and writes `test-*.sh` plus `test-all.sh` into the example directory (same content Terraform would write via `todos.tf` when `todos_as_local_files` is true).
+
+Alternatively, `./build-tests.sh` synthesizes test scripts from other outputs via `tools/build-test-scripts-from-output.sh` (useful when `test_script_files` is not exposed at the root module).
 
 ### Testing Pre-requisites
 
@@ -39,7 +41,7 @@ If you're running the Terraform examples in a different location from where you 
 3. Get specific test commands for your deployment
 
     - If you set the `todos_as_outputs` variable to `true`, your Terraform apply run should contain `todos_2` output variable with testing instructions. `./generate-todos.sh` writes each TODO file from the `todo_files` output (or, on older modules, `todos_1.md` / `todos_2.md` / `todos_3.md` from the joined outputs).
-    - If you set `todos_as_local_files` variable to `true` (the default), your Terraform apply run still writes local files named `TODO 2 ...` with testing instructions. That `local_file` behavior is deprecated and will be removed in 0.8. `./generate-todos.sh` writes the same files from outputs.
+    - If you set `todos_as_local_files` variable to `true` (the default), your Terraform apply run still writes local files named `TODO 2 ...` with testing instructions. That `local_file` behavior is deprecated and will be removed in 0.8. `./generate-todos.sh` writes the same TODO files from outputs; `./generate-tests.sh` writes `test-*.sh` from the `test_script_files` output.
 
     In both cases, you will need to replace the test tool path included there with the path to your installation.
 

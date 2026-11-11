@@ -1,0 +1,195 @@
+#!/bin/bash
+# Write Psoxy test-*.sh scripts from `terraform output`.
+#
+# Run from the root of a Terraform configuration (an AWS or GCP example, or a
+# deployment based on one). After `terraform apply`, this reads the
+# `test_script_files` output (filename => script content) and writes those files
+# into the current directory.
+#
+# Always overwrites files present in the output (summarizes new vs replaced).
+#
+# Usage:
+#   ./generate-tests.sh
+#
+# Tests (no cloud credentials): ./tools/generate-tests.test.sh
+
+set -euo pipefail
+
+COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+  # shellcheck disable=SC1090
+  source "$COLORSCHEME_SH"
+else
+  ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
+
+BOLD=''
+if [ -t 1 ] && command -v tput >/dev/null 2>&1; then
+  ncolors=$(tput colors 2>/dev/null || true)
+  if [ -n "$ncolors" ] && [ "$ncolors" -ge 8 ]; then
+    BOLD=$(tput bold)
+  fi
+fi
+
+plural_s() {
+  if [[ "$1" -eq 1 ]]; then
+    printf ''
+  else
+    printf 's'
+  fi
+}
+
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [--help]
+
+Write test-*.sh scripts from \`terraform output\` into the current directory.
+Run this from the root of a Psoxy Terraform configuration, after \`terraform apply\`.
+
+Existing test scripts are always replaced when they appear in the output.
+
+  --help, -h  Show this help
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf "${ERR}Unknown argument: %s${NC}\n" "$1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+if ! command -v terraform >/dev/null 2>&1; then
+  printf "${ERR}terraform is not installed or not on PATH.${NC}\n" >&2
+  exit 1
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  printf "${ERR}jq is required to read terraform output.${NC}\n" >&2
+  printf "Install it with ${CODE}brew install jq${NC} or your platform package manager.\n" >&2
+  exit 1
+fi
+
+shopt -s nullglob
+tf_files=( *.tf )
+shopt -u nullglob
+if [[ ${#tf_files[@]} -eq 0 ]]; then
+  printf "${ERR}No Terraform configuration (*.tf) in %s.${NC}\n" "$(pwd)" >&2
+  printf "Run this script from the root of your Psoxy Terraform configuration.\n" >&2
+  exit 1
+fi
+
+printf "${BOLD}${INFO}Reading Terraform outputs...${NC}\n"
+
+if ! outputs_json="$(terraform output -json)"; then
+  printf "${ERR}terraform output failed. Apply this configuration first, then re-run.${NC}\n" >&2
+  exit 1
+fi
+
+files_stream="$(printf '%s' "$outputs_json" | jq -c '
+  def entries_from_map:
+    [ to_entries[]
+      | select(.value != null and (.value | type) == "string" and .value != "")
+      | {key: .key, value: .value} ];
+
+  (if has("test_script_files") and (.test_script_files.value | type) == "object" then
+    .test_script_files.value | entries_from_map
+  else
+    []
+  end)
+  | sort_by(.key)
+  | .[]
+')"
+
+if [[ -z "$files_stream" ]]; then
+  printf "${WARN}No test script content found in Terraform outputs.${NC}\n"
+  printf "Expected ${CODE}test_script_files${NC} (filename => script). Apply a configuration that exposes that output, then re-run.\n"
+  exit 0
+fi
+
+file_count="$(printf '%s\n' "$files_stream" | grep -c . || true)"
+printf "${BOLD}Found ${INFO}%s${NC}${BOLD} test script%s to write${NC}${BOLD} (existing files will be overwritten).${NC}\n" "$file_count" "$(plural_s "$file_count")"
+
+written=()
+overwritten=()
+rejected=()
+
+safe_filename() {
+  local name="$1"
+  if [[ -z "$name" || "$name" == *"/"* || "$name" == *".."* || "$name" == *$'\n'* ]]; then
+    return 1
+  fi
+  case "$name" in
+    /*|.*) return 1 ;;
+  esac
+  return 0
+}
+
+write_file() {
+  local name="$1"
+  local content="$2"
+  local tmp
+  tmp="$(mktemp)"
+  printf '%s' "$content" > "$tmp"
+  if [[ -n "$content" && "${content: -1}" != $'\n' ]]; then
+    printf '\n' >> "$tmp"
+  fi
+  mv "$tmp" "$name"
+  if [[ "$name" == *.sh ]]; then
+    chmod +x "$name"
+  fi
+}
+
+while IFS= read -r record <&3; do
+  filename="$(printf '%s' "$record" | jq -r '.key')"
+  content="$(printf '%s' "$record" | jq -r '.value')"
+
+  if ! safe_filename "$filename"; then
+    printf "${ERR}Refusing to write unsafe path:${NC} %s\n" "$filename" >&2
+    rejected+=("$filename")
+    continue
+  fi
+
+  if [[ -e "$filename" ]]; then
+    write_file "$filename" "$content"
+    overwritten+=("$filename")
+  else
+    write_file "$filename" "$content"
+    written+=("$filename")
+  fi
+done 3< <(printf '%s\n' "$files_stream")
+
+printf "\n"
+if [[ ${#written[@]} -gt 0 ]]; then
+  printf "${BOLD}${SUCCESS}Wrote %s new test script%s${NC}\n" "${#written[@]}" "$(plural_s "${#written[@]}")"
+  for name in "${written[@]}"; do
+    printf "  ${SUCCESS}+${NC} ${CODE}%s${NC}\n" "$name"
+  done
+fi
+
+if [[ ${#overwritten[@]} -gt 0 ]]; then
+  printf "${BOLD}${SUCCESS}Overwrote %s existing test script%s${NC}\n" "${#overwritten[@]}" "$(plural_s "${#overwritten[@]}")"
+  for name in "${overwritten[@]}"; do
+    printf "  ${SUCCESS}~${NC} ${CODE}%s${NC}\n" "$name"
+  done
+fi
+
+if [[ ${#rejected[@]} -gt 0 ]]; then
+  printf "${BOLD}${ERR}Skipped %s unsafe path%s${NC}\n" "${#rejected[@]}" "$(plural_s "${#rejected[@]}")"
+  for name in "${rejected[@]}"; do
+    printf "  ${ERR}!${NC} ${CODE}%s${NC}\n" "$name"
+  done
+  exit 1
+fi
+
+total_written=$(( ${#written[@]} + ${#overwritten[@]} ))
+if [[ "$total_written" -eq 0 ]]; then
+  printf "${WARN}Nothing was written.${NC}\n"
+fi
