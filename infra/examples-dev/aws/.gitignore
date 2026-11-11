@@ -28,6 +28,3 @@
 */upgrade-terraform-modules
 */upgrade-terraform-modules.sh
 
-
-# helper scripts
-az-auth
