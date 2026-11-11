@@ -143,6 +143,14 @@ This allows data sources to restrict access by IP. The NAT and router above may 
 
 Your VPC must provide connectivity to all data sources you connect to. Google Workspace sources generally work with Private Google Access on the subnet; other SaaS APIs require the NAT path above to reach the public internet with your fixed IP.
 
+## Troubleshooting
+
+A health check that cannot reach Secret Manager returns **HTTP 503** with header `X-Psoxy-Error: CONFIG_STORE_UNREACHABLE` and a JSON body whose `error` field is the same code. `warningMessages` is one sentence: `Unable to reach Secret Manager. Check the logs.` Search the logs for `Error reading configuration from Secret Manager`; the client error is only there. That response is also returned when container startup itself failed to reach Secret Manager, so the health check is not collapsed into a generic 500 from Cloud Functions. Connection failures to other Google APIs use `DEPENDENT_SERVICE_UNREACHABLE` and a sentence such as `Unable to reach Cloud KMS. Check the logs.` The client error stays in the logs.
+
+VPC egress for these functions is **all traffic**, so Secret Manager is reached only through the VPC. The subnet needs Private Google Access, or Cloud NAT, and the firewall must allow HTTPS to that API. A missing secret or a missing IAM grant is a different error (`no value for PSOXY_SALT` or `Permission denied`).
+
+See [GCP troubleshooting](../troubleshooting.md#health-check-returns-503-config_store_unreachable).
+
 ## Removing VPC egress
 
 GCP Cloud Functions (gen2) cannot clear Direct VPC egress or Serverless VPC Access connector settings via an in-place Terraform update. If you remove or comment out `vpc_config` and run `terraform apply`, you may see:
