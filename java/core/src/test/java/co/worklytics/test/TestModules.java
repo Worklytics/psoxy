@@ -38,6 +38,16 @@ public class TestModules {
         }
     }
 
+    @Module
+    public interface ForSystemClock {
+
+        @Provides
+        @Singleton
+        static Clock systemClock() {
+            return Clock.systemUTC();
+        }
+    }
+
     //provide deterministic, fixed UUID from `Provider<UUID>` instead of random
     @Module
     public interface ForFixedUUID {

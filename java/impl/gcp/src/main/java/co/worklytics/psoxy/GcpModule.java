@@ -28,6 +28,7 @@ import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrateg
 import co.worklytics.psoxy.gateway.output.OutputFactory;
 import co.worklytics.psoxy.impl.gen.GenMetadataChatModelProvider;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
+import co.worklytics.psoxy.impl.gen.GenMetadataPromptCacheSupport;
 import co.worklytics.psoxy.impl.gen.VertexGenMetadataConfig;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.gcp.GcpKmsPublicKeyStoreClient;
@@ -235,5 +236,10 @@ public interface GcpModule {
         @Binds
         @IntoSet
         abstract GenMetadataChatModelProvider vertexGeminiChatModelProvider(VertexGeminiChatModelProvider impl);
+
+        @Binds
+        @IntoSet
+        abstract GenMetadataPromptCacheSupport vertexGenMetadataPromptCacheSupport(
+            VertexGenMetadataPromptCacheSupport impl);
     }
 }
