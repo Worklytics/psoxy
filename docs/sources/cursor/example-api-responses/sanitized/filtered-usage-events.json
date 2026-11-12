@@ -11,7 +11,7 @@
     {
       "timestamp":"1710720000000",
       "model":"gpt-4",
-      "kindLabel":"Usage-based",
+      "kind":"Usage-based",
       "maxMode":false,
       "requestsCosts":0.05,
       "isTokenBasedCall":true,
@@ -20,27 +20,36 @@
         "outputTokens":750,
         "cacheWriteTokens":0,
         "cacheReadTokens":0,
-        "totalCents":25
+        "totalCents":25,
+        "discountPercentOff":10
       },
-      "isFreeBugbot":false,
-      "chargedCents":25,
+      "isChargeable":true,
+      "isHeadless":false,
+      "cursorTokenFee":1.18,
+      "conversationId":"8f2e4a1b-6c3d-4e5f-9a7b-2d1c8e6f4a3b",
+      "chargedCents":26.18,
       "userEmail":"t~bSkdfjBTY24htUdeLzDD8hBKsXGprapgKEXQFW5AFPU@company.com"
     },
     {
       "timestamp":"1710720000000",
       "model":"claude-3-opus",
-      "kindLabel":"Included in Business",
+      "kind":"Included in Business",
       "maxMode":true,
       "requestsCosts":0.0,
       "isTokenBasedCall":false,
-      "isFreeBugbot":false,
+      "isChargeable":false,
+      "isHeadless":true,
+      "serviceAccountId":"t~x2bx4BS7F0POPP38zjCT67IkOlbULQS-2Dhj7sD2OMY",
+      "serviceAccountName":"t~XqLgwi3cJpKjPq1naVs8UOurCSEVL1xxDp9yWj07GHE",
+      "cloudAgentId":"ca_abc123",
+      "automationId":"7fc64f90-6d7a-4a5d-91b1-bd1f529a85dd",
       "chargedCents":0,
       "userEmail":"t~I3fHxUsK2qMysD_fKva0I3q09GP06Uqw4G6RKUylNPY@company.com"
     },
     {
       "timestamp":"1710720000000",
       "model":"gpt-4",
-      "kindLabel":"Usage-based",
+      "kind":"Usage-based",
       "maxMode":false,
       "requestsCosts":0.03,
       "isTokenBasedCall":true,
@@ -51,9 +60,11 @@
         "cacheReadTokens":0,
         "totalCents":15
       },
-      "isFreeBugbot":true,
       "chargedCents":0,
-      "userEmail":"t~JYdSZrv6Gmaj3htiQnFhB89WYPFcw7pp-Kv9h0nOsbc@company.com"
+      "userEmail":"t~JYdSZrv6Gmaj3htiQnFhB89WYPFcw7pp-Kv9h0nOsbc@company.com",
+      "prAuthor":"t~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM",
+      "repo":"github.com/acme/widgets",
+      "prNumber":42
     }
   ],
   "period":{
