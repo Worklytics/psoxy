@@ -11,7 +11,7 @@
         {
             "timestamp": "1710720000000",
             "model": "gpt-4",
-            "kindLabel": "Usage-based",
+            "kind": "Usage-based",
             "maxMode": false,
             "requestsCosts": 0.05,
             "isTokenBasedCall": true,
@@ -20,27 +20,36 @@
                 "outputTokens": 750,
                 "cacheWriteTokens": 0,
                 "cacheReadTokens": 0,
-                "totalCents": 25
+                "totalCents": 25,
+                "discountPercentOff": 10
             },
-            "isFreeBugbot": false,
-            "chargedCents": 25,
+            "isChargeable": true,
+            "isHeadless": false,
+            "cursorTokenFee": 1.18,
+            "conversationId": "8f2e4a1b-6c3d-4e5f-9a7b-2d1c8e6f4a3b",
+            "chargedCents": 26.18,
             "userEmail": "developer@company.com"
         },
         {
             "timestamp": "1710720000000",
             "model": "claude-3-opus",
-            "kindLabel": "Included in Business",
+            "kind": "Included in Business",
             "maxMode": true,
             "requestsCosts": 0.0,
             "isTokenBasedCall": false,
-            "isFreeBugbot": false,
+            "isChargeable": false,
+            "isHeadless": true,
+            "serviceAccountId": "sa_abc123",
+            "serviceAccountName": "Nightly CI Agent",
+            "cloudAgentId": "ca_abc123",
+            "automationId": "7fc64f90-6d7a-4a5d-91b1-bd1f529a85dd",
             "chargedCents": 0,
             "userEmail": "senior.dev@company.com"
         },
         {
             "timestamp": "1710720000000",
             "model": "gpt-4",
-            "kindLabel": "Usage-based",
+            "kind": "Usage-based",
             "maxMode": false,
             "requestsCosts": 0.03,
             "isTokenBasedCall": true,
@@ -51,9 +60,11 @@
                 "cacheReadTokens": 0,
                 "totalCents": 15
             },
-            "isFreeBugbot": true,
             "chargedCents": 0,
-            "userEmail": "admin@company.com"
+            "userEmail": "admin@company.com",
+            "prAuthor": "octocat",
+            "repo": "github.com/acme/widgets",
+            "prNumber": 42
         }
     ],
     "period": {
