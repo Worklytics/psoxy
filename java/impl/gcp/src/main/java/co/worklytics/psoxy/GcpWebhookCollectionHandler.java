@@ -22,6 +22,7 @@ import com.google.pubsub.v1.ProjectSubscriptionName;
 import com.google.pubsub.v1.PullRequest;
 import com.google.pubsub.v1.PullResponse;
 import com.google.pubsub.v1.ReceivedMessage;
+import co.worklytics.psoxy.gateway.ConnectivityFailureMatcher;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
@@ -44,6 +45,7 @@ public class GcpWebhookCollectionHandler {
     JwksDecorator jwksResource;
     EnvVarsConfigService envVarsConfigService;
     Lazy<GcpEnvironment.GcpWebhookCollectorModeConfig> gcpWebhookCollectorModeConfig;
+    ConnectivityFailureMatcher connectivityFailures;
 
     // standard Bearer token prefix on Authorization header
     static final String BEARER_PREFIX = "Bearer ";
@@ -56,7 +58,8 @@ public class GcpWebhookCollectionHandler {
                                        JwksDecorator.Factory jwksDecoratorFactory,
                                        WebhookCollectorModeConfig webhookCollectorModeConfig,
                                        EnvVarsConfigService envVarsConfigService,
-                                       Lazy<GcpEnvironment.GcpWebhookCollectorModeConfig> gcpWebhookCollectorModeConfig) {
+                                       Lazy<GcpEnvironment.GcpWebhookCollectorModeConfig> gcpWebhookCollectorModeConfig,
+                                       ConnectivityFailureMatcher connectivityFailures) {
         this.gcpEnvironment = gcpEnvironment;
         this.inboundWebhookHandler = inboundWebhookHandler;
         this.googleIdTokenVerifierFactory = googleIdTokenVerifierFactory;
@@ -65,6 +68,7 @@ public class GcpWebhookCollectionHandler {
         this.webhookCollectorModeConfig = webhookCollectorModeConfig;
         this.envVarsConfigService = envVarsConfigService;
         this.gcpWebhookCollectorModeConfig = gcpWebhookCollectorModeConfig;
+        this.connectivityFailures = connectivityFailures;
 
         
         // Pre-warm the public key cache during function initialization
@@ -144,6 +148,12 @@ public class GcpWebhookCollectionHandler {
             log.log(Level.WARNING, "Unauthorized : " + e.getMessage());
             response.setStatusCode(HttpStatus.SC_UNAUTHORIZED, e.getMessage());
         } catch (Exception e) {
+            if (connectivityFailures.match(e).isPresent()) {
+                if (e instanceof RuntimeException runtimeException) {
+                    throw runtimeException;
+                }
+                throw new IllegalStateException(e);
+            }
             log.log(Level.WARNING, "Exception while processing batch", e);
             response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
         }

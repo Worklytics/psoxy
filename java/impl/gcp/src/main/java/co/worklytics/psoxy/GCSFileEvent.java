@@ -15,11 +15,26 @@ import java.io.*;
 public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
 
-    volatile GcpContainer container;
+    final GcpContainerStartup startup = new GcpContainerStartup();
 
     @Override
     public void accept(GcsEvent gcsEvent, Context context) throws Exception {
-       injectDependenciesIfNeeded();
+       GcpContainer container = startup.getOrCreate(() -> {
+           GcpContainer created = DaggerGcpContainer.create();
+           created.gcsFileEventHandler();
+           return created;
+       });
+       if (container == null) {
+           String service = startup.match(startup.failure())
+                   .map(failure -> failure.getService())
+                   .orElse(null);
+           String detail = service == null
+                   ? "a dependent service could not be reached. Check the logs."
+                   : service + " could not be reached. Check the logs.";
+           throw new IllegalStateException(
+                   "Cloud Function failed to initialize because " + detail,
+                   startup.failure());
+       }
 
        container.gcsFileEventHandler().process(gcsEvent, context);
     }
@@ -42,13 +57,4 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
     }
 
 
-    void injectDependenciesIfNeeded() {
-        if (container == null) {
-            synchronized (this) {
-                if (container == null) {
-                    container = DaggerGcpContainer.create();
-                }
-            }
-        }
-    }
 }

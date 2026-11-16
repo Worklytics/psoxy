@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 import co.worklytics.psoxy.GcpWebhookCollectionHandler.AuthorizationException;
+import co.worklytics.psoxy.gateway.ConnectivityFailureMatcher;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import lombok.SneakyThrows;
@@ -94,7 +96,8 @@ class GcpWebhookCollectionHandlerTest {
             null, // jwksDecoratorFactory - not needed for these tests
             WebhookCollectorModeConfig.builder().authIssuer(EXPECTED_AUDIENCE).build(),
             mockEnvVarsConfigService,
-            () -> webhookCollectorModeConfig
+            () -> webhookCollectorModeConfig,
+            new ConnectivityFailureMatcher(Set.of())
         );
     }
 

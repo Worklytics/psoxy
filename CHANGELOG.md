@@ -7,6 +7,7 @@ Changes to be including in future/planned release notes will be added here.
 
 ## [0.7.4]
 
+- detect connectivity errors that indicate VPC / networking misconfigurations
 - bulk (`RecordRules`): optional `PARALLEL_PROCESSING_THREADS` (positive integer, max `128`) for ordered parallel sanitization within a single file; Terraform bulk connectors accept `parallel_processing_threads` and set `BULK_PROCESSING_TIMEOUT_SECONDS` from the connector execution timeout (deprecated env aliases `PARALLEL_RECORD_PROCESSING_THREADS` / `PARALLEL_RECORD_PROCESSING=true`). Logs a warning when set but matched rules are not `RecordRules`. Parallel workers share one genMetadata token scope for object metadata.
 
 ## [0.7.3](https://github.com/Worklytics/psoxy/releases/tag/v0.7.3)

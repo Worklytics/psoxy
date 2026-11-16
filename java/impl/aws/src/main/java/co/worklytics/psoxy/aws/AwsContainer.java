@@ -8,6 +8,8 @@ import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.S3Handler;
 import co.worklytics.psoxy.SourceAuthModule;
 import co.worklytics.psoxy.aws.request.LambdaEventUtils;
+import co.worklytics.psoxy.gateway.ConnectivityFailureMatcher;
+import co.worklytics.psoxy.gateway.ConnectivityFailureResponses;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
 import co.worklytics.psoxy.gateway.impl.InboundWebhookHandler;
@@ -27,6 +29,10 @@ public interface AwsContainer {
     co.worklytics.psoxy.gateway.LoggingConfiguration loggingConfiguration();
 
     ApiDataRequestHandler apiDataRequestHandler();
+
+    ConnectivityFailureMatcher connectivityFailures();
+
+    ConnectivityFailureResponses connectivityFailureResponses();
 
     InboundWebhookHandler inboundWebhookHandler();
 
