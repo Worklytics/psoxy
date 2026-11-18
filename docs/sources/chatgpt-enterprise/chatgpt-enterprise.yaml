@@ -547,7 +547,16 @@ endpoints:
     - "$..user_email"
     - "$.event_details.created_by_user_id"
     - "$.event_details.plugin_creator_account_user_id"
+    - "$.action_data.requester_account_user_id"
+    - "$.action_data.slack_user_id"
+    - "$.action_data.microsoft_teams_user_aad_object_id"
+    - "$.event_details.scan_configuration_fields.owner_id"
+    - "$.event_details.updated_fields.owner_id"
+    - "$.event_details.updated_fields.assignee_user_email"
     encoding: "URL_SAFE_TOKEN"
+  - !<redact>
+    jsonPaths:
+    - "$.message.content.annotations[*].urls[*]"
   - !<textDigest>
     jsonPaths:
     - "$.conversation.title"
@@ -567,6 +576,16 @@ endpoints:
     - "$.event_details.text"
     - "$.event_details.release_description"
     - "$.event_details.release_name"
+    - "$.event_details.failure_message"
+    - "$.event_details.agent_fields.prompt"
+    - "$.event_details.agent_fields.description"
+    - "$.event_details.agent_fields.tagline"
+    - "$.event_details.trigger_fields.instructions"
+    - "$.action_data.failure_reason"
+    - "$.payload.resourceSpans[*].scopeSpans[*].spans[*].name"
+    - "$.payload.resourceSpans[*].scopeSpans[*].spans[*].status.message"
+    - "$.event_details.updated_fields.resolution_reason"
+    - "$.event_details.updated_fields.criticality_reason"
     keywords:
     - "python"
     - "javascript"
@@ -695,6 +714,10 @@ endpoints:
   responseSchema:
     type: "object"
     properties:
+      action:
+        type: "string"
+      action_data:
+        $ref: "#/definitions/ActionData"
       actor:
         $ref: "#/definitions/Actor"
       agent:
@@ -727,6 +750,8 @@ endpoints:
         type: "array"
         items:
           $ref: "#/definitions/AppOutputItem"
+      payload:
+        $ref: "#/definitions/ExtendedPayload"
       previous_message_id:
         type: "string"
       principal:
@@ -933,6 +958,51 @@ endpoints:
       object:
         type: "string"
 definitions:
+  ActionData:
+    type: "object"
+    properties:
+      delegated_task_id:
+        type: "string"
+      delegated_workflow_id:
+        type: "string"
+      delegation_request_id:
+        type: "string"
+      delegation_status:
+        type: "string"
+      environment_access_id:
+        type: "string"
+      environment_name:
+        type: "string"
+      environment_status:
+        type: "string"
+      environment_type:
+        type: "string"
+      execution_backend:
+        type: "string"
+      failure_reason:
+        type: "string"
+      flow_id:
+        type: "string"
+      microsoft_teams_channel_id:
+        type: "string"
+      microsoft_teams_event_id:
+        type: "string"
+      microsoft_teams_team_id:
+        type: "string"
+      microsoft_teams_tenant_id:
+        type: "string"
+      microsoft_teams_user_aad_object_id:
+        type: "string"
+      requester_account_user_id:
+        type: "string"
+      slack_channel_id:
+        type: "string"
+      slack_event_id:
+        type: "string"
+      slack_team_id:
+        type: "string"
+      slack_user_id:
+        type: "string"
   Actor:
     type: "object"
     properties:
@@ -1000,6 +1070,8 @@ definitions:
         type: "string"
       failure_message:
         type: "string"
+      finding_id:
+        type: "string"
       invoker:
         $ref: "#/definitions/LeanInvoker"
       launch_span_id:
@@ -1024,6 +1096,8 @@ definitions:
         type: "string"
       plugin_version:
         type: "string"
+      pr_url:
+        type: "string"
       project_id:
         type: "string"
       prompt_text:
@@ -1037,6 +1111,10 @@ definitions:
       result_preview:
         type: "string"
       run_id:
+        type: "string"
+      scan_configuration_fields:
+        $ref: "#/definitions/ScanConfigurationFields"
+      scan_configuration_id:
         type: "string"
       service_tier:
         type: "string"
@@ -1070,6 +1148,10 @@ definitions:
         type: "string"
       turn_id:
         type: "string"
+      updated_fields:
+        $ref: "#/definitions/UpdatedFields"
+      version_id:
+        type: "string"
       version_number:
         type: "integer"
   AppInput:
@@ -1081,6 +1163,15 @@ definitions:
     type: "object"
     properties:
       display_title:
+        type: "string"
+  ArtifactAction:
+    type: "object"
+    properties:
+      action:
+        type: "string"
+      action_count:
+        type: "integer"
+      artifact_kind:
         type: "string"
   Author:
     type: "object"
@@ -1121,6 +1212,15 @@ definitions:
         type: "string"
       name:
         type: "string"
+  Classification:
+    type: "object"
+    properties:
+      level_1:
+        type: "string"
+      level_2:
+        type: "string"
+      taxonomy_version:
+        type: "string"
   Content:
     type: "object"
     properties:
@@ -1151,6 +1251,10 @@ definitions:
           $ref: "#/definitions/CitedFile"
       type:
         type: "string"
+      urls:
+        type: "array"
+        items:
+          type: "string"
   Conversation:
     type: "object"
     properties:
@@ -1319,6 +1423,67 @@ definitions:
         type: "string"
       schedule:
         type: "string"
+  ExtendedPayload:
+    type: "object"
+    properties:
+      artifact_actions:
+        type: "array"
+        items:
+          $ref: "#/definitions/ArtifactAction"
+      classification:
+        $ref: "#/definitions/Classification"
+      completed_at:
+        type: "string"
+        format: "date-time"
+      cost_usd:
+        type: "number"
+      credits:
+        type: "number"
+      duration_ms:
+        type: "integer"
+      estimated_cost_usd:
+        type: "number"
+      hour_partition:
+        type: "string"
+      model:
+        type: "string"
+      plugins:
+        type: "array"
+        items:
+          $ref: "#/definitions/Plugin"
+      product_client_id:
+        type: "string"
+      reasoning_effort:
+        type: "string"
+      resourceSpans:
+        type: "array"
+        items:
+          $ref: "#/definitions/OtlpResourceSpans"
+      response_count:
+        type: "integer"
+      session_id:
+        type: "string"
+      skills:
+        type: "array"
+        items:
+          $ref: "#/definitions/Skill"
+      speed:
+        type: "string"
+      started_at:
+        type: "string"
+        format: "date-time"
+      tags:
+        type: "array"
+        items:
+          type: "string"
+      thread_id:
+        type: "string"
+      token_usage:
+        $ref: "#/definitions/TokenUsage"
+      turn_id:
+        type: "string"
+      turn_key:
+        type: "string"
   LeanInvoker:
     type: "object"
     properties:
@@ -1407,6 +1572,53 @@ definitions:
         type: "string"
       object:
         type: "string"
+  OtlpInstrumentationScope:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+  OtlpResourceSpans:
+    type: "object"
+    properties:
+      scopeSpans:
+        type: "array"
+        items:
+          $ref: "#/definitions/OtlpScopeSpans"
+  OtlpScopeSpans:
+    type: "object"
+    properties:
+      scope:
+        $ref: "#/definitions/OtlpInstrumentationScope"
+      spans:
+        type: "array"
+        items:
+          $ref: "#/definitions/OtlpSpan"
+  OtlpSpan:
+    type: "object"
+    properties:
+      endTimeUnixNano:
+        type: "string"
+      kind:
+        type: "integer"
+      name:
+        type: "string"
+      parentSpanId:
+        type: "string"
+      spanId:
+        type: "string"
+      startTimeUnixNano:
+        type: "string"
+      status:
+        $ref: "#/definitions/OtlpStatus"
+      traceId:
+        type: "string"
+  OtlpStatus:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+      message:
+        type: "string"
   Permissions:
     type: "object"
     properties:
@@ -1417,6 +1629,17 @@ definitions:
       can_write:
         type: "boolean"
       object:
+        type: "string"
+  Plugin:
+    type: "object"
+    properties:
+      call_count:
+        type: "integer"
+      marketplace_name:
+        type: "string"
+      plugin_category:
+        type: "string"
+      plugin_id:
         type: "string"
   Principal:
     type: "object"
@@ -1493,6 +1716,29 @@ definitions:
         type: "string"
       permissions:
         $ref: "#/definitions/Permissions"
+  ScanConfigurationFields:
+    type: "object"
+    properties:
+      environment_id:
+        type: "string"
+      lookback_days:
+        type: "integer"
+      notification_rules_created_count:
+        type: "integer"
+      notification_rules_deleted_count:
+        type: "integer"
+      notification_rules_updated_count:
+        type: "integer"
+      owner_id:
+        type: "string"
+      repo_id:
+        type: "string"
+      scan_type:
+        type: "string"
+      state:
+        type: "string"
+      workspace_id:
+        type: "string"
   Sharing:
     type: "object"
     properties:
@@ -1506,6 +1752,15 @@ definitions:
           $ref: "#/definitions/Recipient"
       visibility:
         type: "string"
+  Skill:
+    type: "object"
+    properties:
+      call_count:
+        type: "integer"
+      skill_id:
+        type: "string"
+      skill_scope:
+        type: "string"
   TokenUsage:
     type: "object"
     properties:
@@ -1517,6 +1772,43 @@ definitions:
         type: "integer"
       reasoning_output_tokens:
         type: "integer"
+      uncached_input_tokens:
+        type: "integer"
+  UpdatedFields:
+    type: "object"
+    properties:
+      assignee_user_email:
+        type: "string"
+      criticality:
+        type: "string"
+      criticality_reason:
+        type: "string"
+      criticality_reason_updated:
+        type: "boolean"
+      environment_id:
+        type: "string"
+      lookback_days:
+        type: "integer"
+      notification_rules_created_count:
+        type: "integer"
+      notification_rules_deleted_count:
+        type: "integer"
+      notification_rules_updated_count:
+        type: "integer"
+      owner_id:
+        type: "string"
+      project_overview_length:
+        type: "integer"
+      project_overview_updated:
+        type: "boolean"
+      resolution_reason:
+        type: "string"
+      resolution_reason_updated:
+        type: "boolean"
+      state:
+        type: "string"
+      status:
+        type: "string"
   WorkspaceUser:
     type: "object"
     properties:

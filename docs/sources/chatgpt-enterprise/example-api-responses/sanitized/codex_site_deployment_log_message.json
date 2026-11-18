@@ -17,6 +17,7 @@
     "detail_type":"SITE_DEPLOYMENT_COMPLETED",
     "project_id":"site-proj-001",
     "slug":"internal-dashboard",
+    "version_id":"version-7",
     "version_number":3,
     "deployment_id":"deploy-001",
     "environment_revision":"rev-7",

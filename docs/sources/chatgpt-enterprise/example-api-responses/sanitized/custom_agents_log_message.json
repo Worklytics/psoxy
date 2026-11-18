@@ -22,6 +22,7 @@
   "event_details":{
     "detail_type":"MEMORY_READ",
     "agent_id":"agent-123",
+    "version_id":"version-7",
     "run_id":"thread_019c9c87-1084-7ad1-b487-c2ee563367c4",
     "memory_path":"customer-notes/q4.md",
     "access_method":"read",

@@ -26,7 +26,13 @@
     },
     "content":{
       "type":"user_instructions",
-      "value":"{\"keywords\":{\"summarize\":1},\"length\":63,\"word_count\":11}"
+      "value":"{\"keywords\":{\"summarize\":1},\"length\":63,\"word_count\":11}",
+      "annotations":[
+        {
+          "type":"url_citation",
+          "urls":[ ]
+        }
+      ]
     },
     "files":[
       {

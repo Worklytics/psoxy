@@ -17,6 +17,7 @@
   "event_details":{
     "detail_type":"AGENT_PUBLISHED",
     "agent_id":"agent-123",
+    "version_id":"version-7",
     "release_name":"{\"length\":2,\"word_count\":1}"
   }
 }

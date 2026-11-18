@@ -1,0 +1,22 @@
+{
+  "event_id":"f1a2b3c4-d5e6-4f70-8a9b-0c1d2e3f4a5b",
+  "type":"AUDIT_LOG",
+  "timestamp":"2026-09-14T15:32:07.120000Z",
+  "principal":{
+    "id":"t~q4ZbwP7oZewMjKQPZfbr4a4vKfoRN-EBmeNkEBtydb4",
+    "type":"CHATGPT_WORKSPACE"
+  },
+  "actor":{
+    "type":"EXTERNAL_COLLABORATION_USER"
+  },
+  "action":"AGENT_RUN_COMPLETED",
+  "action_data":{
+    "flow_id":"flow_7e3a1c2b9d4f4e8a",
+    "requester_account_user_id":"t~qZezgH1590-X3vGc-FW7ztXDzNC_eNeiuaLPSmkpM1s",
+    "execution_backend":"default_agent_runtime",
+    "slack_team_id":"T012AB3CD",
+    "slack_user_id":"t~oFRoLb4cGzcEQbH5Lj2IxwWXjdEMJizzIDVpoxaJIos",
+    "slack_channel_id":"C078IJ9KL",
+    "slack_event_id":"Ev0123456789"
+  }
+}
