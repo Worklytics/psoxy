@@ -305,6 +305,11 @@ output "todo_files" {
   value       = local.todo_files
 }
 
+output "test_script_files" {
+  description = "Per-connector test-*.sh scripts (and test-all.sh). todos.tf writes them when todos_as_local_files is true. ./generate-tests.sh writes the same files from this output."
+  value       = module.psoxy.test_script_files
+}
+
 # although should be sensitive such that Terraform won't echo it to command line or expose it, leave
 # commented out in example until needed
 # if you uncomment it, you will then be able to obtain the value through `terraform output --raw pseudonym_salt`

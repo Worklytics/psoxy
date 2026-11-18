@@ -8,13 +8,10 @@
 # If `todo_files` is absent (older modules), falls back to string outputs named
 # `todos_1`, `todos_2`, … and writes them as `todos_N.md`.
 #
-# Existing files are left unchanged unless you confirm overwrite (default Y) or
-# pass --yes. A non-interactive run never overwrites existing files unless --yes
-# is set.
+# Always overwrites files present in the output (summarizes new vs replaced).
 #
 # Usage:
 #   ./generate-todos.sh
-#   ./generate-todos.sh --yes
 #
 # Tests (no cloud credentials): ./tools/generate-todos.test.sh
 
@@ -37,8 +34,6 @@ if [ -t 1 ] && command -v tput >/dev/null 2>&1; then
   fi
 fi
 
-ASSUME_YES=0
-
 plural_s() {
   if [[ "$1" -eq 1 ]]; then
     printf ''
@@ -49,25 +44,19 @@ plural_s() {
 
 usage() {
   cat <<EOF
-Usage: $(basename "$0") [--yes]
+Usage: $(basename "$0") [--help]
 
 Write TODO markdown files from \`terraform output\` into the current directory.
 Run this from the root of a Psoxy Terraform configuration, after \`terraform apply\`.
 
-  --yes, -y   Overwrite existing TODO files without prompting
-  --help, -h  Show this help
+Existing TODO files are always replaced when they appear in the output.
 
-When a TODO file already exists, you are asked whether to overwrite it [Y/n].
-Press Enter to overwrite. Answer n to leave the file unchanged.
+  --help, -h  Show this help
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -y|--yes)
-      ASSUME_YES=1
-      shift
-      ;;
     -h|--help)
       usage
       exit 0
@@ -107,8 +96,6 @@ if ! outputs_json="$(terraform output -json)"; then
   exit 1
 fi
 
-# NUL-delimited filename/content pairs. Prefer the structured todo_files map.
-# Fall back to joined todos_N string outputs only when that map is not present.
 # One compact JSON object per line ({key, value}). Newlines inside markdown stay escaped,
 # so bash can read a record per line. jq cannot emit NUL delimiters.
 files_stream="$(printf '%s' "$outputs_json" | jq -c '
@@ -139,13 +126,11 @@ if [[ -z "$files_stream" ]]; then
 fi
 
 file_count="$(printf '%s\n' "$files_stream" | grep -c . || true)"
-printf "${BOLD}Found ${INFO}%s${NC}${BOLD} TODO file%s.${NC}\n" "$file_count" "$(plural_s "$file_count")"
+printf "${BOLD}Found ${INFO}%s${NC}${BOLD} TODO file%s to write${NC}${BOLD} (existing files will be overwritten).${NC}\n" "$file_count" "$(plural_s "$file_count")"
 
 written=()
 overwritten=()
-skipped=()
 rejected=()
-noninteractive_notice=0
 
 safe_filename() {
   local name="$1"
@@ -157,27 +142,6 @@ safe_filename() {
     /*|.*) return 1 ;;
   esac
   return 0
-}
-
-confirm_overwrite() {
-  local name="$1"
-  local reply=""
-
-  if [[ "$ASSUME_YES" -eq 1 ]]; then
-    return 0
-  fi
-  if [[ ! -t 0 ]]; then
-    return 1
-  fi
-
-  printf "${WARN}Already exists:${NC} ${BOLD}${CODE}%s${NC}\n" "$name"
-  printf "Overwrite? ${BOLD}${INFO}[Y/n]${NC} "
-  read -r reply || reply="n"
-  reply="${reply:-Y}"
-  case "$reply" in
-    [yY]|[yY][eE][sS]) return 0 ;;
-    *) return 1 ;;
-  esac
 }
 
 write_file() {
@@ -192,7 +156,6 @@ write_file() {
   mv "$tmp" "$name"
 }
 
-# Read records on fd 3 so prompts can use the terminal on stdin.
 while IFS= read -r record <&3; do
   filename="$(printf '%s' "$record" | jq -r '.key')"
   content="$(printf '%s' "$record" | jq -r '.value')"
@@ -204,16 +167,8 @@ while IFS= read -r record <&3; do
   fi
 
   if [[ -e "$filename" ]]; then
-    if [[ "$ASSUME_YES" -eq 0 && ! -t 0 && "$noninteractive_notice" -eq 0 ]]; then
-      printf "${WARN}Not a terminal. Existing TODO files will be left unchanged. Pass ${CODE}--yes${NC}${WARN} to overwrite them.${NC}\n"
-      noninteractive_notice=1
-    fi
-    if confirm_overwrite "$filename"; then
-      write_file "$filename" "$content"
-      overwritten+=("$filename")
-    else
-      skipped+=("$filename")
-    fi
+    write_file "$filename" "$content"
+    overwritten+=("$filename")
   else
     write_file "$filename" "$content"
     written+=("$filename")
@@ -235,13 +190,6 @@ if [[ ${#overwritten[@]} -gt 0 ]]; then
   done
 fi
 
-if [[ ${#skipped[@]} -gt 0 ]]; then
-  printf "${BOLD}${WARN}Left %s existing TODO file%s unchanged${NC}\n" "${#skipped[@]}" "$(plural_s "${#skipped[@]}")"
-  for name in "${skipped[@]}"; do
-    printf "  ${WARN}-${NC} ${CODE}%s${NC}\n" "$name"
-  done
-fi
-
 if [[ ${#rejected[@]} -gt 0 ]]; then
   printf "${BOLD}${ERR}Skipped %s unsafe path%s${NC}\n" "${#rejected[@]}" "$(plural_s "${#rejected[@]}")"
   for name in "${rejected[@]}"; do
@@ -251,6 +199,6 @@ if [[ ${#rejected[@]} -gt 0 ]]; then
 fi
 
 total_written=$(( ${#written[@]} + ${#overwritten[@]} ))
-if [[ "$total_written" -eq 0 && ${#skipped[@]} -eq 0 ]]; then
+if [[ "$total_written" -eq 0 ]]; then
   printf "${WARN}Nothing was written.${NC}\n"
 fi

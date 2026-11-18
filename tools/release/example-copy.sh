@@ -92,6 +92,10 @@ if [ -f "${EXAMPLE_TO_COPY_FROM}/generate-todos.sh" ]; then
   copy_script_lf "${EXAMPLE_TO_COPY_FROM}/generate-todos.sh" "${EXAMPLE_TEMPLATE_REPO}generate-todos.sh"
 fi
 
+if [ -f "${EXAMPLE_TO_COPY_FROM}/generate-tests.sh" ]; then
+  copy_script_lf "${EXAMPLE_TO_COPY_FROM}/generate-tests.sh" "${EXAMPLE_TEMPLATE_REPO}generate-tests.sh"
+fi
+
 if [ -f "${EXAMPLE_TO_COPY_FROM}/preflight.sh" ]; then
   copy_script_lf "${EXAMPLE_TO_COPY_FROM}/preflight.sh" "${EXAMPLE_TEMPLATE_REPO}preflight"
 fi
@@ -125,6 +129,7 @@ available-connectors text eol=lf
 az-auth text eol=lf
 preflight text eol=lf
 generate-todos.sh text eol=lf
+generate-tests.sh text eol=lf
 EOF
 
 # Dev-only artifacts present in examples-dev (symlinks, local scripts, backups).
