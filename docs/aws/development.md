@@ -34,8 +34,34 @@ We recommend deploying your Psoxy code into AWS using the terraform modules foun
 
 Example configurations using those modules can be found in [`infra/examples/](../../infra/examples).
 
-You'll ultimately provision infrastructure represented in green in the following diagram:
+API connectors are invoked through the Lambda function URL. API Gateway remains optional. The dashed Bedrock path is an optional **beta**.
 
-![AWS data flow](./2022-02 Psoxy Data Flow.png)
+```mermaid
+flowchart TB
+    worklytics["Worklytics"]
+    source["Third-party data source"]
+
+    subgraph customer["Provisioned in the customer AWS account"]
+        apigw["API Gateway<br/>optional"]
+        lambda["Lambda<br/>validates the call, authenticates to the source, redacts and pseudonymizes the response"]
+        params["Parameter Store<br/>configuration and source API credentials"]
+        bedrock["Amazon Bedrock<br/>optional beta"]
+        params -.-> lambda
+        lambda -.->|"matched source text"| bedrock
+        bedrock -.->|"derived metadata"| lambda
+    end
+
+    worklytics -->|"function URL<br/>workload identity"| lambda
+    worklytics -.-> apigw
+    apigw -.-> lambda
+    lambda -->|"authenticated request"| source
+    source -->|"API response"| lambda
+    lambda -->|"sanitized response"| worklytics
+
+    classDef beta fill:#fff7e6,stroke:#c47d00,stroke-dasharray: 5 5
+    class bedrock beta
+```
+
+Bedrock runs only when `enable_gen_metadata = true` and a custom rule uses `!<classify>` or `!<genMetadata>`. Salt and source credentials stay in Parameter Store. See [genMetadata](../development/alpha-features/gen-metadata-augment.md).
 
 See [`infra/modules/aws/`](../../infra/modules/aws/) for more information.

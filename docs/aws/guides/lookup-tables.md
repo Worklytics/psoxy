@@ -2,7 +2,26 @@
 
 If you use Psoxy to send pseudonymized data to Worklytics and later wish to re-identify the data that you export from Worklytics to your premises, you'll need a lookup table in your data warehouse to JOIN with that data.
 
-![AWS data flow](lookup-table-data-flow.png)
+```mermaid
+flowchart LR
+    inputBucket["hris-input"]
+    proxy["Psoxy Lambda"]
+    sanitized["hris-sanitized<br/>Worklytics can read"]
+    lookup["hris-lookup<br/>customer warehouse only"]
+    worklytics["Worklytics"]
+    export["Worklytics export"]
+    warehouse["Your data warehouse"]
+
+    inputBucket -->|"new HRIS snapshot"| proxy
+    proxy -->|"sanitized copy"| sanitized
+    proxy -->|"lookup copy<br/>original id and pseudonym"| lookup
+    sanitized -->|"workload identity"| worklytics
+    worklytics --> export
+    lookup --> warehouse
+    export --> warehouse
+```
+
+Each new object in the input bucket produces two outputs. Worklytics reads only the sanitized bucket. The lookup bucket stays in the customer account, and the warehouse joins a Worklytics export back to the original id.
 
 Our `aws-host` Terraform module, as used in our [Psoxy AWS Example](https://github.com/Worklytics/psoxy-example-aws/tree/main), provides a variable `lookup_table_builders` to control generation of these lookup tables.
 

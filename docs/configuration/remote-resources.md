@@ -45,7 +45,7 @@ OpenNLP model files for the `textMetadata` augment are loaded from `{SHARED_RESO
 
 ### genMetadata
 
-`!<genMetadata>` and `!<classify>` augments use Vertex AI or Bedrock, not this bucket. See [genMetadata](../development/alpha-features/gen-metadata-augment.md).
+`!<genMetadata>` and `!<classify>` (**beta**) call Amazon Bedrock or Gemini Enterprise Agent Platform (formerly Vertex AI). That path is configured separately from this bucket. See [genMetadata](../development/alpha-features/gen-metadata-augment.md).
 
 ## Troubleshooting
 

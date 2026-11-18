@@ -13,10 +13,52 @@ You'll provision the following to host Psoxy in AWS:
 - [Simple Query Service (SQS) queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html), if using [webhook collection mode](../configuration/webhook-collectors.md) *or* [async API connectors](../configuration/async-api-data.md)
 - [KMS Keys and Aliases](https://docs.aws.amazon.com/kms/latest/developerguide/overview.html), if using [webhook collection mode](../configuration/webhook-collectors.md)
 - [API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html), if using [webhook collection mode](../configuration/webhook-collectors.md); or if desired for API connectors
+- [Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html) (**beta**, optional), only if a connector sets `enable_gen_metadata = true`. See [genMetadata via Bedrock](#genmetadata-via-bedrock).
 
-The diagram below provides an architecture overview of the 'API' and 'Bulk' mode use-cases.
+The diagram below is the architecture for API mode and bulk mode. The dashed Bedrock path is an optional **beta**, used when a connector sets `enable_gen_metadata = true`.
 
-![AWS Arch Diagram](aws-arch-diagram.jpg)
+```mermaid
+flowchart TB
+    sources["Source APIs"]
+    bulkSources["Bulk exports<br/>HRIS, badge, survey"]
+    worklytics["Worklytics"]
+
+    subgraph account["Customer AWS account"]
+        params["Parameter Store<br/>pseudonymization salt and source API secrets"]
+
+        subgraph apiMode["API mode"]
+            lambdaApi["Lambda<br/>one function per data source"]
+        end
+
+        subgraph bulkMode["Bulk mode"]
+            direction LR
+            inputBucket["Input S3 bucket<br/>one per source"]
+            lambdaBulk["Lambda<br/>one function per source"]
+            outputBucket["Output S3 bucket<br/>sanitized data"]
+            inputBucket --> lambdaBulk --> outputBucket
+        end
+
+        bedrock["Amazon Bedrock<br/>optional beta"]
+    end
+
+    worklytics -->|"API request<br/>workload identity federation"| lambdaApi
+    lambdaApi -->|"authenticated request"| sources
+    sources -->|"API response"| lambdaApi
+    lambdaApi -->|"sanitized API response"| worklytics
+    params -.-> lambdaApi
+    params -.-> lambdaBulk
+    lambdaApi -.->|"matched source text"| bedrock
+    bedrock -.->|"derived metadata"| lambdaApi
+    lambdaBulk -.->|"matched source text"| bedrock
+    bedrock -.->|"derived metadata"| lambdaBulk
+    bulkSources -->|"file upload"| inputBucket
+    worklytics -->|"reads sanitized objects<br/>workload identity federation"| outputBucket
+
+    classDef beta fill:#fff7e6,stroke:#c47d00,stroke-dasharray: 5 5
+    class bedrock beta
+```
+
+Bedrock is called only for custom `!<classify>` or `!<genMetadata>` rules. The model receives the matched source text and returns metadata that the Lambda attaches before pseudonymization and redaction. The salt and source API secrets stay in Parameter Store. Prebuilt connector rules leave this path off. Webhook collection and async API mode use extra services from the list above and are outside this figure.
 
 ## Prerequisites
 
@@ -65,7 +107,7 @@ aws sts assume-role --role-arn arn:aws:iam::123456789012:role/PsoxyProvisioningR
 
 ## genMetadata via Bedrock
 
-If any connector sets `enable_gen_metadata = true`:
+**Beta.** If any connector sets `enable_gen_metadata = true`:
 
 1. Confirm Bedrock is usable in this AWS account and region. The default model id is `us.amazon.nova-2-lite-v1:0` (US cross-region inference profile). Use a CRIS id (`us.amazon.nova-2-lite-v1:0`), not the bare foundation-model id (`amazon.nova-2-lite-v1:0`).
 2. Prefer a **US** Lambda region when using that default `us.*` profile. To use another geography, set `GEN_METADATA_MODEL` (for example `eu.amazon.nova-2-lite-v1:0`).

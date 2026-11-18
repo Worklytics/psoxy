@@ -2,11 +2,52 @@
 
 ## Overview
 
-You'll provision infrastructure that ultimately looks as follows:
+You'll provision infrastructure that ultimately looks as follows. The dashed model path is an optional **beta**, used when a connector sets `enable_gen_metadata = true`.
 
-![GCP Archiecture Diagram.png](gcp-arch-diagram.jpg)
+```mermaid
+flowchart TB
+    sources["Source APIs"]
+    bulkSources["Bulk exports<br/>HRIS, badge, survey"]
+    worklytics["Worklytics"]
 
-This includes:
+    subgraph account["Customer GCP project"]
+        secrets["Secret Manager<br/>pseudonymization salt and source API secrets"]
+
+        subgraph apiMode["API mode"]
+            fnApi["Cloud Run function<br/>one function per data source"]
+        end
+
+        subgraph bulkMode["Bulk mode"]
+            direction LR
+            inputBucket["Input bucket<br/>one per source"]
+            fnBulk["Cloud Run function<br/>one function per source"]
+            outputBucket["Output bucket<br/>sanitized data"]
+            inputBucket --> fnBulk --> outputBucket
+        end
+
+        gemini["Gemini Enterprise Agent Platform<br/>formerly Vertex AI<br/>optional beta"]
+    end
+
+    worklytics -->|"API request<br/>workload identity federation"| fnApi
+    fnApi -->|"authenticated request"| sources
+    sources -->|"API response"| fnApi
+    fnApi -->|"sanitized API response"| worklytics
+    secrets -.-> fnApi
+    secrets -.-> fnBulk
+    fnApi -.->|"matched source text"| gemini
+    gemini -.->|"derived metadata"| fnApi
+    fnBulk -.->|"matched source text"| gemini
+    gemini -.->|"derived metadata"| fnBulk
+    bulkSources -->|"file upload"| inputBucket
+    worklytics -->|"reads sanitized objects<br/>workload identity federation"| outputBucket
+
+    classDef beta fill:#fff7e6,stroke:#c47d00,stroke-dasharray: 5 5
+    class gemini beta
+```
+
+Gemini Enterprise Agent Platform is the successor name for Vertex AI. Terraform still enables `aiplatform.googleapis.com` and grants `roles/aiplatform.user`. The model receives the matched source text and returns metadata that the function attaches before pseudonymization and redaction. The salt and source API secrets stay in Secret Manager. Only custom `!<classify>` or `!<genMetadata>` rules use this path. See [genMetadata](#genmetadata-via-gemini-enterprise-agent-platform).
+
+The deployment includes:
 
 - [Cloud Run Functions](https://cloud.google.com/run/docs) - serverless containerized applications
 - [Service Accounts](https://cloud.google.com/iam/docs/service-accounts) - identity and access management
@@ -14,6 +55,7 @@ This includes:
 - [Cloud Storage Buckets](https://cloud.google.com/storage/docs) (GCS), if using Psoxy to sanitize bulk file data, such as CSVs; collecting data via webhooks; or async API requests.
 - [Cloud KMS Keys](https://cloud.google.com/kms/docs) for webhook authentication (if using webhook collection mode).
 - [Pub/Sub Topics and Subscriptions](https://cloud.google.com/pubsub/docs), for webhook message queuing and batch processing (if using webhook collectors); and async API requests (if using an API connector that supports/requires async mode).
+- [Gemini Enterprise Agent Platform](https://cloud.google.com/products/gemini-enterprise-agent-platform) (**beta**, optional; formerly Vertex AI), only if a connector sets `enable_gen_metadata = true`. The API is still `aiplatform.googleapis.com`. See [genMetadata via Gemini Enterprise Agent Platform](#genmetadata-via-gemini-enterprise-agent-platform).
 
 NOTE: if you're connecting to Google Workspace as a data source, you'll also need to provision OAuth clients (GCP service accounts with Domain-wide Delegation) in a GCP project. By default that includes downloaded Service Account Keys; you can instead opt into keyless auth via Workload Identity Federation (`google_workspace_connector_settings.api_client_auth_method = "workload_identity_federation"` on the Google Workspace connectors module). See [Google Workspace](../sources/google-workspace/README.md). The GWS project may be the same GCP project where you deploy the proxy, but that is not required; it can be managed by our provided Terraform modules - or you provision the service accounts (and, if using keys, the keys) outside of terraform and fill them into the secrets manager on your own.
 
@@ -83,9 +125,9 @@ See: [https://developer.hashicorp.com/terraform/language/settings/backends/local
 
 The module [psoxy-constants](../../infra/modules/psoxy-constants) is a dependency-free module that provides lists of GCP roles, etc needed for bootstraping a GCP project in which your proxy instances will reside.
 
-## genMetadata via Vertex
+## genMetadata via Gemini Enterprise Agent Platform
 
-If any connector sets `enable_gen_metadata = true`, Terraform enables `aiplatform.googleapis.com` and grants `roles/aiplatform.user` to that connector's service account. See [genMetadata](../development/alpha-features/gen-metadata-augment.md).
+**Beta.** Formerly Vertex AI. If any connector sets `enable_gen_metadata = true`, Terraform enables `aiplatform.googleapis.com` (shown in the console as the Gemini Enterprise Agent Platform API) and grants `roles/aiplatform.user` to that connector's service account. `GEN_METADATA_BACKEND` remains `vertex`. See [genMetadata](../development/alpha-features/gen-metadata-augment.md).
 
 ## Example
 

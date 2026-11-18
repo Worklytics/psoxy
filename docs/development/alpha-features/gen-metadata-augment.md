@@ -15,7 +15,7 @@ This is an MVP for customers to try with **custom rules**. Prebuilt source rules
 
 | Decision | Choice |
 |----------|--------|
-| Runtime | **Cloud only** — Amazon Bedrock (AWS) or Vertex AI Gemini (GCP) |
+| Runtime | **Cloud only, beta** — Amazon Bedrock (AWS) or Gemini Enterprise Agent Platform (GCP; formerly Vertex AI). Config still uses the Vertex names (`GEN_METADATA_BACKEND=vertex`, `aiplatform.googleapis.com`). |
 | How structure is enforced | **Vertex:** provider constrained JSON. **Bedrock (Nova default):** prompt + parse / `outputSchema` gate — Nova rejects Converse `outputConfig` (LangChain4j maps `ResponseFormat` there). |
 
 Wrong cloud on wrong platform → `augment-gen-unavailable`. Auth / quota failures omit the augment and add a warning; the rest of the response still succeeds.
@@ -147,7 +147,7 @@ Per-row Vertex/Bedrock calls are typically several seconds. A 100-row bulk file 
 Set `enable_gen_metadata = true` on the API, bulk, or webhook collector you want to try, and load **custom rules** that declare `!<classify>` or `!<genMetadata>` augments.
 
 - **AWS:** Terraform attaches Bedrock invoke/converse IAM. Confirm Bedrock is usable in the account and region (see [AWS getting started](../../aws/getting-started.md#genmetadata-via-bedrock)). Default model: `us.amazon.nova-2-lite-v1:0`.
-- **GCP:** Terraform enables `aiplatform.googleapis.com` and grants `roles/aiplatform.user`. Default model: `gemini-3.5-flash-lite` at location `global`, thinking `minimal`.
+- **GCP:** Terraform enables `aiplatform.googleapis.com` and grants `roles/aiplatform.user`. In the console that API is Gemini Enterprise Agent Platform (formerly Vertex AI). Default model: `gemini-3.5-flash-lite` at location `global`, thinking `minimal`.
 
 genMetadata does **not** need `enable_remote_resources` or `REMOTE_RESOURCE_BUCKET`. Those are for remote `rules.yaml` / OpenNLP (`textMetadata`).
 

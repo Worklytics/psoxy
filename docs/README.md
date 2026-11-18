@@ -29,7 +29,30 @@ A Psoxy instances reside on your premises (in the cloud) and act as an intermedi
 
 Orchestration continues to be performed on the Worklytics side.
 
-![proxy illustration](proxy-illustration.jpg)
+```mermaid
+flowchart LR
+    sources["Source APIs and bulk exports"]
+    worklytics["Worklytics"]
+
+    subgraph account["Customer cloud account"]
+        secrets["Salt and source API secrets"]
+        proxy["Psoxy"]
+        model["Cloud model API — optional beta<br/>AWS: Amazon Bedrock<br/>GCP: Gemini Enterprise Agent Platform<br/>formerly Vertex AI"]
+        secrets -.-> proxy
+        proxy -.->|"matched source text"| model
+        model -.->|"derived metadata"| proxy
+    end
+
+    worklytics -->|"request via workload identity"| proxy
+    proxy -->|"authenticated request"| sources
+    sources -->|"source response"| proxy
+    proxy -->|"sanitized response or file"| worklytics
+
+    classDef beta fill:#fff7e6,stroke:#c47d00,stroke-dasharray: 5 5
+    class model beta
+```
+
+The dashed path is an optional **beta**. It runs only when a connector sets `enable_gen_metadata = true` and a custom rule uses `!<classify>` or `!<genMetadata>`. On AWS the proxy calls Amazon Bedrock. On GCP it calls [Gemini Enterprise Agent Platform](https://cloud.google.com/products/gemini-enterprise-agent-platform), the successor to Vertex AI; the API service id is still `aiplatform.googleapis.com`. The call stays in the customer account. The model receives the matched source text and returns metadata, which the proxy attaches before pseudonymization and redaction. Salt and source API secrets stay in the customer secret store. Only custom rules that declare those augments send text to the model. See [genMetadata](development/alpha-features/gen-metadata-augment.md).
 
 Source API data may include PII such as:
 
