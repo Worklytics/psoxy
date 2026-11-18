@@ -22,6 +22,7 @@ import lombok.NoArgsConstructor;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.time.Clock;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -50,6 +51,12 @@ public class CmdLineModule {
     @Provides @Singleton
     static GenMetadataConfig genMetadataConfig() {
         return new GenMetadataConfig.Unsupported("cmdline");
+    }
+
+    @Provides
+    @Singleton
+    static Clock clock() {
+        return Clock.systemUTC();
     }
 
     /** CLI has no cloud bucket; local FS under {@link ResourceService#DEFAULT_LOCAL_RESOURCE_PATH} only. */

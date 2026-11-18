@@ -52,11 +52,12 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
 
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, new GenMetadataPromptBudget(),
+            config, new GenMetadataPromptBudget(config),
             new GenMetadataChatModelFactory(Set.of(provider)),
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
             new GenMetadataResponseFormats(),
+            GenMetadataBackendTestSupport.noPromptCacheFactory(),
             Clock.systemUTC());
 
         JsonSchema schema = JsonSchema.builder()
@@ -103,11 +104,12 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
         GenMetadataConfig config = BedrockGenMetadataConfig.of(BedrockGenMetadataConfig.DEFAULT_MODEL, 30);
         ObjectMapper om2 = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, new GenMetadataPromptBudget(),
+            config, new GenMetadataPromptBudget(config),
             new GenMetadataChatModelFactory(Set.of(provider)),
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om2),
             new GenMetadataResponseFormats(),
+            GenMetadataBackendTestSupport.noPromptCacheFactory(),
             Clock.systemUTC());
         JsonSchema schema = JsonSchema.builder().type("string").build();
 
@@ -146,11 +148,12 @@ class LangChain4jGenMetadataBackendBedrockResponseFormatTest {
         GenMetadataConfig config = BedrockGenMetadataConfig.of(BedrockGenMetadataConfig.DEFAULT_MODEL, 30);
         ObjectMapper om = new ObjectMapper();
         LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(
-            config, new GenMetadataPromptBudget(),
+            config, new GenMetadataPromptBudget(config),
             new GenMetadataChatModelFactory(Set.of(provider)),
             new GenMetadataTokenUsageAccumulator(),
             new GenMetadataPromptBuilder(om),
             new GenMetadataResponseFormats(),
+            GenMetadataBackendTestSupport.noPromptCacheFactory(),
             Clock.systemUTC());
 
         List<String> classes = List.of("Feature", "Uncategorized", "Bug");

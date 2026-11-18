@@ -15,8 +15,9 @@ public final class BedrockGenMetadataConfig extends GenMetadataConfig {
     static final String NOVA_FOUNDATION_MODEL_PREFIX = "amazon.nova";
     static final String NOVA_US_INFERENCE_PROFILE_PREFIX = "us.";
 
-    BedrockGenMetadataConfig(String modelId, int timeoutSeconds, int maxAttempts) {
-        super(Backend.BEDROCK, modelId, timeoutSeconds, maxAttempts);
+    BedrockGenMetadataConfig(String modelId, int timeoutSeconds, int maxAttempts,
+                             int maxDynamicInputChars) {
+        super(Backend.BEDROCK, modelId, timeoutSeconds, maxAttempts, maxDynamicInputChars);
     }
 
     public static BedrockGenMetadataConfig from(ConfigService configService) {
@@ -27,13 +28,15 @@ public final class BedrockGenMetadataConfig extends GenMetadataConfig {
         return new BedrockGenMetadataConfig(
             normalizeModelId(model),
             timeoutSeconds(configService),
-            maxAttempts(configService));
+            maxAttempts(configService),
+            maxDynamicInputChars(configService));
     }
 
     /** Test helper when ConfigService is not involved. */
     public static BedrockGenMetadataConfig of(String modelId, int timeoutSeconds) {
         return new BedrockGenMetadataConfig(
-            normalizeModelId(modelId), timeoutSeconds, DEFAULT_MAX_ATTEMPTS);
+            normalizeModelId(modelId), timeoutSeconds, DEFAULT_MAX_ATTEMPTS,
+            DEFAULT_MAX_DYNAMIC_INPUT_CHARS);
     }
 
     /**

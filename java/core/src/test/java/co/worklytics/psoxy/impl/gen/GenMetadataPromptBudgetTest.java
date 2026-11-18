@@ -7,18 +7,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GenMetadataPromptBudgetTest {
 
-    private final GenMetadataPromptBudget promptBudget = new GenMetadataPromptBudget();
+    private final GenMetadataPromptBudget promptBudget =
+        new GenMetadataPromptBudget(BedrockGenMetadataConfig.of("test-model", 15));
 
     @Test
-    void fitDynamicInput_capsToEstimatedTokensNotCharsOfWholePrompt() {
+    void fitDynamicInput_capsToMaxChars() {
         String input = "x".repeat(5000);
-        String fitted = promptBudget.fitDynamicInput(input, 100);
-        assertEquals(100 * GenMetadataPromptBudget.CHARS_PER_TOKEN_ESTIMATE, fitted.length());
+        String fitted = promptBudget.fitDynamicInput(input, 500);
+        assertEquals(500, fitted.length());
     }
 
     @Test
     void fitDynamicInput_doesNotShrinkBudgetBecauseTaskPromptIsLong() {
-        // Static prompt length is irrelevant: only the dynamic corpus is capped.
         String input = "hello world";
         assertEquals(input, promptBudget.fitDynamicInput(input, 500));
     }
@@ -36,8 +36,14 @@ class GenMetadataPromptBudgetTest {
 
     @Test
     void fitDynamicInput_breaksOnNonWordCharacter() {
-        // 2 estimated tokens → 8 chars would cut "hello world extra" mid-"world"
-        String fitted = promptBudget.fitDynamicInput("hello world extra", 2);
+        String fitted = promptBudget.fitDynamicInput("hello world extra", 6);
         assertEquals("hello ", fitted);
+    }
+
+    @Test
+    void effectiveMaxDynamicInputChars_honorsRuleCap() {
+        assertEquals(500, promptBudget.effectiveMaxDynamicInputChars(100));
+        assertEquals(GenMetadataConfig.DEFAULT_MAX_DYNAMIC_INPUT_CHARS,
+            promptBudget.effectiveMaxDynamicInputChars(null));
     }
 }

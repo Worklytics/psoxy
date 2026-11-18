@@ -24,6 +24,7 @@ public abstract class GenMetadataConfig {
 
     public static final int DEFAULT_MAX_ATTEMPTS = 2;
     public static final int DEFAULT_TIMEOUT_SECONDS = 15;
+    public static final int DEFAULT_MAX_DYNAMIC_INPUT_CHARS = 20_000;
 
     public enum Backend {
         BEDROCK,
@@ -59,6 +60,8 @@ public abstract class GenMetadataConfig {
         GEN_METADATA_MODEL,
         GEN_METADATA_TIMEOUT_SECONDS,
         GEN_METADATA_RETRIES,
+        /** Max characters of per-record dynamic genMetadata input (serialized match). */
+        GEN_METADATA_MAX_DYNAMIC_INPUT_CHARS,
         ;
     }
 
@@ -66,6 +69,7 @@ public abstract class GenMetadataConfig {
     private final String modelId;
     private final int timeoutSeconds;
     private final int maxAttempts;
+    private final int maxDynamicInputChars;
 
     public boolean isSupportedCloudBackend() {
         return backend == Backend.BEDROCK || backend == Backend.VERTEX;
@@ -93,6 +97,11 @@ public abstract class GenMetadataConfig {
             DEFAULT_MAX_ATTEMPTS);
     }
 
+    static int maxDynamicInputChars(ConfigService configService) {
+        return positiveIntOrDefault(configService, ConfigProperty.GEN_METADATA_MAX_DYNAMIC_INPUT_CHARS,
+            DEFAULT_MAX_DYNAMIC_INPUT_CHARS);
+    }
+
     private static int positiveIntOrDefault(ConfigService configService,
                                             ConfigService.ConfigProperty property,
                                             int defaultValue) {
@@ -112,7 +121,8 @@ public abstract class GenMetadataConfig {
         private final String rawBackend;
 
         public Unsupported(String rawBackend) {
-            super(null, "unsupported", DEFAULT_TIMEOUT_SECONDS, DEFAULT_MAX_ATTEMPTS);
+            super(null, "unsupported", DEFAULT_TIMEOUT_SECONDS, DEFAULT_MAX_ATTEMPTS,
+                DEFAULT_MAX_DYNAMIC_INPUT_CHARS);
             this.rawBackend = rawBackend;
         }
 
