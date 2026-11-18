@@ -87,6 +87,14 @@ public abstract class Augment {
     String innerJsonPath = null;
 
     /**
+     * JsonPath filter evaluated against the full response document. The augment runs only when
+     * this expression matches one or more elements (same semantics as transform {@code applyOnlyWhen}).
+     */
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    @Builder.Default
+    String applyOnlyWhen = null;
+
+    /**
      * Returns the augment function name, used in the synthetic property name
      * {@code +{sourceProperty}:{augmentFunction}}.
      */

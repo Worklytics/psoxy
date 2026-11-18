@@ -68,6 +68,45 @@ transforms:
 | `prompt` | yes | How to choose among `classes`. |
 | `classes` | yes | Allowed labels (JSON Schema enum equivalent). Output is exactly one of these strings. |
 | `maxInputTokens` | no | Cap on the dynamic source corpus. Default `256`. |
+| `applyOnlyWhen` | no | JsonPath filter on the full response; inference runs only when the filter matches (same semantics as transform `applyOnlyWhen`). |
+
+### Per-user population (PoC example)
+
+Claude Compliance `GET /v1/compliance/apps/chats/{CHAT_ID}/messages` includes chat-level `user.id`. To run `!<classify>` only for a pilot population, set `applyOnlyWhen` on the augment and keep object-level `jsonPaths: ["$"]` so the whole chat (including `chat_messages`) is the corpus:
+
+```yaml
+augments:
+  - !<classify>
+    applyOnlyWhen: "$[?(@.user.id == 'user_xyz456')]"
+    jsonPaths: ["$"]
+    prompt: Classify the primary work theme of this chat from message text only.
+    classes: [Requirements & Planning, Support & Troubleshooting, Uncategorized]
+```
+
+Example YAML and tests: `java/core/src/test/resources/alpha-features/claude-population/` and `ClaudeChatMessagesPopulationAugmentTest`.
+
+`applyOnlyWhen` lives on the base `Augment` type — it applies equally to `!<classify>` and `!<genMetadata>` (checked in `AugmentProcessor` before any backend call).
+
+### Multiple pilot users (efficient PoC)
+
+Use **one** augment and a JsonPath `in` filter on the allowlist (same pattern already used in transforms, e.g. Google Workspace ` @.name in [...] `):
+
+```yaml
+applyOnlyWhen: "$[?(@.user.id in ['user_xyz456','user_abc111','user_def222'])]"
+```
+
+Alternatives when the cohort is large or name-shaped:
+
+- OR chain: `$[?(@.user.id == 'a' || @.user.id == 'b')]` (fine for 2–3 ids; does not scale in YAML).
+- Prefix / pattern pilot: `$[?(@.user.id =~ /user_pilot_[0-9]+/)]` (Jayway regex match).
+
+Avoid duplicating the same `classify` / `genMetadata` block per user — each duplicate is another rule to keep prompt, schema, and token caps in sync.
+
+| PoC goal | Prefer |
+|----------|--------|
+| Single label per chat | `!<classify>` + `jsonPaths: ["$"]` + `applyOnlyWhen` with `in` |
+| Structured fields (theme, tools used, …) | One `!<genMetadata>` with small `outputSchema` + same filter |
+| Cheapest inference | `classify` (enum output, no `outputSchema` gate) |
 
 ## `!<genMetadata>` (structured extract)
 
@@ -114,6 +153,7 @@ If speaker ids in the augment should be pseudonymized, add a follow-on transform
 | `outputSchema` | yes | JSON Schema for the extracted object/array. |
 | `maxInputTokens` | no | Cap on the **dynamic** source corpus (serialized jsonPath match). Default `256`. Longer extract `500+`. The static prompt/schema are not counted. |
 | `maxOutputTokens` | no | Per-augment **generation** cap (`maxTokens` is accepted as an alias). Default `200`. Meeting transcripts / rich extract should raise this (`500`+). On Gemini, thinking tokens share this budget with visible JSON. |
+| `applyOnlyWhen` | no | Same as `classify` — JsonPath filter on the full response; skip inference when it does not match. |
 
 No `model`, `backend`, or `thinkingLevel` in rules — those stay deployment config.
 

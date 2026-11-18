@@ -17,6 +17,7 @@ import com.jayway.jsonpath.PathNotFoundException;
 import co.worklytics.psoxy.Warning;
 import lombok.NonNull;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -140,6 +141,9 @@ public class AugmentProcessor {
     }
 
     private List<String> applyAugment(Augment augment, Object document) {
+        if (!augmentApplies(augment, document)) {
+            return List.of();
+        }
         List<String> warnings = new ArrayList<>();
         List<JsonPath> paths = compiledAugmentPaths.computeIfAbsent(augment,
             a -> a.getJsonPaths().stream()
@@ -541,5 +545,17 @@ public class AugmentProcessor {
             return cleaned.substring(0, lastDot);
         }
         return null;
+    }
+
+    private boolean augmentApplies(Augment augment, Object document) {
+        if (StringUtils.isNotBlank(augment.getApplyOnlyWhen())) {
+            Object filterResult =
+                JsonPath.compile(augment.getApplyOnlyWhen()).read(document, jsonConfiguration);
+            if (filterResult instanceof List<?> results) {
+                return !results.isEmpty();
+            }
+            return filterResult != null;
+        }
+        return true;
     }
 }

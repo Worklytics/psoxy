@@ -621,6 +621,50 @@ class AugmentProcessorTest {
 
     @SneakyThrows
     @Test
+    void applyAugments_applyOnlyWhen_skipsWhenFilterDoesNotMatch() {
+        Augment.TextDigest augment = Augment.TextDigest.builder()
+            .jsonPath("$.chat_messages[*].content[*].text")
+            .applyOnlyWhen("$[?(@.user.id == 'user_xyz456')]")
+            .build();
+
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("user", Map.of("id", "user_other"));
+        Map<String, Object> content = new LinkedHashMap<>();
+        content.put("type", "text");
+        content.put("text", "Should not digest");
+        Map<String, Object> message = new LinkedHashMap<>();
+        message.put("content", List.of(content));
+        document.put("chat_messages", List.of(message));
+
+        augmentProcessor.applyAugments(List.of(augment), document);
+
+        assertFalse(content.containsKey("+text:textDigest"));
+    }
+
+    @SneakyThrows
+    @Test
+    void applyAugments_applyOnlyWhen_appliesWhenFilterMatchesOnRootObject() {
+        Augment.TextDigest augment = Augment.TextDigest.builder()
+            .jsonPath("$.chat_messages[*].content[*].text")
+            .applyOnlyWhen("$[?(@.user.id == 'user_xyz456')]")
+            .build();
+
+        Map<String, Object> content = new LinkedHashMap<>();
+        content.put("type", "text");
+        content.put("text", "digest me");
+        Map<String, Object> message = new LinkedHashMap<>();
+        message.put("content", List.of(content));
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("user", Map.of("id", "user_xyz456"));
+        document.put("chat_messages", List.of(message));
+
+        augmentProcessor.applyAugments(List.of(augment), document);
+
+        assertTrue(content.containsKey("+text:textDigest"));
+    }
+
+    @SneakyThrows
+    @Test
     void applyAugments_classify_scalarPath_stillSiblingNotSelf() {
         AugmentProcessor processor = processorWithClassifyStub("Feature");
         Augment.Classify augment = Augment.Classify.builder()
