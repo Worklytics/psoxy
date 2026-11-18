@@ -1,0 +1,45 @@
+{
+  "event_id": "b22de7eb-1aa1-4d42-819a-2b14d9655f7d",
+  "type": "CODEX_SECURITY_LOG",
+  "timestamp": "2026-04-02T11:00:00Z",
+  "principal": {
+    "id": "be545252-ad04-4cfa-9ca5-deca58416151",
+    "type": "CHATGPT_WORKSPACE"
+  },
+  "actor": {
+    "type": "ACCOUNT_USER",
+    "user_id": "user-TUvqhBX7HbQPRgHyEBt5WRcI",
+    "user_email": "user@example.org"
+  },
+  "event_type": "SCAN_CONFIGURATION_UPDATED",
+  "client_id": "CODEX_WEB",
+  "workspace_id": "be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details": {
+    "detail_type": "SCAN_CONFIGURATION_UPDATED",
+    "scan_configuration_id": "scan-config-001",
+    "updated_fields": {
+      "environment_id": "env-002",
+      "state": "paused",
+      "owner_id": "user-TUvqhBX7HbQPRgHyEBt5WRcI",
+      "lookback_days": 60,
+      "project_overview_updated": true,
+      "project_overview_length": 420,
+      "notification_rules_created_count": 0,
+      "notification_rules_updated_count": 1,
+      "notification_rules_deleted_count": 1
+    },
+    "scan_configuration_fields": {
+      "scan_type": "sast",
+      "owner_id": "user-TUvqhBX7HbQPRgHyEBt5WRcI",
+      "workspace_id": "be545252-ad04-4cfa-9ca5-deca58416151",
+      "repo_id": "repo-123",
+      "repo_url": "https://github.com/openai/example",
+      "environment_id": "env-002",
+      "state": "paused",
+      "lookback_days": 60,
+      "notification_rules_created_count": 0,
+      "notification_rules_updated_count": 1,
+      "notification_rules_deleted_count": 1
+    }
+  }
+}

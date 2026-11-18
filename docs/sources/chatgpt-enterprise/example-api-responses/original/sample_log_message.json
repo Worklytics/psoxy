@@ -19,12 +19,22 @@
     "author": {
       "type": "user",
       "client_type": "desktop_web",
-      "skills_used_names": ["pdfs"],
+      "skills_used_names": [
+        "pdfs"
+      ],
       "applied_custom_instructions": "Reply in concise bullet points."
     },
     "content": {
       "type": "user_instructions",
-      "value": "Can you summarize the Q2 financial results for the EMEA region?"
+      "value": "Can you summarize the Q2 financial results for the EMEA region?",
+      "annotations": [
+        {
+          "type": "url_citation",
+          "urls": [
+            "https://example.com/q2-financial-report"
+          ]
+        }
+      ]
     },
     "files": [
       {

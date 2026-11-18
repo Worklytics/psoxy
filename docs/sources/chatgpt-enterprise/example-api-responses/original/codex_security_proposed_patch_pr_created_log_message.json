@@ -1,0 +1,22 @@
+{
+  "event_id": "cc36621d-37f9-405c-8b77-8b4d1a3a90b9",
+  "type": "CODEX_SECURITY_LOG",
+  "timestamp": "2025-09-25T23:43:58Z",
+  "principal": {
+    "id": "be545252-ad04-4cfa-9ca5-deca58416151",
+    "type": "CHATGPT_WORKSPACE"
+  },
+  "actor": {
+    "type": "ACCOUNT_USER",
+    "user_id": "user-TUvqhBX7HbQPRgHyEBt5WRcI",
+    "user_email": "user@example.org"
+  },
+  "event_type": "PROPOSED_PATCH_PR_CREATED",
+  "client_id": "CODEX_WEB",
+  "workspace_id": "be545252-ad04-4cfa-9ca5-deca58416151",
+  "event_details": {
+    "detail_type": "PROPOSED_PATCH_PR_CREATED",
+    "finding_id": "hid-123",
+    "pr_url": "https://github.com/openai/example/pull/123"
+  }
+}

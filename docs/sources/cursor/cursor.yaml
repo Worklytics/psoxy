@@ -28,6 +28,9 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.usageEvents[*].userEmail"
+          - "$.usageEvents[*].serviceAccountId"
+          - "$.usageEvents[*].serviceAccountName"
+          - "$.usageEvents[*].prAuthor"
     responseSchema:
       type: "object"
       properties:
@@ -168,29 +171,51 @@ definitions:
         type: "integer"
       cacheWriteTokens:
         type: "integer"
+      discountPercentOff:
+        type: "number"
       inputTokens:
         type: "integer"
       outputTokens:
         type: "integer"
       totalCents:
-        type: "integer"
+        type: "number"
   UsageEvent:
     type: "object"
     properties:
+      automationId:
+        type: "string"
       chargedCents:
-        type: "integer"
-      isFreeBugbot:
+        type: "number"
+      cloudAgentId:
+        type: "string"
+      conversationId:
+        type: "string"
+      cursorTokenFee:
+        type: "number"
+      isChargeable:
+        type: "boolean"
+      isHeadless:
         type: "boolean"
       isTokenBasedCall:
         type: "boolean"
-      kindLabel:
+      kind:
         type: "string"
       maxMode:
         type: "boolean"
       model:
         type: "string"
+      prAuthor:
+        type: "string"
+      prNumber:
+        type: "integer"
+      repo:
+        type: "string"
       requestsCosts:
         type: "number"
+      serviceAccountId:
+        type: "string"
+      serviceAccountName:
+        type: "string"
       timestamp:
         type: "string"
       tokenUsage:
